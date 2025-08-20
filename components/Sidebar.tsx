@@ -119,7 +119,7 @@ export const SidebarComponent = () => {
     return (
         <Sidebar collapsible='icon'>
             <SidebarHeader className='mx-auto'>
-                <div className='flex-col justify-center items-center'>
+                <div className='flex-col'>
                     <Image
                         width={100}
                         height={100}
