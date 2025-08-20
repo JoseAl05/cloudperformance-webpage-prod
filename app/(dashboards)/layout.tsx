@@ -16,20 +16,11 @@ export default function DashboardLayout({
                 } as React.CSSProperties
             }
         >
-            <SidebarComponent variant="inset" />
+            <SidebarComponent variant="sidebar" />
             <SidebarInset>
                 <SidebarTrigger />
                 {children}
             </SidebarInset>
         </SidebarProvider>
-        // <SidebarProvider>
-        //     <SidebarComponent />
-        //     <main>
-        //         <SidebarTrigger />
-        //         <div className='m-10 w-full h-full'>
-        //             {children}
-        //         </div>
-        //     </main>
-        // </SidebarProvider>
     );
 }

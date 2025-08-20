@@ -1,5 +1,4 @@
 'use client'
-
 import useSWR from 'swr'
 import React, { useEffect, useRef, useMemo } from "react"
 import * as echarts from "echarts"
@@ -8,16 +7,16 @@ const fetcher = (url: string) =>
     fetch(url, {
         method: "GET",
         headers: {
-            "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c2VyIjoiQ0wxIiwiZGJfbmFtZSI6IlVDX0NocmlzdHVzX0Nsb3VkX1BlcmZvcm1hbmNlX0FXUyJ9.NhG1nE-ROnhAkvDuoNhbrPyhe4pbuIi6HUFcyyD7ePg",
+            "Authorization": `Bearer ${process.env.NEXT_PUBLIC_API_TOKEN}`,
             "Content-Type": "application/json"
         }
     }).then(res => res.json())
 
 export const MainViewConsume = () => {
-    const chartRef = useRef<HTMLDivElement>(null)   // ← Aquí defines chartRef
+    const chartRef = useRef<HTMLDivElement>(null)
     const chartInstance = useRef<echarts.ECharts | null>(null)
     const { data, error, isLoading } = useSWR(
-        "http://20.81.178.168:8070/api/db/consumo_rds_sqlserver/cpu_usage?date_from=2025-06-01T00:00:00&date_to=2025-08-07T00:00:00&region=all_regions",
+        `${process.env.NEXT_PUBLIC_API_URL}/db/consumo_rds_sqlserver/cpu_usage?date_from=2025-06-01T00:00:00&date_to=2025-08-07T00:00:00&region=all_regions`,
         fetcher
     )
 
@@ -95,7 +94,7 @@ export const MainViewConsume = () => {
             <div
                 ref={chartRef}
                 id="consume-sqlserver-chart-cpu"
-                className='w-full h-[60vh]'
+                className='w-[50vw] h-[60vh]'
             />
         </div>
     )
