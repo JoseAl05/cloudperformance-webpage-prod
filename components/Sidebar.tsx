@@ -17,7 +17,7 @@ import { Grid2X2, Home, LineChart, PieChart, Zap, Box, Computer, Database, Pyram
 import { useEffect, useState } from 'react'
 import Image from 'next/image'
 
-export const SidebarComponent = () => {
+export const SidebarComponent = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
     const routes = [
         {
             label: 'Inicio',
@@ -36,7 +36,7 @@ export const SidebarComponent = () => {
         {
             label: 'Consumo',
             icon: LineChart,
-            href: '/aws/consumo',
+            href: '/aws/consumos',
             tooltip: 'Vista Consumos',
             color: 'text-green-600',
         },
@@ -117,7 +117,7 @@ export const SidebarComponent = () => {
         }
     }, [state])
     return (
-        <Sidebar collapsible='icon'>
+        <Sidebar collapsible="icon" {...props}>
             <SidebarHeader className='mx-auto'>
                 <div className='flex-col'>
                     <Image
