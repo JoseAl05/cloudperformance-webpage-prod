@@ -19,7 +19,9 @@ export default function DashboardLayout({
             <SidebarComponent variant="sidebar" />
             <SidebarInset>
                 <SidebarTrigger />
-                {children}
+                <div className='p-10'>
+                    {children}
+                </div>
             </SidebarInset>
         </SidebarProvider>
     );
