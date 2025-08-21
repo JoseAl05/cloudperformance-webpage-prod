@@ -2,7 +2,6 @@
 import useSWR from 'swr'
 import React, { useEffect, useRef, useMemo } from "react"
 import * as echarts from "echarts"
-import disk from "@/disk.tree.json"
 
 const fetcher = (url: string) =>
     fetch(url, {
