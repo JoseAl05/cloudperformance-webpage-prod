@@ -118,17 +118,15 @@ export const SidebarComponent = ({ ...props }: React.ComponentProps<typeof Sideb
     }, [state])
     return (
         <Sidebar collapsible="icon" {...props}>
-            <SidebarHeader className='mx-auto'>
-                <div className='flex-col'>
+            <SidebarHeader className='flex flex-col items-center gap-2'>
                     <Image
                         width={100}
                         height={100}
                         alt='Logo Cloud Performance'
                         src='/logo.png'
-                        className='object-contain'
+                        className='object-cover'
                     />
-                    {open && <span>Cloud Performance</span>}
-                </div>
+                    {open && <span className='text-xl font-bold'>Cloud Performance</span>}
             </SidebarHeader>
             <SidebarContent>
                 <SidebarGroup>

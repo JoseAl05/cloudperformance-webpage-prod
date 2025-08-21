@@ -28,83 +28,80 @@ export const HeatmapQuotasComponent = ({ startDate, endDate }: HeatmapQuotasComp
         `${process.env.NEXT_PUBLIC_API_URL}/funcion/heatmap-quotas?date_from=${startDateFormatted}&date_to=${endDateFormatted}&group_by_quota=true`,
         fetcher
     )
-    // console.log(data)
-
-
-    const groupedData = data ? Object.groupBy(data, ({ sync_time }) => sync_time.$date) : []
-    const formattedData = groupedData ? Object.entries(groupedData).map(([key, items]) => {
-        console.log(items)
+    const formattedData = data ? data.map(d => {
         return {
-            "name": key,
-            "value": items?.reduce((acc, item) => acc + item.Quota_Usage_Percentage, 0),
-            "children": items?.map(i => {
+            "name": new Date(d.sync_time.$date).toLocaleDateString(),
+            "value": d.services.length,
+            "children": d.services.map(service => {
                 return {
-                    "name": `${i.QuotaName}`,
-                    "value": i.Quota_Usage_Percentage,
+                    "name": service.ServiceName,
+                    "value": service.Quotas.length,
+                    "children": service.Quotas.map(quota => {
+                        return {
+                            "name": quota.QuotaName,
+                            "value": quota.Quota_Usage_Percentage ? quota.Quota_Usage_Percentage : 0
+                        }
+                    })
                 }
             })
         }
     }) : []
-    const formattedDataTest = data
-        ? Object.entries(
-            Object.groupBy(data, ({ sync_time }) => sync_time.$date)
-        ).map(([date, dateItems]) => {
-            const groupedByService = Object.groupBy(dateItems, ({ ServiceName }) => ServiceName);
-
-            const serviceChildren = Object.entries(groupedByService).map(([serviceName, serviceItems]) => {
-                const groupedByQuota = Object.groupBy(serviceItems, ({ QuotaName }) => QuotaName);
-
-                const quotaChildren = Object.entries(groupedByQuota).map(([quotaName, quotaItems]) => ({
-                    name: quotaName,
-                    value: quotaItems.reduce((acc, item) => acc + (item.Quota_Usage_Percentage ?? 0), 0),
-                    children: quotaItems.map(i => ({
-                        name: i.QuotaName,
-                        value: +(i.Quota_Usage_Percentage ?? 0).toFixed(2),
-                    })),
-                }));
-
-                // Promedio correcto por servicio
-                const serviceAverage = quotaChildren.reduce((acc, q) => acc + q.value, 0) / quotaChildren.length;
-
-                return {
-                    name: serviceName,
-                    value: +serviceAverage.toFixed(2),
-                    children: quotaChildren,
-                };
-            });
-
-            // Promedio del día
-            const dateAverage = serviceChildren.reduce((acc, s) => acc + s.value, 0) / serviceChildren.length;
-
-            return {
-                name: date,
-                value: +dateAverage.toFixed(2),
-                children: serviceChildren,
-            };
-        })
-        : [];
-    console.log(formattedDataTest)
 
     useEffect(() => {
         const getLevelOption = () => {
             return [
                 {
                     itemStyle: {
-                        borderColor: '#999',
-                        borderWidth: 2,
+                        borderWidth: 0.5,
+                        borderRadius: 5,
                         gapWidth: 2
                     },
-                    upperLabel: { show: true, height: 20, color: '#000', fontSize: 14 }
+                    upperLabel: {
+                        show: true,
+                        position: 'inside',
+                        height: 20,
+                        color: '#ffffff',
+                        fontSize: 20,
+                        backgroundColor: '#2b00ff',
+                        borderRadius: 3
+                    }
                 },
                 {
-                    itemStyle: { borderColor: '#666', borderWidth: 2, gapWidth: 1 },
-                    upperLabel: { show: true, color: '#111', fontSize: 13 },
-                    emphasis: { itemStyle: { borderColor: '#ddd' } }
+                    itemStyle: {
+                        borderColor: '#666',
+                        borderWidth: 0.5,
+                        borderRadius: 5,
+                        gapWidth: 2
+                    },
+                    upperLabel: {
+                        show: true,
+                        position: 'inside',
+                        height: 20,
+                        color: '#ffffff',
+                        fontSize: 16,
+                        backgroundColor: '#12006e',
+                        borderRadius: 3
+                    },
+                    emphasis: {
+                        itemStyle: {
+                            borderColor: '#ddd',
+                            borderRadius: 5
+                        }
+                    }
                 },
                 {
                     colorSaturation: [0.5, 0.7],
-                    itemStyle: { borderWidth: 2, gapWidth: 1, borderColorSaturation: 0.6 },
-                    upperLabel: { show: true, color: '#333', fontSize: 12 }
+                    itemStyle: {
+                        borderWidth: 0.5,
+                        borderRadius: 5,
+                        gapWidth: 2,
+                        borderColorSaturation: 0.6
+                    },
+                    upperLabel: {
+                        show: true,
+                        color: '#333333',
+                        fontSize: 12
+                    }
                 }
             ];
         };
@@ -112,18 +109,72 @@ export const HeatmapQuotasComponent = ({ startDate, endDate }: HeatmapQuotasComp
         const options: echarts.EChartsOption = {
             title: { text: 'Heatmap Quotas', left: 'center' },
             tooltip: {
-                formatter: function (info) {
-                    const value = info.value as number;
-                    const treePathInfo = info.treePathInfo;
+                formatter: function (params) {
+                    const value = params.value as number;
+                    const treePathInfo = params.treePathInfo;
+                    const level = treePathInfo.length; // 2=fecha, 3=service, 4=quota
                     const treePath = treePathInfo.slice(1).map(v => v.name).join(' / ');
-                    return `<div style="font-weight:bold">${treePath}</div>Valor: ${value.toFixed(2)} %`;
+                    let unit = '';
+                    if (level == 2) {
+                        unit = ' Servicios';
+                    } else if (level === 3) {
+                        unit = ' Quotas';
+                    } else if (level === 4) {
+                        unit = ' %';
+                    }
+                    return `
+                        <div style="font-weight:bold">${treePath}</div>
+                        Valor: ${value.toFixed(2)}${unit}
+                    `;
                 }
             },
             series: [
                 {
                     type: 'treemap',
-                    label: { show: true, formatter: '{b}\n{c} %', fontSize: 12 },
-                    upperLabel: { show: true, height: 20 },
+                    visibleMin: 0,
+                    // Configuración global de bordes redondeados para toda la serie
+                    itemStyle: {
+                        borderRadius: 5,
+                        borderWidth: 0.5,
+                        gapWidth: 2
+                    },
+                    label: {
+                        show: true,
+                        formatter: function (params) {
+                            const name = params.data.name;
+                            const value = params.data.value as number;
+                            let unit = '';
+                            const level = params.treePathInfo.length;
+                            if (level == 2) {
+                                unit = ' Servicios';
+                            } else if (level === 3) {
+                                unit = ' Quotas';
+                            } else if (level === 4) {
+                                unit = ' %';
+                            }
+
+                            return `${name}\n${value.toFixed(2)}${unit}`;
+                        },
+                        fontSize: 12
+                    },
+                    upperLabel: {
+                        show: true,
+                        height: 20,
+                        formatter: function (params) {
+                            if (params.name === "") {
+                                return "Quotas"
+                            }
+                        }
+                    },
+                    // Configuración de hover/emphasis con bordes redondeados
+                    emphasis: {
+                        itemStyle: {
+                            borderRadius: 5,
+                            borderWidth: 1,
+                            shadowBlur: 10,
+                            shadowColor: 'rgba(0,0,0,0.3)'
+                        }
+                    },
                     levels: getLevelOption(),
                     data: formattedData
                 }
@@ -162,7 +213,7 @@ export const HeatmapQuotasComponent = ({ startDate, endDate }: HeatmapQuotasComp
             <h1>Heatmap</h1>
             <div
                 ref={chartRef}
-                className='w-[50vw] h-[60vh]'
+                className='w-full h-[100vh]'
             />
         </div>
     )
