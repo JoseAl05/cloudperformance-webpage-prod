@@ -17,7 +17,6 @@ import {
     PopoverTrigger,
 } from "@/components/ui/popover"
 import useSWR from 'swr'
-import { Value } from '@radix-ui/react-select'
 
 interface InstancesEc2FilterComponentProps {
     instance:string,
@@ -36,10 +35,11 @@ const fetcherPost = (url: string, tags: { Key: string; Value: string } | null = 
             "Authorization": `Bearer ${process.env.NEXT_PUBLIC_API_TOKEN}`,
             "Content-Type": "application/json",
         },
-        body: tags ? JSON.stringify([tags]) : null, // enviar lista de tags
+        body: tags ? JSON.stringify([tags]) : null,
     }).then(res => res.json());
+
 export const InstancesEc2FilterComponent = ({ instance, setInstance, startDate, endDate, region, selectedKey, selectedValue }: InstancesEc2FilterComponentProps) => {
-    const [open, setOpen] = useState(false);    
+    const [open, setOpen] = useState(false);
     const startDateFormatted = startDate.toISOString().replace('Z', '').slice(0, -4);
     const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : '';
     const url = `${process.env.NEXT_PUBLIC_API_URL}/vm/all-instances-ec2?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`;

@@ -57,8 +57,8 @@ export const FiltersComponent = ({
     };
 
     return (
-        <div className='pt-15'>
-            <div className='flex justify-start gap-5 flex-wrap'>
+        <div className='w-full min-w-0 pt-15'>
+            <div className='flex justify-center gap-5'>
                 {dateFilter && (
                     <DatePicker
                         selected={tempRange[0]}
@@ -95,7 +95,7 @@ export const FiltersComponent = ({
                 {instancesFilter && (
                     <InstancesEc2FilterComponent
                         instance={instance}
-                        setInstance={setInstance}                      
+                        setInstance={setInstance}
                         startDate={startDate}
                         endDate={endDate}
                         region={selectedRegion}

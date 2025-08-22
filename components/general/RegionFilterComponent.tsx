@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { Dispatch, SetStateAction, useState } from 'react'
 import { Check, ChevronsUpDown } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
