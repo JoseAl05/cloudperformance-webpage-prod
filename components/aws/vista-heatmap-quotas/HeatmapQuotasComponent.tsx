@@ -132,7 +132,6 @@ export const HeatmapQuotasComponent = ({ startDate, endDate }: HeatmapQuotasComp
                 {
                     type: 'treemap',
                     visibleMin: 0,
-                    // Configuración global de bordes redondeados para toda la serie
                     itemStyle: {
                         borderRadius: 5,
                         borderWidth: 0.5,
@@ -166,7 +165,6 @@ export const HeatmapQuotasComponent = ({ startDate, endDate }: HeatmapQuotasComp
                             }
                         }
                     },
-                    // Configuración de hover/emphasis con bordes redondeados
                     emphasis: {
                         itemStyle: {
                             borderRadius: 5,
@@ -198,7 +196,6 @@ export const HeatmapQuotasComponent = ({ startDate, endDate }: HeatmapQuotasComp
 
         return () => {
             window.removeEventListener('resize', handleResize);
-            // resizeObserver.disconnect(); // Disconnect ResizeObserver
             chartInstance.current?.dispose();
         };
     }, [data])
