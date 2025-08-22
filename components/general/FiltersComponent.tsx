@@ -28,6 +28,7 @@ export const FiltersComponent = ({
 }: FiltersComponentProps) => {
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
+    const [instance, setInstance] = useState("");
     const [startDate, setStartDate] = useState<Date>(yesterday);
     const [endDate, setEndDate] = useState<Date>(new Date());
     const [tempRange, setTempRange] = useState<[Date | null, Date | null]>([startDate, endDate]);
@@ -93,6 +94,8 @@ export const FiltersComponent = ({
 
                 {instancesFilter && (
                     <InstancesEc2FilterComponent
+                        instance={instance}
+                        setInstance={setInstance}                      
                         startDate={startDate}
                         endDate={endDate}
                         region={selectedRegion}
@@ -102,7 +105,7 @@ export const FiltersComponent = ({
                 )}
             </div>
 
-            <Component startDate={startDate} endDate={endDate} />
+            <Component startDate={startDate} endDate={endDate} instance={instance} />
         </div>
     );
 };

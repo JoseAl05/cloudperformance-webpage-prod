@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { Dispatch, SetStateAction, useState } from 'react'
 import { Check, ChevronsUpDown } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -17,8 +17,11 @@ import {
     PopoverTrigger,
 } from "@/components/ui/popover"
 import useSWR from 'swr'
+import { Value } from '@radix-ui/react-select'
 
 interface InstancesEc2FilterComponentProps {
+    instance:string,
+    setInstance:Dispatch<SetStateAction<string>>,
     startDate: Date,
     endDate: Date,
     region: string,
@@ -35,9 +38,8 @@ const fetcherPost = (url: string, tags: { Key: string; Value: string } | null = 
         },
         body: tags ? JSON.stringify([tags]) : null, // enviar lista de tags
     }).then(res => res.json());
-export const InstancesEc2FilterComponent = ({ startDate, endDate, region, selectedKey, selectedValue }: InstancesEc2FilterComponentProps) => {
-    const [open, setOpen] = useState(false);
-    const [value, setValue] = useState("");
+export const InstancesEc2FilterComponent = ({ instance, setInstance, startDate, endDate, region, selectedKey, selectedValue }: InstancesEc2FilterComponentProps) => {
+    const [open, setOpen] = useState(false);    
     const startDateFormatted = startDate.toISOString().replace('Z', '').slice(0, -4);
     const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : '';
     const url = `${process.env.NEXT_PUBLIC_API_URL}/vm/all-instances-ec2?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`;
@@ -61,8 +63,8 @@ export const InstancesEc2FilterComponent = ({ startDate, endDate, region, select
                     aria-expanded={open}
                     className="w-[300px] justify-between"
                 >
-                    {value
-                        ? data.find((instance) => instance === value)
+                    {instance
+                        ? data.find((i:unknown) => i === instance)
                         : "Seleccione una instancia..."}
                     <ChevronsUpDown className="opacity-50" />
                 </Button>
@@ -73,20 +75,20 @@ export const InstancesEc2FilterComponent = ({ startDate, endDate, region, select
                     <CommandList>
                         <CommandEmpty>No se encontró Instancia.</CommandEmpty>
                         <CommandGroup>
-                            {data && data?.map((instance) => (
+                            {data && data?.map((i:unknown) => (
                                 <CommandItem
-                                    key={instance}
-                                    value={instance}
+                                    key={i}
+                                    value={i}
                                     onSelect={(currentValue) => {
-                                        setValue(currentValue === value ? "" : currentValue)
+                                        setInstance(currentValue === instance ? "" : currentValue)
                                         setOpen(false)
                                     }}
                                 >
-                                    {instance}
+                                    {i}
                                     <Check
                                         className={cn(
                                             "ml-auto",
-                                            value === instance ? "opacity-100" : "opacity-0"
+                                            instance === i ? "opacity-100" : "opacity-0"
                                         )}
                                     />
                                 </CommandItem>

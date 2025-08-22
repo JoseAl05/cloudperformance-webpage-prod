@@ -1,5 +1,9 @@
 'use client'
 
+interface InstanceEc2CpuMetricsComponent {
+    
+}
+
 export const InstanceEc2CpuMetricsComponent = () => {
     return(
         <div className='pt-20'>
