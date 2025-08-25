@@ -26,8 +26,12 @@ export const HeatmapQuotasComponent = ({ startDate, endDate }: HeatmapQuotasComp
     const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : '';
 
 
+    // const { data, error, isLoading } = useSWR(
+    //     `${process.env.NEXT_PUBLIC_API_URL}/funcion/heatmap-quotas?date_from=${startDateFormatted}&date_to=${endDateFormatted}&group_by_quota=true`,
+    //     fetcher
+    // )
     const { data, error, isLoading } = useSWR(
-        `${process.env.NEXT_PUBLIC_API_URL}/funcion/heatmap-quotas?date_from=${startDateFormatted}&date_to=${endDateFormatted}&group_by_quota=true`,
+        `/funcion/heatmap-quotas?date_from=${startDateFormatted}&date_to=${endDateFormatted}&group_by_quota=true`,
         fetcher
     )
     const formattedData = data ? data.map(d => {
