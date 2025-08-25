@@ -1,6 +1,6 @@
 'use client'
 import useSWR from 'swr'
-import React, { useEffect, useRef, useMemo } from "react"
+import React, { useEffect, useRef, useMemo, useCallback } from "react"
 import * as echarts from "echarts"
 
 const fetcher = (url: string) =>
@@ -18,8 +18,10 @@ interface HeatmapQuotasComponentProps {
 }
 
 export const HeatmapQuotasComponent = ({ startDate, endDate }: HeatmapQuotasComponentProps) => {
-    const chartRef = useRef<HTMLDivElement>(null)
-    const chartInstance = useRef<echarts.ECharts | null>(null)
+    const chartRef = useRef<HTMLDivElement>(null);
+    const chartInstance = useRef<echarts.ECharts | null>(null);
+    const chartNetworkInstance = useRef<echarts.ECharts | null>(null)
+    const resizeObserverRef = useRef<ResizeObserver | null>(null);
     const startDateFormatted = startDate.toISOString().replace('Z', '').slice(0, -4);
     const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : '';
 
@@ -46,6 +48,11 @@ export const HeatmapQuotasComponent = ({ startDate, endDate }: HeatmapQuotasComp
             })
         }
     }) : []
+    const handleResize = useCallback(() => {
+        if (chartInstance.current) {
+            chartInstance.current.resize();
+        }
+    }, []);
 
     useEffect(() => {
         const getLevelOption = () => {
@@ -182,20 +189,20 @@ export const HeatmapQuotasComponent = ({ startDate, endDate }: HeatmapQuotasComp
 
         if (!chartRef.current) return
 
+        resizeObserverRef.current = new ResizeObserver(handleResize);
+        resizeObserverRef.current.observe(chartRef.current);
         if (chartRef.current) {
             chartInstance.current = echarts.init(chartRef.current);
             chartInstance.current.setOption(options);
         }
 
-        const handleResize = () => {
-            chartInstance.current?.resize();
-        };
         window.addEventListener('resize', handleResize);
 
 
 
         return () => {
             window.removeEventListener('resize', handleResize);
+            resizeObserverRef.current?.disconnect();
             chartInstance.current?.dispose();
         };
     }, [data])
