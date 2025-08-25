@@ -42,8 +42,7 @@ export const InstancesEc2FilterComponent = ({ instance, setInstance, startDate, 
     const [open, setOpen] = useState(false);
     const startDateFormatted = startDate.toISOString().replace('Z', '').slice(0, -4);
     const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : '';
-    // const url = `${process.env.NEXT_PUBLIC_API_URL}/vm/all-instances-ec2?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`;
-const url = `/vm/all-instances-ec2?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`;
+    const url = `${process.env.NEXT_PUBLIC_API_URL}/vm/all-instances-ec2?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`;
     const tagsBody = selectedKey && selectedValue ? { Key: selectedKey, Value: selectedValue } : null;
 
     const { data, error, isLoading } = useSWR([url, tagsBody], ([url, tags]) => fetcherPost(url, tags));
