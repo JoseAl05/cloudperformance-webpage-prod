@@ -20,18 +20,13 @@ interface HeatmapQuotasComponentProps {
 export const HeatmapQuotasComponent = ({ startDate, endDate }: HeatmapQuotasComponentProps) => {
     const chartRef = useRef<HTMLDivElement>(null);
     const chartInstance = useRef<echarts.ECharts | null>(null);
-    const chartNetworkInstance = useRef<echarts.ECharts | null>(null)
     const resizeObserverRef = useRef<ResizeObserver | null>(null);
     const startDateFormatted = startDate.toISOString().replace('Z', '').slice(0, -4);
     const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : '';
 
 
-    // const { data, error, isLoading } = useSWR(
-    //     `${process.env.NEXT_PUBLIC_API_URL}/funcion/heatmap-quotas?date_from=${startDateFormatted}&date_to=${endDateFormatted}&group_by_quota=true`,
-    //     fetcher
-    // )
     const { data, error, isLoading } = useSWR(
-        `/funcion/heatmap-quotas?date_from=${startDateFormatted}&date_to=${endDateFormatted}&group_by_quota=true`,
+        `${process.env.NEXT_PUBLIC_API_URL}/funcion/heatmap-quotas?date_from=${startDateFormatted}&date_to=${endDateFormatted}&group_by_quota=true`,
         fetcher
     )
     const formattedData = data ? data.map(d => {

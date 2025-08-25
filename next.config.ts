@@ -11,14 +11,6 @@ const nextConfig: NextConfig = {
     // ⚠️ Esto ignora TODOS los errores de TypeScript durante el build
     ignoreBuildErrors: true,
   },
-  async rewrites() {
-    return [
-      {
-        source: '/api/:path*',
-        destination: 'http://20.81.178.168:8070/api/:path*', // backend sin HTTPS
-      },
-    ];
-  },
 };
 
 export default nextConfig;
