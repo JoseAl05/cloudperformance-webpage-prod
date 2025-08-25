@@ -37,6 +37,8 @@ export const FiltersComponent = ({
     const [selectedValue, setSelectedValue] = useState<string | null>(null);
     const [tagsData, setTagsData] = useState<unknown[]>([]);
 
+    console.log(instance)
+
 
     useEffect(() => {
         const hasTagsForRegion = tagsData?.some(item => item?.Tags?.length > 0);
@@ -58,15 +60,25 @@ export const FiltersComponent = ({
 
     return (
         <div className='w-full min-w-0 pt-15'>
-            <div className='flex justify-center gap-5'>
+            <div className='flex justify-start gap-5'>
                 {dateFilter && (
+                    // <DatePicker
+                    //     selected={tempRange[0]}
+                    //     onChange={onChange}
+                    //     startDate={tempRange[0]}
+                    //     endDate={tempRange[1]}
+                    //     selectsRange
+                    //     className='border rounded-md p-2 bg-[color-mix(in_oklab,var(--input)_30%,transparent)] w-[13rem]'
+                    // />
                     <DatePicker
                         selected={tempRange[0]}
                         onChange={onChange}
                         startDate={tempRange[0]}
                         endDate={tempRange[1]}
                         selectsRange
-                        className='border rounded-md p-2 bg-[color-mix(in_oklab,var(--input)_30%,transparent)] w-[13rem]'
+                        className='border rounded-md p-2 bg-background text-foreground w-full focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent dark:bg-background dark:border-border dark:text-foreground'
+                        calendarClassName='dark:bg-popover dark:border-border dark:text-popover-foreground'
+                        dayClassName={(date) => 'hover:bg-accent hover:text-accent-foreground", "dark:hover:bg-accent dark:hover:text-accent-foreground'}
                     />
                 )}
 

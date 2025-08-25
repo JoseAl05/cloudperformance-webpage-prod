@@ -6,7 +6,7 @@ interface ResourceViewUsageNetworkComponentProps {
     data: unknown
 }
 
-export const ResourceViewUsageNetworkComponent = ({ data }: ResourceViewUsageNetworkComponentProps) => {
+export const Ec2ResourceViewUsageNetworkComponent = ({ data }: ResourceViewUsageNetworkComponentProps) => {
     // Chart para Network Metrics
     const chartRefNetwork = useRef<HTMLDivElement>(null);
     const chartNetworkInstance = useRef<echarts.ECharts | null>(null);

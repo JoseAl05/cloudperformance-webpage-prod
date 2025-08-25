@@ -6,7 +6,7 @@ interface ResourceViewUsageCreditsComponentProps {
     data: unknown
 }
 
-export const ResourceViewUsageCreditsComponent = ({ data }: ResourceViewUsageCreditsComponentProps) => {
+export const Ec2ResourceViewUsageCreditsComponent = ({ data }: ResourceViewUsageCreditsComponentProps) => {
     // Chart para Credits Metrics
     const chartRefCpuCredits = useRef<HTMLDivElement>(null);
     const chartCpuCreditsInstance = useRef<echarts.ECharts | null>(null);

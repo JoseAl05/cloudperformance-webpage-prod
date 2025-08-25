@@ -51,7 +51,6 @@ export const InstancesEc2FilterComponent = ({ instance, setInstance, startDate, 
 
     if (isLoading) return <div>Cargando...</div>
     if (error) return <div>Error al cargar datos</div>
-    console.log(data);
 
     return (
         <Popover open={open} onOpenChange={setOpen}>

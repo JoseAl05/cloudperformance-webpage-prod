@@ -6,7 +6,8 @@ interface ResourceViewUsageCpuComponentProps {
     data: unknown
 }
 
-export const ResourceViewUsageCpuComponent = ({ data }: ResourceViewUsageCpuComponentProps) => {
+
+export const Ec2ResourceViewUsageCpuComponent = ({ data }: ResourceViewUsageCpuComponentProps) => {
     // Chart para CPU Metrics
     const chartRefCpuMetrics = useRef<HTMLDivElement>(null);
     const chartCpuMetricsInstance = useRef<echarts.ECharts | null>(null);
