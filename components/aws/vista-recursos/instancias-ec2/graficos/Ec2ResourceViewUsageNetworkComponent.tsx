@@ -30,10 +30,14 @@ export const Ec2ResourceViewUsageNetworkComponent = ({ data }: ResourceViewUsage
     }, []);
 
     useEffect(() => {
+        const isDarkMode = document.documentElement.classList.contains('dark');
         const optionsNetworkMetrics: echarts.EChartsOption = {
             title: {
                 text: 'Entrada y Salida de Red',
-                left: 'center'
+                left: 'center',
+                textStyle: {
+                    color: isDarkMode ? '#ffff' : '#000',
+                }
             },
             dataZoom: {
                 type: 'slider',     // tipo slider
@@ -74,7 +78,7 @@ export const Ec2ResourceViewUsageNetworkComponent = ({ data }: ResourceViewUsage
                 }
             },
             xAxis: {
-                type: 'category',
+                type: 'time',
                 axisLabel: {
                     formatter: value => {
                         const date = new Date(value);

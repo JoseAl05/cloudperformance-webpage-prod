@@ -29,11 +29,14 @@ export const Ec2ResourceViewUsageCpuComponent = ({ data }: ResourceViewUsageCpuC
     }, []);
 
     useEffect(() => {
-
+        const isDarkMode = document.documentElement.classList.contains('dark');
         const optionsCpuMetrics: echarts.EChartsOption = {
             title: {
                 text: 'Uso de CPU (Promedio)',
-                left: 'center'
+                left: 'center',
+                textStyle: {
+                    color: isDarkMode ? '#ffff' : '#000',
+                }
             },
             dataZoom: {
                 type: 'slider',     // tipo slider
@@ -74,7 +77,7 @@ export const Ec2ResourceViewUsageCpuComponent = ({ data }: ResourceViewUsageCpuC
                 }
             },
             xAxis: {
-                type: 'category',
+                type: 'time',
                 axisLabel: {
                     formatter: value => {
                         const date = new Date(value);

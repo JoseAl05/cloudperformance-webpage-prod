@@ -35,7 +35,7 @@ export const RegionFilterComponent = ({ selectedRegion, setSelectedRegion }: Reg
                     role="combobox"
                     aria-expanded={open}
                     size='lg'
-                    className="w-[300px] justify-between"
+                    className="w-[250px] justify-between"
                 >
                     {selectedRegion === "all_regions"
                         ? "Todas las Regiones"
