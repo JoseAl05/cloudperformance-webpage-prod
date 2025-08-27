@@ -96,6 +96,16 @@ export const Ec2ResourceViewInfoComponent = ({ data }: Ec2ResourceViewInfoCompon
 
                     const latestLaunchTime = new Date(instances[0].LaunchTime);
 
+                    const today = new Date();
+                    const latestSyncTime = new Date(instances[0].sync_time);
+                    const isToday =
+                        latestSyncTime.getDate() === today.getDate() &&
+                        latestSyncTime.getMonth() === today.getMonth() &&
+                        latestSyncTime.getFullYear() === today.getFullYear();
+                    const instanceCardTitle = isToday
+                        ? "Instancia Actual"
+                        : `Instancia a fecha de: ${latestSyncTime.toLocaleDateString()}`;
+
                     const uptimeInstance = getUptime(latestLaunchTime);
 
 
@@ -111,7 +121,7 @@ export const Ec2ResourceViewInfoComponent = ({ data }: Ec2ResourceViewInfoCompon
                                     <CardHeader className="pb-3">
                                         <CardTitle className="text-lg flex items-center gap-2">
                                             <Server className="h-5 w-5 text-blue-500" />
-                                            Instancia Actual
+                                            {instanceCardTitle}
                                         </CardTitle>
                                     </CardHeader>
                                     <CardContent className="space-y-4">

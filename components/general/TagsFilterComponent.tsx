@@ -83,29 +83,46 @@ export const TagFilterComponent = ({
     const valuesForKey = selectedKey ? Array.from(new Set(tagMap[selectedKey])) : []
 
     return (
-        <div className="flex flex-col gap-4">
+        <div className="space-y-2">
             {/* Keys */}
             <Popover open={openKey} onOpenChange={setOpenKey}>
                 <PopoverTrigger asChild>
-                    <Button variant="outline" className="w-[250px] justify-between">
+                    <Button
+                        variant="outline"
+                        role="combobox"
+                        aria-expanded={openKey}
+                        className="w-full justify-between bg-transparent"
+                    >
                         {selectedKey || "Selecciona una Key"}
+                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                     </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-[250px] p-0">
+                <PopoverContent className="w-full p-0">
                     <Command>
                         <CommandInput placeholder="Buscar key..." />
                         <CommandList>
                             <CommandEmpty>No hay keys.</CommandEmpty>
                             <CommandGroup>
+                                <CommandItem
+                                    value="allKeys"
+                                    onSelect={() => {
+                                        setSelectedKey(null)
+                                        setOpenKey(false)
+                                    }}
+                                >
+                                    <Check className={cn("mr-2 h-4 w-4", !selectedKey ? "opacity-100" : "opacity-0")} />
+                                    Todas las claves
+                                </CommandItem>
                                 {keys.map((key, idx) => (
                                     <CommandItem
-                                        key={`${key}-${idx}`} // ✅ clave única aunque haya duplicados
+                                        key={`${key}-${idx}`}
                                         onSelect={() => {
                                             setSelectedKey(key)
                                             setSelectedValue(null)
                                             setOpenKey(false)
                                         }}
                                     >
+                                        <Check className={cn("mr-2 h-4 w-4", selectedKey === key ? "opacity-100" : "opacity-0")} />
                                         {key}
                                     </CommandItem>
                                 ))}
@@ -114,8 +131,6 @@ export const TagFilterComponent = ({
                     </Command>
                 </PopoverContent>
             </Popover>
-
-            {/* Values */}
             {selectedKey && (
                 <Popover open={openValue} onOpenChange={setOpenValue}>
                     <PopoverTrigger asChild>
@@ -131,7 +146,7 @@ export const TagFilterComponent = ({
                                 <CommandGroup>
                                     {valuesForKey.map((value, idx) => (
                                         <CommandItem
-                                            key={`${value}-${idx}`} // ✅ clave única aunque haya duplicados
+                                            key={`${value}-${idx}`}
                                             onSelect={() => {
                                                 setSelectedValue(value)
                                                 setOpenValue(false)

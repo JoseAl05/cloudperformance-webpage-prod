@@ -19,8 +19,8 @@ import {
 import useSWR from 'swr'
 
 interface InstancesEc2FilterComponentProps {
-    instance:string,
-    setInstance:Dispatch<SetStateAction<string>>,
+    instance: string,
+    setInstance: Dispatch<SetStateAction<string>>,
     startDate: Date,
     endDate: Date,
     region: string,
@@ -43,7 +43,7 @@ export const InstancesEc2FilterComponent = ({ instance, setInstance, startDate, 
     const startDateFormatted = startDate.toISOString().replace('Z', '').slice(0, -4);
     const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : '';
     const url = `${process.env.NEXT_PUBLIC_API_URL}/vm/all-instances-ec2?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`;
-    const tagsBody = selectedKey && selectedValue ? { Key: selectedKey, Value: selectedValue } : null;
+    const tagsBody = selectedKey !== 'allKeys' && selectedValue ? { Key: selectedKey, Value: selectedValue } : null;
 
     const { data, error, isLoading } = useSWR([url, tagsBody], ([url, tags]) => fetcherPost(url, tags));
 
@@ -57,23 +57,22 @@ export const InstancesEc2FilterComponent = ({ instance, setInstance, startDate, 
                 <Button
                     variant="outline"
                     role="combobox"
-                    size='lg'
                     aria-expanded={open}
-                    className="w-[300px] justify-between"
+                    className="w-full justify-between bg-transparent"
                 >
                     {instance
-                        ? data.find((i:unknown) => i === instance)
+                        ? data.find((i: unknown) => i === instance)
                         : "Seleccione una instancia..."}
-                    <ChevronsUpDown className="opacity-50" />
+                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-[300px] p-0">
+            <PopoverContent className="w-full p-0">
                 <Command>
-                    <CommandInput placeholder="Buscar Instancia..." className="h-9" />
+                    <CommandInput placeholder="Buscar Instancia..." />
                     <CommandList>
                         <CommandEmpty>No se encontró Instancia.</CommandEmpty>
                         <CommandGroup>
-                            {data && data?.map((i:unknown) => (
+                            {data && data?.map((i: unknown) => (
                                 <CommandItem
                                     key={i}
                                     value={i}
@@ -82,13 +81,13 @@ export const InstancesEc2FilterComponent = ({ instance, setInstance, startDate, 
                                         setOpen(false)
                                     }}
                                 >
-                                    {i}
                                     <Check
                                         className={cn(
                                             "ml-auto",
                                             instance === i ? "opacity-100" : "opacity-0"
                                         )}
                                     />
+                                    {i}
                                 </CommandItem>
                             ))}
                         </CommandGroup>

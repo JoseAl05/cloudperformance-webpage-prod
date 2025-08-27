@@ -34,21 +34,29 @@ export const RegionFilterComponent = ({ selectedRegion, setSelectedRegion }: Reg
                     variant="outline"
                     role="combobox"
                     aria-expanded={open}
-                    size='lg'
-                    className="w-[250px] justify-between"
+                    className="w-full justify-between bg-transparent"
                 >
                     {selectedRegion === "all_regions"
                         ? "Todas las Regiones"
                         : aws_regions.find((region) => region.value === selectedRegion)?.label}
-                    <ChevronsUpDown className="opacity-50" />
+                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-[300px] p-0">
+            <PopoverContent className="w-full p-0">
                 <Command>
-                    <CommandInput placeholder="Buscar Región..." className="h-9" />
+                    <CommandInput placeholder="Buscar Región..." />
                     <CommandList>
                         <CommandEmpty>No se encontró región.</CommandEmpty>
                         <CommandGroup>
+                            <CommandItem
+                                value="all_regions"
+                                onSelect={() => {
+                                    setSelectedRegion('all_regions')
+                                }}
+                            >
+                                <Check className={cn("ml-auto mr-2 h-4 w-4", !selectedRegion ? "opacity-100" : "opacity-0")} />
+                                Todas las regiones
+                            </CommandItem>
                             {aws_regions.map((region) => (
                                 <CommandItem
                                     key={region.value}
@@ -58,13 +66,10 @@ export const RegionFilterComponent = ({ selectedRegion, setSelectedRegion }: Reg
                                         setOpen(false)
                                     }}
                                 >
-                                    {region.label}
                                     <Check
-                                        className={cn(
-                                            "ml-auto",
-                                            selectedRegion === region.value ? "opacity-100" : "opacity-0"
-                                        )}
+                                        className={cn("ml-auto mr-2 h-4 w-4", selectedRegion === region.value ? "opacity-100" : "opacity-0")}
                                     />
+                                    {region.label}
                                 </CommandItem>
                             ))}
                         </CommandGroup>
