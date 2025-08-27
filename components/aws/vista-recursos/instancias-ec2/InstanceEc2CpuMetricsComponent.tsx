@@ -15,6 +15,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { TestComponent } from './graficos/TestComponent';
+import { MainEc2ResourceViewMetricsSummaryComponent } from './graficos/MainEc2ResourceViewMetricsSummaryComponent';
 
 interface InstanceEc2CpuMetricsComponentProps {
     startDate: Date,
@@ -60,24 +61,23 @@ export const InstanceEc2CpuMetricsComponent = ({ startDate, endDate, instance }:
 
     const eventsColumns = createColumns(awsEventColumns);
 
-    const lastCpuCreditBalanceEc2 = ec2Metrics.data ? ec2Metrics.data.calculated_summary ? ec2Metrics.data.calculated_summary.Last_CPU_Credit_Balance_EC2 : 0 : 0
-    const lastCpuCreditUsageEc2 = ec2Metrics.data ? ec2Metrics.data.calculated_summary ? ec2Metrics.data.calculated_summary.Last_CPU_Credit_Usage_EC2 : 0 : 0
-    const percentageCreditsUsageEc2 = ec2Metrics.data ? ec2Metrics.data.calculated_summary ? ec2Metrics.data.calculated_summary.Porcentaje_Uso_Créditos_CPU_EC2 : 0 : 0
-    const creditsEfficiencyEc2 = ec2Metrics.data ? ec2Metrics.data.calculated_summary ? ec2Metrics.data.calculated_summary.Eficiencia_Creditos_CPU_EC2_Instancia : "" : ""
     return (
         <>
             {/* <TestComponent /> */}
-            <div className="mx-5 px-0 py-8">
-                <div className="grid grid-cols-1 xl:grid-cols-4 gap-8">
-                    <div className="xl:col-span-1">
-                        <div className="space-y-6">
-                            <Ec2ResourceViewInfoComponent
-                                data={ec2Info.data}
-                            />
-                        </div>
+            <div className="max-w-7xl mx-auto px-6 py-8">
+                <div className="flex flex-col xl:flex-row gap-8">
+                    {/* Panel izquierdo */}
+                    <div className="w-full xl:max-w-sm">
+                        <Ec2ResourceViewInfoComponent data={ec2Info.data} />
+                    </div>
+
+                    {/* Área principal */}
+                    <div className="flex-1">
+                        <MainEc2ResourceViewMetricsSummaryComponent ec2Metrics={ec2Metrics} />
                     </div>
                 </div>
             </div>
+
             {/* <div className='flex flex-col gap-5 pt-20'>
             <div className="flex items-center gap-3 mb-8">
                 <Server className="h-8 w-8 text-blue-500" />

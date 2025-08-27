@@ -92,8 +92,8 @@
 //                         )}
 //                         {regionFilter && (
 //                             <div className='space-y-2'>
-//                                 <label className="text-sm font-medium text-foreground flex items-center gap-2">
-//                                     <MapPin className="h-4 w-4" />
+//                                 <label className='text-sm font-medium text-foreground flex items-center gap-2'>
+//                                     <MapPin className='h-4 w-4' />
 //                                     Región
 //                                 </label>
 //                                 <RegionFilterComponent
@@ -105,8 +105,8 @@
 
 //                         {tagsFilter && (
 //                             <div className='space-y-2'>
-//                                 <label className="text-sm font-medium text-foreground flex items-center gap-2">
-//                                     <Tag className="h-4 w-4" />
+//                                 <label className='text-sm font-medium text-foreground flex items-center gap-2'>
+//                                     <Tag className='h-4 w-4' />
 //                                     Tags
 //                                 </label>
 //                                 <TagFilterComponent
@@ -125,8 +125,8 @@
 //                         )}
 //                         {instancesFilter && (
 //                             <div className='space-y-2'>
-//                                 <label className="text-sm font-medium text-foreground flex items-center gap-2">
-//                                     <Server className="h-4 w-4" />
+//                                 <label className='text-sm font-medium text-foreground flex items-center gap-2'>
+//                                     <Server className='h-4 w-4' />
 //                                     Instancia
 //                                 </label>
 //                                 <InstancesEc2FilterComponent
@@ -265,8 +265,8 @@ export const FiltersComponent = ({
                         )}
                         {regionFilter && (
                             <div className='space-y-2'>
-                                <label className="text-sm font-medium text-foreground flex items-center gap-2">
-                                    <MapPin className="h-4 w-4" />
+                                <label className='text-sm font-medium text-foreground flex items-center gap-2'>
+                                    <MapPin className='h-4 w-4' />
                                     Región
                                 </label>
                                 <RegionFilterComponent
@@ -277,8 +277,8 @@ export const FiltersComponent = ({
                         )}
                         {tagsFilter && (
                             <div className='space-y-2'>
-                                <label className="text-sm font-medium text-foreground flex items-center gap-2">
-                                    <Tag className="h-4 w-4" />
+                                <label className='text-sm font-medium text-foreground flex items-center gap-2'>
+                                    <Tag className='h-4 w-4' />
                                     Tags
                                 </label>
                                 <TagFilterComponent
@@ -297,8 +297,8 @@ export const FiltersComponent = ({
                         )}
                         {instancesFilter && (
                             <div className='space-y-2'>
-                                <label className="text-sm font-medium text-foreground flex items-center gap-2">
-                                    <Server className="h-4 w-4" />
+                                <label className='text-sm font-medium text-foreground flex items-center gap-2'>
+                                    <Server className='h-4 w-4' />
                                     Instancia
                                 </label>
                                 <InstancesEc2FilterComponent
