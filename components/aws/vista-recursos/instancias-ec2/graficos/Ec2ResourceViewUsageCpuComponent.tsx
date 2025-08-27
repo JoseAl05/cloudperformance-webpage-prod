@@ -1,6 +1,7 @@
 'use client'
 import { useCallback, useEffect, useRef } from 'react';
 import * as echarts from "echarts"
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 interface ResourceViewUsageCpuComponentProps {
     data: unknown
@@ -22,6 +23,15 @@ export const Ec2ResourceViewUsageCpuComponent = ({ data }: ResourceViewUsageCpuC
     const unusedData = cpuData.map(item => [item.Timestamp, item.unused]);
     const umbralCpu = cpuData.map(item => [item.Timestamp, ((90 * item.total) / 100)]);
 
+
+    const maxTotalValue = totalData.length > 0
+        ? Math.max(...totalData.map(item => item[1]))
+        : 0;
+
+    const yMaxRaw = Math.ceil(maxTotalValue * 1.5);
+    const factor = 1;
+    const yMaxRounded = Math.floor(yMaxRaw / factor) * factor;
+
     const handleResize = useCallback(() => {
         if (chartCpuMetricsInstance.current) {
             chartCpuMetricsInstance.current.resize();
@@ -31,13 +41,6 @@ export const Ec2ResourceViewUsageCpuComponent = ({ data }: ResourceViewUsageCpuC
     useEffect(() => {
         const isDarkMode = document.documentElement.classList.contains('dark');
         const optionsCpuMetrics: echarts.EChartsOption = {
-            title: {
-                text: 'Uso de CPU (Promedio)',
-                left: 'center',
-                textStyle: {
-                    color: isDarkMode ? '#ffff' : '#000',
-                }
-            },
             dataZoom: {
                 type: 'slider',     // tipo slider
                 xAxisIndex: 0,      // aplica al eje X
@@ -53,23 +56,36 @@ export const Ec2ResourceViewUsageCpuComponent = ({ data }: ResourceViewUsageCpuC
                     const date = new Date(params[0].value[0]).toUTCString();
                     let result = `${date}<br/>`;
                     params.forEach(p => {
-                        result += `${p.marker} ${p.seriesName}: ${p.value[1]}<br/>`;
+                        result += `${p.marker} ${p.seriesName}: ${p.value[1]} vCores<br/>`;
                     });
                     return result;
                 }
             },
             legend: {
-                data: ['Total', 'Umbral Critico', 'Used', 'Unused'],
-                orient: 'vertical',  // vertical para que se apile
-                right: 10,            // distancia desde el borde derecho
-                top: 'middle'         // centrada verticalmente
+                data: ['Uso de Créditos', 'Créditos Disponibles'],
+                orient: 'horizontal',
+                top: 10,
+                left: 'center'
             },
+            // legend: {
+            //     data: ['Total', 'Umbral Critico', 'Used', 'Unused'],
+            //     orient: 'vertical',  // vertical para que se apile
+            //     right: 10,            // distancia desde el borde derecho
+            //     top: 'middle'         // centrada verticalmente
+            // },
+            // grid: {
+            //     left: 50,
+            //     right: 180, // deja espacio para la leyenda
+            //     top: 50,
+            //     bottom: 50,
+            //     containLabel: true // asegura que los labels no se corten
+            // },
             grid: {
                 left: 50,
-                right: 180, // deja espacio para la leyenda
-                top: 50,
-                bottom: 50,
-                containLabel: true // asegura que los labels no se corten
+                right: 30,
+                top: 60,
+                bottom: 60,
+                containLabel: true
             },
             toolbox: {
                 feature: {
@@ -87,7 +103,10 @@ export const Ec2ResourceViewUsageCpuComponent = ({ data }: ResourceViewUsageCpuC
             },
             yAxis: {
                 type: 'value',
-                scale: true
+                max: yMaxRounded,
+                axisLabel: {
+                    formatter: (value: number) => `${value} vCores`
+                }
             },
             series: [
                 {
@@ -192,9 +211,13 @@ export const Ec2ResourceViewUsageCpuComponent = ({ data }: ResourceViewUsageCpuC
     }, [data, handleResize])
 
     return (
-        <div
-            ref={chartRefCpuMetrics}
-            className='w-full h-[70vh]'
-        />
+        <Card className="w-full">
+            <CardHeader>
+                <CardTitle>Uso de Cores de CPU</CardTitle>
+            </CardHeader>
+            <CardContent>
+                <div ref={chartRefCpuMetrics} className="w-full h-[400px] md:h-[450px] lg:h-[500px]" />
+            </CardContent>
+        </Card>
     )
 }

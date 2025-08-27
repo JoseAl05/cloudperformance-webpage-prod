@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useCallback, useState } from 'react';
 import useSWR from 'swr';
-import * as echarts from "echarts"
+import * as echarts from 'echarts'
 import { Ec2ResourceViewUsageCpuComponent } from './graficos/Ec2ResourceViewUsageCpuComponent';
 import { Ec2ResourceViewUsageCreditsComponent } from './graficos/Ec2ResourceViewUsageCreditsComponent';
 import { Ec2ResourceViewUsageNetworkComponent } from './graficos/Ec2ResourceViewUsageNetworkComponent';
@@ -25,10 +25,10 @@ interface InstanceEc2CpuMetricsComponentProps {
 
 const fetcher = (url: string) =>
     fetch(url, {
-        method: "GET",
+        method: 'GET',
         headers: {
-            "Authorization": `Bearer ${process.env.NEXT_PUBLIC_API_TOKEN}`,
-            "Content-Type": "application/json"
+            'Authorization': `Bearer ${process.env.NEXT_PUBLIC_API_TOKEN}`,
+            'Content-Type': 'application/json'
         }
     }).then(res => res.json())
 
@@ -37,6 +37,7 @@ export const InstanceEc2CpuMetricsComponent = ({ startDate, endDate, instance }:
     const [searchTerm, setSearchTerm] = useState('');
     const startDateFormatted = startDate.toISOString().replace('Z', '').slice(0, -4);
     const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : '';
+
     const ec2Metrics = useSWR(
         instance ? `${process.env.NEXT_PUBLIC_API_URL}/vm/instancias-ec2-metrics?date_from=${startDateFormatted}&date_to=${endDateFormatted}&resource=${instance}` : null,
         fetcher
@@ -60,88 +61,55 @@ export const InstanceEc2CpuMetricsComponent = ({ startDate, endDate, instance }:
     if (ec2Events.error) return <div>Error al cargar datos</div>
 
     const eventsColumns = createColumns(awsEventColumns);
+    if (!instance) {
+        return (
+            <div className='max-w-7xl mx-auto px-6 py-8'>
+                <div className='text-center text-gray-500 text-lg font-medium'>
+                    No se ha seleccionado ninguna instancia.
+                </div>
+            </div>
+        );
+    }
+    const metricsData = ec2Metrics.data;
+    const infoData = ec2Info.data;
+
+    if (!metricsData || !metricsData.metrics_data || metricsData.metrics_data.length === 0) {
+        return (
+            <div className='max-w-7xl mx-auto px-6 py-8'>
+                <div className='text-center text-gray-500 text-lg font-medium'>
+                    No hay métricas disponibles para esta instancia en el rango seleccionado.
+                </div>
+            </div>
+        );
+    }
 
     return (
         <>
             {/* <TestComponent /> */}
-            <div className="max-w-7xl mx-auto px-6 py-8">
-                <div className="flex flex-col xl:flex-row gap-8">
+            <div className='w-full min-w-0 px-4 py-6'>
+                <div className='flex flex-col xl:flex-row gap-8 min-w-0'>
                     {/* Panel izquierdo */}
-                    <div className="w-full xl:max-w-sm">
-                        <Ec2ResourceViewInfoComponent data={ec2Info.data} />
+                    <div className='w-full xl:max-w-sm min-w-0'>
+                        <Ec2ResourceViewInfoComponent data={infoData} />
                     </div>
 
                     {/* Área principal */}
-                    <div className="flex-1">
-                        <MainEc2ResourceViewMetricsSummaryComponent ec2Metrics={ec2Metrics} />
+                    <div className='flex-1 space-y-6 min-w-0 overflow-hidden'>
+                        <MainEc2ResourceViewMetricsSummaryComponent data={metricsData} />
                     </div>
                 </div>
-            </div>
-
-            {/* <div className='flex flex-col gap-5 pt-20'>
-            <div className="flex items-center gap-3 mb-8">
-                <Server className="h-8 w-8 text-blue-500" />
-                <h1 className="text-3xl font-bold text-foreground">Registro Instancia</h1>
-            </div>
-            <Ec2ResourceViewInfoComponent
-                data={ec2Info.data}
-            />
-            <h1 className='text-3xl font-bold'>Métricas</h1>
-            <div className='flex flex-col items-center gap-10'>
-                <Ec2ResourceViewUsageCpuComponent
-                    data={ec2Metrics.data}
-                />
-                <Ec2ResourceViewUsageCreditsComponent
-                    data={ec2Metrics.data}
-                    lastCpuCreditBalanceEc2={lastCpuCreditBalanceEc2}
-                    lastCpuCreditUsageEc2={lastCpuCreditUsageEc2}
-                    percentageCreditsUsageEc2={percentageCreditsUsageEc2}
-                    creditsEfficiencyEc2={creditsEfficiencyEc2}
-                />
-                <Ec2ResourceViewUsageNetworkComponent
-                    data={ec2Metrics.data}
-                />
-            </div>
-            <div className="flex items-center gap-3 mb-8">
-                <Clock className="h-8 w-8 text-blue-500" />
-                <h1 className="text-3xl font-bold text-foreground">Eventos de la Instancia</h1>
-            </div>
-            <Card>
-                <CardHeader className="border-b">
-                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                        <div>
-                            <CardTitle className="flex items-center gap-2">
-                                ☁️ Historial de Eventos
-                            </CardTitle>
-                            <p className="text-sm text-muted-foreground mt-1">
-                                Actividad reciente de la instancia {instance}
-                            </p>
-                        </div>
-                    </div>
-                </CardHeader>
-                <CardContent>
-                    <DataTable
-                        columns={eventsColumns}
-                        data={ec2Events.data ? ec2Events.data : []}
+                <div className='flex flex-col gap-5 mt-10'>
+                    <Ec2ResourceViewUsageCreditsComponent
+                        data={metricsData}
                     />
-                    <div className="border-t bg-muted/50 px-6 py-4">
-                        <div className="flex items-center justify-between">
-                            {
-                                ec2Events.data && (
-                                    <div className="text-sm text-muted-foreground">
-
-                                        Mostrando {ec2Events.data.length} eventos
-                                    </div>
-                                )
-                            }
-                            <div className="text-sm text-muted-foreground">
-                                Período: {startDate.toLocaleDateString()} - {endDate.toLocaleDateString()}
-                            </div>
-                        </div>
-                    </div>
-                </CardContent>
-            </Card>
-        </div> */}
+                    <Ec2ResourceViewUsageCpuComponent
+                        data={metricsData}
+                    />
+                    <Ec2ResourceViewUsageNetworkComponent
+                        data={metricsData}
+                    />
+                </div>
+            </div>
         </>
     )
 }

@@ -1,10 +1,13 @@
 'use client'
 import { useCallback, useEffect, useRef } from 'react';
 import * as echarts from "echarts"
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { bytesToMB } from '@/lib/bytesToMbs';
 
 interface ResourceViewUsageNetworkComponentProps {
     data: unknown
 }
+
 
 export const Ec2ResourceViewUsageNetworkComponent = ({ data }: ResourceViewUsageNetworkComponentProps) => {
     // Chart para Network Metrics
@@ -16,11 +19,11 @@ export const Ec2ResourceViewUsageNetworkComponent = ({ data }: ResourceViewUsage
     // Network IN
     const networkInData = data ? data.metrics_data.filter(item => item.MetricLabel === "Entrada de Red (Promedio)") : [];
     networkInData.sort((a, b) => new Date(a.Timestamp) - new Date(b.Timestamp));
-    const networkInMetric = networkInData.map(item => [item.Timestamp, item.Value.toFixed(2)]);
+    const networkInMetric = networkInData.map(item => [item.Timestamp, bytesToMB(item.Value)]);
     // Network OUT
     const networkOutData = data ? data.metrics_data.filter(item => item.MetricLabel === "Salida de Red (Promedio)") : [];
     networkOutData.sort((a, b) => new Date(a.Timestamp) - new Date(b.Timestamp));
-    const networkOutMetric = networkOutData.map(item => [item.Timestamp, item.Value.toFixed(2)]);
+    const networkOutMetric = networkOutData.map(item => [item.Timestamp, bytesToMB(item.Value)]);
 
     const handleResize = useCallback(() => {
 
@@ -32,13 +35,6 @@ export const Ec2ResourceViewUsageNetworkComponent = ({ data }: ResourceViewUsage
     useEffect(() => {
         const isDarkMode = document.documentElement.classList.contains('dark');
         const optionsNetworkMetrics: echarts.EChartsOption = {
-            title: {
-                text: 'Entrada y Salida de Red',
-                left: 'center',
-                textStyle: {
-                    color: isDarkMode ? '#ffff' : '#000',
-                }
-            },
             dataZoom: {
                 type: 'slider',     // tipo slider
                 xAxisIndex: 0,      // aplica al eje X
@@ -54,24 +50,37 @@ export const Ec2ResourceViewUsageNetworkComponent = ({ data }: ResourceViewUsage
                     const date = new Date(params[0].value[0]).toUTCString();
                     let result = `${date}<br/>`;
                     params.forEach(p => {
-                        result += `${p.marker} ${p.seriesName}: ${p.value[1]}<br/>`;
+                        result += `${p.marker} ${p.seriesName}: ${p.value[1]} Mbs<br/>`;
                     });
                     return result;
                 }
             },
             legend: {
-                data: ['Entrada de Red', 'Salida de Red'],
-                orient: 'vertical',  // vertical para que se apile
-                right: 10,            // distancia desde el borde derecho
-                top: 'middle'         // centrada verticalmente
+                data: ['Uso de Créditos', 'Créditos Disponibles'],
+                orient: 'horizontal',
+                top: 10,
+                left: 'center'
             },
+            // legend: {
+            //     data: ['Entrada de Red', 'Salida de Red'],
+            //     orient: 'vertical',  // vertical para que se apile
+            //     right: 10,            // distancia desde el borde derecho
+            //     top: 'middle'         // centrada verticalmente
+            // },
             grid: {
                 left: 50,
-                right: 180, // deja espacio para la leyenda
-                top: 50,
-                bottom: 50,
-                containLabel: true // asegura que los labels no se corten
+                right: 30,
+                top: 60,
+                bottom: 60,
+                containLabel: true
             },
+            // grid: {
+            //     left: 50,
+            //     right: 180, // deja espacio para la leyenda
+            //     top: 50,
+            //     bottom: 50,
+            //     containLabel: true // asegura que los labels no se corten
+            // },
             toolbox: {
                 feature: {
                     saveAsImage: {}
@@ -88,7 +97,10 @@ export const Ec2ResourceViewUsageNetworkComponent = ({ data }: ResourceViewUsage
             },
             yAxis: {
                 type: 'value',
-                scale: true
+                scale: true,
+                axisLabel: {
+                    formatter: (value: number) => `${value} MB/s`
+                }
             },
             series: [
                 {
@@ -144,9 +156,13 @@ export const Ec2ResourceViewUsageNetworkComponent = ({ data }: ResourceViewUsage
         };
     }, [data, handleResize])
     return (
-        <div
-            ref={chartRefNetwork}
-            className='w-full h-[70vh]'
-        />
+        <Card className="w-full">
+            <CardHeader>
+                <CardTitle>Entrada y Salida de Red</CardTitle>
+            </CardHeader>
+            <CardContent>
+                <div ref={chartRefNetwork} className="w-full h-[400px] md:h-[450px] lg:h-[500px]" />
+            </CardContent>
+        </Card>
     )
 }

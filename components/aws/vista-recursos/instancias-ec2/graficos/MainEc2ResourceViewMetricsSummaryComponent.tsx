@@ -1,38 +1,30 @@
 'use client'
 
 import { Card, CardContent } from '@/components/ui/card'
+import { bytesToMB } from '@/lib/bytesToMbs'
 import { Activity, Cpu, Network, Percent, TrendingUp, Zap } from 'lucide-react'
 
 interface MainEc2ResourceViewMetricsSummaryComponentProps {
-    ec2Metrics: unknown
+    data: unknown
 }
 
-export const MainEc2ResourceViewMetricsSummaryComponent = ({ ec2Metrics }: MainEc2ResourceViewMetricsSummaryComponentProps) => {
-    const today = new Date();
-    console.log(ec2Metrics);
-    if (!ec2Metrics.data) {
+export const MainEc2ResourceViewMetricsSummaryComponent = ({ data }: MainEc2ResourceViewMetricsSummaryComponentProps) => {
+    if (!data || data.metrics_data.length === 0) {
         return (
-            <div className="flex items-center justify-center p-12 bg-muted/30 rounded-lg">
-                <p className="text-muted-foreground text-center font-medium">Seleccione una Instancia.</p>
+            <div className="text-center text-gray-500 py-6">
+                No hay métricas disponibles para mostrar.
             </div>
-        )
-    }
-    if (!ec2Metrics.data || ec2Metrics.data.metrics_data.length === 0) {
-        return (
-            <div className="flex items-center justify-center p-12 bg-muted/30 rounded-lg">
-                <p className="text-muted-foreground text-center font-medium">La instancia no tiene métricas en el periodo seleccionado.</p>
-            </div>
-        )
+        );
     }
 
-    const sortedMetrics = [...ec2Metrics.data.metrics_data].sort((a, b) => {
+    const today = new Date();
+    const sortedMetrics = [...data.metrics_data].sort((a, b) => {
         const dateA = new Date(a.sync_time).getTime();
         const dateB = new Date(b.sync_time).getTime();
-        return dateB - dateA; // descendente
+        return dateB - dateA;
     });
 
     const latestMetric = sortedMetrics[0];
-
     const referenceDate = new Date(latestMetric.sync_time);
     const isToday =
         referenceDate.getDate() === today.getDate() &&
@@ -45,13 +37,13 @@ export const MainEc2ResourceViewMetricsSummaryComponent = ({ ec2Metrics }: MainE
     const creditsUsageTitle = "Créditos Utilizados"
     const percentageCreditsTitle = "Porcentaje Créditos Utilizados"
     const creditsEfficiencyTitle = "Eficiencia Instancia"
-    const lastCpuCreditBalanceEc2 = ec2Metrics?.data?.calculated_summary?.Last_CPU_Credit_Balance_EC2 ?? 0;
-    const lastCpuCreditUsageEc2 = ec2Metrics?.data?.calculated_summary?.Last_CPU_Credit_Usage_EC2 ?? 0;
-    const percentageCreditsUsageEc2 = ec2Metrics?.data?.calculated_summary?.Porcentaje_Uso_Créditos_CPU_EC2 ?? 0;
-    const creditsEfficiencyEc2 = ec2Metrics?.data?.calculated_summary?.Eficiencia_Creditos_CPU_EC2_Instancia ?? "";
+    const lastCpuCreditBalanceEc2 = data?.calculated_summary?.Last_CPU_Credit_Balance_EC2 ?? 0;
+    const lastCpuCreditUsageEc2 = data?.calculated_summary?.Last_CPU_Credit_Usage_EC2 ?? 0;
+    const percentageCreditsUsageEc2 = data?.calculated_summary?.Porcentaje_Uso_Créditos_CPU_EC2 ?? 0;
+    const creditsEfficiencyEc2 = data?.calculated_summary?.Eficiencia_Creditos_CPU_EC2_Instancia ?? "";
 
     // PROMEDIO USO DE CPU
-    const cpuMetrics = ec2Metrics.data.metrics_data.filter(
+    const cpuMetrics = data.metrics_data.filter(
         (m: unknown) => m.MetricLabel === 'Uso de CPU (Promedio)'
     );
     const averageCpuUsage = cpuMetrics.length > 0
@@ -59,7 +51,7 @@ export const MainEc2ResourceViewMetricsSummaryComponent = ({ ec2Metrics }: MainE
         : 0;
     const usageCpuTitle = 'Promedio Uso de CPU';
     // PROMEDIO ENTRADA DE RED
-    const inNetworkMetrics = ec2Metrics.data.metrics_data.filter(
+    const inNetworkMetrics = data.metrics_data.filter(
         (m: unknown) => m.MetricLabel === 'Entrada de Red (Promedio)'
     );
     const averageinNetworkUsage = inNetworkMetrics.length > 0
@@ -67,7 +59,7 @@ export const MainEc2ResourceViewMetricsSummaryComponent = ({ ec2Metrics }: MainE
         : 0;
     const inNetworkTitle = 'Promedio Salida de Red';
     // PROMEDIO SALIDA DE RED
-    const outNetworkMetrics = ec2Metrics.data.metrics_data.filter(
+    const outNetworkMetrics = data.metrics_data.filter(
         (m: unknown) => m.MetricLabel === 'Salida de Red (Promedio)'
     );
     const averageOutNetworkUsage = outNetworkMetrics.length > 0
@@ -138,7 +130,7 @@ export const MainEc2ResourceViewMetricsSummaryComponent = ({ ec2Metrics }: MainE
         },
         {
             title: inNetworkTitle,
-            value: `${averageinNetworkUsage.toFixed(2)} Bytes`,
+            value: `${bytesToMB(averageinNetworkUsage)} Mbs`,
             icon: Network,
             color: "blue",
             bgColor: "bg-blue-50 dark:bg-blue-950/20",
@@ -150,7 +142,7 @@ export const MainEc2ResourceViewMetricsSummaryComponent = ({ ec2Metrics }: MainE
         },
         {
             title: outNetworkTitle,
-            value: `${averageOutNetworkUsage.toFixed(2)} Bytes`,
+            value: `${bytesToMB(averageOutNetworkUsage)} Mbs`,
             icon: Network,
             color: "blue",
             bgColor: "bg-blue-50 dark:bg-blue-950/20",
@@ -163,7 +155,7 @@ export const MainEc2ResourceViewMetricsSummaryComponent = ({ ec2Metrics }: MainE
     ]
     return (
         <div className="space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-2 2xl:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-2 2xl:grid-cols-3 gap-4">
                 {metricsData.map((metric, index) => {
                     const IconComponent = metric.icon
                     return (

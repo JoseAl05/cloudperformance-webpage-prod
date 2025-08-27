@@ -7,7 +7,7 @@ import { RegionFilterComponent } from './RegionFilterComponent';
 import { InstancesEc2FilterComponent } from './InstancesEc2FilterComponent';
 import { TagFilterComponent } from './TagsFilterComponent';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
-import { Calendar, MapPin, Server, Tag } from 'lucide-react';
+import { Calendar, Filter, MapPin, Server, Tag } from 'lucide-react';
 import { Button } from '../ui/button';
 
 interface FiltersComponentProps {
@@ -84,7 +84,7 @@ export const FiltersComponent = ({
 
     return (
         <div className='space-y-6'>
-            <Card>
+            <Card className="w-full min-w-0 overflow-hidden">
                 <CardHeader className='pb-4'>
                     <CardTitle className='text-xl font-semibold flex items-center gap-2'>
                         <Server className='h-5 w-5' />
@@ -160,7 +160,8 @@ export const FiltersComponent = ({
                         )}
                     </div>
                     <div className='flex items-center'>
-                        <Button onClick={applyFilters} className='max-w-5xl'>
+                        <Button onClick={applyFilters} className='max-w-5xl text-white cursor-pointer bg-blue-700 hover:bg-blue-500'>
+                            <Filter />
                             Aplicar Filtros
                         </Button>
                     </div>
