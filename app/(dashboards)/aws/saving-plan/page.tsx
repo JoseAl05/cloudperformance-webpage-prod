@@ -1,10 +1,11 @@
 import { MainViewSavingPlansComponent } from '@/components/aws/vista-saving-plan/MainViewSavingPlansComponent';
-
+import { Suspense } from 'react';
 export default function DashboardSavingPlanAws() {
-    return(
+    return (
         <div className=''>
-            <h1>Dashboard AWS / Saving Plan</h1>
-            <MainViewSavingPlansComponent />
+            <Suspense fallback={<div>Cargando...</div>}>
+                <MainViewSavingPlansComponent />
+            </Suspense>
         </div>
     )
 }
