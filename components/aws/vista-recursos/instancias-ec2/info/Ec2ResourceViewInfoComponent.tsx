@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button';
 import { useState } from 'react';
 import { Ec2ResourceViewHistoricInfoComponent } from './Ec2ResourceViewHistoricInfoComponent';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { getUptime } from '@/lib/getUptimeInstance';
 
 interface Ec2ResourceViewInfoComponentProps {
     data: unknown
@@ -61,14 +62,6 @@ export const Ec2ResourceViewInfoComponent = ({ data }: Ec2ResourceViewInfoCompon
         return publicIps.filter((ip) => ip !== null).length
     }
 
-    const getUptime = (launchTime: Date) => {
-        const now = new Date();
-        const diffMs = now.getTime() - launchTime.getTime();
-        const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-        const diffHours = Math.floor((diffMs / (1000 * 60 * 60)) % 24);
-        const diffMinutes = Math.floor((diffMs / (1000 * 60)) % 60);
-        return `${diffDays}d ${diffHours}h ${diffMinutes}m`;
-    }
     console.log(data)
     return (
         <div className='w-full xl:w-[22rem]'>

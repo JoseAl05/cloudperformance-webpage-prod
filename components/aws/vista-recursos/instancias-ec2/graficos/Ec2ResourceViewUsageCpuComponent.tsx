@@ -62,7 +62,7 @@ export const Ec2ResourceViewUsageCpuComponent = ({ data }: ResourceViewUsageCpuC
                 }
             },
             legend: {
-                data: ['Uso de Créditos', 'Créditos Disponibles'],
+                data: ['Total', 'Used', 'Unused', 'Umbral Critico'],
                 orient: 'horizontal',
                 top: 10,
                 left: 'center'

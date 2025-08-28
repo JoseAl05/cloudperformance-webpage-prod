@@ -2,10 +2,54 @@
 
 import { Card, CardContent } from '@/components/ui/card'
 import { bytesToMB } from '@/lib/bytesToMbs'
-import { Activity, Cpu, Network, Percent, TrendingUp, Zap } from 'lucide-react'
+import { Activity, ChevronDown, Cpu, Network, Percent, TrendingUp, Zap } from 'lucide-react'
 
 interface MainEc2ResourceViewMetricsSummaryComponentProps {
     data: unknown
+}
+
+const CPU_THRESHOLD_LOW = 20;
+const CPU_THRESHOLD_HIGH = 80;
+const NETWORK_THRESHOLD_LOW = 5;
+
+const getUsageStatus = (type: "cpu" | "network", value: number) => {
+    if (type === "cpu") {
+        if (value < CPU_THRESHOLD_LOW) {
+            return {
+                message: "Bajo uso de CPU",
+                icon: ChevronDown,
+                style: "text-xs text-red-600 font-bold pt-2"
+            };
+        } else if (value > CPU_THRESHOLD_HIGH) {
+            return {
+                message: "Alto uso de CPU",
+                icon: ChevronUp,
+                style: "text-xs text-green-600 font-bold pt-2"
+            };
+        }
+        return {
+            message: "Uso de CPU normal",
+            icon: Minus,
+            style: "text-xs text-gray-500 font-bold pt-2"
+        };
+    }
+
+    if (type === "network") {
+        if (value < NETWORK_THRESHOLD_LOW) {
+            return {
+                message: "Bajo tráfico de red",
+                icon: ChevronDown,
+                style: "text-xs text-red-600 font-bold pt-2"
+            };
+        }
+        return {
+            message: "Tráfico normal",
+            icon: Minus,
+            style: "text-xs text-gray-500 font-bold pt-2"
+        };
+    }
+
+    return null;
 }
 
 export const MainEc2ResourceViewMetricsSummaryComponent = ({ data }: MainEc2ResourceViewMetricsSummaryComponentProps) => {
@@ -65,7 +109,11 @@ export const MainEc2ResourceViewMetricsSummaryComponent = ({ data }: MainEc2Reso
     const averageOutNetworkUsage = outNetworkMetrics.length > 0
         ? outNetworkMetrics.reduce((sum: number, m: unknown) => sum + (m.Value ?? 0), 0) / outNetworkMetrics.length
         : 0;
-    const outNetworkTitle = 'Promedio Salida de Red';
+    const outNetworkTitle = 'Promedio Entrada de Red';
+
+    const cpuStatus = getUsageStatus("cpu", averageCpuUsage);
+    const inNetworkStatus = getUsageStatus("network", bytesToMB(averageinNetworkUsage));
+    const outNetworkStatus = getUsageStatus("network", bytesToMB(averageOutNetworkUsage));
 
     const metricsData = [
         {
@@ -126,6 +174,9 @@ export const MainEc2ResourceViewMetricsSummaryComponent = ({ data }: MainEc2Reso
             borderColor: "border-l-blue-500",
             subtitle: isToday ? "Actual" : `${dateLabel}`,
             valueStyle: 'text-xl font-bold text-foreground tracking-tight',
+            usage: cpuStatus?.message,
+            usageIcon: cpuStatus?.icon,
+            usageStyle: cpuStatus?.style,
             format: (val: number) => val.toString(),
         },
         {
@@ -138,6 +189,9 @@ export const MainEc2ResourceViewMetricsSummaryComponent = ({ data }: MainEc2Reso
             borderColor: "border-l-blue-500",
             subtitle: isToday ? "Actual" : `${dateLabel}`,
             valueStyle: 'text-xl font-bold text-foreground tracking-tight',
+            usage: inNetworkStatus?.message,
+            usageIcon: inNetworkStatus?.icon,
+            usageStyle: inNetworkStatus?.style,
             format: (val: number) => val.toString(),
         },
         {
@@ -150,6 +204,9 @@ export const MainEc2ResourceViewMetricsSummaryComponent = ({ data }: MainEc2Reso
             borderColor: "border-l-blue-500",
             subtitle: isToday ? "Actual" : `${dateLabel}`,
             valueStyle: 'text-xl font-bold text-foreground tracking-tight',
+            usage: outNetworkStatus?.message,
+            usageIcon: outNetworkStatus?.icon,
+            usageStyle: outNetworkStatus?.style,
             format: (val: number) => val.toString(),
         }
     ]
@@ -158,6 +215,7 @@ export const MainEc2ResourceViewMetricsSummaryComponent = ({ data }: MainEc2Reso
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-2 2xl:grid-cols-3 gap-4">
                 {metricsData.map((metric, index) => {
                     const IconComponent = metric.icon
+                    const UsageIconComponent = metric.usageIcon || null;
                     return (
                         <Card
                             key={index}
@@ -177,6 +235,14 @@ export const MainEc2ResourceViewMetricsSummaryComponent = ({ data }: MainEc2Reso
                                 <h3 className="text-sm font-medium text-muted-foreground leading-tight mt-2">{metric.title}</h3>
                                 <div className="mt-auto">
                                     <p className={metric.valueStyle}>{metric.format(metric.value)}</p>
+                                    {
+                                        metric.usage && (
+                                            <span className={metric.usageStyle}>
+                                                {UsageIconComponent && <UsageIconComponent className="h-4 w-4 inline-block mr-1" />}
+                                                {metric.usage}
+                                            </span>
+                                        )
+                                    }
                                 </div>
 
                             </CardContent>

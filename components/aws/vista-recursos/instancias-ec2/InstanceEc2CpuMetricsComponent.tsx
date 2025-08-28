@@ -10,12 +10,12 @@ import { Ec2ResourceViewInfoComponent } from './info/Ec2ResourceViewInfoComponen
 import { Calendar1, Clock, FileSpreadsheet, Search, Server } from 'lucide-react';
 import { DataTable } from '@/components/general/data-table/data-table';
 import { createColumns } from '@/components/general/data-table/columns';
-import { awsEventColumns } from './events/Ec2EventsColumns';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { TestComponent } from './graficos/TestComponent';
 import { MainEc2ResourceViewMetricsSummaryComponent } from './graficos/MainEc2ResourceViewMetricsSummaryComponent';
+import { Ec2EventsTableComponent } from './events/Ec2EventsTable';
 
 interface InstanceEc2CpuMetricsComponentProps {
     startDate: Date,
@@ -60,7 +60,6 @@ export const InstanceEc2CpuMetricsComponent = ({ startDate, endDate, instance }:
     if (ec2Events.isLoading) return <div>Cargando...</div>
     if (ec2Events.error) return <div>Error al cargar datos</div>
 
-    const eventsColumns = createColumns(awsEventColumns);
     if (!instance) {
         return (
             <div className='max-w-7xl mx-auto px-6 py-8'>
@@ -75,9 +74,14 @@ export const InstanceEc2CpuMetricsComponent = ({ startDate, endDate, instance }:
 
     if (!metricsData || !metricsData.metrics_data || metricsData.metrics_data.length === 0) {
         return (
-            <div className='max-w-7xl mx-auto px-6 py-8'>
-                <div className='text-center text-gray-500 text-lg font-medium'>
-                    No hay métricas disponibles para esta instancia en el rango seleccionado.
+            <div className='w-full min-w-0 px-4 py-6'>
+                <div className='flex flex-col xl:flex-row gap-8 min-w-0'>
+                    <div className='w-full xl:max-w-sm min-w-0'>
+                        <Ec2ResourceViewInfoComponent data={infoData} />
+                    </div>
+                    <div className='text-center text-gray-500 text-lg font-medium'>
+                        No hay métricas disponibles para esta instancia en el rango seleccionado.
+                    </div>
                 </div>
             </div>
         );
@@ -88,12 +92,10 @@ export const InstanceEc2CpuMetricsComponent = ({ startDate, endDate, instance }:
             {/* <TestComponent /> */}
             <div className='w-full min-w-0 px-4 py-6'>
                 <div className='flex flex-col xl:flex-row gap-8 min-w-0'>
-                    {/* Panel izquierdo */}
                     <div className='w-full xl:max-w-sm min-w-0'>
                         <Ec2ResourceViewInfoComponent data={infoData} />
                     </div>
 
-                    {/* Área principal */}
                     <div className='flex-1 space-y-6 min-w-0 overflow-hidden'>
                         <MainEc2ResourceViewMetricsSummaryComponent data={metricsData} />
                     </div>
@@ -109,6 +111,16 @@ export const InstanceEc2CpuMetricsComponent = ({ startDate, endDate, instance }:
                         data={metricsData}
                     />
                 </div>
+                <div className="flex items-center gap-3 mb-8">
+                    <Clock className="h-8 w-8 text-blue-500" />
+                    <h1 className="text-3xl font-bold text-foreground">Eventos de la Instancia</h1>
+                </div>
+                <Ec2EventsTableComponent
+                    data={ec2Events}
+                    startDate={startDate}
+                    endDate={endDate}
+                    instance={instance}
+                />
             </div>
         </>
     )

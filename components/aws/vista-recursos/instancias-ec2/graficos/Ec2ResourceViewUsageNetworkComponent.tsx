@@ -56,7 +56,7 @@ export const Ec2ResourceViewUsageNetworkComponent = ({ data }: ResourceViewUsage
                 }
             },
             legend: {
-                data: ['Uso de Créditos', 'Créditos Disponibles'],
+                data: ['Entrada de Red', 'Salida de Red'],
                 orient: 'horizontal',
                 top: 10,
                 left: 'center'
@@ -111,8 +111,8 @@ export const Ec2ResourceViewUsageNetworkComponent = ({ data }: ResourceViewUsage
                     areaStyle: { color: 'rgba(54, 162, 235, 0.3)' },
                     lineStyle: { color: '#36A2EB' },
                     itemStyle: {
-                        color: '#36A2EB',        // color del punto
-                        borderColor: '#ffffff',  // borde del punto
+                        color: '#36A2EB',
+                        borderColor: '#ffffff',
                         borderWidth: 1
                     },
                     emphasis: {

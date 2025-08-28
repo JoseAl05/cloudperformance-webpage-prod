@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { 
-  Server, 
-  Activity, 
-  Clock, 
-  Settings, 
-  Eye, 
+import {
+  Server,
+  Activity,
+  Clock,
+  Settings,
+  Eye,
   Download,
   Filter,
   MoreHorizontal,
@@ -168,20 +168,18 @@ export const TestComponent = () => {
                     <div key={key} className="space-y-2">
                       <div className="flex justify-between text-sm">
                         <span className="capitalize font-medium">{key}:</span>
-                        <span className={`${
-                          typeof metric.current === 'number' ? 
-                          (metric.current > 70 ? 'text-red-500' : 'text-green-500') : 
-                          'text-blue-500'
-                        }`}>
+                        <span className={`${typeof metric.current === 'number' ?
+                            (metric.current > 70 ? 'text-red-500' : 'text-green-500') :
+                            'text-blue-500'
+                          }`}>
                           {typeof metric.current === 'number' ? `${metric.current}%` : metric.current}
                         </span>
                       </div>
                       {typeof metric.current === 'number' && (
                         <div className="w-full bg-gray-200 rounded-full h-2">
-                          <div 
-                            className={`h-2 rounded-full ${
-                              metric.current > 70 ? 'bg-red-500' : 'bg-green-500'
-                            }`}
+                          <div
+                            className={`h-2 rounded-full ${metric.current > 70 ? 'bg-red-500' : 'bg-green-500'
+                              }`}
                             style={{ width: `${metric.current}%` }}
                           ></div>
                         </div>
@@ -207,7 +205,7 @@ export const TestComponent = () => {
                           <div className="font-medium">{event.event}</div>
                           <div className="text-gray-500">{event.time}</div>
                         </div>
-                        <Badge 
+                        <Badge
                           variant={event.status === 'completed' ? 'default' : 'destructive'}
                           className="text-xs"
                         >
@@ -240,7 +238,7 @@ export const TestComponent = () => {
                       </label>
                       <div className="mt-1 relative">
                         <Calendar className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
-                        <Input 
+                        <Input
                           placeholder="Seleccionar fechas"
                           className="pl-10"
                         />
@@ -252,7 +250,7 @@ export const TestComponent = () => {
                       </label>
                       <div className="mt-1 relative">
                         <MapPin className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
-                        <Input 
+                        <Input
                           placeholder="us-east-1"
                           className="pl-10"
                         />
@@ -264,7 +262,7 @@ export const TestComponent = () => {
                       </label>
                       <div className="mt-1 relative">
                         <Server className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
-                        <Input 
+                        <Input
                           placeholder="i-0dedc21ae416dc16"
                           className="pl-10"
                           value={selectedInstance}
