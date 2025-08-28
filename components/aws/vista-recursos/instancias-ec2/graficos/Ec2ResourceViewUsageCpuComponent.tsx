@@ -1,223 +1,131 @@
-'use client'
-import { useCallback, useEffect, useRef } from 'react';
-import * as echarts from "echarts"
+'use client';
+
+import { useCallback, useEffect, useMemo, useRef } from 'react';
+import * as echarts from 'echarts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 interface ResourceViewUsageCpuComponentProps {
-    data: unknown
+  data: {
+    metrics_data: { MetricLabel: string; Timestamp: string; total: number; used: number; unused: number }[];
+  } | null;
 }
 
+const sliderConfig = {
+  type: 'slider',
+  xAxisIndex: 0,
+  bottom: 20,
+  height: 20,
+  handleSize: '100%',
+  start: 0,
+  end: 100
+};
+
+const tooltipFormatter = (params: unknown) => {
+  const date = new Date(params[0].value[0]).toUTCString();
+  return (
+    `${date}<br/>` +
+    params.map((p: unknown) => `${p.marker} ${p.seriesName}: ${p.value[1]} vCores<br/>`).join('')
+  );
+};
 
 export const Ec2ResourceViewUsageCpuComponent = ({ data }: ResourceViewUsageCpuComponentProps) => {
-    // Chart para CPU Metrics
-    const chartRefCpuMetrics = useRef<HTMLDivElement>(null);
-    const chartCpuMetricsInstance = useRef<echarts.ECharts | null>(null);
-    // Resize Observer
-    const resizeObserverRef = useRef<ResizeObserver | null>(null);
+  const chartRef = useRef<HTMLDivElement>(null);
+  const chartInstance = useRef<echarts.ECharts | null>(null);
+  const resizeObserverRef = useRef<ResizeObserver | null>(null);
 
-    // Métricas de Uso de CPU
-    const cpuData = data ? data.metrics_data.filter(item => item.MetricLabel === "Uso de CPU (Promedio)") : [];
-    cpuData.sort((a, b) => new Date(a.Timestamp) - new Date(b.Timestamp));
-    const totalData = cpuData.map(item => [item.Timestamp, item.total]);
-    const usedData = cpuData.map(item => [item.Timestamp, item.used]);
-    const unusedData = cpuData.map(item => [item.Timestamp, item.unused]);
-    const umbralCpu = cpuData.map(item => [item.Timestamp, ((90 * item.total) / 100)]);
+  const { totalData, usedData, unusedData, umbralCpu, yMaxRounded } = useMemo(() => {
+    const cpuData = data?.metrics_data.filter(item => item.MetricLabel === 'Uso de CPU (Promedio)') || [];
+    cpuData.sort((a, b) => new Date(a.Timestamp).getTime() - new Date(b.Timestamp).getTime());
 
+    const totalData: [string, number][] = cpuData.map(item => [item.Timestamp, item.total]);
+    const usedData: [string, number][] = cpuData.map(item => [item.Timestamp, item.used]);
+    const unusedData: [string, number][] = cpuData.map(item => [item.Timestamp, item.unused]);
+    const umbralCpu: [string, number][] = cpuData.map(item => [item.Timestamp, (90 * item.total) / 100]);
 
-    const maxTotalValue = totalData.length > 0
-        ? Math.max(...totalData.map(item => item[1]))
-        : 0;
-
+    const maxTotalValue = totalData.length ? Math.max(...totalData.map(item => item[1])) : 0;
     const yMaxRaw = Math.ceil(maxTotalValue * 1.5);
-    const factor = 1;
-    const yMaxRounded = Math.floor(yMaxRaw / factor) * factor;
+    const yMaxRounded = Math.floor(yMaxRaw / 1) * 1;
 
-    const handleResize = useCallback(() => {
-        if (chartCpuMetricsInstance.current) {
-            chartCpuMetricsInstance.current.resize();
+    return { totalData, usedData, unusedData, umbralCpu, yMaxRounded };
+  }, [data]);
+
+  const handleResize = useCallback(() => {
+    chartInstance.current?.resize();
+  }, []);
+
+  useEffect(() => {
+    if (!chartRef.current) return;
+
+    const optionsCpuMetrics: echarts.EChartsOption = {
+      dataZoom: sliderConfig,
+      tooltip: { trigger: 'axis', formatter: tooltipFormatter },
+      legend: { data: ['Total', 'Used', 'Unused', 'Umbral Crítico'], top: 10, left: 'center' },
+      grid: { left: 50, right: 30, top: 60, bottom: 60, containLabel: true },
+      toolbox: { feature: { saveAsImage: {} } },
+      xAxis: {
+        type: 'time',
+        axisLabel: {
+          formatter: (value: number) => {
+            const date = new Date(value);
+            return `${date.getUTCDate()}/${date.getUTCMonth() + 1} ${date.getUTCHours()}:00`;
+          }
         }
-    }, []);
-
-    useEffect(() => {
-        const isDarkMode = document.documentElement.classList.contains('dark');
-        const optionsCpuMetrics: echarts.EChartsOption = {
-            dataZoom: {
-                type: 'slider',     // tipo slider
-                xAxisIndex: 0,      // aplica al eje X
-                bottom: 20,         // distancia desde la parte inferior del contenedor
-                height: 20,         // altura del slider
-                handleSize: '100%', // tamaño del manejador
-                start: 0,           // posición inicial
-                end: 100            // posición final
-            },
-            tooltip: {
-                trigger: 'axis',
-                formatter: params => {
-                    const date = new Date(params[0].value[0]).toUTCString();
-                    let result = `${date}<br/>`;
-                    params.forEach(p => {
-                        result += `${p.marker} ${p.seriesName}: ${p.value[1]} vCores<br/>`;
-                    });
-                    return result;
-                }
-            },
-            legend: {
-                data: ['Total', 'Used', 'Unused', 'Umbral Critico'],
-                orient: 'horizontal',
-                top: 10,
-                left: 'center'
-            },
-            // legend: {
-            //     data: ['Total', 'Umbral Critico', 'Used', 'Unused'],
-            //     orient: 'vertical',  // vertical para que se apile
-            //     right: 10,            // distancia desde el borde derecho
-            //     top: 'middle'         // centrada verticalmente
-            // },
-            // grid: {
-            //     left: 50,
-            //     right: 180, // deja espacio para la leyenda
-            //     top: 50,
-            //     bottom: 50,
-            //     containLabel: true // asegura que los labels no se corten
-            // },
-            grid: {
-                left: 50,
-                right: 30,
-                top: 60,
-                bottom: 60,
-                containLabel: true
-            },
-            toolbox: {
-                feature: {
-                    saveAsImage: {}
-                }
-            },
-            xAxis: {
-                type: 'time',
-                axisLabel: {
-                    formatter: value => {
-                        const date = new Date(value);
-                        return `${date.getUTCDate()}/${date.getUTCMonth() + 1} ${date.getUTCHours()}:00`;
-                    }
-                }
-            },
-            yAxis: {
-                type: 'value',
-                max: yMaxRounded,
-                axisLabel: {
-                    formatter: (value: number) => `${value} vCores`
-                }
-            },
-            series: [
-                {
-                    name: 'Total',
-                    type: 'line',
-                    data: totalData,
-                    smooth: true,
-                    areaStyle: { color: 'rgba(54, 162, 235, 0.3)' },
-                    lineStyle: { color: '#36A2EB' },
-                    itemStyle: {
-                        color: '#36A2EB',
-                        borderColor: '#ffffff',
-                        borderWidth: 1
-                    },
-                    emphasis: {
-                        focus: 'series'
-                    }
-                },
-                {
-                    name: 'Used',
-                    type: 'line',
-                    data: usedData,
-                    smooth: true,
-                    // areaStyle: { color: 'rgba(81, 243, 162, 0.232)' },
-                    lineStyle: { color: '#28e995' },
-                    itemStyle: {
-                        color: '#28e995',
-                        borderColor: '#ffffff',
-                        borderWidth: 1
-                    },
-                    emphasis: {
-                        focus: 'series'
-                    }
-                },
-                {
-                    name: 'Umbral Critico',
-                    type: 'line',
-                    data: umbralCpu,
-                    smooth: true,
-                    // areaStyle: { color: 'rgba(172, 0, 0, 0.286)' },
-                    lineStyle: { color: '#ef0000' },
-                    itemStyle: {
-                        color: '#ef0000',
-                        borderColor: '#ffffff',
-                        borderWidth: 1
-                    },
-                    emphasis: {
-                        focus: 'series'
-                    }
-                },
-                {
-                    name: 'Unused',
-                    type: 'line',
-                    data: unusedData,
-                    smooth: true,
-                    lineStyle: { color: '#FF6384' },
-                    itemStyle: {
-                        color: '#FF6384',
-                        borderColor: '#ffffff',
-                        borderWidth: 1
-                    },
-                    emphasis: { focus: 'series' },
-                    markPoint: {
-                        data: unusedData
-                            .map(item => {
-                                const timestamp = item[0];
-                                const value = item[1];
-                                const threshold = 90;
-                                if (value > threshold) {
-                                    return { name: 'Peak', value, xAxis: timestamp, yAxis: value };
-                                }
-                                return null;
-                            })
-                            .filter(Boolean),
-                        symbol: 'circle',
-                        symbolSize: 10,
-                        label: { show: true, formatter: '{c}', color: '#ef0000' }
-                    }
-                }
-            ],
-            animation: true,
-        };
-
-        if (!chartRefCpuMetrics.current) return
-
-        resizeObserverRef.current = new ResizeObserver(handleResize);
-        resizeObserverRef.current.observe(chartRefCpuMetrics.current);
-        if (chartRefCpuMetrics.current) {
-            chartCpuMetricsInstance.current = echarts.init(chartRefCpuMetrics.current);
-            chartCpuMetricsInstance.current.setOption(optionsCpuMetrics);
+      },
+      yAxis: { type: 'value', max: yMaxRounded, axisLabel: { formatter: (val: number) => `${val} vCores` } },
+      series: [
+        createSeries('Total', totalData, '#36A2EB', 'rgba(54, 162, 235, 0.3)'),
+        createSeries('Used', usedData, '#28e995'),
+        createSeries('Umbral Crítico', umbralCpu, '#ef0000'),
+        {
+          ...createSeries('Unused', unusedData, '#FF6384'),
+          markPoint: {
+            data: unusedData
+              .map(([timestamp, value]) =>
+                value > 90 ? { name: 'Peak', value, xAxis: timestamp, yAxis: value } : null
+              )
+              .filter(Boolean),
+            symbol: 'circle',
+            symbolSize: 10,
+            label: { show: true, formatter: '{c}', color: '#ef0000' }
+          }
         }
+      ],
+      animation: true
+    };
 
-        window.addEventListener('resize', handleResize);
+    chartInstance.current = echarts.init(chartRef.current);
+    chartInstance.current.setOption(optionsCpuMetrics);
 
+    resizeObserverRef.current = new ResizeObserver(handleResize);
+    resizeObserverRef.current.observe(chartRef.current);
+    window.addEventListener('resize', handleResize);
 
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      resizeObserverRef.current?.disconnect();
+      chartInstance.current?.dispose();
+    };
+  }, [totalData, usedData, unusedData, umbralCpu, yMaxRounded, handleResize]);
 
-        return () => {
-            window.removeEventListener('resize', handleResize);
-            resizeObserverRef.current?.disconnect();
-            chartCpuMetricsInstance.current?.dispose();
-        };
-    }, [data, handleResize])
+  return (
+    <Card className="w-full">
+      <CardHeader>
+        <CardTitle>Uso de Cores de CPU</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div ref={chartRef} className="w-full h-[400px] md:h-[450px] lg:h-[500px]" />
+      </CardContent>
+    </Card>
+  );
+};
 
-    return (
-        <Card className="w-full">
-            <CardHeader>
-                <CardTitle>Uso de Cores de CPU</CardTitle>
-            </CardHeader>
-            <CardContent>
-                <div ref={chartRefCpuMetrics} className="w-full h-[400px] md:h-[450px] lg:h-[500px]" />
-            </CardContent>
-        </Card>
-    )
-}
+const createSeries = (name: string, data: [string, number][], color: string, areaColor?: string) => ({
+  name,
+  type: 'line',
+  data,
+  smooth: true,
+  lineStyle: { color },
+  itemStyle: { color, borderColor: '#fff', borderWidth: 1 },
+  emphasis: { focus: 'series' },
+  ...(areaColor && { areaStyle: { color: areaColor } })
+});

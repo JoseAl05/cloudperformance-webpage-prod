@@ -18,7 +18,11 @@ const getPublicIpCount = (publicIps: (string | null)[]) => {
 }
 
 export const Ec2ResourceViewHistoricInfoComponent = ({ instances }: Ec2ResourceViewHistoricInfoComponentProps) => {
-    console.log(instances);
+    const statusColors = {
+        running: 'bg-green-500/10 text-green-500 border-green-500/20',
+        stopped: 'bg-red-500/10 text-red-500 border-red-500/20',
+        pending: 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20',
+    }
     return (
         <ScrollArea className="max-h-[60vh]">
             {
@@ -50,7 +54,7 @@ export const Ec2ResourceViewHistoricInfoComponent = ({ instances }: Ec2ResourceV
                                     <div>
                                         <div className="flex items-center justify-between gap-5">
                                             <span></span>
-                                            <Badge variant="default" className="bg-green-100 text-green-800">
+                                            <Badge variant="default" className={statusColors[instance.State_Name]}>
                                                 {instance.State_Name}
                                             </Badge>
                                         </div>

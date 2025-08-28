@@ -1,19 +1,11 @@
 'use client'
 
-import { useEffect, useRef, useCallback, useState } from 'react';
 import useSWR from 'swr';
-import * as echarts from 'echarts'
 import { Ec2ResourceViewUsageCpuComponent } from './graficos/Ec2ResourceViewUsageCpuComponent';
 import { Ec2ResourceViewUsageCreditsComponent } from './graficos/Ec2ResourceViewUsageCreditsComponent';
 import { Ec2ResourceViewUsageNetworkComponent } from './graficos/Ec2ResourceViewUsageNetworkComponent';
 import { Ec2ResourceViewInfoComponent } from './info/Ec2ResourceViewInfoComponent';
-import { Calendar1, Clock, FileSpreadsheet, Search, Server } from 'lucide-react';
-import { DataTable } from '@/components/general/data-table/data-table';
-import { createColumns } from '@/components/general/data-table/columns';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { TestComponent } from './graficos/TestComponent';
+import { ChartBar, Clock } from 'lucide-react';
 import { MainEc2ResourceViewMetricsSummaryComponent } from './graficos/MainEc2ResourceViewMetricsSummaryComponent';
 import { Ec2EventsTableComponent } from './events/Ec2EventsTable';
 
@@ -34,7 +26,6 @@ const fetcher = (url: string) =>
 
 export const InstanceEc2CpuMetricsComponent = ({ startDate, endDate, instance }: InstanceEc2CpuMetricsComponentProps) => {
 
-    const [searchTerm, setSearchTerm] = useState('');
     const startDateFormatted = startDate.toISOString().replace('Z', '').slice(0, -4);
     const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : '';
 
@@ -89,7 +80,6 @@ export const InstanceEc2CpuMetricsComponent = ({ startDate, endDate, instance }:
 
     return (
         <>
-            {/* <TestComponent /> */}
             <div className='w-full min-w-0 px-4 py-6'>
                 <div className='flex flex-col xl:flex-row gap-8 min-w-0'>
                     <div className='w-full xl:max-w-sm min-w-0'>
@@ -101,6 +91,10 @@ export const InstanceEc2CpuMetricsComponent = ({ startDate, endDate, instance }:
                     </div>
                 </div>
                 <div className='flex flex-col gap-5 mt-10'>
+                    <div className="flex items-center gap-3 my-5">
+                        <ChartBar className="h-8 w-8 text-blue-500" />
+                        <h1 className="text-3xl font-bold text-foreground">Métricas de la Instancia</h1>
+                    </div>
                     <Ec2ResourceViewUsageCreditsComponent
                         data={metricsData}
                     />
@@ -111,7 +105,7 @@ export const InstanceEc2CpuMetricsComponent = ({ startDate, endDate, instance }:
                         data={metricsData}
                     />
                 </div>
-                <div className="flex items-center gap-3 mb-8">
+                <div className="flex items-center gap-3 my-10">
                     <Clock className="h-8 w-8 text-blue-500" />
                     <h1 className="text-3xl font-bold text-foreground">Eventos de la Instancia</h1>
                 </div>

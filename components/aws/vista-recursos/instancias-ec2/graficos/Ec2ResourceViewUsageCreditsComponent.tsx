@@ -1,106 +1,72 @@
-'use client'
-import { useCallback, useEffect, useRef } from 'react';
-import * as echarts from "echarts"
+'use client';
+
+import { useCallback, useEffect, useMemo, useRef } from 'react';
+import * as echarts from 'echarts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 interface ResourceViewUsageCreditsComponentProps {
-    data: unknown
+    data: {
+        metrics_data: { MetricLabel: string; Timestamp: string; Value: number }[];
+    } | null;
 }
 
-export const Ec2ResourceViewUsageCreditsComponent = ({ data, lastCpuCreditBalanceEc2, lastCpuCreditUsageEc2, percentageCreditsUsageEc2, creditsEfficiencyEc2 }: ResourceViewUsageCreditsComponentProps) => {
-    // Chart para Credits Metrics
-    const chartRefCpuCredits = useRef<HTMLDivElement>(null);
-    const chartCpuCreditsInstance = useRef<echarts.ECharts | null>(null);
-    // Resize Observer
-    const resizeObserverRef = useRef<ResizeObserver | null>(null);
-    // Métricas de Uso de Créditos
-    const creditsUsageData = data ? data.metrics_data.filter(item => item.MetricLabel === "Uso de Créditos CPU (Promedio)") : [];
-    creditsUsageData.sort((a, b) => new Date(a.Timestamp) - new Date(b.Timestamp));
-    const creditsUsageMetric = creditsUsageData.map(item => [item.Timestamp, item.Value.toFixed(2)]);
-    // Métricas de Créditos Disponibles
-    const creditsBalanceData = data ? data.metrics_data.filter(item => item.MetricLabel === "Créditos de CPU Disponibles (Promedio)") : [];
-    creditsBalanceData.sort((a, b) => new Date(a.Timestamp) - new Date(b.Timestamp));
-    const creditsBalanceMetric = creditsBalanceData.map(item => [item.Timestamp, item.Value.toFixed(2)]);
-    const maxCreditsValue = creditsBalanceData.length > 0
-        ? Math.max(...creditsBalanceData.map(item => item.Value))
-        : 0;
+const sliderConfig = {
+    type: 'slider',
+    xAxisIndex: 0,
+    bottom: 20,
+    height: 20,
+    handleSize: '100%',
+    start: 0,
+    end: 100
+};
 
-    const yMaxRaw = Math.ceil(maxCreditsValue * 1.5); // 1628
-    const factor = 100; // múltiplo al que quieres redondear
-    const yMaxRounded = Math.floor(yMaxRaw / factor) * factor;
-    // const yInterval = Math.ceil(yMax / 5 / 50) * 50;
+const tooltipFormatter = (params: unknown) => {
+    const date = new Date(params[0].value[0]).toUTCString();
+    return (
+        `${date}<br/>` +
+        params.map((p: unknown) => `${p.marker} ${p.seriesName}: ${p.value[1]} Créditos<br/>`).join('')
+    );
+};
+
+export const Ec2ResourceViewUsageCreditsComponent = ({ data }: ResourceViewUsageCreditsComponentProps) => {
+    const chartRef = useRef<HTMLDivElement>(null);
+    const chartInstance = useRef<echarts.ECharts | null>(null);
+    const resizeObserverRef = useRef<ResizeObserver | null>(null);
+
+    const { creditsUsageMetric, creditsBalanceMetric, yMaxRounded } = useMemo(() => {
+        const creditsUsageData = data?.metrics_data.filter(item => item.MetricLabel === 'Uso de Créditos CPU (Promedio)') || [];
+        creditsUsageData.sort((a, b) => new Date(a.Timestamp).getTime() - new Date(b.Timestamp).getTime());
+        const creditsUsageMetric: [string, number][] = creditsUsageData.map(item => [item.Timestamp, +item.Value.toFixed(2)]);
+
+        const creditsBalanceData = data?.metrics_data.filter(item => item.MetricLabel === 'Créditos de CPU Disponibles (Promedio)') || [];
+        creditsBalanceData.sort((a, b) => new Date(a.Timestamp).getTime() - new Date(b.Timestamp).getTime());
+        const creditsBalanceMetric: [string, number][] = creditsBalanceData.map(item => [item.Timestamp, +item.Value.toFixed(2)]);
+
+        const maxCreditsValue = creditsBalanceData.length ? Math.max(...creditsBalanceData.map(item => item.Value)) : 0;
+        const yMaxRaw = Math.ceil(maxCreditsValue * 1.5);
+        const factor = 100;
+        const yMaxRounded = Math.floor(yMaxRaw / factor) * factor;
+
+        return { creditsUsageMetric, creditsBalanceMetric, yMaxRounded };
+    }, [data]);
 
     const handleResize = useCallback(() => {
-        if (chartCpuCreditsInstance.current) {
-            chartCpuCreditsInstance.current.resize();
-        }
+        chartInstance.current?.resize();
     }, []);
 
     useEffect(() => {
-        const isDarkMode = document.documentElement.classList.contains('dark');
+        if (!chartRef.current) return;
+
         const optionsCpuCreditsMetrics: echarts.EChartsOption = {
-            // title: {
-            //     text: 'Consumo y Balance de Créditos',
-            //     left: 'center',
-            //     textStyle: {
-            //         color: isDarkMode ? '#ffff' : '#000',
-            //     }
-            // },
-            dataZoom: {
-                type: 'slider',     // tipo slider
-                xAxisIndex: 0,      // aplica al eje X
-                bottom: 20,         // distancia desde la parte inferior del contenedor
-                height: 20,         // altura del slider
-                handleSize: '100%', // tamaño del manejador
-                start: 0,           // posición inicial
-                end: 100            // posición final
-            },
-            tooltip: {
-                trigger: 'axis',
-                formatter: params => {
-                    const date = new Date(params[0].value[0]).toUTCString();
-                    let result = `${date}<br/>`;
-                    params.forEach(p => {
-                        result += `${p.marker} ${p.seriesName}: ${p.value[1]} Créditos<br/>`;
-                    });
-                    return result;
-                }
-            },
-            legend: {
-                data: ['Uso de Créditos', 'Créditos Disponibles'],
-                orient: 'horizontal',
-                top: 10,
-                left: 'center'
-            },
-            // legend: {
-            //     data: ['Uso de Créditos', 'Créditos Disponibles'],
-            //     orient: 'vertical',  // vertical para que se apile
-            //     right: 10,            // distancia desde el borde derecho
-            //     top: 'middle'         // centrada verticalmente
-            // },
-            grid: {
-                left: 50,
-                right: 30,
-                top: 60,
-                bottom: 60,
-                containLabel: true
-            },
-            // grid: {
-            //     left: 50,
-            //     right: 180, // deja espacio para la leyenda
-            //     top: 50,
-            //     bottom: 60,
-            //     containLabel: true // asegura que los labels no se corten
-            // },
-            toolbox: {
-                feature: {
-                    saveAsImage: {}
-                }
-            },
+            dataZoom: sliderConfig,
+            tooltip: { trigger: 'axis', formatter: tooltipFormatter },
+            legend: { data: ['Uso de Créditos', 'Créditos Disponibles'], top: 10, left: 'center' },
+            grid: { left: 50, right: 30, top: 60, bottom: 60, containLabel: true },
+            toolbox: { feature: { saveAsImage: {} } },
             xAxis: {
                 type: 'time',
                 axisLabel: {
-                    formatter: value => {
+                    formatter: (value: number) => {
                         const date = new Date(value);
                         return `${date.getDate()}/${date.getMonth() + 1} ${date.getHours()}:00`;
                     }
@@ -109,64 +75,28 @@ export const Ec2ResourceViewUsageCreditsComponent = ({ data, lastCpuCreditBalanc
             yAxis: {
                 type: 'value',
                 max: yMaxRounded,
-                // interval: yInterval,
-                axisLabel: {
-                    formatter: (value: number) => `${value} Créditos`
-                }
+                axisLabel: { formatter: (val: number) => `${val} Créditos` }
             },
             series: [
-                {
-                    name: 'Uso de Créditos',
-                    type: 'line',
-                    data: creditsUsageMetric,
-                    smooth: true,
-                    areaStyle: { color: 'rgba(54, 162, 235, 0.3)' },
-                    lineStyle: { color: '#36A2EB' },
-                    itemStyle: {
-                        color: '#36A2EB',        // color del punto
-                        borderColor: '#ffffff',  // borde del punto
-                        borderWidth: 1
-                    },
-                    emphasis: {
-                        focus: 'series'
-                    }
-                },
-                {
-                    name: 'Créditos Disponibles',
-                    type: 'line',
-                    data: creditsBalanceMetric,
-                    smooth: true,
-                    areaStyle: { color: 'rgba(235, 0, 0, 0.3)' },
-                    lineStyle: { color: '#e60000' },
-                    itemStyle: {
-                        color: '#e60000',        // color del punto
-                        borderColor: '#ffffff',  // borde del punto
-                        borderWidth: 1
-                    },
-                    emphasis: {
-                        focus: 'series'
-                    }
-                },
+                createSeries('Uso de Créditos', creditsUsageMetric, '#36A2EB', 'rgba(54, 162, 235, 0.3)'),
+                createSeries('Créditos Disponibles', creditsBalanceMetric, '#e60000', 'rgba(235, 0, 0, 0.3)')
             ],
-            animation: true,
+            animation: true
         };
-        if (!chartRefCpuCredits.current) return
 
-        if (chartRefCpuCredits.current) {
-            chartCpuCreditsInstance.current = echarts.init(chartRefCpuCredits.current);
-            chartCpuCreditsInstance.current.setOption(optionsCpuCreditsMetrics);
-        }
+        chartInstance.current = echarts.init(chartRef.current);
+        chartInstance.current.setOption(optionsCpuCreditsMetrics);
 
         resizeObserverRef.current = new ResizeObserver(handleResize);
-        resizeObserverRef.current.observe(chartRefCpuCredits.current);
+        resizeObserverRef.current.observe(chartRef.current);
         window.addEventListener('resize', handleResize);
 
         return () => {
             window.removeEventListener('resize', handleResize);
             resizeObserverRef.current?.disconnect();
-            chartCpuCreditsInstance.current?.dispose();
+            chartInstance.current?.dispose();
         };
-    }, [data, handleResize])
+    }, [creditsUsageMetric, creditsBalanceMetric, yMaxRounded, handleResize]);
 
     return (
         <Card className="w-full">
@@ -174,8 +104,19 @@ export const Ec2ResourceViewUsageCreditsComponent = ({ data, lastCpuCreditBalanc
                 <CardTitle>Consumo y Balance de Créditos</CardTitle>
             </CardHeader>
             <CardContent>
-                <div ref={chartRefCpuCredits} className="w-full h-[400px] md:h-[450px] lg:h-[500px]" />
+                <div ref={chartRef} className="w-full h-[400px] md:h-[450px] lg:h-[500px]" />
             </CardContent>
         </Card>
-    )
-}
+    );
+};
+
+const createSeries = (name: string, data: [string, number][], color: string, areaColor?: string) => ({
+    name,
+    type: 'line',
+    data,
+    smooth: true,
+    lineStyle: { color },
+    itemStyle: { color, borderColor: '#fff', borderWidth: 1 },
+    emphasis: { focus: 'series' },
+    ...(areaColor && { areaStyle: { color: areaColor } })
+});

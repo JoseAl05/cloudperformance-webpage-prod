@@ -1,5 +1,5 @@
 'use client'
-import { useState, Dispatch, SetStateAction, useEffect } from 'react'
+import { useState, Dispatch, SetStateAction, useEffect, useMemo } from 'react'
 import { Check, ChevronsUpDown } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -24,8 +24,8 @@ interface TagFilterComponentProps {
     region: string,
     collection: string,
     tagColumnName: string,
-    selectedKey?: string,
-    selectedValue?: string,
+    selectedKey?: string | null,
+    selectedValue?: string | null,
     setSelectedKey: Dispatch<SetStateAction<string | null>>,
     setSelectedValue: Dispatch<SetStateAction<string | null>>,
     setTagsData?: Dispatch<SetStateAction<unknown[]>>
@@ -65,11 +65,8 @@ export const TagFilterComponent = ({
     )
 
     useEffect(() => {
-        if (setTagsData) setTagsData(data || []);
+        if (setTagsData) setTagsData(data || [])
     }, [data, setTagsData])
-
-    if (isLoading) return <div>Cargando...</div>
-    if (error) return <div>Error al cargar datos</div>
 
     const tagMap: Record<string, Set<string>> = {}
     data?.forEach((item: unknown) => {
@@ -79,12 +76,34 @@ export const TagFilterComponent = ({
         })
     })
 
-    const keys = Array.from(new Set(Object.keys(tagMap)))
-    const valuesForKey = selectedKey ? Array.from(new Set(tagMap[selectedKey])) : []
+    const keys = Object.keys(tagMap)
+
+
+    const valuesForKey = useMemo(
+        () => (selectedKey ? Array.from(tagMap[selectedKey] || []) : []),
+        [selectedKey, tagMap]
+    )
+
+    const isValidKey = selectedKey && keys.includes(selectedKey)
+    const isValidValue = selectedValue && isValidKey && valuesForKey.includes(selectedValue)
+    useEffect(() => {
+        if (!data || isLoading) return
+        console.log("SELECTED KEY " + selectedKey)
+        console.log("ALL KEYS " + keys)
+        if (selectedKey && !keys.includes(selectedKey)) {
+            setSelectedKey(null)
+            setSelectedValue(null)
+        }
+        else if (selectedValue && selectedKey && !valuesForKey.includes(selectedValue)) {
+            setSelectedValue(null)
+        }
+    }, [data, isLoading, keys, valuesForKey, selectedKey, selectedValue, setSelectedKey, setSelectedValue])
+
+    if (isLoading) return <div>Cargando...</div>
+    if (error) return <div>Error al cargar datos</div>
 
     return (
         <div className="space-y-2">
-            {/* Keys */}
             <Popover open={openKey} onOpenChange={setOpenKey}>
                 <PopoverTrigger asChild>
                     <Button
@@ -93,7 +112,7 @@ export const TagFilterComponent = ({
                         aria-expanded={openKey}
                         className="w-full justify-between bg-transparent"
                     >
-                        {selectedKey || "Selecciona una Key"}
+                        {isValidKey ? selectedKey : "Selecciona una Key"}
                         <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                     </Button>
                 </PopoverTrigger>
@@ -107,6 +126,7 @@ export const TagFilterComponent = ({
                                     value="allKeys"
                                     onSelect={() => {
                                         setSelectedKey(null)
+                                        setSelectedValue(null)
                                         setOpenKey(false)
                                     }}
                                 >
@@ -131,19 +151,29 @@ export const TagFilterComponent = ({
                     </Command>
                 </PopoverContent>
             </Popover>
-            {selectedKey && (
+            {isValidKey && (
                 <Popover open={openValue} onOpenChange={setOpenValue}>
                     <PopoverTrigger asChild>
-                        <Button variant="outline" className="w-[300px] justify-between">
-                            {selectedValue || "Selecciona un Value"}
+                        <Button variant="outline" className="w-full justify-between">
+                            {isValidValue ? selectedValue : "Selecciona un Value"}
+                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                         </Button>
                     </PopoverTrigger>
-                    <PopoverContent className="w-[300px] p-0">
+                    <PopoverContent className="w-full p-0">
                         <Command>
                             <CommandInput placeholder="Buscar value..." />
                             <CommandList>
                                 <CommandEmpty>No hay valores.</CommandEmpty>
                                 <CommandGroup>
+                                    <CommandItem
+                                        onSelect={() => {
+                                            setSelectedValue(null)
+                                            setOpenValue(false)
+                                        }}
+                                    >
+                                        <Check className={cn("mr-2 h-4 w-4", !selectedValue ? "opacity-100" : "opacity-0")} />
+                                        Todos los valores
+                                    </CommandItem>
                                     {valuesForKey.map((value, idx) => (
                                         <CommandItem
                                             key={`${value}-${idx}`}
@@ -152,6 +182,7 @@ export const TagFilterComponent = ({
                                                 setOpenValue(false)
                                             }}
                                         >
+                                            <Check className={cn("mr-2 h-4 w-4", selectedValue === value ? "opacity-100" : "opacity-0")} />
                                             {value}
                                         </CommandItem>
                                     ))}

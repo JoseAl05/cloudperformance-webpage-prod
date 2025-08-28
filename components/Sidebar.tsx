@@ -22,7 +22,7 @@ export const SidebarComponent = ({ ...props }: React.ComponentProps<typeof Sideb
         {
             label: 'Inicio',
             icon: Grid2X2,
-            href: '/aws/main-view',
+            href: '/aws/facturacion/tendencia-facturacion',
             tooltip: 'Vista Principal',
             color: 'text-sky-500',
         },

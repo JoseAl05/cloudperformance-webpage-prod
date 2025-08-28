@@ -122,7 +122,7 @@ export const Ec2ResourceViewInfoComponent = ({ data }: Ec2ResourceViewInfoCompon
                                         <div>
                                             <div className='flex items-center justify-between gap-5'>
                                                 <span className='font-semibold text-sm'>{instanceId}</span>
-                                                <Badge variant='default' className='bg-green-100 text-green-800'>
+                                                <Badge variant='default' className={statusColors[latestInstanceState]}>
                                                     {latestInstanceState}
                                                 </Badge>
                                             </div>
