@@ -62,7 +62,7 @@ export const FiltersComponent = ({
             startDate: startDateParam ? new Date(startDateParam) : yesterday,
             endDate: endDateParam ? new Date(endDateParam) : new Date(),
             instance: instanceParam || '',
-            region: regionParam || '',
+            region: regionParam || 'all_regions',
             selectedKey: selectedKeyParam || null,
             selectedValue: selectedValueParam || null,
             service: selectedServiceParam || ''

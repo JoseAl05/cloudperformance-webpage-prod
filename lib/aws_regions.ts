@@ -1,4 +1,5 @@
 export const aws_regions = [
+    { label: 'Todas las Regiones', value: 'all' },
     { label: 'Africa (Cape Town)', value: 'af-south-1' },
     { label: 'Asia Pacific (Hong Kong)', value: 'ap-east-1' },
     { label: 'Asia Pacific (Hyderabad)', value: 'ap-east-2' },
