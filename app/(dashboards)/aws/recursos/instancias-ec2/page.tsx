@@ -1,9 +1,12 @@
 import { MainViewInstancesEc2Component } from '@/components/aws/vista-recursos/instancias-ec2/MainViewInstancesEc2Component';
+import { Suspense } from 'react';
 
 export default function DashboardInstanciasEc2() {
-    return(
+    return (
         <div className=''>
-            <MainViewInstancesEc2Component />
+            <Suspense fallback={<div>Cargando...</div>}>
+                <MainViewInstancesEc2Component />
+            </Suspense>
         </div>
     )
 }
