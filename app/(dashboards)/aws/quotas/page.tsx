@@ -1,10 +1,12 @@
 import { MainViewHeatmapQuotasComponent } from '@/components/aws/vista-heatmap-quotas/MainViewHeatmapQuotasComponent';
+import { Suspense } from 'react';
 
 export default function DashboardAwsHeatmapQuotas() {
-    return(
+    return (
         <div>
-            <h1>Dashboard AWS / Heatmap Quotas</h1>
-            <MainViewHeatmapQuotasComponent />
+            <Suspense fallback={<div>Cargando...</div>}>
+                <MainViewHeatmapQuotasComponent />
+            </Suspense>
         </div>
     )
 }
