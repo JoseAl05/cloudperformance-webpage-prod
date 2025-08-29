@@ -68,12 +68,9 @@ export const TendenciaFacturacionChartComponent = ({ startDate, endDate, service
     const startDateFormatted = startDate.toISOString().split('.')[0];
     const endDateFormatted = endDate.toISOString().split('.')[0];
 
-    const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/facturacion/tendencia-facturacion?date_from=${startDateFormatted}&date_to=${endDateFormatted}&services=${services}&region=${region}`;
-    console.log(apiUrl)
-    // if (services && services.length > 0) {
-    //     const servicesParam = services.map(s => encodeURIComponent(s)).join(',');
-    //     apiUrl += `&services=${servicesParam}`;
-    // }
+    const serviceParam = services ? `services=${services}` : '';
+
+    const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/facturacion/tendencia-facturacion?date_from=${startDateFormatted}&date_to=${endDateFormatted}&${serviceParam}&region=${region}`;
 
     const { data, error, isLoading } = useSWR<FacturacionData[]>(apiUrl, fetcher);
 

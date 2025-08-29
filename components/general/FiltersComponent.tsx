@@ -24,7 +24,7 @@ interface FiltersComponentProps {
     }) => React.JSX.Element;
     dateFilter?: boolean;
     regionFilter?: boolean;
-    isRegionMultiSelect?:boolean;
+    isRegionMultiSelect?: boolean;
     instancesFilter?: boolean;
     tagsFilter?: boolean;
     serviceFilter?: boolean;
@@ -122,7 +122,9 @@ export const FiltersComponent = ({
         if (newFilters.startDate) query.set('startDate', newFilters.startDate.toISOString());
         if (newFilters.endDate) query.set('endDate', newFilters.endDate.toISOString());
         if (newFilters.instance) query.set('instance', newFilters.instance);
-        if (newFilters.region && newFilters.region !== 'all_regions') query.set('region', newFilters.region);
+        if (newFilters.region && newFilters.region !== 'all_regions') {
+            query.set('region', newFilters.region);
+        }
         if (newFilters.selectedKey) query.set('selectedKey', newFilters.selectedKey);
         if (newFilters.selectedValue) query.set('selectedValue', newFilters.selectedValue);
         if (newFilters.service) query.set('services', newFilters.service);

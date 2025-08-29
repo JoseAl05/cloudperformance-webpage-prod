@@ -48,24 +48,26 @@ export const RegionFilterComponent = ({
     };
 
     const handleRegionToggle = (regionValue: string) => {
+        let regionArray = selectedRegion ? selectedRegion.split(',').filter(Boolean) : [];
+
         if (regionValue === 'all_regions') {
-            setSelectedRegion('all_regions');
+            regionArray = ['all_regions'];
         } else {
-            const regionArray = selectedRegion ? selectedRegion.split(',') : [];
+            regionArray = regionArray.filter((r) => r !== 'all_regions');
+
             if (regionArray.includes(regionValue)) {
-                const updated = regionArray.filter((s) => s !== regionValue);
-                setSelectedRegion(updated.join(','));
+                regionArray = regionArray.filter((r) => r !== regionValue);
             } else {
-                const updated = [...regionArray, regionValue];
-                setSelectedRegion(updated.join(','));
+                regionArray.push(regionValue);
             }
         }
+
+        setSelectedRegion(regionArray.length ? regionArray.join(',') : 'all_regions');
     };
 
-    const selectedRegionArray = selectedRegion ? selectedRegion.split(',') : [];
+    const selectedRegionArray = selectedRegion ? selectedRegion.split(',').filter(Boolean) : [];
 
     return !isRegionMultiSelect ? (
-        // === SINGLE SELECT MODE ===
         <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
                 <Button
@@ -108,7 +110,6 @@ export const RegionFilterComponent = ({
             </PopoverContent>
         </Popover>
     ) : (
-        // === MULTI SELECT MODE ===
         <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
                 <Button
@@ -128,7 +129,7 @@ export const RegionFilterComponent = ({
                     <CommandGroup className="max-h-[200px] overflow-y-auto">
                         <CommandItem
                             value="all_regions"
-                            onSelect={() => setSelectedRegion('all_regions')}
+                            onSelect={() => handleRegionToggle('all_regions')}
                         >
                             <Check
                                 className={`mr-2 h-4 w-4 ${selectedRegion === 'all_regions' ? 'opacity-100' : 'opacity-0'
@@ -146,8 +147,8 @@ export const RegionFilterComponent = ({
                                 >
                                     <Check
                                         className={`mr-2 h-4 w-4 ${selectedRegionArray.includes(region.value)
-                                                ? 'opacity-100'
-                                                : 'opacity-0'
+                                            ? 'opacity-100'
+                                            : 'opacity-0'
                                             }`}
                                     />
                                     {region.label}
