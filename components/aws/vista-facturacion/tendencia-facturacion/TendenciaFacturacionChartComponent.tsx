@@ -6,6 +6,7 @@ import * as echarts from 'echarts';
 import { TrendingUp, DollarSign, Download, Filter, Calendar } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { aws_regions } from '@/lib/aws_regions';
 
 interface TendenciaFacturacionProps {
     startDate: Date;
@@ -18,7 +19,7 @@ interface FacturacionData {
     SERVICE: string;
     end_date: string;
     unblendedcost: number;
-    REGION_Formatted: string;
+    REGION: string;
     RESOURCE_ID: string | null;
     sync_time: { $date: string };
 }
@@ -132,7 +133,7 @@ export const TendenciaFacturacionChartComponent = ({ startDate, endDate, service
         const significantServices = Array.from(serviceMap.entries())
             .filter(([_, dateMap]) => {
                 const totalCost = Array.from(dateMap.values()).reduce((sum, cost) => sum + cost, 0);
-                return totalCost > 0.01; // Filtrar servicios con costo muy bajo
+                return totalCost; // Filtrar servicios con costo muy bajo
             })
             .sort((a, b) => {
                 const totalA = Array.from(a[1].values()).reduce((sum, cost) => sum + cost, 0);
@@ -172,6 +173,7 @@ export const TendenciaFacturacionChartComponent = ({ startDate, endDate, service
 
     const calculateMetrics = (rawData: FacturacionData[]) => {
         if (!rawData || rawData.length === 0) return { total: 0, services: 0, regions: 0 };
+        console.log(rawData);
         const total = rawData.reduce((sum, item) => sum + item.unblendedcost, 0);
         const services = new Set(rawData.map(item => item.SERVICE)).size;
         const regions = new Set(rawData.map(item => item.REGION)).size;
@@ -481,7 +483,7 @@ export const TendenciaFacturacionChartComponent = ({ startDate, endDate, service
 
     if (!data || !Array.isArray(data) || data.length === 0) {
         return (
-            <div className="text-gray-500 p-8 text-center bg-gray-50 rounded-lg">
+            <div className="text-gray-500 p-8 text-center rounded-lg">
                 <TrendingUp className="h-12 w-12 mx-auto mb-4 text-gray-400" />
                 <h3 className="text-lg font-semibold mb-2">No hay datos disponibles</h3>
                 <p>No se encontraron datos de facturación para el período seleccionado</p>
@@ -490,7 +492,15 @@ export const TendenciaFacturacionChartComponent = ({ startDate, endDate, service
     }
 
     const metrics = calculateMetrics(data);
+    let selectedRegionsCount = 0;
 
+    if (region === 'all_regions') {
+        selectedRegionsCount = aws_regions.length - 1;
+    } else if (region) {
+        selectedRegionsCount = region.split(',').length;
+    } else {
+        selectedRegionsCount = 0;
+    }
     return (
         <div className="w-full min-w-0 px-4 py-6">
             {/* Header */}
@@ -507,10 +517,6 @@ export const TendenciaFacturacionChartComponent = ({ startDate, endDate, service
                     </div>
                 </div>
                 <div className="flex gap-2">
-                    <Button variant="outline" className="gap-2">
-                        <Filter className="h-4 w-4" />
-                        Filtros
-                    </Button>
                     <Button
                         variant="outline"
                         className="gap-2"
@@ -528,9 +534,15 @@ export const TendenciaFacturacionChartComponent = ({ startDate, endDate, service
                     <CardContent className="p-6">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-sm font-medium text-muted-foreground">Costo Total</p>
+                                <p className="text-sm font-medium text-muted-foreground">Costo Acumulado</p>
                                 <p className="text-2xl font-bold text-green-600">
-                                    ${metrics.total.toLocaleString('es-ES', { minimumFractionDigits: 2 })}
+                                    $
+                                    {metrics < 0.01 ? (
+                                        metrics.total.toPrecision(2)
+                                    ) : (
+                                        metrics.total.toLocaleString('es-ES', { minimumFractionDigits: 2 })
+                                    )}
+                                    {/* {num.toPrecision(3)} */}
                                 </p>
                                 <p className="text-xs text-muted-foreground">
                                     Período seleccionado
@@ -563,7 +575,7 @@ export const TendenciaFacturacionChartComponent = ({ startDate, endDate, service
                                 <p className="text-sm font-medium text-muted-foreground">Regiones</p>
                                 <p className="text-2xl font-bold text-purple-600">{metrics.regions}</p>
                                 <p className="text-xs text-muted-foreground">
-                                    Diferentes regiones
+                                    Diferentes regiones con datos
                                 </p>
                             </div>
                             <Calendar className="h-8 w-8 text-purple-500" />
@@ -609,11 +621,15 @@ export const TendenciaFacturacionChartComponent = ({ startDate, endDate, service
                         </div>
                         <div>
                             <span className="text-muted-foreground">Región:</span>
-                            <p className="font-medium">Todas las regiones</p>
+                            <p className="font-medium">
+                                {metrics.regions}
+                            </p>
                         </div>
                         <div>
-                            <span className="text-muted-foreground">Tipo:</span>
-                            <p className="font-medium">Gráfico de área apilada</p>
+                            <span className="text-muted-foreground">Servicios:</span>
+                            <p className="font-medium">
+                                {metrics.services}
+                            </p>
                         </div>
                     </div>
                 </CardContent>

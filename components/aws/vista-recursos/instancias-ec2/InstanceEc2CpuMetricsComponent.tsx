@@ -44,11 +44,32 @@ export const InstanceEc2CpuMetricsComponent = ({ startDate, endDate, instance }:
         fetcher
     )
 
-    if (ec2Metrics.isLoading) return <div>Cargando...</div>
+    if (ec2Metrics.isLoading) {
+        return (
+            <div className="flex justify-center items-center p-12">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-500"></div>
+                <span className="ml-3">Cargando Métricas...</span>
+            </div>
+        );
+    }
     if (ec2Metrics.error) return <div>Error al cargar datos</div>
-    if (ec2Info.isLoading) return <div>Cargando...</div>
+    if (ec2Info.isLoading) {
+        return (
+            <div className="flex justify-center items-center p-12">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-500"></div>
+                <span className="ml-3">Cargando información de Instancia...</span>
+            </div>
+        );
+    }
     if (ec2Info.error) return <div>Error al cargar datos</div>
-    if (ec2Events.isLoading) return <div>Cargando...</div>
+    if (ec2Events.isLoading) {
+        return (
+            <div className="flex justify-center items-center p-12">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-500"></div>
+                <span className="ml-3">Cargando eventos...</span>
+            </div>
+        );
+    }
     if (ec2Events.error) return <div>Error al cargar datos</div>
 
     if (!instance) {

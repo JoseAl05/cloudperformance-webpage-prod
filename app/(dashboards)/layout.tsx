@@ -2,6 +2,7 @@
 import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar"
 import { SidebarComponent } from "@/components/Sidebar"
 import { ModeToggle } from '@/components/ModeToggle';
+import { Navbar } from '@/components/Navbar';
 
 
 export default function DashboardLayout({
@@ -22,7 +23,7 @@ export default function DashboardLayout({
             <SidebarInset className="min-w-0">
                 <div className='flex items-center gap-3 p-5'>
                     <SidebarTrigger />
-                    <ModeToggle />
+                    <Navbar />
                 </div>
                 <div className="flex flex-col">
                     <div className="@container/main flex flex-col gap-2">

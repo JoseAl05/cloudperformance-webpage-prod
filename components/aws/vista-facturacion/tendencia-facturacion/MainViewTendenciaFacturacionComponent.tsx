@@ -24,16 +24,6 @@ export const MainViewTendenciaFacturacionComponent = () => {
                             </div>
                         </div>
                     </div>
-                    <div className='flex items-center gap-3'>
-                        <Button variant='outline' className='gap-2'>
-                            <Filter className='h-4 w-4' />
-                            Filtros
-                        </Button>
-                        <Button className='gap-2 bg-blue-600 hover:bg-blue-700'>
-                            <Download className='h-4 w-4' />
-                            Exportar Datos
-                        </Button>
-                    </div>
                 </div>
             </div>
             <div className='w-full min-w-0'>

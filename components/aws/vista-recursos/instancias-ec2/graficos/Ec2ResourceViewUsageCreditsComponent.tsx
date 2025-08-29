@@ -10,15 +10,23 @@ interface ResourceViewUsageCreditsComponentProps {
     } | null;
 }
 
-const sliderConfig = {
-    type: 'slider',
-    xAxisIndex: 0,
-    bottom: 20,
-    height: 20,
-    handleSize: '100%',
-    start: 0,
-    end: 100
-};
+const sliderConfig = [
+    {
+        type: 'slider',
+        xAxisIndex: 0,
+        bottom: 20,
+        height: 20,
+        handleSize: '100%',
+        start: 0,
+        end: 100
+    },
+    {
+        type: 'inside',
+        start: 0,
+        end: 100,
+        filterMode: 'filter'
+    },
+];
 
 const tooltipFormatter = (params: unknown) => {
     const date = new Date(params[0].value[0]).toUTCString();

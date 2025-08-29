@@ -244,11 +244,11 @@ export const FiltersComponent = ({
                         )}
                     </div>
                     <div className='flex items-center gap-4'>
-                        <Button onClick={applyFilters} className='flex items-center gap-2 bg-blue-700 hover:bg-blue-500 text-white'>
+                        <Button onClick={applyFilters} className='flex items-center gap-2 bg-blue-700 cursor-pointer hover:bg-blue-500 text-white'>
                             <Filter />
                             Aplicar Filtros
                         </Button>
-                        <Button onClick={clearFilters} className='flex items-center gap-2 bg-gray-500 hover:bg-gray-400 text-white'>
+                        <Button onClick={clearFilters} className='flex items-center gap-2 bg-gray-500 cursor-pointer hover:bg-gray-400 text-white'>
                             <XCircle />
                             Limpiar Filtros
                         </Button>

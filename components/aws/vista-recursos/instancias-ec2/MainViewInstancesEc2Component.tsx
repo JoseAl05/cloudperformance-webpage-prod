@@ -37,6 +37,5 @@ export const MainViewInstancesEc2Component = () => {
                 />
             </div>
         </div>
-
     )
 }
