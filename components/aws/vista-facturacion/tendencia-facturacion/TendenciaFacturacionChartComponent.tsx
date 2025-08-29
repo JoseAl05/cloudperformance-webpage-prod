@@ -32,38 +32,68 @@ const fetcher = (url: string) =>
         }
     }).then(res => res.json());
 
-// Colores más suaves similar a Power BI
-const serviceColors = {
-    'Amazon Elastic Compute Cloud': 'rgba(255, 107, 107, 0.8)',
-    'Amazon Elastic Container Service': 'rgba(78, 205, 196, 0.8)',
-    'Amazon Elastic File System': 'rgba(69, 183, 209, 0.8)',
-    'Amazon Relational Database Service': 'rgba(150, 206, 180, 0.8)',
-    'Amazon Simple Notification Service': 'rgba(255, 234, 167, 0.8)',
-    'Amazon Simple Queue Service': 'rgba(221, 160, 221, 0.8)',
-    'Amazon Simple Storage Service': 'rgba(152, 216, 200, 0.8)',
-    'Amazon Virtual Private Cloud': 'rgba(247, 220, 111, 0.8)',
-    'AmazonCloudWatch': 'rgba(187, 143, 206, 0.8)',
-    'AWS Cost Explorer': 'rgba(133, 193, 233, 0.8)',
-    'AWS Support (Developer)': 'rgba(248, 196, 113, 0.8)',
-    'EC2 - Other': 'rgba(130, 224, 170, 0.8)',
-    'Tax': 'rgba(241, 148, 138, 0.8)',
-    'AWS CloudFormation': 'rgba(174, 214, 241, 0.8)',
-    'AWS CloudTrail': 'rgba(169, 223, 191, 0.8)',
-    'AWS Config': 'rgba(249, 231, 159, 0.8)',
-    'AWS Key Management Service': 'rgba(255, 182, 193, 0.8)',
-    'AWS Data Pipeline': 'rgba(144, 238, 144, 0.8)',
-    'AWS Glue': 'rgba(221, 221, 221, 0.8)'
+const generateUniqueColors = (count: number) => {
+    const colors: string[] = [];
+    const saturation = 70; // Saturación consistente para colores vibrantes
+    const lightness = 65;  // Luminosidad consistente para buena legibilidad
+
+    // Usar el ángulo dorado para distribución óptima de colores
+    const goldenAngle = 137.5; // Aproximación del ángulo dorado en grados
+
+    for (let i = 0; i < count; i++) {
+        // Distribución uniforme usando el ángulo dorado
+        const hue = (i * goldenAngle) % 360;
+
+        // Generar color en formato HSL y convertir a rgba
+        const color = `hsla(${Math.round(hue)}, ${saturation}%, ${lightness}%, 0.8)`;
+        colors.push(color);
+    }
+
+    return colors;
 };
 
-// Función para generar colores aleatorios suaves
-const generateSoftColor = (index: number) => {
-    const hue = (index * 137.508) % 360; // Golden angle approximation
-    return `hsla(${hue}, 65%, 70%, 0.8)`;
+// Cache para colores por servicio (mantiene consistencia entre renders)
+const serviceColorCache = new Map<string, string>();
+
+const getServiceColor = (serviceName: string, serviceIndex: number, totalServices: number) => {
+    // Si ya tenemos un color para este servicio, lo devolvemos
+    if (serviceColorCache.has(serviceName)) {
+        return serviceColorCache.get(serviceName)!;
+    }
+
+    // Generar colores únicos para todos los servicios
+    if (serviceColorCache.size === 0) {
+        const colors = generateUniqueColors(Math.max(totalServices, 50)); // Mínimo 50 colores
+
+        // Solo asignamos el color del servicio actual para evitar conflictos
+        const color = colors[serviceIndex % colors.length];
+        serviceColorCache.set(serviceName, color);
+        return color;
+    }
+
+    // Para servicios nuevos que aparezcan después
+    const usedColors = Array.from(serviceColorCache.values());
+    const allColors = generateUniqueColors(usedColors.length + 20); // Generar más colores
+
+    // Buscar el primer color no usado
+    for (const color of allColors) {
+        if (!usedColors.includes(color)) {
+            serviceColorCache.set(serviceName, color);
+            return color;
+        }
+    }
+
+    // Fallback: generar un color específico para este servicio
+    const hue = (serviceName.charCodeAt(0) + serviceName.length * 137.5) % 360;
+    const fallbackColor = `hsla(${Math.round(hue)}, 70%, 65%, 0.8)`;
+    serviceColorCache.set(serviceName, fallbackColor);
+    return fallbackColor;
 };
 
 export const TendenciaFacturacionChartComponent = ({ startDate, endDate, services, region }: TendenciaFacturacionProps) => {
     const chartRef = useRef<HTMLDivElement>(null);
     const chartInstance = useRef<echarts.ECharts | null>(null);
+    const resizeObserverRef = useRef<ResizeObserver | null>(null);
 
     const startDateFormatted = startDate.toISOString().split('.')[0];
     const endDateFormatted = endDate.toISOString().split('.')[0];
@@ -114,12 +144,12 @@ export const TendenciaFacturacionChartComponent = ({ startDate, endDate, service
         const series = significantServices.map(([serviceName, dateMap], index) => {
             const serviceData = sortedDates.map(date => dateMap.get(date) || 0);
 
-            const baseColor = serviceColors[serviceName as keyof typeof serviceColors] || generateSoftColor(index);
+            const baseColor = getServiceColor(serviceName, index, significantServices.length);
 
             return {
                 name: serviceName,
                 type: 'line' as const,
-                stack: 'total',
+                stack: 'Total',
                 areaStyle: {
                     color: baseColor,
                     opacity: 0.7
@@ -142,10 +172,9 @@ export const TendenciaFacturacionChartComponent = ({ startDate, endDate, service
 
     const calculateMetrics = (rawData: FacturacionData[]) => {
         if (!rawData || rawData.length === 0) return { total: 0, services: 0, regions: 0 };
-
         const total = rawData.reduce((sum, item) => sum + item.unblendedcost, 0);
         const services = new Set(rawData.map(item => item.SERVICE)).size;
-        const regions = new Set(rawData.map(item => item.REGION_Formatted)).size;
+        const regions = new Set(rawData.map(item => item.REGION)).size;
 
         return { total, services, regions };
     };
@@ -163,6 +192,7 @@ export const TendenciaFacturacionChartComponent = ({ startDate, endDate, service
         }
     };
 
+
     useEffect(() => {
         if (!data || !chartRef.current) return;
 
@@ -175,13 +205,63 @@ export const TendenciaFacturacionChartComponent = ({ startDate, endDate, service
         const chart = echarts.init(chartRef.current);
         chartInstance.current = chart;
 
-        // Formatear fechas para mostrar
-        const formattedDates = dates.map(date => {
-            const d = new Date(date);
-            return d.toLocaleDateString('es-ES', {
-                day: 'numeric',
-                month: 'short'
+        // Función para formatear fechas adaptativa según el rango
+        const formatDatesAdaptive = (dates) => {
+            const dateCount = dates.length;
+            const startDate = new Date(dates[0]);
+            const endDate = new Date(dates[dates.length - 1]);
+            const daysDiff = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24));
+
+            return dates.map((date, index) => {
+                const d = new Date(date);
+
+                // Para rangos muy amplios (>365 días), mostrar solo algunos puntos
+                if (daysDiff > 365) {
+                    if (index === 0 || index === dates.length - 1 || index % Math.ceil(dateCount / 12) === 0) {
+                        return d.toLocaleDateString('es-ES', { month: 'short', year: '2-digit' });
+                    }
+                    return '';
+                }
+                // Para rangos medios (30-365 días)
+                else if (daysDiff > 30) {
+                    if (index % Math.ceil(dateCount / 20) === 0) {
+                        return d.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
+                    }
+                    return '';
+                }
+                // Para rangos cortos (<30 días)
+                else {
+                    return d.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
+                }
             });
+        };
+
+        const formattedDates = formatDatesAdaptive(dates);
+
+        // Calcular colores dinámicos para mejor diferenciación visual
+        const generateDistinctColors = (count) => {
+            const colors = [];
+            const saturation = 70;
+            const lightness = 50;
+
+            for (let i = 0; i < count; i++) {
+                const hue = (i * 360 / count) % 360;
+                colors.push(`hsl(${hue}, ${saturation}%, ${lightness}%)`);
+            }
+            return colors;
+        };
+
+        // Asignar colores únicos a cada serie
+        const distinctColors = generateDistinctColors(series.length);
+        series.forEach((serie, index) => {
+            serie.itemStyle = { color: distinctColors[index] };
+            serie.lineStyle = { width: 2 };
+            serie.symbol = 'circle';
+            serie.symbolSize = 4;
+            serie.emphasis = {
+                focus: 'series',
+                lineStyle: { width: 3 }
+            };
         });
 
         const option = {
@@ -189,82 +269,114 @@ export const TendenciaFacturacionChartComponent = ({ startDate, endDate, service
             tooltip: {
                 trigger: 'axis',
                 axisPointer: {
-                    type: 'cross',
-                    label: {
-                        backgroundColor: '#6a7985'
-                    }
+                    type: 'line', // o 'cross'
+                    snap: true
                 },
-                formatter: function (params: unknown) {
+                backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                borderColor: '#ccc',
+                borderWidth: 1,
+                textStyle: { fontSize: 12 },
+                formatter: function (params) {
                     if (!params || params.length === 0) return '';
 
-                    let total = 0;
-                    let tooltip = `<div style="font-weight: bold; margin-bottom: 5px;">${params[0].axisValue}</div>`;
+                    const total = params.reduce((acc, p) => acc + (p.value || 0), 0);
 
-                    // Ordenar por valor descendente para mostrar los más grandes primero
-                    const sortedParams = [...params].sort((a, b) => b.value - a.value);
-
-                    sortedParams.forEach((param: unknown) => {
-                        if (param.value > 0) {
-                            tooltip += `<div style="margin: 2px 0;">
-                                ${param.marker} 
-                                <span style="display: inline-block; width: 200px;">${param.seriesName}</span>
-                                <span style="font-weight: bold;">$${param.value.toFixed(2)}</span>
-                            </div>`;
-                            total += param.value;
-                        }
+                    const originalDate = new Date(dates[params[0].dataIndex]);
+                    const dateStr = originalDate.toLocaleDateString('es-ES', {
+                        weekday: 'short',
+                        day: 'numeric',
+                        month: 'short',
+                        year: 'numeric'
                     });
 
-                    tooltip += `<div style="border-top: 1px solid #ccc; margin-top: 5px; padding-top: 5px; font-weight: bold;">
-                        Total: $${total.toFixed(2)}
-                    </div>`;
+                    // Mostrar la serie con valor máximo en ese punto como “en foco”
+                    const maxSerie = params.reduce((prev, curr) => {
+                        return (curr.value || 0) > (prev.value || 0) ? curr : prev;
+                    }, params[0]);
+
+                    let tooltip = `<div style="font-weight: bold; margin-bottom: 8px;">${dateStr}</div>`;
+
+                    tooltip += `
+            <div style="border-top: 1px solid #eee; margin-top: 5px; padding-top: 5px; font-weight: bold; font-size: 13px;">
+                Total: $${total.toLocaleString()}
+            </div>
+        `;
+
                     return tooltip;
                 }
             },
             legend: {
                 type: 'scroll',
-                orient: 'vertical',
-                right: 20,
-                top: 20,
-                bottom: 20,
-                width: 250,
-                textStyle: {
-                    fontSize: 12
-                },
-                pageIconColor: '#2f4554',
-                pageIconInactiveColor: '#aaa',
-                pageIconSize: 15,
-                pageTextStyle: {
-                    color: '#333'
-                }
+                orient: 'horizontal',
+                top: 10,
+                left: 'center',
+                textStyle: { fontSize: 11, color: '#666' },
+                selectedMode: 'multiple',
+                data: series.map(s => s.name) // <-- asegura que la leyenda siga el mismo orden de series
             },
             grid: {
-                left: '3%',
-                right: '280px',
-                bottom: '10%',
-                top: '5%',
+                left: 60,
+                right: 60,
+                top: 50,       // suficiente margen para la leyenda horizontal
+                bottom: 80,
                 containLabel: true
             },
+            dataZoom: [
+                {
+                    type: 'inside',
+                    start: 0,
+                    end: 100,
+                    filterMode: 'filter'
+                },
+                {
+                    type: 'slider',
+                    start: 0,
+                    end: 100,
+                    height: 20,
+                    bottom: 20,
+                    handleStyle: {
+                        color: '#5470c6'
+                    },
+                    dataBackground: {
+                        areaStyle: {
+                            color: 'rgba(84, 112, 198, 0.3)'
+                        },
+                        lineStyle: {
+                            opacity: 0.8,
+                            color: '#5470c6'
+                        }
+                    },
+                    selectedDataBackground: {
+                        areaStyle: {
+                            color: 'rgba(84, 112, 198, 0.5)'
+                        },
+                        lineStyle: {
+                            color: '#5470c6'
+                        }
+                    }
+                }
+            ],
             xAxis: {
                 type: 'category',
                 boundaryGap: false,
                 data: formattedDates,
                 axisLine: {
-                    lineStyle: {
-                        color: '#ccc'
-                    }
+                    lineStyle: { color: '#d0d0d0' }
                 },
-                axisTick: {
-                    show: false
-                },
+                axisTick: { show: false },
                 axisLabel: {
-                    fontSize: 11,
+                    fontSize: 10,
                     color: '#666',
-                    rotate: 0
+                    rotate: 45,
+                    margin: 8,
+                    formatter: function (value) {
+                        return value; // Ya está formateado
+                    }
                 },
                 splitLine: {
                     show: true,
                     lineStyle: {
-                        color: '#f0f0f0',
+                        color: '#f5f5f5',
                         type: 'dashed'
                     }
                 }
@@ -274,48 +386,77 @@ export const TendenciaFacturacionChartComponent = ({ startDate, endDate, service
                 name: 'Facturación (USD)',
                 nameTextStyle: {
                     color: '#666',
-                    fontSize: 12
+                    fontSize: 12,
+                    padding: [0, 0, 10, 0]
                 },
-                axisLine: {
-                    show: false
-                },
-                axisTick: {
-                    show: false
-                },
+                nameGap: 25,
+                axisLine: { show: false },
+                axisTick: { show: false },
                 axisLabel: {
-                    formatter: function (value: number) {
+                    formatter: function (value) {
+                        if (value === 0) return '$0';
                         if (value >= 1000000) {
                             return '$' + (value / 1000000).toFixed(1) + 'M';
                         } else if (value >= 1000) {
-                            return '$' + (value / 1000).toFixed(1) + 'K';
+                            return '$' + (value / 1000).toFixed(0) + 'K';
                         }
-                        return '$' + value.toFixed(0);
+                        return '$' + value.toLocaleString();
                     },
                     color: '#666',
-                    fontSize: 11
+                    fontSize: 10
                 },
                 splitLine: {
                     lineStyle: {
-                        color: '#f0f0f0',
+                        color: '#f5f5f5',
                         type: 'dashed'
                     }
+                },
+                min: function (value) {
+                    return Math.max(0, value.min - (value.max - value.min) * 0.1);
                 }
             },
-            series: series,
+            series: series.slice().reverse(),
             animation: true,
-            animationDuration: 1500,
-            animationEasing: 'cubicOut'
+            animationDuration: 1000,
+            animationEasing: 'cubicOut',
+            animationDelay: function (idx) {
+                return idx * 20; // Animación escalonada
+            }
         };
 
         chart.setOption(option);
 
-        const handleResize = () => chart.resize();
-        window.addEventListener('resize', handleResize);
+        // Manejo de redimensionamiento con ResizeObserver
 
+        // Cleanup del ResizeObserver anterior si existe
+        if (resizeObserverRef.current) {
+            resizeObserverRef.current.disconnect();
+        }
+
+        // Configurar ResizeObserver para mejor detección de cambios de tamaño
+        resizeObserverRef.current = new ResizeObserver((entries) => {
+            for (const entry of entries) {
+                if (chart && !chart.isDisposed()) {
+                    // Pequeño delay para evitar múltiples redimensionamientos
+                    setTimeout(() => {
+                        if (chart && !chart.isDisposed()) {
+                            chart.resize();
+                        }
+                    }, 100);
+                }
+            }
+        });
+
+        resizeObserverRef.current.observe(chartRef.current);
+
+        // Cleanup mejorado
         return () => {
-            window.removeEventListener('resize', handleResize);
+            if (resizeObserverRef.current) {
+                resizeObserverRef.current.disconnect();
+            }
             if (chartInstance.current) {
                 chartInstance.current.dispose();
+                chartInstance.current = null;
             }
         };
     }, [data]);
@@ -351,7 +492,7 @@ export const TendenciaFacturacionChartComponent = ({ startDate, endDate, service
     const metrics = calculateMetrics(data);
 
     return (
-        <div className="space-y-6">
+        <div className="w-full min-w-0 px-4 py-6">
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -382,7 +523,7 @@ export const TendenciaFacturacionChartComponent = ({ startDate, endDate, service
             </div>
 
             {/* Metrics Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 py-5">
                 <Card className="border-l-4 border-l-green-500">
                     <CardContent className="p-6">
                         <div className="flex items-center justify-between">
@@ -452,7 +593,7 @@ export const TendenciaFacturacionChartComponent = ({ startDate, endDate, service
             </Card>
 
             {/* Period Info */}
-            <Card>
+            <Card className='mt-5'>
                 <CardHeader>
                     <CardTitle className="text-sm">Información del Período</CardTitle>
                 </CardHeader>
