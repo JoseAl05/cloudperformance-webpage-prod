@@ -20,7 +20,7 @@ export const Navbar = () => {
         <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
             <div className="flex h-14 items-center px-4 gap-4">
                 {/* Sidebar trigger for mobile */}
-                <SidebarTrigger className="md:hidden" />
+                <SidebarTrigger className="cursor-pointer md:hidden" />
 
                 {/* Logo/Brand - hidden on mobile when sidebar is present */}
                 <div className="hidden md:flex items-center gap-2">
@@ -43,7 +43,7 @@ export const Navbar = () => {
                         variant="ghost"
                         size="sm"
                         onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                        className="w-9 h-9 p-0"
+                        className="w-9 h-9 p-0 cursor-pointer"
                     >
                         <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
                         <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />

@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/sidebar'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
 import { cn } from '@/lib/utils'
-import { Grid2X2, Home, LineChart, PieChart, Zap, Box, Computer, Database, Pyramid, ChevronDown } from 'lucide-react'
+import { Grid2X2, Home, LineChart, PieChart, Zap, Box, Computer, Database, Pyramid, ChevronDown, HandCoins } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { usePathname } from 'next/navigation'
 import Image from 'next/image'
@@ -29,6 +29,7 @@ export const SidebarComponent = ({ ...props }: React.ComponentProps<typeof Sideb
         { label: 'Quotas', icon: PieChart, href: '/aws/quotas', color: 'text-violet-500' },
         { label: 'Deployments', icon: Zap, href: '/aws/deployments', color: 'text-pink-500' },
         { label: 'Vista Asesor', icon: Pyramid, href: '/aws/advisor', color: 'text-[#3258de]' },
+        { label: 'Vista Saving Plans', icon: HandCoins, href: '/aws/saving-plan', tooltip: 'Vista Saving Plans', color: 'text-[#3258de]'}
     ]
 
     const recursos = [
