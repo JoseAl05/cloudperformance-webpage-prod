@@ -31,6 +31,8 @@ export const Ec2EventsTableComponent = ({ data, startDate, endDate, instance }: 
                 <DataTable
                     columns={eventsColumns}
                     data={data.data}
+                    filterColumn='EventName'
+                    filterPlaceholder='Buscar Evento...'
                 />
                 <div className="border-t bg-muted/50 px-6 py-4">
                     <div className="flex items-center justify-between">

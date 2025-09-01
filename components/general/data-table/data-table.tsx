@@ -17,6 +17,8 @@ import { useState } from 'react'
 interface DataTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[]
     data: TData[]
+    filterColumn?: string
+    filterPlaceholder?: string
 }
 
 export function DataTable<TData, TValue>({ columns, data, filterColumn, filterPlaceholder = "Buscar..." }: DataTableProps<TData, TValue>) {
