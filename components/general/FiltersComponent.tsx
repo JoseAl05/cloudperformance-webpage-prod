@@ -26,6 +26,7 @@ interface FiltersComponentProps {
     regionFilter?: boolean;
     isRegionMultiSelect?: boolean;
     instancesFilter?: boolean;
+    isInstanceMultiSelect?:boolean;
     tagsFilter?: boolean;
     serviceFilter?: boolean;
     collection?: string;
@@ -38,6 +39,7 @@ export const FiltersComponent = ({
     regionFilter = false,
     isRegionMultiSelect = false,
     instancesFilter = false,
+    isInstanceMultiSelect = false,
     tagsFilter = false,
     serviceFilter = false,
     collection = null,
@@ -61,7 +63,7 @@ export const FiltersComponent = ({
         return {
             startDate: startDateParam ? new Date(startDateParam) : yesterday,
             endDate: endDateParam ? new Date(endDateParam) : new Date(),
-            instance: instanceParam || '',
+            instance: instanceParam || 'all',
             region: regionParam || 'all_regions',
             selectedKey: selectedKeyParam || null,
             selectedValue: selectedValueParam || null,
@@ -227,6 +229,7 @@ export const FiltersComponent = ({
                                     region={tempRegion}
                                     selectedKey={tempKey ?? ''}
                                     selectedValue={tempValue ?? ''}
+                                    isInstanceMultiSelect={isInstanceMultiSelect}
                                 />
                             </div>
                         )}
