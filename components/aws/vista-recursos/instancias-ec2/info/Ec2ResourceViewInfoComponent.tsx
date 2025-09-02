@@ -21,18 +21,12 @@ interface Ec2ResourceViewInfoComponentProps {
 
 
 export const Ec2ResourceViewInfoComponent = ({ data }: Ec2ResourceViewInfoComponentProps) => {
-    const [isOpen, setIsOpen] = useState(false)
     const statusColors = {
         running: 'bg-green-500/10 text-green-500 border-green-500/20',
         stopped: 'bg-red-500/10 text-red-500 border-red-500/20',
         pending: 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20',
     }
 
-    const billingColors = {
-        'on-demand': 'bg-blue-500/10 text-blue-400 border-blue-500/20',
-        spot: 'bg-purple-500/10 text-purple-400 border-purple-500/20',
-        reserved: 'bg-orange-500/10 text-orange-400 border-orange-500/20',
-    }
     const quickActions = [
         { icon: History, label: 'Ver Historial', color: 'blue' },
     ];
@@ -46,18 +40,7 @@ export const Ec2ResourceViewInfoComponent = ({ data }: Ec2ResourceViewInfoCompon
         },
         {} as Record<string, InstanceData[]>,
     ) : []
-    const formatSyncTime = (syncTime: string) => {
-        const cleanSyncTime = syncTime.replace(' ', 'T').replace(/\.\d+/, '')
-        const date = new Date(cleanSyncTime)
-        return date.toLocaleString('es-ES', {
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit',
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit',
-        })
-    }
+
     const getPublicIpCount = (publicIps: (string | null)[]) => {
         return publicIps.filter((ip) => ip !== null).length
     }
@@ -68,7 +51,6 @@ export const Ec2ResourceViewInfoComponent = ({ data }: Ec2ResourceViewInfoCompon
             <div className='space-y-8'>
                 {Object.entries(groupedInstances).map(([instanceId, instances]) => {
                     // INSTANCE METADATA
-                    const latestInstance = instances[0];
                     const latestInstanceState = instances[0].State_Name;
                     const latestInstanceType = instances[0].InstanceType;
                     const latestInstanceRegion = instances[0].region;
@@ -275,8 +257,6 @@ export const Ec2ResourceViewInfoComponent = ({ data }: Ec2ResourceViewInfoCompon
                                                 {quickActions.map((action, index) => (
                                                     <Dialog
                                                         key={index}
-                                                        // variant='outline'
-                                                        // size='sm'
                                                         className='gap-2 justify-center'
                                                     >
                                                         <DialogTrigger className='flex items-center justify-center gap-2 cursor-pointer transition-all hover:scale-110'>

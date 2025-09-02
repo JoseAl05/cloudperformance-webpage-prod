@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import * as echarts from 'echarts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Info } from 'lucide-react';
 
 interface ResourceViewUsageCpuComponentProps {
   data: {
@@ -121,6 +122,12 @@ export const Ec2ResourceViewUsageCpuComponent = ({ data }: ResourceViewUsageCpuC
         <CardTitle>Uso de Cores de CPU</CardTitle>
       </CardHeader>
       <CardContent>
+        <div className="flex items-center justify-center gap-2 mb-2">
+          <Info className="w-5 h-5 text-blue-500 flex-shrink-0" />
+          <p className="text-xs text-muted-foreground">
+            Las marcas de tiempo (Timestamps) están en formato <strong>UTC</strong>.
+          </p>
+        </div>
         <div ref={chartRef} className="w-full h-[400px] md:h-[450px] lg:h-[500px]" />
       </CardContent>
     </Card>
