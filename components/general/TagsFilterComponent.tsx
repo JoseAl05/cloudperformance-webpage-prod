@@ -88,8 +88,6 @@ export const TagFilterComponent = ({
     const isValidValue = selectedValue && isValidKey && valuesForKey.includes(selectedValue)
     useEffect(() => {
         if (!data || isLoading) return
-        console.log("SELECTED KEY " + selectedKey)
-        console.log("ALL KEYS " + keys)
         if (selectedKey && !keys.includes(selectedKey)) {
             setSelectedKey(null)
             setSelectedValue(null)
