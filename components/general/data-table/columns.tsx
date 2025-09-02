@@ -6,7 +6,7 @@ export type DynamicColumn<T> = {
   header: string;
   accessorKey?: keyof T | string;
   accessorFn?: (row: T) => unknown;
-  cell?: (value: unknown, row: T) => React.ReactNode;
+  cell?: (info: unknown) => React.ReactNode;
 };
 
 export const createColumns = <T extends object>(cols: DynamicColumn<T>[]): ColumnDef<T>[] => {
@@ -15,10 +15,10 @@ export const createColumns = <T extends object>(cols: DynamicColumn<T>[]): Colum
     accessorKey: col.accessorKey ? String(col.accessorKey) : undefined,
     accessorFn: col.accessorFn,
     cell: (info) => {
-      const value = info.getValue();
       if (col.cell) {
-        return col.cell(value, info.row.original);
+        return col.cell(info)
       }
+      const value = info.getValue();
       return String(value ?? '');
     },
   }));
