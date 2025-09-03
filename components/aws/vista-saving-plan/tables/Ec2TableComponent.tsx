@@ -2,7 +2,7 @@
 
 import useSWR from "swr"
 import { ColumnDef } from "@tanstack/react-table"
-import { DataTable } from "@/components/general/data-table/data-table"
+import { DataTable } from "@/components/general/data-table/data-table-grouping"
 
 type EC2Instance = {
     InstanceId: string

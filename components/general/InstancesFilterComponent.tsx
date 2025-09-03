@@ -18,7 +18,8 @@ import {
 } from '@/components/ui/popover'
 import useSWR from 'swr'
 
-interface InstancesEc2FilterComponentProps {
+interface InstancesFilterComponentProps {
+    service: string,
     instance: string,
     setInstance: Dispatch<SetStateAction<string>>,
     startDate: Date,
@@ -39,7 +40,8 @@ const fetcherPost = (url: string, tags: { Key: string; Value: string } | null = 
         body: tags ? JSON.stringify([tags]) : null,
     }).then(res => res.json());
 
-export const InstancesEc2FilterComponent = ({
+export const InstancesFilterComponent = ({
+    service,
     instance,
     setInstance,
     startDate,
@@ -48,12 +50,26 @@ export const InstancesEc2FilterComponent = ({
     selectedKey,
     selectedValue,
     isInstanceMultiSelect
-}: InstancesEc2FilterComponentProps) => {
+}: InstancesFilterComponentProps) => {
     const [open, setOpen] = useState(false);
 
+    let url = ''
     const startDateFormatted = startDate.toISOString().replace('Z', '').slice(0, -4);
     const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : '';
-    const url = `${process.env.NEXT_PUBLIC_API_URL}/vm/all-instances-ec2?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`;
+
+    switch (service) {
+        case "ec2":
+            url = `${process.env.NEXT_PUBLIC_API_URL}/vm/all-instances-ec2?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`;
+            break;
+        case "rds-pg":
+            url = `${process.env.NEXT_PUBLIC_API_URL}/db/all-instances-rds-pg?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`;
+            break;
+        default:
+            break;
+    }
+
+
+
     const tagsBody = selectedKey !== 'allKeys' && selectedValue ? { Key: selectedKey, Value: selectedValue } : null;
 
     const { data, error, isLoading } = useSWR([url, tagsBody], ([url, tags]) => fetcherPost(url, tags));
@@ -62,8 +78,7 @@ export const InstancesEc2FilterComponent = ({
     if (error) return <div>Error al cargar datos</div>
 
     const selectedInstancesArray = instance ? instance.split(',').filter(Boolean) : [];
-    console.log(instance)
-    console.log(isInstanceMultiSelect)
+
     const getDisplayText = () => {
         if (!instance || (!isInstanceMultiSelect && instance === 'all')) {
             return 'Seleccione una instancia';

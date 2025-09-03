@@ -1,7 +1,8 @@
 import { createColumns } from '@/components/general/data-table/columns';
-import { DataTable } from '@/components/general/data-table/data-table'
+import { DataTableSingle } from '@/components/general/data-table/data-table-single'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Ec2ConsumeViewInstanceColumns } from './Ec2ConsumeViewInstanceColumns';
+import { DataTableGrouping } from '@/components/general/data-table/data-table-grouping';
 
 interface Ec2ConsumeViewInstanceTableProps {
     data: {
@@ -82,7 +83,7 @@ export const Ec2ConsumeViewInstanceTable = ({
                 </div>
             </CardHeader>
             <CardContent>
-                <DataTable
+                <DataTableGrouping
                     columns={instanceColumns}
                     data={tableData}
                     filterColumn='resource'

@@ -1,3 +1,5 @@
+'use client'
+
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -47,15 +49,16 @@ export const Ec2ConsumeViewAttachedDiskHistoricComponent = ({ instanceInfo }: Ec
 
     return (
         <div className="relative">
-            <div className="mb-6">
+            <div className="mb-4">
                 <input
                     type="text"
                     placeholder="Buscar instancia..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full p-3 border border-gray-200 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                    className="w-full p-2 border rounded"
                 />
             </div>
+
             <div ref={scrollRef} className="max-h-[60vh] overflow-auto space-y-4">
                 {filteredInstances.length === 0 ? (
                     <div className="text-center py-8 text-gray-500">
@@ -65,152 +68,108 @@ export const Ec2ConsumeViewAttachedDiskHistoricComponent = ({ instanceInfo }: Ec
                     </div>
                 ) : (
                     filteredInstances.map((instance, idx) => {
-                        const countSyncTimes = instance.syncs.length
+                        const countSyncTimes = instance.syncs.length;
                         return (
-                            <Card key={`${instance.instanceId}-${idx}`} className="shadow-sm border-l-4 border-l-blue-500">
-                                <CardHeader className="pb-4">
-                                    <CardTitle className="text-xl flex items-center gap-3">
-                                        <div className="p-2 rounded-lg">
-                                            <Server className="h-6 w-6 text-blue-600" />
-                                        </div>
-                                        <div>
-                                            <span className="text-gray-600 dark:text-blue-600">Instancia</span>
-                                            <Link
-                                                href={{
-                                                    pathname: '/aws/recursos/instancias-ec2',
-                                                    query: { instance: instance.instanceId }
-                                                }}
-                                                rel="noopener noreferrer" target="_blank"
-                                            >
-                                                <Badge variant="secondary" className="ml-3 font-mono text-sm transition-all hover:scale-[1.02]">
-                                                    <ExternalLink />
-                                                    {instance.instanceId}
-                                                </Badge>
-                                            </Link>
-                                        </div>
+                            <Card key={`${instance.instanceId}-${idx}`} className="my-5">
+                                <CardHeader className="pb-3">
+                                    <CardTitle className="text-lg flex items-center gap-2">
+                                        <Server className="h-5 w-5 text-blue-500" />
+                                        <Link
+                                            href={{
+                                                pathname: '/aws/recursos/instancias-ec2',
+                                                query: { instance: instance.instanceId }
+                                            }}
+                                            rel="noopener noreferrer"
+                                            target="_blank"
+                                        >
+                                            <Badge variant="secondary" className="ml-3 font-mono text-sm transition-all hover:scale-[1.02]">
+                                                <ExternalLink />
+                                                {instance.instanceId}
+                                            </Badge>
+                                        </Link>
                                     </CardTitle>
                                 </CardHeader>
-                                <CardContent className="pt-4">
+
+                                <CardContent className="space-y-4">
                                     <Accordion type="single" collapsible className="w-full">
                                         <AccordionItem value={instance.instanceId} className="border-none">
-                                            <AccordionTrigger className="hover:no-underline py-3 px-4 rounded-lg cursor-pointer">
-                                                <div className="flex items-center gap-3">
-                                                    <Clock className="h-5 w-5 text-blue-600" />
-                                                    <span className="font-semibold text-gray-600 dark:text-blue-600">Historial de Observaciones</span>
-                                                    <Badge variant="outline" className="ml-2">
-                                                        {countSyncTimes} registros
-                                                    </Badge>
-                                                </div>
+                                            <AccordionTrigger className="hover:no-underline py-2 px-0 cursor-pointer">
+                                                <span className="flex items-center gap-2 text-sm font-medium">
+                                                    <Clock className="h-4 w-4" />
+                                                    Historial ({countSyncTimes})
+                                                </span>
                                             </AccordionTrigger>
-                                            <AccordionContent className="pt-6">
-                                                <div className="space-y-4">
-                                                    {instance.syncs.map((sync, sIdx) => {
-                                                        const syncTimeFormatted = new Date(sync.sync_time).toLocaleString()
-                                                        return (
-                                                            <Card key={`${sync.sync_time}-${sIdx}`} className="border border-gray-200">
-                                                                <CardHeader className="pb-3">
-                                                                    <div className="bg-muted/50 px-4 py-3 rounded-t-lg border-b">
-                                                                        <div className="flex items-center gap-2">
-                                                                            <Clock className="h-4 w-4 text-muted-foreground" />
-                                                                            <span className="font-medium text-sm">
-                                                                                Sincronización: {syncTimeFormatted}
-                                                                            </span>
-                                                                        </div>
+                                            <AccordionContent className="pt-4">
+                                                <div className="space-y-4 pl-6 border-l-2 border-border/30">
+                                                    {instance.syncs.map((sync, syncIdx) => (
+                                                        <div key={syncIdx} className="border rounded-lg bg-card shadow-sm">
+                                                            <div className="bg-muted/50 px-4 py-3 rounded-t-lg border-b">
+                                                                <div className="flex items-center gap-2">
+                                                                    <Clock className="h-4 w-4 text-muted-foreground" />
+                                                                    <span className="font-medium text-sm">
+                                                                        Sincronización: {new Date(sync.sync_time).toLocaleString()}
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+
+                                                            <div className="p-4">
+                                                                {sync.instanceEbs.length === 0 ? (
+                                                                    <div className="flex items-center gap-2 text-amber-600 bg-amber-50 p-3 rounded-lg border border-amber-200">
+                                                                        <HardDrive className="h-4 w-4" />
+                                                                        <span className="text-sm">
+                                                                            No hay volúmenes EBS en esta sincronización.
+                                                                        </span>
                                                                     </div>
-                                                                </CardHeader>
-                                                                <CardContent className="pt-4">
-                                                                    <Accordion type="single" collapsible className="w-full">
-                                                                        <AccordionItem value={syncTimeFormatted} className="border-none">
-                                                                            <AccordionTrigger className="hover:no-underline py-2 px-3 rounded-md cursor-pointer">
-                                                                                <div className="flex items-center gap-3">
-                                                                                    <HardDrive className="h-5 w-5 text-orange-700" />
-                                                                                    <span className="font-medium text-gray-600 dark:text-blue-600">Volúmenes EBS Adjuntos</span>
-                                                                                    {sync.instanceEbs && sync.instanceEbs.length > 0 && (
-                                                                                        <Badge variant="secondary" className="ml-2">
-                                                                                            {
-                                                                                                sync.instanceEbs.length === 1 ? (
-                                                                                                    `${sync.instanceEbs.length} volúmen`
-                                                                                                ) : (
-                                                                                                    `${sync.instanceEbs.length} volúmenes`
-                                                                                                )
-                                                                                            }
-                                                                                        </Badge>
-                                                                                    )}
+                                                                ) : (
+                                                                    <div className="space-y-4">
+                                                                        {sync.instanceEbs.map((ebs: unknown, ebsIdx: number) => (
+                                                                            <div key={ebsIdx} className="border rounded-lg p-4 bg-background">
+                                                                                <div className="flex items-center justify-between mb-4 pb-2 border-b">
+                                                                                    <div className="flex items-center gap-2">
+                                                                                        <HardDrive className="h-4 w-4 text-orange-500" />
+                                                                                        <span className="font-medium text-sm">Volumen {ebsIdx + 1}</span>
+                                                                                    </div>
+                                                                                    <Badge variant="outline">{ebs.Ebs.VolumeId}</Badge>
                                                                                 </div>
-                                                                            </AccordionTrigger>
-                                                                            <AccordionContent className="pt-4">
-                                                                                {sync.instanceEbs && sync.instanceEbs.length > 0 ? (
-                                                                                    <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-                                                                                        {sync.instanceEbs.map((ebs, index) => (
-                                                                                            <Card
-                                                                                                key={`${ebs.Ebs.VolumeId}-${index}`}
-                                                                                                className="border "
-                                                                                            >
-                                                                                                <CardContent className="p-4">
-                                                                                                    <div className="space-y-3">
-                                                                                                        <div className="flex items-center gap-2 pb-2 border-b border-gray-100">
-                                                                                                            <div className="p-1.5 bg-purple-300 rounded-full">
-                                                                                                                <HardDrive className="h-4 w-4 text-purple-700" />
-                                                                                                            </div>
-                                                                                                            <span className="font-semibold text-gray-600 dark:text-blue-600 text-sm">
-                                                                                                                Volumen EBS
-                                                                                                            </span>
-                                                                                                        </div>
 
-                                                                                                        <div className="space-y-2">
-                                                                                                            <div>
-                                                                                                                <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">
-                                                                                                                    Dispositivo
-                                                                                                                </p>
-                                                                                                                <Badge variant="outline" className="mt-1 font-mono text-sm">
-                                                                                                                    {ebs.DeviceName}
-                                                                                                                </Badge>
-                                                                                                            </div>
-
-                                                                                                            <div>
-                                                                                                                <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">
-                                                                                                                    Volume ID
-                                                                                                                </p>
-                                                                                                                <Badge variant="secondary" className="mt-1 font-mono text-sm">
-                                                                                                                    {ebs.Ebs.VolumeId}
-                                                                                                                </Badge>
-                                                                                                            </div>
-                                                                                                        </div>
-                                                                                                    </div>
-                                                                                                </CardContent>
-                                                                                            </Card>
-                                                                                        ))}
+                                                                                <div className="grid gap-4 md:grid-cols-2">
+                                                                                    <div className="space-y-2">
+                                                                                        <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">
+                                                                                            Información Básica
+                                                                                        </h4>
+                                                                                        <div className="flex items-center gap-2 text-sm">
+                                                                                            <span className="text-muted-foreground min-w-[60px]">Dispositivo:</span>
+                                                                                            <Badge variant="outline" className="font-mono text-xs">{ebs.DeviceName}</Badge>
+                                                                                        </div>
+                                                                                        <div className="flex items-center gap-2 text-sm">
+                                                                                            <span className="text-muted-foreground min-w-[60px]">Volume ID:</span>
+                                                                                            <Badge variant="secondary" className="font-mono text-xs">{ebs.Ebs.VolumeId}</Badge>
+                                                                                        </div>
                                                                                     </div>
-                                                                                ) : (
-                                                                                    <div className="text-center py-6 text-gray-500 bg-gray-50 rounded-lg">
-                                                                                        <HardDrive className="h-8 w-8 mx-auto mb-2 text-gray-300" />
-                                                                                        <p className="font-medium">Sin Volúmenes EBS</p>
-                                                                                        <p className="text-sm">No hay volúmenes adjuntos en esta observación</p>
-                                                                                    </div>
-                                                                                )}
-                                                                            </AccordionContent>
-                                                                        </AccordionItem>
-                                                                    </Accordion>
-                                                                </CardContent>
-                                                            </Card>
-                                                        )
-                                                    })}
+                                                                                </div>
+                                                                            </div>
+                                                                        ))}
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    ))}
                                                 </div>
                                             </AccordionContent>
                                         </AccordionItem>
                                     </Accordion>
                                 </CardContent>
                             </Card>
-                        )
+                        );
                     })
                 )}
             </div>
+
             <Button
                 onClick={scrollToTop}
-                className="fixed bottom-6 right-6 bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 z-50 flex items-center gap-2"
+                className='fixed bottom-5 right-5 cursor-pointer bg-blue-500 hover:bg-blue-600 text-white p-3 rounded-full shadow-lg z-50 flex items-center gap-2'
             >
-                <ArrowUp className="w-5 h-5" />
-                <span className="sr-only">Volver arriba</span>
+                Arriba <ArrowUp className='w-5 h-5' />
             </Button>
         </div>
     );

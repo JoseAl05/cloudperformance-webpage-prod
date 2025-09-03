@@ -17,13 +17,20 @@ const sliderConfig = [
     height: 20,
     handleSize: '100%',
     start: 0,
-    end: 100
+    end: 100,
+    realtime: false,
+    throttle: 100,
+    zoomOnMouseWheel: false,
+    moveOnMouseMove: false
   },
   {
     type: 'inside',
     start: 0,
     end: 100,
-    filterMode: 'filter'
+    filterMode: 'filter',
+    throttle: 100,
+    zoomOnMouseWheel: true,
+    moveOnMouseMove: true
   },
 ];
 
@@ -63,21 +70,103 @@ export const Ec2ResourceConsumeViewUsageCpuComponent = ({ data }: Ec2ResourceCon
     if (!chartRef.current) return;
 
     const optionsCpuMetrics: echarts.EChartsOption = {
+      animation: totalData.length < 1000,
+      animationDuration: 300,
+      animationEasing: 'linear',
+      progressiveThreshold: 500,
+      progressive: 200,
+      hoverLayerThreshold: 3000,
+      useUTC: true,
       dataZoom: sliderConfig,
-      tooltip: { trigger: 'axis', formatter: tooltipFormatter },
-      legend: { data: ['Total', 'Used', 'Unused', 'Umbral Crítico'], top: 10, left: 'center' },
+      tooltip: {
+        trigger: 'axis',
+        formatter: tooltipFormatter,
+        transitionDuration: 0.1,
+        hideDelay: 100,
+        backgroundColor: 'rgba(50, 50, 50, 0.95)',
+        borderColor: 'rgba(255, 255, 255, 0.2)',
+        textStyle: {
+          color: '#fff',
+          fontSize: 12
+        },
+        axisPointer: {
+          animation: false
+        }
+      },
+      legend: {
+        data: ['Total', 'Used', 'Unused', 'Umbral Crítico'],
+        top: 10,
+        left: 'center',
+        animation: false,
+        textStyle: {
+          fontSize: 12
+        }
+      },
       grid: { left: 50, right: 30, top: 60, bottom: 60, containLabel: true },
-      toolbox: { feature: { saveAsImage: {} } },
-      xAxis: {
-        type: 'time',
-        axisLabel: {
-          formatter: (value: number) => {
-            const date = new Date(value);
-            return `${date.getUTCDate()}/${date.getUTCMonth() + 1} ${date.getUTCHours()}:00`;
+      toolbox: {
+        feature: {
+          saveAsImage: {
+            pixelRatio: 2,
+            excludeComponents: ['toolbox']
+          }
+        },
+        iconStyle: {
+          borderColor: '#999'
+        },
+        emphasis: {
+          iconStyle: {
+            borderColor: '#666'
           }
         }
       },
-      yAxis: { type: 'value', max: yMaxRounded, axisLabel: { formatter: (val: number) => `${val} vCores` } },
+      xAxis: {
+        type: 'time',
+        boundaryGap: false,
+        axisLabel: {
+          fontSize: 11,
+          formatter: (value: number) => {
+            const date = new Date(value);
+            return `${date.getUTCDate()}/${date.getUTCMonth() + 1} ${date.getUTCHours()}:00`;
+          },
+          showMaxLabel: true,
+          showMinLabel: true
+        },
+        axisLine: {
+          lineStyle: {
+            color: '#e0e0e0'
+          }
+        },
+        axisTick: {
+          show: false
+        },
+        splitLine: {
+          show: false
+        }
+      },
+      yAxis: {
+        type: 'value',
+        max: yMaxRounded,
+        scale: true,
+        axisLabel: {
+          fontSize: 11,
+          formatter: (val: number) => `${val} vCores`,
+          showMaxLabel: true,
+          showMinLabel: true
+        },
+        axisLine: {
+          show: false
+        },
+        axisTick: {
+          show: false
+        },
+        splitLine: {
+          lineStyle: {
+            color: '#f0f0f0',
+            type: 'solid',
+            width: 1
+          }
+        }
+      },
       series: [
         createSeries('Total', totalData, '#36A2EB', 'rgba(54, 162, 235, 0.3)'),
         createSeries('Used', usedData, '#28e995'),
@@ -99,8 +188,14 @@ export const Ec2ResourceConsumeViewUsageCpuComponent = ({ data }: Ec2ResourceCon
       animation: true
     };
 
-    chartInstance.current = echarts.init(chartRef.current);
-    chartInstance.current.setOption(optionsCpuMetrics);
+    chartInstance.current = echarts.init(chartRef.current, null, {
+      renderer: 'canvas'
+    });
+    chartInstance.current.setOption(optionsCpuMetrics, {
+      notMerge: true,
+      lazyUpdate: true,
+      silent: false
+    });
 
     resizeObserverRef.current = new ResizeObserver(handleResize);
     resizeObserverRef.current.observe(chartRef.current);
@@ -135,9 +230,39 @@ const createSeries = (name: string, data: [string, number][], color: string, are
   name,
   type: 'line',
   data,
-  smooth: true,
-  lineStyle: { color },
+  smooth: false,
+  smoothMonotone: null,
+  symbol: 'none',
+  symbolSize: 0,
+  lineStyle: {
+    color,
+    width: 2,
+    cap: 'round',
+    join: 'round'
+  },
   itemStyle: { color, borderColor: '#fff', borderWidth: 1 },
-  emphasis: { focus: 'series' },
-  ...(areaColor && { areaStyle: { color: areaColor } })
+  emphasis: {
+    focus: 'series',
+    lineStyle: {
+      width: 3
+    },
+    disabled: data.length > 5000
+  },
+  blur: {
+    lineStyle: {
+      opacity: 0.2
+    }
+  },
+  large: data.length > 1000,
+  largeThreshold: 1000,
+  sampling: data.length > 2000 ? 'lttb' : null,
+  progressive: data.length > 1000 ? 0 : undefined,
+  progressiveThreshold: data.length > 1000 ? 500 : undefined,
+  progressiveChunkMode: data.length > 5000 ? 'mod' : undefined,
+  ...(areaColor && {
+    areaStyle: {
+      color: areaColor,
+      opacity: 0.4
+    }
+  })
 });

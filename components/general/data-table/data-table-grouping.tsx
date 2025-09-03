@@ -35,7 +35,7 @@ interface GroupedRow<T> {
     isExpanded?: boolean
 }
 
-export function DataTable<TData, TValue>({
+export function DataTableGrouping<TData, TValue>({
     columns,
     data = [],
     filterColumn,

@@ -5,13 +5,13 @@ import { DatePicker } from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 
 import { RegionFilterComponent } from './RegionFilterComponent';
-import { InstancesEc2FilterComponent } from './InstancesEc2FilterComponent';
 import { TagFilterComponent } from './TagsFilterComponent';
 import { ServiceFilterComponent } from './ServiceFilterComponent';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Calendar, Filter, MapPin, Server, Tag, XCircle } from 'lucide-react';
 import { Button } from '../ui/button';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { InstancesFilterComponent } from './InstancesFilterComponent';
 
 interface FiltersComponentProps {
     Component: (params: {
@@ -26,6 +26,7 @@ interface FiltersComponentProps {
     regionFilter?: boolean;
     isRegionMultiSelect?: boolean;
     instancesFilter?: boolean;
+    instancesService?:string;
     isInstanceMultiSelect?:boolean;
     tagsFilter?: boolean;
     serviceFilter?: boolean;
@@ -39,6 +40,7 @@ export const FiltersComponent = ({
     regionFilter = false,
     isRegionMultiSelect = false,
     instancesFilter = false,
+    instancesService,
     isInstanceMultiSelect = false,
     tagsFilter = false,
     serviceFilter = false,
@@ -64,6 +66,7 @@ export const FiltersComponent = ({
             startDate: startDateParam ? new Date(startDateParam) : yesterday,
             endDate: endDateParam ? new Date(endDateParam) : new Date(),
             instance: instanceParam || 'all',
+            instanceService: instancesService || null,
             region: regionParam || 'all_regions',
             selectedKey: selectedKeyParam || null,
             selectedValue: selectedValueParam || null,
@@ -76,6 +79,7 @@ export const FiltersComponent = ({
 
     const [tempRange, setTempRange] = useState<[Date | null, Date | null]>([filters.startDate, filters.endDate]);
     const [tempInstance, setTempInstance] = useState(filters.instance);
+    const [tempInstanceService, setTempInstanceService] = useState(filters.instanceService);
     const [tempRegion, setTempRegion] = useState(filters.region);
     const [tempKey, setTempKey] = useState<string | null>(filters.selectedKey);
     const [tempValue, setTempValue] = useState<string | null>(filters.selectedValue);
@@ -87,6 +91,7 @@ export const FiltersComponent = ({
         setFilters(newFilters);
         setTempRange([newFilters.startDate, newFilters.endDate]);
         setTempInstance(newFilters.instance);
+        setTempInstanceService(newFilters.instanceService);
         setTempRegion(newFilters.region);
         setTempKey(newFilters.selectedKey);
         setTempValue(newFilters.selectedValue);
@@ -100,7 +105,7 @@ export const FiltersComponent = ({
             setTempKey(null);
             setTempValue(null);
         }
-    }, [tempRegion, tagsData]);
+    }, [tempRegion, tagsData, tempKey, tempValue]);
 
     const onChange = (dates: [Date | null, Date | null]) => {
         setTempRange(dates);
@@ -114,6 +119,7 @@ export const FiltersComponent = ({
             startDate: start,
             endDate: end,
             instance: tempInstance,
+            instanceService: tempInstanceService,
             region: tempRegion,
             selectedKey: tempKey,
             selectedValue: tempValue,
@@ -124,6 +130,7 @@ export const FiltersComponent = ({
         if (newFilters.startDate) query.set('startDate', newFilters.startDate.toISOString());
         if (newFilters.endDate) query.set('endDate', newFilters.endDate.toISOString());
         if (newFilters.instance) query.set('instance', newFilters.instance);
+        if (newFilters.instanceService) query.set('instanceService', newFilters.instanceService);
         if (newFilters.region && newFilters.region !== 'all_regions') {
             query.set('region', newFilters.region);
         }
@@ -139,6 +146,7 @@ export const FiltersComponent = ({
             startDate: yesterday,
             endDate: new Date(),
             instance: '',
+            instancesService: null,
             region: 'all_regions',
             selectedKey: null,
             selectedValue: null,
@@ -148,6 +156,7 @@ export const FiltersComponent = ({
         setFilters(defaultFilters);
         setTempRange([defaultFilters.startDate, defaultFilters.endDate]);
         setTempInstance(defaultFilters.instance);
+        setTempInstanceService(defaultFilters.instancesService);
         setTempRegion(defaultFilters.region);
         setTempKey(defaultFilters.selectedKey);
         setTempValue(defaultFilters.selectedValue);
@@ -221,7 +230,8 @@ export const FiltersComponent = ({
                                     <Server className='h-4 w-4' />
                                     Instancia
                                 </label>
-                                <InstancesEc2FilterComponent
+                                <InstancesFilterComponent
+                                    service={tempInstanceService}
                                     instance={tempInstance}
                                     setInstance={setTempInstance}
                                     startDate={filters.startDate}

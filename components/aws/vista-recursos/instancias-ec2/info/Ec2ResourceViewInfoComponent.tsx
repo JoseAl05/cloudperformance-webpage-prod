@@ -44,8 +44,6 @@ export const Ec2ResourceViewInfoComponent = ({ data }: Ec2ResourceViewInfoCompon
     const getPublicIpCount = (publicIps: (string | null)[]) => {
         return publicIps.filter((ip) => ip !== null).length
     }
-
-    console.log(data)
     return (
         <div className='w-full xl:w-[22rem]'>
             <div className='space-y-8'>

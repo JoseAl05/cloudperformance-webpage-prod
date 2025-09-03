@@ -1,7 +1,7 @@
 import { createColumns } from '@/components/general/data-table/columns';
-import { DataTable } from '@/components/general/data-table/data-table'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { awsEventColumns } from './Ec2EventsColumns';
+import { DataTableSingle } from '@/components/general/data-table/data-table-single';
 
 interface Ec2EventsTableComponentProps {
     data: unknown,
@@ -28,7 +28,7 @@ export const Ec2EventsTableComponent = ({ data, startDate, endDate, instance }: 
                 </div>
             </CardHeader>
             <CardContent>
-                <DataTable
+                <DataTableSingle
                     columns={eventsColumns}
                     data={data.data}
                     filterColumn='EventName'
