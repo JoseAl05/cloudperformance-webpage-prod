@@ -1,4 +1,4 @@
-import { MainViewInstancesEc2Component } from '@/components/aws/vista-recursos/instancias-ec2/MainViewInstancesEc2Component';
+import { MainViewInstancesEc2Component } from '@/components/aws/vista-ec2/instancias-ec2/MainViewInstancesEc2Component';
 import { Suspense } from 'react';
 
 export default function DashboardInstanciasEc2() {

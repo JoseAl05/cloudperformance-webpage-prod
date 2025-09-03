@@ -133,15 +133,6 @@ export const Ec2InstancesConsumeComponent = ({ startDate, endDate, instance, reg
     return (
         <>
             <div className='w-full min-w-0 px-4 py-6'>
-                {/* <div className='flex flex-col xl:flex-row gap-8 min-w-0'>
-                    <div className='w-full xl:max-w-sm min-w-0'>
-                        <Ec2ResourceViewInfoComponent data={infoData} />
-                    </div>
-
-                    <div className='flex-1 space-y-6 min-w-0 overflow-hidden'>
-                        <MainEc2ResourceViewMetricsSummaryComponent data={metricsData} />
-                    </div>
-                </div> */}
                 <div className='flex-1 space-y-6 min-w-0 overflow-hidden'>
                     <Ec2InfoConsumeViewComponent
                         cpuData={cpuMetricsData}
@@ -161,12 +152,6 @@ export const Ec2InstancesConsumeComponent = ({ startDate, endDate, instance, reg
                     <Ec2ResourceConsumeViewUsageCpuComponent
                         data={cpuMetricsData}
                     />
-                    {/* <Ec2ResourceViewUsageCpuComponent
-                        data={metricsData}
-                    />
-                    <Ec2ResourceViewUsageNetworkComponent
-                        data={metricsData}
-                    /> */}
                 </div>
                 <Ec2ConsumeViewInstanceTable
                     data={infoData}

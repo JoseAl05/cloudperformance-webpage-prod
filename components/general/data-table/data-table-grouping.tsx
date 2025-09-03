@@ -17,7 +17,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { useState, useMemo } from 'react'
 import { ChevronDown, ChevronRight } from 'lucide-react'
 
-interface DataTableProps<TData, TValue> {
+interface DataTableGroupingProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[]
     data?: TData[]
     filterColumn?: string
@@ -42,7 +42,7 @@ export function DataTableGrouping<TData, TValue>({
     filterPlaceholder = "Buscar...",
     enableGrouping = false,
     groupByColumn
-}: DataTableProps<TData, TValue>) {
+}: DataTableGroupingProps<TData, TValue>) {
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
     const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set())
     const [currentPage, setCurrentPage] = useState(0)

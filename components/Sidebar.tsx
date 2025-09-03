@@ -24,7 +24,6 @@ export const SidebarComponent = ({ ...props }: React.ComponentProps<typeof Sideb
 
     const routes = [
         { label: 'Inicio', icon: Grid2X2, href: '/aws/facturacion/tendencia-facturacion', color: 'text-sky-500' },
-        { label: 'Consumo', icon: LineChart, href: '/aws/consumos', color: 'text-green-600' },
         { label: 'Quotas', icon: PieChart, href: '/aws/quotas', color: 'text-violet-500' },
         { label: 'Deployments', icon: Zap, href: '/aws/deployments', color: 'text-pink-500' },
         { label: 'Vista Asesor', icon: Pyramid, href: '/aws/advisor', color: 'text-[#3258de]' },
@@ -50,6 +49,14 @@ export const SidebarComponent = ({ ...props }: React.ComponentProps<typeof Sideb
         { label: 'Top Facturaciones por ID Recurso', href: '/aws/funciones/top-id-recurso', icon: Grid2X2, color: 'text-blue-500' },
     ]
 
+    const ec2Consume = [
+        { label: 'Consumo EC2', icon: Computer, href: '/aws/consumos/ec2', color: 'text-green-600' },
+    ]
+
+    const consumes = [
+        { label: 'Consumos', subItems: ec2Consume, icon: Zap, color: 'text-green-600' },
+    ]
+
     const funciones = [
         { label: 'Top Facturaciones', subItems: topFacturaciones, icon: Zap, color: 'text-purple-500' },
     ]
@@ -59,6 +66,9 @@ export const SidebarComponent = ({ ...props }: React.ComponentProps<typeof Sideb
 
     const defaultOpenFunciones = funciones.some((f) => f.subItems?.some((sub) => sub.href === pathname))
     const [isFuncionesOpen, setIsFuncionesOpen] = useState(defaultOpenFunciones)
+
+    const defaultOpenConsumes = consumes.some((f) => f.subItems?.some((sub) => sub.href === pathname))
+    const [isConsumesOpen, setIsConsumesOpen] = useState(defaultOpenConsumes)
 
     const defaultOpenTopFacturaciones = topFacturaciones.some((t) => t.href === pathname)
     const [isTopFacturacionesOpen, setIsTopFacturacionesOpen] = useState(defaultOpenTopFacturaciones)
@@ -102,6 +112,44 @@ export const SidebarComponent = ({ ...props }: React.ComponentProps<typeof Sideb
                         {
                             open && (
                                 <>
+                                    <SidebarMenuItem>
+                                        <Collapsible open={isConsumesOpen} onOpenChange={setIsConsumesOpen}>
+                                            <CollapsibleTrigger asChild>
+                                                <SidebarMenuButton className="w-full justify-between">
+                                                    <div className="flex items-center gap-2">
+                                                        <LineChart className="h-5 w-5 text-green-500" />
+                                                        <span className="text-sm">Consumos</span>
+                                                    </div>
+                                                    <ChevronDown
+                                                        className={cn(
+                                                            "h-4 w-4 transition-transform duration-200 ease-in-out",
+                                                            isConsumesOpen ? "rotate-180" : "",
+                                                        )}
+                                                    />
+                                                </SidebarMenuButton>
+                                            </CollapsibleTrigger>
+                                            <CollapsibleContent className="space-y-1 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:slide-out-to-top-1 data-[state=open]:slide-in-from-top-1 duration-200">
+                                                    <CollapsibleContent className="space-y-1 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:slide-out-to-top-1 data-[state=open]:slide-in-from-top-1 duration-200">
+                                                        {ec2Consume.map((sub) => {
+                                                            const isSubActive = pathname === sub.href
+                                                            return (
+                                                                <a
+                                                                    key={sub.label}
+                                                                    href={sub.href}
+                                                                    className={cn(
+                                                                        "flex items-center gap-2 p-2 rounded-md cursor-pointer pl-10 transition-colors duration-150",
+                                                                        isSubActive ? "bg-blue-500 text-white" : "hover:bg-accent/50",
+                                                                    )}
+                                                                >
+                                                                    <sub.icon className={cn("h-4 w-4", sub.color)} />
+                                                                    <span className="text-sm">{sub.label}</span>
+                                                                </a>
+                                                            )
+                                                        })}
+                                                    </CollapsibleContent>
+                                            </CollapsibleContent>
+                                        </Collapsible>
+                                    </SidebarMenuItem>
                                     <SidebarMenuItem>
                                         <Collapsible open={isFuncionesOpen} onOpenChange={setIsFuncionesOpen}>
                                             <CollapsibleTrigger asChild>

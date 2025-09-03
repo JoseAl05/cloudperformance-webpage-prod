@@ -1,9 +1,9 @@
 'use client'
 import { FiltersComponent } from '@/components/general/FiltersComponent'
 import { ChartLine } from 'lucide-react'
-import { Ec2InstancesConsumeComponent } from './Ec2InstancesConsumeComponent'
+import { AsgConsumeComponent } from './AsgConsumeComponent'
 
-export const MainViewConsume = () => {
+export const MainViewConsumeAsgComponent = () => {
 
     return (
         <div className='w-full min-w-0 space-y-4'>
@@ -16,11 +16,8 @@ export const MainViewConsume = () => {
                             </div>
                             <div>
                                 <h1 className='text-3xl font-bold text-gray-900 dark:text-gray-100'>
-                                    Instancias EC2
+                                    Autoscaling Groups
                                 </h1>
-                                <p className='text-gray-500 dark:text-gray-400'>
-                                    Monitoreo y gestión de instancias Amazon EC2
-                                </p>
                             </div>
                         </div>
                     </div>
@@ -28,13 +25,14 @@ export const MainViewConsume = () => {
             </div>
             <div className='w-full min-w-0'>
                 <FiltersComponent
-                    Component={Ec2InstancesConsumeComponent}
+                    Component={AsgConsumeComponent}
                     dateFilter
                     regionFilter
                     instancesFilter
+                    instancesService='asg'
                     isInstanceMultiSelect
                     tagsFilter
-                    collection='aws_ec2_instances'
+                    collection='aws_auto_scaling_groups'
                     tagColumnName='Tags'
                 />
             </div>

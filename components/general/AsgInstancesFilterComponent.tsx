@@ -18,64 +18,42 @@ import {
 } from '@/components/ui/popover'
 import useSWR from 'swr'
 
-interface InstancesFilterComponentProps {
-    service: string,
+interface AsgInstancesFilterComponentProps {
     asgName: string,
     instance: string,
     setInstance: Dispatch<SetStateAction<string>>,
     startDate: Date,
     endDate: Date,
     region: string,
-    selectedKey: string,
-    selectedValue: string,
     isInstanceMultiSelect: boolean
 }
 
-const fetcherPost = (url: string, tags: { Key: string; Value: string } | null = null) =>
+const fetcher = (url: string) =>
     fetch(url, {
-        method: 'POST',
+        method: 'GET',
         headers: {
             'Authorization': `Bearer ${process.env.NEXT_PUBLIC_API_TOKEN}`,
             'Content-Type': 'application/json',
-        },
-        body: tags ? JSON.stringify([tags]) : null,
+        }
     }).then(res => res.json());
 
-export const InstancesFilterComponent = ({
-    service,
+export const AsgInstancesFilterComponent = ({
     asgName,
     instance,
     setInstance,
     startDate,
     endDate,
     region,
-    selectedKey,
-    selectedValue,
     isInstanceMultiSelect
-}: InstancesFilterComponentProps) => {
+}: AsgInstancesFilterComponentProps) => {
     const [open, setOpen] = useState(false);
 
-    let url = ''
     const startDateFormatted = startDate.toISOString().replace('Z', '').slice(0, -4);
     const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : '';
 
-    switch (service) {
-        case "ec2":
-            url = `${process.env.NEXT_PUBLIC_API_URL}/vm/all-instances-ec2?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`;
-            break;
-        case "rds-pg":
-            url = `${process.env.NEXT_PUBLIC_API_URL}/db/all-instances-rds-pg?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`;
-            break;
-        case "asg":
-            url = `${process.env.NEXT_PUBLIC_API_URL}/autoscaling/all-autoscaling-groups?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`;
-            break;
-        default:
-            break;
-    }
+    const url = `${process.env.NEXT_PUBLIC_API_URL}/autoscaling/all-asg-instances-ec2?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&asgName=${asgName}`;
 
-    const tagsBody = selectedKey !== 'allKeys' && selectedValue ? { Key: selectedKey, Value: selectedValue } : null;
-
-    const { data, error, isLoading } = useSWR([url, tagsBody], ([url, tags]) => fetcherPost(url, tags));
+    const { data, error, isLoading } = useSWR(instance ? url : null, fetcher);
 
     if (isLoading) return <div>Cargando...</div>
     if (error) return <div>Error al cargar datos</div>

@@ -12,6 +12,7 @@ import { Calendar, Filter, MapPin, Server, Tag, XCircle } from 'lucide-react';
 import { Button } from '../ui/button';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { InstancesFilterComponent } from './InstancesFilterComponent';
+import { AsgInstancesFilterComponent } from './AsgInstancesFilterComponent';
 
 interface FiltersComponentProps {
     Component: (params: {
@@ -26,8 +27,10 @@ interface FiltersComponentProps {
     regionFilter?: boolean;
     isRegionMultiSelect?: boolean;
     instancesFilter?: boolean;
-    instancesService?:string;
-    isInstanceMultiSelect?:boolean;
+    instancesService?: string;
+    asgFilter?: boolean;
+    asgName?: string;
+    isInstanceMultiSelect?: boolean;
     tagsFilter?: boolean;
     serviceFilter?: boolean;
     collection?: string;
@@ -41,6 +44,8 @@ export const FiltersComponent = ({
     isRegionMultiSelect = false,
     instancesFilter = false,
     instancesService,
+    asgFilter = false,
+    asgName,
     isInstanceMultiSelect = false,
     tagsFilter = false,
     serviceFilter = false,
@@ -57,16 +62,18 @@ export const FiltersComponent = ({
         const startDateParam = searchParams.get('startDate');
         const endDateParam = searchParams.get('endDate');
         const instanceParam = searchParams.get('instance');
+        const asgNameParam = searchParams.get('asgName');
         const regionParam = searchParams.get('region');
         const selectedKeyParam = searchParams.get('selectedKey');
         const selectedValueParam = searchParams.get('selectedValue');
-        const selectedServiceParam = searchParams.get('services')
+        const selectedServiceParam = searchParams.get('services');
 
         return {
             startDate: startDateParam ? new Date(startDateParam) : yesterday,
             endDate: endDateParam ? new Date(endDateParam) : new Date(),
             instance: instanceParam || 'all',
             instanceService: instancesService || null,
+            asgName: asgNameParam || 'all',
             region: regionParam || 'all_regions',
             selectedKey: selectedKeyParam || null,
             selectedValue: selectedValueParam || null,
@@ -80,6 +87,7 @@ export const FiltersComponent = ({
     const [tempRange, setTempRange] = useState<[Date | null, Date | null]>([filters.startDate, filters.endDate]);
     const [tempInstance, setTempInstance] = useState(filters.instance);
     const [tempInstanceService, setTempInstanceService] = useState(filters.instanceService);
+    const [tempAsgName, setTempAsgName] = useState(filters.asgName);
     const [tempRegion, setTempRegion] = useState(filters.region);
     const [tempKey, setTempKey] = useState<string | null>(filters.selectedKey);
     const [tempValue, setTempValue] = useState<string | null>(filters.selectedValue);
@@ -92,6 +100,7 @@ export const FiltersComponent = ({
         setTempRange([newFilters.startDate, newFilters.endDate]);
         setTempInstance(newFilters.instance);
         setTempInstanceService(newFilters.instanceService);
+        setTempAsgName(newFilters.asgName);
         setTempRegion(newFilters.region);
         setTempKey(newFilters.selectedKey);
         setTempValue(newFilters.selectedValue);
@@ -120,6 +129,7 @@ export const FiltersComponent = ({
             endDate: end,
             instance: tempInstance,
             instanceService: tempInstanceService,
+            asgName: tempAsgName,
             region: tempRegion,
             selectedKey: tempKey,
             selectedValue: tempValue,
@@ -131,6 +141,7 @@ export const FiltersComponent = ({
         if (newFilters.endDate) query.set('endDate', newFilters.endDate.toISOString());
         if (newFilters.instance) query.set('instance', newFilters.instance);
         if (newFilters.instanceService) query.set('instanceService', newFilters.instanceService);
+        if (newFilters.asgName) query.set('asgName', newFilters.asgName);
         if (newFilters.region && newFilters.region !== 'all_regions') {
             query.set('region', newFilters.region);
         }
@@ -147,6 +158,7 @@ export const FiltersComponent = ({
             endDate: new Date(),
             instance: '',
             instancesService: null,
+            asgName: 'all',
             region: 'all_regions',
             selectedKey: null,
             selectedValue: null,
@@ -157,6 +169,7 @@ export const FiltersComponent = ({
         setTempRange([defaultFilters.startDate, defaultFilters.endDate]);
         setTempInstance(defaultFilters.instance);
         setTempInstanceService(defaultFilters.instancesService);
+        setTempAsgName(defaultFilters.asgName);
         setTempRegion(defaultFilters.region);
         setTempKey(defaultFilters.selectedKey);
         setTempValue(defaultFilters.selectedValue);
@@ -243,6 +256,25 @@ export const FiltersComponent = ({
                                 />
                             </div>
                         )}
+                        {
+                            asgFilter && (
+                                <div className='space-y-2'>
+                                    <label className='text-sm font-medium text-foreground flex items-center gap-2'>
+                                        <Server className='h-4 w-4' />
+                                        Instancia
+                                    </label>
+                                    <AsgInstancesFilterComponent
+                                        asgName={tempAsgName}
+                                        instance={tempInstance}
+                                        setInstance={setTempInstance}
+                                        startDate={filters.startDate}
+                                        endDate={filters.endDate}
+                                        region={tempRegion}
+                                        isInstanceMultiSelect={isInstanceMultiSelect}
+                                    />
+                                </div>
+                            )
+                        }
                         {serviceFilter && (
                             <div className='space-y-2'>
                                 <label className='text-sm font-medium text-foreground flex items-center gap-2'>
