@@ -390,7 +390,6 @@ export const Ec2ResourceViewUsageCpuComponent = ({ data }: ResourceViewUsageCpuC
       ],
       animation: true
     };
-    console.log(unusedData[unusedData.length - 1]);
     chartInstance.current = echarts.init(chartRef.current, null, {
       renderer: 'canvas'
     });

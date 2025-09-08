@@ -7,6 +7,8 @@ import { Ec2ResourceConsumeViewUsageCreditsComponent } from './graficos/Ec2Resou
 import { Ec2InfoConsumeViewComponent } from './info/Ec2InfoConsumeViewComponent'
 import { Ec2ConsumeViewInstanceTable } from './table/Ec2ConsumeViewInstanceTable'
 import { MessageCard } from '../../cards/MessageCards';
+import { LoaderComponent } from '@/components/general/LoaderComponent'
+import { ConsumeViewEc2CpuMetrics, ConsumeViewEc2CreditsMetrics, Ec2ConsumneViewInstance } from '@/interfaces/vista-consumos/ec2ConsumeViewInterfaces'
 
 interface Ec2InstancesConsumeComponentProps {
     startDate: Date
@@ -91,19 +93,8 @@ export const Ec2InstancesConsumeComponent = ({
     const hasInfoData = !!infoData && infoData.length > 0
 
     if (anyLoading) {
-        return (
-            <div className="w-full min-w-0 px-4 py-10 flex flex-col items-center gap-4">
-                <div className="flex items-center gap-3">
-                    <Loader2 className="h-6 w-6 animate-spin" />
-                    <span className="text-sm text-muted-foreground">Cargando datos de la instancia…</span>
-                </div>
-                <MessageCard
-                    icon={Info}
-                    title="Preparando visualizaciones"
-                    description="Estamos obteniendo métricas de CPU, créditos y la información general de la instancia."
-                    tone="info"
-                />
-            </div>
+        return(
+            <LoaderComponent />
         )
     }
 

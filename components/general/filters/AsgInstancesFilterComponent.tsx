@@ -67,6 +67,11 @@ export const AsgInstancesFilterComponent = ({
 
     const handleInstanceToggle = (val: string) => {
         const curr = selectedArray.slice();
+        if(val === 'all' && asg !== 'all'){
+            console.log(list.toString());
+            setAsgInstance(list.toString());
+            return;
+        }
         if (val === 'all') {
             setAsgInstance('all');
             return;

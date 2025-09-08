@@ -1,4 +1,4 @@
-interface ConsumeViewEc2CpuMetrics {
+export interface ConsumeViewEc2CpuMetrics {
     timestamp: string;
     sync_time: string;
     region: string;
@@ -8,7 +8,7 @@ interface ConsumeViewEc2CpuMetrics {
     average_cpu_metric_value: number;
 }
 
-interface ConsumeViewEc2CreditsMetrics {
+export interface ConsumeViewEc2CreditsMetrics {
     timestamp: string;
     sync_time: string;
     region: string;
@@ -16,7 +16,7 @@ interface ConsumeViewEc2CreditsMetrics {
     CpuCreditBalanceValue: number;
 }
 
-interface ConsumeViewEc2EbsDevice {
+export interface ConsumeViewEc2EbsDevice {
     DeviceName: string;
     Ebs: {
         AttachTime: string;
@@ -26,14 +26,14 @@ interface ConsumeViewEc2EbsDevice {
     };
 }
 
-interface ConsumeViewEc2NetworkInterface {
+export interface ConsumeViewEc2NetworkInterface {
     Association: { PublicIp: string; PublicDnsName: string };
     Status: string;
     NetworkInterfaceId: string;
     PrivateIpAddress: string;
 }
 
-interface Ec2ConsumneViewInstance {
+export interface Ec2ConsumneViewInstance {
     resource: string;
     resource_type: string;
     resource_status: string;
