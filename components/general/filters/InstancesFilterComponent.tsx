@@ -30,6 +30,16 @@ const fetcherPost = (url: string, tags: { Key: string; Value: string } | null = 
         body: tags ? JSON.stringify([tags]) : null,
     }).then(res => res.json());
 
+const fetcherGet = (url: string) =>
+    fetch(url, {
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${process.env.NEXT_PUBLIC_API_TOKEN}`,
+            'Content-Type': 'application/json',
+        },
+    }).then(res => res.json());
+
+
 export const InstancesFilterComponent = ({
     service, instance, setInstance, startDate, endDate, region, selectedKey, selectedValue, isInstanceMultiSelect
 }: InstancesFilterComponentProps) => {
@@ -49,6 +59,9 @@ export const InstancesFilterComponent = ({
         case 'asg':
             url = `${process.env.NEXT_PUBLIC_API_URL}/autoscaling/all-autoscaling-groups?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`;
             break;
+        case "infraUsed":
+            url = `${process.env.NEXT_PUBLIC_API_URL}/aws/ec2/unused/getInstances?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`;
+            break;
         default:
             url = '';
     }
@@ -56,7 +69,8 @@ export const InstancesFilterComponent = ({
     const tagsBody = selectedKey !== 'allKeys' && selectedValue ? { Key: selectedKey, Value: selectedValue } : null;
 
     const shouldFetch = !!url && !!region // dejar pasar 'all_regions'
-    const { data, error, isLoading } = useSWR<unknown[]>(shouldFetch ? [url, tagsBody] : null, ([u, t]) => fetcherPost(u, t));
+    const apiMethod = service === "infraUsed" ? fetcherGet : fetcherPost;
+    const { data, error, isLoading } = useSWR<unknown[]>(shouldFetch ? [url, tagsBody] : null, ([u, t]) => apiMethod(u, t));
 
     // normalizar si queda sin data
     useEffect(() => {
