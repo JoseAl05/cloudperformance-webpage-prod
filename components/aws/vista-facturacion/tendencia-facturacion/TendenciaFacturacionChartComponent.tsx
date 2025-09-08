@@ -18,7 +18,7 @@ interface TendenciaFacturacionProps {
 
 interface FacturacionData {
     SERVICE: string;
-    end_date: string;
+    start_date: string;
     unblendedcost: number;
     REGION: string;
     RESOURCE_ID: string | null;
@@ -99,7 +99,6 @@ export const TendenciaFacturacionChartComponent = ({ startDate, endDate, service
 
     const startDateFormatted = startDate.toISOString().split('.')[0];
     const endDateFormatted = endDate.toISOString().split('.')[0];
-    console.log(services)
     const serviceParam = services ? `services=${services}` : '';
 
     const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/facturacion/tendencia-facturacion?date_from=${startDateFormatted}&date_to=${endDateFormatted}&${serviceParam}&region=${region}`;
@@ -115,7 +114,7 @@ export const TendenciaFacturacionChartComponent = ({ startDate, endDate, service
 
         rawData.forEach(item => {
             const service = item.SERVICE;
-            const date = item.end_date;
+            const date = new Date(item.start_date).toISOString().slice(0, 10);
             const cost = item.unblendedcost;
 
             allDates.add(date);
@@ -194,7 +193,15 @@ export const TendenciaFacturacionChartComponent = ({ startDate, endDate, service
         }
     };
 
-
+    const toUTCDate = (s: string) => {
+        const [y, m, d] = s.split("-").map(Number);
+        return new Date(Date.UTC(y, m - 1, d));
+    };
+    const fmt = new Intl.DateTimeFormat("es-ES", {
+        day: "numeric",
+        month: "short",
+        timeZone: "UTC",
+    });
     useEffect(() => {
         if (!data || !chartRef.current) return;
 
@@ -208,38 +215,48 @@ export const TendenciaFacturacionChartComponent = ({ startDate, endDate, service
         chartInstance.current = chart;
 
         // Función para formatear fechas adaptativa según el rango
-        const formatDatesAdaptive = (dates) => {
+        const formatDatesAdaptive = (dates: string[]) => {
+            if (!Array.isArray(dates) || dates.length === 0) return [];
+
             const dateCount = dates.length;
-            const startDate = new Date(dates[0]);
-            const endDate = new Date(dates[dates.length - 1]);
-            const daysDiff = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24));
 
-            return dates.map((date, index) => {
-                const d = new Date(date);
+            const startDate = toUTCDate(dates[0]);
+            const endDate = toUTCDate(dates[dateCount - 1]);
 
-                // Para rangos muy amplios (>365 días), mostrar solo algunos puntos
+            // Diferencia de días INCLUSIVA (1..n)
+            const daysDiff = Math.floor((+endDate - +startDate) / 86_400_000) + 1;
+
+            // Formateador fijo en UTC para evitar corrimientos
+            // const fmt = new Intl.DateTimeFormat("es-ES", {
+            //     day: "numeric",
+            //     month: "short",
+            //     timeZone: "UTC",
+            // });
+
+            // Tamaños de salto con resguardo para no dividir por 0
+            const bigStep = Math.max(1, Math.ceil(dateCount / 12)); // >365
+            const midStep = Math.max(1, Math.ceil(dateCount / 20)); // 31..365
+
+            const labels = dates.map((s, i) => {
+                const d = toUTCDate(s);
+
                 if (daysDiff > 365) {
-                    if (index === 0 || index === dates.length - 1 || index % Math.ceil(dateCount / 12) === 0) {
-                        return d.toLocaleDateString('es-ES', { month: 'short', year: '2-digit' });
-                    }
-                    return '';
-                }
-                // Para rangos medios (30-365 días)
-                else if (daysDiff > 30) {
-                    if (index % Math.ceil(dateCount / 20) === 0) {
-                        return d.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
-                    }
-                    return '';
-                }
-                // Para rangos cortos (<30 días)
-                else {
-                    return d.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
+                    if (i === 0 || i === dateCount - 1 || i % bigStep === 0) return fmt.format(d);
+                    return "";
+                } else if (daysDiff > 30) {
+                    if (i % midStep === 0) return fmt.format(d);
+                    return "";
+                } else {
+                    return fmt.format(d);
                 }
             });
+
+            // Útil para depurar:
+            console.log("Start:", startDate.toISOString(), "End:", endDate.toISOString(), "DaysDiff:", daysDiff);
+
+            return labels;
         };
-
         const formattedDates = formatDatesAdaptive(dates);
-
         // Calcular colores dinámicos para mejor diferenciación visual
         const generateDistinctColors = (count) => {
             const colors = [];
@@ -283,13 +300,15 @@ export const TendenciaFacturacionChartComponent = ({ startDate, endDate, service
 
                     const total = params.reduce((acc, p) => acc + (p.value || 0), 0);
 
-                    const originalDate = new Date(dates[params[0].dataIndex]);
-                    const dateStr = originalDate.toLocaleDateString('es-ES', {
-                        weekday: 'short',
-                        day: 'numeric',
-                        month: 'short',
-                        year: 'numeric'
-                    });
+                    const originalDate = toUTCDate(dates[params[0].dataIndex]);
+                    // const dateStr = originalDate.toLocaleDateString('es-ES', {
+                    //     weekday: 'short',
+                    //     day: 'numeric',
+                    //     month: 'short',
+                    //     year: 'numeric'
+                    // });
+
+                    const dateStr = fmt.format(originalDate);
 
                     // Mostrar la serie con valor máximo en ese punto como “en foco”
                     const maxSerie = params.reduce((prev, curr) => {
@@ -496,6 +515,7 @@ export const TendenciaFacturacionChartComponent = ({ startDate, endDate, service
     } else {
         selectedRegionsCount = 0;
     }
+    console.log(data)
     return (
         <div className="w-full min-w-0 px-4 py-6">
             {/* Header */}
