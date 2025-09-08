@@ -20,7 +20,7 @@ export const Navbar = () => {
         <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
             <div className="flex h-14 items-center px-4 gap-4">
                 {/* Sidebar trigger for mobile */}
-                <SidebarTrigger className="cursor-pointer md:hidden" />
+                {/* <SidebarTrigger className="cursor-pointer" /> */}
 
                 {/* Logo/Brand - hidden on mobile when sidebar is present */}
                 <div className="hidden md:flex items-center gap-2">

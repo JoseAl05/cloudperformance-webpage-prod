@@ -7,6 +7,7 @@ import { TrendingUp, DollarSign, Download, Filter, Calendar } from 'lucide-react
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { aws_regions } from '@/lib/aws_regions';
+import { LoaderComponent } from '@/components/general/LoaderComponent';
 
 interface TendenciaFacturacionProps {
     startDate: Date;
@@ -98,7 +99,7 @@ export const TendenciaFacturacionChartComponent = ({ startDate, endDate, service
 
     const startDateFormatted = startDate.toISOString().split('.')[0];
     const endDateFormatted = endDate.toISOString().split('.')[0];
-
+    console.log(services)
     const serviceParam = services ? `services=${services}` : '';
 
     const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/facturacion/tendencia-facturacion?date_from=${startDateFormatted}&date_to=${endDateFormatted}&${serviceParam}&region=${region}`;
@@ -173,7 +174,6 @@ export const TendenciaFacturacionChartComponent = ({ startDate, endDate, service
 
     const calculateMetrics = (rawData: FacturacionData[]) => {
         if (!rawData || rawData.length === 0) return { total: 0, services: 0, regions: 0 };
-        console.log(rawData);
         const total = rawData.reduce((sum, item) => sum + item.unblendedcost, 0);
         const services = new Set(rawData.map(item => item.SERVICE)).size;
         const regions = new Set(rawData.map(item => item.REGION)).size;
@@ -464,12 +464,7 @@ export const TendenciaFacturacionChartComponent = ({ startDate, endDate, service
     }, [data]);
 
     if (isLoading) {
-        return (
-            <div className="flex justify-center items-center p-12">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-500"></div>
-                <span className="ml-3">Cargando tendencia de facturación...</span>
-            </div>
-        );
+        return <LoaderComponent />
     }
 
     if (error) {

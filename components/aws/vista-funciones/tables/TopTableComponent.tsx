@@ -5,6 +5,7 @@ import { ColumnDef } from "@tanstack/react-table"
 import { DataTableSingle } from "@/components/general/data-table/data-table-single"
 import { ArrowUpDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { LoaderComponent } from '@/components/general/LoaderComponent'
 
 type TableDataTop = {
   service_dimension: string
@@ -102,7 +103,7 @@ export const TableComponentTop = ({
     },
   ]
 
-  if (isLoading) return <p>Cargando datos...</p>
+  if (isLoading) return <LoaderComponent />
   if (error) return <p>Error cargando datos</p>
 
   console.log("📊 Data recibida:", data)

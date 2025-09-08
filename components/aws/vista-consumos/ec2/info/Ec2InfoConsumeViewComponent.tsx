@@ -18,14 +18,12 @@ export const Ec2InfoConsumeViewComponent = ({ infoData, cpuData, creditsData, cr
     if (!infoData || infoData.length === 0) {
         return <div className="text-center text-gray-500 py-6">No hay instancias para mostrar.</div>;
     }
-    if (!cpuData || cpuData.length === 0) {
-        return <div className="text-center text-gray-500 py-6">No hay instancias para mostrar.</div>;
-    }
+    const hasCpu = Array.isArray(cpuData) && cpuData.length > 0;
     return (
         <>
             <Ec2InfoConsumeViewCardsComponent
                 infoData={infoData}
-                cpuData={cpuData}
+                cpuData={hasCpu ? cpuData : null}
                 creditsGlobalEfficiencyData={creditsGlobalEfficiency}
             />
         </>

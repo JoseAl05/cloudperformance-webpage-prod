@@ -4,19 +4,11 @@ import { Check, ChevronsUpDown } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import {
-    Command,
-    CommandEmpty,
-    CommandGroup,
-    CommandInput,
-    CommandItem,
-    CommandList,
+    Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList,
 } from "@/components/ui/command"
-import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
-} from "@/components/ui/popover"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import useSWR from 'swr'
+import { LoaderComponent } from '../LoaderComponent'
 
 interface TagFilterComponentProps {
     startDate: Date,
@@ -28,7 +20,8 @@ interface TagFilterComponentProps {
     selectedValue?: string | null,
     setSelectedKey: Dispatch<SetStateAction<string | null>>,
     setSelectedValue: Dispatch<SetStateAction<string | null>>,
-    setTagsData?: Dispatch<SetStateAction<unknown[]>>
+    setTagsData?: Dispatch<SetStateAction<unknown[]>>,
+    onChange?: (next: { key: string | null; value: string | null }) => void
 }
 
 const fetcher = (url: string) =>
@@ -50,17 +43,23 @@ export const TagFilterComponent = ({
     selectedValue,
     setSelectedKey,
     setSelectedValue,
-    setTagsData
+    setTagsData,
+    onChange
 }: TagFilterComponentProps) => {
-
     const [openKey, setOpenKey] = useState(false)
     const [openValue, setOpenValue] = useState(false)
+    const [isMounted, setIsMounted] = useState(false);
+
 
     const startDateFormatted = startDate.toISOString().replace('Z', '').slice(0, -4)
     const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : ''
 
+    // Evitar fetch si no hay región (deja pasar 'all_regions' para traer todos)
+    const shouldFetch = !!region
     const { data, error, isLoading } = useSWR(
-        `${process.env.NEXT_PUBLIC_API_URL}/get-all-tags?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&collection=${collection}&tag_column_name=${tagColumnName}`,
+        shouldFetch
+            ? `${process.env.NEXT_PUBLIC_API_URL}/get-all-tags?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&collection=${collection}&tag_column_name=${tagColumnName}`
+            : null,
         fetcher
     )
 
@@ -77,40 +76,43 @@ export const TagFilterComponent = ({
     })
 
     const keys = Object.keys(tagMap)
-
-
     const valuesForKey = useMemo(
         () => (selectedKey ? Array.from(tagMap[selectedKey] || []) : []),
         [selectedKey, tagMap]
     )
 
-    const isValidKey = selectedKey && keys.includes(selectedKey)
-    const isValidValue = selectedValue && isValidKey && valuesForKey.includes(selectedValue)
+    const isValidKey = !!(selectedKey && keys.includes(selectedKey))
+    const isValidValue = !!(selectedValue && isValidKey && valuesForKey.includes(selectedValue))
+
     useEffect(() => {
         if (!data || isLoading) return
         if (selectedKey && !keys.includes(selectedKey)) {
             setSelectedKey(null)
             setSelectedValue(null)
-        }
-        else if (selectedValue && selectedKey && !valuesForKey.includes(selectedValue)) {
+        } else if (selectedValue && selectedKey && !valuesForKey.includes(selectedValue)) {
             setSelectedValue(null)
         }
     }, [data, isLoading, keys, valuesForKey, selectedKey, selectedValue, setSelectedKey, setSelectedValue])
 
-    if (isLoading) return <div>Cargando...</div>
+    useEffect(() => {
+        setIsMounted(true);
+    }, []);
+
+    if (!isMounted) {
+        return null;
+    }
+
+    if (isLoading) return <LoaderComponent />
     if (error) return <div>Error al cargar datos</div>
+
+    const noTags = (data && data.length === 0) || keys.length === 0
 
     return (
         <div className="space-y-2">
             <Popover open={openKey} onOpenChange={setOpenKey}>
                 <PopoverTrigger asChild>
-                    <Button
-                        variant="outline"
-                        role="combobox"
-                        aria-expanded={openKey}
-                        className="w-full justify-between bg-transparent"
-                    >
-                        {isValidKey ? selectedKey : "Selecciona una Key"}
+                    <Button variant="outline" role="combobox" aria-expanded={openKey} className="w-full justify-between bg-transparent">
+                        {noTags ? 'Sin tags para la región seleccionada' : (isValidKey ? selectedKey : 'Selecciona una Key')}
                         <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                     </Button>
                 </PopoverTrigger>
@@ -118,37 +120,42 @@ export const TagFilterComponent = ({
                     <Command>
                         <CommandInput placeholder="Buscar key..." />
                         <CommandList>
-                            <CommandEmpty>No hay keys.</CommandEmpty>
-                            <CommandGroup>
-                                <CommandItem
-                                    value="allKeys"
-                                    onSelect={() => {
-                                        setSelectedKey(null)
-                                        setSelectedValue(null)
-                                        setOpenKey(false)
-                                    }}
-                                >
-                                    <Check className={cn("mr-2 h-4 w-4", !selectedKey ? "opacity-100" : "opacity-0")} />
-                                    Todas las claves
-                                </CommandItem>
-                                {keys.map((key, idx) => (
+                            <CommandEmpty>{noTags ? 'No hay tags disponibles.' : 'No hay keys.'}</CommandEmpty>
+                            {!noTags && (
+                                <CommandGroup>
                                     <CommandItem
-                                        key={`${key}-${idx}`}
+                                        value="allKeys"
                                         onSelect={() => {
-                                            setSelectedKey(key)
+                                            setSelectedKey(null)
                                             setSelectedValue(null)
                                             setOpenKey(false)
+                                            onChange?.({ key: null, value: null })
                                         }}
                                     >
-                                        <Check className={cn("mr-2 h-4 w-4", selectedKey === key ? "opacity-100" : "opacity-0")} />
-                                        {key}
+                                        <Check className={cn("mr-2 h-4 w-4", !selectedKey ? "opacity-100" : "opacity-0")} />
+                                        Todas las claves
                                     </CommandItem>
-                                ))}
-                            </CommandGroup>
+                                    {keys.map((key, idx) => (
+                                        <CommandItem
+                                            key={`${key}-${idx}`}
+                                            onSelect={() => {
+                                                setSelectedKey(key)
+                                                setSelectedValue(null)
+                                                setOpenKey(false)
+                                                onChange?.({ key, value: null })
+                                            }}
+                                        >
+                                            <Check className={cn("mr-2 h-4 w-4", selectedKey === key ? "opacity-100" : "opacity-0")} />
+                                            {key}
+                                        </CommandItem>
+                                    ))}
+                                </CommandGroup>
+                            )}
                         </CommandList>
                     </Command>
                 </PopoverContent>
             </Popover>
+
             {isValidKey && (
                 <Popover open={openValue} onOpenChange={setOpenValue}>
                     <PopoverTrigger asChild>
@@ -167,6 +174,7 @@ export const TagFilterComponent = ({
                                         onSelect={() => {
                                             setSelectedValue(null)
                                             setOpenValue(false)
+                                            onChange?.({ key: selectedKey ?? null, value: null })
                                         }}
                                     >
                                         <Check className={cn("mr-2 h-4 w-4", !selectedValue ? "opacity-100" : "opacity-0")} />
@@ -178,6 +186,7 @@ export const TagFilterComponent = ({
                                             onSelect={() => {
                                                 setSelectedValue(value)
                                                 setOpenValue(false)
+                                                onChange?.({ key: selectedKey ?? null, value })
                                             }}
                                         >
                                             <Check className={cn("mr-2 h-4 w-4", selectedValue === value ? "opacity-100" : "opacity-0")} />

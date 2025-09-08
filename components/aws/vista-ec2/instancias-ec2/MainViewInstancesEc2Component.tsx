@@ -1,4 +1,4 @@
-import { FiltersComponent } from '@/components/general/FiltersComponent'
+import { FiltersComponent } from '@/components/general/filters/FiltersComponent'
 import { InstanceEc2CpuMetricsComponent } from './InstanceEc2CpuMetricsComponent'
 import { Download, Filter, Server } from 'lucide-react'
 import { Button } from '@/components/ui/button'

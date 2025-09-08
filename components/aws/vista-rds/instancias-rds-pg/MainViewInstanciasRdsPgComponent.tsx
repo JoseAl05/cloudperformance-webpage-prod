@@ -1,4 +1,4 @@
-import { FiltersComponent } from '@/components/general/FiltersComponent'
+import { FiltersComponent } from '@/components/general/filters/FiltersComponent'
 import { InstanciasRdsPgChartComponent } from './InstanciasRdsPgChartComponent'
 import { Database } from 'lucide-react'
 

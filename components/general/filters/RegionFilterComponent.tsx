@@ -16,7 +16,6 @@ import {
     PopoverContent,
     PopoverTrigger,
 } from '@/components/ui/popover';
-
 import { aws_regions } from '@/lib/aws_regions';
 
 interface RegionFilterComponentProps {
@@ -33,12 +32,8 @@ export const RegionFilterComponent = ({
     const [open, setOpen] = useState(false);
 
     const getDisplayText = () => {
-        if (!selectedRegion || selectedRegion.trim() === '') {
-            return 'Selecciona región';
-        }
-        if (selectedRegion === 'all_regions') {
-            return 'Todas las Regiones';
-        }
+        if (!selectedRegion || selectedRegion.trim() === '') return 'Selecciona región';
+        if (selectedRegion === 'all_regions') return 'Todas las Regiones';
         const regionArray = selectedRegion.split(',').filter((s) => s.trim() !== '');
         if (regionArray.length === 1) {
             const found = aws_regions.find((r) => r.value === regionArray[0]);
@@ -54,14 +49,12 @@ export const RegionFilterComponent = ({
             regionArray = ['all_regions'];
         } else {
             regionArray = regionArray.filter((r) => r !== 'all_regions');
-
             if (regionArray.includes(regionValue)) {
                 regionArray = regionArray.filter((r) => r !== regionValue);
             } else {
                 regionArray.push(regionValue);
             }
         }
-
         setSelectedRegion(regionArray.length ? regionArray.join(',') : 'all_regions');
     };
 
@@ -70,12 +63,7 @@ export const RegionFilterComponent = ({
     return !isRegionMultiSelect ? (
         <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
-                <Button
-                    variant="outline"
-                    role="combobox"
-                    aria-expanded={open}
-                    className="w-full justify-between bg-transparent"
-                >
+                <Button variant="outline" role="combobox" aria-expanded={open} className="w-full justify-between bg-transparent">
                     {getDisplayText()}
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
@@ -95,12 +83,7 @@ export const RegionFilterComponent = ({
                                         setOpen(false);
                                     }}
                                 >
-                                    <Check
-                                        className={cn(
-                                            'mr-2 h-4 w-4',
-                                            selectedRegion === region.value ? 'opacity-100' : 'opacity-0'
-                                        )}
-                                    />
+                                    <Check className={cn('mr-2 h-4 w-4', selectedRegion === region.value ? 'opacity-100' : 'opacity-0')} />
                                     {region.label}
                                 </CommandItem>
                             ))}
@@ -112,12 +95,7 @@ export const RegionFilterComponent = ({
     ) : (
         <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
-                <Button
-                    variant="outline"
-                    role="combobox"
-                    aria-expanded={open}
-                    className="w-[250px] justify-between"
-                >
+                <Button variant="outline" role="combobox" aria-expanded={open} className="w-[250px] justify-between">
                     {getDisplayText()}
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
@@ -127,29 +105,16 @@ export const RegionFilterComponent = ({
                     <CommandInput placeholder="Buscar región..." />
                     <CommandEmpty>No se encontró la región.</CommandEmpty>
                     <CommandGroup className="max-h-[200px] overflow-y-auto">
-                        <CommandItem
-                            value="all_regions"
-                            onSelect={() => handleRegionToggle('all_regions')}
-                        >
-                            <Check
-                                className={`mr-2 h-4 w-4 ${selectedRegion === 'all_regions' ? 'opacity-100' : 'opacity-0'
-                                    }`}
-                            />
+                        <CommandItem value="all_regions" onSelect={() => handleRegionToggle('all_regions')}>
+                            <Check className={`mr-2 h-4 w-4 ${selectedRegion === 'all_regions' ? 'opacity-100' : 'opacity-0'}`} />
                             Todas las Regiones
                         </CommandItem>
                         {aws_regions
                             .filter((r) => r.value !== 'all_regions')
                             .map((region) => (
-                                <CommandItem
-                                    key={region.value}
-                                    value={region.value}
-                                    onSelect={() => handleRegionToggle(region.value)}
-                                >
+                                <CommandItem key={region.value} value={region.value} onSelect={() => handleRegionToggle(region.value)}>
                                     <Check
-                                        className={`mr-2 h-4 w-4 ${selectedRegionArray.includes(region.value)
-                                            ? 'opacity-100'
-                                            : 'opacity-0'
-                                            }`}
+                                        className={`mr-2 h-4 w-4 ${selectedRegionArray.includes(region.value) ? 'opacity-100' : 'opacity-0'}`}
                                     />
                                     {region.label}
                                 </CommandItem>

@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState, useMemo } from "react"
 import * as echarts from "echarts"
 import { TableComponentTop } from "@/components/aws/vista-funciones/tables/TopTableComponent"
 import { Card, CardContent, CardTitle, CardHeader } from '@/components/ui/card'
+import { LoaderComponent } from '@/components/general/LoaderComponent'
 
 
 const fetcher = (url: string) =>
@@ -205,7 +206,7 @@ export const TopDolarRegionComponent = ({ startDate, endDate }: TopDolaresRegion
     }, [topDolaresRegion, tipoCosto, topLimit, selectedRegion]);
 
 
-  if (isLoading) return <p>Cargando...</p>
+  if (isLoading) return <LoaderComponent />
   if (error) return <p>Error cargando los datos.</p>
 
 return (

@@ -47,19 +47,21 @@ export const Ec2ResourceConsumeViewUsageCreditsComponent = ({ data }: Ec2Resourc
     const chartInstance = useRef<echarts.ECharts | null>(null);
     const resizeObserverRef = useRef<ResizeObserver | null>(null);
 
+    const safeData = Array.isArray(data) ? data : [];
+
     const { creditsUsageMetric, creditsBalanceMetric, yMaxRounded } = useMemo(() => {
-        const creditsUsageData = data?.filter(item => item.CpuCreditUsageValue) || [];
+        const creditsUsageData = safeData.filter(item => typeof item.CpuCreditUsageValue === 'number');
         creditsUsageData.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
         const creditsUsageMetric: [string, number][] = creditsUsageData.map(item => [item.timestamp, +item.CpuCreditUsageValue.toFixed(2)]);
 
-        const creditsBalanceData = data?.filter(item => item.CpuCreditBalanceValue) || [];
+        const creditsBalanceData = safeData.filter(item => typeof item.CpuCreditBalanceValue === 'number');
         creditsBalanceData.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
         const creditsBalanceMetric: [string, number][] = creditsBalanceData.map(item => [item.timestamp, +item.CpuCreditBalanceValue.toFixed(2)]);
 
         const maxCreditsValue = creditsBalanceData.length ? Math.max(...creditsBalanceData.map(item => item.CpuCreditBalanceValue)) : 0;
         const yMaxRaw = Math.ceil(maxCreditsValue * 1.5);
         const factor = 100;
-        const yMaxRounded = Math.floor(yMaxRaw / factor) * factor;
+        const yMaxRounded = Math.max(10, Math.floor(yMaxRaw / factor) * factor);
 
         return { creditsUsageMetric, creditsBalanceMetric, yMaxRounded };
     }, [data]);
@@ -196,6 +198,8 @@ export const Ec2ResourceConsumeViewUsageCreditsComponent = ({ data }: Ec2Resourc
         };
     }, [creditsUsageMetric, creditsBalanceMetric, yMaxRounded, handleResize]);
 
+    const isEmpty = safeData.length === 0;
+
     return (
         <Card className="w-full">
             <CardHeader>
@@ -208,7 +212,13 @@ export const Ec2ResourceConsumeViewUsageCreditsComponent = ({ data }: Ec2Resourc
                         Las marcas de tiempo (Timestamps) están en formato <strong>UTC</strong>.
                     </p>
                 </div>
-                <div ref={chartRef} className="w-full h-[400px] md:h-[450px] lg:h-[500px]" />
+                {isEmpty ? (
+                    <div className="w-full h-[200px] flex items-center justify-center">
+                        <p className="text-sm text-muted-foreground">No hay métricas de créditos disponibles.</p>
+                    </div>
+                ) : (
+                    <div ref={chartRef} className="w-full h-[400px] md:h-[450px] lg:h-[500px]" />
+                )}
             </CardContent>
         </Card>
     );

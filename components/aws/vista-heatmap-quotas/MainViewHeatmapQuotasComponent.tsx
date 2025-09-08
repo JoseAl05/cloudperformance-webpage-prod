@@ -1,4 +1,4 @@
-import { FiltersComponent } from '@/components/general/FiltersComponent'
+import { FiltersComponent } from '@/components/general/filters/FiltersComponent'
 import { HeatmapQuotasComponent } from './HeatmapQuotasComponent'
 
 export const MainViewHeatmapQuotasComponent = () => {

@@ -1,11 +1,11 @@
-import { MainViewConsume } from '@/components/aws/vista-consumos/MainViewConsume';
+import { MainViewConsumeAsgComponent } from '@/components/aws/vista-consumos/ec2/asg/MainViewConsumeAsgComponent';
 import { Suspense } from 'react';
 
-export default function DashboardAwsConsumePage() {
+export default function DashboardAwsAsgEc2ConsumePage() {
     return (
         <div className=''>
             <Suspense fallback={<div>Cargando...</div>}>
-                <MainViewConsume />
+                <MainViewConsumeAsgComponent />
             </Suspense>
         </div>
     )

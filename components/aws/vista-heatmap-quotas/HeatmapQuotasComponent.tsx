@@ -2,6 +2,7 @@
 import useSWR from 'swr'
 import React, { useEffect, useRef, useMemo, useCallback } from "react"
 import * as echarts from "echarts"
+import { LoaderComponent } from '@/components/general/LoaderComponent'
 
 const fetcher = (url: string) =>
     fetch(url, {
@@ -209,7 +210,7 @@ export const HeatmapQuotasComponent = ({ startDate, endDate }: HeatmapQuotasComp
     console.log(`START DATE: ${startDate.toISOString().replace('Z', '').slice(0, -4)}`);
     console.log(`END DATE: ${endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : ''}`);
 
-    if (isLoading) return <div>Cargando...</div>
+    if (isLoading) return <LoaderComponent />
     if (error) return <div>Error al cargar datos</div>
     return (
         <div>

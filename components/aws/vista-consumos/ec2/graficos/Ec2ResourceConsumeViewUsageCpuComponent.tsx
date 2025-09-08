@@ -47,19 +47,21 @@ export const Ec2ResourceConsumeViewUsageCpuComponent = ({ data }: Ec2ResourceCon
   const chartInstance = useRef<echarts.ECharts | null>(null);
   const resizeObserverRef = useRef<ResizeObserver | null>(null);
 
-  const { totalData, usedData, unusedData, umbralCpu, yMaxRounded } = useMemo(() => {
-    const sortedData = data.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+  const safeData = Array.isArray(data) ? data : [];
+
+  const { totalData, usedData, unusedData, yMaxRounded } = useMemo(() => {
+    const sortedData = [...safeData].sort((a, b) => new Date((a as unknown).timestamp ?? a.Timestamp).getTime() - new Date((b as unknown).timestamp ?? b.Timestamp).getTime());
 
     const totalData: [string, number][] = sortedData.map(item => [item.timestamp, item.total_cpu]);
     const usedData: [string, number][] = sortedData.map(item => [item.timestamp, item.used_cpu]);
     const unusedData: [string, number][] = sortedData.map(item => [item.timestamp, item.unused_cpu]);
-    const umbralCpu: [string, number][] = sortedData.map(item => [item.timestamp, (90 * item.total_cpu) / 100]);
+    // const umbralCpu: [string, number][] = sortedData.map(item => [item.timestamp, (90 * item.total_cpu) / 100]);
 
     const maxTotalValue = totalData.length ? Math.max(...totalData.map(item => item[1])) : 0;
     const yMaxRaw = Math.ceil(maxTotalValue * 1.5);
     const yMaxRounded = Math.floor(yMaxRaw / 1) * 1;
 
-    return { totalData, usedData, unusedData, umbralCpu, yMaxRounded };
+    return { totalData, usedData, unusedData, yMaxRounded };
   }, [data]);
 
   const handleResize = useCallback(() => {
@@ -94,7 +96,7 @@ export const Ec2ResourceConsumeViewUsageCpuComponent = ({ data }: Ec2ResourceCon
         }
       },
       legend: {
-        data: ['Total', 'Used', 'Unused', 'Umbral Crítico'],
+        data: ['Total', 'Usado', 'No Usado'],
         top: 10,
         left: 'center',
         animation: false,
@@ -169,10 +171,9 @@ export const Ec2ResourceConsumeViewUsageCpuComponent = ({ data }: Ec2ResourceCon
       },
       series: [
         createSeries('Total', totalData, '#36A2EB', 'rgba(54, 162, 235, 0.3)'),
-        createSeries('Used', usedData, '#28e995'),
-        createSeries('Umbral Crítico', umbralCpu, '#ef0000'),
+        createSeries('Usado', usedData, '#28e995'),
         {
-          ...createSeries('Unused', unusedData, '#FF6384'),
+          ...createSeries('No Usado', unusedData, '#FF6384'),
           markPoint: {
             data: unusedData
               .map(([timestamp, value]) =>
@@ -206,7 +207,9 @@ export const Ec2ResourceConsumeViewUsageCpuComponent = ({ data }: Ec2ResourceCon
       resizeObserverRef.current?.disconnect();
       chartInstance.current?.dispose();
     };
-  }, [totalData, usedData, unusedData, umbralCpu, yMaxRounded, handleResize]);
+  }, [totalData, usedData, unusedData, yMaxRounded, handleResize]);
+
+  const isEmpty = totalData.length === 0;
 
   return (
     <Card className="w-full">
@@ -220,7 +223,13 @@ export const Ec2ResourceConsumeViewUsageCpuComponent = ({ data }: Ec2ResourceCon
             Las marcas de tiempo (Timestamps) están en formato <strong>UTC</strong>.
           </p>
         </div>
-        <div ref={chartRef} className="w-full h-[400px] md:h-[450px] lg:h-[500px]" />
+        {isEmpty ? (
+          <div className="w-full h-[200px] flex items-center justify-center">
+            <p className="text-sm text-muted-foreground">No hay métricas de CPU disponibles.</p>
+          </div>
+        ) : (
+          <div ref={chartRef} className="w-full h-[400px] md:h-[450px] lg:h-[500px]" />
+        )}
       </CardContent>
     </Card>
   );

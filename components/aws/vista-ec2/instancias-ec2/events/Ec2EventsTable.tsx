@@ -12,7 +12,6 @@ interface Ec2EventsTableComponentProps {
 
 export const Ec2EventsTableComponent = ({ data, startDate, endDate, instance }: Ec2EventsTableComponentProps) => {
     const eventsColumns = createColumns(awsEventColumns);
-    console.log(data.data);
     return (
         <Card>
             <CardHeader className="border-b">
@@ -30,10 +29,15 @@ export const Ec2EventsTableComponent = ({ data, startDate, endDate, instance }: 
             <CardContent>
                 <DataTableSingle
                     columns={eventsColumns}
-                    data={data.data}
+                    data={Array.isArray(data?.data) ? data.data : []}
                     filterColumn='EventName'
                     filterPlaceholder='Buscar Evento...'
                 />
+                {(!data || !Array.isArray(data.data) || data.data.length === 0) && (
+                    <div className="text-center text-gray-500 py-6">
+                        No hay eventos disponibles para mostrar.
+                    </div>
+                )}
                 <div className="border-t bg-muted/50 px-6 py-4">
                     <div className="flex items-center justify-between">
                         {

@@ -1,9 +1,25 @@
-'use client'
-import { FiltersComponent } from '@/components/general/FiltersComponent'
-import { ChartLine } from 'lucide-react'
-import { AsgConsumeComponent } from './AsgConsumeComponent'
+import { FiltersComponent } from '@/components/general/filters/FiltersComponent';
+import { ChartLine } from 'lucide-react';
+import { RdsPgInstancesConsumeComponent } from './RdsPgInstancesConsumeComponent';
 
-export const MainViewConsumeAsgComponent = () => {
+interface MainViewConsumeRdsComponentProps {
+    rdsType: string;
+}
+
+export const MainViewConsumeRdsComponent = ({ rdsType }: MainViewConsumeRdsComponentProps) => {
+    let instancesService = '';
+    let collection = '';
+    let tagColumnName = '';
+
+    switch (rdsType) {
+        case 'postgresql':
+            instancesService = 'rds-pg';
+            collection = 'aws_rds_postgresql';
+            tagColumnName = 'TagList';
+            break;
+        default:
+            break;
+    }
 
     return (
         <div className='w-full min-w-0 space-y-4'>
@@ -16,7 +32,7 @@ export const MainViewConsumeAsgComponent = () => {
                             </div>
                             <div>
                                 <h1 className='text-3xl font-bold text-gray-900 dark:text-gray-100'>
-                                    Autoscaling Groups
+                                    Consumo/No Consumo Instancias RDS Postgresql
                                 </h1>
                             </div>
                         </div>
@@ -25,15 +41,15 @@ export const MainViewConsumeAsgComponent = () => {
             </div>
             <div className='w-full min-w-0'>
                 <FiltersComponent
-                    Component={AsgConsumeComponent}
+                    Component={RdsPgInstancesConsumeComponent}
                     dateFilter
                     regionFilter
                     instancesFilter
-                    instancesService='asg'
+                    instancesService={instancesService}
                     isInstanceMultiSelect
                     tagsFilter
-                    collection='aws_auto_scaling_groups'
-                    tagColumnName='Tags'
+                    collection={collection}
+                    tagColumnName={tagColumnName}
                 />
             </div>
         </div>

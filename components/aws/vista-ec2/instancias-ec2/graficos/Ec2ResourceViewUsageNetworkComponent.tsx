@@ -430,7 +430,11 @@ export const Ec2ResourceViewUsageNetworkComponent = ({ data }: ResourceViewUsage
                         Las marcas de tiempo (Timestamps) están en formato <strong>UTC</strong>.
                     </p>
                 </div>
-                <div ref={chartRef} className="w-full h-[400px] md:h-[450px] lg:h-[500px]" />
+                {(!data || data.metrics_data.length === 0) ? (
+                    <div className="text-center text-gray-500 py-6">No hay métricas de Red disponibles.</div>
+                ) : (
+                    <div ref={chartRef} className="w-full h-[400px] md:h-[450px] lg:h-[500px]" />
+                )}
             </CardContent>
         </Card>
     );

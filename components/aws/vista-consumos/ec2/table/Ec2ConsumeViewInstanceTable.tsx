@@ -63,6 +63,8 @@ export const Ec2ConsumeViewInstanceTable = ({
         );
     }
 
+    const isEmpty = tableData.length === 0;
+
     return (
         <Card>
             <CardHeader className="border-b">
@@ -91,6 +93,11 @@ export const Ec2ConsumeViewInstanceTable = ({
                     enableGrouping={enableGrouping}
                     groupByColumn='resource'
                 />
+                {isEmpty && (
+                    <div className="mt-6 flex items-center justify-center">
+                        <p className="text-sm text-muted-foreground">No hay registros para mostrar.</p>
+                    </div>
+                )}
                 <div className="border-t bg-muted/50 px-6 py-4">
                     <div className="flex items-center justify-between">
                         {tableData.length > 0 && (

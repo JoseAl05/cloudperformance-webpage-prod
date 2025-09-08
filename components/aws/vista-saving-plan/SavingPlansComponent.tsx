@@ -14,6 +14,7 @@ import {
   DialogDescription,
   DialogTrigger
 } from "@/components/ui/dialog";
+import { LoaderComponent } from '@/components/general/LoaderComponent'
 
 
 const fetcher = (url: string) =>
@@ -240,7 +241,7 @@ export const SavingPlansViewComponent = ({ startDate, endDate }: SavingPlansComp
     };
   }, [costUsage, startDate, endDate]);
 
-  if (isLoading) return <p>Cargando...</p>
+  if (isLoading) return <LoaderComponent />
   if (error) return <p>Error cargando los datos.</p>
 
 
