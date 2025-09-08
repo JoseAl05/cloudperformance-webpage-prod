@@ -15,7 +15,8 @@ interface AsgInstancesFilterComponentProps {
     region: string,
     startDate: string,
     endDate: string,
-    isInstanceMultiSelect: boolean
+    isInstanceMultiSelect: boolean,
+    isInstancesService?: string
 }
 
 const fetcher = (url: string) =>
@@ -28,18 +29,28 @@ const fetcher = (url: string) =>
     }).then(res => res.json());
 
 export const AsgInstancesFilterComponent = ({
-    asg, asgInstance, setAsgInstance, startDate, endDate, region, isInstanceMultiSelect
+    asg, asgInstance, setAsgInstance, startDate, endDate, region, isInstanceMultiSelect, isInstancesService
 }: AsgInstancesFilterComponentProps) => {
     const [open, setOpen] = useState(false);
 
     const shouldFetch = !!asg && !!region
-
-    const url = shouldFetch
-        ? `${process.env.NEXT_PUBLIC_API_URL}/autoscaling/all-asg-instances-ec2?date_from=${startDate}&date_to=${endDate}&region=${region}&autoscaling_group=${encodeURIComponent(asg)}`
-        : null
+    let url = '';
+    switch (isInstancesService) {
+        case 'infraUsed':
+            url = shouldFetch ? `${process.env.NEXT_PUBLIC_API_URL}/autoscaling/all-asg-instances-ec2?date_from=${startDate}&date_to=${endDate}&region=${region}&autoscaling_group=${encodeURIComponent(asg)}` : null;
+            break;
+        default:
+            url = shouldFetch
+                ? `${process.env.NEXT_PUBLIC_API_URL}/autoscaling/all-asg-instances-ec2?date_from=${startDate}&date_to=${endDate}&region=${region}&autoscaling_group=${encodeURIComponent(asg)}`
+                : null;
+            break;
+    }
+    // const url = shouldFetch
+    //     ? `${process.env.NEXT_PUBLIC_API_URL}/autoscaling/all-asg-instances-ec2?date_from=${startDate}&date_to=${endDate}&region=${region}&autoscaling_group=${encodeURIComponent(asg)}`
+    //     : null
 
     const { data, error, isLoading } = useSWR<string[]>(url, fetcher);
-
+    console.log(data);
     // normalizar selección si la lista queda vacía
     useEffect(() => {
         if (!isLoading && !error && shouldFetch) {
@@ -67,7 +78,7 @@ export const AsgInstancesFilterComponent = ({
 
     const handleInstanceToggle = (val: string) => {
         const curr = selectedArray.slice();
-        if(val === 'all' && asg !== 'all'){
+        if (val === 'all' && asg !== 'all') {
             console.log(list.toString());
             setAsgInstance(list.toString());
             return;

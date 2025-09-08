@@ -36,11 +36,12 @@ export const MainViewInfrautilizadasComponent = () => {
           // instancesFilter
           // instancesService="infraUsed"
           // isInstanceMultiSelect
+          instancesService='infraUsed'
           regionFilter
           asgFilter
           isAsgMultiSelect
           isAsgInstanceMultiSelect
-          
+
         />
       </div>
     </div>

@@ -20,7 +20,8 @@ interface AsgFilterComponentProps {
     selectedKey: string,
     selectedValue: string,
     isAsgMultiSelect: boolean,
-    isAsgInstanceMultiselect: boolean
+    isAsgInstanceMultiselect: boolean,
+    isInstancesService?: string
 }
 
 const fetcherPost = (url: string, tags: { Key: string; Value: string } | null = null) =>
@@ -36,7 +37,7 @@ const fetcherPost = (url: string, tags: { Key: string; Value: string } | null = 
 export const AsgFilterComponent = ({
     asg, asgInstance, setAsg, setAsgInstance,
     startDate, endDate, region, selectedKey, selectedValue,
-    isAsgMultiSelect, isAsgInstanceMultiselect
+    isAsgMultiSelect, isAsgInstanceMultiselect, isInstancesService
 }: AsgFilterComponentProps) => {
     const [open, setOpen] = useState(false);
 
@@ -142,6 +143,7 @@ export const AsgFilterComponent = ({
                 endDate={endDateFormatted}
                 region={region}
                 isInstanceMultiSelect={isAsgInstanceMultiselect}
+                isInstancesService={isInstancesService}
             />
         </div>
     )
