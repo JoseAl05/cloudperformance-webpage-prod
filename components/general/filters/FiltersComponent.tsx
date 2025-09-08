@@ -331,6 +331,7 @@ export const FiltersComponent = ({
                                     selectedValue={tempValue ?? ''}
                                     isAsgMultiSelect={isAsgMultiSelect}
                                     isAsgInstanceMultiselect={isAsgInstanceMultiSelect}
+                                    isInstancesService={instancesService}
                                 />
                             </div>
                         )}
