@@ -1,8 +1,9 @@
 'use client'
 import { Badge } from '@/components/ui/badge';
 import { DynamicColumn } from '@/components/general/data-table/columns';
-import { useSearchParams } from 'next/navigation';
+import { RdsConsumeViewInstance } from '@/interfaces/vista-consumos/rdsPgConsumeViewInterfaces';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 
 const DateParams = () => {
     const searchParams = useSearchParams();
@@ -13,18 +14,40 @@ const DateParams = () => {
     return { startDateParam: startDateParam, endDateParam: endDateParam }
 }
 
-export const Ec2ConsumeViewInstanceColumns: DynamicColumn<Ec2ConsumneViewInstance>[] = [
+const InstancesServiceParam = () => {
+    const searchParams = useSearchParams();
+
+    const instancesServiceParam = searchParams.get('instanceService');
+
+    return { instancesServiceParam }
+}
+
+
+export const RdsConsumeViewInstanceColumns: DynamicColumn<RdsConsumeViewInstance>[] = [
     {
         header: "ID Instancia",
         accessorKey: "resource",
         cell: (info) => {
             const value = info.getValue() as string;
             const startDate = DateParams().startDateParam;
-            const endDate = DateParams().endDateParam
+            const endDate = DateParams().endDateParam;
+            let pathname = '';
+
+            switch (InstancesServiceParam().instancesServiceParam) {
+                case 'postgresql':
+                    pathname = '/aws/recursos/instancias-rds-pg';
+                    break;
+                case 'mysql':
+                    pathname = '/aws/recursos/instancias-rds-mysql';
+                    break;
+                default:
+                    break;
+            }
+
             return (
                 <div className="font-medium">
                     <Link
-                        href={{ pathname: '/aws/recursos/instancias-ec2', query: { instance: value, startDate: startDate, endDate: endDate } }}
+                        href={{ pathname: pathname, query: { instance: value, startDate: startDate, endDate: endDate } }}
                         rel="noopener noreferrer"
                         target="_blank"
                     >
@@ -37,15 +60,6 @@ export const Ec2ConsumeViewInstanceColumns: DynamicColumn<Ec2ConsumneViewInstanc
         }
     },
     {
-        header: "Tipo",
-        accessorKey: "resource_type",
-        cell: (info) => (
-            <div className="text-sm text-muted-foreground">
-                {info.getValue() as string}
-            </div>
-        )
-    },
-    {
         header: "Sync Time",
         accessorKey: "metric_sync_time",
         cell: (info) => {
@@ -56,6 +70,24 @@ export const Ec2ConsumeViewInstanceColumns: DynamicColumn<Ec2ConsumneViewInstanc
                 </div>
             );
         }
+    },
+    {
+        header: "Engine",
+        accessorKey: "engine",
+        cell: (info) => (
+            <div className="text-sm text-muted-foreground">
+                {info.getValue() as string}
+            </div>
+        )
+    },
+    {
+        header: "Versión Engine",
+        accessorKey: "engine_version",
+        cell: (info) => (
+            <div className="text-sm text-muted-foreground">
+                {info.getValue() as string}
+            </div>
+        )
     },
     {
         header: "Eficiencia",

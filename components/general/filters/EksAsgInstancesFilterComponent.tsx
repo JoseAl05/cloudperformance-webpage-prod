@@ -8,15 +8,14 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import useSWR from 'swr'
 import { LoaderComponent } from '../LoaderComponent'
 
-interface AsgInstancesFilterComponentProps {
-    asg: string,
-    asgInstance: string,
-    setAsgInstance: Dispatch<SetStateAction<string>>,
+interface EksAsgInstancesFilterComponentProps {
+    eksAsg: string,
+    eksAsgInstance: string,
+    setEksAsgInstance: Dispatch<SetStateAction<string>>,
     region: string,
     startDate: string,
     endDate: string,
-    isInstanceMultiSelect: boolean,
-    isInstancesService?: string
+    isInstanceMultiselect: boolean
 }
 
 const fetcher = (url: string) =>
@@ -28,36 +27,42 @@ const fetcher = (url: string) =>
         }
     }).then(res => res.json());
 
-export const AsgInstancesFilterComponent = ({
-    asg, asgInstance, setAsgInstance, startDate, endDate, region, isInstanceMultiSelect, isInstancesService
-}: AsgInstancesFilterComponentProps) => {
+export const EksAsgInstancesFilterComponent = ({
+    eksAsg,
+    eksAsgInstance,
+    setEksAsgInstance,
+    startDate,
+    endDate,
+    region,
+    isEksAsgInstanceMultiselect
+}: EksAsgInstancesFilterComponentProps) => {
     const [open, setOpen] = useState(false);
 
-    const shouldFetch = !!asg && !!region
-    let url = '';
-    switch (isInstancesService) {
-        case 'infraUsed':
-            url = shouldFetch ? `${process.env.NEXT_PUBLIC_API_URL}/autoscaling/all-asg-instances-ec2?date_from=${startDate}&date_to=${endDate}&region=${region}&autoscaling_group=${encodeURIComponent(asg)}` : null;
-            break;
-        default:
-            url = shouldFetch
-                ? `${process.env.NEXT_PUBLIC_API_URL}/autoscaling/all-asg-instances-ec2?date_from=${startDate}&date_to=${endDate}&region=${region}&autoscaling_group=${encodeURIComponent(asg)}`
-                : null;
-            break;
-    }
-    // const url = shouldFetch
-    //     ? `${process.env.NEXT_PUBLIC_API_URL}/autoscaling/all-asg-instances-ec2?date_from=${startDate}&date_to=${endDate}&region=${region}&autoscaling_group=${encodeURIComponent(asg)}`
-    //     : null
+    const shouldFetch = !!eksAsg && !!region
+    // let url = '';
+    // switch (isInstancesService) {
+    //     case 'infraUsed':
+    //         url = shouldFetch ? `${process.env.NEXT_PUBLIC_API_URL}/autoscaling/all-asg-instances-ec2?date_from=${startDate}&date_to=${endDate}&region=${region}&autoscaling_group=${encodeURIComponent(asg)}` : null;
+    //         break;
+    //     default:
+    //         url = shouldFetch
+    //             ? `${process.env.NEXT_PUBLIC_API_URL}/autoscaling/all-asg-instances-ec2?date_from=${startDate}&date_to=${endDate}&region=${region}&autoscaling_group=${encodeURIComponent(asg)}`
+    //             : null;
+    //         break;
+    // }
+    const url = shouldFetch
+        ? `${process.env.NEXT_PUBLIC_API_URL}/eks/all-eks-asg-instances-ec2?date_from=${startDate}&date_to=${endDate}&region=${region}&autoscaling_group=${encodeURIComponent(asg)}`
+        : null
 
     const { data, error, isLoading } = useSWR<string[]>(url, fetcher);
-    // normalizar selección si la lista queda vacía
+    console.log(data);
     useEffect(() => {
         if (!isLoading && !error && shouldFetch) {
             if (!Array.isArray(data) || data.length === 0) {
-                setAsgInstance('');
+                setEksAsgInstance('');
             }
         }
-    }, [data, isLoading, error, shouldFetch, setAsgInstance]);
+    }, [data, isLoading, error, shouldFetch, setEksAsgInstance]);
 
 
     if (isLoading) return <LoaderComponent size='small' />
@@ -66,35 +71,29 @@ export const AsgInstancesFilterComponent = ({
     const list: string[] = Array.isArray(data) ? data : []
     const noInstances = shouldFetch && list.length === 0
 
-    const selectedArray = asgInstance ? asgInstance.split(',').filter(Boolean) : [];
+    const selectedArray = eksAsgInstance ? eksAsgInstance.split(',').filter(Boolean) : [];
     const getDisplayText = () => {
         if (noInstances) return 'Sin instancias para el ASG seleccionado';
-        if (!asgInstance || (!isInstanceMultiSelect && asgInstance === 'all')) return 'Seleccione una instancia';
-        if (isInstanceMultiSelect && selectedArray.includes('all')) return 'Todas las Instancias';
+        if (!eksAsgInstance || (!isInstanceMultiSelect && eksAsgInstance === 'all')) return 'Seleccione una instancia';
+        if (isEksAsgInstanceMultiselect && selectedArray.includes('all')) return 'Todas las Instancias';
         if (selectedArray.length === 1) return selectedArray[0];
         return `${selectedArray.length} instancias seleccionadas`;
     };
 
     const handleInstanceToggle = (val: string) => {
         const curr = selectedArray.slice();
-        if (val === 'all' && asg !== 'all') {
+        if (val === 'all' && eksAsg !== 'all') {
             setAsgInstance(list.toString());
             return;
         }
         if (val === 'all') {
-            setAsgInstance('all');
+            setEksAsgInstance('all');
             return;
-        }
-        if (val !== 'all' && asg === 'all'){
-            if(curr.includes('all')){
-                const idx = curr.indexOf('all');
-                curr.splice(idx, 1);
-            }
         }
         const idx = curr.indexOf(val);
         if (idx >= 0) curr.splice(idx, 1);
         else curr.push(val);
-        setAsgInstance(curr.length ? curr.join(',') : '');
+        setEksAsgInstance(curr.length ? curr.join(',') : '');
     };
 
     return (
@@ -121,7 +120,7 @@ export const AsgInstancesFilterComponent = ({
                             <CommandEmpty>{noInstances ? 'No hay instancias disponibles.' : 'No se encontró instancia.'}</CommandEmpty>
                             {!noInstances && shouldFetch && (
                                 <CommandGroup className='max-h-[200px] overflow-y-auto'>
-                                    {isInstanceMultiSelect && (
+                                    {isEksAsgInstanceMultiselect && (
                                         <CommandItem value='all' onSelect={() => handleInstanceToggle('all')}>
                                             <Check className={cn('mr-2 h-4 w-4', selectedArray.includes('all') ? 'opacity-100' : 'opacity-0')} />
                                             Todas las Instancias
@@ -129,13 +128,13 @@ export const AsgInstancesFilterComponent = ({
                                     )}
                                     {list.map((i) => (
                                         <CommandItem key={i} value={i} onSelect={() => {
-                                            if (isInstanceMultiSelect) handleInstanceToggle(i)
+                                            if (isEksAsgInstanceMultiselect) handleInstanceToggle(i)
                                             else {
-                                                setAsgInstance(i)
+                                                setEksAsgInstance(i)
                                                 setOpen(false)
                                             }
                                         }}>
-                                            <Check className={cn('mr-2 h-4 w-4', isInstanceMultiSelect ? (selectedArray.includes(i) ? 'opacity-100' : 'opacity-0') : (asgInstance === i ? 'opacity-100' : 'opacity-0'))} />
+                                            <Check className={cn('mr-2 h-4 w-4', isEksAsgInstanceMultiselect ? (selectedArray.includes(i) ? 'opacity-100' : 'opacity-0') : (eksAsgInstance === i ? 'opacity-100' : 'opacity-0'))} />
                                             {i}
                                         </CommandItem>
                                     ))}

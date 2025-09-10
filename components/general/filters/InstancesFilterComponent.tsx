@@ -56,6 +56,18 @@ export const InstancesFilterComponent = ({
         case 'rds-pg':
             url = `${process.env.NEXT_PUBLIC_API_URL}/db/all-instances-rds-pg?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`;
             break;
+        case 'rds-mysql':
+            url = `${process.env.NEXT_PUBLIC_API_URL}/db/all-instances-rds-mysql?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`;
+            break;
+        case 'rds-oracle':
+            url = `${process.env.NEXT_PUBLIC_API_URL}/db/all-instances-rds-oracle?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`;
+            break;
+        case 'rds-sqlserver':
+            url = `${process.env.NEXT_PUBLIC_API_URL}/db/all-instances-rds-sqlserver?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`;
+            break;
+        case 'rds-mariadb':
+            url = `${process.env.NEXT_PUBLIC_API_URL}/db/all-instances-rds-mariadb?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`;
+            break;
         case 'asg':
             url = `${process.env.NEXT_PUBLIC_API_URL}/autoscaling/all-autoscaling-groups?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`;
             break;
@@ -82,7 +94,7 @@ export const InstancesFilterComponent = ({
     }, [data, isLoading, error, shouldFetch, setInstance]);
 
 
-    if (isLoading) return <LoaderComponent />
+    if (isLoading) return <LoaderComponent size='small'/>
     if (error) return <div>Error al cargar datos</div>
 
     const list: string[] = Array.isArray(data) ? data : []
@@ -115,8 +127,16 @@ export const InstancesFilterComponent = ({
     return !isInstanceMultiSelect ? (
         <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
-                <Button variant='outline' role='combobox' aria-expanded={open} className='w-full justify-between bg-transparent' disabled={noInstances || !shouldFetch}>
-                    {getDisplayText()}
+                <Button
+                    variant='outline'
+                    role='combobox'
+                    aria-expanded={open}
+                    className='w-full justify-between bg-transparent'
+                    disabled={noInstances || !shouldFetch}
+                >
+                    <span className="truncate text-left max-w-[85%]">
+                        {getDisplayText()}
+                    </span>
                     <ChevronsUpDown className='ml-2 h-4 w-4 shrink-0 opacity-50' />
                 </Button>
             </PopoverTrigger>
@@ -142,12 +162,20 @@ export const InstancesFilterComponent = ({
     ) : (
         <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
-                <Button variant='outline' role='combobox' aria-expanded={open} className='w-[250px] justify-between' disabled={noInstances || !shouldFetch}>
-                    {getDisplayText()}
+                <Button
+                    variant='outline'
+                    role='combobox'
+                    aria-expanded={open}
+                    className='w-full justify-between bg-transparent'
+                    disabled={noInstances || !shouldFetch}
+                >
+                    <span className="truncate text-left max-w-[85%]">
+                        {getDisplayText()}
+                    </span>
                     <ChevronsUpDown className='ml-2 h-4 w-4 shrink-0 opacity-50' />
                 </Button>
             </PopoverTrigger>
-            <PopoverContent className='w-[300px] p-0'>
+            <PopoverContent className='w-full p-0'>
                 <Command>
                     <CommandInput placeholder='Buscar instancia...' />
                     <CommandEmpty>{noInstances ? 'No hay instancias disponibles.' : 'No se encontró instancia.'}</CommandEmpty>

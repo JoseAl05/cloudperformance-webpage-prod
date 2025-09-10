@@ -1,6 +1,6 @@
 import { FiltersComponent } from '@/components/general/filters/FiltersComponent';
 import { ChartLine } from 'lucide-react';
-import { RdsPgInstancesConsumeComponent } from './RdsPgInstancesConsumeComponent';
+import { RdsInstancesConsumeComponent } from './RdsInstancesConsumeComponent';
 
 interface MainViewConsumeRdsComponentProps {
     rdsType: string;
@@ -10,12 +10,38 @@ export const MainViewConsumeRdsComponent = ({ rdsType }: MainViewConsumeRdsCompo
     let instancesService = '';
     let collection = '';
     let tagColumnName = '';
+    let componentTitle = '';
 
     switch (rdsType) {
         case 'postgresql':
             instancesService = 'rds-pg';
             collection = 'aws_rds_postgresql';
             tagColumnName = 'TagList';
+            componentTitle = 'Consumo/No Consumo Instancias RDS Postgresql';
+            break;
+        case 'mysql':
+            instancesService = 'rds-mysql';
+            collection = 'aws_rds_mysql';
+            tagColumnName = 'TagList';
+            componentTitle = 'Consumo/No Consumo Instancias RDS Mysql';
+            break;
+        case 'oracle':
+            instancesService = 'rds-oracle';
+            collection = 'aws_rds_oracle';
+            tagColumnName = 'TagList';
+            componentTitle = 'Consumo/No Consumo Instancias RDS Oracle';
+            break;
+        case 'sqlserver':
+            instancesService = 'rds-sqlserver';
+            collection = 'aws_rds_sqlserver';
+            tagColumnName = 'TagList';
+            componentTitle = 'Consumo/No Consumo Instancias RDS SQL Server';
+            break;
+        case 'mariadb':
+            instancesService = 'rds-mariadb';
+            collection = 'aws_rds_mariadb';
+            tagColumnName = 'TagList';
+            componentTitle = 'Consumo/No Consumo Instancias RDS MariaDB';
             break;
         default:
             break;
@@ -32,7 +58,7 @@ export const MainViewConsumeRdsComponent = ({ rdsType }: MainViewConsumeRdsCompo
                             </div>
                             <div>
                                 <h1 className='text-3xl font-bold text-gray-900 dark:text-gray-100'>
-                                    Consumo/No Consumo Instancias RDS Postgresql
+                                    {componentTitle}
                                 </h1>
                             </div>
                         </div>
@@ -41,7 +67,7 @@ export const MainViewConsumeRdsComponent = ({ rdsType }: MainViewConsumeRdsCompo
             </div>
             <div className='w-full min-w-0'>
                 <FiltersComponent
-                    Component={RdsPgInstancesConsumeComponent}
+                    Component={RdsInstancesConsumeComponent}
                     dateFilter
                     regionFilter
                     instancesFilter

@@ -3,15 +3,21 @@
 import { LoaderComponent } from '@/components/general/LoaderComponent'
 import useSWR from 'swr'
 import { MessageCard } from '../../cards/MessageCards'
-import { AlertCircle, ChartBar, Info } from 'lucide-react'
-import { ConsumeViewRdsPgCpuMetrics, ConsumeViewRdsPgCreditsMetrics, ConsumeViewRdsPgDbConnectionsMetrics, RdsConsumeViewInstance } from '@/interfaces/vista-consumos/rdsPgConsumeViewInterfaces'
+import { AlertCircle, ChartBar, Clock, Info } from 'lucide-react'
+import { ConsumeViewRdsPgCpuMetrics, ConsumeViewRdsPgCreditsMetrics, ConsumeViewRdsPgDbConnectionsMetrics, ConsumeViewRdsPgFreeStorageMetrics, RdsConsumeViewInstance } from '@/interfaces/vista-consumos/rdsPgConsumeViewInterfaces'
 import { RdsInfoConsumeViewComponent } from './info/RdsInfoConsumeViewComponent'
+import { RdsConsumeViewUsageCpuComponent } from './graficos/RdsConsumeViewUsageCpuComponent'
+import { RdsConsumeViewUsageCreditsComponent } from './graficos/RdsConsumeViewUsageCreditsComponent'
+import { RdsConsumeViewDbConnectionsComponent } from './graficos/RdsConsumeViewDbConnectionsComponent'
+import { RdsConsumeViewFreeStorageComponent } from './graficos/RdsConsumeViewFreeStorageComponent'
+import { RdsConsumeViewInstanceTable } from './table/RdsConsumeViewInstanceTable'
 
-interface RdsPgInstancesConsumeComponentProps {
+interface RdsInstancesConsumeComponentProps {
     startDate: Date
     endDate: Date
     instance: string
     region: string
+    instancesService: string
 }
 
 const fetcher = (url: string) =>
@@ -26,38 +32,65 @@ const fetcher = (url: string) =>
 const isNonEmptyArray = <T,>(v: unknown): v is T[] => Array.isArray(v) && v.length > 0
 const isNullish = (v: unknown) => v === null || v === undefined
 
-export const RdsPgInstancesConsumeComponent = ({ startDate, endDate, instance, region }: RdsPgInstancesConsumeComponentProps) => {
+export const RdsInstancesConsumeComponent = ({ startDate, endDate, instance, region, instancesService }: RdsPgInstancesConsumeComponentProps) => {
 
     const startDateFormatted = startDate.toISOString().replace('Z', '').slice(0, -4);
     const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : '';
 
+    let url = '';
+    switch (instancesService) {
+        case 'rds-pg':
+            url = `${process.env.NEXT_PUBLIC_API_URL}/db/consumo_rds_postgresql`
+            break;
+        case 'rds-mysql':
+            url = `${process.env.NEXT_PUBLIC_API_URL}/db/consumo_rds_mysql`
+            break;
+        case 'rds-oracle':
+            url = `${process.env.NEXT_PUBLIC_API_URL}/db/consumo_rds_oracle`
+            break;
+        case 'rds-sqlserver':
+            url = `${process.env.NEXT_PUBLIC_API_URL}/db/consumo_rds_sqlserver`
+            break;
+        case 'rds-mariadb':
+            url = `${process.env.NEXT_PUBLIC_API_URL}/db/consumo_rds_mariadb`
+            break;
+        default:
+            break;
+    }
+
     const rdsPgCpuMetrics = useSWR(
         instance
-            ? `${process.env.NEXT_PUBLIC_API_URL}/db/consumo_rds_postgresql/cpu_usage?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&resource=${instance}`
+            ? `${url}/cpu_usage?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&resource=${instance}`
             : null,
         fetcher
     );
     const rdsPgCreditsMetrics = useSWR(
         instance
-            ? `${process.env.NEXT_PUBLIC_API_URL}/db/consumo_rds_postgresql/credits_usage?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&resource=${instance}`
+            ? `${url}/credits_usage?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&resource=${instance}`
             : null,
         fetcher
     );
     const rdsPgDbConnectionsMetrics = useSWR(
         instance
-            ? `${process.env.NEXT_PUBLIC_API_URL}/db/consumo_rds_postgresql/db_connections?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&resource=${instance}`
+            ? `${url}/db_connections?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&resource=${instance}`
+            : null,
+        fetcher
+    );
+    const rdsPgFreeStorageMetrics = useSWR(
+        instance
+            ? `${url}/free_storage?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&resource=${instance}`
             : null,
         fetcher
     );
     const rdsPgInfo = useSWR(
         instance
-            ? `${process.env.NEXT_PUBLIC_API_URL}/db/consumo_rds_postgresql/info?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&resource=${instance}`
+            ? `${url}/info?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&resource=${instance}`
             : null,
         fetcher
     );
     const rdsPgGlobalCreditsEfficiency = useSWR(
         instance
-            ? `${process.env.NEXT_PUBLIC_API_URL}/db/consumo_rds_postgresql/global_credits_efficiency?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&resource=${instance}`
+            ? `${url}/global_credits_efficiency?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&resource=${instance}`
             : null,
         fetcher
     );
@@ -66,6 +99,7 @@ export const RdsPgInstancesConsumeComponent = ({ startDate, endDate, instance, r
         rdsPgCpuMetrics.isLoading ||
         rdsPgCreditsMetrics.isLoading ||
         rdsPgDbConnectionsMetrics.isLoading ||
+        rdsPgFreeStorageMetrics.isLoading ||
         rdsPgGlobalCreditsEfficiency.isLoading ||
         rdsPgInfo.isLoading
 
@@ -73,6 +107,7 @@ export const RdsPgInstancesConsumeComponent = ({ startDate, endDate, instance, r
         !!rdsPgCpuMetrics.error ||
         !!rdsPgCreditsMetrics.error ||
         !!rdsPgDbConnectionsMetrics.error ||
+        !!rdsPgFreeStorageMetrics.error ||
         !!rdsPgGlobalCreditsEfficiency.error ||
         !!rdsPgInfo.error
 
@@ -85,6 +120,9 @@ export const RdsPgInstancesConsumeComponent = ({ startDate, endDate, instance, r
     const dbConnectionsMetricsData: ConsumeViewRdsPgDbConnectionsMetrics[] | null =
         isNonEmptyArray<ConsumeViewRdsPgDbConnectionsMetrics>(rdsPgDbConnectionsMetrics.data) ? rdsPgDbConnectionsMetrics.data : null;
 
+    const freeStorageMetricsData: ConsumeViewRdsPgFreeStorageMetrics[] | null =
+        isNonEmptyArray<ConsumeViewRdsPgFreeStorageMetrics>(rdsPgFreeStorageMetrics.data) ? rdsPgFreeStorageMetrics.data : null;
+
     const infoData: RdsConsumeViewInstance[] | null =
         isNonEmptyArray<RdsConsumeViewInstance>(rdsPgInfo.data) ? rdsPgInfo.data : null
 
@@ -95,6 +133,7 @@ export const RdsPgInstancesConsumeComponent = ({ startDate, endDate, instance, r
     const hasCpuData = !!cpuMetricsData && cpuMetricsData.length > 0;
     const hasCreditsData = !!creditsMetricsData && creditsMetricsData.length > 0;
     const hasDbConnectionsData = !!dbConnectionsMetricsData && dbConnectionsMetricsData.length > 0;
+    const hasFreeStorageData = !!freeStorageMetricsData && freeStorageMetricsData.length > 0;
 
     if (anyLoading) {
         return (
@@ -122,7 +161,7 @@ export const RdsPgInstancesConsumeComponent = ({ startDate, endDate, instance, r
         )
     }
 
-    const noneHasData = !hasCpuData && !hasCreditsData && !hasDbConnectionsData;
+    const noneHasData = !hasCpuData && !hasCreditsData && !hasDbConnectionsData && !hasFreeStorageData;
 
     if (noneHasData) {
         return (
@@ -153,17 +192,24 @@ export const RdsPgInstancesConsumeComponent = ({ startDate, endDate, instance, r
                     <h1 className="text-3xl font-bold text-foreground">Métricas de la Instancia</h1>
                 </div>
 
-                {/* <Ec2ResourceConsumeViewUsageCreditsComponent data={creditsMetricsData} />
-                <Ec2ResourceConsumeViewUsageCpuComponent data={cpuMetricsData} /> */}
+                <RdsConsumeViewUsageCreditsComponent data={creditsMetricsData} />
+                <RdsConsumeViewUsageCpuComponent data={cpuMetricsData} />
+                <RdsConsumeViewDbConnectionsComponent data={dbConnectionsMetricsData} />
+                <RdsConsumeViewFreeStorageComponent data={freeStorageMetricsData} />
             </div>
-
-            {/* <Ec2ConsumeViewInstanceTable
-                data={infoData}
-                startDate={startDate}
-                endDate={endDate}
-                instance={instance}
-                enableGrouping
-            /> */}
+            <div className="flex flex-col gap-5 mt-10">
+                <div className="flex items-center gap-3 my-5">
+                    <Clock className="h-8 w-8 text-blue-500" />
+                    <h1 className="text-3xl font-bold text-foreground">Detalle Instancias</h1>
+                </div>
+                <RdsConsumeViewInstanceTable
+                    data={infoData}
+                    startDate={startDate}
+                    endDate={endDate}
+                    instance={instance}
+                    enableGrouping
+                />
+            </div>
         </div>
     )
 }

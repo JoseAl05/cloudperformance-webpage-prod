@@ -23,26 +23,11 @@ export interface ConsumeViewRdsPgDbConnectionsMetrics {
   value: number;
 }
 
-export type RdsConsumeViewInstanceResponse = RdsConsumeViewInstance[];
-
-export interface RdsConsumeViewInstance {
+export interface ConsumeViewRdsPgFreeStorageMetrics {
+  timestamp: string;
   sync_time: string;
-  resources: RdsResource[];
-}
-
-export interface RdsResource {
-  db_sync_time: string;
-  resource: string;
-  resource_id: string;
-  engine: string;
-  engine_version: string;
-  db_subnet_group: string;
-  db_subnet_group_status: string;
-  db_subnet_group_subnets: DbSubnet[];
   region: string;
-  last_cpu_credits_balance: number;
-  last_cpu_credits_usage: number;
-  credit_efficiency: string;
+  value: number;
 }
 
 export interface DbSubnet {
@@ -52,4 +37,21 @@ export interface DbSubnet {
   };
   SubnetOutpost: unknown; // objeto vacío en la muestra
   SubnetStatus: string;
+}
+
+export interface RdsConsumeViewInstance {
+  resource: string;
+  resource_status: string;
+  resource_create_time: string;
+  engine: string;
+  engine_version: string;
+  db_subnet_group: string;
+  db_subnet_group_status: string;
+  db_subnets: DbSubnet[];
+  region: string;
+  last_cpu_credits_balance: number;
+  last_cpu_credits_usage: number;
+  credit_efficiency: string;
+  metric_sync_time: string;
+  db_sync_time: string;
 }

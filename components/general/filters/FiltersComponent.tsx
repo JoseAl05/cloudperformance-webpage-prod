@@ -7,13 +7,14 @@ import 'react-datepicker/dist/react-datepicker.css';
 import { RegionFilterComponent } from './RegionFilterComponent';
 import { TagFilterComponent } from './TagsFilterComponent';
 import { ServiceFilterComponent } from './ServiceFilterComponent';
-import { Card, CardContent, CardHeader, CardTitle } from '../../ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Calendar, Filter, MapPin, Server, Tag, XCircle, Ban } from 'lucide-react';
-import { Button } from '../../ui/button';
+import { Button } from '@/components/ui/button';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { InstancesFilterComponent } from './InstancesFilterComponent';
 import { AsgInstancesFilterComponent } from './AsgInstancesFilterComponent';
 import { AsgFilterComponent } from './AsgFilterComponent';
+import { EksFilterComponent } from './EksFilterComponent';
 
 interface FiltersComponentProps {
     Component: (params: {
@@ -30,10 +31,15 @@ interface FiltersComponentProps {
     instancesFilter?: boolean;
     instancesService?: string;
     asgFilter?: boolean;
+    eksFilter?: boolean;
     isAsgMultiSelect?: boolean;
+    isEksMultiSelect?: boolean;
+    isEksAsgMultiSelect?: boolean;
+    isEksAsgInstanceMultiSelect?: boolean;
     isAsgInstanceMultiSelect?: boolean;
     isInstanceMultiSelect?: boolean;
     isViewUnused?: boolean;
+    isViewResource?: boolean;
     tagsFilter?: boolean;
     serviceFilter?: boolean;
     collection?: string;
@@ -48,9 +54,14 @@ export const FiltersComponent = ({
     instancesFilter = false,
     instancesService,
     asgFilter = false,
+    eksFilter = false,
     isInstanceMultiSelect = false,
     isAsgMultiSelect = false,
+    isEksMultiSelect = false,
+    isEksAsgMultiSelect = false,
     isAsgInstanceMultiSelect = false,
+    isEksAsgInstanceMultiSelect = false,
+    isViewResource = false,
     tagsFilter = false,
     serviceFilter = false,
     collection = null,
@@ -67,6 +78,9 @@ export const FiltersComponent = ({
         const endDateParam = searchParams.get('endDate');
         const instanceParam = searchParams.get('instance');
         const asgParam = searchParams.get('asg');
+        const eksParam = searchParams.get('eks');
+        const eksAsgParam = searchParams.get('eksAsg');
+        const eksAsgInstanceParam = searchParams.get('eksAsgInstance');
         const asgInstanceParam = searchParams.get('asgInstance');
         const regionParam = searchParams.get('region');
         const selectedKeyParam = searchParams.get('selectedKey');
@@ -79,6 +93,9 @@ export const FiltersComponent = ({
             instance: instanceParam || '',
             asg: asgParam || '',
             asgInstance: asgInstanceParam || '',
+            eks: eksParam || '',
+            eksAsg: eksAsgParam || '',
+            eksAsgInstance: eksAsgInstanceParam || '',
             instanceService: instancesService || null,
             region: regionParam || 'all_regions',
             selectedKey: selectedKeyParam || null,
@@ -91,6 +108,9 @@ export const FiltersComponent = ({
     const [tempRange, setTempRange] = useState<[Date | null, Date | null]>([filters.startDate, filters.endDate]);
     const [tempInstance, setTempInstance] = useState(filters.instance);
     const [tempAsg, setTempAsg] = useState(filters.asg);
+    const [tempEks, setTempEks] = useState(filters.eks);
+    const [tempEksAsg, setTempEksAsg] = useState(filters.eksAsg);
+    const [tempEksAsgInstance, setTempEksAsgInstance] = useState(filters.eksAsgInstance);
     const [tempAsgInstance, setTempAsgInstance] = useState(filters.asgInstance);
     const [tempInstanceService, setTempInstanceService] = useState(filters.instanceService);
     const [tempRegion, setTempRegion] = useState(filters.region);
@@ -105,6 +125,9 @@ export const FiltersComponent = ({
         setTempRange([newFilters.startDate, newFilters.endDate]);
         setTempInstance(newFilters.instance);
         setTempAsg(newFilters.asg);
+        setTempEks(newFilters.eks);
+        setTempEksAsg(newFilters.eksAsg);
+        setTempEksAsgInstance(newFilters.eksAsgInstance);
         setTempAsgInstance(newFilters.asgInstance);
         setTempInstanceService(newFilters.instanceService);
         setTempRegion(newFilters.region);
@@ -124,6 +147,9 @@ export const FiltersComponent = ({
             endDate: end,
             instance: tempAsg ? tempAsgInstance : tempInstance,
             asg: tempAsg,
+            eks: tempEks,
+            eksAsg: tempEksAsg,
+            eksAsgInstance: tempEksAsgInstance,
             asgInstance: tempAsgInstance,
             instanceService: tempInstanceService,
             region: tempRegion,
@@ -137,6 +163,9 @@ export const FiltersComponent = ({
         query.set('startDate', newFilters.startDate.toISOString());
         query.set('endDate', newFilters.endDate.toISOString());
         if (newFilters.asg) query.set('asg', newFilters.asg);
+        if (newFilters.eks) query.set('eks', newFilters.eks);
+        if (newFilters.eksAsg) query.set('eksAsg', newFilters.eksAsg);
+        if (newFilters.eksAsgInstance) query.set('eksAsgInstance', newFilters.eksAsgInstance);
         if (newFilters.asgInstance) query.set('asgInstance', newFilters.asgInstance);
         if (!newFilters.asg && newFilters.instance) query.set('instance', newFilters.instance);
         if (newFilters.instanceService) query.set('instanceService', String(newFilters.instanceService));
@@ -154,6 +183,9 @@ export const FiltersComponent = ({
             endDate: new Date(),
             instance: '',
             asg: '',
+            eks: '',
+            eksAsg: '',
+            eksAsgInstance: '',
             asgInstance: '',
             instancesService: null,
             region: 'all_regions',
@@ -167,6 +199,9 @@ export const FiltersComponent = ({
             endDate: defaultFilters.endDate,
             instance: defaultFilters.instance,
             asg: defaultFilters.asg,
+            eks: defaultFilters.eks,
+            eksAsg: defaultFilters.eksAsg,
+            eksAsgInstance: defaultFilters.eksAsgInstance,
             asgInstance: defaultFilters.asgInstance,
             instanceService: defaultFilters.instancesService,
             region: defaultFilters.region,
@@ -177,6 +212,9 @@ export const FiltersComponent = ({
         setTempRange([defaultFilters.startDate, defaultFilters.endDate]);
         setTempInstance(defaultFilters.instance);
         setTempAsg(defaultFilters.asg);
+        setTempEks(defaultFilters.eks);
+        setTempEksAsg(defaultFilters.eksAsg);
+        setTempEksAsgInstance(defaultFilters.eksAsgInstance);
         setTempAsgInstance(defaultFilters.asgInstance);
         setTempInstanceService(defaultFilters.instancesService);
         setTempRegion(defaultFilters.region);
@@ -193,6 +231,9 @@ export const FiltersComponent = ({
         setTempInstance('');
         setTempAsg('');
         setTempAsgInstance('');
+        setTempEks('');
+        setTempEksAsg('');
+        setTempEksAsgInstance('');
 
         const params = new URLSearchParams(searchParams.toString());
 
@@ -213,6 +254,9 @@ export const FiltersComponent = ({
         params.delete('instance');
         params.delete('asg');
         params.delete('asgInstance');
+        params.delete('eks');
+        params.delete('eksAsg');
+        params.delete('eksAsgInstance');
 
         router.replace(`${window.location.pathname}?${params.toString()}`, { scroll: false });
     };
@@ -332,6 +376,31 @@ export const FiltersComponent = ({
                                     isAsgMultiSelect={isAsgMultiSelect}
                                     isAsgInstanceMultiselect={isAsgInstanceMultiSelect}
                                     isInstancesService={instancesService}
+                                    isViewResource={isViewResource}
+                                />
+                            </div>
+                        )}
+                        {eksFilter && (
+                            <div className='space-y-2'>
+                                <label className='text-sm font-medium text-foreground flex items-center gap-2'>
+                                    <Server className='h-4 w-4' />
+                                    Cluster EKS
+                                </label>
+                                <EksFilterComponent
+                                    eks={tempEks}
+                                    eksAsg={tempEksAsg}
+                                    eksAsgInstance={tempEksAsgInstance}
+                                    setEks={setTempEks}
+                                    setEksAsg={setTempEksAsg}
+                                    setEksAsgInstance={setTempEksAsgInstance}
+                                    startDate={tempStartDate}
+                                    endDate={tempEndDate}
+                                    region={tempRegion}
+                                    selectedKey={tempKey ?? ''}
+                                    selectedValue={tempValue ?? ''}
+                                    isEksMultiSelect={isEksMultiSelect}
+                                    isEksAsgMultiselect={isEksAsgMultiSelect}
+                                    isEksAsgInstanceMultiselect={isEksAsgInstanceMultiSelect}
                                 />
                             </div>
                         )}
@@ -358,26 +427,11 @@ export const FiltersComponent = ({
                         </Button>
                     </div>
                 </CardContent>
-
-                {/* {!canFetch ? (
-                    <EmptyState text={asgFilter
-                        ? 'Selecciona un Autoscaling Group o una instancia del ASG para continuar.'
-                        : 'Selecciona una instancia para continuar.'
-                    } />
-                ) : (
-                    <Component
-                        startDate={filters.startDate}
-                        endDate={filters.endDate}
-                        instance={asgFilter ? (filters.asgInstance || filters.asg) : filters.instance}
-                        region={filters.region}
-                        selectedKey={filters.selectedKey}
-                        selectedValue={filters.selectedValue}
-                    />
-                )} */}
                 <Component
                     startDate={filters.startDate}
                     endDate={filters.endDate}
                     instance={asgFilter ? (filters.asgInstance || filters.asg) : filters.instance}
+                    instancesService={instancesService}
                     region={filters.region}
                     selectedKey={filters.selectedKey}
                     selectedValue={filters.selectedValue}

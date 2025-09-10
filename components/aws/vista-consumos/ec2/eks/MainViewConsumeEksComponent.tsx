@@ -1,9 +1,9 @@
 'use client'
 import { FiltersComponent } from '@/components/general/filters/FiltersComponent'
 import { ChartLine } from 'lucide-react'
-import { AsgConsumeComponent } from './AsgConsumeComponent'
+import { EksConsumeComponent } from '@/components/aws/vista-consumos/ec2/eks/EksConsumeComponent'
 
-export const MainViewConsumeAsgComponent = () => {
+export const MainViewConsumeEksComponent = () => {
     return (
         <div className='w-full min-w-0 space-y-4'>
             <div className='mb-8'>
@@ -14,7 +14,7 @@ export const MainViewConsumeAsgComponent = () => {
                                 <ChartLine className='h-6 w-6 text-blue-600' />
                             </div>
                             <div>
-                                <h1 className='text-3xl font-bold text-gray-900 dark:text-gray-100'>Consumo/No Consumo Instancias de Autoscaling Groups</h1>
+                                <h1 className='text-3xl font-bold text-gray-900 dark:text-gray-100'>Consumo/No Consumo Nodos de Clusters EKS</h1>
                             </div>
                         </div>
                     </div>
@@ -23,15 +23,16 @@ export const MainViewConsumeAsgComponent = () => {
 
             <div className='w-full min-w-0'>
                 <FiltersComponent
-                    Component={AsgConsumeComponent}
+                    Component={EksConsumeComponent}
                     dateFilter
                     regionFilter
-                    asgFilter
-                    isAsgMultiSelect
-                    isAsgInstanceMultiSelect
+                    eksFilter
+                    isEksMultiSelect
+                    isEksAsgMultiSelect
+                    isEksAsgInstanceMultiSelect
                     tagsFilter
-                    collection='aws_auto_scaling_groups'
-                    tagColumnName='Tags'
+                    collection='aws_eks_clusters_details'
+                    tagColumnName='tags'
                 />
             </div>
         </div>

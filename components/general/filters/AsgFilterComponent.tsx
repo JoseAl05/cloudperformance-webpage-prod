@@ -21,7 +21,8 @@ interface AsgFilterComponentProps {
     selectedValue: string,
     isAsgMultiSelect: boolean,
     isAsgInstanceMultiselect: boolean,
-    isInstancesService?: string
+    isInstancesService?: string,
+    isViewResource?: boolean
 }
 
 const fetcherPost = (url: string, tags: { Key: string; Value: string } | null = null) =>
@@ -37,7 +38,7 @@ const fetcherPost = (url: string, tags: { Key: string; Value: string } | null = 
 export const AsgFilterComponent = ({
     asg, asgInstance, setAsg, setAsgInstance,
     startDate, endDate, region, selectedKey, selectedValue,
-    isAsgMultiSelect, isAsgInstanceMultiselect, isInstancesService
+    isAsgMultiSelect, isAsgInstanceMultiselect, isInstancesService, isViewResource
 }: AsgFilterComponentProps) => {
     const [open, setOpen] = useState(false);
 
@@ -58,7 +59,7 @@ export const AsgFilterComponent = ({
         }
     }, [isLoading, error, data, setAsg, setAsgInstance]);
 
-    if (isLoading) return <LoaderComponent />
+    if (isLoading) return <LoaderComponent size='small' />
     if (error) return <div>Error al cargar datos</div>
 
     const list: string[] = Array.isArray(data) ? data : []
@@ -91,8 +92,16 @@ export const AsgFilterComponent = ({
         <div className='space-y-2'>
             <Popover open={open} onOpenChange={setOpen}>
                 <PopoverTrigger asChild>
-                    <Button variant='outline' role='combobox' aria-expanded={open} className='w-full justify-between bg-transparent' disabled={noAsg}>
-                        {getDisplayText()}
+                    <Button
+                        variant='outline'
+                        role='combobox'
+                        aria-expanded={open}
+                        className='w-full justify-between bg-transparent'
+                        disabled={noAsg || !shouldFetch}
+                    >
+                        <span className="truncate text-left max-w-[85%]">
+                            {getDisplayText()}
+                        </span>
                         <ChevronsUpDown className='ml-2 h-4 w-4 shrink-0 opacity-50' />
                     </Button>
                 </PopoverTrigger>
@@ -135,16 +144,22 @@ export const AsgFilterComponent = ({
             </Popover>
 
             {/* Instancias de ASG (solo si hay ASG disponible y seleccionado) */}
-            <AsgInstancesFilterComponent
-                asg={asg}
-                asgInstance={asgInstance}
-                setAsgInstance={setAsgInstance}
-                startDate={startDateFormatted}
-                endDate={endDateFormatted}
-                region={region}
-                isInstanceMultiSelect={isAsgInstanceMultiselect}
-                isInstancesService={isInstancesService}
-            />
+            {
+                isViewResource ? (
+                    <></>
+                ) : (
+                    <AsgInstancesFilterComponent
+                        asg={asg}
+                        asgInstance={asgInstance}
+                        setAsgInstance={setAsgInstance}
+                        startDate={startDateFormatted}
+                        endDate={endDateFormatted}
+                        region={region}
+                        isInstanceMultiSelect={isAsgInstanceMultiselect}
+                        isInstancesService={isInstancesService}
+                    />
+                )
+            }
         </div>
     )
 };

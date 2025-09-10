@@ -102,7 +102,7 @@ export const TagFilterComponent = ({
         return null;
     }
 
-    if (isLoading) return <LoaderComponent />
+    if (isLoading) return <LoaderComponent size='small'/>
     if (error) return <div>Error al cargar datos</div>
 
     const noTags = (data && data.length === 0) || keys.length === 0

@@ -1,7 +1,7 @@
 'use client'
 
 import useSWR from 'swr'
-import { ChartBar, AlertCircle, Loader2, Info } from 'lucide-react'
+import { ChartBar, AlertCircle, Loader2, Info, Clock } from 'lucide-react'
 import { Ec2ResourceConsumeViewUsageCpuComponent } from './graficos/Ec2ResourceConsumeViewUsageCpuComponent'
 import { Ec2ResourceConsumeViewUsageCreditsComponent } from './graficos/Ec2ResourceConsumeViewUsageCreditsComponent'
 import { Ec2InfoConsumeViewComponent } from './info/Ec2InfoConsumeViewComponent'
@@ -93,7 +93,7 @@ export const Ec2InstancesConsumeComponent = ({
     const hasInfoData = !!infoData && infoData.length > 0
 
     if (anyLoading) {
-        return(
+        return (
             <LoaderComponent />
         )
     }
@@ -153,14 +153,19 @@ export const Ec2InstancesConsumeComponent = ({
                 <Ec2ResourceConsumeViewUsageCreditsComponent data={creditsMetricsData} />
                 <Ec2ResourceConsumeViewUsageCpuComponent data={cpuMetricsData} />
             </div>
-
-            <Ec2ConsumeViewInstanceTable
-                data={infoData}
-                startDate={startDate}
-                endDate={endDate}
-                instance={instance}
-                enableGrouping
-            />
+            <div className="flex flex-col gap-5 mt-10">
+                <div className="flex items-center gap-3 my-5">
+                    <Clock className="h-8 w-8 text-blue-500" />
+                    <h1 className="text-3xl font-bold text-foreground">Detalle Instancias</h1>
+                </div>
+                <Ec2ConsumeViewInstanceTable
+                    data={infoData}
+                    startDate={startDate}
+                    endDate={endDate}
+                    instance={instance}
+                    enableGrouping
+                />
+            </div>
         </div>
     )
 }

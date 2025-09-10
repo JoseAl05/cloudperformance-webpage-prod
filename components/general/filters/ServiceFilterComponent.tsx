@@ -57,7 +57,7 @@ export const ServiceFilterComponent = ({ selectedServices, setSelectedServices }
   };
 
   if (isLoading) {
-    return <LoaderComponent />
+    return <LoaderComponent size='small'/>
   }
 
   if (error || !services) {

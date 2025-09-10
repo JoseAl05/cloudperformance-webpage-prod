@@ -27,7 +27,6 @@ import {
     ChevronDown,
     HandCoins,
     Earth,
-    Layers,
     LineChart,
 } from 'lucide-react'
 import { useEffect, useState } from 'react'
@@ -152,8 +151,13 @@ export const SidebarComponent = ({
 
     const consumeSubItems = [
         { label: 'Consumo EC2', icon: Computer, href: '/aws/consumos/ec2' },
-        { label: 'Consumo ASG EC2', icon: Layers, href: '/aws/consumos/asg' },
-        { label: 'Consumo RDS Postgresql', icon: Database , href: '/aws/consumos/rds/postgresql'}
+        { label: 'Consumo ASG EC2', icon: Computer, href: '/aws/consumos/asg' },
+        { label: 'Consumo EKS', icon: Computer , href: '/aws/consumos/eks'},
+        { label: 'Consumo RDS Postgresql', icon: Database , href: '/aws/consumos/rds/postgresql'},
+        { label: 'Consumo RDS Mysql', icon: Database , href: '/aws/consumos/rds/mysql'},
+        { label: 'Consumo RDS Oracle', icon: Database , href: '/aws/consumos/rds/oracle'},
+        { label: 'Consumo RDS SQL Server', icon: Database , href: '/aws/consumos/rds/sqlserver'},
+        { label: 'Consumo RDS MariaDB', icon: Database , href: '/aws/consumos/rds/mariadb'}
     ]
 
     const consumes = [{ label: 'Consumos', subItems: consumeSubItems, icon: Zap }]

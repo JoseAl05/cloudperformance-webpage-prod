@@ -1,14 +1,13 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { ChevronDown, ChevronUp, Computer, Cpu, HardDrive, List, Minus, MonitorCheck, MonitorX, Network, Zap } from 'lucide-react';
-import { Ec2ConsumeViewAttachedDiskHistoricComponent } from './Ec2ConsumeViewAttachedDiskHistoricComponent';
-import { Ec2ConsumeViewStoppedInstancesHistoricComponent } from './Ec2ConsumeViewStoppedInstancesHistoricComponent';
-import { Ec2ConsumeViewInUseInterfacesHistoricComponent } from './Ec2ConsumeViewInUseInterfacesHistoricComponent';
-import { Ec2ConsumneViewInstance } from '@/interfaces/vista-consumos/ec2ConsumeViewInterfaces';
+import { ConsumeViewRdsPgCpuMetrics, ConsumeViewRdsPgDbConnectionsMetrics, RdsConsumeViewInstance, RdsResource } from '@/interfaces/vista-consumos/rdsPgConsumeViewInterfaces';
+import { ChevronDown, ChevronUp, Computer, Cpu, Database, List, Minus, MonitorCheck, MonitorX, Zap } from 'lucide-react';
+import { RdsConsumeViewStoppedInstancesHistoricComponent } from './RdsConsumeViewStoppedInstancesHistoricComponent';
 
-interface Ec2InfoConsumeViewCardsComponentProps {
-    infoData: Ec2ConsumneViewInstance[] | null;
-    cpuData: ConsumeViewEc2CpuMetrics[] | null;
+interface RdsInfoConsumeViewCardsComponentProps {
+    infoData: RdsConsumeViewInstance[] | null;
+    cpuData: ConsumeViewRdsPgCpuMetrics[] | null;
+    dbConnectionsData: ConsumeViewRdsPgDbConnectionsMetrics[] | null;
     creditsGlobalEfficiencyData: unknown;
 }
 
@@ -39,7 +38,7 @@ const getCreditsEfficiencyBorder = (efficiency: string) => {
     }
 };
 
-export const Ec2InfoConsumeViewCardsComponent = ({ infoData, cpuData, creditsGlobalEfficiencyData }: Ec2InfoConsumeViewCardsComponentProps) => {
+export const RdsInfoConsumeViewCardsComponent = ({ infoData, cpuData, dbConnectionsData, creditsGlobalEfficiencyData }: RdsInfoConsumeViewCardsComponentProps) => {
     const noInfo = !infoData || infoData.length === 0;
     const noCpu = !cpuData || cpuData.length === 0;
 
@@ -54,14 +53,14 @@ export const Ec2InfoConsumeViewCardsComponent = ({ infoData, cpuData, creditsGlo
         const latestByInstance = new Map<string, Ec2ConsumneViewInstance>();
         (infoData || []).forEach(inst => {
             const existing = latestByInstance.get(inst.resource);
-            const currentTime = new Date(inst.instance_sync_time).getTime();
-            if (!existing || currentTime > new Date(existing.instance_sync_time).getTime()) {
+            const currentTime = new Date(inst.db_sync_time).getTime();
+            if (!existing || currentTime > new Date(existing.db_sync_time).getTime()) {
                 latestByInstance.set(inst.resource, inst);
             }
         });
         const latest = Array.from(latestByInstance.values())
-            .sort((a, b) => new Date(b.instance_sync_time).getTime() - new Date(a.instance_sync_time).getTime())[0];
-        return latest?.instance_sync_time;
+            .sort((a, b) => new Date(b.db_sync_time).getTime() - new Date(a.db_sync_time).getTime())[0];
+        return latest?.db_sync_time;
     })();
 
     const referenceDate = latestCpuSync ? new Date(latestCpuSync) : (latestInfoSync ? new Date(latestInfoSync) : new Date());
@@ -103,7 +102,7 @@ export const Ec2InfoConsumeViewCardsComponent = ({ infoData, cpuData, creditsGlo
     };
 
     const getUsageStatusCredits = (percent: number) => {
-        if (percent === 0) return { message: 'Sin datos de créditos', icon: Minus, style: 'text-xs text-gray-400 font-bold pt-2', border: 'border-l-gray-500' };
+        if (percent === 0) return { message: 'Sin créditos disponibles', icon: Minus, style: 'text-xs text-gray-400 font-bold pt-2', border: 'border-l-gray-500' };
         if (percent > 50) return { message: 'Uso alto de créditos', icon: ChevronUp, style: 'text-xs text-green-600 font-bold pt-2', border: 'border-l-green-500' };
         if (percent > 20) return { message: 'Uso moderado de créditos', icon: Minus, style: 'text-xs text-gray-500 font-bold pt-2', border: 'border-l-yellow-500' };
         return { message: 'Uso bajo de créditos', icon: ChevronDown, style: 'text-xs text-red-600 font-bold pt-2', border: 'border-l-red-500' };
@@ -117,25 +116,19 @@ export const Ec2InfoConsumeViewCardsComponent = ({ infoData, cpuData, creditsGlo
     const instanceStatusMap = new Map<string, string>();
     (infoData || []).forEach(inst => instanceStatusMap.set(inst.resource, inst.resource_status || ''));
 
-    const countRunningInstances = Array.from(instanceStatusMap.values()).filter(s => s.toLowerCase() === 'running').length;
-    const countStoppedInstances = Array.from(instanceStatusMap.values()).filter(s => s.toLowerCase() === 'stopped').length;
+    const countRunningInstances = (infoData || []).filter(inst => (inst.resource_status || '').toLowerCase() === 'available').length;
+    const countStoppedInstances = (infoData || []).filter(inst => (inst.resource_status || '').toLowerCase() === 'stopped').length;
     const stoppedInstances = (infoData || []).filter(inst => (inst.resource_status || '').toLowerCase() === 'stopped');
     const hasStopped = stoppedInstances.length > 0;
 
     const latestByInstance = new Map<string, Ec2ConsumneViewInstance>();
     (infoData || []).forEach(inst => {
         const existing = latestByInstance.get(inst.resource);
-        const currentTime = new Date(inst.instance_sync_time).getTime();
-        if (!existing || currentTime > new Date(existing.instance_sync_time).getTime()) {
+        const currentTime = new Date(inst.db_sync_time).getTime();
+        if (!existing || currentTime > new Date(existing.db_sync_time).getTime()) {
             latestByInstance.set(inst.resource, inst);
         }
     });
-
-    const totalAttachedDisks = Array.from(latestByInstance.values())
-        .reduce((sum, inst) => sum + (inst.devices_attached_count || 0), 0);
-
-    const totalInterfacesInUse = Array.from(latestByInstance.values())
-        .reduce((sum, inst) => sum + (inst.interfaces_inuse_count || 0), 0);
 
     const efficiencyValue = (creditsGlobalEfficiencyData as unknown)?.global_efficiency ?? 'Sin Datos';
 
@@ -154,7 +147,7 @@ export const Ec2InfoConsumeViewCardsComponent = ({ infoData, cpuData, creditsGlo
         {
             title: 'Cantidad de Instancias',
             value: uniqueInstances,
-            icon: Computer,
+            icon: Database,
             borderColor: 'border-l-cyan-500',
             subtitle: isToday ? 'Actual' : dateLabel,
             valueStyle: 'text-xl font-bold text-foreground tracking-tight'
@@ -177,7 +170,7 @@ export const Ec2InfoConsumeViewCardsComponent = ({ infoData, cpuData, creditsGlo
             dialog: !!stoppedInstances.length,
             dialogLabel: 'Ver instancias "stopped"',
             dialogTitle: 'Instancias stopped en periodo seleccionado.',
-            dialogContentComponent: <Ec2ConsumeViewStoppedInstancesHistoricComponent instanceInfo={stoppedInstances} />
+            dialogContentComponent: <RdsConsumeViewStoppedInstancesHistoricComponent instanceInfo={stoppedInstances} />
         }
     ];
 
@@ -216,34 +209,6 @@ export const Ec2InfoConsumeViewCardsComponent = ({ infoData, cpuData, creditsGlo
             usageStyle: usageStatus.style
         }
     ];
-
-    const instanceComponentsData = [
-        {
-            title: 'Cantidad de discos Attachados',
-            value: totalAttachedDisks,
-            icon: HardDrive,
-            borderColor: 'border-l-orange-500',
-            subtitle: isToday ? 'Actual' : dateLabel,
-            valueStyle: 'text-xl font-bold text-foreground tracking-tight',
-            dialog: !!(infoData && infoData.length),
-            dialogLabel: 'Ver discos attachados',
-            dialogTitle: 'Discos attachados en periodo seleccionado.',
-            dialogContentComponent: <Ec2ConsumeViewAttachedDiskHistoricComponent instanceInfo={infoData || []} />
-        },
-        {
-            title: 'Cantidad de interfaces en uso',
-            value: totalInterfacesInUse,
-            icon: Network,
-            borderColor: 'border-l-orange-500',
-            subtitle: isToday ? 'Actual' : dateLabel,
-            valueStyle: 'text-xl font-bold text-foreground tracking-tight',
-            dialog: !!(infoData && infoData.length),
-            dialogLabel: 'Ver interfaces en uso',
-            dialogTitle: 'Interfaces en uso en periodo seleccionado.',
-            dialogContentComponent: <Ec2ConsumeViewInUseInterfacesHistoricComponent instanceInfo={infoData || []} />
-        },
-    ];
-
     return (
         <div className="space-y-4">
             <div className="grid grid-cols-1 gap-4">
@@ -339,7 +304,7 @@ export const Ec2InfoConsumeViewCardsComponent = ({ infoData, cpuData, creditsGlo
                                                         <DialogTitle>{instance.dialogTitle ?? 'Instancias stopped en periodo seleccionado.'}</DialogTitle>
                                                         <DialogDescription>Información histórica</DialogDescription>
                                                     </DialogHeader>
-                                                    <Ec2ConsumeViewStoppedInstancesHistoricComponent instanceInfo={stoppedInstances} />
+                                                    <RdsConsumeViewStoppedInstancesHistoricComponent instanceInfo={stoppedInstances} />
                                                 </DialogContent>
                                             </Dialog>
                                         ) : (
@@ -354,46 +319,6 @@ export const Ec2InfoConsumeViewCardsComponent = ({ infoData, cpuData, creditsGlo
                     );
                 })}
             </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {instanceComponentsData.map((c, index) => {
-                    const IconComponent = c.icon;
-                    return (
-                        <Card key={index} className={`${c.borderColor} border-l-4 group`}>
-                            <CardContent className="p-4 flex flex-col h-full">
-                                <div className="flex items-center justify-between">
-                                    <div className="p-2 rounded-lg bg-blue-50 dark:bg-blue-950/20 transition-colors duration-200 group-hover:scale-110">
-                                        <IconComponent className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                                    </div>
-                                    <p className="text-xs text-muted-foreground font-medium">{c.subtitle}</p>
-                                </div>
-                                <h3 className="text-sm font-medium text-muted-foreground mt-2">{c.title}</h3>
-                                <div className="mt-auto">
-                                    <p className={c.valueStyle}>
-                                        {typeof (c as unknown).format === 'function' ? (c as unknown).format(c.value) : c.value}
-                                    </p>
-                                    {c.usage && <span className={c.usageStyle}>{c.usage}</span>}
-                                    {c.dialog && (
-                                        <Dialog key={index} className='gap-2 justify-center'>
-                                            <DialogTrigger className='flex items-center justify-center gap-2 cursor-pointer transition-all hover:scale-110'>
-                                                <List className='h-4 w-4 text-blue-500' />
-                                                {c.dialogLabel}
-                                            </DialogTrigger>
-                                            <DialogContent className='max-w-2xl max-h-[80vh] sm:max-w-4xl'>
-                                                <DialogHeader>
-                                                    <DialogTitle>{c.dialogTitle}</DialogTitle>
-                                                    <DialogDescription>Información historica</DialogDescription>
-                                                </DialogHeader>
-                                                {c.dialogContentComponent}
-                                            </DialogContent>
-                                        </Dialog>
-                                    )}
-                                </div>
-                            </CardContent>
-                        </Card>
-                    );
-                })}
-            </div>
         </div>
-    );
-};
+    )
+}

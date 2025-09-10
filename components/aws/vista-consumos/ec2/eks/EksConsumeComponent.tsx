@@ -9,7 +9,7 @@ import { Ec2ConsumeViewInstanceTable } from '@/components/aws/vista-consumos/ec2
 import { MessageCard } from '@/components/aws/cards/MessageCards';
 import { LoaderComponent } from '@/components/general/LoaderComponent';
 
-interface AsgConsumeComponentProps {
+interface EksConsumeComponentProps {
     startDate: Date,
     endDate: Date,
     instance: string,
@@ -25,10 +25,10 @@ const fetcher = (url: string) =>
         }
     }).then(res => res.json())
 
-const isNonEmptyArray = <T,>(v: unknown): v is T[] => Array.isArray(v) && v.length > 0
-const isNullish = (v: unknown) => v === null || v === undefined
+const isNonEmptyArray = <T,>(v: unknown): v is T[] => Array.isArray(v) && v.length > 0;
+const isNullish = (v: unknown) => v === null || v === undefined;
 
-export const AsgConsumeComponent = ({ startDate, endDate, instance, region }: AsgConsumeComponentProps) => {
+export const EksConsumeComponent = ({ startDate, endDate, instance, region }: EksConsumeComponentProps) => {
     const startDateFormatted = startDate.toISOString().replace('Z', '').slice(0, -4);
     const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : '';
 
@@ -126,8 +126,6 @@ export const AsgConsumeComponent = ({ startDate, endDate, instance, region }: As
             </div>
         )
     }
-
-
     return (
         <div className="w-full min-w-0 px-4 py-6">
             <div className="flex-1 space-y-6 min-w-0 overflow-hidden">

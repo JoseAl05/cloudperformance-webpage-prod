@@ -91,7 +91,7 @@ export const MainEc2ResourceViewMetricsSummaryComponent = ({ data }: MainEc2Reso
       borderColor: 'border-l-blue-500',
       subtitle: isToday ? 'Actual' : dateLabel,
       valueStyle: 'text-xl font-bold text-foreground tracking-tight',
-      format: (val: number) => val.toString(),
+      format: (val: number | null | undefined) => ((val ?? 0).toFixed(2)),
     },
     {
       title: 'Créditos Utilizados',
