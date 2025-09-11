@@ -43,17 +43,7 @@ export const TableComponentTop = ({
   const columns: ColumnDef<TableDataTop>[] = [
     {
       accessorKey: "dimension",
-      header: ({ column }) => {
-        return (
-          <a
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            Region
-            <ArrowUpDown className="ml-2 h-4 w-4" />
-          </a>
-        )
-      }
+      header: "Región",
     },
     {
       accessorKey: "service_dimension",

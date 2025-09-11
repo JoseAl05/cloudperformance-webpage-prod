@@ -45,16 +45,16 @@ export const TableComponentTop = ({
     {
       accessorKey: "end_date",
       header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Fecha
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      )
-    },
+        return (
+          <span
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            Fecha
+            <ArrowUpDown className="ml-2 h-4 w-4" />
+          </span>
+        )
+      },
       cell: (info) => {
         const date = new Date(info.getValue() as string)
         return date.toLocaleDateString("es-CL", {
@@ -69,16 +69,16 @@ export const TableComponentTop = ({
       accessorKey: "dimension",
       header: "Sistema Operativo",
     },
-{
+    {
       accessorKey: "costo_bruto",
       header: ({ column }) => (
-        <Button
+        <span
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           Costo Bruto
           <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
+        </span>
       ),
       cell: (info) => {
         const value = info.getValue()
@@ -89,13 +89,13 @@ export const TableComponentTop = ({
     {
       accessorKey: "costo_neto",
       header: ({ column }) => (
-        <Button
+        <span
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           Costo Neto
           <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
+        </span>
       ),
       cell: (info) => {
         const value = info.getValue()
@@ -117,11 +117,11 @@ export const TableComponentTop = ({
   return (
     <DataTableGrouping
       columns={columns}
-      data={filteredData}  
+      data={filteredData}
       filterColumn="dimension"
       filterPlaceholder="Buscar sistema operativo…"
-      enableGrouping={true}                
-      groupByColumn="dimension"  
+      enableGrouping={true}
+      groupByColumn="dimension"
     />
   )
 }

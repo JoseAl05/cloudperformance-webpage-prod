@@ -39,66 +39,33 @@ export const TableComponentTop = ({
   })
 
   const columns: ColumnDef<TableDataTop>[] = [
-    {
-      accessorKey: "service_dimension",
-      header: "Servicio",
-    },
+    { accessorKey: "service_dimension", header: "Servicio" },
     {
       accessorKey: "end_date",
-      header: ({ column }) => (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Fecha
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      ),
+      header: "Fecha",
       cell: (info) => {
         const date = new Date(info.getValue() as string)
         return date.toLocaleDateString("es-CL", {
-          weekday: "long",
-          year: "numeric",
-          month: "long",
-          day: "numeric",
+          weekday: "long", year: "numeric", month: "long", day: "numeric",
         })
       },
     },
-    {
-      accessorKey: "dimension",
-      header: "Tipo de Instancia",
-    },
+    { accessorKey: "dimension", header: "Tipo de Instancia" },
     {
       accessorKey: "costo_bruto",
-      header: ({ column }) => (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Costo Bruto
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      ),
+      header: "Costo Bruto",
       cell: (info) => {
-        const value = info.getValue()
-        const num = typeof value === "string" ? parseFloat(value) : value
+        const v = info.getValue()
+        const num = typeof v === "string" ? parseFloat(v) : v
         return num === 0 ? "Sin cobro" : `${num.toPrecision(6)} USD`
       },
     },
     {
       accessorKey: "costo_neto",
-      header: ({ column }) => (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Costo Neto
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      ),
+      header: "Costo Neto",
       cell: (info) => {
-        const value = info.getValue()
-        const num = typeof value === "string" ? parseFloat(value) : value
+        const v = info.getValue()
+        const num = typeof v === "string" ? parseFloat(v) : v
         return num === 0 ? "Sin cobro" : `${num.toPrecision(6)} USD`
       },
     },
@@ -123,14 +90,14 @@ export const TableComponentTop = ({
       </CardHeader>
 
       <CardContent>
-          <DataTableGrouping
-            columns={columns}
-            data={filteredData}
-            filterColumn="dimension"
-            filterPlaceholder="Buscar tipo de Instancia…"
-            enableGrouping={true}                
-            groupByColumn="dimension"            
-          />
+        <DataTableGrouping
+          columns={columns}
+          data={filteredData}
+          filterColumn="dimension"
+          filterPlaceholder="Buscar tipo de Instancia…"
+          enableGrouping={true}
+          groupByColumn="dimension"
+        />
 
         <div className="border-t bg-muted/50 px-6 py-4">
           <div className="flex items-center justify-between">

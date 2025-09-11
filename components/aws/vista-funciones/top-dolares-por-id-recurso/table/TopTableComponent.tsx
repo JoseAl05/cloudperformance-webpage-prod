@@ -46,13 +46,13 @@ export const TableComponentTop = ({
     {
       accessorKey: "end_date",
       header: ({ column }) => (
-        <Button
+        <span
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           Fecha
           <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
+        </span>
       ),
       cell: (info) => {
         const date = new Date(info.getValue() as string)
@@ -71,13 +71,13 @@ export const TableComponentTop = ({
     {
       accessorKey: "costo_bruto",
       header: ({ column }) => (
-        <Button
+        <span
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           Costo Bruto
           <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
+        </span>
       ),
       cell: (info) => {
         const value = info.getValue()
@@ -88,13 +88,13 @@ export const TableComponentTop = ({
     {
       accessorKey: "costo_neto",
       header: ({ column }) => (
-        <Button
+        <span
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           Costo Neto
           <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
+        </span>
       ),
       cell: (info) => {
         const value = info.getValue()
