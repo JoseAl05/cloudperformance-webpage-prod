@@ -2,7 +2,7 @@
 
 import useSWR from "swr"
 import { ColumnDef } from "@tanstack/react-table"
-import { DataTableSingle } from '@/components/general/data-table/data-table-single'
+import { DataTableGrouping } from "@/components/general/data-table/data-table-grouping"
 
 type EC2Instance = {
     InstanceId: string
@@ -65,7 +65,7 @@ export const Ec2TableComponent = ({
     if (error) return <p>Error cargando datos</p>
 
     return (
-        <DataTableSingle
+        <DataTableGrouping
             columns={columns}
             data={data?.instances ?? []}
             filterColumn="InstanceId"

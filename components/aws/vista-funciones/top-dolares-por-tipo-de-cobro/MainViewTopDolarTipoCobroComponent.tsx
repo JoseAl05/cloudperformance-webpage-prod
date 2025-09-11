@@ -1,8 +1,8 @@
 import { FiltersComponent } from '@/components/general/filters/FiltersComponent'
+import { MainViewTopDolaresTipoCobro } from './TopDolarTipoCobroComponent'
 import { Globe } from 'lucide-react'
-import { TopDolarRegionComponent } from './TopDolarRegionComponent'
 
-export const MainViewTopDolaresRegionComponent = () => {
+export const TopDolarTipoCobroComponent = () => {
   return (
     <div className='w-full min-w-2 space-y-9'>
       {/* Header */}
@@ -18,7 +18,7 @@ export const MainViewTopDolaresRegionComponent = () => {
                   Dashboard AWS / Facturación
                 </h1>
                 <p className='text-gray-500 dark:text-gray-400'>
-                  Top Dólares por Región
+                  Top Dólares por Tipo de Cobro
                 </p>
               </div>
             </div>
@@ -28,7 +28,7 @@ export const MainViewTopDolaresRegionComponent = () => {
 
       {/* Filtros + gráfico */}
       <FiltersComponent
-        Component={TopDolarRegionComponent}
+        Component={MainViewTopDolaresTipoCobro} 
         dateFilter
       />
     </div>

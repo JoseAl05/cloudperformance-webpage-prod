@@ -15,6 +15,7 @@ import { InstancesFilterComponent } from './InstancesFilterComponent';
 import { AsgInstancesFilterComponent } from './AsgInstancesFilterComponent';
 import { AsgFilterComponent } from './AsgFilterComponent';
 import { EksFilterComponent } from './EksFilterComponent';
+import { S3BucketFilter } from './S3FilterComponent';
 
 interface FiltersComponentProps {
     Component: (params: {
@@ -32,6 +33,7 @@ interface FiltersComponentProps {
     instancesService?: string;
     asgFilter?: boolean;
     eksFilter?: boolean;
+    s3Filter?: boolean;
     isAsgMultiSelect?: boolean;
     isEksMultiSelect?: boolean;
     isEksAsgMultiSelect?: boolean;
@@ -55,6 +57,7 @@ export const FiltersComponent = ({
     instancesService,
     asgFilter = false,
     eksFilter = false,
+    s3Filter = false,
     isInstanceMultiSelect = false,
     isAsgMultiSelect = false,
     isEksMultiSelect = false,
@@ -86,6 +89,7 @@ export const FiltersComponent = ({
         const selectedKeyParam = searchParams.get('selectedKey');
         const selectedValueParam = searchParams.get('selectedValue');
         const selectedServiceParam = searchParams.get('services');
+        const s3BucketParam = searchParams.get('s3Bucket');
 
         return {
             startDate: startDateParam ? new Date(startDateParam) : yesterday,
@@ -100,7 +104,8 @@ export const FiltersComponent = ({
             region: regionParam || 'all_regions',
             selectedKey: selectedKeyParam || null,
             selectedValue: selectedValueParam || null,
-            service: selectedServiceParam || ''
+            service: selectedServiceParam || '',
+            s3Bucket: s3BucketParam || ''
         };
     };
 
@@ -118,6 +123,7 @@ export const FiltersComponent = ({
     const [tempValue, setTempValue] = useState<string | null>(filters.selectedValue);
     const [tagsData, setTagsData] = useState<unknown[]>([]);
     const [tempService, setTempService] = useState(filters.service);
+    const [tempS3Bucket, setTempS3Bucket] = useState(filters.s3Bucket);
 
     useEffect(() => {
         const newFilters = getInitialFilters();
@@ -134,6 +140,7 @@ export const FiltersComponent = ({
         setTempKey(newFilters.selectedKey);
         setTempValue(newFilters.selectedValue);
         setTempService(newFilters.service);
+        setTempS3Bucket(newFilters.s3Bucket);
     }, [searchParams]);
 
     const onChange = (dates: [Date | null, Date | null]) => setTempRange(dates);
@@ -155,7 +162,8 @@ export const FiltersComponent = ({
             region: tempRegion,
             selectedKey: tempKey,
             selectedValue: tempValue,
-            service: tempService
+            service: tempService,
+            s3Bucket: tempS3Bucket
         };
         setFilters(newFilters);
 
@@ -173,6 +181,7 @@ export const FiltersComponent = ({
         if (newFilters.selectedKey) query.set('selectedKey', newFilters.selectedKey);
         if (newFilters.selectedValue) query.set('selectedValue', newFilters.selectedValue);
         if (newFilters.service) query.set('services', newFilters.service);
+        if (newFilters.s3Bucket) query.set('s3Bucket', newFilters.s3Bucket);
 
         router.push(`${window.location.pathname}?${query.toString()}`);
     };
@@ -191,7 +200,8 @@ export const FiltersComponent = ({
             region: 'all_regions',
             selectedKey: null,
             selectedValue: null,
-            service: ''
+            service: '',
+            s3Bucket: ''
         };
 
         setFilters({
@@ -207,7 +217,8 @@ export const FiltersComponent = ({
             region: defaultFilters.region,
             selectedKey: defaultFilters.selectedKey,
             selectedValue: defaultFilters.selectedValue,
-            service: defaultFilters.service
+            service: defaultFilters.service,
+            s3Bucket: defaultFilters.s3Bucket
         });
         setTempRange([defaultFilters.startDate, defaultFilters.endDate]);
         setTempInstance(defaultFilters.instance);
@@ -221,6 +232,7 @@ export const FiltersComponent = ({
         setTempKey(defaultFilters.selectedKey);
         setTempValue(defaultFilters.selectedValue);
         setTempService(defaultFilters.service);
+        setTempS3Bucket(defaultFilters.s3Bucket);
 
         router.push(window.location.pathname);
     };
@@ -414,6 +426,23 @@ export const FiltersComponent = ({
                                 <ServiceFilterComponent selectedServices={tempService} setSelectedServices={setTempService} />
                             </div>
                         )}
+                        {
+                            s3Filter && (
+                                <div className='space-y-2'>
+                                    <label className='text-sm font-medium text-foreground flex items-center gap-2'>
+                                        <Server className='h-4 w-4' />
+                                        S3 Buckets
+                                    </label>
+                                    <S3BucketFilter
+                                        selectedBuckets={tempS3Bucket}
+                                        setSelectedBuckets={setTempS3Bucket}
+                                        startDate={tempStartDate}
+                                        endDate={tempEndDate}
+                                        region={tempRegion}
+                                    />
+                                </div>
+                            )
+                        }
                     </div>
 
                     <div className='flex items-center gap-4'>
@@ -436,6 +465,7 @@ export const FiltersComponent = ({
                     selectedKey={filters.selectedKey}
                     selectedValue={filters.selectedValue}
                     services={filters.service}
+                    buckets={filters.s3Bucket}
                 />
             </Card>
         </div>

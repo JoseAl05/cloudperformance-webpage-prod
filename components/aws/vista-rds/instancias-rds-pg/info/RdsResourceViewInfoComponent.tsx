@@ -165,6 +165,10 @@ export const RdsResourceViewInfoComponent = ({ data }: RdsResourceViewInfoCompon
                                             <span className='font-medium'>{latestInstance.EnginePlusVersion}</span>
                                         </div>
                                         <div className='flex justify-between'>
+                                            <span className='text-gray-500'>Licencia:</span>
+                                            <span className='font-medium'>{latestInstance.LicenseModel || 'N/A'}</span>
+                                        </div>                                        
+                                        <div className='flex justify-between'>
                                             <span className='text-gray-500'>Storage:</span>
                                             <span className='font-medium'>{latestInstance.Allocated_Storage_RDS_Postgresql_Formatted}</span>
                                         </div>

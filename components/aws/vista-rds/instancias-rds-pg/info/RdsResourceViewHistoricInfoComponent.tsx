@@ -99,6 +99,10 @@ export const RdsResourceViewHistoricInfoComponent = ({ instances }: RdsResourceV
                                     <span className='font-medium'>{instance.EnginePlusVersion}</span>
                                 </div>
                                 <div className='flex justify-between'>
+                                    <span className='text-gray-500'>Licencia:</span>
+                                    <span className='font-medium'>{instance.LicenseModel || 'N/A'}</span>
+                                </div>                                
+                                <div className='flex justify-between'>
                                     <span className='text-gray-500'>Storage:</span>
                                     <span className='font-medium'>{instance.Allocated_Storage_RDS_Postgresql_Formatted}</span>
                                 </div>

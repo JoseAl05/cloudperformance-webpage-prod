@@ -15,7 +15,6 @@ import { RdsDbConnectionsChart } from "./graficos/RdsPgResourceViewDbConnections
 import { RdsIopsChart } from "./graficos/RdsPgResourceViewIopsComponent";
 import { RdsStorageChart } from "./graficos/RdsPgResourceViewStorageComponent";
 import { RdsPgEventsTableComponent } from "./events/RdsPgEventsTable";
-import { LoaderComponent } from '@/components/general/LoaderComponent';
 
 interface InstanciasRdsPgProps {
   startDate: Date;
@@ -211,14 +210,19 @@ export const InstanciasRdsPgChartComponent = ({
 
   // -------- Loaders / errores --------
   if (infoLoading) {
-    return <LoaderComponent />
+    return (
+      <div className="flex justify-center items-center p-12">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500"></div>
+        <span className="ml-3">Cargando instancias RDS PostgreSQL...</span>
+      </div>
+    );
   }
   if (infoError) {
     return (
       <div className="text-red-500 p-4 bg-red-50 rounded-lg border border-red-200">
         <h3 className="font-semibold">Error al cargar datos</h3>
         <p className="text-sm mt-1">
-          No se pudieron obtener las instancias RDS
+          No se pudieron obtener las instancias RDS PostgreSQL
         </p>
       </div>
     );
@@ -251,7 +255,12 @@ export const InstanciasRdsPgChartComponent = ({
 
   // Carga/errores de métricas del summary
   if (metricsLoading) {
-    return <LoaderComponent />
+    return (
+      <div className="flex justify-center items-center p-12">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500"></div>
+        <span className="ml-3">Cargando métricas de RDS {instance}...</span>
+      </div>
+    );
   }
   if (metricsError) {
     return (

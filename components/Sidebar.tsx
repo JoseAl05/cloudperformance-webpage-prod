@@ -28,6 +28,8 @@ import {
     HandCoins,
     Earth,
     LineChart,
+    TrendingUp,
+    Server,
 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { usePathname } from 'next/navigation'
@@ -58,7 +60,7 @@ export const SidebarComponent = ({
 }: React.ComponentProps<typeof Sidebar>) => {
     const pathname = usePathname();
     const { state, open } = useSidebar()
-    const isExpanded = open || state === 'mobile' // <- clave
+    const isExpanded = open || state === 'mobile'
     const { getMenuItemClasses } = useMenuStyles();
     const [isMounted, setIsMounted] = useState(false);
 
@@ -79,97 +81,53 @@ export const SidebarComponent = ({
     ]
 
     const recursos = [
-        {
-            label: 'Instancias EC2',
-            icon: Computer,
-            href: '/aws/recursos/instancias-ec2',
-        },
-        {
-            label: 'Autoscaling Groups',
-            icon: Computer,
-            href: '/aws/recursos/autoscaling-groups',
-        },
-        {
-            label: 'Instancias RDS Postgresql',
-            icon: Database,
-            href: '/aws/recursos/instancias-rds-pg',
-        },
-        {
-            label: 'Instancias RDS Mysql',
-            icon: Database,
-            href: '/aws/recursos/instancias-rds-mysql',
-        },
-        {
-            label: 'Instancias RDS SQL Server',
-            icon: Database,
-            href: '/aws/recursos/instancias-rds-sqlserver',
-        },
-        {
-            label: 'Instancias RDS Oracle',
-            icon: Database,
-            href: '/aws/recursos/instancias-rds-oracle',
-        },
+        { label: 'Instancias EC2', icon: Computer, href: '/aws/recursos/instancias-ec2', color: 'text-orange-500' },
+        { label: 'Auto Scaling groups', icon: TrendingUp, href: '/aws/recursos/autoscaling-groups', color: 'text-emerald-500' },
+        { label: 'Instancias RDS Postgresql', icon: Database, href: '/aws/recursos/instancias-rds-pg', color: 'text-blue-600' },
+        { label: 'Instancias RDS Mysql', icon: Database, href: '/aws/recursos/instancias-rds-mysql', color: 'text-emerald-600' },
+        { label: 'Instancias RDS SQL Server', icon: Database, href: '/aws/recursos/instancias-rds-sqlserver', color: 'text-purple-600' },
+        { label: 'Instancias RDS Oracle', icon: Database, href: '/aws/recursos/instancias-rds-oracle', color: 'text-red-600' },
+        { label: 'Instancias RDS MariaDB', icon: Database, href: '/aws/recursos/instancias-rds-mariadb', color: 'text-amber-600' },
     ]
 
     const topFacturaciones = [
-        {
-            label: 'Top Facturaciones por Región',
-            href: '/aws/funciones/top-dolares-region',
-            icon: Earth,
-        },
-        {
-            label: 'Top Facturaciones por SO',
-            href: '/aws/funciones/top-dolares-so',
-            icon: Database,
-        },
-        {
-            label: 'Top Facturaciones por Tipo de Instancia',
-            href: '/aws/funciones/top-tipo-instancia',
-            icon: Computer,
-        },
-        {
-            label: 'Top Facturaciones por Familia de Instancias',
-            href: '/aws/funciones/top-familia-instancias',
-            icon: Box,
-        },
-        {
-            label: 'Top Facturaciones por Tipo de Compra',
-            href: '/aws/funciones/top-tipo-compra',
-            icon: HandCoins,
-        },
-        {
-            label: 'Top Facturaciones por Tipo de Cobro',
-            href: '/aws/funciones/top-tipo-cobro',
-            icon: Zap,
-        },
-        {
-            label: 'Top Facturaciones por ID Recurso',
-            href: '/aws/funciones/top-id-recurso',
-            icon: Grid2X2,
-        },
+        { label: 'Top Facturaciones por Región', href: '/aws/funciones/top-dolares-region', icon: Earth, color: 'text-purple-500' },
+        { label: 'Top Facturaciones por SO', href: '/aws/funciones/top-dolares-so', icon: Database, color: 'text-purple-500' },
+        { label: 'Top Facturaciones por Tipo de Instancia', href: '/aws/funciones/top-dolares-por-tipo-instancia', icon: Computer, color: 'text-teal-600' },
+        { label: 'Top Facturaciones por Familia de Instancias', href: '/aws/funciones/top-dolares-por-familia-instancias', icon: Box, color: 'text-indigo-600' },
+        { label: 'Top Facturaciones por Tipo de Compra', href: '/aws/funciones/top-dolares-por-tipo-compra', icon: HandCoins, color: 'text-amber-600' },
+        { label: 'Top Facturaciones por Tipo de Cobro', href: '/aws/funciones/top-dolares-por-tipo-cobro', icon: Zap, color: 'text-red-500' },
+        { label: 'Top Facturaciones por Recursos', href: '/aws/funciones/top-dolares-por-id-recurso', icon: Grid2X2, color: 'text-blue-500' },
+        { label: 'Top Recursos', href: '/aws/funciones/top-recursos', icon: Grid2X2, color: 'text-blue-500' },
     ]
 
     const consumeSubItems = [
         { label: 'Consumo EC2', icon: Computer, href: '/aws/consumos/ec2' },
         { label: 'Consumo ASG EC2', icon: Computer, href: '/aws/consumos/asg' },
-        { label: 'Consumo EKS', icon: Computer , href: '/aws/consumos/eks'},
-        { label: 'Consumo RDS Postgresql', icon: Database , href: '/aws/consumos/rds/postgresql'},
-        { label: 'Consumo RDS Mysql', icon: Database , href: '/aws/consumos/rds/mysql'},
-        { label: 'Consumo RDS Oracle', icon: Database , href: '/aws/consumos/rds/oracle'},
-        { label: 'Consumo RDS SQL Server', icon: Database , href: '/aws/consumos/rds/sqlserver'},
-        { label: 'Consumo RDS MariaDB', icon: Database , href: '/aws/consumos/rds/mariadb'}
+        { label: 'Consumo EKS', icon: Computer, href: '/aws/consumos/eks' },
+        { label: 'Consumo RDS Postgresql', icon: Database, href: '/aws/consumos/rds/postgresql' },
+        { label: 'Consumo RDS Mysql', icon: Database, href: '/aws/consumos/rds/mysql' },
+        { label: 'Consumo RDS Oracle', icon: Database, href: '/aws/consumos/rds/oracle' },
+        { label: 'Consumo RDS SQL Server', icon: Database, href: '/aws/consumos/rds/sqlserver' },
+        { label: 'Consumo RDS MariaDB', icon: Database, href: '/aws/consumos/rds/mariadb' }
     ]
 
     const consumes = [{ label: 'Consumos', subItems: consumeSubItems, icon: Zap }]
+
+    // FUNCIONES: separar con y sin subitems
     const funciones = [
         { label: 'Top Facturaciones', subItems: topFacturaciones, icon: Zap },
+        { label: 'Spot vs Vm', href: '/aws/funciones/spot-vs-vm', icon: Database },
+        { label: 'Top S3 Buckets', href: '/aws/funciones/top-s3-buckets', icon: Server },
     ]
+    const funcionesConSub = funciones.filter(f => f.subItems && f.subItems.length)
+    const funcionesSimples = funciones.filter(f => f.href)
 
     const defaultOpenRecursos = recursos.some((r) => r.href === pathname)
     const [isRecursosOpen, setIsRecursosOpen] = useState(defaultOpenRecursos)
 
     const defaultOpenFunciones = funciones.some((f) =>
-        f.subItems?.some((sub) => sub.href === pathname)
+        (f.href && f.href === pathname) || f.subItems?.some((sub) => sub.href === pathname)
     )
     const [isFuncionesOpen, setIsFuncionesOpen] = useState(defaultOpenFunciones)
 
@@ -241,6 +199,7 @@ export const SidebarComponent = ({
 
                         {isExpanded && (
                             <>
+                                {/* CONSUMOS */}
                                 <SidebarMenuItem className="mt-4 pt-2 border-t border-gray-200 dark:border-gray-800">
                                     <Collapsible open={isConsumesOpen} onOpenChange={setIsConsumesOpen}>
                                         <CollapsibleTrigger asChild>
@@ -285,6 +244,7 @@ export const SidebarComponent = ({
                                     </Collapsible>
                                 </SidebarMenuItem>
 
+                                {/* FUNCIONES */}
                                 <SidebarMenuItem className="mt-2">
                                     <Collapsible open={isFuncionesOpen} onOpenChange={setIsFuncionesOpen}>
                                         <CollapsibleTrigger asChild>
@@ -301,51 +261,81 @@ export const SidebarComponent = ({
                                                 />
                                             </SidebarMenuButton>
                                         </CollapsibleTrigger>
+
                                         <CollapsibleContent className="mt-1 space-y-1 overflow-hidden transition-all duration-300 ease-in-out data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down">
-                                            <Collapsible
-                                                open={isTopFacturacionesOpen}
-                                                onOpenChange={setIsTopFacturacionesOpen}
-                                            >
-                                                <CollapsibleTrigger asChild>
-                                                    <div className="flex items-center justify-between px-3 py-2 pl-6 rounded-md cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900 transition-all duration-200 ease-in-out hover:scale-[1.01] hover:translate-x-1">
-                                                        <div className="flex items-center gap-2">
-                                                            <Zap className="h-5 w-5 text-blue-400 transition-transform duration-200 hover:scale-110" />
-                                                            <span className="text-sm font-medium">
-                                                                Top Facturaciones
-                                                            </span>
-                                                        </div>
-                                                        <ChevronDown
-                                                            className={cn(
-                                                                'h-4 w-4 transition-transform duration-300 ease-in-out',
-                                                                isTopFacturacionesOpen && 'rotate-180'
-                                                            )}
-                                                        />
-                                                    </div>
-                                                </CollapsibleTrigger>
-                                                <CollapsibleContent className="mt-1 space-y-1 overflow-hidden transition-all duration-300 ease-in-out data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down">
-                                                    {topFacturaciones.map((sub) => {
-                                                        const isSubActive = pathname === sub.href
-                                                        return (
-                                                            <Link
-                                                                key={sub.label}
-                                                                href={sub.href}
+                                            {/* Subgrupo: Top Facturaciones */}
+                                            {funcionesConSub.map((grupo) => (
+                                                <Collapsible
+                                                    key={grupo.label}
+                                                    open={isTopFacturacionesOpen}
+                                                    onOpenChange={setIsTopFacturacionesOpen}
+                                                >
+                                                    <CollapsibleTrigger asChild>
+                                                        <button
+                                                            type="button"
+                                                            className="w-full flex items-center justify-between px-3 py-2 pl-6 rounded-md hover:bg-blue-50 dark:hover:bg-blue-900 transition-all duration-200 ease-in-out hover:scale-[1.01] hover:translate-x-1"
+                                                        >
+                                                            <div className="flex items-center gap-2">
+                                                                <grupo.icon className="h-5 w-5 text-blue-400" />
+                                                                <span className="text-sm font-medium">
+                                                                    {grupo.label}
+                                                                </span>
+                                                            </div>
+                                                            <ChevronDown
                                                                 className={cn(
-                                                                    "flex items-center gap-2 px-3 py-2 rounded-md cursor-pointer pl-10 border-l transition-all duration-200 ease-in-out transform",
-                                                                    getMenuItemClasses(isSubActive),
-                                                                    "border-blue-200 dark:border-blue-800",
-                                                                    "hover:scale-[1.02] hover:translate-x-1",
+                                                                    'h-4 w-4 transition-transform duration-300 ease-in-out',
+                                                                    isTopFacturacionesOpen && 'rotate-180'
                                                                 )}
-                                                            >
-                                                                <sub.icon className="h-4 w-4 text-blue-400 transition-transform duration-200 hover:scale-110" />
-                                                                <span className="text-sm">{sub.label}</span>
-                                                            </Link>
-                                                        )
-                                                    })}
-                                                </CollapsibleContent>
-                                            </Collapsible>
+                                                            />
+                                                        </button>
+                                                    </CollapsibleTrigger>
+
+                                                    <CollapsibleContent className="mt-1 space-y-1 overflow-hidden transition-all duration-300 ease-in-out data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down">
+                                                        {grupo.subItems!.map((sub) => {
+                                                            const isSubActive = pathname === sub.href
+                                                            return (
+                                                                <Link
+                                                                    key={sub.label}
+                                                                    href={sub.href}
+                                                                    className={cn(
+                                                                        "flex items-center gap-2 px-3 py-2 rounded-md cursor-pointer pl-10 border-l-2 transition-all duration-200 ease-in-out transform border-current",
+                                                                        sub.color, // color de texto y por ende del borde (currentColor)
+                                                                        getMenuItemClasses(isSubActive),
+                                                                        "hover:scale-[1.02] hover:translate-x-1",
+                                                                    )}
+                                                                >
+                                                                    <sub.icon className="h-4 w-4 transition-transform duration-200 hover:scale-110" />
+                                                                    <span className="text-sm">{sub.label}</span>
+                                                                </Link>
+                                                            )
+                                                        })}
+                                                    </CollapsibleContent>
+                                                </Collapsible>
+                                            ))}
+
+                                            {/* Ítems simples dentro de Funciones */}
+                                            {funcionesSimples.map((f) => {
+                                                const isActive = pathname === f.href
+                                                return (
+                                                    <Link
+                                                        key={f.label}
+                                                        href={f.href!}
+                                                        className={cn(
+                                                            "flex items-center gap-2 px-3 py-2 rounded-md cursor-pointer pl-6 transition-all duration-200 ease-in-out transform",
+                                                            getMenuItemClasses(isActive),
+                                                            "hover:scale-[1.02] hover:translate-x-1",
+                                                        )}
+                                                    >
+                                                        <f.icon className="h-4 w-4 text-blue-400" />
+                                                        <span className="text-sm">{f.label}</span>
+                                                    </Link>
+                                                )
+                                            })}
                                         </CollapsibleContent>
                                     </Collapsible>
                                 </SidebarMenuItem>
+
+                                {/* RECURSOS */}
                                 <SidebarMenuItem className="mt-2">
                                     <Collapsible open={isRecursosOpen} onOpenChange={setIsRecursosOpen}>
                                         <CollapsibleTrigger asChild>
@@ -376,7 +366,7 @@ export const SidebarComponent = ({
                                                             "hover:scale-[1.02] hover:translate-x-1",
                                                         )}
                                                     >
-                                                        <subItem.icon className="h-4 w-4 text-blue-400 transition-transform duration-200 hover:scale-110" />
+                                                        <subItem.icon className={cn("h-4 w-4 text-blue-400 transition-transform duration-200 hover:scale-110", subItem.color)} />
                                                         <span className="text-sm">{subItem.label}</span>
                                                     </Link>
                                                 )

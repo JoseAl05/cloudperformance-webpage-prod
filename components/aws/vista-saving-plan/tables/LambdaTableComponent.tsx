@@ -2,8 +2,7 @@
 
 import useSWR from "swr"
 import { ColumnDef } from "@tanstack/react-table"
-import { DataTableSingle } from "@/components/general/data-table/data-table-single"
-import { DataTableGrouping } from '@/components/general/data-table/data-table-grouping'
+import { DataTableGrouping } from "@/components/general/data-table/data-table-grouping"
 
 type LambdaFunction = {
     service: string
@@ -84,8 +83,6 @@ export const LambdaTableComponent = ({
             data={data?.functions ?? []}
             filterColumn="function_name"
             filterPlaceholder="Buscar función…"
-            enableGrouping
-            groupByColumn='function_name'
         />
     )
 }

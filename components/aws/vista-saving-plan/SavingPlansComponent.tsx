@@ -14,7 +14,6 @@ import {
   DialogDescription,
   DialogTrigger
 } from "@/components/ui/dialog";
-import { LoaderComponent } from '@/components/general/LoaderComponent'
 
 
 const fetcher = (url: string) =>
@@ -184,11 +183,11 @@ export const SavingPlansViewComponent = ({ startDate, endDate }: SavingPlansComp
     if (!costUsage || costUsage.length === 0 || !lineChartRef.current) return;
 
     const filteredData = costUsage.filter(item => {
-      const date = new Date(item.sync_time.$date);
+      const date = new Date(item.start_date.$date);
       return (!startDate || date >= startDate) && (!endDate || date <= endDate);
     });
 
-    const days = Array.from(new Set(filteredData.map(item => new Date(item.sync_time.$date).toISOString().split('T')[0])))
+    const days = Array.from(new Set(filteredData.map(item => new Date(item.start_date.$date).toISOString().split('T')[0])))
       .sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
 
     const services = Array.from(new Set(filteredData.map(item => item.dimensions?.SERVICE || 'Otro')));
@@ -199,7 +198,7 @@ export const SavingPlansViewComponent = ({ startDate, endDate }: SavingPlansComp
       smooth: true,
       data: days.map(day => {
         const match = filteredData.filter(item => {
-          const date = new Date(item.sync_time.$date).toISOString().split('T')[0];
+          const date = new Date(item.start_date.$date).toISOString().split('T')[0];
           return date === day && (item.dimensions?.SERVICE || 'Otro') === service;
         });
         return match.reduce((sum, m) => sum + parseFloat(m.amortizedcost || 0), 0);
@@ -241,7 +240,7 @@ export const SavingPlansViewComponent = ({ startDate, endDate }: SavingPlansComp
     };
   }, [costUsage, startDate, endDate]);
 
-  if (isLoading) return <LoaderComponent />
+  if (isLoading) return <p>Cargando...</p>
   if (error) return <p>Error cargando los datos.</p>
 
 
