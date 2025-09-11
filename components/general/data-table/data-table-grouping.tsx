@@ -160,7 +160,14 @@ export function DataTableGrouping<TData, TValue>({
             return acc
         }, {} as Record<string, AnyRow[]>)
 
-        const groupEntries = Object.entries(groups) // [groupValue, items[]]
+        let groupEntries = Object.entries(groups) // [groupValue, items[]]
+        const groupSorting = sorting.find(s => s.id === groupByColumn)
+        if (groupSorting) {
+            groupEntries = [...groupEntries].sort((a, b) => {
+                const res = cmp(a[0], b[0]) // a[0] y b[0] son los valores del grupo
+                return groupSorting.desc ? -res : res
+            })
+        } // [groupValue, items[]]
         // 🔒 Ya NO reordenamos groupEntries por el "sorting" para mantener fijo el orden de la tabla general.
 
         // 2) Paginación de GRUPOS (tabla general)
@@ -297,9 +304,9 @@ export function DataTableGrouping<TData, TValue>({
         const buttons: JSX.Element[] = []
         if (start > 0) {
             buttons.push(
-                <Button key="first" variant="outline" size="sm" className="h-7 px-2 text-xs" onClick={() => goToGroupPage(groupValue, 0)}>
+                <a key="first" variant="outline" size="sm" className="h-7 px-2 text-xs" onClick={() => goToGroupPage(groupValue, 0)}>
                     1
-                </Button>
+                </a>
             )
             if (start > 1) {
                 buttons.push(<span key="pre-ellipsis" className="px-1 text-muted-foreground"><MoreHorizontal className="h-4 w-4" /></span>)
@@ -338,7 +345,7 @@ export function DataTableGrouping<TData, TValue>({
         return buttons
     }
 
-    const renderSortableHeader = (header: any) => {
+    const renderSortableHeader = (header: unknown) => {
         const canSort = header.column.getCanSort?.() ?? true
         const sorted = header.column.getIsSorted?.() as false | 'asc' | 'desc'
         const label = flexRender(header.column.columnDef.header, header.getContext())

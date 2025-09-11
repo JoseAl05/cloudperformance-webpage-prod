@@ -46,7 +46,7 @@ export const MainViewTopDolaresRegion = ({ startDate, endDate }: TopDolaresRegio
   const topDolaresRegion = Array.isArray(data) ? data : (data?.data ?? [])
 
   // === Función segura para números
-  const toNumber = (v: any) => {
+  const toNumber = (v: unknown) => {
     const n = Number(v);
     return Number.isFinite(n) ? n : 0;
   };
@@ -101,7 +101,7 @@ export const MainViewTopDolaresRegion = ({ startDate, endDate }: TopDolaresRegio
       const dataMap = new Map<string, Map<string, number>>();
       const regionTotals: Record<string, number> = {};
 
-      filteredData.forEach((item: any) => {
+      filteredData.forEach((item: unknown) => {
         const region = item.dimension;
         const service = item.service_dimension;
         const cost = toNumber(item[tipoCosto]);
@@ -136,14 +136,14 @@ export const MainViewTopDolaresRegion = ({ startDate, endDate }: TopDolaresRegio
         tooltip: {
           trigger: 'axis',
           axisPointer: { type: 'shadow' },
-          formatter: (params: any) => {
+          formatter: (params: unknown) => {
           //filtrar solo valores mayores a 0
-          const visibleItems = params.filter((item: any) => Number(item.value) > 0);
+          const visibleItems = params.filter((item: unknown) => Number(item.value) > 0);
 
-          const total = visibleItems.reduce((sum: number, item: any) => sum + item.value, 0);
+          const total = visibleItems.reduce((sum: number, item: unknown) => sum + item.value, 0);
 
           const tooltipItems = visibleItems.map(
-            (item: any) => `${item.marker} ${item.seriesName}: $${item.value.toPrecision(2)}`
+            (item: unknown) => `${item.marker} ${item.seriesName}: $${item.value.toPrecision(2)}`
           );
 
           return `<strong>${params[0].axisValue} - Total: $${total.toFixed(2)}</strong><br/>${
@@ -202,13 +202,13 @@ export const MainViewTopDolaresRegion = ({ startDate, endDate }: TopDolaresRegio
 
       chart.setOption(option);
 
-      chart.on('click', function (params: any) {
+      chart.on('click', function (params: unknown) {
         const region = params.name;
         if (region) setSelectedRegion(region);
       });
     } else {
       // === Vista DETALLE por SERVICIOS ===
-      const regionData = topDolaresRegion.filter((item: any) => item.dimension === selectedRegion);
+      const regionData = topDolaresRegion.filter((item: unknown) => item.dimension === selectedRegion);
       const serviceTotals: Record<string, number> = {};
 
       regionData.forEach(item => {
@@ -227,13 +227,13 @@ export const MainViewTopDolaresRegion = ({ startDate, endDate }: TopDolaresRegio
         tooltip: {
           trigger: 'axis',
           axisPointer: { type: 'shadow' },
-          formatter: (params: any) => {
-            const visibleItems = params.filter((item: any) => Number(item.value) > 0);
+          formatter: (params: unknown) => {
+            const visibleItems = params.filter((item: unknown) => Number(item.value) > 0);
 
-            const total = visibleItems.reduce((sum: number, item: any) => sum + item.value, 0);
+            const total = visibleItems.reduce((sum: number, item: unknown) => sum + item.value, 0);
 
             const tooltipItems = visibleItems.map(
-              (item: any) => `${item.marker} ${item.name}: $${item.value.toPrecision(2)}`
+              (item: unknown) => `${item.marker} ${item.name}: $${item.value.toPrecision(2)}`
             );
 
             return `<strong>Total: $${total.toFixed(2)}</strong><br/>${

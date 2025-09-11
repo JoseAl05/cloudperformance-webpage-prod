@@ -38,24 +38,41 @@ export const TableComponentTop = ({
     return !(costoNeto === 0 && costoBruto === 0)   // ✅ deja pasar si alguno es distinto de 0
   })
 
+  console.log(data);
+
   const columns: ColumnDef<TableDataTop>[] = [
+    {
+      accessorKey: "dimension",
+      header: ({ column }) => {
+        return (
+          <a
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            Region
+            <ArrowUpDown className="ml-2 h-4 w-4" />
+          </a>
+        )
+      }
+    },
     {
       accessorKey: "service_dimension",
       header: "Servicio",
     },
     {
       accessorKey: "end_date",
-      header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Fecha
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      )
-    },
+      header: 'Fecha',
+      // header: ({ column }) => {
+      //   return (
+      //     <Button
+      //       variant="ghost"
+      //       onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+      //     >
+      //       Fecha
+      //       <ArrowUpDown className="ml-2 h-4 w-4" />
+      //     </Button>
+      //   )
+      // },
       cell: (info) => {
         const date = new Date(info.getValue() as string)
         return date.toLocaleDateString("es-CL", {
@@ -66,38 +83,37 @@ export const TableComponentTop = ({
         })
       },
     },
-    {
-      accessorKey: "dimension",
-      header: "Región",
-    },
+
     {
       accessorKey: "costo_bruto",
-      header: ({ column }) => (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Costo Bruto
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      ),
-      cell: (info) => {
-        const value = info.getValue()
-        const num = typeof value === "string" ? parseFloat(value) : value
-        return num === 0 ? "Sin cobro" : `${num.toPrecision(6)} USD`
-      },
+      header: 'Costo Bruto'
+      // header: ({ column }) => (
+      //   <Button
+      //     variant="ghost"
+      //     onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+      //   >
+      //     Costo Bruto
+      //     <ArrowUpDown className="ml-2 h-4 w-4" />
+      //   </Button>
+      // ),
+      // cell: (info) => {
+      //   const value = info.getValue()
+      //   const num = typeof value === "string" ? parseFloat(value) : value
+      //   return num === 0 ? "Sin cobro" : `${num.toPrecision(6)} USD`
+      // },
     },
     {
       accessorKey: "costo_neto",
-      header: ({ column }) => (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Costo Neto
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      ),
+      header: 'Costo Neto',
+      // header: ({ column }) => (
+      //   <Button
+      //     variant="ghost"
+      //     onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+      //   >
+      //     Costo Neto
+      //     <ArrowUpDown className="ml-2 h-4 w-4" />
+      //   </Button>
+      // ),
       cell: (info) => {
         const value = info.getValue()
         const num = typeof value === "string" ? parseFloat(value) : value
@@ -125,14 +141,14 @@ export const TableComponentTop = ({
       </CardHeader>
 
       <CardContent>
-          <DataTableGrouping
-            columns={columns}
-            data={filteredData}
-            filterColumn="dimension"
-            filterPlaceholder="Buscar región…"
-            enableGrouping={true}                //activa agrupación
-            groupByColumn="dimension"            //agrupa por Región
-          />
+        <DataTableGrouping
+          columns={columns}
+          data={filteredData}
+          filterColumn="dimension"
+          filterPlaceholder="Buscar región…"
+          enableGrouping={true}                //activa agrupación
+          groupByColumn="dimension"            //agrupa por Región
+        />
 
         <div className="border-t bg-muted/50 px-6 py-4">
           <div className="flex items-center justify-between">
