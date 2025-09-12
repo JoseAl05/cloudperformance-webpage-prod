@@ -30,6 +30,7 @@ import {
     LineChart,
     TrendingUp,
     Server,
+    HardDrive,
 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { usePathname } from 'next/navigation'
@@ -119,6 +120,7 @@ export const SidebarComponent = ({
         { label: 'Top Facturaciones', subItems: topFacturaciones, icon: Zap },
         { label: 'Spot vs Vm', href: '/aws/funciones/spot-vs-vm', icon: Database },
         { label: 'Top S3 Buckets', href: '/aws/funciones/top-s3-buckets', icon: Server },
+        { label: 'Ebs No Utilizados', href: '/aws/funciones/ebs-no-utilizados', icon: HardDrive }
     ]
     const funcionesConSub = funciones.filter(f => f.subItems && f.subItems.length)
     const funcionesSimples = funciones.filter(f => f.href)

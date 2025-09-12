@@ -3,6 +3,7 @@ import { DataTableSingle } from '@/components/general/data-table/data-table-sing
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Ec2ConsumeViewInstanceColumns } from './Ec2ConsumeViewInstanceColumns';
 import { DataTableGrouping } from '@/components/general/data-table/data-table-grouping';
+import { Ec2ConsumneViewInstance } from '@/interfaces/vista-consumos/ec2ConsumeViewInterfaces';
 
 interface Ec2ConsumeViewInstanceTableProps {
     data: {

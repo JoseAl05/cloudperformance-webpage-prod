@@ -408,11 +408,17 @@ export function DataTableGrouping<TData, TValue>({
     const [itemsPageSize, setItemsPageSize] = useState(pageSizeItems)
 
     const safeData = Array.isArray(data) ? data : []
+    const totalGroupsForPagination = enableGrouping
+        ? new Set(safeData.map((r: unknown) => String(r[groupByColumn] ?? '—'))).size
+        : safeData.length
 
-    const { currentPage, totalPages, canPrevious, canNext, goToPrevious, goToNext, resetPage } = usePagination(
-        enableGrouping ? 0 : safeData.length,
-        groupPageSize
-    )
+    const { currentPage, totalPages, canPrevious, canNext, goToPrevious, goToNext, resetPage } =
+        usePagination(totalGroupsForPagination, groupPageSize)
+
+    // const { currentPage, totalPages, canPrevious, canNext, goToPrevious, goToNext, resetPage } = usePagination(
+    //     enableGrouping ? 0 : safeData.length,
+    //     groupPageSize
+    // )
 
     useEffect(() => {
         resetPage()
