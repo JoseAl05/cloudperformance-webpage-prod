@@ -73,6 +73,7 @@ export const SidebarComponent = ({
         },
         { label: 'Quotas', icon: PieChart, href: '/aws/quotas' },
         { label: 'Deployments', icon: Zap, href: '/aws/deployments' },
+        { label: 'Eventos', icon: Zap, href: '/aws/eventos' },
         { label: 'Vista Asesor', icon: Pyramid, href: '/aws/advisor' },
         {
             label: 'Vista Saving Plans',
