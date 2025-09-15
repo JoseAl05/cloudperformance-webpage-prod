@@ -8,7 +8,7 @@ import { RegionFilterComponent } from './RegionFilterComponent';
 import { TagFilterComponent } from './TagsFilterComponent';
 import { ServiceFilterComponent } from './ServiceFilterComponent';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Calendar, Filter, MapPin, Server, Tag, XCircle, Ban } from 'lucide-react';
+import { Calendar, Filter, MapPin, Server, Tag, XCircle, Ban, Box, Activity } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { InstancesFilterComponent } from './InstancesFilterComponent';
@@ -18,6 +18,8 @@ import { EksFilterComponent } from './EksFilterComponent';
 import { S3BucketFilter } from './S3FilterComponent';
 import { EbsFilterComponent } from './EbsFilterComponent';
 import { EventsTypeFilterComponent } from './EventsTypeFilterComponent';
+import { AdvisorCategoriesFilterComponent } from './AdvisorCategoriesFilterComponent';
+import { AdvisorStatusFilterComponent } from './AdvisorStatusFilterComponent';
 
 interface FiltersComponentProps {
     Component: (params: {
@@ -38,6 +40,10 @@ interface FiltersComponentProps {
     s3Filter?: boolean;
     ebsFilter?: boolean;
     eventsTypesFilter?: boolean;
+    advisorCategoriesFilter?: boolean;
+    advisorStatusFilter?: boolean;
+    isAdvisorCategoryMultiselect?: boolean;
+    isAdvisorStatusMultiselect?: boolean;
     isEventsTypesMultiselect?: boolean;
     isAsgMultiSelect?: boolean;
     isEksMultiSelect?: boolean;
@@ -66,6 +72,10 @@ export const FiltersComponent = ({
     s3Filter = false,
     ebsFilter = false,
     eventsTypesFilter = false,
+    advisorCategoriesFilter = false,
+    advisorStatusFilter = false,
+    isAdvisorCategoryMultiselect = false,
+    isAdvisorStatusMultiselect = false,
     isEventsTypesMultiselect = false,
     isEbsMultiselect = false,
     isInstanceMultiSelect = false,
@@ -102,6 +112,8 @@ export const FiltersComponent = ({
         const s3BucketParam = searchParams.get('s3Bucket');
         const ebsParam = searchParams.get('ebs');
         const eventsTypesParam = searchParams.get('eventsTypes');
+        const advisorCategoryParam = searchParams.get('advisorCategory');
+        const advisorStatusParam = searchParams.get('advisorStatus');
 
         return {
             startDate: startDateParam ? new Date(startDateParam) : yesterday,
@@ -119,7 +131,9 @@ export const FiltersComponent = ({
             service: selectedServiceParam || '',
             s3Bucket: s3BucketParam || '',
             ebs: ebsParam || '',
-            eventsTypes: eventsTypesParam || ''
+            eventsTypes: eventsTypesParam || '',
+            advisorCategory: advisorCategoryParam || '',
+            advisorStatus: advisorStatusParam || ''
         };
     };
 
@@ -139,7 +153,9 @@ export const FiltersComponent = ({
     const [tempService, setTempService] = useState(filters.service);
     const [tempS3Bucket, setTempS3Bucket] = useState(filters.s3Bucket);
     const [tempEbs, setTempEbs] = useState(filters.ebs);
-    const [tempEventsTypes, setTempEventsTypes] = useState(filters.eventsTypes)
+    const [tempEventsTypes, setTempEventsTypes] = useState(filters.eventsTypes);
+    const [tempAdvisorCategory, setTempAdvisorCategory] = useState(filters.advisorCategory);
+    const [tempAdvisorStatus, setTempAdvisorStatus] = useState(filters.advisorStatus);
 
     useEffect(() => {
         const newFilters = getInitialFilters();
@@ -159,6 +175,8 @@ export const FiltersComponent = ({
         setTempS3Bucket(newFilters.s3Bucket);
         setTempEbs(newFilters.ebs);
         setTempEventsTypes(newFilters.eventsTypes);
+        setTempAdvisorCategory(newFilters.advisorCategory);
+        setTempAdvisorStatus(newFilters.advisorStatus);
     }, [searchParams]);
 
     const onChange = (dates: [Date | null, Date | null]) => setTempRange(dates);
@@ -183,7 +201,9 @@ export const FiltersComponent = ({
             service: tempService,
             s3Bucket: tempS3Bucket,
             ebs: tempEbs,
-            eventsTypes: tempEventsTypes
+            eventsTypes: tempEventsTypes,
+            advisorCategory: tempAdvisorCategory,
+            advisorStatus: tempAdvisorStatus
         };
         setFilters(newFilters);
 
@@ -204,6 +224,8 @@ export const FiltersComponent = ({
         if (newFilters.s3Bucket) query.set('s3Bucket', newFilters.s3Bucket);
         if (newFilters.ebs) query.set('ebs', newFilters.ebs);
         if (newFilters.eventsTypes) query.set('eventsTypes', newFilters.eventsTypes);
+        if (newFilters.advisorCategory) query.set('advisorCategory', newFilters.advisorCategory);
+        if (newFilters.advisorStatus) query.set('advisorStatus', newFilters.advisorStatus);
 
         router.push(`${window.location.pathname}?${query.toString()}`);
     };
@@ -225,7 +247,9 @@ export const FiltersComponent = ({
             service: '',
             s3Bucket: '',
             ebs: '',
-            eventsTypes: ''
+            eventsTypes: '',
+            advisorCategory: '',
+            advisorStatus: ''
         };
 
         setFilters({
@@ -244,7 +268,9 @@ export const FiltersComponent = ({
             service: defaultFilters.service,
             s3Bucket: defaultFilters.s3Bucket,
             ebs: defaultFilters.ebs,
-            eventsTypes: defaultFilters.eventsTypes
+            eventsTypes: defaultFilters.eventsTypes,
+            advisorCategory: defaultFilters.advisorCategory,
+            advisorStatus: defaultFilters.advisorStatus
         });
         setTempRange([defaultFilters.startDate, defaultFilters.endDate]);
         setTempInstance(defaultFilters.instance);
@@ -261,6 +287,8 @@ export const FiltersComponent = ({
         setTempS3Bucket(defaultFilters.s3Bucket);
         setTempEbs(defaultFilters.ebs);
         setTempEventsTypes(defaultFilters.eventsTypes);
+        setTempAdvisorCategory(defaultFilters.advisorCategory);
+        setTempAdvisorStatus(defaultFilters.advisorStatus);
 
         router.push(window.location.pathname);
     };
@@ -504,6 +532,39 @@ export const FiltersComponent = ({
                                 </div>
                             )
                         }
+                        {
+                            advisorCategoriesFilter && (
+                                <div className='space-y-2'>
+                                    <label className='text-sm font-medium text-foreground flex items-center gap-2'>
+                                        <Box className='h-4 w-4' />
+                                        Categorías
+                                    </label>
+                                    <AdvisorCategoriesFilterComponent
+                                        advisorCategory={tempAdvisorCategory}
+                                        setAdvisorCategory={setTempAdvisorCategory}
+                                        startDate={tempStartDate}
+                                        endDate={tempEndDate}
+                                        region={tempRegion}
+                                        isAdvisorCategoryMultiselect={isAdvisorCategoryMultiselect}
+                                    />
+                                </div>
+                            )
+                        }
+                        {
+                            advisorStatusFilter && (
+                                <div className='space-y-2'>
+                                    <label className='text-sm font-medium text-foreground flex items-center gap-2'>
+                                        <Activity className='h-4 w-4' />
+                                        Status
+                                    </label>
+                                    <AdvisorStatusFilterComponent
+                                        advisorStatus={tempAdvisorStatus}
+                                        setAdvisorStatus={setTempAdvisorStatus}
+                                        isAdvisorStatusMultiselect={isAdvisorStatusMultiselect}
+                                    />
+                                </div>
+                            )
+                        }
                     </div>
 
                     <div className='flex items-center gap-4'>
@@ -521,6 +582,7 @@ export const FiltersComponent = ({
                     startDate={filters.startDate}
                     endDate={filters.endDate}
                     instance={asgFilter ? (filters.asgInstance || filters.asg) : filters.instance}
+                    eksAsgInstance={filters.eksAsgInstance}
                     instancesService={instancesService}
                     region={filters.region}
                     selectedKey={filters.selectedKey}
@@ -529,6 +591,8 @@ export const FiltersComponent = ({
                     buckets={filters.s3Bucket}
                     ebs={filters.ebs}
                     eventType={filters.eventsTypes}
+                    advisorCategory={filters.advisorCategory}
+                    advisorStatus={filters.advisorStatus}
                 />
             </Card>
         </div>
