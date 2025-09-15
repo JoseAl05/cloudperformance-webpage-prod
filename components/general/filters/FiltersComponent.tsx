@@ -528,6 +528,7 @@ export const FiltersComponent = ({
                     services={filters.service}
                     buckets={filters.s3Bucket}
                     ebs={filters.ebs}
+                    eventType={filters.eventsTypes}
                 />
             </Card>
         </div>

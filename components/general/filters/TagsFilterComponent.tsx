@@ -24,6 +24,9 @@ interface TagFilterComponentProps {
     onChange?: (next: { key: string | null; value: string | null }) => void
 }
 
+type Tag = { Key: string; Value: string };
+type Item = { Tags?: Tag[] };
+
 const fetcher = (url: string) =>
     fetch(url, {
         method: "GET",
@@ -67,13 +70,18 @@ export const TagFilterComponent = ({
         if (setTagsData) setTagsData(data || [])
     }, [data, setTagsData])
 
-    const tagMap: Record<string, Set<string>> = {}
-    data?.forEach((item: unknown) => {
-        item?.Tags?.forEach((tag: { Key: string; Value: string }) => {
-            if (!tagMap[tag.Key]) tagMap[tag.Key] = new Set()
-            tagMap[tag.Key].add(tag.Value)
-        })
-    })
+    const tagMap: Record<string, Set<string>> = {};
+    if (Array.isArray(data)) {
+        data.forEach((item: Item) => {
+            if (!item || !Array.isArray(item.Tags)) return;
+            item.Tags.forEach(({ Key, Value }) => {
+                if (!tagMap[Key]) {
+                    tagMap[Key] = new Set<string>();
+                }
+                tagMap[Key].add(Value);
+            });
+        });
+    }
 
     const keys = Object.keys(tagMap)
     const valuesForKey = useMemo(
@@ -102,7 +110,7 @@ export const TagFilterComponent = ({
         return null;
     }
 
-    if (isLoading) return <LoaderComponent size='small'/>
+    if (isLoading) return <LoaderComponent size='small' />
     if (error) return <div>Error al cargar datos</div>
 
     const noTags = (data && data.length === 0) || keys.length === 0
