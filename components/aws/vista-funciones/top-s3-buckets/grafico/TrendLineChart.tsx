@@ -45,7 +45,7 @@ export const TrendLineChart = ({
     fetcher
   )
 
-  const toNumber = (v: any) => {
+  const toNumber = (v: unknown) => {
     const n = Number(v)
     return Number.isFinite(n) ? n : 0
   }
@@ -54,9 +54,9 @@ export const TrendLineChart = ({
     if (!chartRef.current || !data) return
 
     // Filtrar por métrica
-    const filtered = data.filter((d: any) => d.metric === metric)
+    const filtered = data.filter((d: unknown) => d.metric === metric)
     const map = new Map<string, number>()
-    filtered.forEach((item: any) => {
+    filtered.forEach((item: unknown) => {
       const key = item.sync_time
       const prev = map.get(key) ?? 0
       map.set(key, prev + toNumber(item.metric_value))

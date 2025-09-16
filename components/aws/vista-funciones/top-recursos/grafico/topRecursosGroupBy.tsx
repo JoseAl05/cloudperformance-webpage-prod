@@ -44,7 +44,7 @@ export const TopRecursosChart = ({ startDate, endDate,groupBy, title, icon }: To
   const groups = Array.isArray(data) ? data : []
 
   // Ahora `total_unique_resources` ya viene calculado, no necesitamos sumar histórico
-  const aggregated = groups.map((g: any) => ({
+  const aggregated = groups.map((g: unknown) => ({
     name: g.group_by ?? "N/A",
     total: g.total_unique_resources ?? 0
   }))

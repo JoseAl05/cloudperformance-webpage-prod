@@ -50,9 +50,9 @@ export const MainViewSpotVsVm = ({ startDate, endDate }: SpotVsVmProps) => {
   useEffect(() => {
     if (!chartRef.current || !data) return
 
-    const times = data.map((item: any) => item.sync_time)
-    const totalInstancias = data.map((item: any) => item.total_instancias)
-    const totalSpot = data.map((item: any) => item.total_spot)
+    const times = data.map((item: unknown) => item.sync_time)
+    const totalInstancias = data.map((item: unknown) => item.total_instancias)
+    const totalSpot = data.map((item: unknown) => item.total_spot)
 
     const options: echarts.EChartsOption = {
       tooltip: {

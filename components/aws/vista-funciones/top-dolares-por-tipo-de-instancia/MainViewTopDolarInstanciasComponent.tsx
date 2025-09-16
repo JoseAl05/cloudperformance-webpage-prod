@@ -46,7 +46,7 @@ export const MainViewTopDolaresTipoInstancia = ({ startDate, endDate }: TopDolar
   const topDolaresInstance = Array.isArray(data) ? data : (data?.data ?? [])
 
   // === Función segura para números
-  const toNumber = (v: any) => {
+  const toNumber = (v: unknown) => {
     const n = Number(v);
     return Number.isFinite(n) ? n : 0;
   };
@@ -95,7 +95,7 @@ export const MainViewTopDolaresTipoInstancia = ({ startDate, endDate }: TopDolar
       const dataMap = new Map<string, Map<string, number>>();
       const instanceTotals: Record<string, number> = {};
 
-      filteredData.forEach((item: any) => {
+      filteredData.forEach((item: unknown) => {
         const instance = item.dimension;
         const service = item.service_dimension;
         const cost = toNumber(item[tipoCosto]);
@@ -130,14 +130,14 @@ export const MainViewTopDolaresTipoInstancia = ({ startDate, endDate }: TopDolar
         tooltip: {
           trigger: 'axis',
           axisPointer: { type: 'shadow' },
-          formatter: (params: any) => {
+          formatter: (params: unknown) => {
           //filtrar solo valores mayores a 0
-          const visibleItems = params.filter((item: any) => Number(item.value) > 0);
+          const visibleItems = params.filter((item: unknown) => Number(item.value) > 0);
 
-          const total = visibleItems.reduce((sum: number, item: any) => sum + item.value, 0);
+          const total = visibleItems.reduce((sum: number, item: unknown) => sum + item.value, 0);
 
           const tooltipItems = visibleItems.map(
-            (item: any) => `${item.marker} ${item.seriesName}: $${item.value.toPrecision(2)}`
+            (item: unknown) => `${item.marker} ${item.seriesName}: $${item.value.toPrecision(2)}`
           );
 
           return `<strong>${params[0].axisValue} - Total: $${total.toFixed(2)}</strong><br/>${
@@ -175,13 +175,13 @@ export const MainViewTopDolaresTipoInstancia = ({ startDate, endDate }: TopDolar
 
       chart.setOption(option);
 
-      chart.on('click', function (params: any) {
+      chart.on('click', function (params: unknown) {
         const instance = params.name;
         if (instance) setSelectedInstance(instance);
       });
     } else {
       // === Vista DETALLE por Servicios ===
-      const instanceData = topDolaresInstance.filter((item: any) => item.dimension === selectedInstance);
+      const instanceData = topDolaresInstance.filter((item: unknown) => item.dimension === selectedInstance);
       const serviceTotals: Record<string, number> = {};
 
       instanceData.forEach(item => {
@@ -200,13 +200,13 @@ export const MainViewTopDolaresTipoInstancia = ({ startDate, endDate }: TopDolar
         tooltip: {
           trigger: 'axis',
           axisPointer: { type: 'shadow' },
-          formatter: (params: any) => {
-            const visibleItems = params.filter((item: any) => Number(item.value) > 0);
+          formatter: (params: unknown) => {
+            const visibleItems = params.filter((item: unknown) => Number(item.value) > 0);
 
-            const total = visibleItems.reduce((sum: number, item: any) => sum + item.value, 0);
+            const total = visibleItems.reduce((sum: number, item: unknown) => sum + item.value, 0);
 
             const tooltipItems = visibleItems.map(
-              (item: any) => `${item.marker} ${item.name}: $${item.value.toPrecision(2)}`
+              (item: unknown) => `${item.marker} ${item.name}: $${item.value.toPrecision(2)}`
             );
 
             return `<strong>Total: $${total.toFixed(2)}</strong><br/>${

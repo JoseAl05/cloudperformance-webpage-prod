@@ -45,7 +45,7 @@ export const MainViewTopDolaresRecurso = ({ startDate, endDate }: TopDolaresReso
 
   const topDolaresResource = Array.isArray(data) ? data : (data?.data ?? [])
 
-  const toNumber = (v: any) => {
+  const toNumber = (v: unknown) => {
     const n = Number(v);
     return Number.isFinite(n) ? n : 0;
   };
@@ -94,7 +94,7 @@ export const MainViewTopDolaresRecurso = ({ startDate, endDate }: TopDolaresReso
   //     const dataMap = new Map<string, Map<string, number>>();
   //     const serviceTotals: Record<string, number> = {};
 
-  //     filteredData.forEach((item: any) => {
+  //     filteredData.forEach((item: unknown) => {
   //       const service = item.service_dimension;
   //       const resource = item.dimension;
   //       const cost = toNumber(item[tipoCosto]);
@@ -130,12 +130,12 @@ export const MainViewTopDolaresRecurso = ({ startDate, endDate }: TopDolaresReso
   //       tooltip: {
   //         trigger: "axis",
   //         axisPointer: { type: "shadow" },
-  //         formatter: (params: any) => {
-  //           const visibleItems = params.filter((item: any) => Number(item.value) > 0);
-  //           const total = visibleItems.reduce((sum: number, item: any) => sum + item.value, 0);
+  //         formatter: (params: unknown) => {
+  //           const visibleItems = params.filter((item: unknown) => Number(item.value) > 0);
+  //           const total = visibleItems.reduce((sum: number, item: unknown) => sum + item.value, 0);
 
   //           const tooltipItems = visibleItems.map(
-  //             (item: any) => `${item.marker} ${item.seriesName}: $${item.value.toPrecision(2)}`
+  //             (item: unknown) => `${item.marker} ${item.seriesName}: $${item.value.toPrecision(2)}`
   //           );
 
   //           return `<strong>${params[0].axisValue} - Total: $${total.toFixed(2)}</strong><br/>${
@@ -168,13 +168,13 @@ export const MainViewTopDolaresRecurso = ({ startDate, endDate }: TopDolaresReso
 
   //     chart.setOption(option);
 
-  //     chart.on("click", function (params: any) {
+  //     chart.on("click", function (params: unknown) {
   //       const service = params.name;
   //       if (service) setSelectedResource(service);
   //     });
   //   } else {
   //     // === VISTA DETALLE por RECURSOS ===
-  //     const serviceData = topDolaresResource.filter((item: any) => item.service_dimension === selectedResource);
+  //     const serviceData = topDolaresResource.filter((item: unknown) => item.service_dimension === selectedResource);
   //     const resourceTotals: Record<string, number> = {};
 
   //     serviceData.forEach(item => {
@@ -227,7 +227,7 @@ export const MainViewTopDolaresRecurso = ({ startDate, endDate }: TopDolaresReso
   //     const dataMap = new Map<string, Map<string, number>>();
   //     const serviceTotals: Record<string, number> = {};
 
-  //     filteredData.forEach((item: any) => {
+  //     filteredData.forEach((item: unknown) => {
   //       const service = item.service_dimension;
   //       const resource = item.dimension;
   //       const cost = toNumber(item[tipoCosto]);
@@ -278,12 +278,12 @@ export const MainViewTopDolaresRecurso = ({ startDate, endDate }: TopDolaresReso
   //       tooltip: {
   //         trigger: "axis",
   //         axisPointer: { type: "shadow" },
-  //         formatter: (params: any) => {
-  //           const visibleItems = params.filter((item: any) => Number(item.value) > 0);
-  //           const total = visibleItems.reduce((sum: number, item: any) => sum + item.value, 0);
+  //         formatter: (params: unknown) => {
+  //           const visibleItems = params.filter((item: unknown) => Number(item.value) > 0);
+  //           const total = visibleItems.reduce((sum: number, item: unknown) => sum + item.value, 0);
 
   //           const tooltipItems = visibleItems.map(
-  //             (item: any) => `${item.marker} ${item.seriesName}: $${item.value.toPrecision(2)}`
+  //             (item: unknown) => `${item.marker} ${item.seriesName}: $${item.value.toPrecision(2)}`
   //           );
 
   //           return `<strong>${params[0].axisValue} - Total: $${total.toFixed(2)}</strong><br/>${
@@ -316,13 +316,13 @@ export const MainViewTopDolaresRecurso = ({ startDate, endDate }: TopDolaresReso
 
   //     chart.setOption(option);
 
-  //     chart.on("click", function (params: any) {
+  //     chart.on("click", function (params: unknown) {
   //       const service = params.name;
   //       if (service) setSelectedResource(service);
   //     });
   //   } else {
   //     // === VISTA DETALLE por RECURSOS ===
-  //     const serviceData = topDolaresResource.filter((item: any) => item.service_dimension === selectedResource);
+  //     const serviceData = topDolaresResource.filter((item: unknown) => item.service_dimension === selectedResource);
   //     const resourceTotals: Record<string, number> = {};
 
   //     serviceData.forEach(item => {
@@ -376,7 +376,7 @@ export const MainViewTopDolaresRecurso = ({ startDate, endDate }: TopDolaresReso
 
       // === 1) calcular totales globales por recurso ===
       const resourceTotalsGlobal: Record<string, number> = {};
-      filteredData.forEach((item: any) => {
+      filteredData.forEach((item: unknown) => {
         const resource = item.dimension;
         const cost = toNumber(item[tipoCosto]);
         resourceTotalsGlobal[resource] = (resourceTotalsGlobal[resource] || 0) + cost;
@@ -395,7 +395,7 @@ export const MainViewTopDolaresRecurso = ({ startDate, endDate }: TopDolaresReso
       const dataMap = new Map<string, Map<string, number>>();
       const serviceTotals: Record<string, number> = {};
 
-      filteredData.forEach((item: any) => {
+      filteredData.forEach((item: unknown) => {
         const service = item.service_dimension;
         const resource = topResources.includes(item.dimension) ? item.dimension : "Otros";
         const cost = toNumber(item[tipoCosto]);
@@ -434,12 +434,12 @@ export const MainViewTopDolaresRecurso = ({ startDate, endDate }: TopDolaresReso
         tooltip: {
           trigger: "axis",
           axisPointer: { type: "shadow" },
-          formatter: (params: any) => {
-            const visibleItems = params.filter((item: any) => Number(item.value) > 0);
-            const total = visibleItems.reduce((sum: number, item: any) => sum + item.value, 0);
+          formatter: (params: unknown) => {
+            const visibleItems = params.filter((item: unknown) => Number(item.value) > 0);
+            const total = visibleItems.reduce((sum: number, item: unknown) => sum + item.value, 0);
 
             const tooltipItems = visibleItems.map(
-              (item: any) => `${item.marker} ${item.seriesName}: $${item.value.toPrecision(2)}`
+              (item: unknown) => `${item.marker} ${item.seriesName}: $${item.value.toPrecision(2)}`
             );
 
             return `<strong>${params[0].axisValue} - Total: $${total.toFixed(2)}</strong><br/>${
@@ -472,13 +472,13 @@ export const MainViewTopDolaresRecurso = ({ startDate, endDate }: TopDolaresReso
 
       chart.setOption(option);
 
-      chart.on("click", function (params: any) {
+      chart.on("click", function (params: unknown) {
         const service = params.name;
         if (service) setSelectedResource(service);
       });
     } else {
       // === VISTA DETALLE por RECURSOS ===
-      const serviceData = topDolaresResource.filter((item: any) => item.service_dimension === selectedResource);
+      const serviceData = topDolaresResource.filter((item: unknown) => item.service_dimension === selectedResource);
       const resourceTotals: Record<string, number> = {};
 
       serviceData.forEach(item => {

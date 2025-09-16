@@ -45,7 +45,7 @@ export const MainViewTopDolaresTipoCompra = ({ startDate, endDate }: TopDolaresP
 
   const topDolaresPurchaseType = Array.isArray(data) ? data : (data?.data ?? [])
 
-  const toNumber = (v: any) => {
+  const toNumber = (v: unknown) => {
     const n = Number(v);
     return Number.isFinite(n) ? n : 0;
   };
@@ -94,7 +94,7 @@ export const MainViewTopDolaresTipoCompra = ({ startDate, endDate }: TopDolaresP
       const dataMap = new Map<string, Map<string, number>>();
       const purchaseTotals: Record<string, number> = {};
 
-      filteredData.forEach((item: any) => {
+      filteredData.forEach((item: unknown) => {
         const purchase = item.dimension;
         const service = item.service_dimension;
         const cost = toNumber(item[tipoCosto]);
@@ -129,12 +129,12 @@ export const MainViewTopDolaresTipoCompra = ({ startDate, endDate }: TopDolaresP
         tooltip: {
           trigger: 'axis',
           axisPointer: { type: 'shadow' },
-          formatter: (params: any) => {
-            const visibleItems = params.filter((item: any) => Number(item.value) > 0);
-            const total = visibleItems.reduce((sum: number, item: any) => sum + item.value, 0);
+          formatter: (params: unknown) => {
+            const visibleItems = params.filter((item: unknown) => Number(item.value) > 0);
+            const total = visibleItems.reduce((sum: number, item: unknown) => sum + item.value, 0);
 
             const tooltipItems = visibleItems.map(
-              (item: any) => `${item.marker} ${item.seriesName}: $${item.value.toPrecision(2)}`
+              (item: unknown) => `${item.marker} ${item.seriesName}: $${item.value.toPrecision(2)}`
             );
 
             return `<strong>${params[0].axisValue} - Total: $${total.toFixed(2)}</strong><br/>${
@@ -176,13 +176,13 @@ export const MainViewTopDolaresTipoCompra = ({ startDate, endDate }: TopDolaresP
 
       chart.setOption(option);
 
-      chart.on('click', function (params: any) {
+      chart.on('click', function (params: unknown) {
         const purchase = params.name;
         if (purchase) setSelectedPurchaseType(purchase);
       });
     } else {
       // === Vista DETALLE por SERVICIOS ===
-      const purchaseData = topDolaresPurchaseType.filter((item: any) => item.dimension === selectedPurchaseType);
+      const purchaseData = topDolaresPurchaseType.filter((item: unknown) => item.dimension === selectedPurchaseType);
       const serviceTotals: Record<string, number> = {};
 
       purchaseData.forEach(item => {
@@ -201,12 +201,12 @@ export const MainViewTopDolaresTipoCompra = ({ startDate, endDate }: TopDolaresP
         tooltip: {
           trigger: 'axis',
           axisPointer: { type: 'shadow' },
-          formatter: (params: any) => {
-            const visibleItems = params.filter((item: any) => Number(item.value) > 0);
-            const total = visibleItems.reduce((sum: number, item: any) => sum + item.value, 0);
+          formatter: (params: unknown) => {
+            const visibleItems = params.filter((item: unknown) => Number(item.value) > 0);
+            const total = visibleItems.reduce((sum: number, item: unknown) => sum + item.value, 0);
 
             const tooltipItems = visibleItems.map(
-              (item: any) => `${item.marker} ${item.name}: $${item.value.toPrecision(2)}`
+              (item: unknown) => `${item.marker} ${item.name}: $${item.value.toPrecision(2)}`
             );
 
             return `<strong>Total: $${total.toFixed(2)}</strong><br/>${

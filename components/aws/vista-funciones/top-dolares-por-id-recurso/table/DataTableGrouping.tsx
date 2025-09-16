@@ -79,7 +79,7 @@ export function DataTableGrouping<TData, TValue>({
     const endGroupIndex = startGroupIndex + outerPageSize
     const pageGroups = groupEntries.slice(startGroupIndex, endGroupIndex)
 
-    const result: any[] = []
+    const result: unknown[] = []
     pageGroups.forEach(([groupValue, items]) => {
       result.push({
         __rowId: `group-${groupValue}`,
@@ -97,7 +97,7 @@ export function DataTableGrouping<TData, TValue>({
     data: processedData,
     columns,
     getCoreRowModel: getCoreRowModel(),
-    getRowId: (row: any) => row.__rowId,
+    getRowId: (row: unknown) => row.__rowId,
   })
 
   const totalPages = enableGrouping
@@ -147,7 +147,7 @@ export function DataTableGrouping<TData, TValue>({
           <TableBody>
             {table.getRowModel().rows.length ? (
               table.getRowModel().rows.map((row) => {
-                const rowData = row.original as any
+                const rowData = row.original as unknown
                 if (rowData.__isGroupRow) {
                   const isExpanded = expandedGroups.has(rowData.__groupValue)
                   const items = rowData.__items || []
@@ -178,7 +178,7 @@ export function DataTableGrouping<TData, TValue>({
                       </TableRow>
 
                       {isExpanded &&
-                        paginatedItems.map((item: any, idx: number) => (
+                        paginatedItems.map((item: unknown, idx: number) => (
                           <TableRow key={`item-${rowData.__groupValue}-${idx}`}>
                             {columns.map((col, i) => {
                               const accessor = col.accessorKey as string

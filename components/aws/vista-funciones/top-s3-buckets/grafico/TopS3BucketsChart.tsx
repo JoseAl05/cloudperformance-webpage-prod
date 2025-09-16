@@ -38,9 +38,9 @@ export const TopS3BucketsChart = ({ startDate, endDate, region, buckets, metric,
 
   const aggregateData = () => {
     if (!Array.isArray(data)) return []
-    const filtered = data.filter((d: any) => d.metric === metric)
+    const filtered = data.filter((d: unknown) => d.metric === metric)
     const map = new Map<string, number>()
-    filtered.forEach((item: any) => {
+    filtered.forEach((item: unknown) => {
       const prev = map.get(item.resource) ?? 0
       map.set(item.resource, prev + Number(item.metric_value))
     })
@@ -61,7 +61,7 @@ export const TopS3BucketsChart = ({ startDate, endDate, region, buckets, metric,
       tooltip: {
         trigger: 'axis',
         axisPointer: { type: 'shadow' },
-        formatter: (params: any) => {
+        formatter: (params: unknown) => {
           const val = params[0].value
           return metric.includes('Bytes')
             ? `${params[0].name}<br/>${(val / 1073741824).toFixed(2)} GB`

@@ -45,7 +45,7 @@ export const MainViewTopDolaresTipoCobro = ({ startDate, endDate }: TopDolaresRe
 
   const topDolaresRecordType = Array.isArray(data) ? data : (data?.data ?? [])
 
-  const toNumber = (v: any) => {
+  const toNumber = (v: unknown) => {
     const n = Number(v);
     return Number.isFinite(n) ? n : 0;
   };
@@ -94,7 +94,7 @@ export const MainViewTopDolaresTipoCobro = ({ startDate, endDate }: TopDolaresRe
       const dataMap = new Map<string, Map<string, number>>();
       const recordTotals: Record<string, number> = {};
 
-      filteredData.forEach((item: any) => {
+      filteredData.forEach((item: unknown) => {
         const record = item.dimension;
         const service = item.service_dimension;
         const cost = toNumber(item[tipoCosto]);
@@ -129,12 +129,12 @@ export const MainViewTopDolaresTipoCobro = ({ startDate, endDate }: TopDolaresRe
         tooltip: {
           trigger: 'axis',
           axisPointer: { type: 'shadow' },
-          formatter: (params: any) => {
-            const visibleItems = params.filter((item: any) => Number(item.value) > 0);
-            const total = visibleItems.reduce((sum: number, item: any) => sum + item.value, 0);
+          formatter: (params: unknown) => {
+            const visibleItems = params.filter((item: unknown) => Number(item.value) > 0);
+            const total = visibleItems.reduce((sum: number, item: unknown) => sum + item.value, 0);
 
             const tooltipItems = visibleItems.map(
-              (item: any) => `${item.marker} ${item.seriesName}: $${item.value.toPrecision(2)}`
+              (item: unknown) => `${item.marker} ${item.seriesName}: $${item.value.toPrecision(2)}`
             );
 
             return `<strong>${params[0].axisValue} - Total: $${total.toFixed(2)}</strong><br/>${
@@ -176,13 +176,13 @@ export const MainViewTopDolaresTipoCobro = ({ startDate, endDate }: TopDolaresRe
 
       chart.setOption(option);
 
-      chart.on('click', function (params: any) {
+      chart.on('click', function (params: unknown) {
         const record = params.name;
         if (record) setSelectedRecordType(record);
       });
     } else {
       // === Vista DETALLE por SERVICIOS ===
-      const recordData = topDolaresRecordType.filter((item: any) => item.dimension === selectedRecordType);
+      const recordData = topDolaresRecordType.filter((item: unknown) => item.dimension === selectedRecordType);
       const serviceTotals: Record<string, number> = {};
 
       recordData.forEach(item => {
@@ -201,12 +201,12 @@ export const MainViewTopDolaresTipoCobro = ({ startDate, endDate }: TopDolaresRe
         tooltip: {
           trigger: 'axis',
           axisPointer: { type: 'shadow' },
-          formatter: (params: any) => {
-            const visibleItems = params.filter((item: any) => Number(item.value) > 0);
-            const total = visibleItems.reduce((sum: number, item: any) => sum + item.value, 0);
+          formatter: (params: unknown) => {
+            const visibleItems = params.filter((item: unknown) => Number(item.value) > 0);
+            const total = visibleItems.reduce((sum: number, item: unknown) => sum + item.value, 0);
 
             const tooltipItems = visibleItems.map(
-              (item: any) => `${item.marker} ${item.name}: $${item.value.toPrecision(2)}`
+              (item: unknown) => `${item.marker} ${item.name}: $${item.value.toPrecision(2)}`
             );
 
             return `<strong>Total: $${total.toFixed(2)}</strong><br/>${
