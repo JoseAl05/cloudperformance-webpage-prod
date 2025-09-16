@@ -21,6 +21,7 @@ interface EksAsgFilterComponentProps {
     region: string,
     isEksAsgMultiselect: boolean,
     isEksAsgInstanceMultiselect: boolean,
+    isInstancesService?: string,
 }
 
 const fetcher = (url: string) =>
@@ -32,6 +33,7 @@ const fetcher = (url: string) =>
         }
     }).then(res => res.json());
 
+
 export const EksAsgFilterComponent = ({
     eks,
     eksAsg,
@@ -42,14 +44,25 @@ export const EksAsgFilterComponent = ({
     endDate,
     region,
     isEksAsgMultiselect,
-    isEksAsgInstanceMultiselect
+    isEksAsgInstanceMultiselect,
+    isInstancesService
 }: EksAsgFilterComponentProps) => {
     const [open, setOpen] = useState(false);
 
-    const url = `${process.env.NEXT_PUBLIC_API_URL}/eks/all-eks-autoscaling-groups?date_from=${startDate}&date_to=${endDate}&region=${region}`;
+    let url = '';
+    switch (isInstancesService) {
+        case "infraUsed":
+            url = `${process.env.NEXT_PUBLIC_API_URL}/aws/eks/getAsgListbyClusterName?date_from=${startDate}&date_to=${endDate}&eks_clusterName=${eks}&region=${region}`;
+            break;
+        default:
+            url = `${process.env.NEXT_PUBLIC_API_URL}/eks/all-eks-autoscaling-groups?date_from=${startDate}&date_to=${endDate}&region=${region}`;
+            break;
+    }
+
 
     const shouldFetch = !!region;
     const { data, error, isLoading } = useSWR(shouldFetch ? url : null, fetcher);
+
 
     useEffect(() => {
         // Solo actuar cuando terminó la carga y no hubo error
@@ -81,7 +94,7 @@ export const EksAsgFilterComponent = ({
         if (eksAsgValue === 'all') {
             eksAsgs = ['all'];
         } else {
-            eksAsgs = asgs.filter((i) => i !== 'all');
+            eksAsgs = eksAsgs.filter((i) => i !== 'all');
             if (eksAsgs.includes(eksAsgValue)) eksAsgs = eksAsgs.filter((i) => i !== eksAsgValue);
             else eksAsgs.push(eksAsgValue);
         }
@@ -150,6 +163,7 @@ export const EksAsgFilterComponent = ({
                 endDate={endDate}
                 region={region}
                 isEksAsgInstanceMultiselect={isEksAsgInstanceMultiselect}
+                isInstancesService={isInstancesService}
             />
             {/* Instancias de ASG (solo si hay ASG disponible y seleccionado) */}
             {/* <AsgInstancesFilterComponent

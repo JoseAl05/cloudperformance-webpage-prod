@@ -469,6 +469,7 @@ export const FiltersComponent = ({
                                     isEksMultiSelect={isEksMultiSelect}
                                     isEksAsgMultiselect={isEksAsgMultiSelect}
                                     isEksAsgInstanceMultiselect={isEksAsgInstanceMultiSelect}
+                                    isInstancesService={instancesService}
                                 />
                             </div>
                         )}

@@ -4,6 +4,7 @@ import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import { LoaderComponent } from '../LoaderComponent';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils'
 import { Check, ChevronsUpDown } from 'lucide-react';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { EksAsgFilterComponent } from './EksAsgFilterComponent';
@@ -24,6 +25,7 @@ interface EksFilterComponentProps {
     isEksMultiSelect: boolean;
     isEksAsgMultiselect: boolean;
     isEksAsgInstanceMultiselect: boolean;
+    isInstancesService?: string;
 }
 
 const fetcherPost = (url: string, tags: { Key: string; Value: string } | null = null) =>
@@ -34,6 +36,15 @@ const fetcherPost = (url: string, tags: { Key: string; Value: string } | null = 
             'Content-Type': 'application/json',
         },
         body: tags ? JSON.stringify([tags]) : null,
+    }).then(res => res.json());
+
+const fetcherGet = (url: string) =>
+    fetch(url, {
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${process.env.NEXT_PUBLIC_API_TOKEN}`,
+            'Content-Type': 'application/json',
+        },
     }).then(res => res.json());
 
 
@@ -51,7 +62,8 @@ export const EksFilterComponent = ({
     selectedValue,
     isEksMultiSelect,
     isEksAsgMultiselect,
-    isEksAsgInstanceMultiselect
+    isEksAsgInstanceMultiselect,
+    isInstancesService
 }: EksFilterComponentProps) => {
 
     const [open, setOpen] = useState(false);
@@ -59,11 +71,24 @@ export const EksFilterComponent = ({
     const startDateFormatted = startDate.toISOString().replace('Z', '').slice(0, -4);
     const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : '';
 
-    const url = `${process.env.NEXT_PUBLIC_API_URL}/eks/all-eks_clusters?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`;
+    // const url = `${process.env.NEXT_PUBLIC_API_URL}/eks/all-eks_clusters?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`;
+    let url = '';
+    switch (isInstancesService) {
+        case "infraUsed":
+            url = `${process.env.NEXT_PUBLIC_API_URL}/aws/eks/getClusterEksList?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`;
+            break;
+        default:
+            url = `${process.env.NEXT_PUBLIC_API_URL}/eks/all-eks_clusters?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`;
+            break;
+    }
+
+    // const url = `${process.env.NEXT_PUBLIC_API_URL}/aws/eks/getClusterEksList?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`;
     const tagsBody = selectedKey !== 'allKeys' && selectedValue ? { Key: selectedKey, Value: selectedValue } : null;
 
+
     const shouldFetch = !!region;
-    const { data, error, isLoading } = useSWR(shouldFetch ? [url, tagsBody] : null, ([u, t]) => fetcherPost(u, t));
+    const apiMethod = isInstancesService === "infraUsed" ? fetcherGet : fetcherPost;
+    const { data, error, isLoading } = useSWR(shouldFetch ? [url, tagsBody] : null, ([u, t]) => apiMethod(u, t));
 
     useEffect(() => {
         // Solo actuar cuando terminó la carga y no hubo error
@@ -168,6 +193,7 @@ export const EksFilterComponent = ({
                 region={region}
                 isEksAsgMultiselect={isEksAsgMultiselect}
                 isEksAsgInstanceMultiselect={isEksAsgInstanceMultiselect}
+                isInstancesService={isInstancesService}
             />
             {/* Instancias de ASG (solo si hay ASG disponible y seleccionado) */}
             {/* <AsgInstancesFilterComponent
