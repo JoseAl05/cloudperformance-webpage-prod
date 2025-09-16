@@ -51,8 +51,7 @@ export const AsgInstancesFilterComponent = ({
     //     : null
 
     const { data, error, isLoading } = useSWR<string[]>(url, fetcher);
-    console.log(data);
-    // normalizar selección si la lista queda vacía
+
     useEffect(() => {
         if (!isLoading && !error && shouldFetch) {
             if (!Array.isArray(data) || data.length === 0) {
