@@ -8,14 +8,16 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 
 interface AdvisorStatusFilterComponentProps {
     advisorStatus: string,
+    advisorCategory: string,
     setAdvisorStatus: Dispatch<SetStateAction<string>>,
     isAdvisorStatusMultiselect: boolean
 }
 
-const ADVISOR_STATUSES = ['OK','ERROR','NOT_AVAILABLE','WARNING']
+const ADVISOR_STATUSES = ['OK', 'ERROR', 'NOT_AVAILABLE', 'WARNING']
 
 export const AdvisorStatusFilterComponent = ({
     advisorStatus,
+    advisorCategory,
     setAdvisorStatus,
     isAdvisorStatusMultiselect
 }: AdvisorStatusFilterComponentProps) => {
@@ -24,6 +26,13 @@ export const AdvisorStatusFilterComponent = ({
     const list: string[] = Array.isArray(ADVISOR_STATUSES) ? ADVISOR_STATUSES : [];
     const selectedStatusArray = advisorStatus ? advisorStatus.split(',').filter(Boolean) : [];
 
+    const shouldShow = !!advisorCategory
+
+    useEffect(() => {
+        if (shouldShow) {
+            setAdvisorStatus('');
+        }
+    }, [shouldShow,setAdvisorStatus]);
 
     const getDisplayText = () => {
         if (!advisorStatus || (!isAdvisorStatusMultiselect && advisorStatus === 'all')) return 'Seleccione uno o más status';
@@ -53,6 +62,7 @@ export const AdvisorStatusFilterComponent = ({
                     role='combobox'
                     aria-expanded={open}
                     className='w-full justify-between bg-transparent'
+                    disabled={!shouldShow}
                 >
                     <span className="truncate text-left max-w-[85%]">
                         {getDisplayText()}
@@ -65,7 +75,7 @@ export const AdvisorStatusFilterComponent = ({
                     <CommandInput placeholder='Buscar status..' />
                     <CommandList>
                         {/* <CommandEmpty>{ADVISOR_STATUSES ? 'No hay status disponibles.' : 'No se encontró status.'}</CommandEmpty> */}
-                        {ADVISOR_STATUSES && (
+                        {shouldShow && (
                             <CommandGroup className='max-h-[250px] overflow-y-auto'>
                                 {list.map((i: string) => (
                                     <CommandItem key={i} value={i} onSelect={() => { setAdvisorStatus(i); setOpen(false); }}>
@@ -87,6 +97,7 @@ export const AdvisorStatusFilterComponent = ({
                     role='combobox'
                     aria-expanded={open}
                     className='w-full justify-between bg-transparent'
+                    disabled={!shouldShow}
                 >
                     <span className="truncate text-left max-w-[85%]">
                         {getDisplayText()}
@@ -98,7 +109,7 @@ export const AdvisorStatusFilterComponent = ({
                 <Command>
                     <CommandInput placeholder='Buscar status...' />
                     {/* <CommandEmpty>{!ADVISOR_STATUSES ? 'No hay status disponibles.' : 'No se encontró status.'}</CommandEmpty> */}
-                    {ADVISOR_STATUSES && (
+                    {shouldShow && (
                         <CommandGroup className='max-h-[200px] overflow-y-auto'>
                             <CommandItem value='all' onSelect={() => handleEventToggle('all')}>
                                 <Check className={cn('mr-2 h-4 w-4', selectedStatusArray.includes('all') ? 'opacity-100' : 'opacity-0')} />

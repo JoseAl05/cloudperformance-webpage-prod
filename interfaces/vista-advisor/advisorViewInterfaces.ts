@@ -4,6 +4,10 @@ export interface AllAdvisorRecommendations {
   category: string;
   recommendations: AllAdvisorRecommendationsData[];
   total_recommendations: number;
+  total_ok_recommendations?:number;
+  total_warning_recommendations?:number;
+  total_not_available_recommendations?:number;
+  total_error_recommendations?:number;
 }
 
 export interface AllAdvisorRecommendationsData {

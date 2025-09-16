@@ -8,8 +8,10 @@ import { AlertCircle, ChartBar, Info, Search, ChevronDown, ChevronRight, X } fro
 import type {
     AdvisorApiResponse,
     AdvisorCategoryGroup,
+    AdvisorCheckDetails,
     AdvisorRecommendation,
 } from '@/interfaces/vista-advisor/advisorViewInterfaces'
+import { AdvisorViewPieChartComponent } from './grafico/AdvisorViewPieChartComponent'
 
 interface AdvisorViewComponentProps {
     advisorCategory: string
@@ -17,6 +19,34 @@ interface AdvisorViewComponentProps {
     startDate: Date
     endDate: Date
     region: string
+}
+type CheckDetail = {
+    status?: string
+    sync_time?: string
+    categorySpecificSummary?: {
+        costOptimizing?: {
+            estimatedMonthlySavings?: number
+            estimatedPercentMonthlySavings?: number
+        }
+        [k: string]: unknown
+    }
+    resourcesSummary?: {
+        resourcesProcessed?: number
+        resourcesFlagged?: number
+        resourcesIgnored?: number
+        resourcesSuppressed?: number
+    }
+    flaggedResources?: Array<{
+        status?: string
+        region?: string
+        resourceId?: string
+        isSuppressed?: boolean
+        metadata?: unknown[]
+    }>
+}
+
+type AdvisorRecMaybeDetails = AdvisorRecommendation & {
+    check_details?: CheckDetail[]
 }
 
 const fetcher = (url: string) =>
@@ -32,7 +62,19 @@ const normalize = (s: string) =>
     s
         .toLowerCase()
         .normalize('NFD')
-        .replace(/\p{Diacritic}/gu, '')
+        .replace(/\p{Diacritic}/gu, '');
+
+const hasCheckDetails = (rec: unknown): rec is AdvisorRecMaybeDetails =>
+    !!rec && typeof rec === 'object' && Array.isArray((rec as unknown).check_details)
+
+const fmtCurrencyUSD = (n?: number) =>
+    typeof n === 'number' ? new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n) : null
+
+const fmtPct = (n?: number) =>
+    typeof n === 'number' ? `${n}%` : null
+
+const shortId = (id?: string, left = 6, right = 6) =>
+    id && id.length > left + right + 3 ? `${id.slice(0, left)}...${id.slice(-right)}` : id ?? ''
 
 export const AdvisorViewComponent = ({
     advisorCategory,
@@ -41,10 +83,10 @@ export const AdvisorViewComponent = ({
     endDate,
     region,
 }: AdvisorViewComponentProps) => {
-    const startDateFormatted = startDate.toISOString().replace('Z', '').slice(0, -4)
-    const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : ''
-    const advisorCategoryFormatted = advisorCategory?.toLowerCase() ?? ''
-    const advisorStatusFormatted = advisorStatus?.toLowerCase() ?? ''
+    const startDateFormatted = startDate.toISOString().replace('Z', '').slice(0, -4);
+    const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : '';
+    const advisorCategoryFormatted = advisorCategory?.toLowerCase() ?? '';
+    const advisorStatusFormatted = advisorStatus?.toLowerCase() ?? '';
 
     const { data, error, isLoading } = useSWR<AdvisorApiResponse | unknown>(
         advisorCategory || advisorStatus
@@ -56,11 +98,11 @@ export const AdvisorViewComponent = ({
     const allRecommendationsData: AdvisorCategoryGroup[] | null = useMemo(() => {
         if (!Array.isArray(data)) return null
         return (data as unknown[])
-            .filter((g) => g && typeof g.category === 'string' && Array.isArray(g.recommendations))
-            .map((g) => ({
+            .filter((g) => g && typeof (g as unknown).category === 'string' && Array.isArray((g as unknown).recommendations))
+            .map((g: unknown) => ({
                 category: g.category as string,
                 recommendations: (g.recommendations as unknown[]).filter(
-                    (r) => r && typeof r.name === 'string' && typeof r.check_id !== 'undefined',
+                    (r: unknown) => r && typeof r.name === 'string' && typeof r.check_id !== 'undefined',
                 ) as AdvisorRecommendation[],
             }))
     }, [data])
@@ -85,6 +127,7 @@ export const AdvisorViewComponent = ({
             .filter((g) => g.recommendations.length > 0)
     }, [allRecommendationsData, query])
 
+    // Asegura selección válida dentro del filtro
     useEffect(() => {
         if (!filteredGroups.length) {
             setSelectedCheckId(null)
@@ -95,7 +138,7 @@ export const AdvisorViewComponent = ({
             const first = filteredGroups[0]?.recommendations[0]
             setSelectedCheckId(first ? String(first.check_id) : null)
         }
-    }, [filteredGroups])
+    }, [filteredGroups, selectedCheckId])
 
     const selectedRec: AdvisorRecommendation | null = useMemo(() => {
         if (!selectedCheckId) return null
@@ -110,9 +153,26 @@ export const AdvisorViewComponent = ({
     const totalRecs = allRecommendationsData?.reduce((acc, g) => acc + (g.recommendations?.length ?? 0), 0) ?? 0
     const filteredRecs = filteredGroups.reduce((acc, g) => acc + g.recommendations.length, 0)
 
-    const toggleExpand = (cat: string) => setExpanded((prev) => ({ ...prev, [cat]: !prev[cat] }))
-    const expandAll = () => setExpanded(Object.fromEntries(filteredGroups.map((g) => [g.category, true])))
-    const collapseAll = () => setExpanded({})
+    const toggleExpand = (cat: string) =>
+        setExpanded((prev) => ({ ...prev, [cat]: !(prev[cat] ?? false) }))
+
+    const expandAll = () =>
+        setExpanded(Object.fromEntries(filteredGroups.map((g) => [g.category, true])))
+
+    const collapseAll = () =>
+        setExpanded(Object.fromEntries(filteredGroups.map((g) => [g.category, false])))
+
+    // (Opcional) Si deseas que, al cambiar drásticamente el filtro, los nuevos grupos aparezcan colapsados,
+    // puedes “sincronizar” claves desconocidas a false:
+    useEffect(() => {
+        setExpanded((prev) => {
+            const next: Record<string, boolean> = {}
+            for (const g of filteredGroups) {
+                next[g.category] = prev[g.category] ?? false
+            }
+            return next
+        })
+    }, [filteredGroups])
 
     const FilterMark = ({ text, q }: { text: string; q: string }) => {
         if (!q) return <>{text}</>
@@ -131,6 +191,11 @@ export const AdvisorViewComponent = ({
             </>
         )
     }
+    const details: CheckDetail | null = useMemo(() => {
+        if (!selectedRec) return null
+        if (!hasCheckDetails(selectedRec)) return null
+        return selectedRec.check_details?.[0] ?? null
+    }, [selectedRec])
 
     if (isLoading) return <LoaderComponent />
 
@@ -170,11 +235,36 @@ export const AdvisorViewComponent = ({
         )
     }
 
+    const savingsUSD = details?.categorySpecificSummary && typeof details.categorySpecificSummary === 'object'
+        ? (details.categorySpecificSummary as unknown)?.costOptimizing?.estimatedMonthlySavings
+        : undefined
+
+    const savingsPct = details?.categorySpecificSummary && typeof details.categorySpecificSummary === 'object'
+        ? (details.categorySpecificSummary as unknown)?.costOptimizing?.estimatedPercentMonthlySavings
+        : undefined
+
+    const resSum = details?.resourcesSummary
+    const flagged = details?.flaggedResources ?? []
+
+    const statusBadge = (st?: string) => {
+        const s = (st ?? '').toLowerCase()
+        const base = 'inline-flex items-center px-2 py-0.5 rounded text-xs font-medium'
+        if (s === 'ok' || s === 'green') return <span className={`${base} bg-emerald-500/10 text-emerald-600 ring-1 ring-emerald-500/30`}>OK</span>
+        if (s === 'warning' || s === 'yellow') return <span className={`${base} bg-amber-500/10 text-amber-700 ring-1 ring-amber-500/30`}>Warning</span>
+        if (s === 'error' || s === 'red') return <span className={`${base} bg-rose-500/10 text-rose-600 ring-1 ring-rose-500/30`}>Error</span>
+        return <span className={`${base} bg-muted text-muted-foreground`}>{st ?? '—'}</span>
+    }
+
     return (
         <div className="w-full min-w-0 px-4 py-6">
             <div className="flex items-center gap-3 mb-6">
                 <ChartBar className="h-7 w-7 text-blue-500" />
                 <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Recomendaciones</h1>
+            </div>
+            <div className='my-5'>
+                <AdvisorViewPieChartComponent
+                    data={data as AdvisorApiResponse}
+                />
             </div>
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-4">
                 <div className="relative w-full sm:max-w-md">
@@ -224,13 +314,13 @@ export const AdvisorViewComponent = ({
                     </div>
                     <div className="max-h-[70vh] overflow-y-auto">
                         {filteredGroups.map((group) => {
-                            const isOpen = expanded[group.category] ?? true
+                            const isOpen = expanded[group.category] ?? false
                             return (
                                 <div key={group.category} className="border-b last:border-b-0">
                                     <button
                                         type="button"
                                         onClick={() => toggleExpand(group.category)}
-                                        className="w-full flex items-center justify-between px-3 py-2 hover:bg-muted/70"
+                                        className="w-full flex items-center justify-between px-3 py-2 hover:bg-muted/70 cursor-pointer select-none"
                                         aria-expanded={isOpen}
                                     >
                                         <div className="flex items-center gap-2">
@@ -258,7 +348,7 @@ export const AdvisorViewComponent = ({
                                                             aria-checked={isSelected}
                                                             className={[
                                                                 'w-full text-left rounded-md px-3 py-2 my-1',
-                                                                isSelected ? 'bg-primary/10 ring-1 ring-primary' : 'hover:bg-muted',
+                                                                isSelected ? 'bg-primary/10 ring-1 ring-primary' : 'hover:bg-muted cursor-pointer',
                                                             ].join(' ')}
                                                             onClick={() => setSelectedCheckId(String(rec.check_id))}
                                                         >
@@ -299,6 +389,105 @@ export const AdvisorViewComponent = ({
                                     className="[&_a]:text-blue-500 [&_a]:underline [&_h4]:text-xl [&_h4]:font-bold"
                                     dangerouslySetInnerHTML={{ __html: selectedRec.description }}
                                 />
+                                {details && (
+                                    <div className="space-y-3 pt-5">
+                                        <h3 className="text-xl font-bold">Check details</h3>
+
+                                        {/* Estado + Ahorros */}
+                                        <div className="grid sm:grid-cols-3 gap-3">
+                                            <div className="rounded-lg border p-3">
+                                                <div className="text-xs text-muted-foreground mb-1">Estado</div>
+                                                {statusBadge(details.status)}
+                                            </div>
+
+                                            <div className="rounded-lg border p-3">
+                                                <div className="text-xs text-muted-foreground mb-1">Ahorro mensual estimado</div>
+                                                <div className="text-sm font-medium">
+                                                    {fmtCurrencyUSD(savingsUSD) ?? '—'}
+                                                </div>
+                                            </div>
+
+                                            <div className="rounded-lg border p-3">
+                                                <div className="text-xs text-muted-foreground mb-1">% ahorro estimado</div>
+                                                <div className="text-sm font-medium">
+                                                    {fmtPct(savingsPct) ?? '—'}
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Resumen de recursos */}
+                                        {resSum && (
+                                            <div className="rounded-lg border p-3">
+                                                <div className="text-xs text-muted-foreground mb-2">Resumen de recursos</div>
+                                                <div className="flex flex-wrap gap-2">
+                                                    <span className="px-2 py-1 text-xs rounded bg-muted">
+                                                        Procesados: <strong>{resSum.resourcesProcessed ?? 0}</strong>
+                                                    </span>
+                                                    <span className="px-2 py-1 text-xs rounded bg-muted">
+                                                        Marcados: <strong>{resSum.resourcesFlagged ?? 0}</strong>
+                                                    </span>
+                                                    <span className="px-2 py-1 text-xs rounded bg-muted">
+                                                        Ignorados: <strong>{resSum.resourcesIgnored ?? 0}</strong>
+                                                    </span>
+                                                    <span className="px-2 py-1 text-xs rounded bg-muted">
+                                                        Suprimidos: <strong>{resSum.resourcesSuppressed ?? 0}</strong>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* Flagged resources */}
+                                        <div className="rounded-lg border">
+                                            <div className="p-3 border-b flex items-center justify-between">
+                                                <div className="text-sm font-medium">Recursos marcados</div>
+                                                <div className="text-xs text-muted-foreground">{flagged.length} ítems</div>
+                                            </div>
+
+                                            {flagged.length === 0 ? (
+                                                <div className="p-4 text-sm text-muted-foreground">
+                                                    No hay recursos marcados para esta verificación.
+                                                </div>
+                                            ) : (
+                                                <div className="overflow-x-auto">
+                                                    <table className="w-full text-sm text-wrap wrap-break-word">
+                                                        <thead className="text-left text-muted-foreground border-b">
+                                                            <tr>
+                                                                <th className="px-3 py-2">Región</th>
+                                                                <th className="px-3 py-2">Estado</th>
+                                                                <th className="px-3 py-2">ResourceId</th>
+                                                                <th className="px-3 py-2">Suprimido</th>
+                                                                <th className="px-3 py-2">Metadata</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            {flagged.map((fr, idx) => (
+                                                                <tr key={`${fr.resourceId ?? idx}-${idx}`} className="border-b last:border-b-0">
+                                                                    <td className="px-3 py-2">{fr.region ?? '—'}</td>
+                                                                    <td className="px-3 py-2">{statusBadge(fr.status)}</td>
+                                                                    <td className="px-3 py-2 font-mono text-xs">{fr.resourceId}</td>
+                                                                    <td className="px-3 py-2">{fr.isSuppressed ? 'Sí' : 'No'}</td>
+                                                                    <td className="px-3 py-2">
+                                                                        {Array.isArray(fr.metadata) && fr.metadata.length > 0 ? (
+                                                                            <div className="flex flex-wrap gap-1">
+                                                                                {fr.metadata.map((m, i) => (
+                                                                                    <span key={i} className="px-1.5 py-0.5 text-xs rounded bg-muted">
+                                                                                        {String(m)}
+                                                                                    </span>
+                                                                                ))}
+                                                                            </div>
+                                                                        ) : (
+                                                                            <span className="text-muted-foreground">—</span>
+                                                                        )}
+                                                                    </td>
+                                                                </tr>
+                                                            ))}
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     )}

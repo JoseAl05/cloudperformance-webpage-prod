@@ -559,6 +559,7 @@ export const FiltersComponent = ({
                                     </label>
                                     <AdvisorStatusFilterComponent
                                         advisorStatus={tempAdvisorStatus}
+                                        advisorCategory={tempAdvisorCategory}
                                         setAdvisorStatus={setTempAdvisorStatus}
                                         isAdvisorStatusMultiselect={isAdvisorStatusMultiselect}
                                     />
