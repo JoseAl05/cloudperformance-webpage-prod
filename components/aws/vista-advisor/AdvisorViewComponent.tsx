@@ -1,165 +1,3 @@
-// 'use client'
-
-// import { LoaderComponent } from '@/components/general/LoaderComponent'
-// import { EventsApiResponse } from '@/interfaces/vista-eventos/eventsViewInterfaces'
-// import useSWR from 'swr'
-// import { MessageCard } from '../cards/MessageCards'
-// import { AlertCircle, ChartBar, Info } from 'lucide-react'
-// import { EventsViewTableComponent } from './table/EventsViewTableComponent'
-// import { EventsViewInfoComponent } from './info/EventsViewInfoComponent'
-// import { EventsViewEventCountComponent } from './graficos/EventsViewEventCountComponent'
-// import { AdvisorApiResponse } from '@/interfaces/vista-advisor/advisorViewInterfaces'
-
-// interface AdvisorViewComponentProps {
-//     advisorCategory: string;
-//     advisorStatus: string;
-//     startDate: Date;
-//     endDate: Date;
-//     region: string;
-// };
-
-// const fetcher = (url: string) =>
-//     fetch(url, {
-//         method: 'GET',
-//         headers: {
-//             Authorization: `Bearer ${process.env.NEXT_PUBLIC_API_TOKEN}`,
-//             'Content-Type': 'application/json',
-//         },
-//     }).then((res) => res.json())
-
-// const isNonEmptyArray = <T,>(v: unknown): v is T[] => Array.isArray(v) && v.length > 0
-// const isNullish = (v: unknown) => v === null || v === undefined
-
-// export const AdvisorViewComponent = ({ advisorCategory, advisorStatus, startDate, endDate, region }: AdvisorViewComponentProps) => {
-
-//     const startDateFormatted = startDate.toISOString().replace('Z', '').slice(0, -4);
-//     const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : '';
-//     const advisorCategoryFormatted = advisorCategory.toLowerCase();
-//     const advisorStatusFormatted = advisorStatus.toLowerCase();
-
-//     const allRecommendations = useSWR(
-//         advisorCategory || advisorStatus
-//             ? `${process.env.NEXT_PUBLIC_API_URL}/advisor/get_advisor_data?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&category=${advisorCategoryFormatted}&status=${advisorStatusFormatted}`
-//             : null,
-//         fetcher
-//     )
-
-//     const unknownLoading =
-//         allRecommendations.isLoading
-
-//     const unknownError =
-//         !!allRecommendations.error
-
-//     const allRecommendationsData: AdvisorApiResponse | null =
-//         isNonEmptyArray<AllAdvisorRecommendations>(allRecommendations.data) ? allRecommendations.data : null;
-
-//     const hasRecommendationsData = !!allRecommendationsData && allRecommendationsData.length > 0;
-
-//     if (unknownLoading) {
-//         return (
-//             <LoaderComponent />
-//         )
-//     }
-
-//     if (!advisorCategory || !advisorStatus) {
-//         return (
-//             <div className="max-w-7xl mx-auto px-6 py-8">
-//                 <div className="text-center text-gray-500 text-lg font-medium">No se ha seleccionado ninguna categoría o status.</div>
-//             </div>
-//         )
-//     }
-
-//     if (unknownError) {
-//         return (
-//             <div className="w-full min-w-0 px-4 py-10 flex flex-col items-center gap-4">
-//                 <MessageCard
-//                     icon={AlertCircle}
-//                     title="Error al cargar datos"
-//                     description="Ocurrió un problema al obtener la información desde la API. Intenta nuevamente o ajusta el rango de fechas."
-//                     tone="error"
-//                 />
-//             </div>
-//         )
-//     }
-
-//     const noneHasData = !hasRecommendationsData;
-//     if (noneHasData) {
-//         return (
-//             <div className="w-full min-w-0 px-4 py-6">
-//                 <MessageCard
-//                     icon={Info}
-//                     title="Sin datos para mostrar"
-//                     description="No encontramos métricas ni información del advisor en el rango seleccionado."
-//                     tone="warn"
-//                 />
-//             </div>
-//         )
-//     }
-
-//     const recommendationsData = allRecommendationsData.map(rec => rec.recommendations);
-//     console.log(recommendationsData);
-//     return (
-//         <div className="w-full min-w-0 px-4 py-6">
-//             <div className="flex-1 space-y-6 min-w-0 overflow-hidden">
-//                 <div className="grid grid-cols-1 gap-5">
-//                     {allRecommendationsData?.map((allRec) => (
-//                         <div key={allRec.category}>
-//                             <h1>{allRec.category}</h1>
-//                             {
-//                                 allRec.recommendations ? (
-//                                     <>
-//                                         {
-//                                             allRec.recommendations.map(rec => (
-//                                                 <>
-//                                                     <p>{rec.name}</p>
-//                                                     <div key={rec.check_id} dangerouslySetInnerHTML={{ __html: rec.description }}></div>
-//                                                 </>
-//                                             ))
-//                                         }
-//                                     </>
-//                                 ) : null
-//                             }
-//                         </div>
-//                     ))}
-//                 </div>
-//                 {/* <EventsViewInfoComponent
-//                     infoData={allEventsData}
-//                 /> */}
-//             </div>
-
-//             <div className="flex flex-col gap-5 mt-10">
-//                 <div className="flex items-center gap-3 my-5">
-//                     <ChartBar className="h-8 w-8 text-blue-500" />
-//                     <h1 className="text-3xl font-bold text-foreground">Advisor AWS</h1>
-//                 </div>
-//                 {/* <EventsViewEventCountComponent
-//                     data={eventsData}
-//                 /> */}
-//                 {/* <Ec2ResourceConsumeViewUsageCreditsComponent data={creditsMetricsData} />
-//                 <Ec2ResourceConsumeViewUsageCpuComponent data={cpuMetricsData} /> */}
-//             </div>
-//             <div className="flex flex-col gap-5 mt-10">
-//                 <div className="flex items-center gap-3 my-5">
-//                     {/* <Clock className="h-8 w-8 text-blue-500" /> */}
-//                     <h1 className="text-3xl font-bold text-foreground">Detalle Instancias</h1>
-//                 </div>
-//                 {/* <EventsViewTableComponent
-//                     data={allEventsData}
-//                     startDate={startDateFormatted}
-//                     endDate={endDateFormatted}
-//                     eventType={eventType}
-//                 /> */}
-//                 {/* <Ec2ConsumeViewInstanceTable
-//                     data={infoData}
-//                     startDate={startDate}
-//                     endDate={endDate}
-//                     instance={instance}
-//                     enableGrouping
-//                 /> */}
-//             </div>
-//         </div>
-//     )
-// }
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
@@ -167,7 +5,6 @@ import useSWR from 'swr'
 import { LoaderComponent } from '@/components/general/LoaderComponent'
 import { MessageCard } from '../cards/MessageCards'
 import { AlertCircle, ChartBar, Info, Search, ChevronDown, ChevronRight, X } from 'lucide-react'
-// ⬇️ Usa tus interfaces (ajusta el path si es distinto en tu proyecto)
 import type {
     AdvisorApiResponse,
     AdvisorCategoryGroup,
@@ -216,7 +53,6 @@ export const AdvisorViewComponent = ({
         fetcher,
     )
 
-    // Normaliza la respuesta a tus tipos: AdvisorCategoryGroup[]
     const allRecommendationsData: AdvisorCategoryGroup[] | null = useMemo(() => {
         if (!Array.isArray(data)) return null
         return (data as unknown[])
@@ -233,7 +69,6 @@ export const AdvisorViewComponent = ({
     const [expanded, setExpanded] = useState<Record<string, boolean>>({})
     const [selectedCheckId, setSelectedCheckId] = useState<string | null>(null)
 
-    // Deriva lista filtrada por búsqueda (por category o name)
     const filteredGroups = useMemo(() => {
         if (!allRecommendationsData) return [] as AdvisorCategoryGroup[]
 
@@ -250,7 +85,6 @@ export const AdvisorViewComponent = ({
             .filter((g) => g.recommendations.length > 0)
     }, [allRecommendationsData, query])
 
-    // Mantén selección única válida tras filtrar
     useEffect(() => {
         if (!filteredGroups.length) {
             setSelectedCheckId(null)
@@ -280,8 +114,7 @@ export const AdvisorViewComponent = ({
     const expandAll = () => setExpanded(Object.fromEntries(filteredGroups.map((g) => [g.category, true])))
     const collapseAll = () => setExpanded({})
 
-    // Render helpers
-    const Mark = ({ text, q }: { text: string; q: string }) => {
+    const FilterMark = ({ text, q }: { text: string; q: string }) => {
         if (!q) return <>{text}</>
         const norm = normalize(text)
         const nq = normalize(q)
@@ -339,13 +172,10 @@ export const AdvisorViewComponent = ({
 
     return (
         <div className="w-full min-w-0 px-4 py-6">
-            {/* Header */}
             <div className="flex items-center gap-3 mb-6">
                 <ChartBar className="h-7 w-7 text-blue-500" />
                 <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Recomendaciones</h1>
             </div>
-
-            {/* Toolbar: search + stats + actions */}
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-4">
                 <div className="relative w-full sm:max-w-md">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -365,7 +195,6 @@ export const AdvisorViewComponent = ({
                         </button>
                     )}
                 </div>
-
                 <div className="flex items-center gap-3 text-sm text-muted-foreground">
                     <span className="hidden sm:inline">Categorías:</span>
                     <span className="font-medium text-foreground">{totalGroups}</span>
@@ -387,10 +216,7 @@ export const AdvisorViewComponent = ({
                     </div>
                 </div>
             </div>
-
-            {/* Main layout */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 min-h-[60vh]">
-                {/* Left: category + list */}
                 <aside className="lg:col-span-5 xl:col-span-4 rounded-xl border bg-card">
                     <div className="p-3 border-b flex items-center justify-between">
                         <div className="text-sm text-muted-foreground">Resultados</div>
@@ -414,14 +240,13 @@ export const AdvisorViewComponent = ({
                                                 <ChevronRight className="h-4 w-4" />
                                             )}
                                             <span className="font-medium">
-                                                <Mark text={group.category} q={query} />
+                                                <FilterMark text={group.category} q={query} />
                                             </span>
                                         </div>
                                         <span className="text-xs rounded-full bg-muted px-2 py-0.5">
                                             {group.recommendations.length}
                                         </span>
                                     </button>
-
                                     {isOpen && (
                                         <ul role="radiogroup" className="px-1 pb-2">
                                             {group.recommendations.map((rec) => {
@@ -437,7 +262,7 @@ export const AdvisorViewComponent = ({
                                                             ].join(' ')}
                                                             onClick={() => setSelectedCheckId(String(rec.check_id))}
                                                         >
-                                                            <span className="text-sm"><Mark text={rec.name} q={query} /></span>
+                                                            <span className="text-sm"><FilterMark text={rec.name} q={query} /></span>
                                                         </button>
                                                     </li>
                                                 )
@@ -447,14 +272,11 @@ export const AdvisorViewComponent = ({
                                 </div>
                             )
                         })}
-
                         {filteredGroups.length === 0 && (
                             <div className="p-6 text-center text-sm text-muted-foreground">Sin resultados.</div>
                         )}
                     </div>
                 </aside>
-
-                {/* Right: details */}
                 <section className="lg:col-span-7 xl:col-span-8 rounded-xl border bg-card">
                     {!selectedRec ? (
                         <div className="h-full min-h-[50vh] grid place-items-center p-8 text-center">
