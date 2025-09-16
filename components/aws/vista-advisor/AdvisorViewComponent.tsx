@@ -391,7 +391,7 @@ export const AdvisorViewComponent = ({
                                 />
                                 {details && (
                                     <div className="space-y-3 pt-5">
-                                        <h3 className="text-xl font-bold">Check details</h3>
+                                        <h3 className="text-xl font-bold">Detalle Recomendación</h3>
 
                                         {/* Estado + Ahorros */}
                                         <div className="grid sm:grid-cols-3 gap-3">
