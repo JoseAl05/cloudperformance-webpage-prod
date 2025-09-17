@@ -9,8 +9,8 @@ import { Ec2ResourceInfraUsedViewColumns } from "./table/ec2ResourceInfraUsedTab
 
 interface InstanceEc2CInfrautilizadaComponentProps {
   startDate: Date;
-  endDate: Date;
-  instance: string;
+  endDate?: Date;
+  eksAsgInstance: string;
 }
 
 const fetcher = (url: string) =>
@@ -22,10 +22,10 @@ const fetcher = (url: string) =>
     },
   }).then((res) => res.json());
 
-export const InstanceEc2InfrautilizadaComponent = ({
+export const InstanceEksInfrautilizadaComponent = ({
   startDate,
   endDate,
-  instance,
+  eksAsgInstance,
 
 }: InstanceEc2CInfrautilizadaComponentProps) => {
   const startDateFormatted = startDate
@@ -36,14 +36,16 @@ export const InstanceEc2InfrautilizadaComponent = ({
     ? endDate.toISOString().replace("Z", "").slice(0, -4)
     : "";
 
-  console.log(instance)
+  console.log(eksAsgInstance)
   // https://cloudperformance-desarrollo.eastus2.cloudapp.azure.com/api/aws/ec2/unused/unused?date_from=2025-08-01T00:00:00&date_to=2025-09-02T23:59:59&region=all&resource=i-08fc095993a5521be,i-084e4e667310b5e5b,i-0e2e4f97aaaaae90e
   const ec2InfrautilizadaInfo = useSWR(
-    instance
-      ? `${process.env.NEXT_PUBLIC_API_URL}/aws/ec2/unused/unused?date_from=${startDateFormatted}&date_to=${endDateFormatted}&resource=${instance}`
+    eksAsgInstance
+      ? `${process.env.NEXT_PUBLIC_API_URL}/aws/ec2/unused/unused?date_from=${startDateFormatted}&date_to=${endDateFormatted}&resource=${eksAsgInstance}`
       : null,
     fetcher
   );
+  // console.log(ec2InfrautilizadaInfo.resourceList)
+  console.log(ec2InfrautilizadaInfo)
 
 
   if (ec2InfrautilizadaInfo.isLoading) {
@@ -57,7 +59,7 @@ export const InstanceEc2InfrautilizadaComponent = ({
   if (ec2InfrautilizadaInfo.error) return <div>Error al cargar datos</div>;
 
 
-  if (!instance) {
+  if (!eksAsgInstance) {
     return (
       <div className="max-w-7xl mx-auto px-6 py-8">
         <div className="text-center text-gray-500 text-lg font-medium">

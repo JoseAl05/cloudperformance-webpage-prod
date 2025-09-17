@@ -24,9 +24,6 @@ interface TagFilterComponentProps {
     onChange?: (next: { key: string | null; value: string | null }) => void
 }
 
-type Tag = { Key: string; Value: string };
-type Item = { Tags?: Tag[] };
-
 const fetcher = (url: string) =>
     fetch(url, {
         method: "GET",
