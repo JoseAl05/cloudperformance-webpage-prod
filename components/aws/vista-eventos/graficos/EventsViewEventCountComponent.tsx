@@ -1,10 +1,11 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import * as echarts from 'echarts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Info } from 'lucide-react';
 import { EventGroup } from '@/interfaces/vista-eventos/eventsViewInterfaces';
+import { useTheme } from 'next-themes';
 
 interface EventsViewEventCountComponentProps {
     data: EventGroup[][] | null;
@@ -25,9 +26,14 @@ export const EventsViewEventCountComponent = ({
     const chartInstance = useRef<echarts.ECharts | null>(null);
     const resizeObserverRef = useRef<ResizeObserver | null>(null);
 
+    const { resolvedTheme } = useTheme();
+    const isDark = resolvedTheme === 'dark';
+
+    const [mounted, setMounted] = useState(false);
+    useEffect(() => setMounted(true), []);
+
     const safeData = Array.isArray(data) ? data : [];
 
-    // 1) Aplanar y contar por tipo de evento (event_name)
     const { legendItems, pieData, totalCount } = useMemo(() => {
         const counts = new Map<string, number>();
 
@@ -35,7 +41,7 @@ export const EventsViewEventCountComponent = ({
             if (!Array.isArray(allEvents)) continue;
             for (const groupEvent of allEvents) {
                 if (!groupEvent?.event_name || !Array.isArray(groupEvent?.docs)) continue;
-                const inc = groupEvent.docs.length; // cada doc es un evento
+                const inc = groupEvent.docs.length;
                 if (inc > 0) counts.set(groupEvent.event_name, (counts.get(groupEvent.event_name) ?? 0) + inc);
             }
         }
@@ -49,19 +55,28 @@ export const EventsViewEventCountComponent = ({
         const totalCount = entries.reduce((s, e) => s + e.value, 0);
 
         return { legendItems, pieData: entries, totalCount };
-    }, [safeData, sortDesc]);
+    }, [data, sortDesc]);
 
     const handleResize = useCallback(() => {
         chartInstance.current?.resize();
     }, []);
 
     useEffect(() => {
+        if (!mounted) return;
         if (!chartRef.current) return;
+
+        const textColor = isDark ? '#ffffff' : '#131a22';
+        const tooltipBg = isDark ? 'rgba(17, 24, 39, 0.95)' : 'rgba(50, 50, 50, 0.95)';
+        const tooltipBorder = isDark ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.2)';
+        const iconBorder = isDark ? '#9ca3af' : '#999';
+        const iconBorderEmph = isDark ? '#d1d5db' : '#666';
+        const seriesBorderColor = isDark ? '#0b1220' : '#ffffff';
 
         const option: echarts.EChartsOption = {
             animation: true,
             animationDuration: 300,
             animationEasing: 'linear',
+            backgroundColor: 'transparent',
             color: palette,
             toolbox: {
                 right: 10,
@@ -69,18 +84,17 @@ export const EventsViewEventCountComponent = ({
                 feature: {
                     saveAsImage: { pixelRatio: 2, excludeComponents: ['toolbox'] }
                 },
-                iconStyle: { borderColor: '#999' },
-                emphasis: { iconStyle: { borderColor: '#666' } }
+                iconStyle: { borderColor: iconBorder },
+                emphasis: { iconStyle: { borderColor: iconBorderEmph } }
             },
             tooltip: {
                 trigger: 'item',
                 transitionDuration: 0.1,
                 hideDelay: 100,
-                backgroundColor: 'rgba(50, 50, 50, 0.95)',
-                borderColor: 'rgba(255, 255, 255, 0.2)',
+                backgroundColor: tooltipBg,
+                borderColor: tooltipBorder,
                 textStyle: { color: '#fff', fontSize: 12 },
                 formatter: (p: unknown) => {
-                    // p: { name, value, percent, marker }
                     return `${p.marker} ${p.name}<br/><strong>${p.value}</strong> eventos (${p.percent}%)`;
                 }
             },
@@ -90,14 +104,14 @@ export const EventsViewEventCountComponent = ({
                 top: 10,
                 left: 'center',
                 animation: false,
-                textStyle: { fontSize: 12 },
+                textStyle: { fontSize: 12, color: textColor },
                 data: legendItems
             },
             series: [
                 {
                     name: 'Eventos por tipo',
                     type: 'pie',
-                    radius: ['50%', '70%'],          // donut
+                    radius: ['50%', '70%'],
                     center: ['50%', '55%'],
                     avoidLabelOverlap: true,
                     selectedMode: false,
@@ -105,13 +119,14 @@ export const EventsViewEventCountComponent = ({
                     padAngle: 1,
                     itemStyle: {
                         borderRadius: 4,
-                        borderColor: '#fff',
+                        borderColor: seriesBorderColor,
                         borderWidth: 1
                     },
                     label: {
                         show: true,
                         formatter: (p: unknown) => `${p.name}\n${p.value} (${p.percent}%)`,
-                        fontSize: 11
+                        fontSize: 11,
+                        color:textColor
                     },
                     labelLine: {
                         show: true,
@@ -129,19 +144,25 @@ export const EventsViewEventCountComponent = ({
             ]
         };
 
-        chartInstance.current = echarts.init(chartRef.current, null, { renderer: 'canvas' });
+        chartInstance.current?.dispose();
+        chartInstance.current = echarts.init(chartRef.current, undefined, { renderer: 'canvas' });
         chartInstance.current.setOption(option, { notMerge: true, lazyUpdate: true, silent: false });
 
-        resizeObserverRef.current = new ResizeObserver(handleResize);
+        resizeObserverRef.current?.disconnect();
+        resizeObserverRef.current = new ResizeObserver(() => handleResize());
         resizeObserverRef.current.observe(chartRef.current);
-        window.addEventListener('resize', handleResize);
+
+        const onWindowResize = () => handleResize();
+        window.addEventListener('resize', onWindowResize);
 
         return () => {
-            window.removeEventListener('resize', handleResize);
+            window.removeEventListener('resize', onWindowResize);
             resizeObserverRef.current?.disconnect();
+            resizeObserverRef.current = null;
             chartInstance.current?.dispose();
+            chartInstance.current = null;
         };
-    }, [legendItems, pieData, handleResize]);
+    }, [legendItems, pieData, handleResize, isDark, mounted]);
 
     const isEmpty = !pieData?.length || totalCount === 0;
 
