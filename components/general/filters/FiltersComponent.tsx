@@ -7,6 +7,7 @@ import 'react-datepicker/dist/react-datepicker.css';
 import { RegionFilterComponent } from './RegionFilterComponent';
 import { TagFilterComponent } from './TagsFilterComponent';
 import { ServiceFilterComponent } from './ServiceFilterComponent';
+import { VariationServiceFilterComponent } from './VariationServiceFilterComponent';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Calendar, Filter, MapPin, Server, Tag, XCircle, Ban, Box, Activity } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -20,6 +21,7 @@ import { EbsFilterComponent } from './EbsFilterComponent';
 import { EventsTypeFilterComponent } from './EventsTypeFilterComponent';
 import { AdvisorCategoriesFilterComponent } from './AdvisorCategoriesFilterComponent';
 import { AdvisorStatusFilterComponent } from './AdvisorStatusFilterComponent';
+import { VariationMetricFilterComponent } from './VariationMetricFilterComponent';
 
 interface FiltersComponentProps {
     Component: (params: {
@@ -58,6 +60,8 @@ interface FiltersComponentProps {
     serviceFilter?: boolean;
     collection?: string;
     tagColumnName?: string;
+    variationServiceFilter?: boolean;
+    variationMetricFilter?: boolean;
 }
 
 export const FiltersComponent = ({
@@ -88,7 +92,9 @@ export const FiltersComponent = ({
     tagsFilter = false,
     serviceFilter = false,
     collection = null,
-    tagColumnName = null
+    tagColumnName = null,
+    variationServiceFilter = false,
+    variationMetricFilter = false,
 }: FiltersComponentProps) => {
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -114,6 +120,8 @@ export const FiltersComponent = ({
         const eventsTypesParam = searchParams.get('eventsTypes');
         const advisorCategoryParam = searchParams.get('advisorCategory');
         const advisorStatusParam = searchParams.get('advisorStatus');
+        const variationServiceParam = searchParams.get('variationService');
+        const variationMetricParam = searchParams.get('variationMetric');
 
         return {
             startDate: startDateParam ? new Date(startDateParam) : yesterday,
@@ -133,7 +141,9 @@ export const FiltersComponent = ({
             ebs: ebsParam || '',
             eventsTypes: eventsTypesParam || '',
             advisorCategory: advisorCategoryParam || '',
-            advisorStatus: advisorStatusParam || ''
+            advisorStatus: advisorStatusParam || '',
+            variationService: variationServiceParam || '',
+            variationMetric: variationMetricParam || ''
         };
     };
 
@@ -156,6 +166,8 @@ export const FiltersComponent = ({
     const [tempEventsTypes, setTempEventsTypes] = useState(filters.eventsTypes);
     const [tempAdvisorCategory, setTempAdvisorCategory] = useState(filters.advisorCategory);
     const [tempAdvisorStatus, setTempAdvisorStatus] = useState(filters.advisorStatus);
+    const [tempVariationService, setTempVariationService] = useState(filters.variationService);
+    const [tempVariationMetric, setTempVariationMetric] = useState(filters.variationMetric);
 
     useEffect(() => {
         const newFilters = getInitialFilters();
@@ -177,6 +189,8 @@ export const FiltersComponent = ({
         setTempEventsTypes(newFilters.eventsTypes);
         setTempAdvisorCategory(newFilters.advisorCategory);
         setTempAdvisorStatus(newFilters.advisorStatus);
+        setTempVariationService(newFilters.variationService);
+        setTempVariationMetric(newFilters.variationMetric);
     }, [searchParams]);
 
     const onChange = (dates: [Date | null, Date | null]) => setTempRange(dates);
@@ -184,6 +198,7 @@ export const FiltersComponent = ({
     const applyFilters = () => {
         const [start, end] = tempRange;
         if (!start || !end) return;
+
 
         const newFilters = {
             startDate: start,
@@ -203,7 +218,9 @@ export const FiltersComponent = ({
             ebs: tempEbs,
             eventsTypes: tempEventsTypes,
             advisorCategory: tempAdvisorCategory,
-            advisorStatus: tempAdvisorStatus
+            advisorStatus: tempAdvisorStatus,
+            variationService: tempVariationService,
+            variationMetric: tempVariationMetric,
         };
         setFilters(newFilters);
 
@@ -226,6 +243,8 @@ export const FiltersComponent = ({
         if (newFilters.eventsTypes) query.set('eventsTypes', newFilters.eventsTypes);
         if (newFilters.advisorCategory) query.set('advisorCategory', newFilters.advisorCategory);
         if (newFilters.advisorStatus) query.set('advisorStatus', newFilters.advisorStatus);
+        if (newFilters.variationService) query.set('variationService', newFilters.variationService);
+        if (newFilters.variationMetric) query.set('variatonMetric', newFilters.variationMetric);
 
         router.push(`${window.location.pathname}?${query.toString()}`);
     };
@@ -249,7 +268,9 @@ export const FiltersComponent = ({
             ebs: '',
             eventsTypes: '',
             advisorCategory: '',
-            advisorStatus: ''
+            advisorStatus: '',
+            variationService: '',
+            variationMetric: '',
         };
 
         setFilters({
@@ -270,7 +291,9 @@ export const FiltersComponent = ({
             ebs: defaultFilters.ebs,
             eventsTypes: defaultFilters.eventsTypes,
             advisorCategory: defaultFilters.advisorCategory,
-            advisorStatus: defaultFilters.advisorStatus
+            advisorStatus: defaultFilters.advisorStatus,
+            variationService: defaultFilters.variationService,
+            variationMetric: defaultFilters.variationMetric,
         });
         setTempRange([defaultFilters.startDate, defaultFilters.endDate]);
         setTempInstance(defaultFilters.instance);
@@ -289,6 +312,8 @@ export const FiltersComponent = ({
         setTempEventsTypes(defaultFilters.eventsTypes);
         setTempAdvisorCategory(defaultFilters.advisorCategory);
         setTempAdvisorStatus(defaultFilters.advisorStatus);
+        setTempVariationService(defaultFilters.variationService);
+        setTempVariationMetric(defaultFilters.variationMetric);
 
         router.push(window.location.pathname);
     };
@@ -380,6 +405,34 @@ export const FiltersComponent = ({
                                     Región
                                 </label>
                                 <RegionFilterComponent selectedRegion={tempRegion} setSelectedRegion={setTempRegion} isRegionMultiSelect={isRegionMultiSelect} />
+                            </div>
+                        )}
+
+                        {variationServiceFilter && (
+                            <div className='space-y-2'>
+                                <label className='text-sm font-medium text-foreground flex items-center gap-2'>
+                                    <Server className='h-4 w-4' />
+                                    Servicio
+                                </label>
+                                <VariationServiceFilterComponent selectedService={tempVariationService} setSelectedService={setTempVariationService}  />
+                            </div>
+                        )}
+
+                        {variationMetricFilter && (
+                            <div className='space-y-2'>
+                                <label className='text-sm font-medium text-foreground flex items-center gap-2'>
+                                    <MapPin className='h-4 w-4' />
+                                    Metrica
+                                </label>
+                                <VariationMetricFilterComponent 
+                                    startDate={tempStartDate}
+                                    endDate={tempEndDate}
+                                    region={tempRegion} 
+                                    selectedService={tempVariationService}
+                                    selectedMetric={tempVariationMetric}
+                                    setSelectedMetric={setTempVariationMetric}
+                                    isAsgMultiSelect= {false}
+                                />
                             </div>
                         )}
 
@@ -595,6 +648,8 @@ export const FiltersComponent = ({
                     eventType={filters.eventsTypes}
                     advisorCategory={filters.advisorCategory}
                     advisorStatus={filters.advisorStatus}
+                    variationMetric={filters.variationMetric}
+                    variationService={filters.variationService}
                 />
             </Card>
         </div>

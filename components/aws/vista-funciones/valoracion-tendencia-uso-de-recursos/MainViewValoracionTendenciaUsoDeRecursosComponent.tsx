@@ -30,9 +30,11 @@ export const ViewValoracionTendenciaUsoDeRecursos = () => {
       <FiltersComponent
         Component={ValoracionTendenciaUsoDeRecursosComponent}
         dateFilter
-        // regionFilter
+        regionFilter
         // s3Filter
-        serviceFilter
+        // serviceFilter
+        variationServiceFilter
+        variationMetricFilter
       />
     </div>
   )
