@@ -52,7 +52,6 @@ export const AsgFilterComponent = ({
     const { data, error, isLoading } = useSWR(shouldFetch ? [url, tagsBody] : null, ([u, t]) => fetcherPost(u, t));
 
     useEffect(() => {
-        // Solo actuar cuando terminó la carga y no hubo error
         if (!isLoading && !error && Array.isArray(data) && data.length === 0) {
             setAsg('');
             setAsgInstance('');

@@ -4,24 +4,25 @@ import { useEffect, useState, useMemo, useRef } from 'react';
 import { DatePicker } from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 
-import { RegionFilterComponent } from './RegionFilterComponent';
-import { TagFilterComponent } from './TagsFilterComponent';
-import { ServiceFilterComponent } from './ServiceFilterComponent';
-import { VariationServiceFilterComponent } from './VariationServiceFilterComponent';
+import { RegionFilterComponent } from '@/components/general/filters/RegionFilterComponent';
+import { TagFilterComponent } from '@/components/general/filters/TagsFilterComponent';
+import { ServiceFilterComponent } from '@/components/general/filters/ServiceFilterComponent';
+import { VariationServiceFilterComponent } from '@/components/general/filters/VariationServiceFilterComponent';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Calendar, Filter, MapPin, Server, Tag, XCircle, Ban, Box, Activity } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { InstancesFilterComponent } from './InstancesFilterComponent';
-import { AsgInstancesFilterComponent } from './AsgInstancesFilterComponent';
-import { AsgFilterComponent } from './AsgFilterComponent';
-import { EksFilterComponent } from './EksFilterComponent';
-import { S3BucketFilter } from './S3FilterComponent';
-import { EbsFilterComponent } from './EbsFilterComponent';
-import { EventsTypeFilterComponent } from './EventsTypeFilterComponent';
-import { AdvisorCategoriesFilterComponent } from './AdvisorCategoriesFilterComponent';
-import { AdvisorStatusFilterComponent } from './AdvisorStatusFilterComponent';
-import { VariationMetricFilterComponent } from './VariationMetricFilterComponent';
+import { InstancesFilterComponent } from '@/components/general/filters/InstancesFilterComponent';
+import { AsgInstancesFilterComponent } from '@/components/general/filters/AsgInstancesFilterComponent';
+import { AsgFilterComponent } from '@/components/general/filters/AsgFilterComponent';
+import { EksFilterComponent } from '@/components/general/filters/EksFilterComponent';
+import { S3BucketFilter } from '@/components/general/filters/S3FilterComponent';
+import { EbsFilterComponent } from '@/components/general/filters/EbsFilterComponent';
+import { EventsTypeFilterComponent } from '@/components/general/filters/EventsTypeFilterComponent';
+import { AdvisorCategoriesFilterComponent } from '@/components/general/filters/AdvisorCategoriesFilterComponent';
+import { AdvisorStatusFilterComponent } from '@/components/general/filters/AdvisorStatusFilterComponent';
+import { VariationMetricFilterComponent } from '@/components/general/filters/VariationMetricFilterComponent';
+import { EC2MetricFilterComponent } from '@/components/general/filters/Ec2MetricLabelFilterComponent';
 
 interface FiltersComponentProps {
     Component: (params: {
@@ -44,6 +45,7 @@ interface FiltersComponentProps {
     eventsTypesFilter?: boolean;
     advisorCategoriesFilter?: boolean;
     advisorStatusFilter?: boolean;
+    metricFilter?: boolean;
     isAdvisorCategoryMultiselect?: boolean;
     isAdvisorStatusMultiselect?: boolean;
     isEventsTypesMultiselect?: boolean;
@@ -78,6 +80,7 @@ export const FiltersComponent = ({
     eventsTypesFilter = false,
     advisorCategoriesFilter = false,
     advisorStatusFilter = false,
+    metricFilter = false,
     isAdvisorCategoryMultiselect = false,
     isAdvisorStatusMultiselect = false,
     isEventsTypesMultiselect = false,
@@ -122,6 +125,7 @@ export const FiltersComponent = ({
         const advisorStatusParam = searchParams.get('advisorStatus');
         const variationServiceParam = searchParams.get('variationService');
         const variationMetricParam = searchParams.get('variationMetric');
+        const metricParam = searchParams.get('metric');
 
         return {
             startDate: startDateParam ? new Date(startDateParam) : yesterday,
@@ -143,7 +147,8 @@ export const FiltersComponent = ({
             advisorCategory: advisorCategoryParam || '',
             advisorStatus: advisorStatusParam || '',
             variationService: variationServiceParam || '',
-            variationMetric: variationMetricParam || ''
+            variationMetric: variationMetricParam || '',
+            metric: metricParam || '',
         };
     };
 
@@ -168,6 +173,7 @@ export const FiltersComponent = ({
     const [tempAdvisorStatus, setTempAdvisorStatus] = useState(filters.advisorStatus);
     const [tempVariationService, setTempVariationService] = useState(filters.variationService);
     const [tempVariationMetric, setTempVariationMetric] = useState(filters.variationMetric);
+    const [tempMetric, setTempMetric] = useState(filters.metric);
 
     useEffect(() => {
         const newFilters = getInitialFilters();
@@ -191,6 +197,7 @@ export const FiltersComponent = ({
         setTempAdvisorStatus(newFilters.advisorStatus);
         setTempVariationService(newFilters.variationService);
         setTempVariationMetric(newFilters.variationMetric);
+        setTempMetric(newFilters.metric);
     }, [searchParams]);
 
     const onChange = (dates: [Date | null, Date | null]) => setTempRange(dates);
@@ -221,6 +228,7 @@ export const FiltersComponent = ({
             advisorStatus: tempAdvisorStatus,
             variationService: tempVariationService,
             variationMetric: tempVariationMetric,
+            metric: tempMetric,
         };
         setFilters(newFilters);
 
@@ -245,6 +253,7 @@ export const FiltersComponent = ({
         if (newFilters.advisorStatus) query.set('advisorStatus', newFilters.advisorStatus);
         if (newFilters.variationService) query.set('variationService', newFilters.variationService);
         if (newFilters.variationMetric) query.set('variatonMetric', newFilters.variationMetric);
+        if (newFilters.metric) query.set('metric', newFilters.metric);
 
         router.push(`${window.location.pathname}?${query.toString()}`);
     };
@@ -271,6 +280,7 @@ export const FiltersComponent = ({
             advisorStatus: '',
             variationService: '',
             variationMetric: '',
+            metric: ''
         };
 
         setFilters({
@@ -294,6 +304,7 @@ export const FiltersComponent = ({
             advisorStatus: defaultFilters.advisorStatus,
             variationService: defaultFilters.variationService,
             variationMetric: defaultFilters.variationMetric,
+            metric: defaultFilters.metric
         });
         setTempRange([defaultFilters.startDate, defaultFilters.endDate]);
         setTempInstance(defaultFilters.instance);
@@ -314,6 +325,7 @@ export const FiltersComponent = ({
         setTempAdvisorStatus(defaultFilters.advisorStatus);
         setTempVariationService(defaultFilters.variationService);
         setTempVariationMetric(defaultFilters.variationMetric);
+        setTempMetric(defaultFilters.metric);
 
         router.push(window.location.pathname);
     };
@@ -414,7 +426,7 @@ export const FiltersComponent = ({
                                     <Server className='h-4 w-4' />
                                     Servicio
                                 </label>
-                                <VariationServiceFilterComponent selectedService={tempVariationService} setSelectedService={setTempVariationService}  />
+                                <VariationServiceFilterComponent selectedService={tempVariationService} setSelectedService={setTempVariationService} />
                             </div>
                         )}
 
@@ -424,14 +436,14 @@ export const FiltersComponent = ({
                                     <MapPin className='h-4 w-4' />
                                     Metrica
                                 </label>
-                                <VariationMetricFilterComponent 
+                                <VariationMetricFilterComponent
                                     startDate={tempStartDate}
                                     endDate={tempEndDate}
-                                    region={tempRegion} 
+                                    region={tempRegion}
                                     selectedService={tempVariationService}
                                     selectedMetric={tempVariationMetric}
                                     setSelectedMetric={setTempVariationMetric}
-                                    isAsgMultiSelect= {false}
+                                    isAsgMultiSelect={false}
                                 />
                             </div>
                         )}
@@ -553,6 +565,19 @@ export const FiltersComponent = ({
                                 </div>
                             )
                         }
+                        {metricFilter && (
+                            <div className='space-y-2'>
+                                <label className='text-sm font-medium text-foreground flex items-center gap-2'>
+                                    <Activity className='h-4 w-4' /> Métrica EC2
+                                </label>
+                                <EC2MetricFilterComponent
+                                    selectedMetric={tempMetric}
+                                    setSelectedMetric={setTempMetric}
+                                    startDate={tempStartDate}
+                                    endDate={tempEndDate}
+                                />
+                            </div>
+                        )}
                         {
                             ebsFilter && (
                                 <div className='space-y-2'>
@@ -650,6 +675,7 @@ export const FiltersComponent = ({
                     advisorStatus={filters.advisorStatus}
                     variationMetric={filters.variationMetric}
                     variationService={filters.variationService}
+                    metric={filters.metric}
                 />
             </Card>
         </div>

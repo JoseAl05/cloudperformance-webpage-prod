@@ -31,14 +31,15 @@ import {
     TrendingUp,
     Server,
     HardDrive,
+    Clock,
 } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { usePathname } from 'next/navigation'
 import Image from 'next/image'
 import { useTheme } from 'next-themes'
 import Link from 'next/link'
+import { Button } from '@/components/ui/button'
 
-// helper para estilos dinámicos
 const useMenuStyles = () => {
     const { resolvedTheme } = useTheme()
 
@@ -103,6 +104,17 @@ export const SidebarComponent = ({
         { label: 'Top Recursos', href: '/aws/funciones/top-recursos', icon: Grid2X2, color: 'text-blue-500' },
     ]
 
+    const consumoHorario = [
+        { label: 'Consumo Instancias EC2', href: '/aws/funciones/consumo-ec2-horario-habil-vs-no-habil', icon: Computer, color: 'text-green-500' },
+        { label: 'Consumo Instancias EC2 AutoscalingGroups', href: '/aws/funciones/consumo-ec2-autoscaling-groups-horario-habil-vs-no-habil', icon: Computer, color: 'text-green-500' },
+        { label: 'Consumo Instancias EC2 Nodos EKS', href: '/aws/funciones/consumo-ec2-nodos-eks-horario-habil-vs-no-habil', icon: Computer, color: 'text-green-500' },
+        { label: 'Consumo Instancias RDS Postgresql', href: '/aws/funciones/consumo-rds-postgresql-horario-habil-vs-no-habil', icon: Database, color: 'text-green-500' },
+        { label: 'Consumo Instancias RDS Mysql', href: '/aws/funciones/consumo-rds-mysql-horario-habil-vs-no-habil', icon: Database, color: 'text-green-500' },
+        { label: 'Consumo Instancias RDS SQL Server', href: '/aws/funciones/consumo-rds-sql-horario-habil-vs-no-habil', icon: Database, color: 'text-green-500' },
+        { label: 'Consumo Instancias RDS Oracle', href: '/aws/funciones/consumo-rds-oracle-horario-habil-vs-no-habil', icon: Database, color: 'text-green-500' },
+        { label: 'Consumo Instancias RDS MariaDB', href: '/aws/funciones/consumo-rds-mariadb-horario-habil-vs-no-habil', icon: Database, color: 'text-green-500' },
+    ]
+
     const consumeSubItems = [
         { label: 'Consumo EC2', icon: Computer, href: '/aws/consumos/ec2' },
         { label: 'Consumo ASG EC2', icon: Computer, href: '/aws/consumos/asg' },
@@ -116,9 +128,9 @@ export const SidebarComponent = ({
 
     const consumes = [{ label: 'Consumos', subItems: consumeSubItems, icon: Zap }]
 
-    // FUNCIONES: separar con y sin subitems
     const funciones = [
         { label: 'Top Facturaciones', subItems: topFacturaciones, icon: Zap },
+        { label: 'Consumo horario hábil vs no hábil', subItems: consumoHorario, icon: Clock },
         { label: 'Spot vs Vm', href: '/aws/funciones/spot-vs-vm', icon: Database },
         { label: 'Top S3 Buckets', href: '/aws/funciones/top-s3-buckets', icon: Server },
         { label: 'Ebs No Utilizados', href: '/aws/funciones/ebs-no-utilizados', icon: HardDrive }
@@ -139,17 +151,23 @@ export const SidebarComponent = ({
     )
     const [isConsumesOpen, setIsConsumesOpen] = useState(defaultOpenConsumes)
 
-    const defaultOpenTopFacturaciones = topFacturaciones.some(
-        (t) => t.href === pathname
-    )
-    const [isTopFacturacionesOpen, setIsTopFacturacionesOpen] =
-        useState(defaultOpenTopFacturaciones)
+    const initialOpenByGroup = useMemo(() => {
+        return funcionesConSub.reduce<Record<string, boolean>>((acc, grupo) => {
+            acc[grupo.label] = grupo.subItems?.some((sub) => sub.href === pathname) ?? false
+            return acc
+        }, {})
+    }, [funcionesConSub, pathname])
+
+    const [openByGroup, setOpenByGroup] = useState<Record<string, boolean>>(initialOpenByGroup)
 
     useEffect(() => {
         if (state === 'collapsed' && state !== 'mobile') {
             setIsRecursosOpen(false)
             setIsFuncionesOpen(false)
-            setIsTopFacturacionesOpen(false)
+            setOpenByGroup(prev => {
+                const closed = Object.fromEntries(Object.keys(prev).map(k => [k, false]))
+                return closed
+            })
         }
     }, [state])
 
@@ -199,10 +217,8 @@ export const SidebarComponent = ({
                                 </SidebarMenuItem>
                             )
                         })}
-
                         {isExpanded && (
                             <>
-                                {/* CONSUMOS */}
                                 <SidebarMenuItem className="mt-4 pt-2 border-t border-gray-200 dark:border-gray-800">
                                     <Collapsible open={isConsumesOpen} onOpenChange={setIsConsumesOpen}>
                                         <CollapsibleTrigger asChild>
@@ -246,8 +262,6 @@ export const SidebarComponent = ({
                                         </CollapsibleContent>
                                     </Collapsible>
                                 </SidebarMenuItem>
-
-                                {/* FUNCIONES */}
                                 <SidebarMenuItem className="mt-2">
                                     <Collapsible open={isFuncionesOpen} onOpenChange={setIsFuncionesOpen}>
                                         <CollapsibleTrigger asChild>
@@ -264,59 +278,61 @@ export const SidebarComponent = ({
                                                 />
                                             </SidebarMenuButton>
                                         </CollapsibleTrigger>
-
                                         <CollapsibleContent className="mt-1 space-y-1 overflow-hidden transition-all duration-300 ease-in-out data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down">
-                                            {/* Subgrupo: Top Facturaciones */}
-                                            {funcionesConSub.map((grupo) => (
-                                                <Collapsible
-                                                    key={grupo.label}
-                                                    open={isTopFacturacionesOpen}
-                                                    onOpenChange={setIsTopFacturacionesOpen}
-                                                >
-                                                    <CollapsibleTrigger asChild>
-                                                        <button
-                                                            type="button"
-                                                            className="w-full flex items-center justify-between px-3 py-2 pl-6 rounded-md hover:bg-blue-50 dark:hover:bg-blue-900 transition-all duration-200 ease-in-out hover:scale-[1.01] hover:translate-x-1"
-                                                        >
-                                                            <div className="flex items-center gap-2">
-                                                                <grupo.icon className="h-5 w-5 text-blue-400" />
-                                                                <span className="text-sm font-medium">
-                                                                    {grupo.label}
-                                                                </span>
-                                                            </div>
-                                                            <ChevronDown
-                                                                className={cn(
-                                                                    'h-4 w-4 transition-transform duration-300 ease-in-out',
-                                                                    isTopFacturacionesOpen && 'rotate-180'
-                                                                )}
-                                                            />
-                                                        </button>
-                                                    </CollapsibleTrigger>
-
-                                                    <CollapsibleContent className="mt-1 space-y-1 overflow-hidden transition-all duration-300 ease-in-out data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down">
-                                                        {grupo.subItems!.map((sub) => {
-                                                            const isSubActive = pathname === sub.href
-                                                            return (
-                                                                <Link
-                                                                    key={sub.label}
-                                                                    href={sub.href}
+                                            {funcionesConSub.map((grupo) => {
+                                                const isGroupOpen = openByGroup[grupo.label] ?? false
+                                                return (
+                                                    <Collapsible
+                                                        key={grupo.label}
+                                                        open={isGroupOpen}
+                                                        onOpenChange={(open) =>
+                                                            setOpenByGroup(prev => ({ ...prev, [grupo.label]: open }))
+                                                        }
+                                                    >
+                                                        <CollapsibleTrigger asChild>
+                                                            <button
+                                                                type="button"
+                                                                className="w-full flex items-center justify-between px-3 py-2 pl-6 rounded-md cursor-pointer bg-transparent hover:bg-blue-50 dark:hover:bg-blue-900 transition-all duration-200 ease-in-out hover:scale-[1.01] hover:translate-x-1"
+                                                                variant='default'
+                                                            >
+                                                                <div className="flex items-center gap-2">
+                                                                    <grupo.icon className="h-5 w-5 text-blue-400" />
+                                                                    <span className="text-sm font-medium">
+                                                                        {grupo.label}
+                                                                    </span>
+                                                                </div>
+                                                                <ChevronDown
                                                                     className={cn(
-                                                                        "flex items-center gap-2 px-3 py-2 rounded-md cursor-pointer pl-10 border-l-2 transition-all duration-200 ease-in-out transform border-current",
-                                                                        sub.color, // color de texto y por ende del borde (currentColor)
-                                                                        getMenuItemClasses(isSubActive),
-                                                                        "hover:scale-[1.02] hover:translate-x-1",
+                                                                        'h-4 w-4 transition-transform duration-300 ease-in-out',
+                                                                        isGroupOpen && 'rotate-180'
                                                                     )}
-                                                                >
-                                                                    <sub.icon className="h-4 w-4 transition-transform duration-200 hover:scale-110" />
-                                                                    <span className="text-sm">{sub.label}</span>
-                                                                </Link>
-                                                            )
-                                                        })}
-                                                    </CollapsibleContent>
-                                                </Collapsible>
-                                            ))}
+                                                                />
+                                                            </button>
+                                                        </CollapsibleTrigger>
 
-                                            {/* Ítems simples dentro de Funciones */}
+                                                        <CollapsibleContent className="mt-1 space-y-1 overflow-hidden transition-all duration-300 ease-in-out data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down">
+                                                            {grupo.subItems!.map((sub) => {
+                                                                const isSubActive = pathname === sub.href
+                                                                return (
+                                                                    <Link
+                                                                        key={sub.label}
+                                                                        href={sub.href}
+                                                                        className={cn(
+                                                                            "flex items-center gap-2 px-3 py-2 rounded-md cursor-pointer pl-10 border-l-2 transition-all duration-200 ease-in-out transform border-current",
+                                                                            sub.color,
+                                                                            getMenuItemClasses(isSubActive),
+                                                                            "hover:scale-[1.02] hover:translate-x-1",
+                                                                        )}
+                                                                    >
+                                                                        <sub.icon className="h-4 w-4 transition-transform duration-200 hover:scale-110" />
+                                                                        <span className="text-sm">{sub.label}</span>
+                                                                    </Link>
+                                                                )
+                                                            })}
+                                                        </CollapsibleContent>
+                                                    </Collapsible>
+                                                )
+                                            })}
                                             {funcionesSimples.map((f) => {
                                                 const isActive = pathname === f.href
                                                 return (
@@ -337,8 +353,6 @@ export const SidebarComponent = ({
                                         </CollapsibleContent>
                                     </Collapsible>
                                 </SidebarMenuItem>
-
-                                {/* RECURSOS */}
                                 <SidebarMenuItem className="mt-2">
                                     <Collapsible open={isRecursosOpen} onOpenChange={setIsRecursosOpen}>
                                         <CollapsibleTrigger asChild>
