@@ -32,6 +32,9 @@ export const ViewConsumoRdsMysqlHorario = () => {
         dateFilter
         rdsFilter
         engine="mysql"
+        instancesFilter
+        instancesService='rds-mysql'
+        isInstanceMultiSelect
       />
     </div>
   )

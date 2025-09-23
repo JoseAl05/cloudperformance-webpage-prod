@@ -1,5 +1,5 @@
 import { FiltersComponent } from '@/components/general/filters/FiltersComponent'
-import { MainViewConsumoRdsOracleHorario }  from './ConsumoRdsOracleHorarioComponent'
+import { MainViewConsumoRdsOracleHorario } from './ConsumoRdsOracleHorarioComponent'
 import { Database } from 'lucide-react'
 
 export const ViewConsumoRdsOracleHorario = () => {
@@ -15,7 +15,7 @@ export const ViewConsumoRdsOracleHorario = () => {
               </div>
               <div>
                 <h1 className='text-3xl font-bold text-gray-900 dark:text-gray-100'>
-                  Dashboard AWS / Consumo RDS Oracle 
+                  Dashboard AWS / Consumo RDS Oracle
                 </h1>
                 <p className='text-gray-500 dark:text-gray-400'>
                   Comparación de consumo en horario hábil vs no hábil
@@ -30,8 +30,11 @@ export const ViewConsumoRdsOracleHorario = () => {
       <FiltersComponent
         Component={MainViewConsumoRdsOracleHorario}
         dateFilter
-        rdsFilter       
-        engine="oracle" 
+        rdsFilter
+        engine="oracle"
+        instancesFilter
+        instancesService='rds-oracle'
+        isInstanceMultiSelect
       />
     </div>
   )

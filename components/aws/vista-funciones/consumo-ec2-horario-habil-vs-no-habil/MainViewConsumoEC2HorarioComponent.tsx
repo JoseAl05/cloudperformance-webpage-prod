@@ -14,7 +14,7 @@ export const ViewConsumoEC2Horario = () => {
               </div>
               <div>
                 <h1 className='text-3xl font-bold text-gray-900 dark:text-gray-100'>
-                  Dashboard AWS / Consumo EC2
+                  Dashboard AWS / Consumo EC2 
                 </h1>
                 <p className='text-gray-500 dark:text-gray-400'>
                   Comparación de consumo en horario hábil vs no hábil
@@ -28,6 +28,9 @@ export const ViewConsumoEC2Horario = () => {
         Component={MainViewConsumoEC2Horario}
         dateFilter
         metricFilter
+        instancesFilter
+        instancesService='ec2'
+        isInstanceMultiSelect
       />
     </div>
   )

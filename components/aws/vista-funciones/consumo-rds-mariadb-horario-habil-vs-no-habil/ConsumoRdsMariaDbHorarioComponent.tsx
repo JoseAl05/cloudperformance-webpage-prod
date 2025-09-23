@@ -5,7 +5,8 @@ import React, { useEffect, useRef } from 'react'
 import * as echarts from 'echarts'
 import { Card, CardContent } from '@/components/ui/card'
 import { BarChart3, Clock, Moon } from 'lucide-react'
-import { TableRdsMariaDbMetrics } from '@/components/aws/vista-funciones/consumo-rds-mariadb-horario-habil-vs-no-habil/table/tableComponent'
+import { TableRdsMariaDbMetrics } from "@/components/aws/vista-funciones/consumo-rds-mariadb-horario-habil-vs-no-habil/table/tableComponent"
+import { bytesToMB } from '@/lib/bytesToMbs'
 
 const fetcher = (url: string) =>
   fetch(url, {
@@ -16,82 +17,165 @@ const fetcher = (url: string) =>
     }
   }).then(res => res.json())
 
-interface ConsumoEC2HorarioProps {
+interface ConsumoRdsMariaDbHorarioProps {
   startDate: Date,
   endDate: Date,
-  metric?: string
+  metric?: string,
+  instance?: string
 }
 
-// 🔑 Mapa de unidades por métrica
 const metricUnits: Record<string, string> = {
-    "CPUUtilization Average": "%",
-    "CPUUtilization Maximum": "%",
-    "CPUUtilization Minimum": "%",
-    "CPUCreditBalance Average": "Unidades",
-    "CPUCreditBalance Maximum": "Unidades",
-    "CPUCreditBalance Minimum": "Unidades",
-    "CPUCreditUsage Average": "Unidades",
-    "CPUCreditUsage Maximum": "Unidades",
-    "CPUCreditUsage Minimum": "Unidades",
-    "FreeableMemory Average": "Bytes",
-    "FreeableMemory Maximum": "Bytes",
-    "FreeableMemory Minimum": "Bytes",
-    "FreeStorageSpace Average": "Bytes",
-    "FreeStorageSpace Maximum": "Bytes",
-    "FreeStorageSpace Minimum": "Bytes",
-    "DatabaseConnections Average": "Cantidad",
-    "DatabaseConnections Maximum": "Cantidad",
-    "DatabaseConnections Minimum": "Cantidad",
-    "ReadIOPS Average": "IOPS",
-    "ReadIOPS Maximum": "IOPS",
-    "ReadIOPS Minimum": "IOPS",
-    "WriteIOPS Average": "IOPS",
-    "WriteIOPS Maximum": "IOPS",
-    "WriteIOPS Minimum": "IOPS"
+  "CPUUtilization Average": "%",
+  "CPUUtilization Maximum": "%",
+  "CPUUtilization Minimum": "%",
+  "CPUCreditBalance Average": "Creditos",
+  "CPUCreditBalance Maximum": "Creditos",
+  "CPUCreditBalance Minimum": "Creditos",
+  "CPUCreditUsage Average": "Creditos",
+  "CPUCreditUsage Maximum": "Creditos",
+  "CPUCreditUsage Minimum": "Creditos",
+  "FreeableMemory Average": "MBs",
+  "FreeableMemory Maximum": "MBs",
+  "FreeableMemory Minimum": "MBs",
+  "FreeStorageSpace Average": "MBs",
+  "FreeStorageSpace Maximum": "MBs",
+  "FreeStorageSpace Minimum": "MBs",
+  "DatabaseConnections Average": "Cantidad",
+  "DatabaseConnections Maximum": "Cantidad",
+  "DatabaseConnections Minimum": "Cantidad",
+  "ReadIOPS Average": "IOPS",
+  "ReadIOPS Maximum": "IOPS",
+  "ReadIOPS Minimum": "IOPS",
+  "WriteIOPS Average": "IOPS",
+  "WriteIOPS Maximum": "IOPS",
+  "WriteIOPS Minimum": "IOPS"
 }
 
-export const MainViewConsumoRdsMariaDbHorario = ({ startDate, endDate, metric }: ConsumoEC2HorarioProps) => {
+export const MainViewConsumoRdsMariaDbHorario = ({ startDate, endDate, metric, instance }: ConsumoRdsMariaDbHorarioProps) => {
   const chartRef = useRef<HTMLDivElement>(null)
   const chartInstance = useRef<echarts.ECharts | null>(null)
 
   const startDateFormatted = startDate ? startDate.toISOString().replace('Z', '').slice(0, -4) : ''
   const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : ''
+  let avgDataHabil: unknown = 0;
+  let avgDataNoHabil: unknown = 0;
 
   const { data, error, isLoading } = useSWR(
-    `${process.env.NEXT_PUBLIC_API_URL}/aws/rds/mariadb/business-vs-offhours?date_from=${startDateFormatted}&date_to=${endDateFormatted}&metric_label=${metric}`,
+    `${process.env.NEXT_PUBLIC_API_URL}/aws/rds/mariadb/business-vs-offhours?date_from=${startDateFormatted}&date_to=${endDateFormatted}&metric_label=${metric}&resource=${instance || "all"}`,
     fetcher
   )
 
+  const avgStatisticsFormatted = data && data.avgStatistics ? (data.avgStatistics as unknown[]).map((item: unknown) => {
+    if (metric?.includes('FreeStorageSpace') || metric?.includes('FreeableMemory')) {
+      return {
+        ...item,
+        average: Number(bytesToMB(Number(item.average ?? 0)))
+      }
+    }
+    return item;
+  }) : [];
+
+  if (metric?.includes('FreeStorageSpace') || metric?.includes('FreeableMemory')) {
+    avgDataHabil = avgStatisticsFormatted ? avgStatisticsFormatted.find((s: unknown) => s.Horario === "Habil")?.average ?? "--" : 0;
+    avgDataNoHabil = avgStatisticsFormatted ? avgStatisticsFormatted.find((s: unknown) => s.Horario === "No habil")?.average ?? "--" : 0;
+  } else {
+    avgDataHabil = avgStatisticsFormatted ? avgStatisticsFormatted.find((s: unknown) => s.Horario === "Habil")?.average?.toFixed?.(2) ?? "--" : 0;
+    avgDataNoHabil = avgStatisticsFormatted ? avgStatisticsFormatted.find((s: unknown) => s.Horario === "No habil")?.average?.toFixed?.(2) ?? "--" : 0;
+  }
+
   useEffect(() => {
-    if (!chartRef.current || !data) return;
+    if (!chartRef.current) return;
+    if (!data || !Array.isArray(data.data) || data.data.length === 0) {
+      if (chartInstance.current) {
+        chartInstance.current.clear()
+      }
+      return
+    }
 
-    const times = data.data.map((item: unknown) => {
-      const d = new Date(item.Timestamp);
-      return `${d.getUTCDate()}/${d.getUTCMonth() + 1} ${d.getUTCHours()}:00`;
-    });
+    const dataFormatted = (data.data as unknown[]).map((item: unknown) => {
+      const rawVal = item.Value ?? item.value ?? 0
+      let numericVal = Number(rawVal)
 
-    const valoresHabil = data.data.map((item: unknown) =>
-      item.Horario === "Habil" ? item.Value : null
-    );
-    const valoresNoHabil = data.data.map((item: unknown) =>
-      item.Horario === "No habil" ? item.Value : null
-    );
+      if (item.MetricLabel && (item.MetricLabel.includes("FreeStorageSpace") || item.MetricLabel.includes("FreeableMemory"))) {
+        numericVal = Number(bytesToMB(Number(rawVal)))
+      }
+
+      if (Number.isNaN(numericVal)) numericVal = null
+
+      return {
+        ...item,
+        Value: numericVal
+      }
+    })
+
+    const grouped: Record<string, { habil: number[]; noHabil: number[] }> = {}
+
+    dataFormatted.forEach((item: unknown) => {
+      if (!item.Timestamp) return
+      const ts = new Date(item.Timestamp).toISOString()
+      if (!grouped[ts]) grouped[ts] = { habil: [], noHabil: [] }
+
+      const v = item.Value
+      if (v === null || v === undefined) return
+
+      if (item.Horario === "Habil") {
+        grouped[ts].habil.push(Number(v))
+      } else if (item.Horario === "No habil") {
+        grouped[ts].noHabil.push(Number(v))
+      }
+    })
+
+    const times: string[] = []
+    const valoresHabil: (number | null)[] = []
+    const valoresNoHabil: (number | null)[] = []
+
+    Object.keys(grouped)
+      .sort((a, b) => new Date(a).getTime() - new Date(b).getTime())
+      .forEach((ts) => {
+        const d = new Date(ts)
+        times.push(`${d.getUTCDate()}/${d.getUTCMonth() + 1} ${d.getUTCHours()}:00`)
+
+        const habilValues = grouped[ts].habil
+        const noHabilValues = grouped[ts].noHabil
+
+        const avgHabil = habilValues.length > 0
+          ? Number((habilValues.reduce((acc, v) => acc + Number(v), 0) / habilValues.length).toFixed(2))
+          : null
+
+        const avgNoHabil = noHabilValues.length > 0
+          ? Number((noHabilValues.reduce((acc, v) => acc + Number(v), 0) / noHabilValues.length).toFixed(2))
+          : null
+
+        valoresHabil.push(avgHabil)
+        valoresNoHabil.push(avgNoHabil)
+      })
 
     const options: echarts.EChartsOption = {
-      tooltip: { trigger: "axis" },
+      tooltip: {
+        trigger: "axis",
+        valueFormatter: (value: unknown) => (value != null ? Number(value).toFixed(2) : "--")
+      },
       legend: { data: ["Horario Hábil", "Horario No Hábil"], top: 10, left: "center" },
       grid: { left: 50, right: 30, top: 60, bottom: 80, containLabel: true },
       xAxis: { type: "category", data: times, axisLabel: { rotate: 45 } },
-      yAxis: { type: "value", name: metricUnits[metric || ""] || "", min: 0 },
+      yAxis: {
+        type: "value",
+        name: metricUnits[metric || ""] || "",
+        min: 0,
+        axisLabel: {
+          formatter: (value: unknown) => Number(value).toFixed(2)
+        }
+      },
       dataZoom: [
         { type: "slider", start: 80, end: 100 },
-        { type: "inside", start: 80, end: 100 },
+        { type: "inside", start: 80, end: 100 }
       ],
       series: [
         {
           name: "Horario Hábil",
           type: "line",
           smooth: true,
+          connectNulls: false,
           data: valoresHabil,
           symbol: "circle",
           symbolSize: 6,
@@ -102,85 +186,85 @@ export const MainViewConsumoRdsMariaDbHorario = ({ startDate, endDate, metric }:
           name: "Horario No Hábil",
           type: "line",
           smooth: true,
+          connectNulls: false,
           data: valoresNoHabil,
           symbol: "circle",
           symbolSize: 6,
           lineStyle: { color: "#1e40af" },
           itemStyle: { color: "#1e40af" },
         },
-      ],
-    };
-
-    if (!chartInstance.current) {
-      chartInstance.current = echarts.init(chartRef.current);
+      ]
     }
-    chartInstance.current.setOption(options);
 
-    const handleResize = () => chartInstance.current?.resize();
-    window.addEventListener("resize", handleResize);
+    try {
+      if (!chartInstance.current) {
+        chartInstance.current = echarts.init(chartRef.current!)
+      }
+      chartInstance.current.setOption(options)
+    } catch (err) {
+      console.error('Error al inicializar ECharts:', err)
+    }
+
+    const handleResize = () => chartInstance.current?.resize()
+    window.addEventListener("resize", handleResize)
     return () => {
-      window.removeEventListener("resize", handleResize);
-      chartInstance.current?.dispose();
-      chartInstance.current = null;
-    };
-  }, [data]);
+      window.removeEventListener("resize", handleResize)
+      chartInstance.current?.dispose()
+      chartInstance.current = null
+    }
+  }, [data, metric])
 
   if (isLoading) return <p>Cargando datos...</p>
   if (error) return <p>Error al cargar datos</p>
 
-  // 🔑 Definir unidad dinámica según la métrica
   const unit = metricUnits[metric || ""] || ""
 
   return (
     <div className="space-y-6 p-4">
-        {/* 📊 Tarjetas de estadísticas promedio */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-          {/* Horario Hábil */}
-          {data?.avgStatistics && (
-            <Card className="border-l-4 border-l-blue-500 shadow-lg rounded-2xl">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-muted-foreground">
-                      Uso Horario Hábil
-                    </p>
-                    <p className="text-2xl font-bold text-blue-600">
-                      {data.avgStatistics.find((s: unknown) => s.Horario === "Habil")?.average?.toFixed(2) ?? "--"} {unit}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      Promedio de consumo en horas hábiles
-                    </p>
-                  </div>
-                  <Clock className="h-8 w-8 text-blue-500" />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        {data?.avgStatistics && (
+          <Card className="border-l-4 border-l-blue-500 shadow-lg rounded-2xl">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">
+                    Uso Horario Hábil
+                  </p>
+                  <p className="text-2xl font-bold text-blue-600">
+                    {avgDataHabil} {unit}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Promedio de consumo en horas hábiles
+                  </p>
                 </div>
-              </CardContent>
-            </Card>
-          )}
+                <Clock className="h-8 w-8 text-blue-500" />
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
-          {/* Horario No Hábil */}
-          {data?.avgStatistics && (
-            <Card className="border-l-4 border-l-red-500 shadow-lg rounded-2xl">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-muted-foreground">
-                      Uso Horario No Hábil
-                    </p>
-                    <p className="text-2xl font-bold text-red-600">
-                      {data.avgStatistics.find((s: unknown) => s.Horario === "No habil")?.average?.toFixed(2) ?? "--"} {unit}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      Promedio de consumo en horas no hábiles
-                    </p>
-                  </div>
-                  <Moon className="h-8 w-8 text-red-500" />
+        {data?.avgStatistics && (
+          <Card className="border-l-4 border-l-red-500 shadow-lg rounded-2xl">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">
+                    Uso Horario No Hábil
+                  </p>
+                  <p className="text-2xl font-bold text-red-600">
+                    {avgDataNoHabil} {unit}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Promedio de consumo en horas no hábiles
+                  </p>
                 </div>
-              </CardContent>
-            </Card>
-          )}
-        </div>
+                <Moon className="h-8 w-8 text-red-500" />
+              </div>
+            </CardContent>
+          </Card>
+        )}
+      </div>
 
-      {/* 📊 Gráfico */}
       <Card className="shadow-lg rounded-2xl">
         <CardContent className="p-6">
           <div className="flex items-center justify-between mb-4">
@@ -193,12 +277,12 @@ export const MainViewConsumoRdsMariaDbHorario = ({ startDate, endDate, metric }:
         </CardContent>
       </Card>
 
-      {/* === Tabla === */}
       <div>
         <TableRdsMariaDbMetrics
           startDateFormatted={startDateFormatted}
           endDateFormatted={endDateFormatted}
           metric={metric}
+          instance={instance || "all"}
         />
       </div>
     </div>

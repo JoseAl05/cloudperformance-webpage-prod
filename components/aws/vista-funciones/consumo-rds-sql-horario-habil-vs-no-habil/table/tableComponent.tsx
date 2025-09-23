@@ -28,14 +28,16 @@ export const TableRdsSqlMetrics = ({
   startDateFormatted,
   endDateFormatted,
   metric,
+  instance
 }: {
   startDateFormatted: string
   endDateFormatted: string
   metric?: string
+  instance?: string
 }) => {
   const { data, error, isLoading } = useSWR<{ data: SqlMetricData[] }>(
     startDateFormatted && endDateFormatted
-      ? `${process.env.NEXT_PUBLIC_API_URL}/aws/rds/sql/business-vs-offhours?date_from=${startDateFormatted}&date_to=${endDateFormatted}&metric_label=${metric}`
+      ? `${process.env.NEXT_PUBLIC_API_URL}/aws/rds/sql/business-vs-offhours?date_from=${startDateFormatted}&date_to=${endDateFormatted}&metric_label=${metric}&resource=${instance || "all"}`
       : null,
     fetcher
   )

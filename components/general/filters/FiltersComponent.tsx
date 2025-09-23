@@ -23,6 +23,8 @@ import { AdvisorCategoriesFilterComponent } from '@/components/general/filters/A
 import { AdvisorStatusFilterComponent } from '@/components/general/filters/AdvisorStatusFilterComponent';
 import { VariationMetricFilterComponent } from '@/components/general/filters/VariationMetricFilterComponent';
 import { EC2MetricFilterComponent } from '@/components/general/filters/Ec2MetricLabelFilterComponent';
+import { RDSMetricFilterComponent } from './RdsMetricFilterComponent';
+import { AutoScalingGroupFilterComponent } from './Ec2AutoscalingGroupsFilterComponent';
 
 interface FiltersComponentProps {
     Component: (params: {
@@ -45,7 +47,10 @@ interface FiltersComponentProps {
     eventsTypesFilter?: boolean;
     advisorCategoriesFilter?: boolean;
     advisorStatusFilter?: boolean;
+    autoScalingGroupFilter?: boolean;
     metricFilter?: boolean;
+    rdsFilter?: boolean;
+    engine?: string;
     isAdvisorCategoryMultiselect?: boolean;
     isAdvisorStatusMultiselect?: boolean;
     isEventsTypesMultiselect?: boolean;
@@ -80,7 +85,10 @@ export const FiltersComponent = ({
     eventsTypesFilter = false,
     advisorCategoriesFilter = false,
     advisorStatusFilter = false,
+    autoScalingGroupFilter = false,
     metricFilter = false,
+    rdsFilter = false,
+    engine,
     isAdvisorCategoryMultiselect = false,
     isAdvisorStatusMultiselect = false,
     isEventsTypesMultiselect = false,
@@ -126,6 +134,7 @@ export const FiltersComponent = ({
         const variationServiceParam = searchParams.get('variationService');
         const variationMetricParam = searchParams.get('variationMetric');
         const metricParam = searchParams.get('metric');
+        const autoScalingGroupParam = searchParams.get('autoScalingGroup');
 
         return {
             startDate: startDateParam ? new Date(startDateParam) : yesterday,
@@ -149,6 +158,8 @@ export const FiltersComponent = ({
             variationService: variationServiceParam || '',
             variationMetric: variationMetricParam || '',
             metric: metricParam || '',
+            autoScalingGroup: autoScalingGroupParam || '',
+            engine: engine || ''
         };
     };
 
@@ -174,6 +185,8 @@ export const FiltersComponent = ({
     const [tempVariationService, setTempVariationService] = useState(filters.variationService);
     const [tempVariationMetric, setTempVariationMetric] = useState(filters.variationMetric);
     const [tempMetric, setTempMetric] = useState(filters.metric);
+    const [tempAutoScalingGroup, setTempAutoScalingGroup] = useState(filters.autoScalingGroup);
+    const [tempEngine, setTempEngine] = useState(filters.engine);
 
     useEffect(() => {
         const newFilters = getInitialFilters();
@@ -198,6 +211,8 @@ export const FiltersComponent = ({
         setTempVariationService(newFilters.variationService);
         setTempVariationMetric(newFilters.variationMetric);
         setTempMetric(newFilters.metric);
+        setTempAutoScalingGroup(newFilters.autoScalingGroup);
+        setTempEngine(newFilters.engine);
     }, [searchParams]);
 
     const onChange = (dates: [Date | null, Date | null]) => setTempRange(dates);
@@ -229,6 +244,8 @@ export const FiltersComponent = ({
             variationService: tempVariationService,
             variationMetric: tempVariationMetric,
             metric: tempMetric,
+            autoScalingGroup: tempAutoScalingGroup,
+            engine: tempEngine
         };
         setFilters(newFilters);
 
@@ -254,6 +271,8 @@ export const FiltersComponent = ({
         if (newFilters.variationService) query.set('variationService', newFilters.variationService);
         if (newFilters.variationMetric) query.set('variatonMetric', newFilters.variationMetric);
         if (newFilters.metric) query.set('metric', newFilters.metric);
+        if (newFilters.autoScalingGroup) query.set('autoScalingGroup', newFilters.autoScalingGroup);
+        if (rdsFilter && newFilters.engine) query.set('engine', newFilters.engine);
 
         router.push(`${window.location.pathname}?${query.toString()}`);
     };
@@ -280,7 +299,9 @@ export const FiltersComponent = ({
             advisorStatus: '',
             variationService: '',
             variationMetric: '',
-            metric: ''
+            metric: '',
+            autoScalingGroup: '',
+            engine: ''
         };
 
         setFilters({
@@ -304,7 +325,9 @@ export const FiltersComponent = ({
             advisorStatus: defaultFilters.advisorStatus,
             variationService: defaultFilters.variationService,
             variationMetric: defaultFilters.variationMetric,
-            metric: defaultFilters.metric
+            metric: defaultFilters.metric,
+            autoScalingGroup: defaultFilters.autoScalingGroup,
+            engine: defaultFilters.engine
         });
         setTempRange([defaultFilters.startDate, defaultFilters.endDate]);
         setTempInstance(defaultFilters.instance);
@@ -326,6 +349,8 @@ export const FiltersComponent = ({
         setTempVariationService(defaultFilters.variationService);
         setTempVariationMetric(defaultFilters.variationMetric);
         setTempMetric(defaultFilters.metric);
+        setTempAutoScalingGroup(defaultFilters.autoScalingGroup);
+        setTempEngine(defaultFilters.engine);
 
         router.push(window.location.pathname);
     };
@@ -645,6 +670,32 @@ export const FiltersComponent = ({
                                 </div>
                             )
                         }
+                        {autoScalingGroupFilter && (
+                            <div className='space-y-2'>
+                                <label className='text-sm font-medium text-foreground flex items-center gap-2'>
+                                    <Activity className='h-4 w-4' /> Grupo de Auto Scaling
+                                </label>
+                                <AutoScalingGroupFilterComponent
+                                    selectedGroup={tempAutoScalingGroup}
+                                    setSelectedGroup={setTempAutoScalingGroup}
+                                    startDate={tempStartDate}
+                                    endDate={tempEndDate}
+                                />
+                            </div>
+                        )}
+
+                        {rdsFilter && engine && (
+                            <div className='space-y-2'>
+                                <label className='text-sm font-medium text-foreground flex items-center gap-2'>
+                                    <Activity className='h-4 w-4' /> Métrica RDS
+                                </label>
+                                <RDSMetricFilterComponent
+                                    selectedMetric={tempMetric}
+                                    setSelectedMetric={setTempMetric}
+                                    engine={engine}
+                                />
+                            </div>
+                        )}
                     </div>
 
                     <div className='flex items-center gap-4'>

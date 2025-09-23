@@ -30,8 +30,11 @@ export const ViewConsumoRdsMariaDbHorario = () => {
       <FiltersComponent
         Component={MainViewConsumoRdsMariaDbHorario}
         dateFilter
-        rdsFilter       
-        engine="mariadb" 
+        rdsFilter
+        engine="mariadb"
+        instancesFilter
+        instancesService='rds-mariadb'
+        isInstanceMultiSelect
       />
     </div>
   )

@@ -1,6 +1,6 @@
 import { FiltersComponent } from '@/components/general/filters/FiltersComponent'
-import { MainViewConsumoRdsPostgresqlHorario }  from './ConsumoRdsPostgresqlHorarioComponent'
-import { Database  } from 'lucide-react'
+import { MainViewConsumoRdsPostgresqlHorario } from './ConsumoRdsPostgresqlHorarioComponent'
+import { Database } from 'lucide-react'
 
 export const ViewConsumoRdsPostgresqlHorario = () => {
   return (
@@ -11,11 +11,11 @@ export const ViewConsumoRdsPostgresqlHorario = () => {
           <div>
             <div className='flex items-center gap-3 mb-2'>
               <div className='h-12 w-12 bg-green-100 rounded-lg flex items-center justify-center'>
-                <Database  className='h-6 w-6 text-green-600' />
+                <Database className='h-6 w-6 text-green-600' />
               </div>
               <div>
                 <h1 className='text-3xl font-bold text-gray-900 dark:text-gray-100'>
-                  Dashboard AWS / Consumo RDS Postgresql 
+                  Dashboard AWS / Consumo RDS Postgresql
                 </h1>
                 <p className='text-gray-500 dark:text-gray-400'>
                   Comparación de consumo en horario hábil vs no hábil
@@ -30,8 +30,11 @@ export const ViewConsumoRdsPostgresqlHorario = () => {
       <FiltersComponent
         Component={MainViewConsumoRdsPostgresqlHorario}
         dateFilter
-        rdsFilter       
-        engine="postgresql" 
+        rdsFilter
+        engine="postgresql"
+        instancesFilter
+        instancesService='rds-pg'
+        isInstanceMultiSelect
       />
     </div>
   )

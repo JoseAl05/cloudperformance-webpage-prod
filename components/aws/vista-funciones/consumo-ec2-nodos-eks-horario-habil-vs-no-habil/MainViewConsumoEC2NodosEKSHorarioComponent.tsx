@@ -31,6 +31,10 @@ export const ViewConsumoEC2NodesEKSHorario = () => {
         Component={MainViewConsumoEC2NodosEKSHorario}
         dateFilter
         metricFilter
+        eksFilter
+        isEksMultiSelect
+        isEksAsgMultiSelect
+        isEksAsgInstanceMultiSelect
       />
     </div>
   )

@@ -28,14 +28,16 @@ export const TableRdsMysqlMetrics = ({
   startDateFormatted,
   endDateFormatted,
   metric,
+  instance
 }: {
   startDateFormatted: string
   endDateFormatted: string
   metric?: string
+  instance?: string
 }) => {
   const { data, error, isLoading } = useSWR<{ data: MysqlMetricData[] }>(
     startDateFormatted && endDateFormatted
-      ? `${process.env.NEXT_PUBLIC_API_URL}/aws/rds/mysql/business-vs-offhours?date_from=${startDateFormatted}&date_to=${endDateFormatted}&metric_label=${metric}`
+      ? `${process.env.NEXT_PUBLIC_API_URL}/aws/rds/mysql/business-vs-offhours?date_from=${startDateFormatted}&date_to=${endDateFormatted}&metric_label=${metric}&resource=${instance || "all"}`
       : null,
     fetcher
   )
@@ -100,7 +102,7 @@ export const TableRdsMysqlMetrics = ({
           filterColumn="Resource"
           filterPlaceholder="Buscar instancia…"
           enableGrouping={true}          // agrupa por Horario
-          groupByColumn="Resource"
+          groupByColumn="Horario"
         />
 
         <div className="border-t bg-muted/50 px-6 py-4">
