@@ -12,7 +12,7 @@ import { LoaderComponent } from '@/components/general/LoaderComponent';
 interface EksConsumeComponentProps {
     startDate: Date,
     endDate: Date,
-    instance: string,
+    eksAsgInstance: string,
     region: string
 }
 
@@ -28,26 +28,26 @@ const fetcher = (url: string) =>
 const isNonEmptyArray = <T,>(v: unknown): v is T[] => Array.isArray(v) && v.length > 0;
 const isNullish = (v: unknown) => v === null || v === undefined;
 
-export const EksConsumeComponent = ({ startDate, endDate, instance, region }: EksConsumeComponentProps) => {
+export const EksConsumeComponent = ({ startDate, endDate, eksAsgInstance, region }: EksConsumeComponentProps) => {
     const startDateFormatted = startDate.toISOString().replace('Z', '').slice(0, -4);
     const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : '';
 
-    const canFetch = !!instance
+    const canFetch = !!eksAsgInstance
 
     const ec2CpuMetrics = useSWR(
-        canFetch ? `${process.env.NEXT_PUBLIC_API_URL}/vm/consumo_ec2/cpu_usage?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&resource=${encodeURIComponent(instance)}` : null,
+        canFetch ? `${process.env.NEXT_PUBLIC_API_URL}/vm/consumo_ec2/cpu_usage?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&resource=${encodeURIComponent(eksAsgInstance)}` : null,
         fetcher
     )
     const ec2CreditsMetrics = useSWR(
-        canFetch ? `${process.env.NEXT_PUBLIC_API_URL}/vm/consumo_ec2/credits_usage?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&resource=${encodeURIComponent(instance)}` : null,
+        canFetch ? `${process.env.NEXT_PUBLIC_API_URL}/vm/consumo_ec2/credits_usage?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&resource=${encodeURIComponent(eksAsgInstance)}` : null,
         fetcher
     )
     const ec2Info = useSWR(
-        canFetch ? `${process.env.NEXT_PUBLIC_API_URL}/vm/consumo_ec2/info?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&resource=${encodeURIComponent(instance)}` : null,
+        canFetch ? `${process.env.NEXT_PUBLIC_API_URL}/vm/consumo_ec2/info?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&resource=${encodeURIComponent(eksAsgInstance)}` : null,
         fetcher
     )
     const ec2GlobalCreditsEfficiency = useSWR(
-        canFetch ? `${process.env.NEXT_PUBLIC_API_URL}/vm/consumo_ec2/global_credits_efficiency?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&resource=${encodeURIComponent(instance)}` : null,
+        canFetch ? `${process.env.NEXT_PUBLIC_API_URL}/vm/consumo_ec2/global_credits_efficiency?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&resource=${encodeURIComponent(eksAsgInstance)}` : null,
         fetcher
     )
 
@@ -92,7 +92,7 @@ export const EksConsumeComponent = ({ startDate, endDate, instance, region }: Ek
     if (anyLoading) {
         return <LoaderComponent />
     }
-    if (!instance) {
+    if (!eksAsgInstance) {
         return (
             <div className="max-w-7xl mx-auto px-6 py-8">
                 <div className="text-center text-gray-500 text-lg font-medium">No se ha seleccionado ninguna instancia.</div>
@@ -154,7 +154,7 @@ export const EksConsumeComponent = ({ startDate, endDate, instance, region }: Ek
                     data={infoData}
                     startDate={startDate}
                     endDate={endDate}
-                    instance={instance}
+                    instance={eksAsgInstance}
                     enableGrouping
                 />
             </div>

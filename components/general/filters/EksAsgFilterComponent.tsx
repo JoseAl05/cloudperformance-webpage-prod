@@ -55,7 +55,7 @@ export const EksAsgFilterComponent = ({
             url = `${process.env.NEXT_PUBLIC_API_URL}/aws/eks/getAsgListbyClusterName?date_from=${startDate}&date_to=${endDate}&eks_clusterName=${eks}&region=${region}`;
             break;
         default:
-            url = `${process.env.NEXT_PUBLIC_API_URL}/eks/all-eks-autoscaling-groups?date_from=${startDate}&date_to=${endDate}&region=${region}`;
+            url = `${process.env.NEXT_PUBLIC_API_URL}/eks/all-eks-autoscaling-groups?date_from=${startDate}&date_to=${endDate}&region=${region}&cluster_name=${eks}`;
             break;
     }
 

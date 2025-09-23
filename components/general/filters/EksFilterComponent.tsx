@@ -78,7 +78,7 @@ export const EksFilterComponent = ({
             url = `${process.env.NEXT_PUBLIC_API_URL}/aws/eks/getClusterEksList?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`;
             break;
         default:
-            url = `${process.env.NEXT_PUBLIC_API_URL}/eks/all-eks_clusters?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`;
+            url = `${process.env.NEXT_PUBLIC_API_URL}/eks/all-eks-clusters?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`;
             break;
     }
 
