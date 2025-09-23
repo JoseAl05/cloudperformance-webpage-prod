@@ -105,25 +105,25 @@ export const SidebarComponent = ({
     ]
 
     const consumoHorario = [
-        { label: 'Consumo Instancias EC2', href: '/aws/funciones/consumo-ec2-horario-habil-vs-no-habil', icon: Computer, color: 'text-green-500' },
-        { label: 'Consumo Instancias EC2 AutoscalingGroups', href: '/aws/funciones/consumo-ec2-autoscaling-groups-horario-habil-vs-no-habil', icon: Computer, color: 'text-green-500' },
-        { label: 'Consumo Instancias EC2 Nodos EKS', href: '/aws/funciones/consumo-ec2-nodos-eks-horario-habil-vs-no-habil', icon: Computer, color: 'text-green-500' },
-        { label: 'Consumo Instancias RDS Postgresql', href: '/aws/funciones/consumo-rds-postgresql-horario-habil-vs-no-habil', icon: Database, color: 'text-green-500' },
-        { label: 'Consumo Instancias RDS Mysql', href: '/aws/funciones/consumo-rds-mysql-horario-habil-vs-no-habil', icon: Database, color: 'text-green-500' },
-        { label: 'Consumo Instancias RDS SQL Server', href: '/aws/funciones/consumo-rds-sql-horario-habil-vs-no-habil', icon: Database, color: 'text-green-500' },
-        { label: 'Consumo Instancias RDS Oracle', href: '/aws/funciones/consumo-rds-oracle-horario-habil-vs-no-habil', icon: Database, color: 'text-green-500' },
-        { label: 'Consumo Instancias RDS MariaDB', href: '/aws/funciones/consumo-rds-mariadb-horario-habil-vs-no-habil', icon: Database, color: 'text-green-500' },
+        { label: 'Instancias EC2', href: '/aws/funciones/consumo-ec2-horario-habil-vs-no-habil', icon: Computer, color: 'text-green-500' },
+        { label: 'Instancias EC2 AutoscalingGroups', href: '/aws/funciones/consumo-ec2-autoscaling-groups-horario-habil-vs-no-habil', icon: Computer, color: 'text-green-500' },
+        { label: 'Instancias EC2 Nodos EKS', href: '/aws/funciones/consumo-ec2-nodos-eks-horario-habil-vs-no-habil', icon: Computer, color: 'text-green-500' },
+        { label: 'Instancias RDS Postgresql', href: '/aws/funciones/consumo-rds-postgresql-horario-habil-vs-no-habil', icon: Database, color: 'text-green-500' },
+        { label: 'Instancias RDS Mysql', href: '/aws/funciones/consumo-rds-mysql-horario-habil-vs-no-habil', icon: Database, color: 'text-green-500' },
+        { label: 'Instancias RDS SQL Server', href: '/aws/funciones/consumo-rds-sql-horario-habil-vs-no-habil', icon: Database, color: 'text-green-500' },
+        { label: 'Instancias RDS Oracle', href: '/aws/funciones/consumo-rds-oracle-horario-habil-vs-no-habil', icon: Database, color: 'text-green-500' },
+        { label: 'Instancias RDS MariaDB', href: '/aws/funciones/consumo-rds-mariadb-horario-habil-vs-no-habil', icon: Database, color: 'text-green-500' },
     ]
 
     const consumeSubItems = [
-        { label: 'Consumo EC2', icon: Computer, href: '/aws/consumos/ec2' },
-        { label: 'Consumo ASG EC2', icon: Computer, href: '/aws/consumos/asg' },
-        { label: 'Consumo EKS', icon: Computer, href: '/aws/consumos/eks' },
-        { label: 'Consumo RDS Postgresql', icon: Database, href: '/aws/consumos/rds/postgresql' },
-        { label: 'Consumo RDS Mysql', icon: Database, href: '/aws/consumos/rds/mysql' },
-        { label: 'Consumo RDS Oracle', icon: Database, href: '/aws/consumos/rds/oracle' },
-        { label: 'Consumo RDS SQL Server', icon: Database, href: '/aws/consumos/rds/sqlserver' },
-        { label: 'Consumo RDS MariaDB', icon: Database, href: '/aws/consumos/rds/mariadb' }
+        { label: 'Instancias EC2', icon: Computer, href: '/aws/consumos/ec2' },
+        { label: 'Instancias EC2 AutoscalingGroups', icon: Computer, href: '/aws/consumos/asg' },
+        { label: 'Instancias EC2 Nodos EKS', icon: Computer, href: '/aws/consumos/eks' },
+        { label: 'Instancias RDS Postgresql', icon: Database, href: '/aws/consumos/rds/postgresql' },
+        { label: 'Instancias RDS Mysql', icon: Database, href: '/aws/consumos/rds/mysql' },
+        { label: 'Instancias RDS Oracle', icon: Database, href: '/aws/consumos/rds/oracle' },
+        { label: 'Instancias RDS SQL Server', icon: Database, href: '/aws/consumos/rds/sqlserver' },
+        { label: 'Instancias RDS MariaDB', icon: Database, href: '/aws/consumos/rds/mariadb' }
     ]
 
     const consumes = [{ label: 'Consumos', subItems: consumeSubItems, icon: Zap }]
