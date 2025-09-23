@@ -1,11 +1,18 @@
 'use client'
 
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import useSWR from 'swr';
 import * as echarts from 'echarts';
 import { TrendingUp, DollarSign, Download, Calendar } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import {
+    Select,
+    SelectTrigger,
+    SelectValue,
+    SelectContent,
+    SelectItem,
+} from "@/components/ui/select";
 import { aws_regions } from '@/lib/aws_regions';
 import { LoaderComponent } from '@/components/general/LoaderComponent';
 
@@ -83,6 +90,8 @@ const toUTCDate = (s: string) => {
 const fmt = new Intl.DateTimeFormat('es-ES', { day: 'numeric', month: 'short', timeZone: 'UTC' });
 
 export const TendenciaFacturacionChartComponent = ({ startDate, endDate, services, region }: TendenciaFacturacionProps) => {
+    const [topN, setTopN] = useState<number | "all">(8);
+
     const chartRef = useRef<HTMLDivElement>(null);
     const chartInstance = useRef<echarts.ECharts | null>(null);
     const resizeObserverRef = useRef<ResizeObserver | null>(null);
@@ -164,7 +173,7 @@ export const TendenciaFacturacionChartComponent = ({ startDate, endDate, service
         const dateCount = dates.length;
         const start = toUTCDate(dates[0]);
         const end = toUTCDate(dates[dateCount - 1]);
-        const daysDiff = Math.floor((+end - +start) / 86_400_000) + 1; // inclusivo
+        const daysDiff = Math.floor((+end - +start) / 86_400_000) + 1;
 
         const bigStep = Math.max(1, Math.ceil(dateCount / 12));
         const midStep = Math.max(1, Math.ceil(dateCount / 20));
@@ -200,31 +209,97 @@ export const TendenciaFacturacionChartComponent = ({ startDate, endDate, service
         };
 
         const distinctColors = generateDistinctColors(series.length);
-        series.forEach((serie: unknown, index: number) => {
+        (series as unknown[]).forEach((serie: unknown, index: number) => {
             serie.itemStyle = { color: distinctColors[index] };
             serie.lineStyle = { width: 2 };
             serie.symbol = 'circle';
             serie.symbolSize = 4;
             serie.emphasis = { focus: 'series', lineStyle: { width: 3 } };
         });
+        const currentTopN = topN === 'all' ? Number.POSITIVE_INFINITY : Number(topN);
 
         const option = {
             backgroundColor: 'transparent',
             tooltip: {
                 trigger: 'axis',
                 axisPointer: { type: 'line', snap: true },
-                backgroundColor: 'rgba(255, 255, 255, 0.95)',
-                borderColor: '#ccc',
+                backgroundColor: 'rgba(255, 255, 255, 0.98)',
+                borderColor: '#ddd',
                 borderWidth: 1,
-                textStyle: { fontSize: 12 },
-                formatter: function (params: unknown[]) {
+                enterable: true,
+                confine:true,
+                textStyle: { fontSize: 12, color: '#111' },
+                extraCssText: 'max-width:360px; white-space:normal; box-shadow:0 4px 12px rgba(0,0,0,.08); border-radius:10px; padding:10px 12px;',
+                formatter: (params: unknown[]) => {
                     if (!params?.length) return '';
-                    const total = params.reduce((acc, p) => acc + (p.value || 0), 0);
+
                     const originalDate = toUTCDate(dates[params[0].dataIndex]);
                     const dateStr = fmt.format(originalDate);
-                    let tooltip = `<div style="font-weight: bold; margin-bottom: 8px;">${dateStr}</div>`;
-                    tooltip += `<div style="border-top: 1px solid #eee; margin-top: 5px; padding-top: 5px; font-weight: bold; font-size: 13px;">Total: $${total.toLocaleString()}</div>`;
-                    return tooltip;
+
+                    const items = params
+                        .map((p: unknown) => ({
+                            name: p.seriesName,
+                            value: Number(p.value || 0),
+                            marker: p.marker,
+                        }))
+                        .filter((i: unknown) => i.value > 0);
+
+                    if (!items.length) {
+                        return `<div style="font-weight:600;margin-bottom:6px">${dateStr}</div>
+                                <div style="font-weight:600">Total: $0</div>`;
+                    }
+
+                    items.sort((a: unknown, b: unknown) => b.value - a.value);
+                    const total = items.reduce((s: number, i: unknown) => s + i.value, 0);
+
+                    const top = items.slice(0, currentTopN);
+                    const rest = items.slice(currentTopN);
+                    const restSum = rest.reduce((s: number, i: unknown) => s + i.value, 0);
+
+                    const money = (n: number) =>
+                        n >= 1_000_000 ? '$' + (n / 1_000_000).toFixed(2) + 'M'
+                            : n >= 1_000 ? '$' + (n / 1_000).toFixed(0) + 'K'
+                                : '$' + n.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+                    let html = `<div style="font-weight:600;margin-bottom:8px">${dateStr}</div>`;
+
+                    html += `<div style="max-height:280px; overflow:auto; padding-right:4px;">`;
+
+                    html += top.map((i: unknown) => {
+                        const pct = total > 0 ? (i.value / total) * 100 : 0;
+                        return `
+                        <div style="display:flex;align-items:center;gap:8px;justify-content:space-between;line-height:1.25;margin:3px 0">
+                          <div style="display:flex;align-items:center;gap:6px;min-width:0">
+                            ${i.marker}
+                            <span style="max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${i.name}</span>
+                          </div>
+                          <div style="font-variant-numeric: tabular-nums;">
+                            <span>${money(i.value)}</span>
+                            <span style="color:#666"> · ${pct.toFixed(1)}%</span>
+                          </div>
+                        </div>`;
+                    }).join('');
+
+                    if (rest.length) {
+                        const pct = total > 0 ? (restSum / total) * 100 : 0;
+                        html += `
+                        <div style="display:flex;align-items:center;gap:8px;justify-content:space-between;line-height:1.25;margin-top:6px;border-top:1px dashed #eee;padding-top:6px">
+                          <div style="color:#444">+${rest.length} más</div>
+                          <div style="font-variant-numeric: tabular-nums;">
+                            <span>${money(restSum)}</span>
+                            <span style="color:#666"> · ${pct.toFixed(1)}%</span>
+                          </div>
+                        </div>`;
+                    }
+
+                    html += `</div>`;
+
+                    html += `
+                    <div style="border-top:1px solid #eee;margin-top:8px;padding-top:6px;font-weight:700">
+                      Total: ${money(total)}
+                    </div>`;
+
+                    return html;
                 },
             },
             legend: {
@@ -234,7 +309,7 @@ export const TendenciaFacturacionChartComponent = ({ startDate, endDate, service
                 left: 'center',
                 textStyle: { fontSize: 11, color: '#666' },
                 selectedMode: 'multiple',
-                data: series.map((s: unknown) => s.name),
+                data: (series as unknown[]).map((s) => s.name),
             },
             grid: { left: 60, right: 60, top: 50, bottom: 80, containLabel: true },
             dataZoom: [
@@ -279,7 +354,7 @@ export const TendenciaFacturacionChartComponent = ({ startDate, endDate, service
                 splitLine: { lineStyle: { color: '#f5f5f5', type: 'dashed' } },
                 min: (v: unknown) => Math.max(0, v.min - (v.max - v.min) * 0.1),
             },
-            series: series.slice().reverse(),
+            series: (series as unknown[]).slice().reverse(),
             animation: true,
             animationDuration: 1000,
             animationEasing: 'cubicOut',
@@ -292,7 +367,7 @@ export const TendenciaFacturacionChartComponent = ({ startDate, endDate, service
         resizeObserverRef.current = new ResizeObserver(() => {
             if (chart && !chart.isDisposed()) setTimeout(() => chart.resize(), 100);
         });
-        resizeObserverRef.current.observe(chartRef.current);
+        resizeObserverRef.current.observe(chartRef.current!);
 
         return () => {
             if (resizeObserverRef.current) resizeObserverRef.current.disconnect();
@@ -301,7 +376,7 @@ export const TendenciaFacturacionChartComponent = ({ startDate, endDate, service
                 chartInstance.current = null;
             }
         };
-    }, [data]);
+    }, [data, topN]);
 
     if (isLoading) return <LoaderComponent />;
 
@@ -394,12 +469,39 @@ export const TendenciaFacturacionChartComponent = ({ startDate, endDate, service
 
             <Card className="shadow-lg">
                 <CardHeader className="pb-2">
-                    <CardTitle className="flex items-center gap-2">
-                        <TrendingUp className="h-5 w-5 text-green-500" />
-                        Distribución de Costos por Servicio
-                    </CardTitle>
-                    <p className="text-sm text-muted-foreground">Gráfico de área apilada que muestra la evolución temporal de los costos</p>
+                    <div className="flex items-center justify-between gap-2">
+                        <div>
+                            <CardTitle className="flex items-center gap-2">
+                                <TrendingUp className="h-5 w-5 text-green-500" />
+                                Distribución de Costos por Servicio
+                            </CardTitle>
+                            <p className="text-sm text-muted-foreground">
+                                Gráfico de área apilada que muestra la evolución temporal de los costos
+                            </p>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                            <span className="text-sm text-muted-foreground">Tooltip Top:</span>
+                            <Select
+                                value={topN === 'all' ? 'all' : String(topN)}
+                                onValueChange={(val) => setTopN(val === 'all' ? 'all' : parseInt(val, 10))}
+                            >
+                                <SelectTrigger className="h-8 w-[90px]">
+                                    <SelectValue placeholder="Top N" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="5">5</SelectItem>
+                                    <SelectItem value="8">8</SelectItem>
+                                    <SelectItem value="10">10</SelectItem>
+                                    <SelectItem value="15">15</SelectItem>
+                                    <SelectItem value="20">20</SelectItem>
+                                    <SelectItem value="all">Todos</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    </div>
                 </CardHeader>
+
                 <CardContent>
                     <div ref={chartRef} className="w-full" style={{ height: '500px', minHeight: '500px' }} />
                 </CardContent>
@@ -433,3 +535,4 @@ export const TendenciaFacturacionChartComponent = ({ startDate, endDate, service
         </div>
     );
 };
+
