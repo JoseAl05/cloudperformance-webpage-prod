@@ -334,7 +334,7 @@ const GroupRow = ({
                     variant="ghost"
                     size="sm"
                     onClick={onToggle}
-                    className="h-6 w-6 p-0"
+                    className="h-6 w-6 p-0 cursor-pointer"
                     aria-label={isExpanded ? 'Colapsar grupo' : 'Expandir grupo'}
                 >
                     {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}

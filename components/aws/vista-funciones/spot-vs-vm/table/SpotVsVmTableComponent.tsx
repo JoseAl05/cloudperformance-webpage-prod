@@ -57,15 +57,14 @@ export const TableComponentSpotVsVm = ({
     {
       accessorKey: "sync_time",
       header: ({ column }) => (
-        <Button
+        <span
           variant="ghost"
           onClick={() =>
             column.toggleSorting(column.getIsSorted() === "asc")
           }
         >
           Fecha
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
+        </span>
       ),
       cell: (info) => {
         const date = new Date(info.getValue() as string)
