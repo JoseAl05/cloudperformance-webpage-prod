@@ -32,6 +32,7 @@ import {
     Server,
     HardDrive,
     Clock,
+    Map,
 } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { usePathname } from 'next/navigation'
@@ -73,7 +74,6 @@ export const SidebarComponent = ({
             href: '/aws/facturacion/tendencia-facturacion',
         },
         { label: 'Quotas', icon: PieChart, href: '/aws/quotas' },
-        { label: 'Deployments', icon: Zap, href: '/aws/deployments' },
         { label: 'Eventos', icon: Zap, href: '/aws/eventos' },
         { label: 'Vista Advisor', icon: Pyramid, href: '/aws/advisor' },
         {
@@ -115,6 +115,15 @@ export const SidebarComponent = ({
         { label: 'Instancias RDS MariaDB', href: '/aws/funciones/consumo-rds-mariadb-horario-habil-vs-no-habil', icon: Database, color: 'text-green-500' },
     ]
 
+    const consumoLoc = [
+        { label: 'Instancias EC2', href: '/aws/funciones/avg-uso-loc-inst-ec2', icon: Computer, color: 'text-green-500' },
+        { label: 'Instancias RDS Postgresql', href: '/aws/funciones/avg-uso-loc-inst-rds-pg', icon: Database, color: 'text-green-500' },
+        { label: 'Instancias RDS Mysql', href: '/aws/funciones/avg-uso-loc-inst-rds-mysql', icon: Database, color: 'text-green-500' },
+        { label: 'Instancias RDS SQL Server', href: '/aws/funciones/avg-uso-loc-inst-rds-sqlserver', icon: Database, color: 'text-green-500' },
+        { label: 'Instancias RDS Oracle', href: '/aws/funciones/avg-uso-loc-inst-rds-oracle', icon: Database, color: 'text-green-500' },
+        { label: 'Instancias RDS MariaDB', href: '/aws/funciones/avg-uso-loc-inst-rds-mariadb', icon: Database, color: 'text-green-500' },
+    ]
+
     const consumeSubItems = [
         { label: 'Instancias EC2', icon: Computer, href: '/aws/consumos/ec2' },
         { label: 'Instancias EC2 AutoscalingGroups', icon: Computer, href: '/aws/consumos/asg' },
@@ -131,6 +140,7 @@ export const SidebarComponent = ({
     const funciones = [
         { label: 'Top Facturaciones', subItems: topFacturaciones, icon: Zap },
         { label: 'Consumo horario hábil vs no hábil', subItems: consumoHorario, icon: Clock },
+        { label: 'Consumo por Localización', subItems: consumoLoc, icon: Map },
         { label: 'Spot vs Vm', href: '/aws/funciones/spot-vs-vm', icon: Database },
         { label: 'Top S3 Buckets', href: '/aws/funciones/top-s3-buckets', icon: Server },
         { label: 'Ebs No Utilizados', href: '/aws/funciones/ebs-no-utilizados', icon: HardDrive }
