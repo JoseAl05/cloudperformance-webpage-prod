@@ -127,9 +127,9 @@ export const AutoscalingGroupsResourceViewInstancesVsMaxMinComponent = ({
                         backgroundColor: '#f97316'
                     }
                 },
-                formatter: function (params: any) {
+                formatter: function (params: unknown) {
                     let result = `<strong>${new Date(params[0].value[0]).toLocaleString('es-ES')}</strong><br/>`;
-                    params.forEach((param: any) => {
+                    params.forEach((param: unknown) => {
                         if (param.value[1] !== null && param.value[1] !== undefined) {
                             result += `${param.marker}${param.seriesName}: ${param.value[1]} instancias<br/>`;
                         }
