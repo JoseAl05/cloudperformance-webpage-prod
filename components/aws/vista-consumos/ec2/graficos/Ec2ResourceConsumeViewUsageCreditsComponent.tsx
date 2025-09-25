@@ -153,7 +153,7 @@ export const Ec2ResourceConsumeViewUsageCreditsComponent = ({ data }: Ec2Resourc
                 scale: true,
                 axisLabel: {
                     fontSize: 11,
-                    formatter: (val: number) => `${val} vCores`,
+                    formatter: (val: number) => `${val} Créditos`,
                     showMaxLabel: true,
                     showMinLabel: true
                 },

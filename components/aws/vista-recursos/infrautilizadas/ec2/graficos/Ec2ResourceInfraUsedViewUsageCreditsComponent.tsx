@@ -324,7 +324,7 @@ export const Ec2ResourceViewUsageCreditsComponent2 = ({ data }: ResourceViewUsag
                                 name: 'Max',
                                 label: {
                                     formatter: (params: unknown) => {
-                                        return `Max \n${params.data.coord[1]} vCores`;
+                                        return `Max \n${params.data.coord[1]} Créditos`;
                                     }
                                 }
                             },
@@ -333,7 +333,7 @@ export const Ec2ResourceViewUsageCreditsComponent2 = ({ data }: ResourceViewUsag
                                 name: 'Min',
                                 label: {
                                     formatter: (params: unknown) => {
-                                        return `Min \n${params.data.coord[1]} vCores`;
+                                        return `Min \n${params.data.coord[1]} Créditos`;
                                     }
                                 }
                             },
@@ -379,7 +379,7 @@ export const Ec2ResourceViewUsageCreditsComponent2 = ({ data }: ResourceViewUsag
                                 name: 'Max',
                                 label: {
                                     formatter: (params: unknown) => {
-                                        return `Max \n${params.data.coord[1]} vCores`;
+                                        return `Max \n${params.data.coord[1]} Créditos`;
                                     }
                                 }
                             },
@@ -388,7 +388,7 @@ export const Ec2ResourceViewUsageCreditsComponent2 = ({ data }: ResourceViewUsag
                                 name: 'Min',
                                 label: {
                                     formatter: (params: unknown) => {
-                                        return `Min \n${params.data.coord[1]} vCores`;
+                                        return `Min \n${params.data.coord[1]} Créditos`;
                                     }
                                 }
                             },
