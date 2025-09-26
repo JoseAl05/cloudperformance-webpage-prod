@@ -8,7 +8,7 @@ export const Verify2FaComponent = () => {
     const router = useRouter();
     const sp = useSearchParams();
     const userId = sp.get('userId') || '';
-    const next = sp.get('next') || '/dashboard';
+    const next = sp.get('next') || '/aws';
 
     async function onSubmit(e: React.FormEvent) {
         e.preventDefault();
