@@ -17,17 +17,12 @@ interface ServiceData {
 }
 
 const fetcher = (url: string) =>
-  fetch(url, {
-    method: 'GET',
-    headers: {
-      Authorization: `Bearer ${process.env.NEXT_PUBLIC_API_TOKEN}`,
-      'Content-Type': 'application/json',
-    },
-  }).then((res) => res.json());
+    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
+        .then(r => r.json());
 
 export const ServiceFilterComponent = ({ selectedServices, setSelectedServices }: ServiceFilterComponentProps) => {
   const [open, setOpen] = useState(false);
-  const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/funcion/servicios-disponibles`;
+  const apiUrl = `/api/bridge/funcion/servicios-disponibles`;
   const { data: services, error, isLoading } = useSWR<ServiceData[]>(apiUrl, fetcher);
 
   const handleServiceToggle = (serviceValue: string) => {

@@ -7,13 +7,8 @@ import { Server, Cloud, Percent, BarChart3 } from "lucide-react"
 import { TableComponentSpotVsVm } from "@/components/aws/vista-funciones/spot-vs-vm/table/SpotVsVmTableComponent"
 
 const fetcher = (url: string) =>
-  fetch(url, {
-    method: 'GET',
-    headers: {
-      'Authorization': `Bearer ${process.env.NEXT_PUBLIC_API_TOKEN}`,
-      'Content-Type': 'application/json'
-    }
-  }).then(res => res.json())
+    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
+        .then(r => r.json());
 
 interface SpotVsVmProps {
   startDate: Date,
@@ -29,7 +24,7 @@ export const MainViewSpotVsVm = ({ startDate, endDate }: SpotVsVmProps) => {
   const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : '';
 
   const { data, error, isLoading } = useSWR(
-    `${process.env.NEXT_PUBLIC_API_URL}/vm/spot_vs_vm?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=all_regions`,
+    `/api/bridge/vm/spot_vs_vm?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=all_regions`,
     fetcher
   )
 

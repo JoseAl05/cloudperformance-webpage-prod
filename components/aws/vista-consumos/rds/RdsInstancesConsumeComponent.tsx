@@ -21,13 +21,8 @@ interface RdsInstancesConsumeComponentProps {
 }
 
 const fetcher = (url: string) =>
-    fetch(url, {
-        method: 'GET',
-        headers: {
-            Authorization: `Bearer ${process.env.NEXT_PUBLIC_API_TOKEN}`,
-            'Content-Type': 'application/json',
-        },
-    }).then((res) => res.json())
+    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
+        .then(r => r.json());
 
 const isNonEmptyArray = <T,>(v: unknown): v is T[] => Array.isArray(v) && v.length > 0
 const isNullish = (v: unknown) => v === null || v === undefined
@@ -40,19 +35,19 @@ export const RdsInstancesConsumeComponent = ({ startDate, endDate, instance, reg
     let url = '';
     switch (instancesService) {
         case 'rds-pg':
-            url = `${process.env.NEXT_PUBLIC_API_URL}/db/consumo_rds_postgresql`
+            url = `/api/bridge/db/consumo_rds_postgresql`
             break;
         case 'rds-mysql':
-            url = `${process.env.NEXT_PUBLIC_API_URL}/db/consumo_rds_mysql`
+            url = `/api/bridge/db/consumo_rds_mysql`
             break;
         case 'rds-oracle':
-            url = `${process.env.NEXT_PUBLIC_API_URL}/db/consumo_rds_oracle`
+            url = `/api/bridge/db/consumo_rds_oracle`
             break;
         case 'rds-sqlserver':
-            url = `${process.env.NEXT_PUBLIC_API_URL}/db/consumo_rds_sqlserver`
+            url = `/api/bridge/db/consumo_rds_sqlserver`
             break;
         case 'rds-mariadb':
-            url = `${process.env.NEXT_PUBLIC_API_URL}/db/consumo_rds_mariadb`
+            url = `/api/bridge/db/consumo_rds_mariadb`
             break;
         default:
             break;

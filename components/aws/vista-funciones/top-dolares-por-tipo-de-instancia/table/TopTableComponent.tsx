@@ -15,7 +15,9 @@ type TableDataTop = {
   costo_bruto: number | string
 }
 
-const fetcher = (url: string) => fetch(url).then((res) => res.json())
+const fetcher = (url: string) =>
+    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
+        .then(r => r.json());
 
 export const TableComponentTop = ({
   startDateFormatted,
@@ -26,7 +28,7 @@ export const TableComponentTop = ({
 }) => {
   const { data, error, isLoading } = useSWR<TableDataTop[]>(
     startDateFormatted && endDateFormatted
-      ? `${process.env.NEXT_PUBLIC_API_URL}/facturacion/top_facturacion/INSTANCE_TYPE?date_from=${startDateFormatted}&date_to=${endDateFormatted}`
+      ? `/api/bridge/facturacion/top_facturacion/INSTANCE_TYPE?date_from=${startDateFormatted}&date_to=${endDateFormatted}`
       : null,
     fetcher
   )

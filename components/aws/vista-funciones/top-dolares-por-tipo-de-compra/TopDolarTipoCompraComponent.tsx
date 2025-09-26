@@ -15,13 +15,8 @@ import {
 import { Button } from "@/components/ui/button"
 
 const fetcher = (url: string) =>
-  fetch(url, {
-    method: 'GET',
-    headers: {
-      'Authorization': `Bearer ${process.env.NEXT_PUBLIC_API_TOKEN}`,
-      'Content-Type': 'application/json'
-    }
-  }).then(res => res.json())
+    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
+        .then(r => r.json());
 
 interface TopDolaresPurchaseTypeProps {
   startDate: Date,
@@ -39,7 +34,7 @@ export const MainViewTopDolaresTipoCompra = ({ startDate, endDate }: TopDolaresP
   const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : '2025-09-01T00:00:00';
 
   const { data, error, isLoading } = useSWR(
-    `${process.env.NEXT_PUBLIC_API_URL}/facturacion/top_facturacion/PURCHASE_TYPE?date_from=${startDateFormatted}&date_to=${endDateFormatted}`,
+    `/api/bridge/facturacion/top_facturacion/PURCHASE_TYPE?date_from=${startDateFormatted}&date_to=${endDateFormatted}`,
     fetcher
   )
 

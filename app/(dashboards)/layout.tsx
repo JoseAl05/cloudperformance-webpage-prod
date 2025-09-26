@@ -3,13 +3,20 @@ import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/s
 import { SidebarComponent } from "@/components/Sidebar"
 import { ModeToggle } from '@/components/ModeToggle';
 import { Navbar } from '@/components/Navbar';
+import { cookies } from 'next/headers';
+import { AUTH_COOKIE } from '@/lib/cookies';
+import { verifyAuthToken } from '@/lib/auth';
+import Link from 'next/link';
 
 
-export default function DashboardLayout({
+export default async function DashboardLayout({
     children,
 }: Readonly<{
     children: React.ReactNode;
 }>) {
+    const cookieStore = await cookies();
+    const token = cookieStore.get(AUTH_COOKIE)?.value;
+    const payload = token ? await verifyAuthToken(token) : null;
     return (
         <SidebarProvider
             style={
@@ -22,8 +29,16 @@ export default function DashboardLayout({
             <SidebarComponent />
             <SidebarInset className="min-w-0">
                 <div className='flex items-center gap-3 p-5'>
-                    <SidebarTrigger />
-                    <Navbar />
+                    {
+                        payload ? (
+                            <SidebarTrigger />
+                        ) : (
+                            <></>
+                        )
+                    }
+                    <Navbar
+                        payload={payload}
+                    />
                 </div>
                 <div className="flex flex-col">
                     <div className="@container/main flex flex-col gap-2">

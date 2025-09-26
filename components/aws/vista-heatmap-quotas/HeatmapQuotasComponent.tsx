@@ -3,15 +3,19 @@ import useSWR from 'swr'
 import React, { useEffect, useRef, useMemo, useCallback } from "react"
 import * as echarts from "echarts"
 import { LoaderComponent } from '@/components/general/LoaderComponent'
+import { useSession } from '@/hooks/useSession'
 
+// const fetcher = (url: string) =>
+//     fetch(url, {
+//         method: "GET",
+//         headers: {
+//             "Authorization": `Bearer ${process.env.NEXT_PUBLIC_API_TOKEN}`,
+//             "Content-Type": "application/json"
+//         }
+//     }).then(res => res.json())
 const fetcher = (url: string) =>
-    fetch(url, {
-        method: "GET",
-        headers: {
-            "Authorization": `Bearer ${process.env.NEXT_PUBLIC_API_TOKEN}`,
-            "Content-Type": "application/json"
-        }
-    }).then(res => res.json())
+    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
+        .then(r => r.json());
 
 interface HeatmapQuotasComponentProps {
     startDate: Date,
@@ -19,6 +23,7 @@ interface HeatmapQuotasComponentProps {
 }
 
 export const HeatmapQuotasComponent = ({ startDate, endDate }: HeatmapQuotasComponentProps) => {
+
     const chartRef = useRef<HTMLDivElement>(null);
     const chartInstance = useRef<echarts.ECharts | null>(null);
     const resizeObserverRef = useRef<ResizeObserver | null>(null);
@@ -26,10 +31,15 @@ export const HeatmapQuotasComponent = ({ startDate, endDate }: HeatmapQuotasComp
     const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : '';
 
 
+    // const { data, error, isLoading } = useSWR(
+    //     `/api/bridge/funcion/heatmap-quotas?date_from=${startDateFormatted}&date_to=${endDateFormatted}&group_by_quota=true`,
+    //     fetcher
+    // )
     const { data, error, isLoading } = useSWR(
-        `${process.env.NEXT_PUBLIC_API_URL}/funcion/heatmap-quotas?date_from=${startDateFormatted}&date_to=${endDateFormatted}&group_by_quota=true`,
-        fetcher
-    )
+        `/api/bridge/funcion/heatmap-quotas?date_from=${encodeURIComponent(startDateFormatted)}&date_to=${encodeURIComponent(endDateFormatted)}&group_by_quota=true`,
+        fetcher,
+        { revalidateOnFocus: false }
+    );
     const formattedData = data ? data.map(d => {
         return {
             "name": new Date(d.sync_time.$date).toLocaleDateString(),
@@ -277,7 +287,7 @@ export const HeatmapQuotasComponent = ({ startDate, endDate }: HeatmapQuotasComp
 //     const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : '';
 
 //     const { data, error, isLoading } = useSWR(
-//         `${process.env.NEXT_PUBLIC_API_URL}/funcion/heatmap-quotas?date_from=${startDateFormatted}&date_to=${endDateFormatted}&group_by_quota=true`,
+//         `/api/bridge/funcion/heatmap-quotas?date_from=${startDateFormatted}&date_to=${endDateFormatted}&group_by_quota=true`,
 //         fetcher
 //     )
 

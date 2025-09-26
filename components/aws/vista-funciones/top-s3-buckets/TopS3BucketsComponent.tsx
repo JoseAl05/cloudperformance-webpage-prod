@@ -8,13 +8,8 @@ import { TopS3BucketsChart } from '@/components/aws/vista-funciones/top-s3-bucke
 import { TrendLineChart } from '@/components/aws/vista-funciones/top-s3-buckets/grafico/TrendLineChart'
 
 const fetcher = (url: string) =>
-  fetch(url, {
-    method: 'GET',
-    headers: {
-      Authorization: `Bearer ${process.env.NEXT_PUBLIC_API_TOKEN}`,
-      'Content-Type': 'application/json',
-    },
-  }).then(res => res.json())
+    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
+        .then(r => r.json());
 
 interface TopS3BucketsProps {
   startDate: Date
@@ -34,7 +29,7 @@ export const TopS3BucketsComponent = ({
 
   // 🔹 Endpoint para métricas globales (tarjetas)
   const { data: dataInfo, error: errorInfo, isLoading: isLoadingInfo } = useSWR(
-    `${process.env.NEXT_PUBLIC_API_URL}/s3/top_s3_buckets/info?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&resources=${buckets}`,
+    `/api/bridge/s3/top_s3_buckets/info?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&resources=${buckets}`,
     fetcher
   )
 

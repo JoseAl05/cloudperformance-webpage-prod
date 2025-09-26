@@ -20,17 +20,12 @@ interface ApiResponse {
 }
 
 const fetcher = (url: string) =>
-  fetch(url, {
-    method: 'GET',
-    headers: {
-      Authorization: `Bearer ${process.env.NEXT_PUBLIC_API_TOKEN}`,
-      'Content-Type': 'application/json',
-    },
-  }).then((res) => res.json());
+    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
+        .then(r => r.json());
 
 export const MetricsFilterComponent = ({ selectedMetrics, setSelectedMetrics }: MetricsFilterComponentProps) => {
   const [open, setOpen] = useState(false);
-  const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/vm/promedio-loc-ec2/grupos-disponibles`;
+  const apiUrl = `/api/bridge/vm/promedio-loc-ec2/grupos-disponibles`;
   const { data: apiResponse, error, isLoading } = useSWR<ApiResponse>(apiUrl, fetcher);
 
   // Crear la lista de grupos principales (en lugar de métricas individuales)

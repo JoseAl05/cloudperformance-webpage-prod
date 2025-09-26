@@ -52,13 +52,8 @@ type AdvisorRecMaybeDetails = AdvisorRecommendation & {
 }
 
 const fetcher = (url: string) =>
-    fetch(url, {
-        method: 'GET',
-        headers: {
-            Authorization: `Bearer ${process.env.NEXT_PUBLIC_API_TOKEN}`,
-            'Content-Type': 'application/json',
-        },
-    }).then((res) => res.json())
+    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
+        .then(r => r.json());
 
 const normalize = (s: string) =>
     s
@@ -92,7 +87,7 @@ export const AdvisorViewComponent = ({
 
     const { data, error, isLoading } = useSWR<AdvisorApiResponse | unknown>(
         advisorCategory || advisorStatus
-            ? `${process.env.NEXT_PUBLIC_API_URL}/advisor/get_advisor_data?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&category=${advisorCategoryFormatted}&status=${advisorStatusFormatted}`
+            ? `/api/bridge/advisor/get_advisor_data?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&category=${advisorCategoryFormatted}&status=${advisorStatusFormatted}`
             : null,
         fetcher,
     )

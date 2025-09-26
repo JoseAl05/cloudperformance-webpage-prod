@@ -16,13 +16,8 @@ type PostgresqlMetricData = {
 }
 
 const fetcher = (url: string) =>
-  fetch(url, {
-    method: 'GET',
-    headers: {
-      'Authorization': `Bearer ${process.env.NEXT_PUBLIC_API_TOKEN}`,
-      'Content-Type': 'application/json'
-    }
-  }).then(res => res.json())
+    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
+        .then(r => r.json());
 
 export const TableRdsPostgresqlMetrics = ({
   startDateFormatted,
@@ -37,7 +32,7 @@ export const TableRdsPostgresqlMetrics = ({
 }) => {
   const { data, error, isLoading } = useSWR<{ data: PostgresqlMetricData[] }>(
     startDateFormatted && endDateFormatted
-      ? `${process.env.NEXT_PUBLIC_API_URL}/aws/rds/postgresql/business-vs-offhours?date_from=${startDateFormatted}&date_to=${endDateFormatted}&metric_label=${metric}&resource=${instance || "all"}`
+      ? `/api/bridge/aws/rds/postgresql/business-vs-offhours?date_from=${startDateFormatted}&date_to=${endDateFormatted}&metric_label=${metric}&resource=${instance || "all"}`
       : null,
     fetcher
   )

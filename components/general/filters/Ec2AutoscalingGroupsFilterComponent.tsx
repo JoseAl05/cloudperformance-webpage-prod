@@ -21,13 +21,8 @@ import {
 
 // === Fetcher para SWR ===
 const fetcher = (url: string) =>
-  fetch(url, {
-    method: 'GET',
-    headers: {
-      Authorization: `Bearer ${process.env.NEXT_PUBLIC_API_TOKEN}`,
-      'Content-Type': 'application/json',
-    },
-  }).then((res) => res.json());
+    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
+        .then(r => r.json());
 
 interface AutoScalingGroupFilterProps {
   selectedGroup: string;
@@ -51,7 +46,7 @@ export const AutoScalingGroupFilterComponent = ({
 
   // Llamada a la API de AutoScaling Groups (string[])
   const { data, error } = useSWR<string[]>(
-    `${process.env.NEXT_PUBLIC_API_URL}/aws/ec2/autoscaling/groups?date_from=${startDateFormatted}&date_to=${endDateFormatted}`,
+    `/api/bridge/aws/ec2/autoscaling/groups?date_from=${startDateFormatted}&date_to=${endDateFormatted}`,
     fetcher
   );
 

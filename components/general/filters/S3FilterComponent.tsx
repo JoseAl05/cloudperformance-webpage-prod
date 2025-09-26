@@ -26,13 +26,8 @@ interface S3BucketFilterProps {
 }
 
 const fetcher = (url: string) =>
-  fetch(url, {
-    method: 'GET',
-    headers: {
-      Authorization: `Bearer ${process.env.NEXT_PUBLIC_API_TOKEN}`,
-      'Content-Type': 'application/json',
-    },
-  }).then((res) => res.json());
+    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
+        .then(r => r.json());
 
 export const S3BucketFilter = ({
   selectedBuckets,
@@ -48,11 +43,11 @@ export const S3BucketFilter = ({
     ? endDate.toISOString().replace('Z', '').slice(0, -4)
     : '';
 
-  const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/s3/s3_buckets/list?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`;
+  const apiUrl = `/api/bridge/s3/s3_buckets/list?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`;
 
   const { data, error, isLoading } = useSWR<{ buckets: string[] }>(apiUrl, fetcher);
 
-  const bucketsList = data?.buckets || [];
+  const bucketsList = data || [];
 
   const handleBucketToggle = (bucket: string) => {
     if (bucket === 'all') {

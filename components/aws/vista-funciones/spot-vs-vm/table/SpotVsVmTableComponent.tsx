@@ -23,7 +23,9 @@ type SpotVsVmApiResponse = {
   instancias: InstanceData[]
 }
 
-const fetcher = (url: string) => fetch(url).then((res) => res.json())
+const fetcher = (url: string) =>
+    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
+        .then(r => r.json());
 
 export const TableComponentSpotVsVm = ({
   startDateFormatted,
@@ -34,7 +36,7 @@ export const TableComponentSpotVsVm = ({
 }) => {
   const { data, error, isLoading } = useSWR<SpotVsVmApiResponse[]>(
     startDateFormatted && endDateFormatted
-      ? `${process.env.NEXT_PUBLIC_API_URL}/vm/spot_vs_vm?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=all_regions`
+      ? `/api/bridge/vm/spot_vs_vm?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=all_regions`
       : null,
     fetcher
   )

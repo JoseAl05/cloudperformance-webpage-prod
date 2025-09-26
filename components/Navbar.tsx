@@ -12,17 +12,18 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import Image from 'next/image'
+import Link from 'next/link'
 
-export const Navbar = () => {
+interface NavbarProps {
+    payload: unknown;
+}
+
+export const Navbar = ({ payload }: NavbarProps) => {
     const { setTheme, theme } = useTheme()
 
     return (
         <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
             <div className="flex h-14 items-center px-4 gap-4">
-                {/* Sidebar trigger for mobile */}
-                {/* <SidebarTrigger className="cursor-pointer" /> */}
-
-                {/* Logo/Brand - hidden on mobile when sidebar is present */}
                 <div className="hidden md:flex items-center gap-2">
                     <Image
                         alt='logo-cloudperformance'
@@ -32,13 +33,8 @@ export const Navbar = () => {
                     />
                     <span className="font-semibold text-foreground">Cloud Performance</span>
                 </div>
-
-                {/* Spacer */}
                 <div className="flex-1" />
-
-                {/* Right side actions */}
                 <div className="flex items-center gap-2">
-                    {/* Theme toggle */}
                     <Button
                         variant="ghost"
                         size="sm"
@@ -49,6 +45,19 @@ export const Navbar = () => {
                         <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
                         <span className="sr-only">Toggle theme</span>
                     </Button>
+                    {
+                        payload ? (
+                            <div className='flex gap-5 items-center'>
+                                <p>Bienvenido, <strong>{payload.username}</strong> — Cliente: <strong>{payload.client}</strong></p>
+                                <form action="/api/auth/logout" method="post">
+                                    <Button variant='destructive' className='cursor-pointer'>Cerrar sesión</Button>
+                                </form>
+                            </div>
+                        ) : (
+
+                            <Link href="/login" className="underline">Iniciar sesión</Link>
+                        )
+                    }
 
                     {/* Notifications */}
                     {/* <Button variant="ghost" size="sm" className="w-9 h-9 p-0 relative">

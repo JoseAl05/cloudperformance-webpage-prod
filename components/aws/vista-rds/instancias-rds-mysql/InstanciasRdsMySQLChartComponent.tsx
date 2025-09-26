@@ -78,15 +78,9 @@ const transformMetricsForChart = (
   // Los datos ya vienen en el formato correcto desde la API
   return metricsData.metrics_data as MetricPoint[];
 };
-
 const fetcher = (url: string) =>
-  fetch(url, {
-    method: "GET",
-    headers: {
-      Authorization: `Bearer ${process.env.NEXT_PUBLIC_API_TOKEN}`,
-      "Content-Type": "application/json",
-    },
-  }).then((res) => res.json());
+    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
+        .then(r => r.json());
 
 export const InstanciasRdsMySQLChartComponent  = ({
   startDate,
@@ -102,7 +96,7 @@ export const InstanciasRdsMySQLChartComponent  = ({
   const startDateFormatted = startDate.toISOString().split(".")[0];
   const endDateFormatted = endDate.toISOString().split(".")[0];
 
-  let infoUrl = `${process.env.NEXT_PUBLIC_API_URL}/db/instancias-rds-mysql?date_from=${startDateFormatted}&date_to=${endDateFormatted}`;
+  let infoUrl = `/api/bridge/db/instancias-rds-mysql?date_from=${startDateFormatted}&date_to=${endDateFormatted}`;
   if (region && region !== "all_regions") infoUrl += `&region=${region}`;
   if (selectedKey && selectedValue) {
     infoUrl += `&tag_key=${encodeURIComponent(
@@ -126,9 +120,7 @@ export const InstanciasRdsMySQLChartComponent  = ({
     instance !== "all_instances"
   );
   const metricsUrl = shouldFetchMetrics
-    ? `${
-        process.env.NEXT_PUBLIC_API_URL
-      }/db/instancias-rds-mysql-metrics?date_from=${startDateFormatted}&date_to=${endDateFormatted}&resource=${encodeURIComponent(
+    ? `/api/bridge/db/instancias-rds-mysql-metrics?date_from=${startDateFormatted}&date_to=${endDateFormatted}&resource=${encodeURIComponent(
         instance
       )}`
     : null;
@@ -147,7 +139,7 @@ export const InstanciasRdsMySQLChartComponent  = ({
     instance !== "all_instances"
   );
   const eventsUrl = shouldFetchEvents
-    ? `${process.env.NEXT_PUBLIC_API_URL}/db/instancias-rds-mysql-events?date_from=${startDateFormatted}&date_to=${endDateFormatted}&resource=${encodeURIComponent(instance)}`
+    ? `/api/bridge/db/instancias-rds-mysql-events?date_from=${startDateFormatted}&date_to=${endDateFormatted}&resource=${encodeURIComponent(instance)}`
     : null;
 
   const {

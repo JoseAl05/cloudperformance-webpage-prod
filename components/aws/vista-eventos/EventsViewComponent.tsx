@@ -17,13 +17,8 @@ interface EventsViewComponentProps {
 };
 
 const fetcher = (url: string) =>
-    fetch(url, {
-        method: 'GET',
-        headers: {
-            Authorization: `Bearer ${process.env.NEXT_PUBLIC_API_TOKEN}`,
-            'Content-Type': 'application/json',
-        },
-    }).then((res) => res.json())
+    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
+        .then(r => r.json());
 
 const isNonEmptyArray = <T,>(v: unknown): v is T[] => Array.isArray(v) && v.length > 0
 const isNullish = (v: unknown) => v === null || v === undefined
@@ -35,7 +30,7 @@ export const EventsViewComponent = ({ startDate, endDate, eventType, region }: E
 
     const allEvents = useSWR(
         eventType
-            ? `${process.env.NEXT_PUBLIC_API_URL}/eventos/get_eventos?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&event_name=${eventType}`
+            ? `/api/bridge/eventos/get_eventos?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&event_name=${eventType}`
             : null,
         fetcher
     )

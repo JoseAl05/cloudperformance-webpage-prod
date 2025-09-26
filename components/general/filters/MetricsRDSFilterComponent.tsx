@@ -21,13 +21,8 @@ interface ApiResponse {
 }
 
 const fetcher = (url: string) =>
-  fetch(url, {
-    method: 'GET',
-    headers: {
-      Authorization: `Bearer ${process.env.NEXT_PUBLIC_API_TOKEN}`,
-      'Content-Type': 'application/json',
-    },
-  }).then((res) => res.json());
+    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
+        .then(r => r.json());
 
 export const MetricsRDSFilterComponent = ({ selectedMetrics, setSelectedMetrics, rdsService }: MetricsRDSFilterComponentProps) => {
   const [open, setOpen] = useState(false);
@@ -45,7 +40,7 @@ export const MetricsRDSFilterComponent = ({ selectedMetrics, setSelectedMetrics,
     };
     
     const endpoint = serviceMap[service] || 'rds-pg';
-    return `${process.env.NEXT_PUBLIC_API_URL}/db/promedio-loc-${endpoint}/grupos-disponibles`;
+    return `/api/bridge/db/promedio-loc-${endpoint}/grupos-disponibles`;
   };
 
   const apiUrl = getApiUrl(rdsService);

@@ -25,13 +25,8 @@ interface EksAsgFilterComponentProps {
 }
 
 const fetcher = (url: string) =>
-    fetch(url, {
-        method: 'GET',
-        headers: {
-            'Authorization': `Bearer ${process.env.NEXT_PUBLIC_API_TOKEN}`,
-            'Content-Type': 'application/json',
-        }
-    }).then(res => res.json());
+    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
+        .then(r => r.json());
 
 
 export const EksAsgFilterComponent = ({
@@ -52,10 +47,10 @@ export const EksAsgFilterComponent = ({
     let url = '';
     switch (isInstancesService) {
         case "infraUsed":
-            url = `${process.env.NEXT_PUBLIC_API_URL}/aws/eks/getAsgListbyClusterName?date_from=${startDate}&date_to=${endDate}&eks_clusterName=${eks}&region=${region}`;
+            url = `/api/bridge/aws/eks/getAsgListbyClusterName?date_from=${startDate}&date_to=${endDate}&eks_clusterName=${eks}&region=${region}`;
             break;
         default:
-            url = `${process.env.NEXT_PUBLIC_API_URL}/eks/all-eks-autoscaling-groups?date_from=${startDate}&date_to=${endDate}&region=${region}&cluster_name=${eks}`;
+            url = `/api/bridge/eks/all-eks-autoscaling-groups?date_from=${startDate}&date_to=${endDate}&region=${region}&cluster_name=${eks}`;
             break;
     }
 

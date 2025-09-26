@@ -27,14 +27,8 @@ import {
 } from "lucide-react"
 
 const fetcher = (url: string) =>
-  fetch(url, {
-    method: "GET",
-    headers: {
-      Authorization: `Bearer ${process.env.NEXT_PUBLIC_API_TOKEN}`,
-      "Content-Type": "application/json",
-    },
-  }).then((res) => res.json())
-
+    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
+        .then(r => r.json());
 
 const formatUSD = (value: number) =>
   new Intl.NumberFormat("en-US", {
@@ -84,27 +78,27 @@ export const SavingPlansViewComponent = ({ startDate, endDate }: SavingPlansComp
 
 
   const { data: stats } = useSWR(
-    `${process.env.NEXT_PUBLIC_API_URL}/saving-plans/vista-saving-plans/dashboard-stats?date_from=${startDateFormatted}&date_to=${endDateFormatted}`,
+    `/api/bridge/saving-plans/vista-saving-plans/dashboard-stats?date_from=${startDateFormatted}&date_to=${endDateFormatted}`,
     fetcher
   )
 
   const { data: costUsage, error, isLoading } = useSWR(
-    `${process.env.NEXT_PUBLIC_API_URL}/saving-plans/saving-plan-cost-usage?date_from=${startDateFormatted}&date_to=${endDateFormatted}&savings_plan_arn=${selectedArn}`,
+    `/api/bridge/saving-plans/saving-plan-cost-usage?date_from=${startDateFormatted}&date_to=${endDateFormatted}&savings_plan_arn=${selectedArn}`,
     fetcher
   )
 
   const { data: spcost } = useSWR(
-    `${process.env.NEXT_PUBLIC_API_URL}/saving-plans/savings-plan-cost?date_from=${startDateFormatted}&date_to=${endDateFormatted}&savings_plan_arn=${selectedArn}`,
+    `/api/bridge/saving-plans/savings-plan-cost?date_from=${startDateFormatted}&date_to=${endDateFormatted}&savings_plan_arn=${selectedArn}`,
     fetcher
   )
 
   const { data: ec2Intances } = useSWR(
-    `${process.env.NEXT_PUBLIC_API_URL}/saving-plans/ec2-instances-prices/?date_from=${startDateFormatted}&date_to=${endDateFormatted}`,
+    `/api/bridge/saving-plans/ec2-instances-prices/?date_from=${startDateFormatted}&date_to=${endDateFormatted}`,
     fetcher
   )
 
   const { data: lambdaFunctions } = useSWR(
-    `${process.env.NEXT_PUBLIC_API_URL}/saving-plans/lambda-functions-prices/?date_from=${startDateFormatted}&date_to=${endDateFormatted}`,
+    `/api/bridge/saving-plans/lambda-functions-prices/?date_from=${startDateFormatted}&date_to=${endDateFormatted}`,
     fetcher
   )
 

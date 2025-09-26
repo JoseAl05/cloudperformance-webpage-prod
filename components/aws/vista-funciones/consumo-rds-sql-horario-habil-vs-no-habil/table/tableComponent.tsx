@@ -16,13 +16,8 @@ type SqlMetricData = {
 }
 
 const fetcher = (url: string) =>
-  fetch(url, {
-    method: 'GET',
-    headers: {
-      'Authorization': `Bearer ${process.env.NEXT_PUBLIC_API_TOKEN}`,
-      'Content-Type': 'application/json'
-    }
-  }).then(res => res.json())
+    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
+        .then(r => r.json());
 
 export const TableRdsSqlMetrics = ({
   startDateFormatted,
@@ -37,7 +32,7 @@ export const TableRdsSqlMetrics = ({
 }) => {
   const { data, error, isLoading } = useSWR<{ data: SqlMetricData[] }>(
     startDateFormatted && endDateFormatted
-      ? `${process.env.NEXT_PUBLIC_API_URL}/aws/rds/sql/business-vs-offhours?date_from=${startDateFormatted}&date_to=${endDateFormatted}&metric_label=${metric}&resource=${instance || "all"}`
+      ? `/api/bridge/aws/rds/sql/business-vs-offhours?date_from=${startDateFormatted}&date_to=${endDateFormatted}&metric_label=${metric}&resource=${instance || "all"}`
       : null,
     fetcher
   )

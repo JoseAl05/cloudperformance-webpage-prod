@@ -12,13 +12,8 @@ import {
 } from "@/components/ui/select"
 
 const fetcher = (url: string) =>
-  fetch(url, {
-    method: 'GET',
-    headers: {
-      'Authorization': `Bearer ${process.env.NEXT_PUBLIC_API_TOKEN}`,
-      'Content-Type': 'application/json'
-    }
-  }).then(res => res.json())
+    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
+        .then(r => r.json());
 
 interface TopRecursosProps {
   startDate: Date,
@@ -36,7 +31,7 @@ export const TopRecursosChart = ({ startDate, endDate,groupBy, title, icon }: To
   const endDateFormatted = endDate.toISOString().replace('Z', '').slice(0, -4)
 
   const { data, error, isLoading } = useSWR(
-    `${process.env.NEXT_PUBLIC_API_URL}/recursos/top_recursos_unicos?date_from=${startDateFormatted}&date_to=${endDateFormatted}&group_by=${groupBy}`,
+    `/api/bridge/recursos/top_recursos_unicos?date_from=${startDateFormatted}&date_to=${endDateFormatted}&group_by=${groupBy}`,
     fetcher
   )
 

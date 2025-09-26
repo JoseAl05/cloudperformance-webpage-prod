@@ -16,13 +16,8 @@ type MariaDbMetricData = {
 }
 
 const fetcher = (url: string) =>
-  fetch(url, {
-    method: 'GET',
-    headers: {
-      'Authorization': `Bearer ${process.env.NEXT_PUBLIC_API_TOKEN}`,
-      'Content-Type': 'application/json'
-    }
-  }).then(res => res.json())
+    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
+        .then(r => r.json());
 
 export const TableRdsMariaDbMetrics = ({
   startDateFormatted,
@@ -37,7 +32,7 @@ export const TableRdsMariaDbMetrics = ({
 }) => {
   const { data, error, isLoading } = useSWR<{ data: MariaDbMetricData[] }>(
     startDateFormatted && endDateFormatted
-      ? `${process.env.NEXT_PUBLIC_API_URL}/aws/rds/mariadb/business-vs-offhours?date_from=${startDateFormatted}&date_to=${endDateFormatted}&metric_label=${metric}&resource=${instance || "all"}`
+      ? `/api/bridge/aws/rds/mariadb/business-vs-offhours?date_from=${startDateFormatted}&date_to=${endDateFormatted}&metric_label=${metric}&resource=${instance || "all"}`
       : null,
     fetcher
   )

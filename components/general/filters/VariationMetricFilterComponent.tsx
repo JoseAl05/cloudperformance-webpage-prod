@@ -40,8 +40,7 @@ const fetcherPost = (url: string, tags: { Key: string; Value: string } | null = 
     fetch(url, {
         method: 'POST',
         headers: {
-            'Authorization': `Bearer ${process.env.NEXT_PUBLIC_API_TOKEN}`,
-            'Content-Type': 'application/json',
+            'Content-Type': 'application/json'
         },
         body: tags ? JSON.stringify([tags]) : null,
     }).then(res => res.json());
@@ -50,8 +49,7 @@ const fetcherGet = (url: string, tags: { Key: string; Value: string } | null = n
     fetch(url, {
         method: 'GET',
         headers: {
-            'Authorization': `Bearer ${process.env.NEXT_PUBLIC_API_TOKEN}`,
-            'Content-Type': 'application/json',
+            'Content-Type': 'application/json'
         },
         body: tags ? JSON.stringify([tags]) : null,
     }).then(res => res.json());
@@ -65,8 +63,8 @@ export const VariationMetricFilterComponent = ({
     const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : '';
 
     // https://cloudperformance-desarrollo.eastus2.cloudapp.azure.com/api/recursos/getMetric?date_from=2025-01-01T02:32:18&date_to=2025-12-12T01:32:18&region=all_regions&service=DynamoDB
-    // const url = `${process.env.NEXT_PUBLIC_API_URL}/autoscaling/all-autoscaling-groups?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`;
-    const url = `${process.env.NEXT_PUBLIC_API_URL}/recursos/getMetric?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&service=${selectedService}`;
+    // const url = `/api/bridge/autoscaling/all-autoscaling-groups?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`;
+    const url = `/api/bridge/recursos/getMetric?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&service=${selectedService}`;
 
     const shouldFetch = !!region && !!selectedService;
     const { data, error, isLoading } = useSWR(shouldFetch ? [url] : null, ([u]) => fetcherGet(u));

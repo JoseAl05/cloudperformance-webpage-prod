@@ -18,13 +18,8 @@ interface EbsUnusedComponentProps {
 }
 
 const fetcher = (url: string) =>
-    fetch(url, {
-        method: 'GET',
-        headers: {
-            'Authorization': `Bearer ${process.env.NEXT_PUBLIC_API_TOKEN}`,
-            'Content-Type': 'application/json'
-        }
-    }).then(res => res.json())
+    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
+        .then(r => r.json());
 
 const isNonEmptyArray = <T,>(v: unknown): v is T[] => Array.isArray(v) && v.length > 0
 const isNullish = (v: unknown) => v === null || v === undefined
@@ -35,7 +30,7 @@ export const EbsUnusedComponent = ({ startDate, endDate, ebs, region }: EbsUnuse
     const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : '';
 
     const unusedEbs = useSWR(
-        ebs ? `${process.env.NEXT_PUBLIC_API_URL}/ebs/ebs_unused?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&resource=${ebs}` : null,
+        ebs ? `/api/bridge/ebs/ebs_unused?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&resource=${ebs}` : null,
         fetcher
     )
 

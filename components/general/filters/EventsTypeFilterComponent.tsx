@@ -16,13 +16,8 @@ interface EventsTypeFilterComponentProps {
 }
 
 const fetcher = (url: string) =>
-    fetch(url, {
-        method: 'GET',
-        headers: {
-            'Authorization': `Bearer ${process.env.NEXT_PUBLIC_API_TOKEN}`,
-            'Content-Type': 'application/json',
-        },
-    }).then(res => res.json());
+    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
+        .then(r => r.json());
 
 
 export const EventsTypeFilterComponent = ({
@@ -33,7 +28,7 @@ export const EventsTypeFilterComponent = ({
 }: EventsTypeFilterComponentProps) => {
     const [open, setOpen] = useState(false);
 
-    const url = `${process.env.NEXT_PUBLIC_API_URL}/eventos/all_events_types?region=${region}`;
+    const url = `/api/bridge/eventos/all_events_types?region=${region}`;
 
     const shouldFetch = !!url && !!region
     const { data, error, isLoading } = useSWR<unknown[]>(shouldFetch ? url : null, fetcher);

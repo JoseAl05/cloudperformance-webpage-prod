@@ -32,20 +32,14 @@ const fetcherPost = (url: string, tags: { Key: string; Value: string } | null = 
     fetch(url, {
         method: 'POST',
         headers: {
-            'Authorization': `Bearer ${process.env.NEXT_PUBLIC_API_TOKEN}`,
-            'Content-Type': 'application/json',
+            'Content-Type': 'application/json'
         },
         body: tags ? JSON.stringify([tags]) : null,
     }).then(res => res.json());
 
 const fetcherGet = (url: string) =>
-    fetch(url, {
-        method: 'GET',
-        headers: {
-            'Authorization': `Bearer ${process.env.NEXT_PUBLIC_API_TOKEN}`,
-            'Content-Type': 'application/json',
-        },
-    }).then(res => res.json());
+    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
+        .then(r => r.json());
 
 
 export const EksFilterComponent = ({
@@ -71,18 +65,18 @@ export const EksFilterComponent = ({
     const startDateFormatted = startDate.toISOString().replace('Z', '').slice(0, -4);
     const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : '';
 
-    // const url = `${process.env.NEXT_PUBLIC_API_URL}/eks/all-eks_clusters?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`;
+    // const url = `/api/bridge/eks/all-eks_clusters?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`;
     let url = '';
     switch (isInstancesService) {
         case "infraUsed":
-            url = `${process.env.NEXT_PUBLIC_API_URL}/aws/eks/getClusterEksList?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`;
+            url = `/api/bridge/aws/eks/getClusterEksList?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`;
             break;
         default:
-            url = `${process.env.NEXT_PUBLIC_API_URL}/eks/all-eks-clusters?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`;
+            url = `/api/bridge/eks/all-eks-clusters?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`;
             break;
     }
 
-    // const url = `${process.env.NEXT_PUBLIC_API_URL}/aws/eks/getClusterEksList?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`;
+    // const url = `/api/bridge/aws/eks/getClusterEksList?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`;
     const tagsBody = selectedKey !== 'allKeys' && selectedValue ? { Key: selectedKey, Value: selectedValue } : null;
 
 

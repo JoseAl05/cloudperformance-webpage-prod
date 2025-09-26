@@ -20,7 +20,9 @@ type LambdaFunction = {
     estimated_cost_per_invocation: number
 }
 
-const fetcher = (url: string) => fetch(url).then((res) => res.json())
+const fetcher = (url: string) =>
+    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
+        .then(r => r.json());
 
 export const LambdaTableComponent = ({
     startDateFormatted,
@@ -34,7 +36,7 @@ export const LambdaTableComponent = ({
         functions: LambdaFunction[]
     }>(
         startDateFormatted && endDateFormatted
-            ? `${process.env.NEXT_PUBLIC_API_URL}/saving-plans/lambda-functions-prices/?date_from=${startDateFormatted}&date_to=${endDateFormatted}`
+            ? `/api/bridge/saving-plans/lambda-functions-prices/?date_from=${startDateFormatted}&date_to=${endDateFormatted}`
             : null,
         fetcher
     )

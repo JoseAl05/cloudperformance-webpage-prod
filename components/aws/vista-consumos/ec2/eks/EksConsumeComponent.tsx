@@ -17,13 +17,8 @@ interface EksConsumeComponentProps {
 }
 
 const fetcher = (url: string) =>
-    fetch(url, {
-        method: 'GET',
-        headers: {
-            'Authorization': `Bearer ${process.env.NEXT_PUBLIC_API_TOKEN}`,
-            'Content-Type': 'application/json'
-        }
-    }).then(res => res.json())
+    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
+        .then(r => r.json());
 
 const isNonEmptyArray = <T,>(v: unknown): v is T[] => Array.isArray(v) && v.length > 0;
 const isNullish = (v: unknown) => v === null || v === undefined;
@@ -35,19 +30,19 @@ export const EksConsumeComponent = ({ startDate, endDate, eksAsgInstance, region
     const canFetch = !!eksAsgInstance
 
     const ec2CpuMetrics = useSWR(
-        canFetch ? `${process.env.NEXT_PUBLIC_API_URL}/vm/consumo_ec2/cpu_usage?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&resource=${encodeURIComponent(eksAsgInstance)}` : null,
+        canFetch ? `/api/bridge/vm/consumo_ec2/cpu_usage?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&resource=${encodeURIComponent(eksAsgInstance)}` : null,
         fetcher
     )
     const ec2CreditsMetrics = useSWR(
-        canFetch ? `${process.env.NEXT_PUBLIC_API_URL}/vm/consumo_ec2/credits_usage?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&resource=${encodeURIComponent(eksAsgInstance)}` : null,
+        canFetch ? `/api/bridge/vm/consumo_ec2/credits_usage?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&resource=${encodeURIComponent(eksAsgInstance)}` : null,
         fetcher
     )
     const ec2Info = useSWR(
-        canFetch ? `${process.env.NEXT_PUBLIC_API_URL}/vm/consumo_ec2/info?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&resource=${encodeURIComponent(eksAsgInstance)}` : null,
+        canFetch ? `/api/bridge/vm/consumo_ec2/info?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&resource=${encodeURIComponent(eksAsgInstance)}` : null,
         fetcher
     )
     const ec2GlobalCreditsEfficiency = useSWR(
-        canFetch ? `${process.env.NEXT_PUBLIC_API_URL}/vm/consumo_ec2/global_credits_efficiency?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&resource=${encodeURIComponent(eksAsgInstance)}` : null,
+        canFetch ? `/api/bridge/vm/consumo_ec2/global_credits_efficiency?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&resource=${encodeURIComponent(eksAsgInstance)}` : null,
         fetcher
     )
 

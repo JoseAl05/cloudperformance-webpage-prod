@@ -25,13 +25,8 @@ interface TagFilterComponentProps {
 }
 
 const fetcher = (url: string) =>
-    fetch(url, {
-        method: "GET",
-        headers: {
-            "Authorization": `Bearer ${process.env.NEXT_PUBLIC_API_TOKEN}`,
-            "Content-Type": "application/json"
-        }
-    }).then(res => res.json())
+    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
+        .then(r => r.json());
 
 export const TagFilterComponent = ({
     startDate,
@@ -58,7 +53,7 @@ export const TagFilterComponent = ({
     const shouldFetch = !!region
     const { data, error, isLoading } = useSWR(
         shouldFetch
-            ? `${process.env.NEXT_PUBLIC_API_URL}/get-all-tags?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&collection=${collection}&tag_column_name=${tagColumnName}`
+            ? `/api/bridge/get-all-tags?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&collection=${collection}&tag_column_name=${tagColumnName}`
             : null,
         fetcher
     )

@@ -29,13 +29,8 @@ interface AutoscalingGroupData {
 }
 
 const fetcher = (url: string) =>
-  fetch(url, {
-    method: "GET",
-    headers: {
-      Authorization: `Bearer ${process.env.NEXT_PUBLIC_API_TOKEN}`,
-      "Content-Type": "application/json",
-    },
-  }).then((res) => res.json());
+    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
+        .then(r => r.json());
 
 export const InstanciasAutoscalingGroupsChartComponent = (props: unknown) => {
   const { startDate, endDate, region, instance, selectedKey, selectedValue } = props;
@@ -46,7 +41,7 @@ export const InstanciasAutoscalingGroupsChartComponent = (props: unknown) => {
   const startDateFormatted = startDate.toISOString().split(".")[0];
   const endDateFormatted = endDate.toISOString().split(".")[0];
 
-  let apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/autoscaling/autoscaling_groups?date_from=${startDateFormatted}&date_to=${endDateFormatted}`;
+  let apiUrl = `/api/bridge/autoscaling/autoscaling_groups?date_from=${startDateFormatted}&date_to=${endDateFormatted}`;
 
   if (region && region !== "all_regions") {
     apiUrl += `&region=${region}`;
@@ -69,7 +64,7 @@ export const InstanciasAutoscalingGroupsChartComponent = (props: unknown) => {
   );
 
   // API para instancias del autoscaling group
-  const instancesApiUrl = `${process.env.NEXT_PUBLIC_API_URL}/autoscaling/autoscaling_groups_instances?date_from=${startDateFormatted}&date_to=${endDateFormatted}&auto_scaling_group_name=${instance}`;
+  const instancesApiUrl = `/api/bridge/autoscaling/autoscaling_groups_instances?date_from=${startDateFormatted}&date_to=${endDateFormatted}&auto_scaling_group_name=${instance}`;
 
   const { data: instancesData, error: instancesError, isLoading: instancesLoading } = useSWR<unknown[]>(
     (startDate && endDate && instance && instance !== "all_autoscaling_groups") ? instancesApiUrl : null,
@@ -77,7 +72,7 @@ export const InstanciasAutoscalingGroupsChartComponent = (props: unknown) => {
   );
 
   // API para métricas del autoscaling group
-  const metricsApiUrl = `${process.env.NEXT_PUBLIC_API_URL}/autoscaling/autoscaling_groups_metrics?date_from=${startDateFormatted}&date_to=${endDateFormatted}&resource=${instance}`;
+  const metricsApiUrl = `/api/bridge/autoscaling/autoscaling_groups_metrics?date_from=${startDateFormatted}&date_to=${endDateFormatted}&resource=${instance}`;
 
   const { data: metricsData, error: metricsError, isLoading: metricsLoading } = useSWR<unknown[]>(
     (startDate && endDate && instance && instance !== "all_autoscaling_groups") ? metricsApiUrl : null,
@@ -85,7 +80,7 @@ export const InstanciasAutoscalingGroupsChartComponent = (props: unknown) => {
   );
 
   // API para eventos del autoscaling group (usando instance por ahora)
-  const eventsApiUrl = `${process.env.NEXT_PUBLIC_API_URL}/autoscaling/autoscaling_groups_events?date_from=${startDateFormatted}&date_to=${endDateFormatted}&resource=${instance}`;
+  const eventsApiUrl = `/api/bridge/autoscaling/autoscaling_groups_events?date_from=${startDateFormatted}&date_to=${endDateFormatted}&resource=${instance}`;
 
   const { data: eventsData, error: eventsError, isLoading: eventsLoading } = useSWR<unknown>(
     (startDate && endDate && instance && instance !== "all_autoscaling_groups") ? eventsApiUrl : null,

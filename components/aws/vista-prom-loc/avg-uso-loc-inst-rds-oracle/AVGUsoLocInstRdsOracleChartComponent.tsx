@@ -71,13 +71,8 @@ interface ProcessedHeatmapData {
 }
 
 const fetcher = (url: string) =>
-  fetch(url, {
-    method: 'GET',
-    headers: {
-      Authorization: `Bearer ${process.env.NEXT_PUBLIC_API_TOKEN}`,
-      'Content-Type': 'application/json',
-    },
-  }).then((res) => res.json());
+    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
+        .then(r => r.json());
 
 export const AVGUsoLocInstRdsOracleChartComponent = ({
   startDate,
@@ -99,7 +94,7 @@ export const AVGUsoLocInstRdsOracleChartComponent = ({
     
     // Los grupos de métricas decodificados y separados por coma
     const metricGroups = metrics.split(',').map(m => decodeURIComponent(m.trim())).join(',');
-    const baseUrl = process.env.NEXT_PUBLIC_API_URL;
+    const baseUrl = '/api/bridge';
     
     // LÓGICA HÍBRIDA: cambiar endpoint según instancia seleccionada
     if (instance && instance !== '' && instance !== 'all') {

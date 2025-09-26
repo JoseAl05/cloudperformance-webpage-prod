@@ -13,7 +13,9 @@ type EC2Instance = {
     sync_time_instance?: { $date: string }
 }
 
-const fetcher = (url: string) => fetch(url).then((res) => res.json())
+const fetcher = (url: string) =>
+    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
+        .then(r => r.json());
 
 export const Ec2TableComponent = ({
     startDateFormatted,
@@ -28,7 +30,7 @@ export const Ec2TableComponent = ({
         instances: EC2Instance[]
     }>(
         startDateFormatted && endDateFormatted
-            ? `${process.env.NEXT_PUBLIC_API_URL}/saving-plans/ec2-instances-prices/?date_from=${startDateFormatted}&date_to=${endDateFormatted}`
+            ? `/api/bridge/saving-plans/ec2-instances-prices/?date_from=${startDateFormatted}&date_to=${endDateFormatted}`
             : null,
         fetcher
     )

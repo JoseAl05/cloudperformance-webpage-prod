@@ -81,13 +81,8 @@ const transformMetricsForChart = (
 };
 
 const fetcher = (url: string) =>
-  fetch(url, {
-    method: "GET",
-    headers: {
-      Authorization: `Bearer ${process.env.NEXT_PUBLIC_API_TOKEN}`,
-      "Content-Type": "application/json",
-    },
-  }).then((res) => res.json());
+    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
+        .then(r => r.json());
 
 export const InstanciasRdsSQLServerChartComponent = ({
   startDate,
@@ -103,7 +98,7 @@ export const InstanciasRdsSQLServerChartComponent = ({
   const startDateFormatted = startDate.toISOString().split(".")[0];
   const endDateFormatted = endDate.toISOString().split(".")[0];
 
-  let infoUrl = `${process.env.NEXT_PUBLIC_API_URL}/db/instancias-rds-sqlserver?date_from=${startDateFormatted}&date_to=${endDateFormatted}`;
+  let infoUrl = `/api/bridge/db/instancias-rds-sqlserver?date_from=${startDateFormatted}&date_to=${endDateFormatted}`;
   if (region && region !== "all_regions") infoUrl += `&region=${region}`;
   if (selectedKey && selectedValue) {
     infoUrl += `&tag_key=${encodeURIComponent(
@@ -127,9 +122,7 @@ export const InstanciasRdsSQLServerChartComponent = ({
     instance !== "all_instances"
   );
   const metricsUrl = shouldFetchMetrics
-    ? `${
-        process.env.NEXT_PUBLIC_API_URL
-      }/db/instancias-rds-sqlserver-metrics?date_from=${startDateFormatted}&date_to=${endDateFormatted}&resource=${encodeURIComponent(
+    ? `/api/bridge/db/instancias-rds-sqlserver-metrics?date_from=${startDateFormatted}&date_to=${endDateFormatted}&resource=${encodeURIComponent(
         instance
       )}`
     : null;
@@ -148,7 +141,7 @@ export const InstanciasRdsSQLServerChartComponent = ({
     instance !== "all_instances"
   );
   const eventsUrl = shouldFetchEvents
-    ? `${process.env.NEXT_PUBLIC_API_URL}/db/instancias-rds-sqlserver-events?date_from=${startDateFormatted}&date_to=${endDateFormatted}&resource=${encodeURIComponent(instance)}`
+    ? `/api/bridge/db/instancias-rds-sqlserver-events?date_from=${startDateFormatted}&date_to=${endDateFormatted}&resource=${encodeURIComponent(instance)}`
     : null;
 
   const {

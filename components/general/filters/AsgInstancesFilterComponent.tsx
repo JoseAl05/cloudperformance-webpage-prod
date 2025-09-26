@@ -20,13 +20,8 @@ interface AsgInstancesFilterComponentProps {
 }
 
 const fetcher = (url: string) =>
-    fetch(url, {
-        method: 'GET',
-        headers: {
-            'Authorization': `Bearer ${process.env.NEXT_PUBLIC_API_TOKEN}`,
-            'Content-Type': 'application/json',
-        }
-    }).then(res => res.json());
+    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
+        .then(r => r.json());
 
 export const AsgInstancesFilterComponent = ({
     asg, asgInstance, setAsgInstance, startDate, endDate, region, isInstanceMultiSelect, isInstancesService
@@ -38,16 +33,16 @@ export const AsgInstancesFilterComponent = ({
     switch (isInstancesService) {
         case 'infraUsed':
             // /api/aws/ec2/unused/autoscaling/getInstances?date_from=2025-08-01T00:00:00&date_to=2025-09-02T23:59:59&autoscaling_group=AutoscalingWeb,awseb-e-2heftjv3ym-stack-AWSEBAutoScalingGroup-132MCA73CRXKS
-            url = shouldFetch ? `${process.env.NEXT_PUBLIC_API_URL}/aws/ec2/unused/autoscaling/getInstances?date_from=${startDate}&date_to=${endDate}&region=${region}&autoscaling_group=${encodeURIComponent(asg)}` : null;
+            url = shouldFetch ? `/api/bridge/aws/ec2/unused/autoscaling/getInstances?date_from=${startDate}&date_to=${endDate}&region=${region}&autoscaling_group=${encodeURIComponent(asg)}` : null;
             break;
         default:
             url = shouldFetch
-                ? `${process.env.NEXT_PUBLIC_API_URL}/autoscaling/all-asg-instances-ec2?date_from=${startDate}&date_to=${endDate}&region=${region}&autoscaling_group=${encodeURIComponent(asg)}`
+                ? `/api/bridge/autoscaling/all-asg-instances-ec2?date_from=${startDate}&date_to=${endDate}&region=${region}&autoscaling_group=${encodeURIComponent(asg)}`
                 : null;
             break;
     }
     // const url = shouldFetch
-    //     ? `${process.env.NEXT_PUBLIC_API_URL}/autoscaling/all-asg-instances-ec2?date_from=${startDate}&date_to=${endDate}&region=${region}&autoscaling_group=${encodeURIComponent(asg)}`
+    //     ? `/api/bridge/autoscaling/all-asg-instances-ec2?date_from=${startDate}&date_to=${endDate}&region=${region}&autoscaling_group=${encodeURIComponent(asg)}`
     //     : null
 
     const { data, error, isLoading } = useSWR<string[]>(url, fetcher);

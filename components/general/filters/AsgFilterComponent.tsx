@@ -25,12 +25,12 @@ interface AsgFilterComponentProps {
     isViewResource?: boolean
 }
 
+
 const fetcherPost = (url: string, tags: { Key: string; Value: string } | null = null) =>
     fetch(url, {
         method: 'POST',
         headers: {
-            'Authorization': `Bearer ${process.env.NEXT_PUBLIC_API_TOKEN}`,
-            'Content-Type': 'application/json',
+            'Content-Type': 'application/json'
         },
         body: tags ? JSON.stringify([tags]) : null,
     }).then(res => res.json());
@@ -45,7 +45,7 @@ export const AsgFilterComponent = ({
     const startDateFormatted = startDate.toISOString().replace('Z', '').slice(0, -4);
     const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : '';
 
-    const url = `${process.env.NEXT_PUBLIC_API_URL}/autoscaling/all-autoscaling-groups?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`;
+    const url = `/api/bridge/autoscaling/all-autoscaling-groups?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`;
     const tagsBody = selectedKey !== 'allKeys' && selectedValue ? { Key: selectedKey, Value: selectedValue } : null;
 
     const shouldFetch = !!region;

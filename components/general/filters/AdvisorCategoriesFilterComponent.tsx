@@ -18,13 +18,8 @@ interface AdvisorCategoriesFilterComponentProps {
 }
 
 const fetcher = (url: string) =>
-    fetch(url, {
-        method: 'GET',
-        headers: {
-            'Authorization': `Bearer ${process.env.NEXT_PUBLIC_API_TOKEN}`,
-            'Content-Type': 'application/json',
-        },
-    }).then(res => res.json());
+    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
+        .then(r => r.json());
 
 const toCapitalCase = (s: string) =>
     s
@@ -43,7 +38,7 @@ export const AdvisorCategoriesFilterComponent = ({
     const startDateFormatted = startDate.toISOString().replace('Z', '').slice(0, -4);
     const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : '';
 
-    const url = `${process.env.NEXT_PUBLIC_API_URL}/advisor/all_categories?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`;
+    const url = `/api/bridge/advisor/all_categories?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`;
 
     const shouldFetch = !!url && !!region
     const { data, error, isLoading } = useSWR<unknown[]>(shouldFetch ? url : null, fetcher);

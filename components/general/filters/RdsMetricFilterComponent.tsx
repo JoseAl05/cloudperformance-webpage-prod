@@ -21,13 +21,8 @@ import {
 
 // === Fetcher para SWR ===
 const fetcher = (url: string) =>
-  fetch(url, {
-    method: 'GET',
-    headers: {
-      Authorization: `Bearer ${process.env.NEXT_PUBLIC_API_TOKEN}`,
-      'Content-Type': 'application/json',
-    },
-  }).then((res) => res.json());
+    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
+        .then(r => r.json());
 
 interface RDSMetricFilterProps {
   selectedMetric: string;
@@ -44,7 +39,7 @@ export const RDSMetricFilterComponent = ({
 
   // Llamada a la API (devuelve string[])
   const { data, error } = useSWR<string[]>(
-    `${process.env.NEXT_PUBLIC_API_URL}/aws/rds/metrics?engine=${engine}`,
+    `/api/bridge/aws/rds/metrics?engine=${engine}`,
     fetcher
   );
 

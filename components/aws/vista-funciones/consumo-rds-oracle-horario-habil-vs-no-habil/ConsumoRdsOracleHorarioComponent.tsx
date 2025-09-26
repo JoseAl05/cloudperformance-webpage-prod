@@ -9,13 +9,8 @@ import { TableRdsOracleMetrics } from "@/components/aws/vista-funciones/consumo-
 import { bytesToMB } from '@/lib/bytesToMbs'
 
 const fetcher = (url: string) =>
-  fetch(url, {
-    method: 'GET',
-    headers: {
-      'Authorization': `Bearer ${process.env.NEXT_PUBLIC_API_TOKEN}`,
-      'Content-Type': 'application/json'
-    }
-  }).then(res => res.json())
+    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
+        .then(r => r.json());
 
 interface ConsumoRdsOracleHorarioProps {
   startDate: Date,
@@ -61,7 +56,7 @@ export const MainViewConsumoRdsOracleHorario = ({ startDate, endDate, metric, in
   let avgDataNoHabil: unknown = 0;
 
   const { data, error, isLoading } = useSWR(
-    `${process.env.NEXT_PUBLIC_API_URL}/aws/rds/oracle/business-vs-offhours?date_from=${startDateFormatted}&date_to=${endDateFormatted}&metric_label=${metric}&resource=${instance || "all"}`,
+    `/api/bridge/aws/rds/oracle/business-vs-offhours?date_from=${startDateFormatted}&date_to=${endDateFormatted}&metric_label=${metric}&resource=${instance || "all"}`,
     fetcher
   )
   

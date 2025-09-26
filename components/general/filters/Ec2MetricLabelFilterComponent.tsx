@@ -20,13 +20,8 @@ import {
 } from '@/components/ui/popover';
 
 const fetcher = (url: string) =>
-  fetch(url, {
-    method: 'GET',
-    headers: {
-      Authorization: `Bearer ${process.env.NEXT_PUBLIC_API_TOKEN}`,
-      'Content-Type': 'application/json',
-    },
-  }).then((res) => res.json());
+    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
+        .then(r => r.json());
 
 interface EC2MetricFilterProps {
   selectedMetric: string;
@@ -49,7 +44,7 @@ export const EC2MetricFilterComponent = ({
     : '';
 
   const { data, error } = useSWR<string[]>(
-    `${process.env.NEXT_PUBLIC_API_URL}/aws/ec2/metrics/labels?date_from=${startDateFormatted}&date_to=${endDateFormatted}`,
+    `/api/bridge/aws/ec2/metrics/labels?date_from=${startDateFormatted}&date_to=${endDateFormatted}`,
     fetcher
   );
 

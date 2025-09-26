@@ -9,13 +9,8 @@ import { TableRdsPostgresqlMetrics } from "@/components/aws/vista-funciones/cons
 import { bytesToMB } from '@/lib/bytesToMbs'
 
 const fetcher = (url: string) =>
-  fetch(url, {
-    method: 'GET',
-    headers: {
-      'Authorization': `Bearer ${process.env.NEXT_PUBLIC_API_TOKEN}`,
-      'Content-Type': 'application/json'
-    }
-  }).then(res => res.json())
+    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
+        .then(r => r.json());
 
 interface ConsumoRdsPostgresqlHorarioProps {
   startDate: Date,
@@ -62,7 +57,7 @@ export const MainViewConsumoRdsPostgresqlHorario = ({ startDate, endDate, metric
   const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : ''
 
   const { data, error, isLoading } = useSWR(
-    `${process.env.NEXT_PUBLIC_API_URL}/aws/rds/postgresql/business-vs-offhours?date_from=${startDateFormatted}&date_to=${endDateFormatted}&metric_label=${metric}&resource=${instance || "all"}`,
+    `/api/bridge/aws/rds/postgresql/business-vs-offhours?date_from=${startDateFormatted}&date_to=${endDateFormatted}&metric_label=${metric}&resource=${instance || "all"}`,
     fetcher
   )
 

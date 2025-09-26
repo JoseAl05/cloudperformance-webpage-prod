@@ -21,13 +21,8 @@ interface EksAsgInstancesFilterComponentProps {
 }
 
 const fetcher = (url: string) =>
-    fetch(url, {
-        method: 'GET',
-        headers: {
-            'Authorization': `Bearer ${process.env.NEXT_PUBLIC_API_TOKEN}`,
-            'Content-Type': 'application/json',
-        }
-    }).then(res => res.json());
+    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
+        .then(r => r.json());
 
 export const EksAsgInstancesFilterComponent = ({
     eksAsg,
@@ -45,18 +40,18 @@ export const EksAsgInstancesFilterComponent = ({
     let url = '';
     switch (isInstancesService) {
         case 'infraUsed':
-            url = shouldFetch ? `${process.env.NEXT_PUBLIC_API_URL}/aws/ec2/unused/autoscaling/getInstances?date_from=${startDate}&date_to=${endDate}&region=${region}&autoscaling_group=${encodeURIComponent(eksAsg)}`
-            // url = shouldFetch ? `${process.env.NEXT_PUBLIC_API_URL}/autoscaling/all-asg-instances-ec2?date_from=${startDate}&date_to=${endDate}&region=${region}&autoscaling_group=${encodeURIComponent(asg)}`
+            url = shouldFetch ? `/api/bridge/aws/ec2/unused/autoscaling/getInstances?date_from=${startDate}&date_to=${endDate}&region=${region}&autoscaling_group=${encodeURIComponent(eksAsg)}`
+            // url = shouldFetch ? `/api/bridge/autoscaling/all-asg-instances-ec2?date_from=${startDate}&date_to=${endDate}&region=${region}&autoscaling_group=${encodeURIComponent(asg)}`
             : null;
             break;
         default:
             url = shouldFetch
-                ? `${process.env.NEXT_PUBLIC_API_URL}/eks/all-eks-asg-instances-ec2?date_from=${startDate}&date_to=${endDate}&region=${region}&autoscaling_group=${encodeURIComponent(eksAsg)}`
+                ? `/api/bridge/eks/all-eks-asg-instances-ec2?date_from=${startDate}&date_to=${endDate}&region=${region}&autoscaling_group=${encodeURIComponent(eksAsg)}`
                 : null;
             break;
     }
     // const url = shouldFetch
-    //     ? `${process.env.NEXT_PUBLIC_API_URL}/eks/all-eks-asg-instances-ec2?date_from=${startDate}&date_to=${endDate}&region=${region}&autoscaling_group=${encodeURIComponent(eksAsg)}`
+    //     ? `/api/bridge/eks/all-eks-asg-instances-ec2?date_from=${startDate}&date_to=${endDate}&region=${region}&autoscaling_group=${encodeURIComponent(eksAsg)}`
     //     : null
 
     const { data, error, isLoading } = useSWR<string[]>(url, fetcher);

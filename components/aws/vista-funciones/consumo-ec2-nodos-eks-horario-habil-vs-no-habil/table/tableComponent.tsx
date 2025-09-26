@@ -16,13 +16,8 @@ type EC2MetricData = {
 }
 
 const fetcher = (url: string) =>
-  fetch(url, {
-    method: 'GET',
-    headers: {
-      'Authorization': `Bearer ${process.env.NEXT_PUBLIC_API_TOKEN}`,
-      'Content-Type': 'application/json'
-    }
-  }).then(res => res.json())
+    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
+        .then(r => r.json());
 
 export const TableEC2NodesEKSMetrics = ({
   startDateFormatted,
@@ -35,7 +30,7 @@ export const TableEC2NodesEKSMetrics = ({
 }) => {
   const { data, error, isLoading } = useSWR<{ data: EC2MetricData[] }>(
     startDateFormatted && endDateFormatted
-      ? `${process.env.NEXT_PUBLIC_API_URL}/aws/ec2/business-vs-offhours/eks-nodes?date_from=${startDateFormatted}&date_to=${endDateFormatted}&metric_label=${metric}`
+      ? `/api/bridge/aws/ec2/business-vs-offhours/eks-nodes?date_from=${startDateFormatted}&date_to=${endDateFormatted}&metric_label=${metric}`
       : null,
     fetcher
   )

@@ -24,20 +24,14 @@ const fetcherPost = (url: string, tags: { Key: string; Value: string } | null = 
     fetch(url, {
         method: 'POST',
         headers: {
-            'Authorization': `Bearer ${process.env.NEXT_PUBLIC_API_TOKEN}`,
-            'Content-Type': 'application/json',
+            'Content-Type': 'application/json'
         },
         body: tags ? JSON.stringify([tags]) : null,
     }).then(res => res.json());
 
 const fetcherGet = (url: string) =>
-    fetch(url, {
-        method: 'GET',
-        headers: {
-            'Authorization': `Bearer ${process.env.NEXT_PUBLIC_API_TOKEN}`,
-            'Content-Type': 'application/json',
-        },
-    }).then(res => res.json());
+    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
+        .then(r => r.json());
 
 
 export const InstancesFilterComponent = ({
@@ -51,28 +45,28 @@ export const InstancesFilterComponent = ({
 
     switch (service) {
         case 'ec2':
-            url = `${process.env.NEXT_PUBLIC_API_URL}/vm/all-instances-ec2?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`;
+            url = `/api/bridge/vm/all-instances-ec2?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`;
             break;
         case 'rds-pg':
-            url = `${process.env.NEXT_PUBLIC_API_URL}/db/all-instances-rds-pg?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`;
+            url = `/api/bridge/db/all-instances-rds-pg?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`;
             break;
         case 'rds-mysql':
-            url = `${process.env.NEXT_PUBLIC_API_URL}/db/all-instances-rds-mysql?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`;
+            url = `/api/bridge/db/all-instances-rds-mysql?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`;
             break;
         case 'rds-oracle':
-            url = `${process.env.NEXT_PUBLIC_API_URL}/db/all-instances-rds-oracle?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`;
+            url = `/api/bridge/db/all-instances-rds-oracle?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`;
             break;
         case 'rds-sqlserver':
-            url = `${process.env.NEXT_PUBLIC_API_URL}/db/all-instances-rds-sqlserver?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`;
+            url = `/api/bridge/db/all-instances-rds-sqlserver?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`;
             break;
         case 'rds-mariadb':
-            url = `${process.env.NEXT_PUBLIC_API_URL}/db/all-instances-rds-mariadb?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`;
+            url = `/api/bridge/db/all-instances-rds-mariadb?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`;
             break;
         case 'asg':
-            url = `${process.env.NEXT_PUBLIC_API_URL}/autoscaling/all-autoscaling-groups?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`;
+            url = `/api/bridge/autoscaling/all-autoscaling-groups?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`;
             break;
         case "infraUsed":
-            url = `${process.env.NEXT_PUBLIC_API_URL}/aws/ec2/unused/getInstances?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`;
+            url = `/api/bridge/aws/ec2/unused/getInstances?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`;
             break;
         default:
             url = '';
