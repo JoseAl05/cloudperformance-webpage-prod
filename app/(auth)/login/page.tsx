@@ -1,6 +1,6 @@
 import Image from 'next/image';
 import { LoginFormComponent } from '@/components/auth/LoginFormComponent';
-import { GalleryVerticalEnd } from 'lucide-react';
+import { Suspense } from 'react';
 
 export default function LoginPage() {
 
@@ -22,7 +22,9 @@ export default function LoginPage() {
         </div>
         <div className='flex flex-1 items-center justify-center'>
           <div className='w-full max-w-xs'>
-            <LoginFormComponent />
+            <Suspense fallback={<div>Cargando...</div>}>
+              <LoginFormComponent />
+            </Suspense>
           </div>
         </div>
       </div>
