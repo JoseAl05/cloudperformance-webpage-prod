@@ -52,7 +52,7 @@ const normalizeDay = (date: Date | string) => {
 
 const generateDaysRange = (start: Date, end: Date) => {
   const days: string[] = []
-  let current = new Date(start)
+  const current = new Date(start)
   while (current <= end) {
     days.push(normalizeDay(current))
     current.setUTCDate(current.getUTCDate() + 1)
