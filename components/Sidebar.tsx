@@ -33,6 +33,7 @@ import {
     HardDrive,
     Clock,
     Map,
+    TrendingDown,
 } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { usePathname } from 'next/navigation'
@@ -124,6 +125,12 @@ export const SidebarComponent = ({
         { label: 'Instancias RDS MariaDB', href: '/aws/funciones/avg-uso-loc-inst-rds-mariadb', icon: Database, color: 'text-green-500' },
     ]
 
+    const infraused = [
+        { label: 'Instancias EC2', icon: Computer, href: '/aws/recursos/infrautilizadas/ec2' },
+        { label: 'Instancias EC2 AutoscalingGroups', icon: Computer, href: '/aws/recursos/infrautilizadas/autoscaling' },
+        { label: 'Instancias EC2 Nodos EKS', icon: Computer, href: '/aws/recursos/infrautilizadas/eks' }
+    ]
+
     const consumeSubItems = [
         { label: 'Instancias EC2', icon: Computer, href: '/aws/consumos/ec2' },
         { label: 'Instancias EC2 AutoscalingGroups', icon: Computer, href: '/aws/consumos/asg' },
@@ -141,6 +148,7 @@ export const SidebarComponent = ({
         { label: 'Top Facturaciones', subItems: topFacturaciones, icon: Zap },
         { label: 'Consumo horario hábil vs no hábil', subItems: consumoHorario, icon: Clock },
         { label: 'Consumo por Localización', subItems: consumoLoc, icon: Map },
+        { label: 'Recursos no utilizados', subItems: infraused, icon: TrendingDown },
         { label: 'Spot vs Vm', href: '/aws/funciones/spot-vs-vm', icon: Database },
         { label: 'Top S3 Buckets', href: '/aws/funciones/top-s3-buckets', icon: Server },
         { label: 'Ebs No Utilizados', href: '/aws/funciones/ebs-no-utilizados', icon: HardDrive }
