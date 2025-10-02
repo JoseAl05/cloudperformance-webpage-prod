@@ -44,7 +44,7 @@ export const EC2MetricFilterComponent = ({
     : '';
 
   const { data, error } = useSWR<string[]>(
-    `/api/bridge/aws/ec2/metrics/labels?date_from=${startDateFormatted}&date_to=${endDateFormatted}`,
+    `/api/aws/bridge/aws/ec2/metrics/labels?date_from=${startDateFormatted}&date_to=${endDateFormatted}`,
     fetcher
   );
 

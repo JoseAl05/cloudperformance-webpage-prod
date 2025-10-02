@@ -30,7 +30,7 @@ export const TableEC2NodesEKSMetrics = ({
 }) => {
   const { data, error, isLoading } = useSWR<{ data: EC2MetricData[] }>(
     startDateFormatted && endDateFormatted
-      ? `/api/bridge/aws/ec2/business-vs-offhours/eks-nodes?date_from=${startDateFormatted}&date_to=${endDateFormatted}&metric_label=${metric}`
+      ? `/api/aws/bridge/aws/ec2/business-vs-offhours/eks-nodes?date_from=${startDateFormatted}&date_to=${endDateFormatted}&metric_label=${metric}`
       : null,
     fetcher
   )

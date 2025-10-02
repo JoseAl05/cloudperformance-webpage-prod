@@ -63,8 +63,8 @@ export const VariationMetricFilterComponent = ({
     const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : '';
 
     // https://cloudperformance-desarrollo.eastus2.cloudapp.azure.com/api/recursos/getMetric?date_from=2025-01-01T02:32:18&date_to=2025-12-12T01:32:18&region=all_regions&service=DynamoDB
-    // const url = `/api/bridge/autoscaling/all-autoscaling-groups?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`;
-    const url = `/api/bridge/recursos/getMetric?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&service=${selectedService}`;
+    // const url = `/api/aws/bridge/autoscaling/all-autoscaling-groups?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`;
+    const url = `/api/aws/bridge/recursos/getMetric?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&service=${selectedService}`;
 
     const shouldFetch = !!region && !!selectedService;
     const { data, error, isLoading } = useSWR(shouldFetch ? [url] : null, ([u]) => fetcherGet(u));

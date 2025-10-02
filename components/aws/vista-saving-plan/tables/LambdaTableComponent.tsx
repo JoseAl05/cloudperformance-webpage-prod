@@ -36,7 +36,7 @@ export const LambdaTableComponent = ({
         functions: LambdaFunction[]
     }>(
         startDateFormatted && endDateFormatted
-            ? `/api/bridge/saving-plans/lambda-functions-prices/?date_from=${startDateFormatted}&date_to=${endDateFormatted}`
+            ? `/api/aws/bridge/saving-plans/lambda-functions-prices/?date_from=${startDateFormatted}&date_to=${endDateFormatted}`
             : null,
         fetcher
     )

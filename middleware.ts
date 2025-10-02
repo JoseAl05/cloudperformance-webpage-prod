@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getAuthFromRequest } from './lib/auth';
 
 const PROTECTED_PATHS = [
-  '/aws'
+  '/aws',
+  '/azure'
 ];
 
 export async function middleware(req: NextRequest) {
@@ -21,5 +22,8 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/aws/:path*']
+  matcher: [
+    '/aws/:path*',
+    '/azure/:path*'
+  ]
 };

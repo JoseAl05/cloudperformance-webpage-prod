@@ -34,7 +34,7 @@ export const MainViewTopDolaresRecurso = ({ startDate, endDate }: TopDolaresReso
   const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : '';
 
   const { data, error, isLoading } = useSWR(
-    `/api/bridge/facturacion/top_facturacion/RESOURCE_ID?date_from=${startDateFormatted}&date_to=${endDateFormatted}`,
+    `/api/aws/bridge/facturacion/top_facturacion/RESOURCE_ID?date_from=${startDateFormatted}&date_to=${endDateFormatted}`,
     fetcher
   )
 

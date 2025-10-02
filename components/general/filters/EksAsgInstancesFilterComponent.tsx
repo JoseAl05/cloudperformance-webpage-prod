@@ -40,18 +40,18 @@ export const EksAsgInstancesFilterComponent = ({
     let url = '';
     switch (isInstancesService) {
         case 'infraUsed':
-            url = shouldFetch ? `/api/bridge/aws/ec2/unused/autoscaling/getInstances?date_from=${startDate}&date_to=${endDate}&region=${region}&autoscaling_group=${encodeURIComponent(eksAsg)}`
-            // url = shouldFetch ? `/api/bridge/autoscaling/all-asg-instances-ec2?date_from=${startDate}&date_to=${endDate}&region=${region}&autoscaling_group=${encodeURIComponent(asg)}`
+            url = shouldFetch ? `/api/aws/bridge/aws/ec2/unused/autoscaling/getInstances?date_from=${startDate}&date_to=${endDate}&region=${region}&autoscaling_group=${encodeURIComponent(eksAsg)}`
+            // url = shouldFetch ? `/api/aws/bridge/autoscaling/all-asg-instances-ec2?date_from=${startDate}&date_to=${endDate}&region=${region}&autoscaling_group=${encodeURIComponent(asg)}`
             : null;
             break;
         default:
             url = shouldFetch
-                ? `/api/bridge/eks/all-eks-asg-instances-ec2?date_from=${startDate}&date_to=${endDate}&region=${region}&autoscaling_group=${encodeURIComponent(eksAsg)}`
+                ? `/api/aws/bridge/eks/all-eks-asg-instances-ec2?date_from=${startDate}&date_to=${endDate}&region=${region}&autoscaling_group=${encodeURIComponent(eksAsg)}`
                 : null;
             break;
     }
     // const url = shouldFetch
-    //     ? `/api/bridge/eks/all-eks-asg-instances-ec2?date_from=${startDate}&date_to=${endDate}&region=${region}&autoscaling_group=${encodeURIComponent(eksAsg)}`
+    //     ? `/api/aws/bridge/eks/all-eks-asg-instances-ec2?date_from=${startDate}&date_to=${endDate}&region=${region}&autoscaling_group=${encodeURIComponent(eksAsg)}`
     //     : null
 
     const { data, error, isLoading } = useSWR<string[]>(url, fetcher);

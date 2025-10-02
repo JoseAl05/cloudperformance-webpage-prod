@@ -65,18 +65,18 @@ export const EksFilterComponent = ({
     const startDateFormatted = startDate.toISOString().replace('Z', '').slice(0, -4);
     const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : '';
 
-    // const url = `/api/bridge/eks/all-eks_clusters?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`;
+    // const url = `/api/aws/bridge/eks/all-eks_clusters?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`;
     let url = '';
     switch (isInstancesService) {
         case "infraUsed":
-            url = `/api/bridge/aws/eks/getClusterEksList?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`;
+            url = `/api/aws/bridge/aws/eks/getClusterEksList?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`;
             break;
         default:
-            url = `/api/bridge/eks/all-eks-clusters?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`;
+            url = `/api/aws/bridge/eks/all-eks-clusters?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`;
             break;
     }
 
-    // const url = `/api/bridge/aws/eks/getClusterEksList?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`;
+    // const url = `/api/aws/bridge/aws/eks/getClusterEksList?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`;
     const tagsBody = selectedKey !== 'allKeys' && selectedValue ? { Key: selectedKey, Value: selectedValue } : null;
 
 

@@ -28,7 +28,7 @@ export const EventsTypeFilterComponent = ({
 }: EventsTypeFilterComponentProps) => {
     const [open, setOpen] = useState(false);
 
-    const url = `/api/bridge/eventos/all_events_types?region=${region}`;
+    const url = `/api/aws/bridge/eventos/all_events_types?region=${region}`;
 
     const shouldFetch = !!url && !!region
     const { data, error, isLoading } = useSWR<unknown[]>(shouldFetch ? url : null, fetcher);

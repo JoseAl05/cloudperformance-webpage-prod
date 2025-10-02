@@ -36,7 +36,7 @@ export const EbsFilterComponent = ({
     const startDateFormatted = startDate.toISOString().replace('Z', '').slice(0, -4);
     const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : '';
 
-    const url = `/api/bridge/ebs/all_unused_ebs?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`;
+    const url = `/api/aws/bridge/ebs/all_unused_ebs?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`;
 
     const shouldFetch = !!url && !!region
     const { data, error, isLoading } = useSWR<unknown[]>(shouldFetch ? url: null,fetcher);

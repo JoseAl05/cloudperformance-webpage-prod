@@ -89,7 +89,7 @@ export const InstanciasRdsPgChartComponent = ({
   const startDateFormatted = startDate.toISOString().split(".")[0];
   const endDateFormatted = endDate.toISOString().split(".")[0];
 
-  let infoUrl = `/api/bridge/db/instancias-rds-pg?date_from=${startDateFormatted}&date_to=${endDateFormatted}`;
+  let infoUrl = `/api/aws/bridge/db/instancias-rds-pg?date_from=${startDateFormatted}&date_to=${endDateFormatted}`;
   if (region && region !== "all_regions") infoUrl += `&region=${region}`;
   if (selectedKey && selectedValue) {
     infoUrl += `&tag_key=${encodeURIComponent(
@@ -113,7 +113,7 @@ export const InstanciasRdsPgChartComponent = ({
     instance !== "all_instances"
   );
   const metricsUrl = shouldFetchMetrics
-    ? `/api/bridge/db/instancias-rds-pg-metrics?date_from=${startDateFormatted}&date_to=${endDateFormatted}&resource=${encodeURIComponent(
+    ? `/api/aws/bridge/db/instancias-rds-pg-metrics?date_from=${startDateFormatted}&date_to=${endDateFormatted}&resource=${encodeURIComponent(
         instance
       )}`
     : null;
@@ -132,7 +132,7 @@ export const InstanciasRdsPgChartComponent = ({
     instance !== "all_instances"
   );
   const eventsUrl = shouldFetchEvents
-    ? `/api/bridge/db/instancias-rds-pg-events?date_from=${startDateFormatted}&date_to=${endDateFormatted}&resource=${encodeURIComponent(instance)}`
+    ? `/api/aws/bridge/db/instancias-rds-pg-events?date_from=${startDateFormatted}&date_to=${endDateFormatted}&resource=${encodeURIComponent(instance)}`
     : null;
 
   const {

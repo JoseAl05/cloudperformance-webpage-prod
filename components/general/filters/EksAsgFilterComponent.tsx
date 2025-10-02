@@ -47,10 +47,10 @@ export const EksAsgFilterComponent = ({
     let url = '';
     switch (isInstancesService) {
         case "infraUsed":
-            url = `/api/bridge/aws/eks/getAsgListbyClusterName?date_from=${startDate}&date_to=${endDate}&eks_clusterName=${eks}&region=${region}`;
+            url = `/api/aws/bridge/aws/eks/getAsgListbyClusterName?date_from=${startDate}&date_to=${endDate}&eks_clusterName=${eks}&region=${region}`;
             break;
         default:
-            url = `/api/bridge/eks/all-eks-autoscaling-groups?date_from=${startDate}&date_to=${endDate}&region=${region}&cluster_name=${eks}`;
+            url = `/api/aws/bridge/eks/all-eks-autoscaling-groups?date_from=${startDate}&date_to=${endDate}&region=${region}&cluster_name=${eks}`;
             break;
     }
 

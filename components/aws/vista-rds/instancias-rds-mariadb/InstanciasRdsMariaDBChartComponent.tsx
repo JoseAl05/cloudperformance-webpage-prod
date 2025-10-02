@@ -98,7 +98,7 @@ export const InstanciasRdsMariaDBChartComponent = ({
   const endDateFormatted = endDate.toISOString().split(".")[0];
 
   // API de MariaDB
-  let infoUrl = `/api/bridge/db/instancias-rds-mariadb?date_from=${startDateFormatted}&date_to=${endDateFormatted}`;
+  let infoUrl = `/api/aws/bridge/db/instancias-rds-mariadb?date_from=${startDateFormatted}&date_to=${endDateFormatted}`;
   if (region && region !== "all_regions") infoUrl += `&region=${region}`;
   if (selectedKey && selectedValue) {
     infoUrl += `&tag_key=${encodeURIComponent(
@@ -122,7 +122,7 @@ export const InstanciasRdsMariaDBChartComponent = ({
     instance !== "all_instances"
   );
   const metricsUrl = shouldFetchMetrics
-    ? `/api/bridge/db/instancias-rds-mariadb-metrics?date_from=${startDateFormatted}&date_to=${endDateFormatted}&resource=${encodeURIComponent(
+    ? `/api/aws/bridge/db/instancias-rds-mariadb-metrics?date_from=${startDateFormatted}&date_to=${endDateFormatted}&resource=${encodeURIComponent(
         instance
       )}`
     : null;
@@ -141,7 +141,7 @@ export const InstanciasRdsMariaDBChartComponent = ({
     instance !== "all_instances"
   );
   const eventsUrl = shouldFetchEvents
-    ? `/api/bridge/db/instancias-rds-mariadb-events?date_from=${startDateFormatted}&date_to=${endDateFormatted}&resource=${encodeURIComponent(instance)}`
+    ? `/api/aws/bridge/db/instancias-rds-mariadb-events?date_from=${startDateFormatted}&date_to=${endDateFormatted}&resource=${encodeURIComponent(instance)}`
     : null;
 
   const {

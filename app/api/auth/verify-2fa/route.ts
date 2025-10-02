@@ -41,7 +41,8 @@ export async function POST(req: Request) {
     sub: String(user._id),
     username: user.username,
     client: user.client,
-    user_db: user.user_db,
+    user_db_aws: user.user_db_aws,
+    user_db_azure: user.user_db_azure
   });
 
   const sessions = await getCollection('sessions');

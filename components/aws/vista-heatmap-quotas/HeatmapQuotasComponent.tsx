@@ -32,11 +32,11 @@ export const HeatmapQuotasComponent = ({ startDate, endDate }: HeatmapQuotasComp
 
 
     // const { data, error, isLoading } = useSWR(
-    //     `/api/bridge/funcion/heatmap-quotas?date_from=${startDateFormatted}&date_to=${endDateFormatted}&group_by_quota=true`,
+    //     `/api/aws/bridge/funcion/heatmap-quotas?date_from=${startDateFormatted}&date_to=${endDateFormatted}&group_by_quota=true`,
     //     fetcher
     // )
     const { data, error, isLoading } = useSWR(
-        `/api/bridge/funcion/heatmap-quotas?date_from=${encodeURIComponent(startDateFormatted)}&date_to=${encodeURIComponent(endDateFormatted)}&group_by_quota=true`,
+        `/api/aws/bridge/funcion/heatmap-quotas?date_from=${encodeURIComponent(startDateFormatted)}&date_to=${encodeURIComponent(endDateFormatted)}&group_by_quota=true`,
         fetcher,
         { revalidateOnFocus: false }
     );
@@ -287,7 +287,7 @@ export const HeatmapQuotasComponent = ({ startDate, endDate }: HeatmapQuotasComp
 //     const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : '';
 
 //     const { data, error, isLoading } = useSWR(
-//         `/api/bridge/funcion/heatmap-quotas?date_from=${startDateFormatted}&date_to=${endDateFormatted}&group_by_quota=true`,
+//         `/api/aws/bridge/funcion/heatmap-quotas?date_from=${startDateFormatted}&date_to=${endDateFormatted}&group_by_quota=true`,
 //         fetcher
 //     )
 

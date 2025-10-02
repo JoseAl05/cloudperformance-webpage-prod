@@ -30,7 +30,7 @@ export const EbsUnusedComponent = ({ startDate, endDate, ebs, region }: EbsUnuse
     const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : '';
 
     const unusedEbs = useSWR(
-        ebs ? `/api/bridge/ebs/ebs_unused?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&resource=${ebs}` : null,
+        ebs ? `/api/aws/bridge/ebs/ebs_unused?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&resource=${ebs}` : null,
         fetcher
     )
 

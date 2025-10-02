@@ -30,7 +30,7 @@ export const Ec2TableComponent = ({
         instances: EC2Instance[]
     }>(
         startDateFormatted && endDateFormatted
-            ? `/api/bridge/saving-plans/ec2-instances-prices/?date_from=${startDateFormatted}&date_to=${endDateFormatted}`
+            ? `/api/aws/bridge/saving-plans/ec2-instances-prices/?date_from=${startDateFormatted}&date_to=${endDateFormatted}`
             : null,
         fetcher
     )

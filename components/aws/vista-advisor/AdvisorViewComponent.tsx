@@ -87,7 +87,7 @@ export const AdvisorViewComponent = ({
 
     const { data, error, isLoading } = useSWR<AdvisorApiResponse | unknown>(
         advisorCategory || advisorStatus
-            ? `/api/bridge/advisor/get_advisor_data?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&category=${advisorCategoryFormatted}&status=${advisorStatusFormatted}`
+            ? `/api/aws/bridge/advisor/get_advisor_data?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&category=${advisorCategoryFormatted}&status=${advisorStatusFormatted}`
             : null,
         fetcher,
     )

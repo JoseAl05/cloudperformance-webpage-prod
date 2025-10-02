@@ -33,17 +33,17 @@ export const InstanceEc2CpuMetricsComponent = ({ startDate, endDate, instance }:
     const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : '';
 
     const ec2Metrics = useSWR(
-        instance ? `/api/bridge/vm/instancias-ec2-metrics?date_from=${startDateFormatted}&date_to=${endDateFormatted}&resource=${instance}` : null,
+        instance ? `/api/aws/bridge/vm/instancias-ec2-metrics?date_from=${startDateFormatted}&date_to=${endDateFormatted}&resource=${instance}` : null,
         fetcher
     )
 
     const ec2Info = useSWR(
-        instance ? `/api/bridge/vm/instancias-ec2?date_from=${startDateFormatted}&date_to=${endDateFormatted}&instance_id=${instance}` : null,
+        instance ? `/api/aws/bridge/vm/instancias-ec2?date_from=${startDateFormatted}&date_to=${endDateFormatted}&instance_id=${instance}` : null,
         fetcher
     )
 
     const ec2Events = useSWR(
-        instance ? `/api/bridge/vm/instancias-ec2-events?date_from=${startDateFormatted}&date_to=${endDateFormatted}&resource=${instance}` : null,
+        instance ? `/api/aws/bridge/vm/instancias-ec2-events?date_from=${startDateFormatted}&date_to=${endDateFormatted}&resource=${instance}` : null,
         fetcher
     )
 

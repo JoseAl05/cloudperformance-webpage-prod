@@ -43,7 +43,7 @@ export const S3BucketFilter = ({
     ? endDate.toISOString().replace('Z', '').slice(0, -4)
     : '';
 
-  const apiUrl = `/api/bridge/s3/s3_buckets/list?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`;
+  const apiUrl = `/api/aws/bridge/s3/s3_buckets/list?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`;
 
   const { data, error, isLoading } = useSWR<{ buckets: string[] }>(apiUrl, fetcher);
 

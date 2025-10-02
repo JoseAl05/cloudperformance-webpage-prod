@@ -27,7 +27,7 @@ export const TopS3BucketsChart = ({ startDate, endDate, region, buckets, metric,
   const endDateFormatted = endDate.toISOString().replace('Z', '').slice(0, -4)
 
   const { data, error, isLoading } = useSWR(
-    `/api/bridge/s3/top_s3_buckets/tops?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&resources=${buckets}`,
+    `/api/aws/bridge/s3/top_s3_buckets/tops?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&resources=${buckets}`,
     fetcher
   )
 

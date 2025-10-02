@@ -49,11 +49,10 @@ export const TagFilterComponent = ({
     const startDateFormatted = startDate.toISOString().replace('Z', '').slice(0, -4)
     const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : ''
 
-    // Evitar fetch si no hay región (deja pasar 'all_regions' para traer todos)
     const shouldFetch = !!region
     const { data, error, isLoading } = useSWR(
         shouldFetch
-            ? `/api/bridge/get-all-tags?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&collection=${collection}&tag_column_name=${tagColumnName}`
+            ? `/api/aws/bridge/get-all-tags?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&collection=${collection}&tag_column_name=${tagColumnName}`
             : null,
         fetcher
     )

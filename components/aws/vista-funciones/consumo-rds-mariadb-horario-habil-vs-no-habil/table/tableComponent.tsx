@@ -32,7 +32,7 @@ export const TableRdsMariaDbMetrics = ({
 }) => {
   const { data, error, isLoading } = useSWR<{ data: MariaDbMetricData[] }>(
     startDateFormatted && endDateFormatted
-      ? `/api/bridge/aws/rds/mariadb/business-vs-offhours?date_from=${startDateFormatted}&date_to=${endDateFormatted}&metric_label=${metric}&resource=${instance || "all"}`
+      ? `/api/aws/bridge/aws/rds/mariadb/business-vs-offhours?date_from=${startDateFormatted}&date_to=${endDateFormatted}&metric_label=${metric}&resource=${instance || "all"}`
       : null,
     fetcher
   )

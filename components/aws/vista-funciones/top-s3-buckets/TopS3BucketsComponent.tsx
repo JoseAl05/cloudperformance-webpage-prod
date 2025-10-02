@@ -29,7 +29,7 @@ export const TopS3BucketsComponent = ({
 
   // 🔹 Endpoint para métricas globales (tarjetas)
   const { data: dataInfo, error: errorInfo, isLoading: isLoadingInfo } = useSWR(
-    `/api/bridge/s3/top_s3_buckets/info?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&resources=${buckets}`,
+    `/api/aws/bridge/s3/top_s3_buckets/info?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&resources=${buckets}`,
     fetcher
   )
 

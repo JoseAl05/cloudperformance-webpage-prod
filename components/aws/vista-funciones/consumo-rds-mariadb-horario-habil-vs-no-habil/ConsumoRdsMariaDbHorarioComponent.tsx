@@ -56,7 +56,7 @@ export const MainViewConsumoRdsMariaDbHorario = ({ startDate, endDate, metric, i
   let avgDataNoHabil: unknown = 0;
 
   const { data, error, isLoading } = useSWR(
-    `/api/bridge/aws/rds/mariadb/business-vs-offhours?date_from=${startDateFormatted}&date_to=${endDateFormatted}&metric_label=${metric}&resource=${instance || "all"}`,
+    `/api/aws/bridge/aws/rds/mariadb/business-vs-offhours?date_from=${startDateFormatted}&date_to=${endDateFormatted}&metric_label=${metric}&resource=${instance || "all"}`,
     fetcher
   )
 

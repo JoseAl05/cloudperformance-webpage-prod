@@ -47,7 +47,7 @@ export const MainViewConsumoEC2AutoscalingGroupsHorario = ({ startDate, endDate,
   let avgDataNoHabil: unknown = 0
 
   const { data, error, isLoading } = useSWR(
-    `/api/bridge/aws/ec2/business-vs-offhours/autoscaling?date_from=${startDateFormatted}&date_to=${endDateFormatted}&metric_label=${metric}&autoscaling_group=${autoScalingGroup || "all"}`,
+    `/api/aws/bridge/aws/ec2/business-vs-offhours/autoscaling?date_from=${startDateFormatted}&date_to=${endDateFormatted}&metric_label=${metric}&autoscaling_group=${autoScalingGroup || "all"}`,
     fetcher
   )
 

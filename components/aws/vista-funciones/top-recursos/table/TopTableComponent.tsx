@@ -28,7 +28,7 @@ export const TableComponentTop = ({
 }) => {
   const { data, error, isLoading } = useSWR<TableDataTopResource[]>(
     startDateFormatted && endDateFormatted
-      ? `/api/bridge/facturacion/top_facturacion/RESOURCE_ID?date_from=${startDateFormatted}&date_to=${endDateFormatted}`
+      ? `/api/aws/bridge/facturacion/top_facturacion/RESOURCE_ID?date_from=${startDateFormatted}&date_to=${endDateFormatted}`
       : null,
     fetcher
   )

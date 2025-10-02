@@ -67,32 +67,16 @@ export const SidebarComponent = ({
     const isExpanded = open || state === 'mobile'
     const { getMenuItemClasses } = useMenuStyles();
     const [isMounted, setIsMounted] = useState(false);
+    const [isAzure, setIsAzure] = useState(false);
+    const [isAws, setIsAws] = useState(false);
 
-    const routes = [
-        {
-            label: 'Inicio',
-            icon: Grid2X2,
-            href: '/aws/facturacion/tendencia-facturacion',
-        },
-        { label: 'Quotas', icon: PieChart, href: '/aws/quotas' },
-        { label: 'Eventos', icon: Zap, href: '/aws/eventos' },
-        { label: 'Vista Advisor', icon: Pyramid, href: '/aws/advisor' },
-        {
-            label: 'Vista Saving Plans',
-            icon: HandCoins,
-            href: '/aws/saving-plan',
-        },
-    ]
+    const provider = useMemo(() => {
+        if (!pathname) return null
+        if (pathname.startsWith('/aws')) return 'aws'
+        if (pathname.startsWith('/azure')) return 'azure'
+        return null
+    }, [pathname])
 
-    const recursos = [
-        { label: 'Instancias EC2', icon: Computer, href: '/aws/recursos/instancias-ec2', color: 'text-orange-500' },
-        { label: 'Auto Scaling groups', icon: TrendingUp, href: '/aws/recursos/autoscaling-groups', color: 'text-emerald-500' },
-        { label: 'Instancias RDS Postgresql', icon: Database, href: '/aws/recursos/instancias-rds-pg', color: 'text-blue-600' },
-        { label: 'Instancias RDS Mysql', icon: Database, href: '/aws/recursos/instancias-rds-mysql', color: 'text-emerald-600' },
-        { label: 'Instancias RDS SQL Server', icon: Database, href: '/aws/recursos/instancias-rds-sqlserver', color: 'text-purple-600' },
-        { label: 'Instancias RDS Oracle', icon: Database, href: '/aws/recursos/instancias-rds-oracle', color: 'text-red-600' },
-        { label: 'Instancias RDS MariaDB', icon: Database, href: '/aws/recursos/instancias-rds-mariadb', color: 'text-amber-600' },
-    ]
 
     const topFacturaciones = [
         { label: 'Top Facturaciones por Región', href: '/aws/funciones/top-dolares-region', icon: Earth, color: 'text-purple-500' },
@@ -142,32 +126,76 @@ export const SidebarComponent = ({
         { label: 'Instancias RDS MariaDB', icon: Database, href: '/aws/consumos/rds/mariadb' }
     ]
 
-    const consumes = [{ label: 'Consumos', subItems: consumeSubItems, icon: Zap }]
+    const AwsRoutes = {
+        routes: [
+            { label: 'Inicio', icon: Grid2X2, href: '/aws/facturacion/tendencia-facturacion' },
+            { label: 'Quotas', icon: PieChart, href: '/aws/quotas' },
+            { label: 'Eventos', icon: Zap, href: '/aws/eventos' },
+            { label: 'Vista Advisor', icon: Pyramid, href: '/aws/advisor' },
+            { label: 'Vista Saving Plans', icon: HandCoins, href: '/aws/saving-plan' },
+        ],
+        recursos: [
+            { label: 'Instancias EC2', icon: Computer, href: '/aws/recursos/instancias-ec2', color: 'text-orange-500' },
+            { label: 'Auto Scaling groups', icon: TrendingUp, href: '/aws/recursos/autoscaling-groups', color: 'text-emerald-500' },
+            { label: 'Instancias RDS Postgresql', icon: Database, href: '/aws/recursos/instancias-rds-pg', color: 'text-blue-600' },
+            { label: 'Instancias RDS Mysql', icon: Database, href: '/aws/recursos/instancias-rds-mysql', color: 'text-emerald-600' },
+            { label: 'Instancias RDS SQL Server', icon: Database, href: '/aws/recursos/instancias-rds-sqlserver', color: 'text-purple-600' },
+            { label: 'Instancias RDS Oracle', icon: Database, href: '/aws/recursos/instancias-rds-oracle', color: 'text-red-600' },
+            { label: 'Instancias RDS MariaDB', icon: Database, href: '/aws/recursos/instancias-rds-mariadb', color: 'text-amber-600' },
+        ],
+        consumes: [{ label: 'Consumos', subItems: consumeSubItems, icon: Zap }],
+        funciones: [
+            { label: 'Top Facturaciones', subItems: topFacturaciones, icon: Zap },
+            { label: 'Consumo horario hábil vs no hábil', subItems: consumoHorario, icon: Clock },
+            { label: 'Consumo por Localización', subItems: consumoLoc, icon: Map },
+            { label: 'Recursos no utilizados', subItems: infraused, icon: TrendingDown },
+            { label: 'Spot vs Vm', href: '/aws/funciones/spot-vs-vm', icon: Database },
+            { label: 'Top S3 Buckets', href: '/aws/funciones/top-s3-buckets', icon: Server },
+            { label: 'Ebs No Utilizados', href: '/aws/funciones/ebs-no-utilizados', icon: HardDrive },
+        ],
+    }
 
-    const funciones = [
-        { label: 'Top Facturaciones', subItems: topFacturaciones, icon: Zap },
-        { label: 'Consumo horario hábil vs no hábil', subItems: consumoHorario, icon: Clock },
-        { label: 'Consumo por Localización', subItems: consumoLoc, icon: Map },
-        { label: 'Recursos no utilizados', subItems: infraused, icon: TrendingDown },
-        { label: 'Spot vs Vm', href: '/aws/funciones/spot-vs-vm', icon: Database },
-        { label: 'Top S3 Buckets', href: '/aws/funciones/top-s3-buckets', icon: Server },
-        { label: 'Ebs No Utilizados', href: '/aws/funciones/ebs-no-utilizados', icon: HardDrive }
-    ]
-    const funcionesConSub = funciones.filter(f => f.subItems && f.subItems.length)
-    const funcionesSimples = funciones.filter(f => f.href)
+    const AzureRoutes = {
+        routes: [
+            { label: 'Inicio', icon: Grid2X2, href: '/azure/facturacion/tendencia-facturacion' },
+            { label: 'Quotas', icon: PieChart, href: '/azure/quotas' },
+            { label: 'Deployments', icon: Zap, href: '/azure/deployments' },
+            { label: 'Vista Advisor', icon: Pyramid, href: '/azure/advisor' },
+            { label: 'Vista Saving Plans', icon: HandCoins, href: '/azure/saving-plan' },
+        ],
+        recursos: [],
+        consumes: [],
+        funciones: [
+            { label: 'Blob Storage vs Storage General', icon: Zap, href: '/azure/funciones/blob-vs-storage-general' },
+        ],
+    }
 
-    const defaultOpenRecursos = recursos.some((r) => r.href === pathname)
+    const { routes, recursos, consumes, funciones } = useMemo(() => {
+        if (isAws) return AwsRoutes
+        if (isAzure) return AzureRoutes
+        return { routes: [], recursos: [], consumes: [], funciones: [] }
+    }, [isAws, isAzure]);
+
+    const defaultOpenRecursos = useMemo(
+        () => recursos.some((r) => r.href === pathname),
+        [recursos, pathname]
+    )
     const [isRecursosOpen, setIsRecursosOpen] = useState(defaultOpenRecursos)
 
-    const defaultOpenFunciones = funciones.some((f) =>
-        (f.href && f.href === pathname) || f.subItems?.some((sub) => sub.href === pathname)
+    const defaultOpenFunciones = useMemo(
+        () => funciones.some((f) => (f.href && f.href === pathname) || f.subItems?.some((s) => s.href === pathname)),
+        [funciones, pathname]
     )
     const [isFuncionesOpen, setIsFuncionesOpen] = useState(defaultOpenFunciones)
 
-    const defaultOpenConsumes = consumes.some((f) =>
-        f.subItems?.some((sub) => sub.href === pathname)
+    const defaultOpenConsumes = useMemo(
+        () => consumes.some((c) => c.subItems?.some((s) => s.href === pathname)),
+        [consumes, pathname]
     )
     const [isConsumesOpen, setIsConsumesOpen] = useState(defaultOpenConsumes)
+
+    const funcionesConSub = funciones.filter((f) => f.subItems?.length)
+    const funcionesSimples = funciones.filter((f) => f.href)
 
     const initialOpenByGroup = useMemo(() => {
         return funcionesConSub.reduce<Record<string, boolean>>((acc, grupo) => {
@@ -175,6 +203,38 @@ export const SidebarComponent = ({
             return acc
         }, {})
     }, [funcionesConSub, pathname])
+
+    // const funcionesConSub =
+    //     isAws ? AwsRoutes.funciones.filter(f => f.subItems && f.subItems.length) : isAzure ? AzureRoutes.funciones.filter(f => f.subItems && f.subItems.length) : [];
+    // const funcionesSimples =
+    //     isAws ? AwsRoutes.funciones.filter(f => f.href) : isAzure ? AzureRoutes.funciones.filter(f => f.href) : [];
+
+    // const defaultOpenRecursos =
+    //     isAws ? AwsRoutes.recursos.some((r) => r.href === pathname) : isAzure ? AzureRoutes.recursos.some((r) => r.href === pathname) : false
+    // const [isRecursosOpen, setIsRecursosOpen] = useState(defaultOpenRecursos)
+
+    // const defaultOpenFunciones =
+    //     isAws ? AwsRoutes.funciones.some((f) =>
+    //         (f.href && f.href === pathname) || f.subItems?.some((sub) => sub.href === pathname)
+    //     ) : isAzure ? AzureRoutes.funciones.some((f) =>
+    //         (f.href && f.href === pathname) || f.subItems?.some((sub) => sub.href === pathname)
+    //     ) : false
+    // const [isFuncionesOpen, setIsFuncionesOpen] = useState(defaultOpenFunciones)
+
+    // const defaultOpenConsumes =
+    //     isAws ? AwsRoutes.consumes.some((f) =>
+    //         f.subItems?.some((sub) => sub.href === pathname)
+    //     ) : isAzure ? AzureRoutes.consumes.some((f) =>
+    //         f.subItems?.some((sub) => sub.href === pathname)
+    //     ) : false
+    // const [isConsumesOpen, setIsConsumesOpen] = useState(defaultOpenConsumes)
+
+    // const initialOpenByGroup = useMemo(() => {
+    //     return funcionesConSub.reduce<Record<string, boolean>>((acc, grupo) => {
+    //         acc[grupo.label] = grupo.subItems?.some((sub) => sub.href === pathname) ?? false
+    //         return acc
+    //     }, {})
+    // }, [funcionesConSub, pathname])
 
     const [openByGroup, setOpenByGroup] = useState<Record<string, boolean>>(initialOpenByGroup)
 
@@ -188,6 +248,13 @@ export const SidebarComponent = ({
             })
         }
     }, [state])
+
+    useEffect(() => {
+        console.log('AWS' + pathname.startsWith('/aws'))
+        console.log('AZURE' + pathname.startsWith('/azure'))
+        setIsAws(pathname.startsWith('/aws'))
+        setIsAzure(pathname.startsWith('/azure'))
+    }, [pathname])
 
     useEffect(() => {
         setIsMounted(true);
@@ -259,7 +326,7 @@ export const SidebarComponent = ({
                                                 "mt-1 space-y-1",
                                             )}
                                         >
-                                            {consumeSubItems.map((sub) => {
+                                            {(consumes[0]?.subItems ?? []).map((sub) => {
                                                 const isSubActive = pathname === sub.href
                                                 return (
                                                     <Link

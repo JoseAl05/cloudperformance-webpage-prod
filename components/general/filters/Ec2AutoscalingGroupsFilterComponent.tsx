@@ -46,7 +46,7 @@ export const AutoScalingGroupFilterComponent = ({
 
   // Llamada a la API de AutoScaling Groups (string[])
   const { data, error } = useSWR<string[]>(
-    `/api/bridge/aws/ec2/autoscaling/groups?date_from=${startDateFormatted}&date_to=${endDateFormatted}`,
+    `/api/aws/bridge/aws/ec2/autoscaling/groups?date_from=${startDateFormatted}&date_to=${endDateFormatted}`,
     fetcher
   );
 

@@ -36,7 +36,7 @@ export const TableComponentSpotVsVm = ({
 }) => {
   const { data, error, isLoading } = useSWR<SpotVsVmApiResponse[]>(
     startDateFormatted && endDateFormatted
-      ? `/api/bridge/vm/spot_vs_vm?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=all_regions`
+      ? `/api/aws/bridge/vm/spot_vs_vm?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=all_regions`
       : null,
     fetcher
   )

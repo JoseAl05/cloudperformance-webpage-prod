@@ -94,7 +94,7 @@ export const TendenciaFacturacionChartComponent = ({ startDate, endDate, service
     const startDateFormatted = startDate.toISOString().split('.')[0];
     const endDateFormatted = endDate.toISOString().split('.')[0];
     const serviceParam = services ? `services=${services}` : '';
-    const apiUrl = `/api/bridge/facturacion/tendencia-facturacion?date_from=${startDateFormatted}&date_to=${endDateFormatted}&${serviceParam}&region=${region}`;
+    const apiUrl = `/api/aws/bridge/facturacion/tendencia-facturacion?date_from=${startDateFormatted}&date_to=${endDateFormatted}&${serviceParam}&region=${region}`;
 
     const { data, error, isLoading } = useSWR<FacturacionData[]>(apiUrl, fetcher);
 

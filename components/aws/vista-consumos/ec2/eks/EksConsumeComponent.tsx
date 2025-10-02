@@ -30,19 +30,19 @@ export const EksConsumeComponent = ({ startDate, endDate, eksAsgInstance, region
     const canFetch = !!eksAsgInstance
 
     const ec2CpuMetrics = useSWR(
-        canFetch ? `/api/bridge/vm/consumo_ec2/cpu_usage?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&resource=${encodeURIComponent(eksAsgInstance)}` : null,
+        canFetch ? `/api/aws/bridge/vm/consumo_ec2/cpu_usage?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&resource=${encodeURIComponent(eksAsgInstance)}` : null,
         fetcher
     )
     const ec2CreditsMetrics = useSWR(
-        canFetch ? `/api/bridge/vm/consumo_ec2/credits_usage?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&resource=${encodeURIComponent(eksAsgInstance)}` : null,
+        canFetch ? `/api/aws/bridge/vm/consumo_ec2/credits_usage?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&resource=${encodeURIComponent(eksAsgInstance)}` : null,
         fetcher
     )
     const ec2Info = useSWR(
-        canFetch ? `/api/bridge/vm/consumo_ec2/info?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&resource=${encodeURIComponent(eksAsgInstance)}` : null,
+        canFetch ? `/api/aws/bridge/vm/consumo_ec2/info?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&resource=${encodeURIComponent(eksAsgInstance)}` : null,
         fetcher
     )
     const ec2GlobalCreditsEfficiency = useSWR(
-        canFetch ? `/api/bridge/vm/consumo_ec2/global_credits_efficiency?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&resource=${encodeURIComponent(eksAsgInstance)}` : null,
+        canFetch ? `/api/aws/bridge/vm/consumo_ec2/global_credits_efficiency?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&resource=${encodeURIComponent(eksAsgInstance)}` : null,
         fetcher
     )
 

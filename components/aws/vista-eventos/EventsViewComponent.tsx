@@ -30,7 +30,7 @@ export const EventsViewComponent = ({ startDate, endDate, eventType, region }: E
 
     const allEvents = useSWR(
         eventType
-            ? `/api/bridge/eventos/get_eventos?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&event_name=${eventType}`
+            ? `/api/aws/bridge/eventos/get_eventos?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&event_name=${eventType}`
             : null,
         fetcher
     )

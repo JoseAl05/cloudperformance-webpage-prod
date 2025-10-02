@@ -35,7 +35,7 @@ export const InstanceEc2InfrautilizadaComponent = ({
   // https://cloudperformance-desarrollo.eastus2.cloudapp.azure.com/api/aws/ec2/unused/unused?date_from=2025-08-01T00:00:00&date_to=2025-09-02T23:59:59&region=all&resource=i-08fc095993a5521be,i-084e4e667310b5e5b,i-0e2e4f97aaaaae90e
   const ec2InfrautilizadaInfo = useSWR(
     instance
-      ? `/api/bridge/aws/ec2/unused/unused?date_from=${startDateFormatted}&date_to=${endDateFormatted}&resource=${instance}`
+      ? `/api/aws/bridge/aws/ec2/unused/unused?date_from=${startDateFormatted}&date_to=${endDateFormatted}&resource=${instance}`
       : null,
     fetcher
   );

@@ -35,25 +35,25 @@ export const Ec2InstancesConsumeComponent = ({
 
     const ec2CpuMetrics = useSWR(
         instance
-            ? `/api/bridge/vm/consumo_ec2/cpu_usage?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&resource=${instance}`
+            ? `/api/aws/bridge/vm/consumo_ec2/cpu_usage?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&resource=${instance}`
             : null,
         fetcher
     )
     const ec2CreditsMetrics = useSWR(
         instance
-            ? `/api/bridge/vm/consumo_ec2/credits_usage?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&resource=${instance}`
+            ? `/api/aws/bridge/vm/consumo_ec2/credits_usage?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&resource=${instance}`
             : null,
         fetcher
     )
     const ec2Info = useSWR(
         instance
-            ? `/api/bridge/vm/consumo_ec2/info?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&resource=${instance}`
+            ? `/api/aws/bridge/vm/consumo_ec2/info?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&resource=${instance}`
             : null,
         fetcher
     )
     const ec2GlobalCreditsEfficiency = useSWR(
         instance
-            ? `/api/bridge/vm/consumo_ec2/global_credits_efficiency?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&resource=${instance}`
+            ? `/api/aws/bridge/vm/consumo_ec2/global_credits_efficiency?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&resource=${instance}`
             : null,
         fetcher
     )

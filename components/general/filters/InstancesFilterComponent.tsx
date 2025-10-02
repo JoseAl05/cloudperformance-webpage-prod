@@ -45,28 +45,28 @@ export const InstancesFilterComponent = ({
 
     switch (service) {
         case 'ec2':
-            url = `/api/bridge/vm/all-instances-ec2?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`;
+            url = `/api/aws/bridge/vm/all-instances-ec2?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`;
             break;
         case 'rds-pg':
-            url = `/api/bridge/db/all-instances-rds-pg?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`;
+            url = `/api/aws/bridge/db/all-instances-rds-pg?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`;
             break;
         case 'rds-mysql':
-            url = `/api/bridge/db/all-instances-rds-mysql?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`;
+            url = `/api/aws/bridge/db/all-instances-rds-mysql?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`;
             break;
         case 'rds-oracle':
-            url = `/api/bridge/db/all-instances-rds-oracle?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`;
+            url = `/api/aws/bridge/db/all-instances-rds-oracle?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`;
             break;
         case 'rds-sqlserver':
-            url = `/api/bridge/db/all-instances-rds-sqlserver?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`;
+            url = `/api/aws/bridge/db/all-instances-rds-sqlserver?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`;
             break;
         case 'rds-mariadb':
-            url = `/api/bridge/db/all-instances-rds-mariadb?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`;
+            url = `/api/aws/bridge/db/all-instances-rds-mariadb?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`;
             break;
         case 'asg':
-            url = `/api/bridge/autoscaling/all-autoscaling-groups?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`;
+            url = `/api/aws/bridge/autoscaling/all-autoscaling-groups?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`;
             break;
         case "infraUsed":
-            url = `/api/bridge/aws/ec2/unused/getInstances?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`;
+            url = `/api/aws/bridge/aws/ec2/unused/getInstances?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`;
             break;
         default:
             url = '';

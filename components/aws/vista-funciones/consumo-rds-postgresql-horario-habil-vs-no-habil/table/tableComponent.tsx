@@ -32,7 +32,7 @@ export const TableRdsPostgresqlMetrics = ({
 }) => {
   const { data, error, isLoading } = useSWR<{ data: PostgresqlMetricData[] }>(
     startDateFormatted && endDateFormatted
-      ? `/api/bridge/aws/rds/postgresql/business-vs-offhours?date_from=${startDateFormatted}&date_to=${endDateFormatted}&metric_label=${metric}&resource=${instance || "all"}`
+      ? `/api/aws/bridge/aws/rds/postgresql/business-vs-offhours?date_from=${startDateFormatted}&date_to=${endDateFormatted}&metric_label=${metric}&resource=${instance || "all"}`
       : null,
     fetcher
   )

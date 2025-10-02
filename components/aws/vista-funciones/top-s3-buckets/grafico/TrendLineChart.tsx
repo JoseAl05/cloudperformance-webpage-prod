@@ -36,7 +36,7 @@ export const TrendLineChart = ({
   const endDateFormatted = endDate.toISOString().replace('Z', '').slice(0, -4)
 
   const { data, error, isLoading } = useSWR(
-    `/api/bridge/s3/top_s3_buckets/metrics?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&resources=${buckets}`,
+    `/api/aws/bridge/s3/top_s3_buckets/metrics?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&resources=${buckets}`,
     fetcher
   )
 

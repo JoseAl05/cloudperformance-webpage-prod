@@ -46,7 +46,7 @@ export const MainViewConsumoEC2NodosEKSHorario = ({ startDate, endDate, metric }
   let avgDataNoHabil: unknown = 0
 
   const { data, error, isLoading } = useSWR(
-    `/api/bridge/aws/ec2/business-vs-offhours/eks-nodes?date_from=${startDateFormatted}&date_to=${endDateFormatted}&metric_label=${metric}`,
+    `/api/aws/bridge/aws/ec2/business-vs-offhours/eks-nodes?date_from=${startDateFormatted}&date_to=${endDateFormatted}&metric_label=${metric}`,
     fetcher
   )
 

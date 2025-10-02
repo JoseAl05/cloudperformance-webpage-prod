@@ -56,7 +56,7 @@ export const MainViewConsumoRdsSqlHorario = ({ startDate, endDate, metric, insta
   let avgDataNoHabil: unknown = 0;
 
   const { data, error, isLoading } = useSWR(
-    `/api/bridge/aws/rds/sql/business-vs-offhours?date_from=${startDateFormatted}&date_to=${endDateFormatted}&metric_label=${metric}&resource=${instance || "all"}`,
+    `/api/aws/bridge/aws/rds/sql/business-vs-offhours?date_from=${startDateFormatted}&date_to=${endDateFormatted}&metric_label=${metric}&resource=${instance || "all"}`,
     fetcher
   )
 

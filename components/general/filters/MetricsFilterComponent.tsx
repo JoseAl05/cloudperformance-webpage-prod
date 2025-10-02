@@ -25,7 +25,7 @@ const fetcher = (url: string) =>
 
 export const MetricsFilterComponent = ({ selectedMetrics, setSelectedMetrics }: MetricsFilterComponentProps) => {
   const [open, setOpen] = useState(false);
-  const apiUrl = `/api/bridge/vm/promedio-loc-ec2/grupos-disponibles`;
+  const apiUrl = `/api/aws/bridge/vm/promedio-loc-ec2/grupos-disponibles`;
   const { data: apiResponse, error, isLoading } = useSWR<ApiResponse>(apiUrl, fetcher);
 
   // Crear la lista de grupos principales (en lugar de métricas individuales)

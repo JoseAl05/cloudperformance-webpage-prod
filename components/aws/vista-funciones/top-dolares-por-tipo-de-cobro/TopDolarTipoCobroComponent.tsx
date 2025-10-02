@@ -34,7 +34,7 @@ export const MainViewTopDolaresTipoCobro = ({ startDate, endDate }: TopDolaresRe
   const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : '2025-09-01T00:00:00';
 
   const { data, error, isLoading } = useSWR(
-    `/api/bridge/facturacion/top_facturacion/RECORD_TYPE?date_from=${startDateFormatted}&date_to=${endDateFormatted}`,
+    `/api/aws/bridge/facturacion/top_facturacion/RECORD_TYPE?date_from=${startDateFormatted}&date_to=${endDateFormatted}`,
     fetcher
   )
 

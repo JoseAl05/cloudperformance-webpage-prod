@@ -57,7 +57,7 @@ export const MainViewConsumoRdsPostgresqlHorario = ({ startDate, endDate, metric
   const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : ''
 
   const { data, error, isLoading } = useSWR(
-    `/api/bridge/aws/rds/postgresql/business-vs-offhours?date_from=${startDateFormatted}&date_to=${endDateFormatted}&metric_label=${metric}&resource=${instance || "all"}`,
+    `/api/aws/bridge/aws/rds/postgresql/business-vs-offhours?date_from=${startDateFormatted}&date_to=${endDateFormatted}&metric_label=${metric}&resource=${instance || "all"}`,
     fetcher
   )
 

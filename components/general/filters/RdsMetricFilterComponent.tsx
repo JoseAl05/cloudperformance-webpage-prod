@@ -39,7 +39,7 @@ export const RDSMetricFilterComponent = ({
 
   // Llamada a la API (devuelve string[])
   const { data, error } = useSWR<string[]>(
-    `/api/bridge/aws/rds/metrics?engine=${engine}`,
+    `/api/aws/bridge/aws/rds/metrics?engine=${engine}`,
     fetcher
   );
 

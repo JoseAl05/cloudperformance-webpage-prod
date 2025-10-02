@@ -35,19 +35,19 @@ export const RdsInstancesConsumeComponent = ({ startDate, endDate, instance, reg
     let url = '';
     switch (instancesService) {
         case 'rds-pg':
-            url = `/api/bridge/db/consumo_rds_postgresql`
+            url = `/api/aws/bridge/db/consumo_rds_postgresql`
             break;
         case 'rds-mysql':
-            url = `/api/bridge/db/consumo_rds_mysql`
+            url = `/api/aws/bridge/db/consumo_rds_mysql`
             break;
         case 'rds-oracle':
-            url = `/api/bridge/db/consumo_rds_oracle`
+            url = `/api/aws/bridge/db/consumo_rds_oracle`
             break;
         case 'rds-sqlserver':
-            url = `/api/bridge/db/consumo_rds_sqlserver`
+            url = `/api/aws/bridge/db/consumo_rds_sqlserver`
             break;
         case 'rds-mariadb':
-            url = `/api/bridge/db/consumo_rds_mariadb`
+            url = `/api/aws/bridge/db/consumo_rds_mariadb`
             break;
         default:
             break;

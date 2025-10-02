@@ -31,5 +31,6 @@ export interface JWTPayload {
   sub: string;
   username: string;
   client: string;
-  user_db: string;
+  user_db_aws: string;
+  user_db_azure: string;
 }

@@ -38,7 +38,7 @@ export const AdvisorCategoriesFilterComponent = ({
     const startDateFormatted = startDate.toISOString().replace('Z', '').slice(0, -4);
     const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : '';
 
-    const url = `/api/bridge/advisor/all_categories?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`;
+    const url = `/api/aws/bridge/advisor/all_categories?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`;
 
     const shouldFetch = !!url && !!region
     const { data, error, isLoading } = useSWR<unknown[]>(shouldFetch ? url : null, fetcher);

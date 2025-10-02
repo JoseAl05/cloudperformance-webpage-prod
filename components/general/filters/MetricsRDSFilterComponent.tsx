@@ -40,7 +40,7 @@ export const MetricsRDSFilterComponent = ({ selectedMetrics, setSelectedMetrics,
     };
     
     const endpoint = serviceMap[service] || 'rds-pg';
-    return `/api/bridge/db/promedio-loc-${endpoint}/grupos-disponibles`;
+    return `/api/aws/bridge/db/promedio-loc-${endpoint}/grupos-disponibles`;
   };
 
   const apiUrl = getApiUrl(rdsService);

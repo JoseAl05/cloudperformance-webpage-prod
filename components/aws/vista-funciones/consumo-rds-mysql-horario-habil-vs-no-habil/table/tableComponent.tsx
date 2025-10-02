@@ -32,7 +32,7 @@ export const TableRdsMysqlMetrics = ({
 }) => {
   const { data, error, isLoading } = useSWR<{ data: MysqlMetricData[] }>(
     startDateFormatted && endDateFormatted
-      ? `/api/bridge/aws/rds/mysql/business-vs-offhours?date_from=${startDateFormatted}&date_to=${endDateFormatted}&metric_label=${metric}&resource=${instance || "all"}`
+      ? `/api/aws/bridge/aws/rds/mysql/business-vs-offhours?date_from=${startDateFormatted}&date_to=${endDateFormatted}&metric_label=${metric}&resource=${instance || "all"}`
       : null,
     fetcher
   )

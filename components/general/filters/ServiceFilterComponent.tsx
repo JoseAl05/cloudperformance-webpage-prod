@@ -22,7 +22,7 @@ const fetcher = (url: string) =>
 
 export const ServiceFilterComponent = ({ selectedServices, setSelectedServices }: ServiceFilterComponentProps) => {
   const [open, setOpen] = useState(false);
-  const apiUrl = `/api/bridge/funcion/servicios-disponibles`;
+  const apiUrl = `/api/aws/bridge/funcion/servicios-disponibles`;
   const { data: services, error, isLoading } = useSWR<ServiceData[]>(apiUrl, fetcher);
 
   const handleServiceToggle = (serviceValue: string) => {

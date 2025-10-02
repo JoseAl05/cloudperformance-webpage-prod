@@ -32,7 +32,7 @@ export const TableEC2AutoScalingMetrics = ({
 }) => {
   const { data, error, isLoading } = useSWR<{ data: EC2MetricData[] }>(
     startDateFormatted && endDateFormatted
-      ? `/api/bridge/aws/ec2/business-vs-offhours/autoscaling?date_from=${startDateFormatted}&date_to=${endDateFormatted}&metric_label=${metric}&autoscaling_group=${autoScalingGroup}`
+      ? `/api/aws/bridge/aws/ec2/business-vs-offhours/autoscaling?date_from=${startDateFormatted}&date_to=${endDateFormatted}&metric_label=${metric}&autoscaling_group=${autoScalingGroup}`
       : null,
     fetcher
   )

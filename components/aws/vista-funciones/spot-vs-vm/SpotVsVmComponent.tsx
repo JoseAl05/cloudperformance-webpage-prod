@@ -24,7 +24,7 @@ export const MainViewSpotVsVm = ({ startDate, endDate }: SpotVsVmProps) => {
   const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : '';
 
   const { data, error, isLoading } = useSWR(
-    `/api/bridge/vm/spot_vs_vm?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=all_regions`,
+    `/api/aws/bridge/vm/spot_vs_vm?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=all_regions`,
     fetcher
   )
 
