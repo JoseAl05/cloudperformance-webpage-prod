@@ -9,10 +9,12 @@ import { SubscriptionsFilterComponent } from '@/components/general_azure/filters
 import { TagsFilterComponent } from '@/components/general_azure/filters/TagsFilterComponent';
 import { MetricsFilterComponent } from '@/components/general_azure/filters/MetricsFilterComponent';
 import { Card, CardContent } from '@/components/ui/card';
-import { Calendar, Filter, MapPin, XCircle, Cloud, Tag, Activity } from 'lucide-react';
+import { Calendar, Filter, MapPin, XCircle, Cloud, Tag, Activity, Layers, Server } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { SubscriptionsFilterComponentV2 } from './SubscriptionsFilterComponentV2';
+import { SubscriptionsFilterComponentV2 } from '@/components/general_azure/filters/SubscriptionsFilterComponentV2';
+import { ResourceTypesFilterComponent } from '@/components/general_azure/filters/ResourceTypesFilterComponent';
+import { InstancesFilterComponent } from '@/components/general/filters/InstancesFilterComponent';
 
 interface FiltersComponentProps {
     Component: (params: {
@@ -36,6 +38,8 @@ interface FiltersComponentProps {
     isRegionMultiSelect?: boolean;
     metricsFilter?: boolean;
     metricsCollection?: string;
+    resourceTypeFilter?: boolean;
+    instancesFilter?: boolean;
 }
 
 export const FiltersComponent = ({
@@ -52,6 +56,8 @@ export const FiltersComponent = ({
     isRegionMultiSelect = false,
     metricsFilter = false,
     metricsCollection = '',
+    resourceTypeFilter = false,
+    instancesFilter = false
 }: FiltersComponentProps) => {
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -67,6 +73,9 @@ export const FiltersComponent = ({
         const selectedTagKeyParam = searchParams.get('tagKey');
         const selectedTagValueParam = searchParams.get('tagValue');
         const selectedMetricParam = searchParams.get('metric');
+        const selectedResourceTypeParam = searchParams.get('resourceType');
+        const selectedMeterCategoryParam = searchParams.get('meterCategory');
+        const selectedInstanceParam = searchParams.get('instance');
 
         const startDate = startDateParam ? new Date(startDateParam) : yesterday;
         const endDate = endDateParam ? new Date(endDateParam) : new Date();
@@ -79,6 +88,9 @@ export const FiltersComponent = ({
             selectedTagKey: selectedTagKeyParam || null,
             selectedTagValue: selectedTagValueParam || null,
             selectedMetric: selectedMetricParam || '',
+            selectedResourceType: selectedResourceTypeParam || '',
+            selectedMeterCategory: selectedMeterCategoryParam || null,
+            selectedInstance: selectedInstanceParam || null
         };
     };
 
@@ -89,6 +101,9 @@ export const FiltersComponent = ({
     const [tempTagKey, setTempTagKey] = useState<string | null>(filters.selectedTagKey);
     const [tempTagValue, setTempTagValue] = useState<string | null>(filters.selectedTagValue);
     const [tempMetric, setTempMetric] = useState<string>(filters.selectedMetric);
+    const [tempResourceType, setTempResourceType] = useState<string>(filters.selectedResourceType);
+    const [tempMeterCategory, setTempMeterCategory] = useState<string | null>(filters.selectedMeterCategory);
+    const [tempInstance, setTempInstance] = useState<string | null>(filters.selectedInstance);
 
     useEffect(() => {
         const newFilters = getInitialFilters();
@@ -99,6 +114,9 @@ export const FiltersComponent = ({
         setTempTagKey(newFilters.selectedTagKey);
         setTempTagValue(newFilters.selectedTagValue);
         setTempMetric(newFilters.selectedMetric);
+        setTempResourceType(newFilters.selectedResourceType);
+        setTempMeterCategory(newFilters.selectedMeterCategory);
+        setTempInstance(newFilters.selectedInstance);
     }, [searchParams]);
 
     const onChange = (dates: [Date | null, Date | null]) => setTempRange(dates);
@@ -116,6 +134,9 @@ export const FiltersComponent = ({
             selectedTagKey: tempTagKey,
             selectedTagValue: tempTagValue,
             selectedMetric: tempMetric,
+            selectedResourceType: tempResourceType,
+            selectedMeterCategory: tempMeterCategory,
+            selectedInstance: tempInstance,
         };
 
         setFilters(newFilters);
@@ -143,6 +164,15 @@ export const FiltersComponent = ({
         if (newFilters.selectedMetric) {
             query.set('metric', newFilters.selectedMetric);
         }
+        if (newFilters.selectedResourceType) {
+            query.set('resourceType', newFilters.selectedResourceType);
+        }
+        if (newFilters.selectedMeterCategory) {
+            query.set('meterCategory', newFilters.selectedMeterCategory);
+        }
+        if (newFilters.selectedInstance) {
+            query.set('instance', newFilters.selectedInstance);
+        }
 
         router.push(`${window.location.pathname}?${query.toString()}`);
     };
@@ -156,6 +186,9 @@ export const FiltersComponent = ({
             selectedTagKey: null,
             selectedTagValue: null,
             selectedMetric: '',
+            selectedResourceType: '',
+            selectedMeterCategory: null,
+            selectedInstance: null,
         };
 
         setFilters(defaultFilters);
@@ -165,6 +198,9 @@ export const FiltersComponent = ({
         setTempTagKey(defaultFilters.selectedTagKey);
         setTempTagValue(defaultFilters.selectedTagValue);
         setTempMetric(defaultFilters.selectedMetric);
+        setTempResourceType(defaultFilters.selectedResourceType);
+        setTempMeterCategory(defaultFilters.selectedMeterCategory);
+        setTempInstance(defaultFilters.selectedInstance);
 
         router.push(window.location.pathname);
     };
@@ -268,6 +304,38 @@ export const FiltersComponent = ({
                                 />
                             </div>
                         )}
+                        {instancesFilter && (
+                            <div className='space-y-2'>
+                                <label className='text-sm font-medium text-foreground flex items-center gap-2'>
+                                    <Server className='h-4 w-4' />
+                                    Instancias
+                                </label>
+                                <InstancesFilterComponent
+                                    startDate={tempRange[0] ?? filters.startDate}
+                                    endDate={tempRange[1] ?? filters.endDate}
+                                    region={tempRegion}
+                                    subscription={tempSubscription}
+                                    selectedTagKey={tempTagKey}
+                                    selectedTagValue={tempTagValue}
+                                    selectedMeterCategory={tempMeterCategory}
+                                    selectedInstance={tempInstance}
+                                    setSelectedMeterCategory={setTempMeterCategory}
+                                    setSelectedInstance={setTempInstance}
+                                />
+                            </div>
+                        )}
+                        {resourceTypeFilter && (
+                            <div className='space-y-2'>
+                                <label className='text-sm font-medium text-foreground flex items-center gap-2'>
+                                    <Layers className='h-4 w-4' />
+                                    Tipo de Recurso
+                                </label>
+                                <ResourceTypesFilterComponent
+                                    selectedResourceType={tempResourceType}
+                                    setSelectedResourceType={setTempResourceType}
+                                />
+                            </div>
+                        )}
                     </div>
 
                     <div className='flex items-center gap-4'>
@@ -290,6 +358,9 @@ export const FiltersComponent = ({
                     selectedTagKey={filters.selectedTagKey}
                     selectedTagValue={filters.selectedTagValue}
                     selectedMetric={filters.selectedMetric}
+                    selectedResourceType={filters.selectedResourceType}
+                    selectedMeterCategory={filters.selectedMeterCategory}
+                    selectedInstance={filters.selectedInstance}
                 />
             </Card>
         </div>

@@ -20,7 +20,6 @@ const fetcherGet = (url: string) =>
     fetch(url, {
         method: 'GET',
         headers: {
-            'Authorization': `Bearer ${process.env.NEXT_PUBLIC_API_TOKEN}`,
             'Content-Type': 'application/json',
         },
     }).then(res => res.json());
@@ -38,13 +37,13 @@ export const MetricsFilterComponent = ({
     const endDateFormatted = endDate.toISOString().replace('Z', '').slice(0, -4);
 
     const shouldFetch = !!collection;
-    const url = shouldFetch 
-        ? `${process.env.NEXT_PUBLIC_API_URL}/azure/get-all-metrics?date_from=${startDateFormatted}&date_to=${endDateFormatted}&collection=${collection}`
+    const url = shouldFetch
+        ? `/api/azure/bridge/azure/get-all-metrics?date_from=${startDateFormatted}&date_to=${endDateFormatted}&collection=${collection}`
         : null;
 
     const { data, error, isLoading } = useSWR<string[]>(url, fetcherGet);
 
-    if (isLoading) return <LoaderComponent size='small'/>
+    if (isLoading) return <LoaderComponent size='small' />
     if (error) return <div>Error al cargar métricas</div>
 
     const metrics: string[] = Array.isArray(data) ? data : []
@@ -81,17 +80,17 @@ export const MetricsFilterComponent = ({
                     {!noMetrics && (
                         <CommandGroup className='max-h-[200px] overflow-y-auto'>
                             {metrics.map((met: string) => (
-                            <CommandItem 
-                                key={met} 
-                                value={met} 
-                                onSelect={() => { 
-                                    setMetric(met); 
-                                    setOpen(false); 
-                                }}
-                            >
-                                <Check className={cn('mr-2 h-4 w-4', metric === met ? 'opacity-100' : 'opacity-0')} />
-                                {met}
-                            </CommandItem>
+                                <CommandItem
+                                    key={met}
+                                    value={met}
+                                    onSelect={() => {
+                                        setMetric(met);
+                                        setOpen(false);
+                                    }}
+                                >
+                                    <Check className={cn('mr-2 h-4 w-4', metric === met ? 'opacity-100' : 'opacity-0')} />
+                                    {met}
+                                </CommandItem>
                             ))}
                         </CommandGroup>
                     )}

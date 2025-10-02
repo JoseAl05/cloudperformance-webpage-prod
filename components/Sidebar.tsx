@@ -167,6 +167,7 @@ export const SidebarComponent = ({
         consumes: [],
         funciones: [
             { label: 'Blob Storage vs Storage General', icon: Zap, href: '/azure/funciones/blob-vs-storage-general' },
+            { label: 'Top 10 uso de recursos', icon: LineChart, href: '/azure/funciones/top-10-recursos-uso' }
         ],
     }
 
