@@ -17,13 +17,13 @@ const fetcher = (url: string) =>
 interface IncrementoTopRecursosUsoChartProps {
   startDate: Date
   endDate: Date
-  selectedMetric?: string 
+  selectedMetric?: string
   selectedResourceType?: string
   selectedResource?: string
 }
 
-export const IncrementoTopRecursosUsoChartComponent = ({ 
-  startDate, 
+export const IncrementoTopRecursosUsoChartComponent = ({
+  startDate,
   endDate,
   selectedMetric,
   selectedResourceType,
@@ -59,8 +59,8 @@ export const IncrementoTopRecursosUsoChartComponent = ({
   useEffect(() => {
     if (!chartRef.current || !serieTemporal || serieTemporal.length === 0) return
 
-    const timestamps = serieTemporal.map((item: any) => item.fecha)
-    const porcentajes = serieTemporal.map((item: any) => item.porcentaje_uso)
+    const timestamps = serieTemporal.map((item: unknown) => item.fecha)
+    const porcentajes = serieTemporal.map((item: unknown) => item.porcentaje_uso)
 
     if (chartInstance.current) {
       chartInstance.current.dispose()
@@ -83,7 +83,7 @@ export const IncrementoTopRecursosUsoChartComponent = ({
         axisPointer: {
           type: 'cross'
         },
-        formatter: function (params: any) {
+        formatter: function (params: unknown) {
           const fecha = new Date(params.data[0]).toLocaleDateString('es-ES', {
             day: '2-digit',
             month: 'short',
@@ -103,7 +103,7 @@ export const IncrementoTopRecursosUsoChartComponent = ({
         type: 'time',
         boundaryGap: false,
         axisLabel: {
-          formatter: function(value: number) {
+          formatter: function (value: number) {
             const date = new Date(value)
             return date.toLocaleDateString('es-ES', {
               day: '2-digit',
@@ -184,9 +184,9 @@ export const IncrementoTopRecursosUsoChartComponent = ({
   if (isLoading) return <p className="p-8 text-center">Cargando datos...</p>
   if (error) return <p className="p-8 text-center text-red-500">Error al cargar datos</p>
   if (!startDate || !endDate || !selectedMetric || !selectedResourceType) {
-    return <p className="p-8 text-center text-muted-foreground">Seleccione todos los filtros y presione "Aplicar Filtros"</p>
+    return <p className="p-8 text-center text-muted-foreground">Seleccione todos los filtros y presione Aplicar Filtros</p>
   }
-  
+
   if (!serieTemporal || serieTemporal.length === 0) {
     return (
       <div className="w-full min-w-0 px-4 py-6">
@@ -223,8 +223,8 @@ export const IncrementoTopRecursosUsoChartComponent = ({
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Uso Mes Anterior</p>
                     <p className="text-3xl font-bold text-purple-600">
-                      {tarjetas.porcentaje_uso_mes_anterior !== null 
-                        ? `${tarjetas.porcentaje_uso_mes_anterior.toFixed(2)}%` 
+                      {tarjetas.porcentaje_uso_mes_anterior !== null
+                        ? `${tarjetas.porcentaje_uso_mes_anterior.toFixed(2)}%`
                         : '-'}
                     </p>
                   </div>
@@ -240,8 +240,8 @@ export const IncrementoTopRecursosUsoChartComponent = ({
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Uso Mes Actual</p>
                     <p className="text-3xl font-bold text-blue-600">
-                      {tarjetas.porcentaje_uso_mes_actual !== null 
-                        ? `${tarjetas.porcentaje_uso_mes_actual.toFixed(2)}%` 
+                      {tarjetas.porcentaje_uso_mes_actual !== null
+                        ? `${tarjetas.porcentaje_uso_mes_actual.toFixed(2)}%`
                         : '-'}
                     </p>
                   </div>
@@ -278,8 +278,8 @@ export const IncrementoTopRecursosUsoChartComponent = ({
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Uso Fecha Anterior</p>
                     <p className="text-3xl font-bold text-gray-600">
-                      {tarjetas.porcentaje_uso_fecha_anterior !== null 
-                        ? `${tarjetas.porcentaje_uso_fecha_anterior.toFixed(2)}%` 
+                      {tarjetas.porcentaje_uso_fecha_anterior !== null
+                        ? `${tarjetas.porcentaje_uso_fecha_anterior.toFixed(2)}%`
                         : '-'}
                     </p>
                   </div>
@@ -295,8 +295,8 @@ export const IncrementoTopRecursosUsoChartComponent = ({
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Uso Última Fecha</p>
                     <p className="text-3xl font-bold text-green-600">
-                      {tarjetas.porcentaje_uso_ultima_fecha !== null 
-                        ? `${tarjetas.porcentaje_uso_ultima_fecha.toFixed(2)}%` 
+                      {tarjetas.porcentaje_uso_ultima_fecha !== null
+                        ? `${tarjetas.porcentaje_uso_ultima_fecha.toFixed(2)}%`
                         : '-'}
                     </p>
                   </div>

@@ -9,13 +9,14 @@ import { SubscriptionsFilterComponent } from '@/components/general_azure/filters
 import { TagsFilterComponent } from '@/components/general_azure/filters/TagsFilterComponent';
 import { MetricsFilterComponent } from '@/components/general_azure/filters/MetricsFilterComponent';
 import { Card, CardContent } from '@/components/ui/card';
-import { Calendar, Filter, MapPin, XCircle, Cloud, Tag, Activity, Layers, Server, Container, Cylinder } from 'lucide-react';
+import { Calendar, Filter, MapPin, XCircle, Cloud, Tag, Activity, Layers, Server, Container, Cylinder, Database } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { SubscriptionsFilterComponentV2 } from '@/components/general_azure/filters/SubscriptionsFilterComponentV2';
 import { ResourceTypesFilterComponent } from '@/components/general_azure/filters/ResourceTypesFilterComponent';
 import { InstancesFilterComponent } from '@/components/general_azure/filters/InstancesFilterComponent';
 import { StorageAccountsFilterComponent } from '@/components/general_azure/filters/StorageAccountsFilterComponent';
+import { ResourcesFilterComponent } from '@/components/general_azure/filters/ResourcesFilterComponent';
 
 interface FiltersComponentProps {
     Component: (params: {
@@ -44,6 +45,7 @@ interface FiltersComponentProps {
     instancesFilter?: boolean;
     strgAccountFilter?: boolean;
     isStrgAccountMultiselect?: boolean;
+    resourcesFilter?: boolean;
 }
 
 export const FiltersComponent = ({
@@ -64,7 +66,8 @@ export const FiltersComponent = ({
     resourceTypeFilter = false,
     instancesFilter = false,
     strgAccountFilter = false,
-    isStrgAccountMultiselect = false
+    isStrgAccountMultiselect = false,
+    resourcesFilter = false
 }: FiltersComponentProps) => {
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -93,6 +96,7 @@ export const FiltersComponent = ({
         const selectedMeterCategoryParam = searchParams.get('meterCategory');
         const selectedInstanceParam = searchParams.get('instance');
         const selectedStrgAccountParam = searchParams.get('strgAccount');
+        const selectedResourceParam = searchParams.get('resource');
 
         let startDate = startDateParam ? new Date(startDateParam) : yesterday;
         let endDate = endDateParam ? new Date(endDateParam) : new Date();
@@ -125,7 +129,8 @@ export const FiltersComponent = ({
             selectedResourceType: selectedResourceTypeParam || '',
             selectedMeterCategory: selectedMeterCategoryParam || null,
             selectedInstance: selectedInstanceParam || null,
-            selectedStrgAccount: selectedStrgAccountParam || 'all'
+            selectedStrgAccount: selectedStrgAccountParam || 'all',
+            selectedResource: selectedResourceParam || ''
         };
     };
 
@@ -145,6 +150,7 @@ export const FiltersComponent = ({
     const [tempMeterCategory, setTempMeterCategory] = useState<string | null>(filters.selectedMeterCategory);
     const [tempInstance, setTempInstance] = useState<string | null>(filters.selectedInstance);
     const [tempStrgAccount, setTempStrgAccount] = useState(filters.selectedStrgAccount);
+    const [tempResource, setTempResource] = useState<string>(filters.selectedResource);
 
     useEffect(() => {
         const newFilters = getInitialFilters();
@@ -164,6 +170,7 @@ export const FiltersComponent = ({
         setTempMonthYearDate(
             newFilters.month && newFilters.year ? new Date(newFilters.year, newFilters.month - 1, 1) : null
         );
+        setTempResource(newFilters.selectedResource);
     }, [searchParams]);
 
     const onChange = (dates: [Date | null, Date | null]) => setTempRange(dates);
@@ -195,7 +202,8 @@ export const FiltersComponent = ({
             selectedResourceType: tempResourceType,
             selectedMeterCategory: tempMeterCategory,
             selectedInstance: tempInstance,
-            selectedStrgAccount: tempStrgAccount
+            selectedStrgAccount: tempStrgAccount,
+            selectedResource: tempResource
         };
 
         setFilters(newFilters);
@@ -239,6 +247,9 @@ export const FiltersComponent = ({
         if (newFilters.selectedStrgAccount) {
             query.set('strgAccount', newFilters.selectedStrgAccount);
         }
+        if (newFilters.selectedResource) {
+            query.set('resource', newFilters.selectedResource);
+        }
 
         router.push(`${window.location.pathname}?${query.toString()}`);
     };
@@ -257,7 +268,8 @@ export const FiltersComponent = ({
             selectedResourceType: '',
             selectedMeterCategory: null,
             selectedInstance: null,
-            selectedStrgAccount: 'all'
+            selectedStrgAccount: 'all',
+            selectedResource: ''
         };
 
         setFilters(defaultFilters);
@@ -273,6 +285,7 @@ export const FiltersComponent = ({
         setTempMeterCategory(defaultFilters.selectedMeterCategory);
         setTempInstance(defaultFilters.selectedInstance);
         setTempStrgAccount(defaultFilters.selectedStrgAccount);
+        setTempResource(defaultFilters.selectedResource);
 
         router.push(window.location.pathname);
     };
@@ -465,6 +478,22 @@ export const FiltersComponent = ({
                                 />
                             </div>
                         )}
+                        {resourcesFilter && (
+                            <div className='space-y-2'>
+                                <label className='text-sm font-medium text-foreground flex items-center gap-2'>
+                                    <Database className='h-4 w-4' />
+                                    Recursos
+                                </label>
+                                <ResourcesFilterComponent
+                                    startDate={tempRange[0] ?? filters.startDate}
+                                    endDate={tempRange[1] ?? filters.endDate}
+                                    selectedMetric={tempMetric}
+                                    selectedResourceType={tempResourceType}
+                                    selectedResource={tempResource}
+                                    setSelectedResource={setTempResource}
+                                />
+                            </div>
+                        )}
                     </div>
 
                     <div className='flex items-center gap-4'>
@@ -493,6 +522,7 @@ export const FiltersComponent = ({
                     selectedMeterCategory={filters.selectedMeterCategory}
                     selectedInstance={filters.selectedInstance}
                     selectedStrgAccount={filters.selectedStrgAccount}
+                    selectedResource={filters.selectedResource}
                 />
             </Card>
         </div>

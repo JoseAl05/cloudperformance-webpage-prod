@@ -99,9 +99,6 @@ export const StorageVariationComponent = ({ selectedStrgAccount, subscription, r
         )
     ));
 
-
-
-    console.log(mergedBlobMetrics);
     return (
         <div className='w-full min-w-0 px-4 py-6'>
             <div className="flex-1 space-y-6 min-w-0 overflow-hidden">

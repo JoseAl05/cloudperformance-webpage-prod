@@ -6,6 +6,7 @@ import { ChartBar, Clock, FileSpreadsheet } from "lucide-react";
 import { MainEc2ResourceInfraUsedViewMetricsSummaryComponent } from "./graficos/MainEc2ResourceInfraUsedViewMetricsSummaryComponent";
 import { DataTableSingle } from "@/components/general/data-table/data-table-single";
 import { Ec2ResourceInfraUsedViewColumns } from "./table/ec2ResourceInfraUsedTableColumns";
+import { DataTableGrouping } from '@/components/general/data-table/data-table-grouping';
 
 interface InstanceEc2CInfrautilizadaComponentProps {
   startDate: Date;
@@ -109,11 +110,12 @@ export const InstanceEc2InfrautilizadaComponent = ({
             <FileSpreadsheet className="h-8 w-8 text-blue-500" />
             Detalle Instancias
           </div>
-          <DataTableSingle
+          <DataTableGrouping
             columns={Ec2ResourceInfraUsedViewColumns}
             data={metricsData.ec2Intances}
             filterColumns="InstanceId"
             filterPlaceHolder="Buscar instancia...."
+            enableGrouping={false}
           />
         </div>
       </div>
