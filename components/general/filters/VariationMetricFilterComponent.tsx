@@ -63,7 +63,7 @@ export const VariationMetricFilterComponent = ({
     const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : '';
 
     // https://cloudperformance-desarrollo.eastus2.cloudapp.azure.com/api/recursos/getMetric?date_from=2025-01-01T02:32:18&date_to=2025-12-12T01:32:18&region=all_regions&service=DynamoDB
-    // const url = `/api/aws/bridge/autoscaling/all-autoscaling-groups?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`;
+    // const url = `/api/bridge/autoscaling/all-autoscaling-groups?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`;
     const url = `/api/aws/bridge/recursos/getMetric?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&service=${selectedService}`;
 
     const shouldFetch = !!region && !!selectedService;
@@ -135,9 +135,9 @@ export const VariationMetricFilterComponent = ({
                                             Todas las metricas
                                         </CommandItem>
                                     )}
-                                    {list.map((metrics) => (
+                                    {list.map((metrics,index) => (
                                         <CommandItem
-                                            key={metrics.MetricLabel}
+                                            key={index}
                                             value={metrics.MetricLabel}
                                             onSelect={() => {
                                                 if (isAsgMultiSelect) handleInstanceToggle(metrics.MetricLabel);

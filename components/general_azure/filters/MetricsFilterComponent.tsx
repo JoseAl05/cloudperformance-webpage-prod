@@ -38,7 +38,7 @@ export const MetricsFilterComponent = ({
 
     const shouldFetch = !!collection;
     const url = shouldFetch
-        ? `/api/azure/bridge/azure/get-all-metrics?date_from=${startDateFormatted}&date_to=${endDateFormatted}&collection=${collection}`
+        ? `/api/azure/bridge/azure/get-all-metrics?date_from=${startDateFormatted}&date_to=${endDateFormatted}`
         : null;
 
     const { data, error, isLoading } = useSWR<string[]>(url, fetcherGet);

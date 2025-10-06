@@ -34,6 +34,7 @@ import {
     Clock,
     Map,
     TrendingDown,
+    Cylinder,
 } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { usePathname } from 'next/navigation'
@@ -166,8 +167,10 @@ export const SidebarComponent = ({
         recursos: [],
         consumes: [],
         funciones: [
-            { label: 'Blob Storage vs Storage General', icon: Zap, href: '/azure/funciones/blob-vs-storage-general' },
-            { label: 'Top 10 uso de recursos', icon: LineChart, href: '/azure/funciones/top-10-recursos-uso' }
+            { label: 'Blob Storage vs Storage General', icon: Cylinder, href: '/azure/funciones/blob-vs-storage-general' },
+            { label: 'Variación Storage', icon: Cylinder, href: '/azure/funciones/variacion-storage' },
+            { label: 'Top 10 uso de recursos', icon: LineChart, href: '/azure/funciones/top-10-recursos-uso' },
+            { label: 'Incremento Uso de Recursos', icon: LineChart, href: '/azure/funciones/incremento-top-recursos-uso' }
         ],
     }
 

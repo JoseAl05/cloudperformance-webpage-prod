@@ -68,7 +68,7 @@ export const TagsFilterComponent = ({
     
     const { data, error, isLoading } = useSWR(
         shouldFetch
-            ? `${process.env.NEXT_PUBLIC_API_URL}/azure/get-all-tags?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&region_field=${regionField}&subscription=${subscription}&subscription_field=${subscriptionField}&collection=${collection}&tag_column_name=${tagColumnName}`
+            ? `/api/azure/bridge/azure/get-all-tags?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&region_field=${regionField}&subscription=${subscription}&subscription_field=${subscriptionField}&collection=${collection}&tag_column_name=${tagColumnName}`
             : null,
         fetcher
     )

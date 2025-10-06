@@ -74,15 +74,14 @@ export const InstancesFilterComponent = ({
 
     const tagsBody = selectedKey !== 'allKeys' && selectedValue ? { Key: selectedKey, Value: selectedValue } : null;
 
-    const shouldFetch = !!url && !!region // dejar pasar 'all_regions'
+    const shouldFetch = !!url && !!region
     const apiMethod = service === "infraUsed" ? fetcherGet : fetcherPost;
     const { data, error, isLoading } = useSWR<unknown[]>(shouldFetch ? [url, tagsBody] : null, ([u, t]) => apiMethod(u, t));
 
-    // normalizar si queda sin data
     useEffect(() => {
         if (!isLoading && !error && shouldFetch) {
             if (!Array.isArray(data) || data.length === 0) {
-                setInstance(''); // evita fetch aguas abajo
+                setInstance('');
             }
         }
     }, [data, isLoading, error, shouldFetch, setInstance]);

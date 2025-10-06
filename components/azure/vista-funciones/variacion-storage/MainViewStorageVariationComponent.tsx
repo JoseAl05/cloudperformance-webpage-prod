@@ -1,9 +1,8 @@
 import { FiltersComponent } from '@/components/general_azure/filters/FiltersComponent'
-import { InstanciasAutoscalingGroupsChartComponent } from './InstanciasAutoscalingGroupsChartComponent'
-import { Container, TrendingUp } from 'lucide-react'
-import { BlobVsStorageGeneralComponent } from './BlobVsStorageGeneralComponent'
+import { Container } from 'lucide-react'
+import { StorageVariationComponent } from '@/components/azure/vista-funciones/variacion-storage/StorageVariationComponent'
 
-export const MainViewBlobVsStorageComponent = () => {
+export const MainViewStorageVariationComponent = () => {
     return (
         <div className='w-full min-w-0 space-y-4'>
             <div className='mb-8'>
@@ -15,7 +14,7 @@ export const MainViewBlobVsStorageComponent = () => {
                             </div>
                             <div>
                                 <h1 className='text-3xl font-bold text-gray-900 dark:text-gray-100'>
-                                    Blob Storage vs Storage General
+                                    Variación Storage
                                 </h1>
                             </div>
                         </div>
@@ -24,17 +23,12 @@ export const MainViewBlobVsStorageComponent = () => {
             </div>
             <div className='w-full min-w-0'>
                 <FiltersComponent
-                    Component={BlobVsStorageGeneralComponent}
+                    Component={StorageVariationComponent}
                     regionFilter
-                    isRegionMultiSelect
-                    subscriptionIdFilter
+                    dateFilter={false}
+                    monthYearFilter
                     strgAccountFilter
                     isStrgAccountMultiselect
-                    tagsFilter
-                    tagsCollection='azure_storage_accounts'
-                    tagsColumnName='tags'
-                    tagsRegionField='location'
-                    tagsSubscriptionField='subscription_id'
                 />
             </div>
         </div>

@@ -9,12 +9,13 @@ import { SubscriptionsFilterComponent } from '@/components/general_azure/filters
 import { TagsFilterComponent } from '@/components/general_azure/filters/TagsFilterComponent';
 import { MetricsFilterComponent } from '@/components/general_azure/filters/MetricsFilterComponent';
 import { Card, CardContent } from '@/components/ui/card';
-import { Calendar, Filter, MapPin, XCircle, Cloud, Tag, Activity, Layers, Server } from 'lucide-react';
+import { Calendar, Filter, MapPin, XCircle, Cloud, Tag, Activity, Layers, Server, Container, Cylinder } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { SubscriptionsFilterComponentV2 } from '@/components/general_azure/filters/SubscriptionsFilterComponentV2';
 import { ResourceTypesFilterComponent } from '@/components/general_azure/filters/ResourceTypesFilterComponent';
-import { InstancesFilterComponent } from '@/components/general/filters/InstancesFilterComponent';
+import { InstancesFilterComponent } from '@/components/general_azure/filters/InstancesFilterComponent';
+import { StorageAccountsFilterComponent } from '@/components/general_azure/filters/StorageAccountsFilterComponent';
 
 interface FiltersComponentProps {
     Component: (params: {
@@ -27,6 +28,7 @@ interface FiltersComponentProps {
         selectedMetric: string;
     }) => React.JSX.Element;
     dateFilter?: boolean;
+    monthYearFilter?: boolean;
     regionFilter?: boolean;
     subscriptionFilter?: boolean;
     subscriptionIdFilter?: boolean;
@@ -40,11 +42,14 @@ interface FiltersComponentProps {
     metricsCollection?: string;
     resourceTypeFilter?: boolean;
     instancesFilter?: boolean;
+    strgAccountFilter?: boolean;
+    isStrgAccountMultiselect?: boolean;
 }
 
 export const FiltersComponent = ({
     Component,
     dateFilter = true,
+    monthYearFilter = false,
     regionFilter = false,
     subscriptionFilter = false,
     subscriptionIdFilter = false,
@@ -57,7 +62,9 @@ export const FiltersComponent = ({
     metricsFilter = false,
     metricsCollection = '',
     resourceTypeFilter = false,
-    instancesFilter = false
+    instancesFilter = false,
+    strgAccountFilter = false,
+    isStrgAccountMultiselect = false
 }: FiltersComponentProps) => {
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -65,8 +72,17 @@ export const FiltersComponent = ({
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
 
+    const monthYearToRange = (y: number, m1to12: number) => {
+        const monthIdx = Math.max(1, Math.min(12, m1to12)) - 1;
+        const start = new Date(y, monthIdx, 1, 0, 0, 0, 0);
+        const end = new Date(y, monthIdx + 1, 0, 23, 59, 59, 999);
+        return [start, end] as const;
+    };
+
     const getInitialFilters = () => {
         const startDateParam = searchParams.get('startDate');
+        const monthParam = searchParams.get('month');
+        const yearParam = searchParams.get('year');
         const endDateParam = searchParams.get('endDate');
         const regionParam = searchParams.get('region');
         const subscriptionParam = searchParams.get('subscription');
@@ -76,13 +92,31 @@ export const FiltersComponent = ({
         const selectedResourceTypeParam = searchParams.get('resourceType');
         const selectedMeterCategoryParam = searchParams.get('meterCategory');
         const selectedInstanceParam = searchParams.get('instance');
+        const selectedStrgAccountParam = searchParams.get('strgAccount');
 
-        const startDate = startDateParam ? new Date(startDateParam) : yesterday;
-        const endDate = endDateParam ? new Date(endDateParam) : new Date();
+        let startDate = startDateParam ? new Date(startDateParam) : yesterday;
+        let endDate = endDateParam ? new Date(endDateParam) : new Date();
+        const now = new Date();
+        let month: number = now.getMonth() + 1;
+        let year: number = now.getFullYear();
+
+        if (monthYearFilter && monthParam && yearParam) {
+            const m = Number(monthParam);
+            const y = Number(yearParam);
+            if (!Number.isNaN(m) && !Number.isNaN(y) && y >= 1970) {
+                const [s, e] = monthYearToRange(y, m);
+                startDate = s;
+                endDate = e;
+                month = m;
+                year = y;
+            }
+        }
 
         return {
             startDate,
             endDate,
+            month,
+            year,
             region: regionParam || 'all_regions',
             subscription: subscriptionParam || 'all_subscriptions',
             selectedTagKey: selectedTagKeyParam || null,
@@ -90,12 +124,18 @@ export const FiltersComponent = ({
             selectedMetric: selectedMetricParam || '',
             selectedResourceType: selectedResourceTypeParam || '',
             selectedMeterCategory: selectedMeterCategoryParam || null,
-            selectedInstance: selectedInstanceParam || null
+            selectedInstance: selectedInstanceParam || null,
+            selectedStrgAccount: selectedStrgAccountParam || 'all'
         };
     };
 
     const [filters, setFilters] = useState(getInitialFilters);
     const [tempRange, setTempRange] = useState<[Date | null, Date | null]>([filters.startDate, filters.endDate]);
+    const [tempMonth, setTempMonth] = useState<number | null>(filters.month ?? null);
+    const [tempYear, setTempYear] = useState<number | null>(filters.year ?? null);
+    const [tempMonthYearDate, setTempMonthYearDate] = useState<Date | null>(
+        filters.month && filters.year ? new Date(filters.year, (filters.month - 1), 1) : null
+    );
     const [tempRegion, setTempRegion] = useState(filters.region);
     const [tempSubscription, setTempSubscription] = useState(filters.subscription);
     const [tempTagKey, setTempTagKey] = useState<string | null>(filters.selectedTagKey);
@@ -104,6 +144,7 @@ export const FiltersComponent = ({
     const [tempResourceType, setTempResourceType] = useState<string>(filters.selectedResourceType);
     const [tempMeterCategory, setTempMeterCategory] = useState<string | null>(filters.selectedMeterCategory);
     const [tempInstance, setTempInstance] = useState<string | null>(filters.selectedInstance);
+    const [tempStrgAccount, setTempStrgAccount] = useState(filters.selectedStrgAccount);
 
     useEffect(() => {
         const newFilters = getInitialFilters();
@@ -117,18 +158,35 @@ export const FiltersComponent = ({
         setTempResourceType(newFilters.selectedResourceType);
         setTempMeterCategory(newFilters.selectedMeterCategory);
         setTempInstance(newFilters.selectedInstance);
+        setTempStrgAccount(newFilters.selectedStrgAccount);
+        setTempMonth(newFilters.month ?? null);
+        setTempYear(newFilters.year ?? null);
+        setTempMonthYearDate(
+            newFilters.month && newFilters.year ? new Date(newFilters.year, newFilters.month - 1, 1) : null
+        );
     }, [searchParams]);
 
     const onChange = (dates: [Date | null, Date | null]) => setTempRange(dates);
 
     const applyFilters = () => {
-        const [start, end] = tempRange;
+        let [start, end] = tempRange;
+
+        if (monthYearFilter) {
+            const base = tempMonthYearDate ?? new Date();
+            const m = tempMonth ?? (base.getMonth() + 1);
+            const y = tempYear ?? base.getFullYear();
+            const [s, e] = monthYearToRange(y, m);
+            start = s;
+            end = e;
+        }
 
         if (!start || !end) return;
 
         const newFilters = {
             startDate: start,
             endDate: end,
+            month: monthYearFilter ? (tempMonth ?? (tempMonthYearDate ? tempMonthYearDate.getMonth() + 1 : null)) : null,
+            year: monthYearFilter ? (tempYear ?? (tempMonthYearDate ? tempMonthYearDate.getFullYear() : null)) : null,
             region: tempRegion,
             subscription: tempSubscription,
             selectedTagKey: tempTagKey,
@@ -137,6 +195,7 @@ export const FiltersComponent = ({
             selectedResourceType: tempResourceType,
             selectedMeterCategory: tempMeterCategory,
             selectedInstance: tempInstance,
+            selectedStrgAccount: tempStrgAccount
         };
 
         setFilters(newFilters);
@@ -144,6 +203,10 @@ export const FiltersComponent = ({
         const query = new URLSearchParams();
         query.set('startDate', newFilters.startDate.toISOString());
         query.set('endDate', newFilters.endDate.toISOString());
+        if (monthYearFilter) {
+            if (newFilters.month) query.set('month', String(newFilters.month));
+            if (newFilters.year) query.set('year', String(newFilters.year));
+        }
 
         if (newFilters.region && newFilters.region !== 'all_regions') {
             query.set('region', newFilters.region);
@@ -173,6 +236,9 @@ export const FiltersComponent = ({
         if (newFilters.selectedInstance) {
             query.set('instance', newFilters.selectedInstance);
         }
+        if (newFilters.selectedStrgAccount) {
+            query.set('strgAccount', newFilters.selectedStrgAccount);
+        }
 
         router.push(`${window.location.pathname}?${query.toString()}`);
     };
@@ -181,6 +247,8 @@ export const FiltersComponent = ({
         const defaultFilters = {
             startDate: yesterday,
             endDate: new Date(),
+            month: null as number | null,
+            year: null as number | null,
             region: 'all_regions',
             subscription: 'all_subscriptions',
             selectedTagKey: null,
@@ -189,10 +257,13 @@ export const FiltersComponent = ({
             selectedResourceType: '',
             selectedMeterCategory: null,
             selectedInstance: null,
+            selectedStrgAccount: 'all'
         };
 
         setFilters(defaultFilters);
         setTempRange([defaultFilters.startDate, defaultFilters.endDate]);
+        setTempMonth(defaultFilters.month);
+        setTempYear(defaultFilters.year);
         setTempRegion(defaultFilters.region);
         setTempSubscription(defaultFilters.subscription);
         setTempTagKey(defaultFilters.selectedTagKey);
@@ -201,9 +272,13 @@ export const FiltersComponent = ({
         setTempResourceType(defaultFilters.selectedResourceType);
         setTempMeterCategory(defaultFilters.selectedMeterCategory);
         setTempInstance(defaultFilters.selectedInstance);
+        setTempStrgAccount(defaultFilters.selectedStrgAccount);
 
         router.push(window.location.pathname);
     };
+
+    const tempStartDate = useMemo(() => (tempRange[0] ?? filters.startDate), [tempRange, filters.startDate]);
+    const tempEndDate = useMemo(() => (tempRange[1] ?? filters.endDate), [tempRange, filters.endDate]);
 
     return (
         <div className='space-y-6'>
@@ -226,6 +301,41 @@ export const FiltersComponent = ({
                                 />
                             </div>
                         )}
+                        {
+                            monthYearFilter && (
+                                <div className='space-y-2'>
+                                    <label className='text-sm font-medium text-foreground flex items-center gap-2'>
+                                        <Calendar className='h-4 w-4' />
+                                        Mes y Año
+                                    </label>
+                                    <DatePicker
+                                        selected={tempMonthYearDate}
+                                        onChange={(d: Date | null) => {
+                                            setTempMonthYearDate(d);
+                                            if (d) {
+                                                const m = d.getMonth() + 1;
+                                                const y = d.getFullYear();
+                                                setTempMonth(m);
+                                                setTempYear(y);
+                                                const [s, e] = monthYearToRange(y, m);
+                                                setTempRange([s, e]);
+                                            } else {
+                                                setTempMonth(null);
+                                                setTempYear(null);
+                                                setTempRange([null, null]);
+                                            }
+                                        }}
+                                        dateFormat="MMMM yyyy"
+                                        showMonthYearPicker
+                                        showMonthDropdown
+                                        showYearDropdown
+                                        dropdownMode="select"
+                                        placeholderText="Selecciona mes y año"
+                                        className='w-full px-3 py-2 border border-input bg-background text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent'
+                                    />
+                                </div>
+                            )
+                        }
 
                         {regionFilter && (
                             <div className='space-y-2'>
@@ -324,6 +434,25 @@ export const FiltersComponent = ({
                                 />
                             </div>
                         )}
+                        {strgAccountFilter && (
+                            <div className='space-y-2'>
+                                <label className='text-sm font-medium text-foreground flex items-center gap-2'>
+                                    <Cylinder className='h-4 w-4' />
+                                    Storage Accounts
+                                </label>
+                                <StorageAccountsFilterComponent
+                                    strgAccount={tempStrgAccount}
+                                    setStrgAccount={setTempStrgAccount}
+                                    startDate={tempStartDate}
+                                    endDate={tempEndDate}
+                                    region={tempRegion}
+                                    subscriptions={tempSubscription}
+                                    selectedKey={tempTagKey}
+                                    selectedValue={tempTagKey}
+                                    isStrgAccountMultiSelect={isStrgAccountMultiselect}
+                                />
+                            </div>
+                        )}
                         {resourceTypeFilter && (
                             <div className='space-y-2'>
                                 <label className='text-sm font-medium text-foreground flex items-center gap-2'>
@@ -353,6 +482,8 @@ export const FiltersComponent = ({
                 <Component
                     startDate={filters.startDate}
                     endDate={filters.endDate}
+                    month={filters.month}
+                    year={filters.year}
                     region={filters.region}
                     subscription={filters.subscription}
                     selectedTagKey={filters.selectedTagKey}
@@ -361,6 +492,7 @@ export const FiltersComponent = ({
                     selectedResourceType={filters.selectedResourceType}
                     selectedMeterCategory={filters.selectedMeterCategory}
                     selectedInstance={filters.selectedInstance}
+                    selectedStrgAccount={filters.selectedStrgAccount}
                 />
             </Card>
         </div>
