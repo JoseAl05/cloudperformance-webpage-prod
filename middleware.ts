@@ -3,7 +3,8 @@ import { getAuthFromRequest } from './lib/auth';
 
 const PROTECTED_PATHS = [
   '/aws',
-  '/azure'
+  '/azure',
+  '/perfil'
 ];
 
 export async function middleware(req: NextRequest) {
