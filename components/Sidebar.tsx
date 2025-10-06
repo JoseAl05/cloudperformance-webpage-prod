@@ -110,7 +110,7 @@ export const SidebarComponent = ({
         { label: 'Instancias RDS MariaDB', href: '/aws/funciones/avg-uso-loc-inst-rds-mariadb', icon: Database, color: 'text-green-500' },
     ]
 
-    const infraused = [
+    const infrausedAws = [
         { label: 'Instancias EC2', icon: Computer, href: '/aws/recursos/infrautilizadas/ec2' },
         { label: 'Instancias EC2 AutoscalingGroups', icon: Computer, href: '/aws/recursos/infrautilizadas/autoscaling' },
         { label: 'Instancias EC2 Nodos EKS', icon: Computer, href: '/aws/recursos/infrautilizadas/eks' }
@@ -149,12 +149,16 @@ export const SidebarComponent = ({
             { label: 'Top Facturaciones', subItems: topFacturaciones, icon: Zap },
             { label: 'Consumo horario hábil vs no hábil', subItems: consumoHorario, icon: Clock },
             { label: 'Consumo por Localización', subItems: consumoLoc, icon: Map },
-            { label: 'Recursos no utilizados', subItems: infraused, icon: TrendingDown },
+            { label: 'Recursos no utilizados', subItems: infrausedAws, icon: TrendingDown },
             { label: 'Spot vs Vm', href: '/aws/funciones/spot-vs-vm', icon: Database },
             { label: 'Top S3 Buckets', href: '/aws/funciones/top-s3-buckets', icon: Server },
             { label: 'Ebs No Utilizados', href: '/aws/funciones/ebs-no-utilizados', icon: HardDrive },
         ],
     }
+
+    const infrausedAzure = [
+        { label: 'VM', icon: Computer, href: '/azure/funciones/unused-resources/vm' },
+    ]
 
     const AzureRoutes = {
         routes: [
@@ -171,7 +175,8 @@ export const SidebarComponent = ({
             { label: 'Variación Storage', icon: Cylinder, href: '/azure/funciones/variacion-storage' },
             { label: 'Top 10 uso de recursos', icon: LineChart, href: '/azure/funciones/top-10-recursos-uso' },
             { label: 'Incremento Uso de Recursos', icon: LineChart, href: '/azure/funciones/incremento-top-recursos-uso' },
-            { label: 'Spot vs Regular VMs', icon: Computer, href: '/azure/funciones/spot-vs-regular-vm' }
+            { label: 'Spot vs Regular VMs', icon: Computer, href: '/azure/funciones/spot-vs-regular-vm' },
+            { label: 'Recursos no utilizados', subItems: infrausedAzure, icon: TrendingDown }
         ],
     }
 
