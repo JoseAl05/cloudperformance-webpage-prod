@@ -114,7 +114,7 @@ export const InstanceEc2InfrautilizadaComponent = ({
           <DataTableGrouping
             columns={Ec2ResourceInfraUsedViewColumns}
             data={metricsData.ec2Intances}
-            filterColumns="InstanceId"
+            filterColumn="InstanceId"
             filterPlaceHolder="Buscar instancia...."
             enableGrouping={false}
           />
