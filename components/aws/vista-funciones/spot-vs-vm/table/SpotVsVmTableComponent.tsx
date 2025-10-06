@@ -132,7 +132,7 @@ export const TableComponentSpotVsVm = ({
           filterColumn="InstanceId"
           filterPlaceholder="Buscar instancia…"
           enableGrouping={true}
-          groupByColumn="sync_time"   //fecha
+          groupByColumn="sync_time"
         />
 
         <div className="border-t bg-muted/50 px-6 py-4">
