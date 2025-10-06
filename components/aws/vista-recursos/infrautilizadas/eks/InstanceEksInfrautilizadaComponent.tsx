@@ -6,6 +6,7 @@ import { ChartBar, ChartNoAxesColumnIcon, Clock, FileSpreadsheet } from "lucide-
 import { MainEc2ResourceInfraUsedViewMetricsSummaryComponent } from "./graficos/MainEc2ResourceInfraUsedViewMetricsSummaryComponent";
 import { DataTableSingle } from "@/components/general/data-table/data-table-single";
 import { Ec2ResourceInfraUsedViewColumns } from "./table/ec2ResourceInfraUsedTableColumns";
+import { DataTableGrouping } from '@/components/general/data-table/data-table-grouping';
 
 interface InstanceEc2CInfrautilizadaComponentProps {
   startDate: Date;
@@ -110,13 +111,14 @@ export const InstanceEksInfrautilizadaComponent = ({
           <div className="flex items-center gap-3 text-3xl font-bold text-foreground">
             {/* <Clock className="h-8 w-8 text-blue-500" /> */}
             <FileSpreadsheet className="h-8 w-8 text-blue-500" />
-            Detalle Instancias
+            Detalle Instancias Infrautilizadas
           </div>
-          <DataTableSingle
+          <DataTableGrouping
             columns={Ec2ResourceInfraUsedViewColumns}
             data={metricsData.ec2Intances}
             filterColumns="InstanceId"
             filterPlaceHolder="Buscar instancia...."
+            enableGrouping={false}
           />
         </div>
       </div>

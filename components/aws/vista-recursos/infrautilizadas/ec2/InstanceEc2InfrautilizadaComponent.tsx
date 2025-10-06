@@ -108,7 +108,7 @@ export const InstanceEc2InfrautilizadaComponent = ({
           <div className="flex items-center gap-3 text-3xl font-bold text-foreground">
             {/* <Clock className="h-8 w-8 text-blue-500" /> */}
             <FileSpreadsheet className="h-8 w-8 text-blue-500" />
-            Detalle Instancias
+            Detalle Instancias Infrautilizadas
           </div>
           <DataTableGrouping
             columns={Ec2ResourceInfraUsedViewColumns}
