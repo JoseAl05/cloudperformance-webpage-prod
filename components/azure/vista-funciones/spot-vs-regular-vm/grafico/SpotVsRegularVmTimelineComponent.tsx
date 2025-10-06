@@ -26,7 +26,7 @@ export const SpotVsRegularVmTimelineComponent = ({ data }: SpotVsRegularVmTimeli
 
     const metrics = useMemo(() => {
         if (!data || data.length === 0) {
-            return { totalVMs: null, totalSpot: null, spotPercentage: null }
+            return { totalVMs: null, totalSpot: null, spotPercentage: null, totalVmsSeries: null, totalSpotSeries:null }
         }
 
         const last = data[data.length - 1]
@@ -36,33 +36,30 @@ export const SpotVsRegularVmTimelineComponent = ({ data }: SpotVsRegularVmTimeli
 
         const totalVmsSeries =
             data
-                .sort((a,b)=> new Date(a.sync_time).getTime() - new Date(b.sync_time).getTime())
+                .sort((a,b) => new Date(a.sync_time).getTime() - new Date(b.sync_time).getTime())
                 .map(s => [s.sync_time,s.total_instancias]);
 
-        return { totalVMs, totalSpot, spotPercentage }
+        const totalSpotSeries =
+            data
+                .sort((a,b) => new Date(a.sync_time).getTime() - new Date(b.sync_time).getTime())
+                .map(s => [s.sync_time,s.total_spot]);
+
+        return { totalVMs, totalSpot, spotPercentage, totalVmsSeries, totalSpotSeries }
     }, [data])
 
     const option = useMemo(() => {
-        if (!data || data.length === 0) {
-            return { times: null, totalInstancias: null, totalSpot: null }
-        }
-        const times = data.map((item) => item.sync_time)
-        const totalInstancias = data.map((item) => item.total_instancias)
-        const totalSpot = data.map((item) => item.total_spot)
-
         const base = makeBaseOptions({
             // title,
-            legend: ['Total Instancias EC2', 'Total Instancias Spot'],
+            legend: ['Total VMs', 'Total Spot VMs'],
             unitLabel: 'Instancias',
             // yMax: yMaxRounded,
             useUTC: true,
             showToolbox: true,
         });
 
-        // Series con utilizando configuracion global
         const series = [
-            makeLineSeries('Total VMs', totalInstancias),
-            makeLineSeries('Total Spot VMs', totalSpot)
+            makeLineSeries('Total VMs', metrics.totalVmsSeries),
+            makeLineSeries('Total Spot VMs', metrics.totalSpotSeries)
         ];
 
         return deepMerge(base, {
