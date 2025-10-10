@@ -1,22 +1,27 @@
 'use client'
 
-import { SpotVsRegularVm } from '@/interfaces/vista-spot-vs-regular-vm/spotVsRegularVmInterfaces';
-import { useTheme } from 'next-themes';
-import {
-    makeBaseOptions,
-    makeLineSeries,
-    deepMerge,
-    useECharts,
-} from '@/lib/echartsGlobalConfig';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { UnusedVmSeries } from '@/interfaces/vista-unused-resources/unusedVmInterfaces'
+import { UnusedVmssSeries } from '@/interfaces/vista-unused-resources/unusedVmssInterface';
+import { deepMerge, makeBaseOptions, makeLineSeries, useECharts } from '@/lib/echartsGlobalConfig';
 import { Info } from 'lucide-react';
+import { useTheme } from 'next-themes';
 import { useMemo, useRef } from 'react';
 
-interface SpotVsRegularVmTimelineComponentProps {
-    data: SpotVsRegularVm[];
+interface UnusedCreditsConsumedMetricsComponentProps {
+    data: UnusedVmSeries[] | UnusedVmssSeries[];
 }
 
-export const SpotVsRegularVmTimelineComponent = ({ data }: SpotVsRegularVmTimelineComponentProps) => {
+type SeriesTuple = [string, number];
+
+const toSeriesPairs = (arr: UnusedVmSeries[] | UnusedVmssSeries[]): SeriesTuple[] => {
+    return [...(arr ?? [])]
+        .filter(it => typeof it.metric_value === 'number' && !!it.timestamp)
+        .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime())
+        .map(it => [it.timestamp, it.metric_value] as SeriesTuple);
+}
+
+export const UnusedCreditsConsumedMetricsComponent = ({ data }: UnusedCreditsConsumedMetricsComponentProps) => {
 
     const { theme, resolvedTheme } = useTheme();
     const currentTheme = resolvedTheme || theme;
@@ -24,28 +29,23 @@ export const SpotVsRegularVmTimelineComponent = ({ data }: SpotVsRegularVmTimeli
 
     const chartRef = useRef<HTMLDivElement>(null);
 
-    const metrics = useMemo(() => {
-        if (!data || data.length === 0) {
-            return { totalVMs: null, totalSpot: null, spotPercentage: null, totalVmsSeries: null, totalSpotSeries:null }
+    const {
+        creditsConsumedMetrics, anyData
+    } = useMemo(() => {
+
+        const creditsConsumedMetrics = toSeriesPairs(data ?? []);
+
+        return {
+            creditsConsumedMetrics,
+            anyData: creditsConsumedMetrics.length > 0
         }
-        const totalVmsSeries =
-            data
-                .sort((a,b) => new Date(a.sync_time).getTime() - new Date(b.sync_time).getTime())
-                .map(s => [s.sync_time,s.total_instancias]);
-
-        const totalSpotSeries =
-            data
-                .sort((a,b) => new Date(a.sync_time).getTime() - new Date(b.sync_time).getTime())
-                .map(s => [s.sync_time,s.total_spot]);
-
-        return { totalVmsSeries, totalSpotSeries }
     }, [data])
 
     const option = useMemo(() => {
         const base = makeBaseOptions({
             // title,
-            legend: ['Total VMs', 'Total Spot VMs'],
-            unitLabel: 'Instancias',
+            legend: ['Créditos Consumidos'],
+            unitLabel: 'créditos',
             // yMax: yMaxRounded,
             useUTC: true,
             showToolbox: true,
@@ -53,8 +53,7 @@ export const SpotVsRegularVmTimelineComponent = ({ data }: SpotVsRegularVmTimeli
         });
 
         const series = [
-            makeLineSeries('Total VMs', metrics.totalVmsSeries),
-            makeLineSeries('Total Spot VMs', metrics.totalSpotSeries)
+            makeLineSeries('Créditos Consumidos', creditsConsumedMetrics),
         ];
 
         return deepMerge(base, {
@@ -63,10 +62,11 @@ export const SpotVsRegularVmTimelineComponent = ({ data }: SpotVsRegularVmTimeli
     }, [isDark, data]);
 
     useECharts(chartRef, option, [option], isDark ? 'cp-dark' : 'cp-light');
+
     return (
         <Card className="w-full">
             <CardHeader>
-                <CardTitle>Spot vs Regular VMs</CardTitle>
+                <CardTitle>Créditos Disponibles</CardTitle>
             </CardHeader>
             <CardContent>
                 <div className="flex items-center justify-center gap-2 mb-2">
@@ -76,7 +76,7 @@ export const SpotVsRegularVmTimelineComponent = ({ data }: SpotVsRegularVmTimeli
                     </p>
                 </div>
 
-                {!data ? (
+                {!anyData ? (
                     <div className="text-center text-gray-500 py-6">
                         No hay datos de capacidad disponibles.
                     </div>

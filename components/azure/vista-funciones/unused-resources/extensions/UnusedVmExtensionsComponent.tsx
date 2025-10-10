@@ -2,19 +2,18 @@
 
 import { MessageCard } from '@/components/aws/cards/MessageCards';
 import { LoaderComponent } from '@/components/general/LoaderComponent';
-import { SpotVsRegularVm } from '@/interfaces/vista-spot-vs-regular-vm/spotVsRegularVmInterfaces';
-import { AlertCircle, ChartBar, Clock, Info } from 'lucide-react';
-import { useRef } from 'react';
+import { UnusedVmExtensions } from '@/interfaces/vista-unused-resources/unusedVmExtensionsInterfaces';
+import { AlertCircle, Clock, Info } from 'lucide-react';
 import useSWR from 'swr';
-import { SpotVsRegularVmTimelineComponent } from './grafico/SpotVsRegularVmTimelineComponent';
-import { SpotVsRegularVmCardsComponent } from './info/SpotVsRegularVmCardsComponent';
-import { SpotVsRegularVmTable } from './table/SpotVsRegularVmTable';
+import { UnusedVmExtensionsByType } from './grafico/UnusedVmExtensionsByType';
+import { UnusedVmExtensionsTable } from './table/UnusedVmExtensionsTable';
 
-interface SpotVsRegularVmComponentProps {
+interface UnusedVmExtensionsComponentProps {
     startDate: Date;
     endDate: Date;
     subscription: string;
     region: string;
+    selectedVm: string;
 }
 
 const fetcher = (url: string) =>
@@ -24,19 +23,13 @@ const fetcher = (url: string) =>
 const isNonEmptyArray = <T,>(v: unknown): v is T[] => Array.isArray(v) && v.length > 0;
 const isNullish = (v: unknown) => v === null || v === undefined;
 
-
-
-export const SpotVsRegularVmComponent = ({ startDate, endDate, subscription, region }: SpotVsRegularVmComponentProps) => {
-
-    const chartRef = useRef<HTMLDivElement>(null);
-    const chartInstance = useRef<echarts.ECharts | null>(null);
-    const resizeObserverRef = useRef<ResizeObserver | null>(null);
+export const UnusedVmExtensionsComponent = ({ startDate, endDate, subscription, region, selectedVm }: UnusedVmExtensionsComponentProps) => {
 
     const startDateFormatted = startDate ? startDate.toISOString().replace('Z', '').slice(0, -4) : '';
     const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : '';
 
     const { data, error, isLoading } = useSWR(
-        subscription ? `/api/azure/bridge/azure/vms/vm-vs-spot?date_from=${startDateFormatted}&date_to=${endDateFormatted}&location=${region}&subscription=${subscription}` : null,
+        selectedVm ? `/api/azure/bridge/azure/vms/extensions?date_from=${startDateFormatted}&date_to=${endDateFormatted}&location=${region}&subscription=${subscription}&resource=${selectedVm}` : null,
         fetcher
     );
 
@@ -46,14 +39,27 @@ export const SpotVsRegularVmComponent = ({ startDate, endDate, subscription, reg
     const anyError =
         !!error
 
-    const spotVsRegularVmData: SpotVsRegularVm[] | null =
-        isNonEmptyArray<SpotVsRegularVm>(data) ? data : null;
+    const extensionsData: UnusedVmExtensions[] | null =
+        isNonEmptyArray<UnusedVmExtensions>(data) ? data : null;
 
-    const hasSpotVsRegularVmData = !!spotVsRegularVmData && spotVsRegularVmData.length > 0;
-
+    const hasExtensionsData = !!extensionsData && extensionsData.length > 0;
+    const hasSelectedVm = !!selectedVm && selectedVm.length > 0;
 
     if (anyLoading) {
         return <LoaderComponent />
+    }
+    console.log(selectedVm);
+    if (!hasSelectedVm) {
+        return (
+            <div className="w-full min-w-0 px-4 py-6">
+                <MessageCard
+                    icon={Info}
+                    title="VM no seleccionada"
+                    description="Seleccione una VM..."
+                    tone="info"
+                />
+            </div>
+        )
     }
 
     if (anyError) {
@@ -68,7 +74,7 @@ export const SpotVsRegularVmComponent = ({ startDate, endDate, subscription, reg
             </div>
         )
     }
-    const noneHasData = !hasSpotVsRegularVmData;
+    const noneHasData = !hasExtensionsData;
     if (noneHasData) {
         return (
             <div className="w-full min-w-0 px-4 py-6">
@@ -85,26 +91,26 @@ export const SpotVsRegularVmComponent = ({ startDate, endDate, subscription, reg
     return (
         <div className='w-full min-w-0 px-4 py-6'>
             <div className="flex-1 space-y-6 min-w-0 overflow-hidden">
-                <SpotVsRegularVmCardsComponent
-                    data={spotVsRegularVmData}
-                />
+
             </div>
             <div className='flex flex-col gap-5 mt-10'>
                 <div className="flex items-center gap-3 my-5">
-                    <ChartBar className="h-8 w-8 text-blue-500" />
-                    <h1 className="text-3xl font-bold text-foreground">Spot vs Regular VM (Linea de Tiempo)</h1>
+                    <Info className="h-8 w-8 text-blue-500" />
+                    <h1 className="text-3xl font-bold text-foreground">Tipo de Extensiones</h1>
                 </div>
-                <SpotVsRegularVmTimelineComponent
-                    data={spotVsRegularVmData}
-                />
+                <div className='grid grid-cols-1 gap-5 lg:grid-cols-1'>
+                    <UnusedVmExtensionsByType
+                        data={extensionsData}
+                    />
+                </div>
             </div>
             <div className="flex flex-col gap-5 mt-10">
                 <div className="flex items-center gap-3 my-5">
                     <Clock className="h-8 w-8 text-blue-500" />
-                    <h1 className="text-3xl font-bold text-foreground">Detalle VMs</h1>
+                    <h1 className="text-3xl font-bold text-foreground">Detalle historico de Extensiones no utilizadas</h1>
                 </div>
-                <SpotVsRegularVmTable
-                    data={spotVsRegularVmData}
+                <UnusedVmExtensionsTable
+                    data={extensionsData}
                 />
             </div>
         </div>

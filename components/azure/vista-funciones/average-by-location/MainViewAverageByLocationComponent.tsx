@@ -1,8 +1,8 @@
 import { FiltersComponent } from '@/components/general_azure/filters/FiltersComponent'
 import { Computer } from 'lucide-react'
-import { UnusedVmComponent } from '@/components/azure/vista-funciones/unused-resources/vm/UnusedVmComponent'
+import { AverageByLocationComponent } from '@/components/azure/vista-funciones/average-by-location/AverageByLocationComponent'
 
-export const MainViewUnusedVmComponent = () => {
+export const MainViewAverageByLocationComponent = () => {
     return (
         <div className='w-full min-w-0 space-y-4'>
             <div className='mb-8'>
@@ -14,7 +14,7 @@ export const MainViewUnusedVmComponent = () => {
                             </div>
                             <div>
                                 <h1 className='text-3xl font-bold text-gray-900 dark:text-gray-100'>
-                                    VM Infrautilizadas
+                                    Promedio de Uso por Localización
                                 </h1>
                             </div>
                         </div>
@@ -23,12 +23,11 @@ export const MainViewUnusedVmComponent = () => {
             </div>
             <div className='w-full min-w-0'>
                 <FiltersComponent
-                    Component={UnusedVmComponent}
+                    Component={AverageByLocationComponent}
                     regionFilter
                     isRegionMultiSelect
                     subscriptionIdFilter
-                    unusedVmFilter
-                    isUnusedVmFilterMultiselect
+                    serviceFilter
                 />
             </div>
         </div>

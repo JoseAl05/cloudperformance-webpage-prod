@@ -2,23 +2,24 @@
 
 import { MessageCard } from '@/components/aws/cards/MessageCards';
 import { LoaderComponent } from '@/components/general/LoaderComponent';
-import { UnusedVm, UnusedVmSeries } from '@/interfaces/vista-unused-resources/unusedVmInterfaces';
 import { AlertCircle, ChartBar, Clock, Info } from 'lucide-react';
 import useSWR from 'swr';
 import { UnusedCardsComponent } from '@/components/azure/vista-funciones/unused-resources/info/UnusedCardsComponent';
 import { UnusedCpuMetricsComponent } from '@/components/azure/vista-funciones/unused-resources/grafico/UnusedCpuMetricsComponent';
 import { UnusedMemoryMetricsComponent } from '@/components/azure/vista-funciones/unused-resources/grafico/UnusedMemoryMetricsComponent';
+import { bytesToGB } from '@/lib/bytesToMbs';
 import { UnusedDiskIopsMetricsComponent } from '@/components/azure/vista-funciones/unused-resources/grafico/UnusedDiskIopsMetricsComponent';
 import { UnusedCreditsRemainingMetricsComponent } from '@/components/azure/vista-funciones/unused-resources/grafico/UnusedCreditsRemainingMetricsComponent';
-import { UnusedVmTable } from '@/components/azure/vista-funciones/unused-resources/vm/table/UnusedVmTable';
-import { bytesToGB } from '@/lib/bytesToMbs';
+import { UnusedTable } from '@/components/azure/vista-funciones/unused-resources/vm/table/UnusedVmTable';
+import { UnusedVmss } from '@/interfaces/vista-unused-resources/unusedVmssInterface';
+import { UnusedVmssTable } from './table/UnusedVmssTable';
 
-interface UnusedVmComponentProps {
+interface UnusedVmssComponentProps {
     startDate: Date;
     endDate: Date;
     subscription: string;
     region: string;
-    selectedUnusedVm: string;
+    selectedUnusedVmss: string;
 }
 
 const fetcher = (url: string) =>
@@ -64,14 +65,13 @@ const dedupeByTimestamp = (series: UnusedVmSeries[], metric_name: string | strin
     return out;
 };
 
-export const UnusedVmComponent = ({ startDate, endDate, subscription, region, selectedUnusedVm }: UnusedVmComponentProps) => {
-
+export const UnusedVmssComponent = ({ startDate, endDate, subscription, region, selectedUnusedVmss }: UnusedVmssComponentProps) => {
 
     const startDateFormatted = startDate ? startDate.toISOString().replace('Z', '').slice(0, -4) : '';
     const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : '';
 
     const { data, error, isLoading } = useSWR(
-        selectedUnusedVm ? `/api/azure/bridge/azure/vms/unused_vms?date_from=${startDateFormatted}&date_to=${endDateFormatted}&location=${region}&subscription=${subscription}&resource=${selectedUnusedVm}` : null,
+        selectedUnusedVmss ? `/api/azure/bridge/azure/vms/unused_vmss?date_from=${startDateFormatted}&date_to=${endDateFormatted}&location=${region}&subscription=${subscription}&resource=${selectedUnusedVmss}` : null,
         fetcher
     );
 
@@ -81,23 +81,23 @@ export const UnusedVmComponent = ({ startDate, endDate, subscription, region, se
     const anyError =
         !!error
 
-    const unusedVmData: UnusedVm[] | null =
-        isNonEmptyArray<UnusedVm>(data) ? data : null;
+    const unusedVmssData: UnusedVmss[] | null =
+        isNonEmptyArray<UnusedVmss>(data) ? data : null;
 
-    const hasUnusedVmData = !!unusedVmData && unusedVmData.length > 0;
-    const hasSelectedUnusedVm = !!selectedUnusedVm && selectedUnusedVm.length > 0;
+    const hasUnusedVmssData = !!unusedVmssData && unusedVmssData.length > 0;
+    const hasSelectedUnusedVmss = !!selectedUnusedVmss && selectedUnusedVmss.length > 0;
 
     if (anyLoading) {
         return <LoaderComponent />
     }
 
-    if (!hasSelectedUnusedVm) {
+    if (!hasSelectedUnusedVmss) {
         return (
             <div className="w-full min-w-0 px-4 py-6">
                 <MessageCard
                     icon={Info}
-                    title="VM no seleccionada"
-                    description="Seleccione una VM..."
+                    title="VMSS no seleccionada"
+                    description="Seleccione una VMSS..."
                     tone="info"
                 />
             </div>
@@ -116,7 +116,7 @@ export const UnusedVmComponent = ({ startDate, endDate, subscription, region, se
             </div>
         )
     }
-    const noneHasData = !hasUnusedVmData;
+    const noneHasData = !hasUnusedVmssData;
     if (noneHasData) {
         return (
             <div className="w-full min-w-0 px-4 py-6">
@@ -130,40 +130,41 @@ export const UnusedVmComponent = ({ startDate, endDate, subscription, region, se
         )
     }
 
-    const mergedCpuMetrics: UnusedVmSeries[] = [];
-    const mergedAvailableMemoryMetrics: UnusedVmSeries[] = [];
-    const mergedDiskIopsMetrics: UnusedVmSeries[] = [];
-    const mergedCredits: UnusedVmSeries[] = [];
+    const mergedCpuMetrics: UnusedVmssSeries[] = [];
+    const mergedAvailableMemoryMetrics: UnusedVmssSeries[] = [];
+    const mergedDiskIopsMetrics: UnusedVmssSeries[] = [];
+    const mergedCredits: UnusedVmssSeries[] = [];
 
-    unusedVmData.forEach(vm => {
-        mergedCpuMetrics.push(...vm.series.filter(s => s.name === 'Percentage CPU'));
+    unusedVmssData.forEach(vmss => {
+        mergedCpuMetrics.push(...vmss.series.filter(s => s.name === 'Percentage CPU'));
         mergedAvailableMemoryMetrics.push(
-            ...vm.series
+            ...vmss.series
                 .filter(s => s.name === 'Available Memory')
                 .map(s => ({
                     ...s,
                     metric_value: parseFloat(bytesToGB(s.metric_value as number)),
                 }))
         );
-        mergedDiskIopsMetrics.push(...vm.series.filter(s => s.name === 'Disks IOPS'));
-        mergedCredits.push(...vm.series.filter(s => s.name === 'CPU Credits Remaining' || s.name === 'CPU Credits Consumed'));
+        mergedDiskIopsMetrics.push(...vmss.series.filter(s => s.name === 'Disks IOPS'));
+        mergedCredits.push(...vmss.series.filter(s => s.name === 'CPU Credits Remaining' || s.name === 'CPU Credits Consumed'));
     });
     const dedupedCpuMetrics = dedupeByTimestamp(mergedCpuMetrics, 'Percentage CPU');
     const dedupedAvailableMemoryMetrics = dedupeByTimestamp(mergedAvailableMemoryMetrics, 'Available Memory');
     const dedupedDiskIopsMetrics = dedupeByTimestamp(mergedDiskIopsMetrics, 'Disks IOPS');
     const dedupedCpuCreditsMetrics = dedupeByTimestamp(mergedCredits, ['CPU Credits Remaining', 'CPU Credits Consumed']);
+    console.log(unusedVmssData);
     return (
         <div className='w-full min-w-0 px-4 py-6'>
             <div className="flex-1 space-y-6 min-w-0 overflow-hidden">
                 <UnusedCardsComponent
-                    data={unusedVmData}
-                    type='vm'
+                    data={unusedVmssData}
+                    type='vmss'
                 />
             </div>
             <div className='flex flex-col gap-5 mt-10'>
                 <div className="flex items-center gap-3 my-5">
                     <ChartBar className="h-8 w-8 text-blue-500" />
-                    <h1 className="text-3xl font-bold text-foreground">Métricas VMs</h1>
+                    <h1 className="text-3xl font-bold text-foreground">Métricas VMSS</h1>
                 </div>
                 <div className='grid grid-cols-1 gap-5 lg:grid-cols-2'>
                     <UnusedCpuMetricsComponent
@@ -186,10 +187,10 @@ export const UnusedVmComponent = ({ startDate, endDate, subscription, region, se
             <div className="flex flex-col gap-5 mt-10">
                 <div className="flex items-center gap-3 my-5">
                     <Clock className="h-8 w-8 text-blue-500" />
-                    <h1 className="text-3xl font-bold text-foreground">Detalle VMs Infrautilizadas</h1>
+                    <h1 className="text-3xl font-bold text-foreground">Detalle VMSS Infrautilizadas</h1>
                 </div>
-                <UnusedVmTable
-                    data={unusedVmData}
+                <UnusedVmssTable
+                    data={unusedVmssData}
                 />
             </div>
         </div>

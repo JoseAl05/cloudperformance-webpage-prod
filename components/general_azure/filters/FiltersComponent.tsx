@@ -9,7 +9,7 @@ import { SubscriptionsFilterComponent } from '@/components/general_azure/filters
 import { TagsFilterComponent } from '@/components/general_azure/filters/TagsFilterComponent';
 import { MetricsFilterComponent } from '@/components/general_azure/filters/MetricsFilterComponent';
 import { Card, CardContent } from '@/components/ui/card';
-import { Calendar, Filter, MapPin, XCircle, Cloud, Tag, Activity, Layers, Server, Container, Cylinder, Database } from 'lucide-react';
+import { Calendar, Filter, MapPin, XCircle, Cloud, Tag, Activity, Layers, Server, Container, Cylinder, Database, Computer, Boxes } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { SubscriptionsFilterComponentV2 } from '@/components/general_azure/filters/SubscriptionsFilterComponentV2';
@@ -17,6 +17,10 @@ import { ResourceTypesFilterComponent } from '@/components/general_azure/filters
 import { InstancesFilterComponent } from '@/components/general_azure/filters/InstancesFilterComponent';
 import { StorageAccountsFilterComponent } from '@/components/general_azure/filters/StorageAccountsFilterComponent';
 import { ResourcesFilterComponent } from '@/components/general_azure/filters/ResourcesFilterComponent';
+import { UnusedVmFilterComponent } from '@/components/general_azure/filters/UnusedVmFilterComponent';
+import { UnusedVmssFilterComponent } from '@/components/general_azure/filters/UnusedVmssFilterComponent';
+import { VmFilterComponent } from '@/components/general_azure/filters/VmFilterComponent';
+import { ServiceFilterComponent } from './ServiceFilterComponent';
 
 interface FiltersComponentProps {
     Component: (params: {
@@ -46,6 +50,14 @@ interface FiltersComponentProps {
     strgAccountFilter?: boolean;
     isStrgAccountMultiselect?: boolean;
     resourcesFilter?: boolean;
+    unusedVmFilter?: boolean;
+    isUnusedVmFilterMultiselect?: boolean;
+    unusedVmssFilter?: boolean;
+    isUnusedVmssFilterMultiselect?: boolean;
+    vmFilter?: boolean;
+    isVmFilterMultiselect?: boolean;
+    serviceFilter?: boolean;
+    isServiceMultiselect?: boolean;
 }
 
 export const FiltersComponent = ({
@@ -67,7 +79,15 @@ export const FiltersComponent = ({
     instancesFilter = false,
     strgAccountFilter = false,
     isStrgAccountMultiselect = false,
-    resourcesFilter = false
+    resourcesFilter = false,
+    unusedVmFilter = false,
+    isUnusedVmFilterMultiselect = false,
+    unusedVmssFilter = false,
+    isUnusedVmssFilterMultiselect = false,
+    vmFilter = false,
+    isVmFilterMultiselect = false,
+    serviceFilter = false,
+    isServiceMultiselect = false
 }: FiltersComponentProps) => {
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -97,6 +117,10 @@ export const FiltersComponent = ({
         const selectedInstanceParam = searchParams.get('instance');
         const selectedStrgAccountParam = searchParams.get('strgAccount');
         const selectedResourceParam = searchParams.get('resource');
+        const selectedUnusedVmParam = searchParams.get('unusedVm');
+        const selectedUnusedVmssParam = searchParams.get('unusedVmss');
+        const selectedVmParam = searchParams.get('vm');
+        const selectedServiceParam = searchParams.get('service');
 
         let startDate = startDateParam ? new Date(startDateParam) : yesterday;
         let endDate = endDateParam ? new Date(endDateParam) : new Date();
@@ -129,8 +153,12 @@ export const FiltersComponent = ({
             selectedResourceType: selectedResourceTypeParam || '',
             selectedMeterCategory: selectedMeterCategoryParam || null,
             selectedInstance: selectedInstanceParam || null,
-            selectedStrgAccount: selectedStrgAccountParam || 'all',
-            selectedResource: selectedResourceParam || ''
+            selectedStrgAccount: selectedStrgAccountParam || '',
+            selectedResource: selectedResourceParam || '',
+            selectedUnusedVmParam: selectedUnusedVmParam || '',
+            selectedUnusedVmssParam: selectedUnusedVmssParam || '',
+            selectedVmParam: selectedVmParam || '',
+            selectedServiceParam: selectedServiceParam || ''
         };
     };
 
@@ -151,6 +179,10 @@ export const FiltersComponent = ({
     const [tempInstance, setTempInstance] = useState<string | null>(filters.selectedInstance);
     const [tempStrgAccount, setTempStrgAccount] = useState(filters.selectedStrgAccount);
     const [tempResource, setTempResource] = useState<string>(filters.selectedResource);
+    const [tempUnusedVm, setTempUnusedVm] = useState(filters.selectedUnusedVmParam);
+    const [tempUnusedVmss, setTempUnusedVmss] = useState(filters.selectedUnusedVmssParam);
+    const [tempVm, setTempVm] = useState(filters.selectedVmParam);
+    const [tempService, setTempService] = useState(filters.selectedServiceParam);
 
     useEffect(() => {
         const newFilters = getInitialFilters();
@@ -171,6 +203,10 @@ export const FiltersComponent = ({
             newFilters.month && newFilters.year ? new Date(newFilters.year, newFilters.month - 1, 1) : null
         );
         setTempResource(newFilters.selectedResource);
+        setTempUnusedVm(newFilters.selectedUnusedVmParam);
+        setTempUnusedVmss(newFilters.selectedUnusedVmssParam);
+        setTempVm(newFilters.selectedVmParam);
+        setTempService(newFilters.selectedServiceParam);
     }, [searchParams]);
 
     const onChange = (dates: [Date | null, Date | null]) => setTempRange(dates);
@@ -203,7 +239,11 @@ export const FiltersComponent = ({
             selectedMeterCategory: tempMeterCategory,
             selectedInstance: tempInstance,
             selectedStrgAccount: tempStrgAccount,
-            selectedResource: tempResource
+            selectedResource: tempResource,
+            selectedUnusedVm: tempUnusedVm,
+            selectedUnusedVmss: tempUnusedVmss,
+            selectedVm: tempVm,
+            selectedService: tempService
         };
 
         setFilters(newFilters);
@@ -250,6 +290,18 @@ export const FiltersComponent = ({
         if (newFilters.selectedResource) {
             query.set('resource', newFilters.selectedResource);
         }
+        if (newFilters.selectedUnusedVm) {
+            query.set('unusedVm', newFilters.selectedUnusedVm);
+        }
+        if (newFilters.selectedUnusedVmss) {
+            query.set('unusedVmss', newFilters.selectedUnusedVmss);
+        }
+        if (newFilters.selectedVm) {
+            query.set('vm', newFilters.selectedVm);
+        }
+        if (newFilters.selectedService) {
+            query.set('service', newFilters.selectedService);
+        }
 
         router.push(`${window.location.pathname}?${query.toString()}`);
     };
@@ -268,8 +320,12 @@ export const FiltersComponent = ({
             selectedResourceType: '',
             selectedMeterCategory: null,
             selectedInstance: null,
-            selectedStrgAccount: 'all',
-            selectedResource: ''
+            selectedStrgAccount: '',
+            selectedResource: '',
+            selectedUnusedVm: '',
+            selectedUnusedVmss: '',
+            selectedVm: '',
+            selectedService: ''
         };
 
         setFilters(defaultFilters);
@@ -286,6 +342,10 @@ export const FiltersComponent = ({
         setTempInstance(defaultFilters.selectedInstance);
         setTempStrgAccount(defaultFilters.selectedStrgAccount);
         setTempResource(defaultFilters.selectedResource);
+        setTempUnusedVm(defaultFilters.selectedUnusedVm);
+        setTempUnusedVmss(defaultFilters.selectedUnusedVmss);
+        setTempVm(defaultFilters.selectedVm);
+        setTempService(defaultFilters.selectedService);
 
         router.push(window.location.pathname);
     };
@@ -494,6 +554,78 @@ export const FiltersComponent = ({
                                 />
                             </div>
                         )}
+                        {
+                            unusedVmFilter && (
+                                <div className='space-y-2'>
+                                    <label className='text-sm font-medium text-foreground flex items-center gap-2'>
+                                        <Computer className='h-4 w-4' />
+                                        VMs
+                                    </label>
+                                    <UnusedVmFilterComponent
+                                        startDate={tempStartDate}
+                                        endDate={tempEndDate}
+                                        region={tempRegion}
+                                        subscription={tempSubscription}
+                                        unusedVm={tempUnusedVm}
+                                        setUnusedVm={setTempUnusedVm}
+                                        isUnusedVmFilterMultiselect={isUnusedVmFilterMultiselect}
+                                    />
+                                </div>
+                            )
+                        }
+                        {
+                            unusedVmssFilter && (
+                                <div className='space-y-2'>
+                                    <label className='text-sm font-medium text-foreground flex items-center gap-2'>
+                                        <Computer className='h-4 w-4' />
+                                        VMs
+                                    </label>
+                                    <UnusedVmssFilterComponent
+                                        startDate={tempStartDate}
+                                        endDate={tempEndDate}
+                                        region={tempRegion}
+                                        subscription={tempSubscription}
+                                        unusedVmss={tempUnusedVmss}
+                                        setUnusedVmss={setTempUnusedVmss}
+                                        isUnusedVmssFilterMultiselect={isUnusedVmssFilterMultiselect}
+                                    />
+                                </div>
+                            )
+                        }
+                        {
+                            vmFilter && (
+                                <div className='space-y-2'>
+                                    <label className='text-sm font-medium text-foreground flex items-center gap-2'>
+                                        <Computer className='h-4 w-4' />
+                                        VMs
+                                    </label>
+                                    <VmFilterComponent
+                                        startDate={tempStartDate}
+                                        endDate={tempEndDate}
+                                        region={tempRegion}
+                                        subscription={tempSubscription}
+                                        vm={tempVm}
+                                        setVm={setTempVm}
+                                        isVmFilterMultiselect={isVmFilterMultiselect}
+                                    />
+                                </div>
+                            )
+                        }
+                        {
+                            serviceFilter && (
+                                <div className='space-y-2'>
+                                    <label className='text-sm font-medium text-foreground flex items-center gap-2'>
+                                        <Boxes className='h-4 w-4' />
+                                        Servicios
+                                    </label>
+                                    <ServiceFilterComponent
+                                        selectedService={tempService}
+                                        setSelectedService={setTempService}
+                                        isServiceMultiselect={isServiceMultiselect}
+                                    />
+                                </div>
+                            )
+                        }
                     </div>
 
                     <div className='flex items-center gap-4'>
@@ -523,6 +655,10 @@ export const FiltersComponent = ({
                     selectedInstance={filters.selectedInstance}
                     selectedStrgAccount={filters.selectedStrgAccount}
                     selectedResource={filters.selectedResource}
+                    selectedUnusedVm={filters.selectedUnusedVmParam}
+                    selectedUnusedVmss={filters.selectedUnusedVmssParam}
+                    selectedVm={filters.selectedVmParam}
+                    selectedService={filters.selectedServiceParam}
                 />
             </Card>
         </div>

@@ -35,6 +35,8 @@ import {
     Map,
     TrendingDown,
     Cylinder,
+    Puzzle,
+    MapPin,
 } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { usePathname } from 'next/navigation'
@@ -158,6 +160,8 @@ export const SidebarComponent = ({
 
     const infrausedAzure = [
         { label: 'VM', icon: Computer, href: '/azure/funciones/unused-resources/vm' },
+        { label: 'VMSS', icon: Computer, href: '/azure/funciones/unused-resources/vmss' },
+        { label: 'Extensiones VM', icon: Puzzle, href: '/azure/funciones/unused-resources/extensions' }
     ]
 
     const AzureRoutes = {
@@ -176,6 +180,7 @@ export const SidebarComponent = ({
             { label: 'Top 10 uso de recursos', icon: LineChart, href: '/azure/funciones/top-10-recursos-uso' },
             { label: 'Incremento Uso de Recursos', icon: LineChart, href: '/azure/funciones/incremento-top-recursos-uso' },
             { label: 'Spot vs Regular VMs', icon: Computer, href: '/azure/funciones/spot-vs-regular-vm' },
+            { label: 'Promedio de uso por localización', icon: MapPin, href: '/azure/funciones/promedio-por-localizacion' },
             { label: 'Recursos no utilizados', subItems: infrausedAzure, icon: TrendingDown }
         ],
     }

@@ -1,8 +1,8 @@
 import { FiltersComponent } from '@/components/general_azure/filters/FiltersComponent'
 import { Computer } from 'lucide-react'
-import { UnusedVmComponent } from '@/components/azure/vista-funciones/unused-resources/vm/UnusedVmComponent'
+import { UnusedVmExtensionsComponent } from '@/components/azure/vista-funciones/unused-resources/extensions/UnusedVmExtensionsComponent'
 
-export const MainViewUnusedVmComponent = () => {
+export const MainViewUnusedVmExtensionsComponent = () => {
     return (
         <div className='w-full min-w-0 space-y-4'>
             <div className='mb-8'>
@@ -14,7 +14,7 @@ export const MainViewUnusedVmComponent = () => {
                             </div>
                             <div>
                                 <h1 className='text-3xl font-bold text-gray-900 dark:text-gray-100'>
-                                    VM Infrautilizadas
+                                    Extensiones de VMs no utilizadas
                                 </h1>
                             </div>
                         </div>
@@ -23,12 +23,12 @@ export const MainViewUnusedVmComponent = () => {
             </div>
             <div className='w-full min-w-0'>
                 <FiltersComponent
-                    Component={UnusedVmComponent}
+                    Component={UnusedVmExtensionsComponent}
                     regionFilter
                     isRegionMultiSelect
                     subscriptionIdFilter
-                    unusedVmFilter
-                    isUnusedVmFilterMultiselect
+                    vmFilter
+                    isVmFilterMultiselect
                 />
             </div>
         </div>
