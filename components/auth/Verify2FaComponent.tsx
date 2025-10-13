@@ -1,44 +1,71 @@
 'use client'
-import { useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { Button } from '@/components/ui/button';
+
+import { useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Button } from '@/components/ui/button'
+import { Loader2 } from 'lucide-react'
+
 export const Verify2FaComponent = () => {
-    const [code, setCode] = useState('');
-    const [loading, setLoading] = useState(false);
-    const router = useRouter();
-    const sp = useSearchParams();
-    const userId = sp.get('userId') || '';
-    const next = sp.get('next') || '/perfil';
+    const [code, setCode] = useState('')
+    const [loading, setLoading] = useState(false)
+    const router = useRouter()
+    const sp = useSearchParams()
+    const userId = sp.get('userId') || ''
+    const next = sp.get('next') || '/perfil'
 
     async function onSubmit(e: React.FormEvent) {
-        e.preventDefault();
-        setLoading(true);
+        e.preventDefault()
+        setLoading(true)
         const res = await fetch('/api/auth/verify-2fa', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ userId, code })
-        });
-        const data = await res.json();
-        setLoading(false);
-        if (res.ok) router.replace(next);
-        else alert(data.error || 'Código inválido');
+            body: JSON.stringify({ userId, code }),
+        })
+        const data = await res.json()
+        setLoading(false)
+        if (res.ok) router.replace(next)
+        else alert(data.error || 'Código inválido')
     }
+
     return (
-        <div className='bg-gray-50 min-h-screen flex items-center justify-center'>
-            <div className='max-w-md w-full bg-white rounded-2xl shadow-xl p-8 text-center'>
-                <div className='mx-auto h-16 w-16 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full flex items-center justify-center mb-4'>
-                    <svg className='h-8 w-8 text-white' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-                        <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M12 12l8-4-8-4-8 4 8 4zm0 0v8' />
-                    </svg>
-                </div>
-                <h2 className='text-2xl font-bold text-gray-900 mb-2'>Verificación en dos pasos</h2>
-                <p className='text-gray-600 mb-6'>Ingresa el código de 6 dígitos enviado a tu correo electrónico</p>
-                {/* {error && <div className='mb-4 text-red-600 font-medium'>{error}</div>} */}
-                <form onSubmit={onSubmit} className='space-y-6'>
-                    <input type='text' value={code} onChange={e => setCode(e.target.value)} pattern='[0-9]{6}' maxLength={6} required className='w-full px-4 py-3 text-center text-2xl font-mono bg-gray-100 border border-gray-300 rounded-xl' placeholder='000000' />
-                    <Button variant='default' type='submit' disabled={loading} className='w-full bg-gradient-to-r from-cyan-500 to-blue-500 text-white py-3 px-4 rounded-xl font-medium cursor-pointer'>{loading ? 'Verificando…' : 'Confirmar'}</Button>
-                </form>
+        <form onSubmit={onSubmit} className='flex flex-col gap-6'>
+            <div className='flex flex-col items-center gap-2 text-center'>
+                <h1 className='text-2xl font-bold'>Verificación en dos pasos</h1>
+                <p className='text-muted-foreground text-sm text-balance'>
+                    Ingresa el código de 6 dígitos enviado a tu correo electrónico
+                </p>
             </div>
-        </div>
+
+            <div className='grid gap-6'>
+                <div className='grid gap-3'>
+                    <Label htmlFor='code'>Código</Label>
+                    <Input
+                        id='code'
+                        value={code}
+                        onChange={(e) => setCode(e.target.value)}
+                        inputMode='numeric'
+                        autoComplete='one-time-code'
+                        pattern='[0-9]{6}'
+                        maxLength={6}
+                        placeholder='000000'
+                        required
+                        className='text-center tracking-[0.3em] text-lg font-mono'
+                    />
+                </div>
+
+                {loading ? (
+                    <div className='flex flex-col items-center gap-0'>
+                        <Loader2 className='h-5 w-5 animate-spin' />
+                        <span className='text-muted-foreground pt-2'>Verificando…</span>
+                    </div>
+                ) : (
+                    <Button type='submit' className='w-full cursor-pointer'>
+                        Confirmar
+                    </Button>
+                )}
+            </div>
+        </form>
     )
 }
