@@ -1,5 +1,5 @@
 import { FiltersComponent } from '@/components/general/filters/FiltersComponent'
-import { MainViewConsumoRdsMariaDbHorario }  from './ConsumoRdsMariaDbHorarioComponent'
+import { MainViewConsumoRdsMariaDbHorario } from './ConsumoRdsMariaDbHorarioComponent'
 import { Database } from 'lucide-react'
 
 export const ViewConsumoRdsMariaDbHorario = () => {
@@ -15,7 +15,7 @@ export const ViewConsumoRdsMariaDbHorario = () => {
               </div>
               <div>
                 <h1 className='text-3xl font-bold text-gray-900 dark:text-gray-100'>
-                  Dashboard AWS / Consumo RDS MariaDB 
+                  Consumo RDS MariaDB
                 </h1>
                 <p className='text-gray-500 dark:text-gray-400'>
                   Comparación de consumo en horario hábil vs no hábil

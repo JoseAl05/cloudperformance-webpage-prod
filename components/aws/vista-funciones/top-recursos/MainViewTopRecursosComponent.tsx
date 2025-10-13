@@ -15,7 +15,7 @@ export const TopRecursosComponent = () => {
               </div>
               <div>
                 <h1 className='text-3xl font-bold text-gray-900 dark:text-gray-100'>
-                  Dashboard AWS / Top Recursos
+                  Top Recursos
                 </h1>
                 <p className='text-gray-500 dark:text-gray-400'>
                   Top Recursos

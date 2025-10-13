@@ -37,6 +37,7 @@ import {
     Cylinder,
     Puzzle,
     MapPin,
+    LayoutDashboard,
 } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { usePathname } from 'next/navigation'
@@ -131,7 +132,8 @@ export const SidebarComponent = ({
 
     const AwsRoutes = {
         routes: [
-            { label: 'Inicio', icon: Grid2X2, href: '/aws/facturacion/tendencia-facturacion' },
+            { label: 'Inicio', icon: LayoutDashboard, href: '/aws' },
+            { label: 'Tendencia Facturación', icon: Grid2X2, href: '/aws/facturacion/tendencia-facturacion' },
             { label: 'Quotas', icon: PieChart, href: '/aws/quotas' },
             { label: 'Eventos', icon: Zap, href: '/aws/eventos' },
             { label: 'Vista Advisor', icon: Pyramid, href: '/aws/advisor' },
@@ -166,7 +168,8 @@ export const SidebarComponent = ({
 
     const AzureRoutes = {
         routes: [
-            { label: 'Inicio', icon: Grid2X2, href: '/azure/facturacion/tendencia-facturacion' },
+            { label: 'Inicio', icon: LayoutDashboard, href: '/azure' },
+            { label: 'Tendencia Facturación', icon: Grid2X2, href: '/azure/facturacion/tendencia-facturacion' },
             { label: 'Quotas', icon: PieChart, href: '/azure/quotas' },
             { label: 'Deployments', icon: Zap, href: '/azure/deployments' },
             { label: 'Vista Advisor', icon: Pyramid, href: '/azure/advisor' },
