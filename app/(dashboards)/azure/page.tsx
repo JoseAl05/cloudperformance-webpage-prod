@@ -52,7 +52,7 @@ export default function DashboardAzurePage() {
                         <CardDescription>Explora costos, cuotas, despliegues, Advisor y Savings</CardDescription>
                     </CardHeader>
                     <CardContent className="flex flex-wrap gap-2">
-                        <Link href="/azure/facturacion/tendencia-facturacion">
+                        <Link href="/azure/facturacion/tendencia-pago-por-uso">
                             <Button size="sm" variant="outline" className="gap-2">
                                 <LineChart className="h-4 w-4" /> Tendencia de Facturación (Costos)
                             </Button>
