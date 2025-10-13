@@ -26,8 +26,8 @@ export default async function DashboardLayout({
                 } as React.CSSProperties
             }
         >
-            <SidebarComponent />
-            <SidebarInset className="min-w-0">
+            <SidebarComponent/>
+            <SidebarInset className="min-w-0 ">
                 <div className='flex items-center gap-3 p-5'>
                     {
                         payload ? (

@@ -38,6 +38,13 @@ import {
     Puzzle,
     MapPin,
     LayoutDashboard,
+    Globe2,
+    Monitor,
+    ShoppingCart,
+    Receipt,
+    Boxes,
+    Stars,
+    Layers,
 } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { usePathname } from 'next/navigation'
@@ -83,20 +90,20 @@ export const SidebarComponent = ({
 
 
     const topFacturaciones = [
-        { label: 'Top Facturaciones por Región', href: '/aws/funciones/top-dolares-region', icon: Earth, color: 'text-purple-500' },
-        { label: 'Top Facturaciones por SO', href: '/aws/funciones/top-dolares-so', icon: Database, color: 'text-purple-500' },
-        { label: 'Top Facturaciones por Tipo de Instancia', href: '/aws/funciones/top-dolares-por-tipo-de-instancia', icon: Computer, color: 'text-teal-600' },
-        { label: 'Top Facturaciones por Familia de Instancias', href: '/aws/funciones/top-dolares-por-familia-de-instancia', icon: Box, color: 'text-indigo-600' },
-        { label: 'Top Facturaciones por Tipo de Compra', href: '/aws/funciones/top-dolares-por-tipo-de-compra', icon: HandCoins, color: 'text-amber-600' },
-        { label: 'Top Facturaciones por Tipo de Cobro', href: '/aws/funciones/top-dolares-por-tipo-de-cobro', icon: Zap, color: 'text-red-500' },
-        { label: 'Top Facturaciones por Recursos', href: '/aws/funciones/top-dolares-por-id-recurso', icon: Grid2X2, color: 'text-blue-500' },
-        { label: 'Top Recursos', href: '/aws/funciones/top-recursos', icon: Grid2X2, color: 'text-blue-500' },
+        { label: 'Top Facturaciones por Región', href: '/aws/funciones/top-dolares-region', icon: Globe2, color: 'text-purple-500' },
+        { label: 'Top Facturaciones por SO', href: '/aws/funciones/top-dolares-so', icon: Monitor, color: 'text-purple-500' },
+        { label: 'Top Facturaciones por Tipo de Instancia', href: '/aws/funciones/top-dolares-por-tipo-de-instancia', icon: Server, color: 'text-teal-600' },
+        { label: 'Top Facturaciones por Familia de Instancias', href: '/aws/funciones/top-dolares-por-familia-de-instancia', icon: Layers, color: 'text-indigo-600' },
+        { label: 'Top Facturaciones por Tipo de Compra', href: '/aws/funciones/top-dolares-por-tipo-de-compra', icon: ShoppingCart, color: 'text-amber-600' },
+        { label: 'Top Facturaciones por Tipo de Cobro', href: '/aws/funciones/top-dolares-por-tipo-de-cobro', icon: Receipt, color: 'text-red-500' },
+        { label: 'Top Facturaciones por Recursos', href: '/aws/funciones/top-dolares-por-id-recurso', icon: Boxes, color: 'text-blue-500' },
+        { label: 'Top Recursos', href: '/aws/funciones/top-recursos', icon: Stars, color: 'text-blue-500' },
     ]
 
     const consumoHorario = [
-        { label: 'Instancias EC2', href: '/aws/funciones/consumo-ec2-horario-habil-vs-no-habil', icon: Computer, color: 'text-green-500' },
-        { label: 'Instancias EC2 AutoscalingGroups', href: '/aws/funciones/consumo-ec2-autoscaling-groups-horario-habil-vs-no-habil', icon: Computer, color: 'text-green-500' },
-        { label: 'Instancias EC2 Nodos EKS', href: '/aws/funciones/consumo-ec2-nodos-eks-horario-habil-vs-no-habil', icon: Computer, color: 'text-green-500' },
+        { label: 'Instancias EC2', href: '/aws/funciones/consumo-ec2-horario-habil-vs-no-habil', icon: Clock, color: 'text-green-500' },
+        { label: 'Instancias EC2 AutoscalingGroups', href: '/aws/funciones/consumo-ec2-autoscaling-groups-horario-habil-vs-no-habil', icon: TrendingUp, color: 'text-green-500' },
+        { label: 'Instancias EC2 Nodos EKS', href: '/aws/funciones/consumo-ec2-nodos-eks-horario-habil-vs-no-habil', icon: Boxes, color: 'text-green-500' },
         { label: 'Instancias RDS Postgresql', href: '/aws/funciones/consumo-rds-postgresql-horario-habil-vs-no-habil', icon: Database, color: 'text-green-500' },
         { label: 'Instancias RDS Mysql', href: '/aws/funciones/consumo-rds-mysql-horario-habil-vs-no-habil', icon: Database, color: 'text-green-500' },
         { label: 'Instancias RDS SQL Server', href: '/aws/funciones/consumo-rds-sql-horario-habil-vs-no-habil', icon: Database, color: 'text-green-500' },
@@ -105,7 +112,7 @@ export const SidebarComponent = ({
     ]
 
     const consumoLoc = [
-        { label: 'Instancias EC2', href: '/aws/funciones/avg-uso-loc-inst-ec2', icon: Computer, color: 'text-green-500' },
+        { label: 'Instancias EC2', href: '/aws/funciones/avg-uso-loc-inst-ec2', icon: MapPin, color: 'text-green-500' },
         { label: 'Instancias RDS Postgresql', href: '/aws/funciones/avg-uso-loc-inst-rds-pg', icon: Database, color: 'text-green-500' },
         { label: 'Instancias RDS Mysql', href: '/aws/funciones/avg-uso-loc-inst-rds-mysql', icon: Database, color: 'text-green-500' },
         { label: 'Instancias RDS SQL Server', href: '/aws/funciones/avg-uso-loc-inst-rds-sqlserver', icon: Database, color: 'text-green-500' },
@@ -154,8 +161,8 @@ export const SidebarComponent = ({
             { label: 'Consumo horario hábil vs no hábil', subItems: consumoHorario, icon: Clock },
             { label: 'Consumo por Localización', subItems: consumoLoc, icon: Map },
             { label: 'Recursos no utilizados', subItems: infrausedAws, icon: TrendingDown },
-            { label: 'Spot vs Vm', href: '/aws/funciones/spot-vs-vm', icon: Database },
-            { label: 'Top S3 Buckets', href: '/aws/funciones/top-s3-buckets', icon: Server },
+            { label: 'Spot vs Vm', href: '/aws/funciones/spot-vs-vm', icon: Zap },
+            { label: 'Top S3 Buckets', href: '/aws/funciones/top-s3-buckets', icon: Box },
             { label: 'Ebs No Utilizados', href: '/aws/funciones/ebs-no-utilizados', icon: HardDrive },
         ],
     }
