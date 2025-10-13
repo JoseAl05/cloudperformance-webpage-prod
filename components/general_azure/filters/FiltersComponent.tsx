@@ -9,7 +9,7 @@ import { SubscriptionsFilterComponent } from '@/components/general_azure/filters
 import { TagsFilterComponent } from '@/components/general_azure/filters/TagsFilterComponent';
 import { MetricsFilterComponent } from '@/components/general_azure/filters/MetricsFilterComponent';
 import { Card, CardContent } from '@/components/ui/card';
-import { Calendar, Filter, MapPin, XCircle, Cloud, Tag, Activity, Layers, Server, Container, Cylinder, Database, Computer, Boxes } from 'lucide-react';
+import { Calendar, Filter, MapPin, XCircle, Cloud, Tag, Activity, Layers, Server, Container, Cylinder, Database, Computer, Boxes, FolderTree, GitBranch } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { SubscriptionsFilterComponentV2 } from '@/components/general_azure/filters/SubscriptionsFilterComponentV2';
@@ -21,6 +21,9 @@ import { UnusedVmFilterComponent } from '@/components/general_azure/filters/Unus
 import { UnusedVmssFilterComponent } from '@/components/general_azure/filters/UnusedVmssFilterComponent';
 import { VmFilterComponent } from '@/components/general_azure/filters/VmFilterComponent';
 import { ServiceFilterComponent } from './ServiceFilterComponent';
+import { ResourceGroupFilterComponent } from '@/components/general_azure/filters/ResourceGroupsFilterComponent';
+import { InstancesFilterComponentV2 } from '@/components/general_azure/filters/InstancesFilterComponentV2';
+import { DeploymentOperationsFilterComponent } from '@/components/general_azure/filters/DeploymentOperationsFilterComponent';
 
 interface FiltersComponentProps {
     Component: (params: {
@@ -58,6 +61,14 @@ interface FiltersComponentProps {
     isVmFilterMultiselect?: boolean;
     serviceFilter?: boolean;
     isServiceMultiselect?: boolean;
+    resourceGroupFilter?: boolean;
+    resourceGroupCollection?: string;
+    resourceGroupSubscriptionField?: string;
+    instancesFilterV2?: boolean;
+    instancesV2Collection?: string;
+    instancesV2SubscriptionField?: string;
+    instancesV2InstanceField?: string;
+    deploymentOperationsFilter?: boolean;
 }
 
 export const FiltersComponent = ({
@@ -69,9 +80,9 @@ export const FiltersComponent = ({
     subscriptionIdFilter = false,
     tagsFilter = false,
     tagsCollection = '',
-    tagsColumnName = 'tags',
-    tagsRegionField = 'location',
-    tagsSubscriptionField = 'subscription_id',
+    tagsColumnName = '',
+    tagsRegionField = '',
+    tagsSubscriptionField = '',
     isRegionMultiSelect = false,
     metricsFilter = false,
     metricsCollection = '',
@@ -87,7 +98,15 @@ export const FiltersComponent = ({
     vmFilter = false,
     isVmFilterMultiselect = false,
     serviceFilter = false,
-    isServiceMultiselect = false
+    isServiceMultiselect = false,
+    resourceGroupFilter = false,
+    resourceGroupCollection = '',
+    resourceGroupSubscriptionField = '',
+    instancesFilterV2 = false,
+    instancesV2Collection = '',
+    instancesV2SubscriptionField = '',
+    instancesV2InstanceField = '',
+    deploymentOperationsFilter = false,
 }: FiltersComponentProps) => {
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -121,6 +140,10 @@ export const FiltersComponent = ({
         const selectedUnusedVmssParam = searchParams.get('unusedVmss');
         const selectedVmParam = searchParams.get('vm');
         const selectedServiceParam = searchParams.get('service');
+        const selectedResourceGroupParam = searchParams.get('resourceGroup');
+        const selectedInstanceV2Param = searchParams.get('instanceV2');
+        const selectedOperationParam = searchParams.get('operation');
+
 
         let startDate = startDateParam ? new Date(startDateParam) : yesterday;
         let endDate = endDateParam ? new Date(endDateParam) : new Date();
@@ -147,8 +170,8 @@ export const FiltersComponent = ({
             year,
             region: regionParam || 'all_regions',
             subscription: subscriptionParam || 'all_subscriptions',
-            selectedTagKey: selectedTagKeyParam || null,
-            selectedTagValue: selectedTagValueParam || null,
+            selectedTagKey: selectedTagKeyParam || '',
+            selectedTagValue: selectedTagValueParam || '',
             selectedMetric: selectedMetricParam || '',
             selectedResourceType: selectedResourceTypeParam || '',
             selectedMeterCategory: selectedMeterCategoryParam || null,
@@ -158,7 +181,13 @@ export const FiltersComponent = ({
             selectedUnusedVmParam: selectedUnusedVmParam || '',
             selectedUnusedVmssParam: selectedUnusedVmssParam || '',
             selectedVmParam: selectedVmParam || '',
-            selectedServiceParam: selectedServiceParam || ''
+            selectedServiceParam: selectedServiceParam || '',
+            selectedMeterCategory: selectedMeterCategoryParam || '',
+            selectedInstance: selectedInstanceParam || '',
+            selectedResourceGroup: selectedResourceGroupParam || '',
+            selectedInstanceV2: selectedInstanceV2Param || '',
+            selectedOperation: selectedOperationParam || '',
+            selectedVmParam: selectedVmParam || ''
         };
     };
 
@@ -183,6 +212,10 @@ export const FiltersComponent = ({
     const [tempUnusedVmss, setTempUnusedVmss] = useState(filters.selectedUnusedVmssParam);
     const [tempVm, setTempVm] = useState(filters.selectedVmParam);
     const [tempService, setTempService] = useState(filters.selectedServiceParam);
+    const [tempResourceGroup, setTempResourceGroup] = useState<string | null>(filters.selectedResourceGroup);
+    const [tempInstanceV2, setTempInstanceV2] = useState<string | null>(filters.selectedInstanceV2);
+    const [tempOperation, setTempOperation] = useState<string>(filters.selectedOperation);
+
 
     useEffect(() => {
         const newFilters = getInitialFilters();
@@ -207,9 +240,16 @@ export const FiltersComponent = ({
         setTempUnusedVmss(newFilters.selectedUnusedVmssParam);
         setTempVm(newFilters.selectedVmParam);
         setTempService(newFilters.selectedServiceParam);
+        setTempResourceGroup(newFilters.selectedResourceGroup);
+        setTempInstanceV2(newFilters.selectedInstanceV2);
+        setTempOperation(newFilters.selectedOperation);
+        setTempVm(newFilters.selectedVmParam);
     }, [searchParams]);
 
     const onChange = (dates: [Date | null, Date | null]) => setTempRange(dates);
+
+    const tempStartDate = useMemo(() => (tempRange[0] ?? filters.startDate), [tempRange, filters.startDate]);
+    const tempEndDate = useMemo(() => (tempRange[1] ?? filters.endDate), [tempRange, filters.endDate]);
 
     const applyFilters = () => {
         let [start, end] = tempRange;
@@ -243,7 +283,10 @@ export const FiltersComponent = ({
             selectedUnusedVm: tempUnusedVm,
             selectedUnusedVmss: tempUnusedVmss,
             selectedVm: tempVm,
-            selectedService: tempService
+            selectedService: tempService,
+            selectedResourceGroup: tempResourceGroup,
+            selectedInstanceV2: tempInstanceV2,
+            selectedOperation: tempOperation,
         };
 
         setFilters(newFilters);
@@ -295,6 +338,15 @@ export const FiltersComponent = ({
         }
         if (newFilters.selectedUnusedVmss) {
             query.set('unusedVmss', newFilters.selectedUnusedVmss);
+        }   
+        if (newFilters.selectedResourceGroup && newFilters.selectedResourceGroup !== 'all_resource_groups') {
+            query.set('resourceGroup', newFilters.selectedResourceGroup);
+        }
+        if (newFilters.selectedInstanceV2 && newFilters.selectedInstanceV2 !== 'all_instances') {
+            query.set('instanceV2', newFilters.selectedInstanceV2);
+        }
+        if (newFilters.selectedOperation && newFilters.selectedOperation !== 'all_operations') {
+            query.set('operation', newFilters.selectedOperation);
         }
         if (newFilters.selectedVm) {
             query.set('vm', newFilters.selectedVm);
@@ -325,7 +377,10 @@ export const FiltersComponent = ({
             selectedUnusedVm: '',
             selectedUnusedVmss: '',
             selectedVm: '',
-            selectedService: ''
+            selectedService: '',
+            selectedResourceGroup: '',
+            selectedInstanceV2: '',
+            selectedOperation: '',
         };
 
         setFilters(defaultFilters);
@@ -346,12 +401,12 @@ export const FiltersComponent = ({
         setTempUnusedVmss(defaultFilters.selectedUnusedVmss);
         setTempVm(defaultFilters.selectedVm);
         setTempService(defaultFilters.selectedService);
+        setTempResourceGroup(defaultFilters.selectedResourceGroup);
+        setTempInstanceV2(defaultFilters.selectedInstanceV2);
+        setTempOperation(defaultFilters.selectedOperation);
 
         router.push(window.location.pathname);
     };
-
-    const tempStartDate = useMemo(() => (tempRange[0] ?? filters.startDate), [tempRange, filters.startDate]);
-    const tempEndDate = useMemo(() => (tempRange[1] ?? filters.endDate), [tempRange, filters.endDate]);
 
     return (
         <div className='space-y-6'>
@@ -362,7 +417,7 @@ export const FiltersComponent = ({
                             <div className='space-y-2'>
                                 <label className='text-sm font-medium text-foreground flex items-center gap-2'>
                                     <Calendar className='h-4 w-4' />
-                                    Período
+                                    Periodo
                                 </label>
                                 <DatePicker
                                     selected={tempRange[0]}
@@ -592,6 +647,62 @@ export const FiltersComponent = ({
                                 </div>
                             )
                         }
+                        {resourceGroupFilter && (
+                            <div className='space-y-2'>
+                                <label className='text-sm font-medium text-foreground flex items-center gap-2'>
+                                    <FolderTree className='h-4 w-4' />
+                                    Grupo de Recursos
+                                </label>
+                                <ResourceGroupFilterComponent
+                                    startDate={tempRange[0] ?? filters.startDate}
+                                    endDate={tempRange[1] ?? filters.endDate}
+                                    region={tempRegion}
+                                    subscription={tempSubscription}
+                                    collection={resourceGroupCollection}
+                                    subscriptionField={resourceGroupSubscriptionField}
+                                    selectedTagKey={tempTagKey}
+                                    selectedTagValue={tempTagValue}
+                                    selectedResourceGroup={tempResourceGroup}
+                                    setSelectedResourceGroup={setTempResourceGroup}
+                                />
+                            </div>
+                        )}
+                        {instancesFilterV2 && (
+                            <div className='space-y-2'>
+                                <label className='text-sm font-medium text-foreground flex items-center gap-2'>
+                                    <Server className='h-4 w-4' />
+                                    Instancias
+                                </label>
+                                <InstancesFilterComponentV2
+                                    startDate={tempRange[0] ?? filters.startDate}
+                                    endDate={tempRange[1] ?? filters.endDate}
+                                    region={tempRegion}
+                                    subscription={tempSubscription}
+                                    collection={instancesV2Collection}
+                                    subscriptionField={instancesV2SubscriptionField}
+                                    instanceField={instancesV2InstanceField}
+                                    selectedTagKey={tempTagKey}
+                                    selectedTagValue={tempTagValue}
+                                    selectedResourceGroup={tempResourceGroup}
+                                    selectedInstance={tempInstanceV2}
+                                    setSelectedInstance={setTempInstanceV2}
+                                />
+                            </div>
+                        )}
+                        {deploymentOperationsFilter && (
+                            <div className='space-y-2'>
+                                <label className='text-sm font-medium text-foreground flex items-center gap-2'>
+                                    <GitBranch className='h-4 w-4' />
+                                    Operaciones
+                                </label>
+                                <DeploymentOperationsFilterComponent
+                                    startDate={tempRange[0] ?? filters.startDate}
+                                    endDate={tempRange[1] ?? filters.endDate}
+                                    operation={tempOperation}
+                                    setOperation={setTempOperation}
+                                />
+                            </div>
+                        )}
                         {
                             vmFilter && (
                                 <div className='space-y-2'>
@@ -659,6 +770,9 @@ export const FiltersComponent = ({
                     selectedUnusedVmss={filters.selectedUnusedVmssParam}
                     selectedVm={filters.selectedVmParam}
                     selectedService={filters.selectedServiceParam}
+                    selectedResourceGroup={filters.selectedResourceGroup}
+                    selectedInstanceV2={filters.selectedInstanceV2}
+                    selectedOperation={filters.selectedOperation}
                 />
             </Card>
         </div>

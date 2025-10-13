@@ -13,21 +13,29 @@ interface SubscriptionsFilterComponentProps {
     setSubscription: Dispatch<SetStateAction<string>>
 }
 
+// const fetcherGet = (url: string) =>
+//     fetch(url, {
+//         method: 'GET',
+//         headers: {
+//             'Authorization': `Bearer ${process.env.NEXT_PUBLIC_API_TOKEN}`,
+//             'Content-Type': 'application/json',
+//         },
+//     }).then(res => res.json());
+
 const fetcherGet = (url: string) =>
-    fetch(url, {
-        method: 'GET',
-        headers: {
-            'Authorization': `Bearer ${process.env.NEXT_PUBLIC_API_TOKEN}`,
-            'Content-Type': 'application/json',
-        },
-    }).then(res => res.json());
+  fetch(url, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  }).then(res => res.json())    
 
 export const SubscriptionsFilterComponent = ({
     subscription, setSubscription
 }: SubscriptionsFilterComponentProps) => {
     const [open, setOpen] = useState(false);
 
-    const url = `${process.env.NEXT_PUBLIC_API_URL}/azure/subscriptions/all-subscriptions`;
+    const url = `/api/azure/bridge/azure/subscriptions/all-subscriptions`;
     const { data, error, isLoading } = useSWR<string[]>(url, fetcherGet);
 
     if (isLoading) return <LoaderComponent size='small'/>

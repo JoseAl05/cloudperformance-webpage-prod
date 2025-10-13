@@ -33,13 +33,12 @@ interface AzureTagItem {
 }
 
 const fetcher = (url: string) =>
-    fetch(url, {
-        method: "GET",
-        headers: {
-            "Authorization": `Bearer ${process.env.NEXT_PUBLIC_API_TOKEN}`,
-            "Content-Type": "application/json"
-        }
-    }).then(res => res.json())
+  fetch(url, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  }).then(res => res.json())
 
 export const TagsFilterComponent = ({
     startDate,

@@ -172,18 +172,24 @@ export const SidebarComponent = ({
         { label: 'VMSS', icon: Computer, href: '/azure/funciones/unused-resources/vmss' },
         { label: 'Extensiones VM', icon: Puzzle, href: '/azure/funciones/unused-resources/extensions' }
     ]
+    const consumeSubItemsAzure = [
+        { label: 'Maquinas Virtuales', icon: Computer, href: '/azure/consumo-vm' },
+        { label: 'Base de Datos', icon: Database, href: '/azure/consumo-db' },
+        { label: 'Nodos', icon: Server, href: '/azure/consumo-nodos' },
+    ]
 
     const AzureRoutes = {
+        
         routes: [
             { label: 'Inicio', icon: LayoutDashboard, href: '/azure' },
-            { label: 'Tendencia Facturación', icon: Grid2X2, href: '/azure/facturacion/tendencia-facturacion' },
+            { label: 'Tendencia Facturación', icon: Grid2X2, href: '/azure/facturacion/tendencia-pago-por-uso' },
             { label: 'Quotas', icon: PieChart, href: '/azure/quotas' },
             { label: 'Deployments', icon: Zap, href: '/azure/deployments' },
             { label: 'Vista Advisor', icon: Pyramid, href: '/azure/advisor' },
             { label: 'Vista Saving Plans', icon: HandCoins, href: '/azure/saving-plan' },
         ],
-        recursos: [],
-        consumes: [],
+        recursos: [{ label: 'Maquinas Virtuales', icon: Computer, href: '/azure/recursos-vm' }],
+        consumes: [{ label: 'Consumos', subItems: consumeSubItemsAzure, icon: Zap }],
         funciones: [
             { label: 'Blob Storage vs Storage General', icon: Cylinder, href: '/azure/funciones/blob-vs-storage-general' },
             { label: 'Variación Storage', icon: Cylinder, href: '/azure/funciones/variacion-storage' },
