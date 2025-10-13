@@ -142,7 +142,7 @@ export const TendenciaFacturacionAzureChartComponent = ({
     const { data, error, isLoading } = useSWR<FacturacionAzureData[]>(apiUrl, fetcher);
 
     const processChartData = (rawData: FacturacionAzureData[]) => {
-        if (!rawData?.length) return { dates: [] as string[], series: [] as any[], significantServices: [] as any[] };
+        if (!rawData?.length) return { dates: [] as string[], series: [] as unknown[], significantServices: [] as unknown[] };
 
         const serviceMap = new Map<string, Map<string, number>>();
         const allDates = new Set<string>();
@@ -247,7 +247,7 @@ export const TendenciaFacturacionAzureChartComponent = ({
         };
 
         const distinctColors = generateDistinctColors(series.length);
-        series.forEach((serie: any, index: number) => {
+        series.forEach((serie: unknown, index: number) => {
             serie.itemStyle = { color: distinctColors[index] };
             serie.lineStyle = { width: 2 };
             serie.symbol = 'circle';
@@ -269,31 +269,31 @@ export const TendenciaFacturacionAzureChartComponent = ({
                 confine: true,
                 textStyle: { fontSize: 12, color: '#111' },
                 extraCssText: 'max-width:360px; white-space:normal; box-shadow:0 4px 12px rgba(0,0,0,.08); border-radius:10px; padding:10px 12px;',
-                formatter: (params: any[]) => {
+                formatter: (params: unknown[]) => {
                     if (!params?.length) return '';
 
                     const originalDate = toUTCDate(dates[params[0].dataIndex]);
                     const dateStr = fmt.format(originalDate);
 
                     const items = params
-                        .map((p: any) => ({
+                        .map((p: unknown) => ({
                             name: p.seriesName,
                             value: Number(p.value || 0),
                             marker: p.marker,
                         }))
-                        .filter((i: any) => i.value > 0);
+                        .filter((i: unknown) => i.value > 0);
 
                     if (!items.length) {
                         return `<div style="font-weight:600;margin-bottom:6px">${dateStr}</div>
                                 <div style="font-weight:600">Total: $0</div>`;
                     }
 
-                    items.sort((a: any, b: any) => b.value - a.value);
-                    const total = items.reduce((s: number, i: any) => s + i.value, 0);
+                    items.sort((a: unknown, b: unknown) => b.value - a.value);
+                    const total = items.reduce((s: number, i: unknown) => s + i.value, 0);
 
                     const top = items.slice(0, currentTopN);
                     const rest = items.slice(currentTopN);
-                    const restSum = rest.reduce((s: number, i: any) => s + i.value, 0);
+                    const restSum = rest.reduce((s: number, i: unknown) => s + i.value, 0);
 
                     const money = (n: number) =>
                         n >= 1_000_000 ? '$' + (n / 1_000_000).toFixed(2) + 'M'
@@ -304,7 +304,7 @@ export const TendenciaFacturacionAzureChartComponent = ({
 
                     html += `<div style="max-height:280px; overflow:auto; padding-right:4px;">`;
 
-                    html += top.map((i: any) => {
+                    html += top.map((i: unknown) => {
                         const pct = total > 0 ? (i.value / total) * 100 : 0;
                         return `
                         <div style="display:flex;align-items:center;gap:8px;justify-content:space-between;line-height:1.25;margin:3px 0">
@@ -348,7 +348,7 @@ export const TendenciaFacturacionAzureChartComponent = ({
                 left: 'center',
                 textStyle: { fontSize: 11, color: '#666' },
                 selectedMode: 'multiple',
-                data: series.map((s: any) => s.name),
+                data: series.map((s: unknown) => s.name),
             },
             grid: { left: 60, right: 60, top: 50, bottom: 80, containLabel: true },
             dataZoom: [
@@ -391,7 +391,7 @@ export const TendenciaFacturacionAzureChartComponent = ({
                     fontSize: 10,
                 },
                 splitLine: { lineStyle: { color: '#f5f5f5', type: 'dashed' } },
-                min: (v: any) => Math.max(0, v.min - (v.max - v.min) * 0.1),
+                min: (v: unknown) => Math.max(0, v.min - (v.max - v.min) * 0.1),
             },
             series: series.slice().reverse(),
             animation: true,

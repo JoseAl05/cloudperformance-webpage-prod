@@ -131,7 +131,7 @@ export default function DeploymentsChartComponent({ startDate, endDate, selected
                 borderWidth: 1,
                 textStyle: { fontSize: 12, color: '#111' },
                 extraCssText: 'box-shadow:0 4px 12px rgba(0,0,0,.08); border-radius:10px; padding:10px 12px;',
-                formatter: (params: any) => {
+                formatter: (params: unknown) => {
                     const param = Array.isArray(params) ? params[0] : params;
                     const originalDate = toUTCDate(dates[param.dataIndex]);
                     const dateStr = fmt.format(originalDate);

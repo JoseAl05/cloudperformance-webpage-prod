@@ -45,11 +45,11 @@ const sliderConfig = [
   },
 ];
 
-const createTooltipFormatter = (unit: string) => (params: any) => {
+const createTooltipFormatter = (unit: string) => (params: unknown) => {
   const date = new Date(params[0].value[0]).toUTCString();
   return (
     `${date}<br/>` +
-    params.map((p: any) => `${p.marker} ${p.seriesName}: ${p.value[1].toFixed(2)} ${unit}<br/>`).join('')
+    params.map((p: unknown) => `${p.marker} ${p.seriesName}: ${p.value[1].toFixed(2)} ${unit}<br/>`).join('')
   );
 };
 

@@ -58,7 +58,7 @@ const sliderConfig = [
   },
 ];
 
-const createTooltipFormatter = () => (params: any) => {
+const createTooltipFormatter = () => (params: unknown) => {
   const date = new Date(params[0].value[0]).toLocaleDateString('es-CL', {
     day: '2-digit',
     month: '2-digit',
@@ -66,7 +66,7 @@ const createTooltipFormatter = () => (params: any) => {
   });
   return (
     `${date}<br/>` +
-    params.map((p: any) => `${p.marker} ${p.seriesName}: $${p.value[1].toFixed(2)} USD<br/>`).join('')
+    params.map((p: unknown) => `${p.marker} ${p.seriesName}: $${p.value[1].toFixed(2)} USD<br/>`).join('')
   );
 };
 

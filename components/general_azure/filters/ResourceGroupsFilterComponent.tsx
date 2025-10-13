@@ -103,7 +103,7 @@ export const ResourceGroupFilterComponent = ({
   if (isLoading) return <LoaderComponent size="small" />
   if (error) return <div className="text-sm text-red-500">Error al cargar grupos de recursos</div>
 
-  const resourceGroups = Array.isArray(data) ? data.map((item: any) => item.resource_group) : []
+  const resourceGroups = Array.isArray(data) ? data.map((item: unknown) => item.resource_group) : []
   const noGroups = resourceGroups.length === 0
 
   return (

@@ -110,7 +110,7 @@ export const InstancesFilterComponentV2 = ({
   if (isLoading) return <LoaderComponent size="small" />
   if (error) return <div className="text-sm text-red-500">Error al cargar instancias</div>
 
-  const instances = Array.isArray(data) ? data.map((item: any) => item.instance) : []
+  const instances = Array.isArray(data) ? data.map((item: unknown) => item.instance) : []
   const noInstances = instances.length === 0
 
   return (
