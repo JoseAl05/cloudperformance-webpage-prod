@@ -154,7 +154,7 @@ export const HeatmapQuotasComponent = ({ startDate, endDate, region, subscriptio
             `
           }
           
-          let unit = level === 2 ? ' Quotas' : ' %'
+          const unit = level === 2 ? ' Quotas' : ' %'
           return `
             <div style="font-weight:bold">${treePath}</div>
             Valor: ${typeof value === 'number' ? value.toFixed(2) : value}${unit}
@@ -176,7 +176,7 @@ export const HeatmapQuotasComponent = ({ startDate, endDate, region, subscriptio
               const name = params.data.name
               const value = params.data.value
               const level = params.treePathInfo.length
-              let unit = level === 2 ? ' Quotas' : '%'
+              const unit = level === 2 ? ' Quotas' : '%'
               
               return `${name}\n${typeof value === 'number' ? value.toFixed(1) : value}${unit}`
             },
