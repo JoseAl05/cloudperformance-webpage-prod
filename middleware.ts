@@ -9,6 +9,7 @@ export async function middleware(req: NextRequest) {
 
   const isProtected = PROTECTED_PATHS.some((p) => pathname.startsWith(p));
   if (!isProtected) return NextResponse.next();
+
   const session = await getAuthFromRequest(req);
   if (!session) {
     const url = req.nextUrl.clone();
@@ -17,20 +18,22 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  const isAwsAllowed =
-    (session as unknown as { is_aws?: boolean }).is_aws === true;
-  const isAzureAllowed =
-    (session as unknown as { is_azure?: boolean }).is_azure === true;
+  const isAwsAllowed = !!(
+    session as unknown as { is_aws?: boolean | string | number }
+  ).is_aws;
+  const isAzureAllowed = !!(
+    session as unknown as { is_azure?: boolean | string | number }
+  ).is_azure;
 
   if (pathname.startsWith('/aws') && !isAwsAllowed) {
     const url = req.nextUrl.clone();
-    url.pathname = '/login';
+    url.pathname = '/unauthorized';
     return NextResponse.redirect(url);
   }
 
   if (pathname.startsWith('/azure') && !isAzureAllowed) {
     const url = req.nextUrl.clone();
-    url.pathname = '/login';
+    url.pathname = '/unauthorized';
     return NextResponse.redirect(url);
   }
 
