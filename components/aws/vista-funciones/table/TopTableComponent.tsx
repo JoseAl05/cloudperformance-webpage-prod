@@ -107,11 +107,6 @@ export const TableComponentTop = ({
   if (isLoading) return <p>Cargando datos...</p>
   if (error) return <p>Error cargando datos</p>
 
-  console.log("📊 Data recibida:", data)
-
-  if (data && data.length > 0) {
-    console.log("🔎 Primer objeto:", data[0])
-  }
 
   return (
     <DataTableSingle

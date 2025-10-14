@@ -24,13 +24,6 @@ export const AutoscalingGroupsEventsTableComponent = ({
     const tableData = Array.isArray(data) ? data : [];
     const eventCount = tableData.length;
 
-    console.log('=== DEBUG TABLA EVENTOS ===');
-    console.log('Data recibida:', data);
-    console.log('tableData:', tableData);
-    console.log('eventCount:', eventCount);
-    console.log('Primer elemento:', tableData[0]);
-    console.log('================================');        
-
     return (
         <Card>
             <CardHeader className='border-b'>

@@ -23,6 +23,8 @@ import {
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { toast } from 'sonner'
 import { ColumnDef } from '@tanstack/react-table'
+import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
 
 export type AutoscalingGroupInstance = {
     sync_time: { $date: string }
@@ -163,17 +165,38 @@ const AutoscalingInstanceDetailsModal = ({ instance }: { instance: AutoscalingGr
     )
 }
 
+const DateParams = () => {
+    const searchParams = useSearchParams();
+
+    const startDateParam = searchParams.get('startDate');
+    const endDateParam = searchParams.get('endDate');
+
+    return { startDateParam: startDateParam, endDateParam: endDateParam }
+}
+
 export const autoscalingGroupInstanceColumns: ColumnDef<AutoscalingGroupInstance>[] = [
     {
         header: 'Instance ID',
         accessorKey: 'InstanceId',
-        cell: ({ getValue }) => (
-            <div className='font-medium'>
-                <code className='bg-orange-50 px-2 py-1 rounded text-xs font-mono text-orange-700 border border-orange-200'>
-                    {String(getValue() || '')}
-                </code>
-            </div>
-        ),
+        cell: ({ getValue }) => {
+            const value = getValue() as string;
+            const startDate = DateParams().startDateParam;
+            const endDate = DateParams().endDateParam
+            return (
+                <div className='font-medium'>
+                    <Link
+                        className='cursor-pointer'
+                        href={{ pathname: '/aws/recursos/instancias-ec2', query: { instance: value, startDate: startDate, endDate: endDate } }}
+                        rel="noopener noreferrer"
+                        target="_blank"
+                    >
+                        <code className='bg-orange-50 px-2 py-1 rounded text-xs font-mono text-orange-700 border border-orange-200 transition-all hover:scale-[1.02]'>
+                            {value}
+                        </code>
+                    </Link>
+                </div>
+            )
+        },
     },
     {
         header: 'Tipo de Instancia',
@@ -190,13 +213,12 @@ export const autoscalingGroupInstanceColumns: ColumnDef<AutoscalingGroupInstance
         cell: ({ getValue }) => {
             const state = String(getValue() || '');
             return (
-                <Badge 
-                    variant='outline' 
-                    className={`font-mono ${
-                        state.includes('En servicio') || state.includes('InService') 
-                            ? 'bg-green-50 text-green-700 border-green-200' 
-                            : 'bg-yellow-50 text-yellow-700 border-yellow-200'
-                    }`}
+                <Badge
+                    variant='outline'
+                    className={`font-mono ${state.includes('En servicio') || state.includes('InService')
+                        ? 'bg-green-50 text-green-700 border-green-200'
+                        : 'bg-yellow-50 text-yellow-700 border-yellow-200'
+                        }`}
                 >
                     {state}
                 </Badge>
@@ -209,13 +231,12 @@ export const autoscalingGroupInstanceColumns: ColumnDef<AutoscalingGroupInstance
         cell: ({ getValue }) => {
             const status = String(getValue() || '');
             return (
-                <Badge 
-                    variant='outline' 
-                    className={`font-mono ${
-                        status.includes('Healthy') || status.includes('saludable')
-                            ? 'bg-green-50 text-green-700 border-green-200' 
-                            : 'bg-red-50 text-red-700 border-red-200'
-                    }`}
+                <Badge
+                    variant='outline'
+                    className={`font-mono ${status.includes('Healthy') || status.includes('saludable')
+                        ? 'bg-green-50 text-green-700 border-green-200'
+                        : 'bg-red-50 text-red-700 border-red-200'
+                        }`}
                 >
                     {status}
                 </Badge>
@@ -226,7 +247,7 @@ export const autoscalingGroupInstanceColumns: ColumnDef<AutoscalingGroupInstance
         header: 'Fecha Observación',
         accessorKey: 'sync_time',
         cell: ({ getValue }) => {
-            const value = getValue() as { $date: string };
+            const value = getValue()
             const date = new Date(value?.$date || '');
             return (
                 <div className='text-sm'>
@@ -265,7 +286,7 @@ export const autoscalingGroupInstanceColumns: ColumnDef<AutoscalingGroupInstance
                 <span className='text-gray-400 text-xs'>N/A</span>
             );
         }
-    },   
+    },
     {
         header: 'Version Launch Template',
         accessorKey: 'LaunchTemplate_Version',

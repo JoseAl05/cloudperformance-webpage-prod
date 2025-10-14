@@ -97,7 +97,6 @@ export const UnusedCardsComponent: React.FC<UnusedCardsComponentProps> = ({
     const sortedData = (data ? [...data] : [])
         .sort((a, b) => new Date(b.sync_time).getTime() - new Date(a.sync_time).getTime());
 
-    console.log(sortedData);
     const latestData = sortedData[0]?.sync_time;
     const referenceDate = latestData ? new Date(latestData) : new Date();
     const today = new Date();
@@ -130,7 +129,7 @@ export const UnusedCardsComponent: React.FC<UnusedCardsComponentProps> = ({
 
     const totalCardTitle = type === 'vm' ? 'Cantidad VMs Infrautilizadas' : type === 'vmss' ? 'Cantidad VMSS Infrautilizadas' : '';
     const diskTitle = type === 'vm' ? 'Cantidad Disco' : type === 'vmss' ? 'Cantidad Disco del Sistema Operativo' : '';
-    
+
     const totalVmCard = [
         {
             title: totalCardTitle,

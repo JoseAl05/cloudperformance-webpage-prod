@@ -69,7 +69,6 @@ const normalizeDisks = (details: UnusedVmssDiskDetails[]): UnusedVmssDisksData[]
 }
 
 const ExtensionsCell = ({ details }: { details?: UnusedVmExtensionsData[] }) => {
-    console.log(details);
     const total = details?.length ?? 0;
     const [open, setOpen] = useState(false);
 

@@ -29,13 +29,12 @@ interface AutoscalingGroupData {
 }
 
 const fetcher = (url: string) =>
-    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
-        .then(r => r.json());
+  fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
+    .then(r => r.json());
 
 export const InstanciasAutoscalingGroupsChartComponent = (props: unknown) => {
   const { startDate, endDate, region, instance, selectedKey, selectedValue } = props;
 
-  console.log('Instance seleccionado:', instance);
 
   // Construir URL usando la estructura correcta que espera tu API
   const startDateFormatted = startDate.toISOString().split(".")[0];
@@ -54,8 +53,6 @@ export const InstanciasAutoscalingGroupsChartComponent = (props: unknown) => {
   if (instance && instance !== "all_autoscaling_groups") {
     apiUrl += `&auto_scaling_group_name=${instance}`;
   }
-
-  console.log('URL construida:', apiUrl);
 
   // TODOS LOS HOOKS JUNTOS AL PRINCIPIO
   const { data: infoList, error: infoError, isLoading: infoLoading } = useSWR<AutoscalingGroupData[]>(
@@ -87,20 +84,10 @@ export const InstanciasAutoscalingGroupsChartComponent = (props: unknown) => {
     fetcher
   );
 
-  console.log('Datos de la API:', { infoList, infoError, infoLoading });
-  console.log('Datos eventos desde API:', eventsData);
-
-  //borrar despues estos logs 
-  console.log('URL de eventos construida:', eventsApiUrl);
-  console.log('Instance value usado como resource:', instance);
-  console.log('URL que funciona en Postman:', 'resource=awseb-e-znjuf8dzhf-stack-AWSEBAutoScalingGroup-3AaCBeqM5dbr');
-
   // DESPUÉS de todos los hooks, hacer el filtrado
   const autoscalingGroupData = (infoList || []).filter((item: AutoscalingGroupData) =>
     item?.AutoScalingGroupName === instance
   );
-
-  console.log('Datos filtrados:', autoscalingGroupData);
 
   if (infoLoading) {
     return (
@@ -150,48 +137,52 @@ export const InstanciasAutoscalingGroupsChartComponent = (props: unknown) => {
           <MainAutoscalingGroupsResourceViewMetricsSummaryComponent data={autoscalingGroupData} />
         </div>
       </div>
+      <div className='my-5'>
+        {/* Tabla de Instancias del Autoscaling Group */}
+        <AutoscalingGroupsResourceViewInstanciasComponent
+          data={instancesData}
+          startDate={startDate}
+          endDate={endDate}
+          autoscalingGroup={instance}
+          isLoading={instancesLoading}
+        />
+      </div>
+      <div className='my-5'>
+        {/* Gráfico de Estados de Instancias */}
+        <Card className="w-full">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <BarChart3 className="h-5 w-5 text-orange-600" />
+              Estados Instancias - {instance}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <AutoscalingGroupsResourceViewStatesInstancesComponent
+              data={metricsData || []}
+              title="Estados Instancias Autoscaling Group"
+              height="300px"
+            />
+          </CardContent>
+        </Card>
+      </div>
+      <div className='my-5'>
 
-      {/* Tabla de Instancias del Autoscaling Group */}
-      <AutoscalingGroupsResourceViewInstanciasComponent
-        data={instancesData}
-        startDate={startDate}
-        endDate={endDate}
-        autoscalingGroup={instance}
-        isLoading={instancesLoading}
-      />
-
-      {/* Gráfico de Estados de Instancias */}
-      <Card className="w-full">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <BarChart3 className="h-5 w-5 text-orange-600" />
-            Estados Instancias - {instance}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <AutoscalingGroupsResourceViewStatesInstancesComponent
-            data={metricsData || []}
-            title="Estados Instancias Autoscaling Group"
-            height="300px"
-          />
-        </CardContent>
-      </Card>
-
-      {/* Gráfico de Instancias vs Max/Min */}
-      <Card className="w-full">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <BarChart3 className="h-5 w-5 text-orange-600" />
-            Configuración vs Límites - {instance}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <AutoscalingGroupsResourceViewInstancesVsMaxMinComponent
-            data={metricsData || []}
-            height="300px"
-          />
-        </CardContent>
-      </Card>
+        {/* Gráfico de Instancias vs Max/Min */}
+        <Card className="w-full">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <BarChart3 className="h-5 w-5 text-orange-600" />
+              Configuración vs Límites - {instance}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <AutoscalingGroupsResourceViewInstancesVsMaxMinComponent
+              data={metricsData || []}
+              height="300px"
+            />
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Tabla de Eventos del Autoscaling Group */}
       <AutoscalingGroupsEventsTableComponent

@@ -51,6 +51,7 @@ interface FiltersComponentProps {
     autoScalingGroupFilter?: boolean;
     metricFilter?: boolean;
     metricsFilter?: boolean;
+    isMetricsMultiselect?:boolean;
     rdsFilter?: boolean;
     engine?: string;
     metricsRDSFilter?: boolean;
@@ -91,6 +92,7 @@ export const FiltersComponent = ({
     autoScalingGroupFilter = false,
     metricFilter = false,
     metricsFilter = false,
+    isMetricsMultiselect = false,
     rdsFilter = false,
     engine,
     metricsRDSFilter = false,
@@ -835,7 +837,7 @@ export const FiltersComponent = ({
                                     <BarChart3 className='h-4 w-4' />
                                     Métrica
                                 </label>
-                                <MetricsFilterComponent selectedMetrics={tempMetrics} setSelectedMetrics={setTempMetrics} />
+                                <MetricsFilterComponent selectedMetrics={tempMetrics} setSelectedMetrics={setTempMetrics} isMetricsMultiSelect={isMetricsMultiselect}/>
                             </div>
                         )}
                         {metricsRDSFilter && (

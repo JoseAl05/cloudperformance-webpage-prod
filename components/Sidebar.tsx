@@ -281,8 +281,6 @@ export const SidebarComponent = ({
     }, [state])
 
     useEffect(() => {
-        console.log('AWS' + pathname.startsWith('/aws'))
-        console.log('AZURE' + pathname.startsWith('/azure'))
         setIsAws(pathname.startsWith('/aws'))
         setIsAzure(pathname.startsWith('/azure'))
     }, [pathname])

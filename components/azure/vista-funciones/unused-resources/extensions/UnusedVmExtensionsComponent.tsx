@@ -48,7 +48,6 @@ export const UnusedVmExtensionsComponent = ({ startDate, endDate, subscription, 
     if (anyLoading) {
         return <LoaderComponent />
     }
-    console.log(selectedVm);
     if (!hasSelectedVm) {
         return (
             <div className="w-full min-w-0 px-4 py-6">

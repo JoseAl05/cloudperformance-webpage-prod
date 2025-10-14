@@ -40,8 +40,6 @@ export const TableComponentTop = ({
     return !(costoNeto === 0 && costoBruto === 0)   // ✅ deja pasar si alguno es distinto de 0
   })
 
-  console.log(data);
-
   const columns: ColumnDef<TableDataTop>[] = [
     {
       accessorKey: "dimension",

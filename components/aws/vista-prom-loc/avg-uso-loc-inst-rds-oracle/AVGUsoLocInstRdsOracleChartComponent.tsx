@@ -71,8 +71,8 @@ interface ProcessedHeatmapData {
 }
 
 const fetcher = (url: string) =>
-    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
-        .then(r => r.json());
+  fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
+    .then(r => r.json());
 
 export const AVGUsoLocInstRdsOracleChartComponent = ({
   startDate,
@@ -81,21 +81,20 @@ export const AVGUsoLocInstRdsOracleChartComponent = ({
   region,
   metrics
 }: Props) => {
-  console.log('RDS ORACLE DEBUG - Props received:', { startDate, endDate, instance, region, metrics });
 
   // Construir la URL de la API con lógica híbrida
   const apiUrl = useMemo(() => {
     if (!metrics || metrics.trim() === '') return null;
-    
+
     // Formatear fechas: 2025-08-01T00:00:00
     const formatDate = (date: Date) => {
       return date.toISOString().split('.')[0];
     };
-    
+
     // Los grupos de métricas decodificados y separados por coma
     const metricGroups = metrics.split(',').map(m => decodeURIComponent(m.trim())).join(',');
     const baseUrl = '/api/bridge';
-    
+
     // LÓGICA HÍBRIDA: cambiar endpoint según instancia seleccionada
     if (instance && instance !== '' && instance !== 'all') {
       // Endpoint para instancia específica
@@ -106,7 +105,7 @@ export const AVGUsoLocInstRdsOracleChartComponent = ({
         `metric_label=${metricGroups}`,
         `resource=${instance}`
       ].join('&');
-      
+
       return `${baseUrl}/db/promedio-loc-rds-oracle-detalle?${queryParams}`;
     } else {
       // Endpoint general (comportamiento original)
@@ -123,16 +122,9 @@ export const AVGUsoLocInstRdsOracleChartComponent = ({
 
   // Solo hacer la petición si tenemos los parámetros mínimos
   const shouldFetch = !!(startDate && endDate && apiUrl);
-  
-  // Debug: log de la URL generada
-  if (apiUrl) {
-    console.log('RDS ORACLE Generated API URL:', apiUrl);
-    console.log('RDS ORACLE Instance parameter:', instance);
-    console.log('RDS ORACLE Using endpoint:', instance && instance !== '' && instance !== 'all' ? 'DETALLE' : 'GENERAL');
-  }
-  
+
   const { data: apiData, error, isLoading } = useSWR<ApiResponse>(
-    shouldFetch ? apiUrl : null, 
+    shouldFetch ? apiUrl : null,
     fetcher
   );
 
@@ -144,14 +136,14 @@ export const AVGUsoLocInstRdsOracleChartComponent = ({
     if ('resource_info' in apiData) {
       // RESPUESTA DE DETALLE - instancia específica
       const detailData = apiData as ApiResponseDetail;
-      
+
       if (!detailData.metric_averages?.length) return [];
-      
+
       // Usar resource_region del resource_info si existe, sino usar la región del filtro
-      const regionKey = detailData.resource_info.resource_region || 
-                       (region === 'all_regions' ? 'us-east-1' : region);
+      const regionKey = detailData.resource_info.resource_region ||
+        (region === 'all_regions' ? 'us-east-1' : region);
       const metrics: { [key: string]: number } = {};
-      
+
       detailData.metric_averages.forEach(metric => {
         metrics[metric.metric_label] = metric.average_value;
       });
@@ -160,23 +152,23 @@ export const AVGUsoLocInstRdsOracleChartComponent = ({
         region: regionKey,
         metrics
       }];
-      
+
     } else {
       // RESPUESTA GENERAL - todas las instancias (lógica original)
       const generalData = apiData as ApiResponseGeneral;
-      
+
       if (!generalData.metric_averages?.length) return [];
 
       // Agrupar métricas por región real (solo regiones con datos)
       const regionData: { [key: string]: { [key: string]: number } } = {};
-      
+
       generalData.metric_averages.forEach(metric => {
         const regionKey = metric.resource_region; // Usar la región real de cada métrica
-        
+
         if (!regionData[regionKey]) {
           regionData[regionKey] = {};
         }
-        
+
         regionData[regionKey][metric.metric_label] = metric.average_value;
       });
 
@@ -230,7 +222,7 @@ export const AVGUsoLocInstRdsOracleChartComponent = ({
 
   return (
     <div className="w-full min-w-0">
-      <AVGUsoLocInstRdsOracleViewUsoPorRegionComponent 
+      <AVGUsoLocInstRdsOracleViewUsoPorRegionComponent
         data={processedData}
         allMetrics={allMetrics}
         isLoading={isLoading}

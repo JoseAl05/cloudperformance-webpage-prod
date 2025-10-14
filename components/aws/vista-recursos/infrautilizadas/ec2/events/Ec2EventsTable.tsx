@@ -12,7 +12,6 @@ interface Ec2EventsTableComponentProps {
 
 export const Ec2EventsTableComponent = ({ data, startDate, endDate, instance }: Ec2EventsTableComponentProps) => {
     const eventsColumns = createColumns(awsEventColumns);
-    console.log(data.data);
     return (
         <Card>
             <CardHeader className="border-b">

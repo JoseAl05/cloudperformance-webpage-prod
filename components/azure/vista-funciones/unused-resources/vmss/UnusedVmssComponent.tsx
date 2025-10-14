@@ -152,7 +152,6 @@ export const UnusedVmssComponent = ({ startDate, endDate, subscription, region, 
     const dedupedAvailableMemoryMetrics = dedupeByTimestamp(mergedAvailableMemoryMetrics, 'Available Memory');
     const dedupedDiskIopsMetrics = dedupeByTimestamp(mergedDiskIopsMetrics, 'Disks IOPS');
     const dedupedCpuCreditsMetrics = dedupeByTimestamp(mergedCredits, ['CPU Credits Remaining', 'CPU Credits Consumed']);
-    console.log(unusedVmssData);
     return (
         <div className='w-full min-w-0 px-4 py-6'>
             <div className="flex-1 space-y-6 min-w-0 overflow-hidden">
