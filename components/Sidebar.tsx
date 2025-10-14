@@ -268,8 +268,8 @@ export const SidebarComponent = ({
                 <Image
                     width={100}
                     height={100}
-                    alt="Logo Cloud Performance"
-                    src="/logo.png"
+                    alt="Logo Intac"
+                    src="/logo-intac.svg"
                     className="object-cover"
                 />
                 {open && (

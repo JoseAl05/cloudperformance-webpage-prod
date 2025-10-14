@@ -11,10 +11,11 @@ export default function LoginPage() {
           <a href='#' className='flex items-center gap-2 font-medium'>
             <div className='text-primary-foreground flex items-center justify-center rounded-md'>
               <Image
-                src='/logo.png'
-                alt='Logo Cloudperformance Pequeño'
-                width={70}
-                height={70}
+                src='/logo-intac.svg'
+                alt='Logo Intac'
+                width={80}
+                height={80}
+                className='object-cover'
               />
             </div>
             Cloudperformance

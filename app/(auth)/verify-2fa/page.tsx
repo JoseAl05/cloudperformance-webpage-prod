@@ -9,7 +9,7 @@ export default function Verify2FaPage() {
         <div className="flex justify-center gap-2 md:justify-start">
           <a href="#" className="flex items-center gap-2 font-medium">
             <div className="text-primary-foreground flex items-center justify-center rounded-md">
-              <Image src="/logo.png" alt="Logo Cloudperformance Pequeño" width={70} height={70} />
+              <Image src="/logo-intac.svg" alt="Logo Intac" width={70} height={70} />
             </div>
             Cloudperformance
           </a>
