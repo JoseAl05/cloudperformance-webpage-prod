@@ -179,7 +179,7 @@ export const SidebarComponent = ({
     ]
 
     const AzureRoutes = {
-        
+
         routes: [
             { label: 'Inicio', icon: LayoutDashboard, href: '/azure' },
             { label: 'Tendencia Facturación', icon: Grid2X2, href: '/azure/facturacion/tendencia-pago-por-uso' },
@@ -235,37 +235,6 @@ export const SidebarComponent = ({
         }, {})
     }, [funcionesConSub, pathname])
 
-    // const funcionesConSub =
-    //     isAws ? AwsRoutes.funciones.filter(f => f.subItems && f.subItems.length) : isAzure ? AzureRoutes.funciones.filter(f => f.subItems && f.subItems.length) : [];
-    // const funcionesSimples =
-    //     isAws ? AwsRoutes.funciones.filter(f => f.href) : isAzure ? AzureRoutes.funciones.filter(f => f.href) : [];
-
-    // const defaultOpenRecursos =
-    //     isAws ? AwsRoutes.recursos.some((r) => r.href === pathname) : isAzure ? AzureRoutes.recursos.some((r) => r.href === pathname) : false
-    // const [isRecursosOpen, setIsRecursosOpen] = useState(defaultOpenRecursos)
-
-    // const defaultOpenFunciones =
-    //     isAws ? AwsRoutes.funciones.some((f) =>
-    //         (f.href && f.href === pathname) || f.subItems?.some((sub) => sub.href === pathname)
-    //     ) : isAzure ? AzureRoutes.funciones.some((f) =>
-    //         (f.href && f.href === pathname) || f.subItems?.some((sub) => sub.href === pathname)
-    //     ) : false
-    // const [isFuncionesOpen, setIsFuncionesOpen] = useState(defaultOpenFunciones)
-
-    // const defaultOpenConsumes =
-    //     isAws ? AwsRoutes.consumes.some((f) =>
-    //         f.subItems?.some((sub) => sub.href === pathname)
-    //     ) : isAzure ? AzureRoutes.consumes.some((f) =>
-    //         f.subItems?.some((sub) => sub.href === pathname)
-    //     ) : false
-    // const [isConsumesOpen, setIsConsumesOpen] = useState(defaultOpenConsumes)
-
-    // const initialOpenByGroup = useMemo(() => {
-    //     return funcionesConSub.reduce<Record<string, boolean>>((acc, grupo) => {
-    //         acc[grupo.label] = grupo.subItems?.some((sub) => sub.href === pathname) ?? false
-    //         return acc
-    //     }, {})
-    // }, [funcionesConSub, pathname])
 
     const [openByGroup, setOpenByGroup] = useState<Record<string, boolean>>(initialOpenByGroup)
 

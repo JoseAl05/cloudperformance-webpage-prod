@@ -85,6 +85,8 @@ export const LambdaTableComponent = ({
             data={data?.functions ?? []}
             filterColumn="function_name"
             filterPlaceholder="Buscar función…"
+            groupByColumn='function_name'
+            enableGrouping
         />
     )
 }

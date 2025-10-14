@@ -20,6 +20,7 @@ export default async function ProfileLayout({
     const payload = token ? await verifyAuthToken(token) : null;
     return (
         <SidebarProvider
+            defaultOpen={false}
             style={
                 {
                     "--sidebar-width": "calc(var(--spacing) * 72)",

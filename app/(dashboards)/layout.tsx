@@ -1,12 +1,9 @@
-
 import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar"
 import { SidebarComponent } from "@/components/Sidebar"
-import { ModeToggle } from '@/components/ModeToggle';
 import { Navbar } from '@/components/Navbar';
 import { cookies } from 'next/headers';
 import { AUTH_COOKIE } from '@/lib/cookies';
 import { verifyAuthToken } from '@/lib/auth';
-import Link from 'next/link';
 
 
 export default async function DashboardLayout({
@@ -19,6 +16,7 @@ export default async function DashboardLayout({
     const payload = token ? await verifyAuthToken(token) : null;
     return (
         <SidebarProvider
+            defaultOpen={false}
             style={
                 {
                     "--sidebar-width": "calc(var(--spacing) * 72)",
