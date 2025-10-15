@@ -73,14 +73,11 @@ export const AdvisorViewInfoComponent = ({ data, startDate, endDate }: AdvisorVi
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [modalImpactedValue, setModalImpactedValue] = useState<string | null>(null)
 
-    console.log('🔍 Total registros en safeData:', safeData.length)
-    console.log('🔍 Ejemplo de registros:', safeData.slice(0, 3))
-
     // Agrupar primero por problem, luego por category
     const groupedByCategory = useMemo(() => {
         // Paso 1: Agrupar por problem
         const problemGroups = new Map<string, AzureAdvisorRecommendation[]>()
-        
+
         for (const rec of safeData) {
             const key = rec.problem
             if (!problemGroups.has(key)) {
@@ -104,7 +101,7 @@ export const AdvisorViewInfoComponent = ({ data, startDate, endDate }: AdvisorVi
 
         // Paso 3: Agrupar por categoría
         const categoryMap = new Map<string, GroupedRecommendation[]>()
-        
+
         for (const rec of recommendations) {
             if (!categoryMap.has(rec.category)) {
                 categoryMap.set(rec.category, [])
@@ -130,7 +127,7 @@ export const AdvisorViewInfoComponent = ({ data, startDate, endDate }: AdvisorVi
                 const catMatch = normalize(group.category).includes(q)
                 const recs = catMatch
                     ? group.recommendations
-                    : group.recommendations.filter((r) => 
+                    : group.recommendations.filter((r) =>
                         normalize(r.problem).includes(q) ||
                         normalize(r.impact).includes(q) ||
                         normalize(r.resource_type || '').includes(q)
@@ -146,7 +143,7 @@ export const AdvisorViewInfoComponent = ({ data, startDate, endDate }: AdvisorVi
             setSelectedProblem(null)
             return
         }
-        const stillExists = filteredGroups.some((g) => 
+        const stillExists = filteredGroups.some((g) =>
             g.recommendations.some((r) => r.problem === selectedProblem)
         )
         if (!stillExists) {
@@ -207,7 +204,7 @@ export const AdvisorViewInfoComponent = ({ data, startDate, endDate }: AdvisorVi
 
     const impactBadge = (visualImpact: string) => {
         const base = 'inline-flex items-center px-2 py-0.5 rounded text-xs font-medium'
-        
+
         if (visualImpact.includes('Alto') || visualImpact.includes('🟥')) {
             return <span className={`${base} bg-red-500/10 text-red-600 dark:text-red-400 ring-1 ring-red-500/30`}>
                 🟥 Alto
@@ -229,9 +226,9 @@ export const AdvisorViewInfoComponent = ({ data, startDate, endDate }: AdvisorVi
     const formatDate = (dateStr: string) => {
         try {
             const date = new Date(dateStr)
-            return date.toLocaleDateString('es-ES', { 
-                year: 'numeric', 
-                month: 'short', 
+            return date.toLocaleDateString('es-ES', {
+                year: 'numeric',
+                month: 'short',
                 day: 'numeric',
                 hour: '2-digit',
                 minute: '2-digit'
@@ -256,9 +253,6 @@ export const AdvisorViewInfoComponent = ({ data, startDate, endDate }: AdvisorVi
         if (!selectedRec) return []
         // Buscar en safeData todos los registros que tengan el mismo problem
         const recursos = safeData.filter(rec => rec.problem === selectedRec.problem)
-        console.log('🎯 Problem seleccionado:', selectedRec.problem)
-        console.log('🎯 Recursos filtrados:', recursos.length)
-        console.log('🎯 Recursos completos:', recursos)
         return recursos
     }
 
@@ -462,9 +456,9 @@ const DetailModal = ({ resources, onClose }: DetailModalProps) => {
     const formatDate = (dateStr: string) => {
         try {
             const date = new Date(dateStr)
-            return date.toLocaleDateString('es-ES', { 
-                year: 'numeric', 
-                month: 'short', 
+            return date.toLocaleDateString('es-ES', {
+                year: 'numeric',
+                month: 'short',
                 day: 'numeric',
                 hour: '2-digit',
                 minute: '2-digit'
@@ -476,7 +470,7 @@ const DetailModal = ({ resources, onClose }: DetailModalProps) => {
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={onClose}>
-            <div 
+            <div
                 className="bg-background rounded-xl border shadow-lg w-full max-w-4xl max-h-[80vh] overflow-hidden flex flex-col"
                 onClick={(e) => e.stopPropagation()}
             >
