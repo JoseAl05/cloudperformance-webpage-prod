@@ -11,7 +11,6 @@ export async function middleware(req: NextRequest) {
   if (!isProtected) return NextResponse.next();
 
   const session = await getAuthFromRequest(req);
-  console.log(session);
   if (!session) {
     const url = req.nextUrl.clone();
     url.pathname = '/login';
@@ -25,9 +24,6 @@ export async function middleware(req: NextRequest) {
   const isAzureAllowed = !!(
     session as unknown as { is_azure?: boolean | string | number }
   ).is_azure;
-
-  console.log(isAwsAllowed);
-  console.log(isAzureAllowed);
 
   if (pathname.startsWith('/aws') && !isAwsAllowed) {
     const url = req.nextUrl.clone();
