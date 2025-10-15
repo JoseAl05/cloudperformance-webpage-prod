@@ -409,7 +409,7 @@ export function makeLineSeries(
     name,
     type: 'line',
     data,
-    smooth: false,
+    smooth: true,
     symbol: 'none',
     symbolSize: 0,
     lineStyle: { color, width: 2, cap: 'round', join: 'round' },
@@ -502,7 +502,7 @@ export type ChartKind =
   | 'bar'
   | 'stackedBar'
   | 'pie'
-  | 'doughnut'
+  | 'doughnut';
 
 export interface BaseSeriesDef {
   name: string;
@@ -513,6 +513,35 @@ export interface BaseSeriesDef {
    *   Array<{ name: string; value: number }>
    */
   data: unknown[];
+  /**
+   * Overrides opcionales por serie (color, estilos, etc.).
+   */
+  extra?: SeriesOverrides;
+}
+
+export interface SeriesOverrides {
+  /** Color principal de la serie. */
+  color?: string;
+  /** Control fino por tipo de estilo (se aplica por encima de los defaults). */
+  lineStyle?: Record<string, unknown>;
+  areaStyle?: Record<string, unknown>;
+  itemStyle?: Record<string, unknown>;
+  /** Parámetros comunes */
+  showSymbol?: boolean;
+  smooth?: boolean;
+  symbol?: unknown;
+  symbolSize?: number;
+  /** Barras / apilado / ejes */
+  barWidth?: number | string;
+  stack?: string;
+  yAxisIndex?: number;
+  /** Otras opciones específicas */
+  encode?: Record<string, unknown>;
+  label?: Record<string, unknown>;
+  emphasis?: Record<string, unknown>;
+  markPoint?:Record<string,unknown>,
+  z?: number;
+  zlevel?: number;
 }
 
 export interface CartesianSeriesDef extends BaseSeriesDef {
@@ -526,10 +555,7 @@ export interface PieSeriesDef extends BaseSeriesDef {
   center?: [string | number, string | number];
 }
 
-
-export type AnySeriesDef =
-  | CartesianSeriesDef
-  | PieSeriesDef
+export type AnySeriesDef = CartesianSeriesDef | PieSeriesDef;
 
 export interface ChartFactoryInput {
   kind: ChartKind;
@@ -543,40 +569,174 @@ export interface ChartFactoryInput {
   extraOption?: echarts.EChartsOption;
 }
 
-export const buildSeries = (def: AnySeriesDef, opts?: { stackKey?: string }): echarts.SeriesOption  => {
+export const buildSeries = (
+  def: AnySeriesDef,
+  opts?: { stackKey?: string }
+): echarts.SeriesOption => {
+  const ex = (def as unknown as { extra?: SeriesOverrides }).extra;
+
+  const applyOverrides = (
+    series: echarts.SeriesOption,
+    kind: ChartKind | unknown
+  ): echarts.SeriesOption => {
+    const s = series as unknown as Record<string, unknown>;
+    if (!ex) return series;
+
+    // showSymbol / smooth
+    if (typeof ex.showSymbol === 'boolean') s.showSymbol = ex.showSymbol;
+    if (typeof ex.smooth === 'boolean') s.smooth = ex.smooth;
+
+    // yAxisIndex / barWidth / stack
+    if (typeof ex.yAxisIndex === 'number') s.yAxisIndex = ex.yAxisIndex;
+    if (typeof ex.barWidth !== 'undefined')
+      s['barWidth'] = ex.barWidth as unknown;
+    if (typeof ex.stack === 'string') s['stack'] = ex.stack;
+
+    // symbol / symbolSize
+    if (typeof ex.symbol !== 'undefined') s['symbol'] = ex.symbol as unknown;
+    if (typeof ex.symbolSize === 'number') s['symbolSize'] = ex.symbolSize;
+
+    // label / emphasis / encode (merge superficial)
+    if (ex.label) {
+      const prev = (s['label'] as Record<string, unknown> | undefined) ?? {};
+      s['label'] = { ...prev, ...ex.label };
+    }
+    if (ex.emphasis) {
+      const prev = (s['emphasis'] as Record<string, unknown> | undefined) ?? {};
+      s['emphasis'] = { ...prev, ...ex.emphasis };
+    }
+    if (ex.encode) {
+      const prev = (s['encode'] as Record<string, unknown> | undefined) ?? {};
+      s['encode'] = { ...prev, ...ex.encode };
+    }
+
+    // itemStyle / lineStyle / areaStyle
+    if (ex.itemStyle) {
+      const prev =
+        (s['itemStyle'] as Record<string, unknown> | undefined) ?? {};
+      s['itemStyle'] = { ...prev, ...ex.itemStyle };
+    }
+    if (ex.lineStyle) {
+      const prev =
+        (s['lineStyle'] as Record<string, unknown> | undefined) ?? {};
+      s['lineStyle'] = { ...prev, ...ex.lineStyle };
+    }
+    if (ex.areaStyle) {
+      const prev =
+        (s['areaStyle'] as Record<string, unknown> | undefined) ?? {};
+      s['areaStyle'] = { ...prev, ...ex.areaStyle };
+    }
+
+    // Color primario
+    if (typeof ex.color === 'string' && ex.color) {
+      const itemPrev =
+        (s['itemStyle'] as Record<string, unknown> | undefined) ?? {};
+      s['itemStyle'] = { ...itemPrev, color: ex.color };
+
+      const k = kind as string;
+      if (k === 'line' || k === 'area' || k === 'scatter') {
+        const linePrev =
+          (s['lineStyle'] as Record<string, unknown> | undefined) ?? {};
+        s['lineStyle'] = { ...linePrev, color: ex.color };
+      }
+      if ((kind as string) === 'area') {
+        const areaPrev =
+          (s['areaStyle'] as Record<string, unknown> | undefined) ?? {};
+        s['areaStyle'] = { ...areaPrev, color: ex.color };
+      }
+    }
+
+    // z / zlevel
+    if (typeof ex.z === 'number') s['z'] = ex.z;
+    if (typeof ex.zlevel === 'number') s['zlevel'] = ex.zlevel;
+
+    return s as unknown as echarts.SeriesOption;
+  };
+
   switch (def.kind) {
     case 'line':
-    case 'area':
-      return {
+    case 'area': {
+      const base = {
         name: def.name,
         type: 'line',
         smooth: (def as CartesianSeriesDef).smooth ?? true,
         showSymbol: false,
         lineStyle: { width: 2 },
         areaStyle: def.kind === 'area' ? {} : undefined,
-        data: (def.data as Array<[unknown, number]>),
+        data: def.data as Array<[unknown, number]>,
         encode: { x: 0, y: 1 },
         emphasis: { focus: 'series' },
       } as echarts.SeriesOption;
+      return applyOverrides(base, def.kind);
+    }
 
-    case 'bar':
-    case 'stackedBar': {
-      const stack = def.kind === 'stackedBar' ? (opts?.stackKey ?? 'total') : undefined;
-      return {
+    case 'bar': {
+      const base = {
         name: def.name,
         type: 'bar',
-        stack,
-        data: (def.data as Array<[unknown, number]>),
+        data: def.data as Array<[unknown, number]>,
         encode: { x: 0, y: 1 },
         emphasis: { focus: 'series' },
       } as echarts.SeriesOption;
+      return applyOverrides(base, def.kind);
+    }
+
+    case 'stackedBar': {
+      const defaultStack = opts?.stackKey ? `${opts.stackKey}` : 'stack';
+      const base = {
+        name: def.name,
+        type: 'bar',
+        stack: defaultStack,
+        data: def.data as Array<[unknown, number]>,
+        encode: { x: 0, y: 1 },
+        emphasis: { focus: 'series' },
+      } as echarts.SeriesOption;
+      return applyOverrides(base, def.kind);
+    }
+
+    case 'scatter': {
+      const base = {
+        name: def.name,
+        type: 'scatter',
+        data: def.data as Array<[unknown, number]>,
+        encode: { x: 0, y: 1 },
+        emphasis: { focus: 'series' },
+      } as echarts.SeriesOption;
+      return applyOverrides(base, def.kind);
+    }
+
+    case 'radar': {
+      const base = {
+        name: def.name,
+        type: 'radar',
+        data: [
+          {
+            value: def.data as number[],
+            name: def.name,
+          },
+        ],
+        emphasis: { focus: 'series' },
+      } as echarts.SeriesOption;
+      return applyOverrides(base, def.kind);
+    }
+
+    case 'funnel': {
+      const base = {
+        name: def.name,
+        type: 'funnel',
+        data: def.data as Array<{ name: string; value: number }>,
+        emphasis: { focus: 'series' },
+      } as echarts.SeriesOption;
+      return applyOverrides(base, def.kind);
     }
 
     case 'pie':
     case 'doughnut': {
-      const radius = (def as PieSeriesDef).radius ?? (def.kind === 'doughnut' ? ['40%', '70%'] : '60%');
+      const radius =
+        (def as PieSeriesDef).radius ??
+        (def.kind === 'doughnut' ? ['40%', '70%'] : '60%');
       const center = (def as PieSeriesDef).center ?? ['50%', '55%'];
-      return {
+      const base = {
         name: def.name,
         type: 'pie',
         radius,
@@ -586,14 +746,20 @@ export const buildSeries = (def: AnySeriesDef, opts?: { stackKey?: string }): ec
         data: def.data as Array<{ name: string; value: number }>,
         emphasis: { focus: 'data' },
       } as echarts.SeriesOption;
+      return applyOverrides(base, def.kind);
     }
 
     default:
-      return { name: def.name, type: 'line', data: def.data as unknown } as echarts.SeriesOption;
+      return {
+        name: def.name,
+        type: 'line',
+        data: def.data as unknown,
+      } as echarts.SeriesOption;
   }
-}
-
-export const createChartOption = (input: ChartFactoryInput): echarts.EChartsOption  => {
+};
+export const createChartOption = (
+  input: ChartFactoryInput
+): echarts.EChartsOption => {
   const {
     kind,
     title,
@@ -602,46 +768,60 @@ export const createChartOption = (input: ChartFactoryInput): echarts.EChartsOpti
     radarIndicators,
     legend = true,
     tooltip = true,
-    xAxisType = (kind === 'line' || kind === 'area' || kind === 'scatter' ? 'time' : 'category'),
+    xAxisType = kind === 'line' || kind === 'area' || kind === 'scatter'
+      ? 'time'
+      : 'category',
     stackKey,
     extraOption = {},
   } = input;
-  const needsCartesian = ['line', 'area', 'bar', 'stackedBar', 'scatter'].includes(kind);
+  const needsCartesian = [
+    'line',
+    'area',
+    'bar',
+    'stackedBar',
+    'scatter',
+  ].includes(kind);
 
-  const builtSeries = series.map(s => buildSeries(s, { stackKey }));
+  const builtSeries = series.map((s) => buildSeries(s, { stackKey }));
 
   const option: echarts.EChartsOption = {
-    title: title
-      ? { text: title, subtext: subtitle }
-      : undefined,
+    title: title ? { text: title, subtext: subtitle } : undefined,
     legend: legend ? { top: 0 } : undefined,
-    tooltip: tooltip ? { trigger: kind === 'pie' || kind === 'doughnut' || kind === 'funnel' ? 'item' : 'axis' } : undefined,
-    xAxis: needsCartesian
-      ? { type: xAxisType }
-      : undefined,
-    yAxis: needsCartesian
-      ? { type: 'value' }
-      : undefined,
-    radar: kind === 'radar'
+    tooltip: tooltip
       ? {
-          indicator: radarIndicators ?? [],
-          center: ['50%', '55%'],
-          radius: '65%',
+          trigger:
+            kind === 'pie' || kind === 'doughnut' || kind === 'funnel'
+              ? 'item'
+              : 'axis',
         }
       : undefined,
+    xAxis: needsCartesian ? { type: xAxisType } : undefined,
+    yAxis: needsCartesian ? { type: 'value' } : undefined,
+    radar:
+      kind === 'radar'
+        ? {
+            indicator: radarIndicators ?? [],
+            center: ['50%', '55%'],
+            radius: '65%',
+          }
+        : undefined,
     series: builtSeries,
     ...extraOption,
   };
 
   return option;
-}
+};
 export const makeSimpleChart = (
   kind: ChartKind,
   name: string,
   data: unknown[],
   extra?: Partial<ChartFactoryInput>
 ): echarts.EChartsOption => {
-  const def: AnySeriesDef = { kind: kind as unknown, name, data } as AnySeriesDef;
+  const def: AnySeriesDef = {
+    kind: kind as unknown,
+    name,
+    data,
+  } as AnySeriesDef;
   return createChartOption({
     kind,
     series: [def],
