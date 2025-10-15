@@ -5,7 +5,7 @@ import { createTableDetalleHorarioColumns, HorarioData } from './tableDetalleHor
 import { useMemo, useEffect } from 'react'
 
 interface TableDetalleHorarioProps {
-  datos: any[]
+  datos: unknown[]
   selectedVM: string | null
   onSelectVM: (vmName: string) => void
 }

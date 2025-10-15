@@ -51,19 +51,13 @@ export const AnalisisVMsHorarioChartComponent = ({
     }
 
     // Filtrar por VM si hay una seleccionada
-    const datosFiltrados = selectedVM 
-      ? data.datos.filter((d: any) => d.vm_name === selectedVM)
+    const datosFiltrados = selectedVM
+      ? data.datos.filter((d: unknown) => d.vm_name === selectedVM)
       : data.datos
 
-    console.log('VM Seleccionada:', selectedVM)
-    console.log('Datos totales:', data.datos.length)
-    console.log('Datos filtrados:', datosFiltrados.length)
 
-    const habil = datosFiltrados.filter((d: any) => d.Tipo_Horario === "Horario Hábil" || d.Tipo_Horario === "Horario HÃ¡bil")
-    const noHabil = datosFiltrados.filter((d: any) => d.Tipo_Horario === "Horario No Hábil" || d.Tipo_Horario === "Horario No HÃ¡bil")
-
-    console.log('Datos hábiles:', habil.length)
-    console.log('Datos no hábiles:', noHabil.length)
+    const habil = datosFiltrados.filter((d: unknown) => d.Tipo_Horario === "Horario Hábil" || d.Tipo_Horario === "Horario HÃ¡bil")
+    const noHabil = datosFiltrados.filter((d: unknown) => d.Tipo_Horario === "Horario No Hábil" || d.Tipo_Horario === "Horario No HÃ¡bil")
 
     // Extraer unidad del primer valor de las tarjetas originales
     const primeraMetrica = data.tarjetas?.Promedio_Recurso_Utilizado_Habil || ''
@@ -127,7 +121,7 @@ export const AnalisisVMsHorarioChartComponent = ({
   useEffect(() => {
     if (!chartRef.current || (datosHabil.length === 0 && datosNoHabil.length === 0)) return
 
-    const prepararDatos = (datos: any[]) => {
+    const prepararDatos = (datos: unknown[]) => {
       // Agrupar por día y tomar el promedio, guardando también la hora
       const porDia = new Map()
       
@@ -186,7 +180,7 @@ export const AnalisisVMsHorarioChartComponent = ({
         axisPointer: {
           type: 'cross'
         },
-        formatter: function (params: any) {
+        formatter: function (params: unknown) {
           if (!params || params.length === 0) return ''
           
           const fecha = new Date(params[0].value[0]).toLocaleDateString('es-ES', {
@@ -198,7 +192,7 @@ export const AnalisisVMsHorarioChartComponent = ({
           const hora = params[0].data.hora || '10:00:00'
           
           let result = `<strong>${fecha} ${hora}</strong><br/>`
-          params.forEach((param: any) => {
+          params.forEach((param: unknown) => {
             const valor = param.value[1] || param.data.value[1]
             result += `${param.marker}${param.seriesName}: ${valor.toFixed(2)} ${unidad}<br/>`
           })
@@ -316,7 +310,7 @@ export const AnalisisVMsHorarioChartComponent = ({
   if (isLoading) return <p className="p-8 text-center">Cargando datos...</p>
   if (error) return <p className="p-8 text-center text-red-500">Error al cargar datos</p>
   if (!startDate || !endDate || !selectedMetric) {
-    return <p className="p-8 text-center text-muted-foreground">Seleccione todos los filtros y presione "Aplicar Filtros"</p>
+    return <p className="p-8 text-center text-muted-foreground">Seleccione todos los filtros y presione Aplicar Filtros</p>
   }
   
   if (!data?.datos || data.datos.length === 0) {

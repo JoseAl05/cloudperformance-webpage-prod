@@ -77,9 +77,9 @@ export const TopDolaresFacturadosChartComponent = ({
       }
     }
 
-    const formatCurrency = (value: number) => 
-      new Intl.NumberFormat('en-US', { 
-        style: 'currency', 
+    const formatCurrency = (value: number) =>
+      new Intl.NumberFormat('en-US', {
+        style: 'currency',
         currency: 'USD',
         minimumFractionDigits: 2,
         maximumFractionDigits: 2
@@ -91,19 +91,19 @@ export const TopDolaresFacturadosChartComponent = ({
 
       // Filtrar relaciones según el filtro activo
       let filteredRelationships = relationships
-      
+
       switch (activeFilter.type) {
         case 'subscription':
-          filteredRelationships = relationships.filter((r: any) => r.subscription_name === activeFilter.value)
+          filteredRelationships = relationships.filter((r: unknown) => r.subscription_name === activeFilter.value)
           break
         case 'resourceGroup':
-          filteredRelationships = relationships.filter((r: any) => r.resource_group === activeFilter.value)
+          filteredRelationships = relationships.filter((r: unknown) => r.resource_group === activeFilter.value)
           break
         case 'service':
-          filteredRelationships = relationships.filter((r: any) => r.consumed_service === activeFilter.value)
+          filteredRelationships = relationships.filter((r: unknown) => r.consumed_service === activeFilter.value)
           break
         case 'location':
-          filteredRelationships = relationships.filter((r: any) => r.resource_location === activeFilter.value)
+          filteredRelationships = relationships.filter((r: unknown) => r.resource_location === activeFilter.value)
           break
       }
 
@@ -113,7 +113,7 @@ export const TopDolaresFacturadosChartComponent = ({
       const serviceMap = new Map<string, number>()
       const locationMap = new Map<string, number>()
 
-      filteredRelationships.forEach((rel: any) => {
+      filteredRelationships.forEach((rel: unknown) => {
         subscriptionMap.set(rel.subscription_name, (subscriptionMap.get(rel.subscription_name) || 0) + rel.total_cost_usd)
         resourceGroupMap.set(rel.resource_group, (resourceGroupMap.get(rel.resource_group) || 0) + rel.total_cost_usd)
         serviceMap.set(rel.consumed_service, (serviceMap.get(rel.consumed_service) || 0) + rel.total_cost_usd)
@@ -168,7 +168,7 @@ export const TopDolaresFacturadosChartComponent = ({
     // Sin filtro: usar datos originales
     const topSubscriptions = (data.top_by_subscriptions || [])
       .slice(0, 5)
-      .map((item: any) => ({
+      .map((item: unknown) => ({
         name: item.display_name || 'Sin nombre',
         value: item.total_cost_usd || 0,
         formatted: formatCurrency(item.total_cost_usd || 0)
@@ -176,7 +176,7 @@ export const TopDolaresFacturadosChartComponent = ({
 
     const topResourceGroups = (data.top_by_resource_groups || [])
       .slice(0, 5)
-      .map((item: any) => ({
+      .map((item: unknown) => ({
         name: item.resource_group || 'Sin especificar',
         value: item.total_cost_usd || 0,
         formatted: formatCurrency(item.total_cost_usd || 0)
@@ -184,7 +184,7 @@ export const TopDolaresFacturadosChartComponent = ({
 
     const topServices = (data.top_by_services || [])
       .slice(0, 5)
-      .map((item: any) => ({
+      .map((item: unknown) => ({
         name: item.consumed_service || 'Sin servicio',
         value: item.total_cost_usd || 0,
         formatted: formatCurrency(item.total_cost_usd || 0)
@@ -192,7 +192,7 @@ export const TopDolaresFacturadosChartComponent = ({
 
     const topLocations = (data.top_by_locations || [])
       .slice(0, 5)
-      .map((item: any) => ({
+      .map((item: unknown) => ({
         name: item.resource_location || 'Sin ubicación',
         value: item.total_cost_usd || 0,
         formatted: formatCurrency(item.total_cost_usd || 0)
@@ -214,7 +214,7 @@ export const TopDolaresFacturadosChartComponent = ({
     chartInstanceLocations.current?.resize()
   }, [])
 
-  const hasDataWithValue = useCallback((data: any[]) => {
+  const hasDataWithValue = useCallback((data: unknown[]) => {
     return data.some(item => item.value > 0)
   }, [])
 
@@ -234,8 +234,8 @@ export const TopDolaresFacturadosChartComponent = ({
   }, [])
 
   const createChartOptions = (
-    title: string, 
-    data: any[], 
+    title: string,
+    data: unknown[],
     hasData: boolean,
     chartType: FilterState['type']
   ): echarts.EChartsOption => ({
@@ -247,7 +247,7 @@ export const TopDolaresFacturadosChartComponent = ({
     tooltip: {
       trigger: 'axis',
       axisPointer: { type: 'shadow' },
-      formatter: (params: any) => {
+      formatter: (params: unknown) => {
         if (!hasData) return 'No hay datos'
         const item = params[0]
         return `<strong>${item.name}</strong><br/>Costo: ${item.data.formatted}`
@@ -257,7 +257,7 @@ export const TopDolaresFacturadosChartComponent = ({
     xAxis: {
       type: 'value',
       name: 'USD',
-      axisLabel: { 
+      axisLabel: {
         formatter: (value: number) => `$${(value / 1000).toFixed(1)}K`
       },
       splitLine: { show: true, lineStyle: { color: '#f3f4f6' } }
@@ -266,8 +266,8 @@ export const TopDolaresFacturadosChartComponent = ({
       type: 'category',
       inverse: true,
       data: hasData ? data.map(r => r.name) : [],
-      axisLabel: { 
-        width: 100, 
+      axisLabel: {
+        width: 100,
         overflow: 'truncate',
         fontSize: 11
       }
@@ -300,7 +300,7 @@ export const TopDolaresFacturadosChartComponent = ({
       label: {
         show: hasData,
         position: 'right',
-        formatter: (params: any) => params.data.formatted,
+        formatter: (params: unknown) => params.data.formatted,
         fontSize: 10,
         fontWeight: 'bold'
       },
@@ -329,7 +329,7 @@ export const TopDolaresFacturadosChartComponent = ({
 
     // Event listener para clic
     chartInstanceSubscriptions.current.off('click')
-    chartInstanceSubscriptions.current.on('click', (params: any) => {
+    chartInstanceSubscriptions.current.on('click', (params: unknown) => {
       if (params.componentType === 'series') {
         handleChartClick('subscription', params.name)
       }
@@ -357,7 +357,7 @@ export const TopDolaresFacturadosChartComponent = ({
     chartInstanceResourceGroups.current.setOption(options, { notMerge: true, lazyUpdate: true })
 
     chartInstanceResourceGroups.current.off('click')
-    chartInstanceResourceGroups.current.on('click', (params: any) => {
+    chartInstanceResourceGroups.current.on('click', (params: unknown) => {
       if (params.componentType === 'series') {
         handleChartClick('resourceGroup', params.name)
       }
@@ -379,7 +379,7 @@ export const TopDolaresFacturadosChartComponent = ({
     chartInstanceServices.current.setOption(options, { notMerge: true, lazyUpdate: true })
 
     chartInstanceServices.current.off('click')
-    chartInstanceServices.current.on('click', (params: any) => {
+    chartInstanceServices.current.on('click', (params: unknown) => {
       if (params.componentType === 'series') {
         handleChartClick('service', params.name)
       }
@@ -401,7 +401,7 @@ export const TopDolaresFacturadosChartComponent = ({
     chartInstanceLocations.current.setOption(options, { notMerge: true, lazyUpdate: true })
 
     chartInstanceLocations.current.off('click')
-    chartInstanceLocations.current.on('click', (params: any) => {
+    chartInstanceLocations.current.on('click', (params: unknown) => {
       if (params.componentType === 'series') {
         handleChartClick('location', params.name)
       }
@@ -416,19 +416,19 @@ export const TopDolaresFacturadosChartComponent = ({
   }, [topLocations, handleResize, hasDataWithValue, handleChartClick, activeFilter])
 
   const isEmpty = (topSubscriptions.length === 0 || !hasDataWithValue(topSubscriptions)) &&
-                  (topResourceGroups.length === 0 || !hasDataWithValue(topResourceGroups)) &&
-                  (topServices.length === 0 || !hasDataWithValue(topServices)) &&
-                  (topLocations.length === 0 || !hasDataWithValue(topLocations))
+    (topResourceGroups.length === 0 || !hasDataWithValue(topResourceGroups)) &&
+    (topServices.length === 0 || !hasDataWithValue(topServices)) &&
+    (topLocations.length === 0 || !hasDataWithValue(topLocations))
 
   if (isLoading) return <p className="p-8 text-center">Cargando datos...</p>
   if (error) return <p className="p-8 text-center text-red-500">Error al cargar datos</p>
-  
+
   if (!startDate || !endDate) {
     return (
       <div className="w-full min-w-0 px-4 py-6">
         <div className="bg-gray-900 border border-gray-700 rounded-lg p-6 text-center">
           <p className="text-gray-400 text-sm">
-            Seleccione período y presione "Aplicar Filtros"
+            Seleccione período y presione Aplicar Filtros
           </p>
         </div>
       </div>

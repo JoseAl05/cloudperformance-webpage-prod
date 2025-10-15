@@ -92,16 +92,16 @@ export const TopRecursosGeneralChartComponent = ({
       
       switch (activeFilter.type) {
         case 'subscription':
-          filteredRelationships = relationships.filter((r: any) => r.display_name === activeFilter.value)
+          filteredRelationships = relationships.filter((r: unknown) => r.display_name === activeFilter.value)
           break
         case 'resourceGroup':
-          filteredRelationships = relationships.filter((r: any) => r.resource_group === activeFilter.value)
+          filteredRelationships = relationships.filter((r: unknown) => r.resource_group === activeFilter.value)
           break
         case 'service':
-          filteredRelationships = relationships.filter((r: any) => r.providers === activeFilter.value)
+          filteredRelationships = relationships.filter((r: unknown) => r.providers === activeFilter.value)
           break
         case 'location':
-          filteredRelationships = relationships.filter((r: any) => r.location === activeFilter.value)
+          filteredRelationships = relationships.filter((r: unknown) => r.location === activeFilter.value)
           break
       }
 
@@ -111,7 +111,7 @@ export const TopRecursosGeneralChartComponent = ({
       const serviceMap = new Map<string, number>()
       const locationMap = new Map<string, number>()
 
-      filteredRelationships.forEach((rel: any) => {
+      filteredRelationships.forEach((rel: unknown) => {
         subscriptionMap.set(rel.display_name, (subscriptionMap.get(rel.display_name) || 0) + rel.resource_count)
         resourceGroupMap.set(rel.resource_group, (resourceGroupMap.get(rel.resource_group) || 0) + rel.resource_count)
         serviceMap.set(rel.providers, (serviceMap.get(rel.providers) || 0) + rel.resource_count)
@@ -166,7 +166,7 @@ export const TopRecursosGeneralChartComponent = ({
     // Sin filtro: usar datos originales
     const topSubscriptions = (data.top_by_subscriptions || [])
       .slice(0, 5)
-      .map((item: any) => ({
+      .map((item: unknown) => ({
         name: item.display_name || 'Sin nombre',
         value: item.resource_count || 0,
         formatted: formatNumber(item.resource_count || 0)
@@ -174,7 +174,7 @@ export const TopRecursosGeneralChartComponent = ({
 
     const topResourceGroups = (data.top_by_resource_groups || [])
       .slice(0, 5)
-      .map((item: any) => ({
+      .map((item: unknown) => ({
         name: item.resource_group || 'Sin especificar',
         value: item.resource_count || 0,
         formatted: formatNumber(item.resource_count || 0)
@@ -182,7 +182,7 @@ export const TopRecursosGeneralChartComponent = ({
 
     const topServices = (data.top_by_services || [])
       .slice(0, 5)
-      .map((item: any) => ({
+      .map((item: unknown) => ({
         name: item.providers || 'Sin servicio',
         value: item.resource_count || 0,
         formatted: formatNumber(item.resource_count || 0)
@@ -190,7 +190,7 @@ export const TopRecursosGeneralChartComponent = ({
 
     const topLocations = (data.top_by_locations || [])
       .slice(0, 5)
-      .map((item: any) => ({
+      .map((item: unknown) => ({
         name: item.location || 'Sin ubicación',
         value: item.resource_count || 0,
         formatted: formatNumber(item.resource_count || 0)
@@ -212,7 +212,7 @@ export const TopRecursosGeneralChartComponent = ({
     chartInstanceLocations.current?.resize()
   }, [])
 
-  const hasDataWithValue = useCallback((data: any[]) => {
+  const hasDataWithValue = useCallback((data: unknown[]) => {
     return data.some(item => item.value > 0)
   }, [])
 
@@ -233,7 +233,7 @@ export const TopRecursosGeneralChartComponent = ({
 
   const createChartOptions = (
     title: string, 
-    data: any[], 
+    data: unknown[], 
     hasData: boolean,
     chartType: FilterState['type']
   ): echarts.EChartsOption => ({
@@ -245,7 +245,7 @@ export const TopRecursosGeneralChartComponent = ({
     tooltip: {
       trigger: 'axis',
       axisPointer: { type: 'shadow' },
-      formatter: (params: any) => {
+      formatter: (params: unknown) => {
         if (!hasData) return 'No hay datos'
         const item = params[0]
         return `<strong>${item.name}</strong><br/>Recursos: ${item.data.formatted}`
@@ -301,7 +301,7 @@ export const TopRecursosGeneralChartComponent = ({
       label: {
         show: hasData,
         position: 'right',
-        formatter: (params: any) => params.data.formatted,
+        formatter: (params: unknown) => params.data.formatted,
         fontSize: 10,
         fontWeight: 'bold'
       },
@@ -329,7 +329,7 @@ export const TopRecursosGeneralChartComponent = ({
     chartInstanceSubscriptions.current.setOption(options, { notMerge: true, lazyUpdate: true })
 
     chartInstanceSubscriptions.current.off('click')
-    chartInstanceSubscriptions.current.on('click', (params: any) => {
+    chartInstanceSubscriptions.current.on('click', (params: unknown) => {
       if (params.componentType === 'series') {
         handleChartClick('subscription', params.name)
       }
@@ -357,7 +357,7 @@ export const TopRecursosGeneralChartComponent = ({
     chartInstanceResourceGroups.current.setOption(options, { notMerge: true, lazyUpdate: true })
 
     chartInstanceResourceGroups.current.off('click')
-    chartInstanceResourceGroups.current.on('click', (params: any) => {
+    chartInstanceResourceGroups.current.on('click', (params: unknown) => {
       if (params.componentType === 'series') {
         handleChartClick('resourceGroup', params.name)
       }
@@ -379,7 +379,7 @@ export const TopRecursosGeneralChartComponent = ({
     chartInstanceServices.current.setOption(options, { notMerge: true, lazyUpdate: true })
 
     chartInstanceServices.current.off('click')
-    chartInstanceServices.current.on('click', (params: any) => {
+    chartInstanceServices.current.on('click', (params: unknown) => {
       if (params.componentType === 'series') {
         handleChartClick('service', params.name)
       }
@@ -401,7 +401,7 @@ export const TopRecursosGeneralChartComponent = ({
     chartInstanceLocations.current.setOption(options, { notMerge: true, lazyUpdate: true })
 
     chartInstanceLocations.current.off('click')
-    chartInstanceLocations.current.on('click', (params: any) => {
+    chartInstanceLocations.current.on('click', (params: unknown) => {
       if (params.componentType === 'series') {
         handleChartClick('location', params.name)
       }
@@ -428,7 +428,7 @@ export const TopRecursosGeneralChartComponent = ({
       <div className="w-full min-w-0 px-4 py-6">
         <div className="bg-gray-900 border border-gray-700 rounded-lg p-6 text-center">
           <p className="text-gray-400 text-sm">
-            Seleccione período y presione "Aplicar Filtros"
+            Seleccione período y presione Aplicar Filtros
           </p>
         </div>
       </div>

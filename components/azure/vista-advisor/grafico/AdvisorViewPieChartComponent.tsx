@@ -121,7 +121,7 @@ export const AdvisorViewPieChartComponent = ({
                 backgroundColor: tooltipBg,
                 borderColor: tooltipBorder,
                 textStyle: { color: '#fff', fontSize: 12 },
-                formatter: (p: any) => {
+                formatter: (p: unknown) => {
                     const percentage = ((p.value / totalCount) * 100).toFixed(1);
                     return `${p.marker} Impacto ${p.name}<br/><strong>${p.value}</strong> recomendaciones (${percentage}%)`;
                 },
@@ -159,31 +159,31 @@ export const AdvisorViewPieChartComponent = ({
                     selectedMode: false,
                     minAngle: 3,
                     padAngle: 2,
-                    itemStyle: { 
-                        borderRadius: 6, 
-                        borderColor: seriesBorderColor, 
-                        borderWidth: 2 
+                    itemStyle: {
+                        borderRadius: 6,
+                        borderColor: seriesBorderColor,
+                        borderWidth: 2
                     },
                     label: {
                         show: true,
-                        formatter: (p: any) => `${p.name}\n${p.value}`,
+                        formatter: (p: unknown) => `${p.name}\n${p.value}`,
                         fontSize: 12,
                         fontWeight: 600,
                         color: textColor,
                     },
-                    labelLine: { 
-                        show: true, 
-                        length: 15, 
-                        length2: 8, 
-                        lineStyle: { color: subTextColor } 
+                    labelLine: {
+                        show: true,
+                        length: 15,
+                        length2: 8,
+                        lineStyle: { color: subTextColor }
                     },
                     emphasis: {
                         scale: true,
                         scaleSize: 8,
-                        itemStyle: { 
-                            shadowBlur: 10, 
-                            shadowOffsetX: 0, 
-                            shadowColor: isDark ? 'rgba(0,0,0,0.5)' : 'rgba(0,0,0,0.3)' 
+                        itemStyle: {
+                            shadowBlur: 10,
+                            shadowOffsetX: 0,
+                            shadowColor: isDark ? 'rgba(0,0,0,0.5)' : 'rgba(0,0,0,0.3)'
                         },
                         label: { fontWeight: 'bold', fontSize: 14 },
                     },
