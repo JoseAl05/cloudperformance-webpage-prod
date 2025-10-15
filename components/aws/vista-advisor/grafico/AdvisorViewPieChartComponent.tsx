@@ -324,7 +324,7 @@ import { useTheme } from 'next-themes';
 import { AdvisorApiResponse } from '@/interfaces/vista-advisor/advisorViewInterfaces';
 
 // ⬇️ IMPORTA desde tu config global (ajusta la ruta si corresponde)
-import { useECharts, registerGlobalThemes } from '@/lib/echartsGlobalConfig';
+import { useECharts } from '@/lib/echartsGlobalConfig';
 
 interface AdvisorViewPieChartComponentProps {
     data: AdvisorApiResponse | null;
@@ -356,11 +356,6 @@ export const AdvisorViewPieChartComponent = ({
     sortDesc = true,
 }: AdvisorViewPieChartComponentProps) => {
     const chartRef = useRef<HTMLDivElement>(null);
-
-    // Registra temas globales de ECharts una sola vez
-    useEffect(() => {
-        registerGlobalThemes();
-    }, []);
 
     // Tema (shadcn + next-themes)
     const { resolvedTheme } = useTheme();
@@ -454,8 +449,6 @@ export const AdvisorViewPieChartComponent = ({
         };
     }, [safeData, sortDesc]);
 
-    // Construye las opciones exactamente como las tenías (misma lógica),
-    // solo que ahora las pasamos al hook global.
     const option: echarts.EChartsOption = useMemo(() => {
         const textColor = isDark ? '#ffffff' : '#131a22';
         const subTextColor = isDark ? '#a1a1aa' : '#6b7280';
@@ -605,7 +598,6 @@ export const AdvisorViewPieChartComponent = ({
 
     const isEmpty = !Array.isArray(safeData) || safeData.length === 0;
 
-    // ⬇️ Inicializa y maneja resize usando la config global
     useECharts(chartRef, option, [option, themeName], themeName);
 
     return (
@@ -633,4 +625,3 @@ export const AdvisorViewPieChartComponent = ({
         </Card>
     );
 };
-

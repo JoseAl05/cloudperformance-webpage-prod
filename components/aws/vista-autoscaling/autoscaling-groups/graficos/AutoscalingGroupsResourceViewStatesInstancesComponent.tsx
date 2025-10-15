@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef } from 'react';
 import * as echarts from 'echarts';
 import { useTheme } from 'next-themes';
-import { deepMerge, makeBaseOptions, makeLineSeries, useECharts } from '@/lib/echartsGlobalConfig';
+import { createChartOption, deepMerge, makeBaseOptions, makeLineSeries, useECharts } from '@/lib/echartsGlobalConfig';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Info } from 'lucide-react';
 
@@ -73,16 +73,45 @@ export const AutoscalingGroupsResourceViewStatesInstancesComponent = ({
             metricType: 'count'
         });
 
-        const series = [
-            makeLineSeries('Instancias en Espera (Máximo)', metrics.maxInstancesWaiting),
-            makeLineSeries('Instancias en Servicio (Máximo)', metrics.maxInstancesOnService),
-            makeLineSeries('Instancias Totales (Máximo)', metrics.maxInstancesTotal),
-            makeLineSeries('Instancias Pendientes (Máximo)', metrics.maxInstancesPending)
-        ];
-
-        return deepMerge(base, {
-            series
+        const lines = createChartOption({
+            kind: 'line',
+            xAxisType: 'time',
+            legend: true,
+            tooltip: true,
+            series: [
+                {
+                    kind: 'line',
+                    name: 'Instancias en Espera (Máximo)',
+                    data: metrics.maxInstancesWaiting,
+                    smooth: true,
+                },
+                {
+                    kind: 'line',
+                    name: 'Instancias en Servicio (Máximo)',
+                    data: metrics.maxInstancesOnService,
+                    smooth: true,
+                },
+                {
+                    kind: 'line',
+                    name: 'Instancias Totales (Máximo)',
+                    data: metrics.maxInstancesTotal,
+                    smooth: true,
+                },
+                {
+                    kind: 'line',
+                    name: 'Instancias Pendientes (Máximo)',
+                    data: metrics.maxInstancesPending,
+                    smooth: true,
+                }
+            ],
+            extraOption: {
+                xAxis: { axisLabel: { rotate: 30 } },
+                yAxis: { min: 0 },
+                grid: { left: 44, right: 12, top: 56, bottom: 64, containLabel: true },
+            },
         });
+
+        return deepMerge(base, lines);
     }, [isDark, data]);
 
     useECharts(chartRef, option, [option], isDark ? 'cp-dark' : 'cp-light');

@@ -260,6 +260,7 @@
 
 import { useMemo, useRef } from 'react';
 import {
+    createChartOption,
     deepMerge,
     makeBaseOptions,
     makeLineSeries,
@@ -329,15 +330,39 @@ export const AutoscalingGroupsResourceViewInstancesVsMaxMinComponent = ({
             metricType: 'count'
         });
 
-        const series = [
-            makeLineSeries('Capacidad Deseada (Promedio)', metrics.desiredCapacity),
-            makeLineSeries('Tamaño Máximo del Grupo (Promedio)', metrics.maxGroupSize),
-            makeLineSeries('Tamaño Mínimo del Grupo (Promedio)', metrics.minGroupSize),
-        ];
-
-        return deepMerge(base, {
-            series
+        const lines = createChartOption({
+            kind: 'line',
+            xAxisType: 'time',
+            legend: true,
+            tooltip: true,
+            series: [
+                {
+                    kind: 'line',
+                    name: 'Capacidad Deseada (Promedio)',
+                    data: metrics.desiredCapacity,
+                    smooth: true,
+                },
+                {
+                    kind: 'line',
+                    name: 'Tamaño Máximo del Grupo (Promedio)',
+                    data: metrics.maxGroupSize,
+                    smooth: true,
+                },
+                {
+                    kind: 'line',
+                    name: 'Tamaño Mínimo del Grupo (Promedio)',
+                    data: metrics.minGroupSize,
+                    smooth: true,
+                }
+            ],
+            extraOption: {
+                xAxis: { axisLabel: { rotate: 30 } },
+                yAxis: { min: 0 },
+                grid: { left: 44, right: 12, top: 56, bottom: 64, containLabel: true },
+            },
         });
+
+        return deepMerge(base, lines);
     }, [isDark, data]);
 
     useECharts(chartRef, option, [option], isDark ? 'cp-dark' : 'cp-light');
