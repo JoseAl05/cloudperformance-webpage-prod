@@ -43,7 +43,7 @@ export function DataTableSingle<TData, TValue>({
   filterColumn,
   filterPlaceholder = 'Buscar...',
   pageSizeOptions = [5, 10, 20, 50, 100],
-  initialPageSize = 10,
+  initialPageSize = 5,
 }: DataTableProps<TData, TValue>) {
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [sorting, setSorting] = React.useState<SortingState>([])
