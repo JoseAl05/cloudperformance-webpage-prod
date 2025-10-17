@@ -7,16 +7,14 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 
 const DateParams = () => {
-  const searchParams = useSearchParams();
+    const searchParams = useSearchParams();
 
-  const startDateParam = searchParams.get('startDate');
-  const endDateParam = searchParams.get('endDate');
+    const startDateParam = searchParams.get('startDate');
+    const endDateParam = searchParams.get('endDate');
 
-  return {startDateParam:startDateParam , endDateParam:endDateParam}
+    return { startDateParam: startDateParam, endDateParam: endDateParam }
 }
 
-
-console.log()
 
 export const Ec2ResourceInfraUsedViewColumns: DynamicColumn<Ec2Instance>[] = [
     {
@@ -28,16 +26,16 @@ export const Ec2ResourceInfraUsedViewColumns: DynamicColumn<Ec2Instance>[] = [
             const endDate = DateParams().endDateParam
             return (
                 <div className="font-medium">
-                  <Link
-                      href={{ pathname: '/aws/recursos/instancias-ec2' , query: { instance: value, startDate: startDate,  endDate: endDate} }}
-                      rel="noopener noreferrer"
-                      target="_blank"
-                  >
-                      <Badge variant="secondary" className="ml-3 font-mono text-sm transition-all hover:scale-[1.02]">
-                          {value}
-                      </Badge>
-                  </Link>
-              </div>
+                    <Link
+                        href={{ pathname: '/aws/recursos/instancias-ec2', query: { instance: value, startDate: startDate, endDate: endDate } }}
+                        rel="noopener noreferrer"
+                        target="_blank"
+                    >
+                        <Badge variant="secondary" className="ml-3 font-mono text-sm transition-all hover:scale-[1.02]">
+                            {value}
+                        </Badge>
+                    </Link>
+                </div>
             );
         }
     },
@@ -123,7 +121,7 @@ export const Ec2ResourceInfraUsedViewColumns: DynamicColumn<Ec2Instance>[] = [
             );
         }
     },
-    
+
     // {
     //     header: "Eficiencia",
     //     accessorKey: "credit_efficiency",
@@ -144,8 +142,8 @@ export const Ec2ResourceInfraUsedViewColumns: DynamicColumn<Ec2Instance>[] = [
     //         );
     //     }
     // },
-    
-    
+
+
     // {
     //     header: "Créditos CPU Usados",
     //     accessorKey: "last_cpu_credits_usage",

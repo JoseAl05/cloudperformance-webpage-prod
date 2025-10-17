@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { autoscalingGroupInstanceColumns } from './AutoscalingGroupsInstancesColumns';
 import { Calendar, Settings, AlertCircle, Users } from 'lucide-react';
 import { DataTableSingle } from '@/components/general/data-table/data-table-single';
+import { DataTableGrouping } from '@/components/general/data-table/data-table-grouping';
 
 interface AutoscalingGroupsResourceViewInstanciasComponentProps {
     data?: unknown;
@@ -22,7 +23,8 @@ export const AutoscalingGroupsResourceViewInstanciasComponent = ({
     const instanceColumns = createColumns(autoscalingGroupInstanceColumns);
     const tableData = data || [];
     const instanceCount = Array.isArray(tableData) ? tableData.length : 0;
-    
+
+
     return (
         <Card>
             <CardHeader className='border-b'>
@@ -60,11 +62,13 @@ export const AutoscalingGroupsResourceViewInstanciasComponent = ({
                         </div>
                     </div>
                 ) : (
-                    <DataTableSingle
+                    <DataTableGrouping
                         columns={instanceColumns}
                         data={tableData}
                         filterColumn='InstanceId'
                         filterPlaceholder='Buscar Instancia...'
+                        groupByColumn='InstanceId'
+                        enableGrouping={true}
                     />
                 )}
 

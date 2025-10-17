@@ -107,6 +107,7 @@ export const BlobVsStorageGeneralCapacityComponent = ({
             yMax: yMaxRounded,
             useUTC: true,
             showToolbox: true,
+            metricType: 'gb'
         });
 
         // Series con utilizando configuracion global

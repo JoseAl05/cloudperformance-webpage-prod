@@ -28,12 +28,6 @@ export const SpotVsRegularVmTimelineComponent = ({ data }: SpotVsRegularVmTimeli
         if (!data || data.length === 0) {
             return { totalVMs: null, totalSpot: null, spotPercentage: null, totalVmsSeries: null, totalSpotSeries:null }
         }
-
-        const last = data[data.length - 1]
-        const totalVMs = last.total_instancias || 0
-        const totalSpot = last.total_spot || 0
-        const spotPercentage = totalVMs > 0 ? ((totalSpot / totalVMs) * 100).toFixed(2) : null
-
         const totalVmsSeries =
             data
                 .sort((a,b) => new Date(a.sync_time).getTime() - new Date(b.sync_time).getTime())
@@ -44,7 +38,7 @@ export const SpotVsRegularVmTimelineComponent = ({ data }: SpotVsRegularVmTimeli
                 .sort((a,b) => new Date(a.sync_time).getTime() - new Date(b.sync_time).getTime())
                 .map(s => [s.sync_time,s.total_spot]);
 
-        return { totalVMs, totalSpot, spotPercentage, totalVmsSeries, totalSpotSeries }
+        return { totalVmsSeries, totalSpotSeries }
     }, [data])
 
     const option = useMemo(() => {
@@ -55,6 +49,7 @@ export const SpotVsRegularVmTimelineComponent = ({ data }: SpotVsRegularVmTimeli
             // yMax: yMaxRounded,
             useUTC: true,
             showToolbox: true,
+            metricType: 'count'
         });
 
         const series = [

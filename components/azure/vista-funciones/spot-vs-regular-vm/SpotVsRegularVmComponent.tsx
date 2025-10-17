@@ -3,10 +3,12 @@
 import { MessageCard } from '@/components/aws/cards/MessageCards';
 import { LoaderComponent } from '@/components/general/LoaderComponent';
 import { SpotVsRegularVm } from '@/interfaces/vista-spot-vs-regular-vm/spotVsRegularVmInterfaces';
-import { AlertCircle, ChartBar, Info } from 'lucide-react';
+import { AlertCircle, ChartBar, Clock, Info } from 'lucide-react';
 import { useRef } from 'react';
 import useSWR from 'swr';
 import { SpotVsRegularVmTimelineComponent } from './grafico/SpotVsRegularVmTimelineComponent';
+import { SpotVsRegularVmCardsComponent } from './info/SpotVsRegularVmCardsComponent';
+import { SpotVsRegularVmTable } from './table/SpotVsRegularVmTable';
 
 interface SpotVsRegularVmComponentProps {
     startDate: Date;
@@ -34,7 +36,7 @@ export const SpotVsRegularVmComponent = ({ startDate, endDate, subscription, reg
     const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : '';
 
     const { data, error, isLoading } = useSWR(
-        `/api/azure/bridge/azure/vms/vm-vs-spot?date_from=${startDateFormatted}&date_to=${endDateFormatted}&location=${region}&subscription=${subscription}`,
+        subscription ? `/api/azure/bridge/azure/vms/vm-vs-spot?date_from=${startDateFormatted}&date_to=${endDateFormatted}&location=${region}&subscription=${subscription}` : null,
         fetcher
     );
 
@@ -48,6 +50,7 @@ export const SpotVsRegularVmComponent = ({ startDate, endDate, subscription, reg
         isNonEmptyArray<SpotVsRegularVm>(data) ? data : null;
 
     const hasSpotVsRegularVmData = !!spotVsRegularVmData && spotVsRegularVmData.length > 0;
+
 
     if (anyLoading) {
         return <LoaderComponent />
@@ -81,6 +84,11 @@ export const SpotVsRegularVmComponent = ({ startDate, endDate, subscription, reg
 
     return (
         <div className='w-full min-w-0 px-4 py-6'>
+            <div className="flex-1 space-y-6 min-w-0 overflow-hidden">
+                <SpotVsRegularVmCardsComponent
+                    data={spotVsRegularVmData}
+                />
+            </div>
             <div className='flex flex-col gap-5 mt-10'>
                 <div className="flex items-center gap-3 my-5">
                     <ChartBar className="h-8 w-8 text-blue-500" />
@@ -89,10 +97,15 @@ export const SpotVsRegularVmComponent = ({ startDate, endDate, subscription, reg
                 <SpotVsRegularVmTimelineComponent
                     data={spotVsRegularVmData}
                 />
-
             </div>
-            <div className="flex-1 space-y-6 min-w-0 overflow-hidden">
-
+            <div className="flex flex-col gap-5 mt-10">
+                <div className="flex items-center gap-3 my-5">
+                    <Clock className="h-8 w-8 text-blue-500" />
+                    <h1 className="text-3xl font-bold text-foreground">Detalle VMs</h1>
+                </div>
+                <SpotVsRegularVmTable
+                    data={spotVsRegularVmData}
+                />
             </div>
         </div>
     )

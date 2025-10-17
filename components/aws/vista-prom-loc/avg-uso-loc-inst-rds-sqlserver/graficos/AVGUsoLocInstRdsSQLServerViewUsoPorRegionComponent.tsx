@@ -66,7 +66,7 @@ const getMetricGroupName = (metricLabel: string): string => {
 // FUNCIÓN PARA CALCULAR VALORES AGRUPADOS POR NOMBRE BASE (sin paréntesis)
 const calculateMetricValues = (data: ProcessedHeatmapData[], allMetrics: string[]) => {
   const groupedValues: { [key: string]: number[] } = {};
-  
+
   // Agrupar métricas por nombre base (antes del paréntesis)
   const metricGroups: { [key: string]: string[] } = {};
   allMetrics.forEach(metric => {
@@ -76,12 +76,12 @@ const calculateMetricValues = (data: ProcessedHeatmapData[], allMetrics: string[
     }
     metricGroups[groupName].push(metric);
   });
-  
+
   // Para cada grupo, recopilar todos los valores
   Object.keys(metricGroups).forEach(groupName => {
     const metricsInGroup = metricGroups[groupName];
     const allValuesInGroup: number[] = [];
-    
+
     metricsInGroup.forEach(metric => {
       data.forEach(item => {
         const value = item.metrics[metric];
@@ -90,45 +90,43 @@ const calculateMetricValues = (data: ProcessedHeatmapData[], allMetrics: string[
         }
       });
     });
-    
+
     if (allValuesInGroup.length > 0) {
       // Eliminar duplicados y ordenar de MAYOR a MENOR
       const uniqueValues = [...new Set(allValuesInGroup)].sort((a, b) => b - a);
       groupedValues[groupName] = uniqueValues;
-      
+
       // También asignar a cada métrica individual el mismo grupo
       metricsInGroup.forEach(metric => {
         groupedValues[metric] = uniqueValues;
       });
     }
   });
-  
+
   return groupedValues;
 };
 
 // FUNCIÓN DINÁMICA PARA ASIGNAR COLORES BASÁNDOSE EN LA POSICIÓN EN EL RANKING
 const getColorByAbsoluteValue = (
-  value: number, 
-  metricLabel: string, 
+  value: number,
+  metricLabel: string,
   metricValues: { [key: string]: number[] }
 ): string => {
   const values = metricValues[metricLabel];
-  
+
   if (!values || values.length === 0) {
     return 'rgb(220, 220, 220)'; // Default gris si no hay valores
   }
-  
+
   // Encontrar la posición del valor en el array ordenado (mayor a menor)
   const position = values.indexOf(value);
-  
+
   if (position === -1) {
     return 'rgb(220, 220, 220)'; // Default gris si no se encuentra
   }
-  
+
   const totalValues = values.length;
-  
-  console.log(`SQLSERVER MÉTRICA: ${metricLabel}, VALOR: ${value}, POSICIÓN: ${position}, TOTAL: ${totalValues}, VALORES: [${values.join(', ')}]`);
-  
+
   // Asignación de colores según cantidad de valores
   if (totalValues === 1) {
     return 'hsl(45, 60%, 75%)'; // 1 valor = AMARILLO
@@ -165,9 +163,9 @@ export const AVGUsoLocInstRdsSQLServerViewUsoPorRegionComponent = ({
   isLoading,
   error
 }: Props) => {
-  const [hoveredCell, setHoveredCell] = useState<{ 
-    region: string; 
-    metric: string; 
+  const [hoveredCell, setHoveredCell] = useState<{
+    region: string;
+    metric: string;
     value: number;
     x: number;
     y: number;
@@ -192,7 +190,7 @@ export const AVGUsoLocInstRdsSQLServerViewUsoPorRegionComponent = ({
     ['cpu', 'credits', 'connections', 'memory', 'storage', 'io'].forEach(group => {
       const groupMetrics = allMetrics.filter(metric => getMetricGroup(metric) === group);
       const values: number[] = [];
-      
+
       data.forEach(item => {
         groupMetrics.forEach(metric => {
           const value = item.metrics[metric];
@@ -202,7 +200,7 @@ export const AVGUsoLocInstRdsSQLServerViewUsoPorRegionComponent = ({
 
       if (values.length > 0) {
         const avg = values.reduce((sum, val) => sum + val, 0) / values.length;
-        
+
         if (group === 'cpu') {
           stats.cpu.status = avg > 60 ? 'Alto' : avg > 20 ? 'Moderado' : 'Normal';
         } else if (group === 'credits') {
@@ -236,9 +234,9 @@ export const AVGUsoLocInstRdsSQLServerViewUsoPorRegionComponent = ({
   }
 
   const handleCellHover = (
-    region: string, 
-    metric: string, 
-    value: number, 
+    region: string,
+    metric: string,
+    value: number,
     event: React.MouseEvent
   ) => {
     setHoveredCell({
@@ -289,9 +287,8 @@ export const AVGUsoLocInstRdsSQLServerViewUsoPorRegionComponent = ({
               {allMetrics.map((metric) => {
                 const value = item.metrics[metric];
                 const hasValue = value !== undefined && value !== null;
-                console.log('SQLSERVER DEBUG COLOR - metric:', metric, 'value:', value);                
                 // USAR LA FUNCIÓN DINÁMICA
-                const backgroundColor = hasValue                                     
+                const backgroundColor = hasValue
                   ? getColorByAbsoluteValue(value, metric, metricValues)
                   : '#f9fafb';
 
@@ -320,7 +317,7 @@ export const AVGUsoLocInstRdsSQLServerViewUsoPorRegionComponent = ({
 
       {/* Tooltip flotante */}
       {hoveredCell && (
-        <div 
+        <div
           className="fixed z-50 pointer-events-none transform -translate-x-1/2 -translate-y-full"
           style={{
             left: hoveredCell.x,

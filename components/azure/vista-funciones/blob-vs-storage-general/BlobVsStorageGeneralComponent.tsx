@@ -6,7 +6,7 @@ import { AllStorageCapacity } from '@/interfaces/vista-blob-vs-storage/allStorag
 import useSWR from 'swr';
 import { BlobVsStorageCardsComponent } from './info/BlobVsStorageCardsComponent';
 import { StorageVsGeneralCapacity } from '@/interfaces/vista-blob-vs-storage/strgVsGeneralInterfaces';
-import { ChartBar } from 'lucide-react';
+import { ChartBar, Info } from 'lucide-react';
 import { BlobVsStorageGeneralCapacityComponent } from './graficos/BlobVsStorageGeneralCapacityComponent';
 
 const fetcher = (url: string) =>
@@ -25,7 +25,7 @@ interface BlobVsStorageGeneralComponentProps {
 
 }
 
-export const BlobVsStorageGeneralComponent = ({ selectedStrgAccount ,region, subscription, startDate, endDate }: BlobVsStorageGeneralComponentProps) => {
+export const BlobVsStorageGeneralComponent = ({ selectedStrgAccount, region, subscription, startDate, endDate }: BlobVsStorageGeneralComponentProps) => {
     const startDateFormatted = startDate ? startDate.toISOString().replace('Z', '').slice(0, -4) : '';
     const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : '';
     const allStorageCapacity = useSWR(
@@ -53,6 +53,20 @@ export const BlobVsStorageGeneralComponent = ({ selectedStrgAccount ,region, sub
 
     const hasStrgCapacityData = !!strgCapacityData && strgCapacityData.length > 0;
     const hasStrgVsGeneralData = !!strgVsGeneralData && strgVsGeneralData.length > 0;
+    const hasSelectedStrgAccount = !!selectedStrgAccount && selectedStrgAccount.length > 0;
+
+    if (!hasSelectedStrgAccount) {
+        return (
+            <div className="w-full min-w-0 px-4 py-6">
+                <MessageCard
+                    icon={Info}
+                    title="Storage Account no seleccionado"
+                    description="Seleccione un Storage Account.."
+                    tone="info"
+                />
+            </div>
+        )
+    }
 
     if (anyLoading) {
         return <LoaderComponent />

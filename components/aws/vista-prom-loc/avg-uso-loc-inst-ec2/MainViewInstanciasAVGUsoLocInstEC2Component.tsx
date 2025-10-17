@@ -41,6 +41,7 @@ export const MainViewInstanciasAVGUsoLocInstEC2Component = () => {
 
                     isRegionMultiSelect
                     metricsFilter
+                    isMetricsMultiselect
                 />
             </div>
         </div>

@@ -11,10 +11,11 @@ export default function LoginPage() {
           <a href='#' className='flex items-center gap-2 font-medium'>
             <div className='text-primary-foreground flex items-center justify-center rounded-md'>
               <Image
-                src='/logo.png'
-                alt='Logo Cloudperformance Pequeño'
-                width={70}
-                height={70}
+                src='/logo-intac.svg'
+                alt='Logo Intac'
+                width={80}
+                height={80}
+                className='object-cover'
               />
             </div>
             Cloudperformance
@@ -30,16 +31,14 @@ export default function LoginPage() {
       </div>
       <div className='bg-muted relative hidden lg:block'>
         <Image
-          src='/logo-cloudperformance.svg'
-          alt='Logo Cloudperformance Grande'
+          src="/logo-cloudperformance.svg"
+          alt="Logo Cloudperformance Grande"
           fill
           priority
           quality={100}
-          // Indica cuánta pantalla ocupa en cada breakpoint para generar srcset correcto.
-          sizes='(min-width: 1024px) 50vw, 100vw'
-          // Ajusta cómo se encaja la imagen dentro del contenedor.
-          className='absolute inset-0 object-contain object-center select-none pointer-events-none
-                     dark:brightness-[0.2] dark:grayscale'
+          sizes="(min-width: 1024px) 50vw, 100vw"
+          className="absolute inset-0 object-contain object-center select-none pointer-events-none
+             filter-none dark:filter-none grayscale-0 dark:grayscale-0 brightness-100 dark:brightness-100"
           draggable={false}
         />
       </div>

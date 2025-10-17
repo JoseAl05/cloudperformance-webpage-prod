@@ -79,10 +79,10 @@ const transformMetricsForChart = (
   return metricsData.metrics_data as MetricPoint[];
 };
 const fetcher = (url: string) =>
-    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
-        .then(r => r.json());
+  fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
+    .then(r => r.json());
 
-export const InstanciasRdsMySQLChartComponent  = ({
+export const InstanciasRdsMySQLChartComponent = ({
   startDate,
   endDate,
   region,
@@ -121,8 +121,8 @@ export const InstanciasRdsMySQLChartComponent  = ({
   );
   const metricsUrl = shouldFetchMetrics
     ? `/api/aws/bridge/db/instancias-rds-mysql-metrics?date_from=${startDateFormatted}&date_to=${endDateFormatted}&resource=${encodeURIComponent(
-        instance
-      )}`
+      instance
+    )}`
     : null;
 
   const {
@@ -146,15 +146,8 @@ export const InstanciasRdsMySQLChartComponent  = ({
     data: eventsData,
     error: eventsError,
     isLoading: eventsLoading,
-  } = useSWR(eventsUrl, fetcher);  
+  } = useSWR(eventsUrl, fetcher);
 
-  // LOG TEMPORAL PARA DEBUG
-  console.log("=== DEBUG EVENTOS ===");
-  console.log("eventsUrl:", eventsUrl);
-  console.log("eventsData:", eventsData);
-  console.log("eventsError:", eventsError);
-  console.log("eventsLoading:", eventsLoading);
-  console.log("=====================");
 
 
   // ---------- eCharts para "Estado de Instancias" (vista general) ----------
@@ -340,7 +333,7 @@ export const InstanciasRdsMySQLChartComponent  = ({
                   height="300px"
                 />
               </CardContent>
-            </Card> 
+            </Card>
             {/* Gráfico 3: Database Connections */}
             <Card className="w-full">
               <CardHeader>
@@ -356,7 +349,7 @@ export const InstanciasRdsMySQLChartComponent  = ({
                   height="300px"
                 />
               </CardContent>
-            </Card> 
+            </Card>
             {/* Gráfico 4: Memory */}
             <Card className="w-full">
               <CardHeader>
@@ -372,7 +365,7 @@ export const InstanciasRdsMySQLChartComponent  = ({
                   height="300px"
                 />
               </CardContent>
-            </Card>   
+            </Card>
             {/* Gráfico 5: IOPS */}
             <Card className="w-full">
               <CardHeader>
@@ -388,7 +381,7 @@ export const InstanciasRdsMySQLChartComponent  = ({
                   height="300px"
                 />
               </CardContent>
-            </Card>   
+            </Card>
             {/* Gráfico 6: Storage */}
             <Card className="w-full">
               <CardHeader>
@@ -404,14 +397,14 @@ export const InstanciasRdsMySQLChartComponent  = ({
                   height="300px"
                 />
               </CardContent>
-            </Card>  
+            </Card>
             {/* Tabla de Eventos RDS MySQL */}
             <RdsMysqlEventsTableComponent
               data={eventsData}
               startDate={startDate}
               endDate={endDate}
               instance={instance}
-            />                                                              
+            />
           </div>
         )}
       </div>

@@ -113,7 +113,7 @@ const RangeExtras = ({ label, range }: { label: string; range?: StorageVariation
                 ))}
                 {Array.isArray(metrics) && (
                     <div className="flex items-center justify-between gap-4 px-2 py-1.5">
-                        <span className="text-sm text-slate-600 dark:text-slate-400">Métricas analizadas</span>
+                        <span className="text-sm text-slate-600 dark:text-slate-400">Marcas de tiempo analizadas</span>
                         <span className="text-sm font-semibold tabular-nums text-slate-900 dark:text-slate-100">{metrics.length}</span>
                     </div>
                 )}

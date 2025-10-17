@@ -35,6 +35,16 @@ import {
     Map,
     TrendingDown,
     Cylinder,
+    Puzzle,
+    MapPin,
+    LayoutDashboard,
+    Globe2,
+    Monitor,
+    ShoppingCart,
+    Receipt,
+    Boxes,
+    Stars,
+    Layers,
 } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { usePathname } from 'next/navigation'
@@ -80,20 +90,20 @@ export const SidebarComponent = ({
 
 
     const topFacturaciones = [
-        { label: 'Top Facturaciones por Región', href: '/aws/funciones/top-dolares-region', icon: Earth, color: 'text-purple-500' },
-        { label: 'Top Facturaciones por SO', href: '/aws/funciones/top-dolares-so', icon: Database, color: 'text-purple-500' },
-        { label: 'Top Facturaciones por Tipo de Instancia', href: '/aws/funciones/top-dolares-por-tipo-de-instancia', icon: Computer, color: 'text-teal-600' },
-        { label: 'Top Facturaciones por Familia de Instancias', href: '/aws/funciones/top-dolares-por-familia-de-instancia', icon: Box, color: 'text-indigo-600' },
-        { label: 'Top Facturaciones por Tipo de Compra', href: '/aws/funciones/top-dolares-por-tipo-de-compra', icon: HandCoins, color: 'text-amber-600' },
-        { label: 'Top Facturaciones por Tipo de Cobro', href: '/aws/funciones/top-dolares-por-tipo-de-cobro', icon: Zap, color: 'text-red-500' },
-        { label: 'Top Facturaciones por Recursos', href: '/aws/funciones/top-dolares-por-id-recurso', icon: Grid2X2, color: 'text-blue-500' },
-        { label: 'Top Recursos', href: '/aws/funciones/top-recursos', icon: Grid2X2, color: 'text-blue-500' },
+        { label: 'Top Facturaciones por Región', href: '/aws/funciones/top-dolares-region', icon: Globe2, color: 'text-purple-500' },
+        { label: 'Top Facturaciones por SO', href: '/aws/funciones/top-dolares-so', icon: Monitor, color: 'text-purple-500' },
+        { label: 'Top Facturaciones por Tipo de Instancia', href: '/aws/funciones/top-dolares-por-tipo-de-instancia', icon: Server, color: 'text-teal-600' },
+        { label: 'Top Facturaciones por Familia de Instancias', href: '/aws/funciones/top-dolares-por-familia-de-instancia', icon: Layers, color: 'text-indigo-600' },
+        { label: 'Top Facturaciones por Tipo de Compra', href: '/aws/funciones/top-dolares-por-tipo-de-compra', icon: ShoppingCart, color: 'text-amber-600' },
+        { label: 'Top Facturaciones por Tipo de Cobro', href: '/aws/funciones/top-dolares-por-tipo-de-cobro', icon: Receipt, color: 'text-red-500' },
+        { label: 'Top Facturaciones por Recursos', href: '/aws/funciones/top-dolares-por-id-recurso', icon: Boxes, color: 'text-blue-500' },
+        { label: 'Top Recursos', href: '/aws/funciones/top-recursos', icon: Stars, color: 'text-blue-500' },
     ]
 
     const consumoHorario = [
-        { label: 'Instancias EC2', href: '/aws/funciones/consumo-ec2-horario-habil-vs-no-habil', icon: Computer, color: 'text-green-500' },
-        { label: 'Instancias EC2 AutoscalingGroups', href: '/aws/funciones/consumo-ec2-autoscaling-groups-horario-habil-vs-no-habil', icon: Computer, color: 'text-green-500' },
-        { label: 'Instancias EC2 Nodos EKS', href: '/aws/funciones/consumo-ec2-nodos-eks-horario-habil-vs-no-habil', icon: Computer, color: 'text-green-500' },
+        { label: 'Instancias EC2', href: '/aws/funciones/consumo-ec2-horario-habil-vs-no-habil', icon: Clock, color: 'text-green-500' },
+        { label: 'Instancias EC2 AutoscalingGroups', href: '/aws/funciones/consumo-ec2-autoscaling-groups-horario-habil-vs-no-habil', icon: TrendingUp, color: 'text-green-500' },
+        { label: 'Instancias EC2 Nodos EKS', href: '/aws/funciones/consumo-ec2-nodos-eks-horario-habil-vs-no-habil', icon: Boxes, color: 'text-green-500' },
         { label: 'Instancias RDS Postgresql', href: '/aws/funciones/consumo-rds-postgresql-horario-habil-vs-no-habil', icon: Database, color: 'text-green-500' },
         { label: 'Instancias RDS Mysql', href: '/aws/funciones/consumo-rds-mysql-horario-habil-vs-no-habil', icon: Database, color: 'text-green-500' },
         { label: 'Instancias RDS SQL Server', href: '/aws/funciones/consumo-rds-sql-horario-habil-vs-no-habil', icon: Database, color: 'text-green-500' },
@@ -102,7 +112,7 @@ export const SidebarComponent = ({
     ]
 
     const consumoLoc = [
-        { label: 'Instancias EC2', href: '/aws/funciones/avg-uso-loc-inst-ec2', icon: Computer, color: 'text-green-500' },
+        { label: 'Instancias EC2', href: '/aws/funciones/avg-uso-loc-inst-ec2', icon: MapPin, color: 'text-green-500' },
         { label: 'Instancias RDS Postgresql', href: '/aws/funciones/avg-uso-loc-inst-rds-pg', icon: Database, color: 'text-green-500' },
         { label: 'Instancias RDS Mysql', href: '/aws/funciones/avg-uso-loc-inst-rds-mysql', icon: Database, color: 'text-green-500' },
         { label: 'Instancias RDS SQL Server', href: '/aws/funciones/avg-uso-loc-inst-rds-sqlserver', icon: Database, color: 'text-green-500' },
@@ -110,7 +120,7 @@ export const SidebarComponent = ({
         { label: 'Instancias RDS MariaDB', href: '/aws/funciones/avg-uso-loc-inst-rds-mariadb', icon: Database, color: 'text-green-500' },
     ]
 
-    const infraused = [
+    const infrausedAws = [
         { label: 'Instancias EC2', icon: Computer, href: '/aws/recursos/infrautilizadas/ec2' },
         { label: 'Instancias EC2 AutoscalingGroups', icon: Computer, href: '/aws/recursos/infrautilizadas/autoscaling' },
         { label: 'Instancias EC2 Nodos EKS', icon: Computer, href: '/aws/recursos/infrautilizadas/eks' }
@@ -129,7 +139,8 @@ export const SidebarComponent = ({
 
     const AwsRoutes = {
         routes: [
-            { label: 'Inicio', icon: Grid2X2, href: '/aws/facturacion/tendencia-facturacion' },
+            { label: 'Inicio', icon: LayoutDashboard, href: '/aws' },
+            { label: 'Tendencia Facturación', icon: Grid2X2, href: '/aws/facturacion/tendencia-facturacion' },
             { label: 'Quotas', icon: PieChart, href: '/aws/quotas' },
             { label: 'Eventos', icon: Zap, href: '/aws/eventos' },
             { label: 'Vista Advisor', icon: Pyramid, href: '/aws/advisor' },
@@ -149,29 +160,44 @@ export const SidebarComponent = ({
             { label: 'Top Facturaciones', subItems: topFacturaciones, icon: Zap },
             { label: 'Consumo horario hábil vs no hábil', subItems: consumoHorario, icon: Clock },
             { label: 'Consumo por Localización', subItems: consumoLoc, icon: Map },
-            { label: 'Recursos no utilizados', subItems: infraused, icon: TrendingDown },
-            { label: 'Spot vs Vm', href: '/aws/funciones/spot-vs-vm', icon: Database },
-            { label: 'Top S3 Buckets', href: '/aws/funciones/top-s3-buckets', icon: Server },
+            { label: 'Recursos no utilizados', subItems: infrausedAws, icon: TrendingDown },
+            { label: 'Spot vs Vm', href: '/aws/funciones/spot-vs-vm', icon: Zap },
+            { label: 'Top S3 Buckets', href: '/aws/funciones/top-s3-buckets', icon: Box },
             { label: 'Ebs No Utilizados', href: '/aws/funciones/ebs-no-utilizados', icon: HardDrive },
         ],
     }
 
+    const infrausedAzure = [
+        { label: 'VM', icon: Computer, href: '/azure/funciones/unused-resources/vm' },
+        { label: 'VMSS', icon: Computer, href: '/azure/funciones/unused-resources/vmss' },
+        { label: 'Extensiones VM', icon: Puzzle, href: '/azure/funciones/unused-resources/extensions' }
+    ]
+    const consumeSubItemsAzure = [
+        { label: 'Maquinas Virtuales', icon: Computer, href: '/azure/consumo-vm' },
+        { label: 'Base de Datos', icon: Database, href: '/azure/consumo-db' },
+        { label: 'Nodos', icon: Server, href: '/azure/consumo-nodos' },
+    ]
+
     const AzureRoutes = {
+
         routes: [
-            { label: 'Inicio', icon: Grid2X2, href: '/azure/facturacion/tendencia-facturacion' },
+            { label: 'Inicio', icon: LayoutDashboard, href: '/azure' },
+            { label: 'Tendencia Facturación', icon: Grid2X2, href: '/azure/facturacion/tendencia-pago-por-uso' },
             { label: 'Quotas', icon: PieChart, href: '/azure/quotas' },
             { label: 'Deployments', icon: Zap, href: '/azure/deployments' },
             { label: 'Vista Advisor', icon: Pyramid, href: '/azure/advisor' },
             { label: 'Vista Saving Plans', icon: HandCoins, href: '/azure/saving-plan' },
         ],
-        recursos: [],
-        consumes: [],
+        recursos: [{ label: 'Maquinas Virtuales', icon: Computer, href: '/azure/recursos-vm' }],
+        consumes: [{ label: 'Consumos', subItems: consumeSubItemsAzure, icon: Zap }],
         funciones: [
             { label: 'Blob Storage vs Storage General', icon: Cylinder, href: '/azure/funciones/blob-vs-storage-general' },
             { label: 'Variación Storage', icon: Cylinder, href: '/azure/funciones/variacion-storage' },
             { label: 'Top 10 uso de recursos', icon: LineChart, href: '/azure/funciones/top-10-recursos-uso' },
             { label: 'Incremento Uso de Recursos', icon: LineChart, href: '/azure/funciones/incremento-top-recursos-uso' },
-            { label: 'Spot vs Regular VMs', icon: Computer, href: '/azure/funciones/spot-vs-regular-vm' }
+            { label: 'Spot vs Regular VMs', icon: Computer, href: '/azure/funciones/spot-vs-regular-vm' },
+            { label: 'Promedio de uso por localización', icon: MapPin, href: '/azure/funciones/promedio-por-localizacion' },
+            { label: 'Recursos no utilizados', subItems: infrausedAzure, icon: TrendingDown }
         ],
     }
 
@@ -209,37 +235,6 @@ export const SidebarComponent = ({
         }, {})
     }, [funcionesConSub, pathname])
 
-    // const funcionesConSub =
-    //     isAws ? AwsRoutes.funciones.filter(f => f.subItems && f.subItems.length) : isAzure ? AzureRoutes.funciones.filter(f => f.subItems && f.subItems.length) : [];
-    // const funcionesSimples =
-    //     isAws ? AwsRoutes.funciones.filter(f => f.href) : isAzure ? AzureRoutes.funciones.filter(f => f.href) : [];
-
-    // const defaultOpenRecursos =
-    //     isAws ? AwsRoutes.recursos.some((r) => r.href === pathname) : isAzure ? AzureRoutes.recursos.some((r) => r.href === pathname) : false
-    // const [isRecursosOpen, setIsRecursosOpen] = useState(defaultOpenRecursos)
-
-    // const defaultOpenFunciones =
-    //     isAws ? AwsRoutes.funciones.some((f) =>
-    //         (f.href && f.href === pathname) || f.subItems?.some((sub) => sub.href === pathname)
-    //     ) : isAzure ? AzureRoutes.funciones.some((f) =>
-    //         (f.href && f.href === pathname) || f.subItems?.some((sub) => sub.href === pathname)
-    //     ) : false
-    // const [isFuncionesOpen, setIsFuncionesOpen] = useState(defaultOpenFunciones)
-
-    // const defaultOpenConsumes =
-    //     isAws ? AwsRoutes.consumes.some((f) =>
-    //         f.subItems?.some((sub) => sub.href === pathname)
-    //     ) : isAzure ? AzureRoutes.consumes.some((f) =>
-    //         f.subItems?.some((sub) => sub.href === pathname)
-    //     ) : false
-    // const [isConsumesOpen, setIsConsumesOpen] = useState(defaultOpenConsumes)
-
-    // const initialOpenByGroup = useMemo(() => {
-    //     return funcionesConSub.reduce<Record<string, boolean>>((acc, grupo) => {
-    //         acc[grupo.label] = grupo.subItems?.some((sub) => sub.href === pathname) ?? false
-    //         return acc
-    //     }, {})
-    // }, [funcionesConSub, pathname])
 
     const [openByGroup, setOpenByGroup] = useState<Record<string, boolean>>(initialOpenByGroup)
 
@@ -255,8 +250,6 @@ export const SidebarComponent = ({
     }, [state])
 
     useEffect(() => {
-        console.log('AWS' + pathname.startsWith('/aws'))
-        console.log('AZURE' + pathname.startsWith('/azure'))
         setIsAws(pathname.startsWith('/aws'))
         setIsAzure(pathname.startsWith('/azure'))
     }, [pathname])
@@ -275,8 +268,8 @@ export const SidebarComponent = ({
                 <Image
                     width={100}
                     height={100}
-                    alt="Logo Cloud Performance"
-                    src="/logo.png"
+                    alt="Logo Intac"
+                    src="/logo-intac.svg"
                     className="object-cover"
                 />
                 {open && (

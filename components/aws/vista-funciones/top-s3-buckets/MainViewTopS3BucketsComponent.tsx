@@ -16,7 +16,7 @@ export const ViewTopS3Buckets = () => {
               </div>
               <div>
                 <h1 className='text-3xl font-bold text-gray-900 dark:text-gray-100'>
-                  Dashboard AWS / Top S3 Buckets
+                  Top S3 Buckets
                 </h1>
                 <p className='text-gray-500 dark:text-gray-400'>
                   Vista Top S3 Buckets

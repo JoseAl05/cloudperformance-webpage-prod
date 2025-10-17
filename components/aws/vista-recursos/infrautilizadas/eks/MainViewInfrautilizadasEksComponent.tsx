@@ -19,9 +19,6 @@ export const MainViewInfrautilizadasEksComponent = () => {
                 <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
                   Cluster EKS instancias EC2 infrautilizadas
                 </h1>
-                <p className="text-gray-500 dark:text-gray-400">
-                  Monitoreo y gestión de cluster EKS infrautilizadas
-                </p>
               </div>
             </div>
           </div>

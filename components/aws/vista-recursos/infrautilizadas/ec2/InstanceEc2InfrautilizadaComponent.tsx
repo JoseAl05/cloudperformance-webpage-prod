@@ -15,8 +15,8 @@ interface InstanceEc2CInfrautilizadaComponentProps {
 }
 
 const fetcher = (url: string) =>
-    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
-        .then(r => r.json());
+  fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
+    .then(r => r.json());
 
 export const InstanceEc2InfrautilizadaComponent = ({
   startDate,
@@ -38,8 +38,6 @@ export const InstanceEc2InfrautilizadaComponent = ({
       : null,
     fetcher
   );
-  console.log(ec2InfrautilizadaInfo.resourceList)
-
 
   if (ec2InfrautilizadaInfo.isLoading) {
     return (

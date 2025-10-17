@@ -72,6 +72,8 @@ export const Ec2TableComponent = ({
             data={data?.instances ?? []}
             filterColumn="InstanceId"
             filterPlaceholder="Buscar InstanceId…"
+            groupByColumn='InstanceId'
+            enableGrouping
         />
     )
 }

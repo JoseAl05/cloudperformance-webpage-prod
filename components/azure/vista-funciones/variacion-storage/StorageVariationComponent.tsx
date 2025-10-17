@@ -39,6 +39,20 @@ export const StorageVariationComponent = ({ selectedStrgAccount, subscription, r
         isNonEmptyArray<StorageVariation>(allStorageVariations.data) ? allStorageVariations.data : null;
 
     const hasStrgVariationData = !!strgVariationData && strgVariationData.length > 0;
+    const hasSelectedStrgAccount = !!selectedStrgAccount && selectedStrgAccount.length > 0;
+
+    if (!hasSelectedStrgAccount) {
+        return (
+            <div className="w-full min-w-0 px-4 py-6">
+                <MessageCard
+                    icon={Info}
+                    title="Storage Account no seleccionado"
+                    description="Seleccione un Storage Account.."
+                    tone="info"
+                />
+            </div>
+        )
+    }
 
     if (anyLoading) {
         return <LoaderComponent />

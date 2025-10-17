@@ -15,7 +15,7 @@ export const ViewConsumoRdsOracleHorario = () => {
               </div>
               <div>
                 <h1 className='text-3xl font-bold text-gray-900 dark:text-gray-100'>
-                  Dashboard AWS / Consumo RDS Oracle
+                  Consumo RDS Oracle
                 </h1>
                 <p className='text-gray-500 dark:text-gray-400'>
                   Comparación de consumo en horario hábil vs no hábil

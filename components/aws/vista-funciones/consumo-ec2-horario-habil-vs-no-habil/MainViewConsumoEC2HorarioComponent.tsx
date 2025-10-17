@@ -1,5 +1,5 @@
 import { FiltersComponent } from '@/components/general/filters/FiltersComponent'
-import { MainViewConsumoEC2Horario }  from './ConsumoEC2HorarioComponent'
+import { MainViewConsumoEC2Horario } from './ConsumoEC2HorarioComponent'
 import { Computer } from 'lucide-react'
 
 export const ViewConsumoEC2Horario = () => {
@@ -14,7 +14,7 @@ export const ViewConsumoEC2Horario = () => {
               </div>
               <div>
                 <h1 className='text-3xl font-bold text-gray-900 dark:text-gray-100'>
-                  Dashboard AWS / Consumo EC2 
+                  Consumo EC2
                 </h1>
                 <p className='text-gray-500 dark:text-gray-400'>
                   Comparación de consumo en horario hábil vs no hábil

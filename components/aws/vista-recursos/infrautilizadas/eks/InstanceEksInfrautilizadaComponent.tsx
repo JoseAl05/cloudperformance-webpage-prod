@@ -15,8 +15,8 @@ interface InstanceEc2CInfrautilizadaComponentProps {
 }
 
 const fetcher = (url: string) =>
-    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
-        .then(r => r.json());
+  fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
+    .then(r => r.json());
 
 export const InstanceEksInfrautilizadaComponent = ({
   startDate,
@@ -32,7 +32,6 @@ export const InstanceEksInfrautilizadaComponent = ({
     ? endDate.toISOString().replace("Z", "").slice(0, -4)
     : "";
 
-  console.log(eksAsgInstance)
   // https://cloudperformance-desarrollo.eastus2.cloudapp.azure.com/api/aws/ec2/unused/unused?date_from=2025-08-01T00:00:00&date_to=2025-09-02T23:59:59&region=all&resource=i-08fc095993a5521be,i-084e4e667310b5e5b,i-0e2e4f97aaaaae90e
   const ec2InfrautilizadaInfo = useSWR(
     eksAsgInstance
@@ -40,8 +39,6 @@ export const InstanceEksInfrautilizadaComponent = ({
       : null,
     fetcher
   );
-  // console.log(ec2InfrautilizadaInfo.resourceList)
-  console.log(ec2InfrautilizadaInfo)
 
 
   if (ec2InfrautilizadaInfo.isLoading) {

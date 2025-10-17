@@ -91,7 +91,7 @@ export const AVGUsoLocInstEC2ChartComponent = ({
 
     // Los grupos de métricas decodificados y separados por coma
     const metricGroups = metrics.split(',').map(m => decodeURIComponent(m.trim())).join(',');
-    const baseUrl = '/api/bridge';
+    const baseUrl = '/api/aws/bridge';
 
     // LÓGICA HÍBRIDA: cambiar endpoint según instancia seleccionada
     if (instance && instance !== '' && instance !== 'all') {
@@ -121,12 +121,7 @@ export const AVGUsoLocInstEC2ChartComponent = ({
   // Solo hacer la petición si tenemos los parámetros mínimos
   const shouldFetch = !!(startDate && endDate && apiUrl);
 
-  // Debug: log de la URL generada
-  if (apiUrl) {
-    console.log('Generated API URL:', apiUrl);
-    console.log('Instance parameter:', instance);
-    console.log('Using endpoint:', instance && instance !== '' && instance !== 'all' ? 'DETALLE' : 'GENERAL');
-  }
+
 
   const { data: apiData, error, isLoading } = useSWR<ApiResponse>(
     shouldFetch ? apiUrl : null,
@@ -145,11 +140,6 @@ export const AVGUsoLocInstEC2ChartComponent = ({
       if (!detailData.metric_averages?.length) return [];
 
       const regionKey = detailData.instance_info.resource_region;
-
-      console.log('DEBUG DETALLE - instance_info:', detailData.instance_info);
-      console.log('DEBUG DETALLE - regionKey:', regionKey);
-      console.log('DEBUG DETALLE - primera métrica:', detailData.metric_averages[0]);
-
 
       const metrics: { [key: string]: number } = {};
 

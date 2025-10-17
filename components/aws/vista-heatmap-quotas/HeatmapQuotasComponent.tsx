@@ -217,9 +217,6 @@ export const HeatmapQuotasComponent = ({ startDate, endDate }: HeatmapQuotasComp
         };
     }, [data])
 
-    console.log(`START DATE: ${startDate.toISOString().replace('Z', '').slice(0, -4)}`);
-    console.log(`END DATE: ${endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : ''}`);
-
     if (isLoading) return <LoaderComponent />
     if (error) return <div>Error al cargar datos</div>
     return (
