@@ -82,7 +82,7 @@ export const PresupuestoMensualTableComponent = ({
   );
 
   // Fetch centros de costo
-  const { data: centrosCosto, isLoading: loadingCentros } = useSWR<CentroCosto[]>(
+  const { data: centrosCosto } = useSWR<CentroCosto[]>(
     cloud ? `/api/presupuesto/bridge/${cloud}/centro-costo` : null,
     fetcher
   );
@@ -147,7 +147,7 @@ export const PresupuestoMensualTableComponent = ({
   };
 
   const filteredAndSortedData = useMemo(() => {
-    let filtered = presupuestos.filter((p) => {
+    const filtered = presupuestos.filter((p) => {
       const search = searchTerm.toLowerCase();
       return (
         p.id_centro_costo.toString().includes(search) ||

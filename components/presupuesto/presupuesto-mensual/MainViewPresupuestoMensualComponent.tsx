@@ -1,8 +1,5 @@
 "use client";
 
-import { useSession } from "@/hooks/useSession";
-import { useState } from "react";
-import useSWR, { mutate } from "swr";
 import { CircleDollarSign } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SessionGate } from "@/components/general_presupuesto/session/SesionGate";

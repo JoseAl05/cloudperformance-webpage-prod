@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import useSWR, { mutate } from "swr";
-import { CircleDollarSign, Search, TicketsIcon, AlertCircle, Trash2, CheckCircle } from "lucide-react";
+import { mutate } from "swr";
+import { Search, TicketsIcon, AlertCircle, Trash2, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -33,6 +33,22 @@ interface CentroDeCostoComponentProps {
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
 export const CentroDeCostoComponent = ({ cloud }: CentroDeCostoComponentProps) => {
+    const cloudTypeMap: Record<string, string> = {
+    AWS: "aws",
+    AZURE: "azure",
+  };
+  const cloudType = cloud ? cloudTypeMap[cloud] ?? undefined : undefined;
+
+  // --- Estados
+  const [editingCentro, setEditingCentro] = useState<CentroCosto | null>(null);
+  const [showForm, setShowForm] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [centroToDelete, setCentroToDelete] = useState<number | string | null>(null);
+  const [errorDialogOpen, setErrorDialogOpen] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [successDialogOpen, setSuccessDialogOpen] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
+
   if (!cloud) {
     return (
       <div className="bg-white dark:bg-gray-900 rounded-xl py-16 text-center">
@@ -48,22 +64,6 @@ export const CentroDeCostoComponent = ({ cloud }: CentroDeCostoComponentProps) =
       </div>
     );
   }
-
-  const cloudTypeMap: Record<string, string> = {
-    AWS: "aws",
-    AZURE: "azure",
-  };
-  const cloudType = cloud ? cloudTypeMap[cloud] ?? undefined : undefined;
-
-  // --- Estados
-  const [editingCentro, setEditingCentro] = useState<CentroCosto | null>(null);
-  const [showForm, setShowForm] = useState(false);
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [centroToDelete, setCentroToDelete] = useState<number | string | null>(null);
-  const [errorDialogOpen, setErrorDialogOpen] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
-  const [successDialogOpen, setSuccessDialogOpen] = useState(false);
-  const [successMessage, setSuccessMessage] = useState("");
 
   // --- Acciones
   const handleEdit = (centro: CentroCosto) => {

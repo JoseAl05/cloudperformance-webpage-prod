@@ -1,10 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import useSWR, { mutate } from "swr";
+import { mutate } from "swr";
 import {
   Search,
-  TicketsIcon,
   Trash2,
   AlertCircle,
   CheckCircle,
@@ -42,20 +41,6 @@ interface PresupuestoMensualComponentProps {
 export const PresupuestoMensualComponent = ({
   cloud,
 }: PresupuestoMensualComponentProps) => {
-  if (!cloud)
-    return (
-      <div className="bg-white dark:bg-gray-900 rounded-xl py-16 text-center">
-        <div className="flex flex-col items-center justify-center space-y-3">
-          <Search className="w-12 h-12 text-gray-300 dark:text-gray-600" />
-          <div>
-            <p className="text-lg font-semibold">No se encontraron resultados</p>
-            <p className="text-sm text-gray-400 mt-1">
-              Intenta con otros términos de búsqueda
-            </p>
-          </div>
-        </div>
-      </div>
-    );
 
   // --- Mapeo Cloud
   const cloudTypeMap: Record<string, string> = {
@@ -72,6 +57,21 @@ export const PresupuestoMensualComponent = ({
     type: "error" | "success" | null;
     message: string;
   }>({ type: null, message: "" });
+
+  if (!cloud)
+    return (
+      <div className="bg-white dark:bg-gray-900 rounded-xl py-16 text-center">
+        <div className="flex flex-col items-center justify-center space-y-3">
+          <Search className="w-12 h-12 text-gray-300 dark:text-gray-600" />
+          <div>
+            <p className="text-lg font-semibold">No se encontraron resultados</p>
+            <p className="text-sm text-gray-400 mt-1">
+              Intenta con otros términos de búsqueda
+            </p>
+          </div>
+        </div>
+      </div>
+    );
 
   // --- Handlers
   const handleOpenForm = (item?: PresupuestoMensual) => {

@@ -71,7 +71,7 @@ export const CentroDeCostoTableComponent = ({ cloud, onEdit, onDelete }: CentroD
   const filteredAndSortedData = useMemo(() => {
     const centros: CentroCosto[] = Array.isArray(data) ? data : [];
     
-    let filtered = centros.filter((centro) => {
+    const filtered = centros.filter((centro) => {
       const search = searchTerm.toLowerCase();
       return (
         centro.id_centro_costo.toString().includes(search) ||

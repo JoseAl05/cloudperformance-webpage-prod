@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import useSWR from "swr";
-import { Calendar, Pencil, Trash2, Search, ArrowUpDown, ArrowUp, ArrowDown, ChevronLeft, ChevronRight, TrendingUp } from "lucide-react";
+import { Calendar, Pencil, Trash2, Search, ArrowUpDown, ArrowUp, ArrowDown, ChevronLeft, ChevronRight } from "lucide-react";
 
 // Tipos del schema
 interface PresupuestoMensual {
@@ -36,7 +36,7 @@ const fetcher = (url: string) =>
     .then((r) => r.json());
 
 export const PresupuestoAnualTableComponent = ({ cloud, onEdit, onDelete }: PresupuestoAnualTableComponentProps) => {
-  const { data, error, isLoading } = useSWR<PresupuestoAnual[]>(
+  const { data, error } = useSWR<PresupuestoAnual[]>(
     cloud ? `/api/presupuesto/bridge/${cloud}/presupuesto/anual` : null,
     fetcher,
     {
@@ -82,7 +82,7 @@ export const PresupuestoAnualTableComponent = ({ cloud, onEdit, onDelete }: Pres
   const filteredAndSortedData = useMemo(() => {
     const presupuestos: PresupuestoAnual[] = Array.isArray(data) ? data : [];
     
-    let filtered = presupuestos.filter((presupuesto) => {
+    const filtered = presupuestos.filter((presupuesto) => {
       const search = searchTerm.toLowerCase();
       return (
         presupuesto.id_presupuesto_anual.toString().includes(search) ||
@@ -181,10 +181,6 @@ export const PresupuestoAnualTableComponent = ({ cloud, onEdit, onDelete }: Pres
     });
   };
 
-  const getMesesNombres = () => [
-    "Ene", "Feb", "Mar", "Abr", "May", "Jun",
-    "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"
-  ];
 
   if (!data && !error) {
     return (

@@ -16,6 +16,14 @@ export interface PresupuestoMensual {
   id_presupuesto_anual?: number | string;
 }
 
+interface PresupuestoMensualPostPut {
+  mes: number;
+  anio: number;
+  monto_mensual_asociado: string;
+  monto_real_mes: string;
+  monto_forecast_mes: string;
+}
+
 interface CentroCosto {
   id_centro_costo: number;
   nombre_centro: string;
@@ -28,7 +36,7 @@ interface PresupuestoAnual {
   id_centro_costo: number;
   anio: number;
   monto_anual_asociado: string;
-  presupuestos_mensuales: any[] | null;
+  presupuestos_mensuales: PresupuestoMensualPostPut[] | null;
 }
 
 interface PresupuestoMensualFormProps {

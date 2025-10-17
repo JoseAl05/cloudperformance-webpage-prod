@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import useSWR from "swr";
-import { Plus, Trash2, Calendar, DollarSign, TrendingUp, Building2, X, Eye, EyeOff } from "lucide-react";
+import { Plus, Calendar, DollarSign, TrendingUp, Building2, X, Eye, EyeOff } from "lucide-react";
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
 

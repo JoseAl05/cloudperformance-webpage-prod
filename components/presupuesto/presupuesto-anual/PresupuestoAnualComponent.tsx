@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import useSWR, { mutate } from "swr";
+import { mutate } from "swr";
 import { Calendar, Search, AlertCircle, Trash2, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -29,25 +29,7 @@ interface PresupuestoAnualComponentProps {
   cloud: string;
 }
 
-const fetcher = (url: string) => fetch(url).then((r) => r.json());
-
 export const PresupuestoAnualComponent = ({ cloud }: PresupuestoAnualComponentProps) => {
-  if (!cloud) {
-    return (
-      <div className="bg-white dark:bg-gray-900 rounded-xl py-16 text-center">
-        <div className="flex flex-col items-center justify-center space-y-3">
-          <Search className="w-12 h-12 text-gray-300 dark:text-gray-600" />
-          <div>
-            <p className="text-lg font-semibold dark:text-gray-100">No se encontraron resultados</p>
-            <p className="text-sm text-gray-400 mt-1">
-              Selecciona un proveedor cloud
-            </p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   const cloudTypeMap: Record<string, string> = {
     AWS: "aws",
     AZURE: "azure",
@@ -63,6 +45,22 @@ export const PresupuestoAnualComponent = ({ cloud }: PresupuestoAnualComponentPr
   const [errorMessage, setErrorMessage] = useState("");
   const [successDialogOpen, setSuccessDialogOpen] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
+
+  if (!cloud) {
+    return (
+      <div className="bg-white dark:bg-gray-900 rounded-xl py-16 text-center">
+        <div className="flex flex-col items-center justify-center space-y-3">
+          <Search className="w-12 h-12 text-gray-300 dark:text-gray-600" />
+          <div>
+            <p className="text-lg font-semibold dark:text-gray-100">No se encontraron resultados</p>
+            <p className="text-sm text-gray-400 mt-1">
+              Selecciona un proveedor cloud
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   // --- Acciones
   const handleEdit = (presupuesto: PresupuestoAnual) => {
