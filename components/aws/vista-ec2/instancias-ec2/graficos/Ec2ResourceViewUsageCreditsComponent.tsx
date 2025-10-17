@@ -79,6 +79,7 @@ export const Ec2ResourceViewUsageCreditsComponent = ({ data }: ResourceViewUsage
         const colors = getThemeColors();
         const base = makeBaseOptions({
             legend: ['Uso de Créditos', 'Créditos Disponibles'],
+            legendPos: 'top',
             unitLabel: 'Créditos',
             useUTC: true,
             showToolbox: true,

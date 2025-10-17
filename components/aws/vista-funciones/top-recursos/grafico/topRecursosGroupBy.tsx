@@ -1,7 +1,6 @@
 'use client'
 import useSWR from 'swr'
-import React, { useEffect, useRef, useState } from "react"
-import * as echarts from "echarts"
+import React, { useMemo, useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
   Select,
@@ -9,23 +8,30 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
+} from '@/components/ui/select'
+import { TopDolarFamiliaChartComponent } from '../../top-dolares-por-famila-de-instancias/grafico/TopDolarFamiliaChartComponent'
+
 
 const fetcher = (url: string) =>
-    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
-        .then(r => r.json());
+  fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } }).then((r) => r.json())
 
 interface TopRecursosProps {
-  startDate: Date,
-  endDate: Date,
-  groupBy: "ResourceRegion" | "ResourceType" | "ResourceService",
-  title: string,
+  startDate: Date
+  endDate: Date
+  groupBy: 'ResourceRegion' | 'ResourceType' | 'ResourceService'
+  title: string
   icon?: React.ReactNode
 }
 
-export const TopRecursosChart = ({ startDate, endDate,groupBy, title, icon }: TopRecursosProps) => {
-  const chartRef = useRef<HTMLDivElement>(null)
-  const [topLimit, setTopLimit] = useState<number | "all">(10)
+type Row = {
+  group_by: unknown
+  total_unique_resources: unknown
+}
+
+export const TopRecursosChart = ({ startDate, endDate, groupBy, title, icon }: TopRecursosProps) => {
+  const [topLimit, setTopLimit] = useState<number | 'all'>(10)
+  // Creamos estado dummy requerido por el chart, pero NO se usará porque deshabilitamos details:
+  const [selectedFamily, setSelectedFamily] = useState<string>('')
 
   const startDateFormatted = startDate.toISOString().replace('Z', '').slice(0, -4)
   const endDateFormatted = endDate.toISOString().replace('Z', '').slice(0, -4)
@@ -35,56 +41,26 @@ export const TopRecursosChart = ({ startDate, endDate,groupBy, title, icon }: To
     fetcher
   )
 
-  // `data` es un array con varios grupos
-  const groups = Array.isArray(data) ? data : []
+  const groups: Row[] = Array.isArray(data) ? (data as Row[]) : []
 
-  // Ahora `total_unique_resources` ya viene calculado, no necesitamos sumar histórico
-  const aggregated = groups.map((g: unknown) => ({
-    name: g.group_by ?? "N/A",
-    total: g.total_unique_resources ?? 0
-  }))
+  const aggregated = useMemo(() => {
+    const rows = groups.map((g) => ({
+      name: typeof g.group_by === 'string' ? g.group_by : String(g.group_by ?? 'N/A'),
+      total: Number(g.total_unique_resources) || 0,
+    }))
+    const sorted = rows.sort((a, b) => b.total - a.total)
+    return topLimit === 'all' ? sorted : sorted.slice(0, topLimit)
+  }, [groups, topLimit])
 
-  // Ordenar y cortar por topLimit
-  let sorted = aggregated.sort((a, b) => b.total - a.total)
-  if (topLimit !== "all") {
-    sorted = sorted.slice(0, topLimit)
-  }
-
-  useEffect(() => {
-    if (!chartRef.current || !sorted.length) return
-    const chart = echarts.init(chartRef.current)
-
-    chart.setOption({
-      title: { text: `${title} (${topLimit === "all" ? "Todas" : "Top " + topLimit})`, left: "center" },
-      tooltip: { trigger: "axis", axisPointer: { type: "shadow" } },
-      grid: { left: 150, right: 50, top: 60, bottom: 60 },
-      xAxis: { type: "value", name: "Recursos" },
-      yAxis: {
-        type: "category",
-        data: sorted.map(r => r.name),
-        inverse: true,
-        axisLabel: {
-          formatter: (val: string) => {
-            const total = sorted.find(r => r.name === val)?.total || 0
-            return `${val} (${total})`
-          }
-        }
-      },
-      series: [{
-        type: "bar",
-        data: sorted.map(r => r.total),
-        itemStyle: { borderRadius: [6, 6, 0, 0] }
-      }]
-    })
-
-    const resizeObserver = new ResizeObserver(() => chart.resize())
-    resizeObserver.observe(chartRef.current)
-
-    return () => {
-      resizeObserver.disconnect()
-      chart.dispose()
-    }
-  }, [sorted, topLimit, title])
+  // Adaptación al formato que espera el chart:
+  const chartData = useMemo(() => {
+    return aggregated.map((r) => ({
+      dimension: r.name,                 // eje Y
+      service_dimension: 'Recursos',     // serie única
+      costo_neto: r.total,               // reusamos las keys para el valor
+      costo_bruto: r.total,
+    }))
+  }, [aggregated])
 
   if (isLoading) return <p>Cargando...</p>
   if (error) return <p>Error cargando los datos</p>
@@ -96,7 +72,11 @@ export const TopRecursosChart = ({ startDate, endDate,groupBy, title, icon }: To
           {icon}
           <CardTitle>{title}</CardTitle>
         </div>
-        <Select value={topLimit.toString()} onValueChange={(val) => setTopLimit(val === "all" ? "all" : Number(val))}>
+
+        <Select
+          value={topLimit.toString()}
+          onValueChange={(val) => setTopLimit(val === 'all' ? 'all' : Number(val))}
+        >
           <SelectTrigger className="w-28">
             <SelectValue placeholder="Top" />
           </SelectTrigger>
@@ -108,8 +88,26 @@ export const TopRecursosChart = ({ startDate, endDate,groupBy, title, icon }: To
           </SelectContent>
         </Select>
       </CardHeader>
-      <CardContent className="h-[400px]">
-        <div ref={chartRef} className="w-full h-full" />
+
+      <CardContent className="relative">
+        <TopDolarFamiliaChartComponent
+          data={chartData}
+          selectedFamily={selectedFamily}
+          setSelectedFamily={setSelectedFamily}
+          tipoCosto="costo_neto"
+          topLimit={topLimit}
+          detailsEnabled={false}
+          uiTuning={{
+            yLabelStrategy: 'truncate',
+            yLabelMaxChars: 38,
+            yLabelFontSize: 12,
+            gridMinLeft: 30,
+            gridMaxLeft: 40,
+            axisLabelInterval: 'auto',
+            legend: { type: 'plain', orient: 'horizontal', bottom: 8, left: 'center' },
+          }}
+          isBilling={false}
+        />
       </CardContent>
     </Card>
   )

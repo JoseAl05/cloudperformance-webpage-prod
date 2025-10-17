@@ -1,4 +1,4 @@
-import { ViewConsumoEC2AutoscalingGroupsHorario } from '@/components/aws/vista-funciones/consumo-ec2-autoscaling-groups-horario-habil-vs-no-habil/MainViewConsumoEC2AsgHorarioComponent';
+import { ViewConsumoEC2AutoscalingGroupsHorario } from '@/components/aws/vista-funciones/consumo-horario-habil-vs-no-habil/consumo-ec2-autoscaling-groups-horario-habil-vs-no-habil/MainViewConsumoEC2AsgHorarioComponent';
 import { Suspense } from 'react';
 
 export default function DashboardAwsConsumoEC2AutoscalingGroupsHorario() {

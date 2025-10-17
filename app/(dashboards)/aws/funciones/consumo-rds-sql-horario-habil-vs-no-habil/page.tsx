@@ -1,4 +1,4 @@
-import { ViewConsumoRdsSqlHorario } from '@/components/aws/vista-funciones/consumo-rds-sql-horario-habil-vs-no-habil/MainViewConsumoRdsSqlHorarioComponent';
+import { ViewConsumoRdsSqlHorario } from '@/components/aws/vista-funciones/consumo-horario-habil-vs-no-habil/consumo-rds-sql-horario-habil-vs-no-habil/MainViewConsumoRdsSqlHorarioComponent';
 import { Suspense } from 'react';
 
 export default function DashboardAwsRdsSqlHorario() {

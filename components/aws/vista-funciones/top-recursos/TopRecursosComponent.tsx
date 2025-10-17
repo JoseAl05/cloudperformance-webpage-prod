@@ -3,14 +3,12 @@ import React from "react";
 import { TopRecursosChart } from "@/components/aws/vista-funciones/top-recursos/grafico/topRecursosGroupBy";
 import { MapPin, Layers, Grid } from "lucide-react";
 
-
 interface MainViewTopRecursosProps {
   startDate: Date;
   endDate: Date;
 }
 
 export const MainViewTopRecursos = ({ startDate, endDate }: MainViewTopRecursosProps) => {
-
   return (
     <div className="space-y-6 p-4">
       <div>
@@ -42,4 +40,4 @@ export const MainViewTopRecursos = ({ startDate, endDate }: MainViewTopRecursosP
       </div>
     </div>
   );
-}
+};

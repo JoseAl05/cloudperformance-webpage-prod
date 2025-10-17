@@ -1,4 +1,4 @@
-import { ViewConsumoRdsMariaDbHorario } from '@/components/aws/vista-funciones/consumo-rds-mariadb-horario-habil-vs-no-habil/MainViewConsumoRdsMariaDbHorarioComponent';
+import { ViewConsumoRdsMariaDbHorario } from '@/components/aws/vista-funciones/consumo-horario-habil-vs-no-habil/consumo-rds-mariadb-horario-habil-vs-no-habil/MainViewConsumoRdsMariaDbHorarioComponent';
 import { Suspense } from 'react';
 
 export default function DashboardAwsRdsMariaDbHorario() {
