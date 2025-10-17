@@ -2,45 +2,13 @@
 import { useEffect, useMemo, useRef } from 'react';
 import * as echarts from 'echarts';
 
-// export const defaultDataZoom: echarts.EChartsOption['dataZoom'] = [
-//   {
-//     type: 'slider',
-//     xAxisIndex: 0,
-//     bottom: 20,
-//     height: 20,
-//     handleSize: '100%',
-//     start: 0,
-//     end: 100,
-//     realtime: false,
-//     throttle: 100,
-//     zoomOnMouseWheel: false,
-//     moveOnMouseMove: false,
-//     filterMode: 'none'
-//   },
-//   {
-//     type: 'inside',
-//     start: 0,
-//     end: 100,
-//     filterMode: 'none',
-//     throttle: 100,
-//     zoomOnMouseWheel: true,
-//     moveOnMouseMove: true,
-//   },
-// ];
-export type MetricType =
-  | 'count'
-  | 'percent'
-  | 'bytes'
-  | 'gb'
-  | 'mb'
-  | 'default';
-
+/** Controles de zoom por defecto (slider + inside) */
 export const defaultDataZoom: echarts.EChartsOption['dataZoom'] = [
   {
     type: 'slider',
     xAxisIndex: 0,
-    bottom: 28,
-    height: 18,
+    bottom: 20,
+    height: 20,
     handleSize: '100%',
     start: 0,
     end: 100,
@@ -51,337 +19,230 @@ export const defaultDataZoom: echarts.EChartsOption['dataZoom'] = [
   },
   {
     type: 'inside',
+    xAxisIndex: 0,
     start: 0,
     end: 100,
-    filterMode: 'none',
-    throttle: 100,
     zoomOnMouseWheel: true,
     moveOnMouseMove: true,
+    throttle: 50,
   },
 ];
 
-const makeNiceY = (
-  minPad = 0.1,
-  maxPad = 0.15,
-  opts?: {
-    minSpan?: number;
-    hardFloor?: number;
-    hardCeil?: number;
-    integerTicks?: boolean;
+/** Merge profundo y simple */
+export function deepMerge<T extends Record<string, unknown>>(a: T, b: T): T {
+  const out: Record<string, unknown> = { ...a };
+  Object.keys(b ?? {}).forEach((k) => {
+    const av = a?.[k];
+    const bv = b?.[k];
+    if (
+      av &&
+      bv &&
+      typeof av === 'object' &&
+      typeof bv === 'object' &&
+      !Array.isArray(av) &&
+      !Array.isArray(bv)
+    ) {
+      out[k] = deepMerge(
+        av as Record<string, unknown>,
+        bv as Record<string, unknown>
+      );
+    } else {
+      out[k] = bv;
+    }
+  });
+  return out as T;
+}
+
+/** Posición de leyenda: abreviada o detallada */
+type LegendPos =
+  | 'top'
+  | 'bottom'
+  | 'left'
+  | 'right'
+  | {
+      left?: string | number;
+      right?: string | number;
+      top?: string | number;
+      bottom?: string | number;
+      orient?: 'horizontal' | 'vertical';
+      align?: 'auto' | 'left' | 'right';
+    };
+
+function buildLegendOption(
+  legend: string[] | boolean,
+  legendPos: LegendPos
+): echarts.EChartsOption['legend'] {
+  // Normalizar posicionamiento
+  let pos: Record<string, unknown> = {};
+  if (typeof legendPos === 'string') {
+    const side = legendPos;
+    if (side === 'top') pos = { top: 0, left: 'center', orient: 'horizontal' };
+    if (side === 'bottom')
+      pos = { bottom: 0, left: 'center', orient: 'horizontal' };
+    if (side === 'left') pos = { left: 0, top: 'middle', orient: 'vertical' };
+    if (side === 'right') pos = { right: 0, top: 'middle', orient: 'vertical' };
+  } else {
+    pos = { ...legendPos };
   }
-) => {
-  const minSpan = opts?.minSpan ?? 1;
-  const hardFloor = opts?.hardFloor;
-  const hardCeil = opts?.hardCeil;
-  const integer = opts?.integerTicks ?? false;
+
+  if (Array.isArray(legend)) {
+    return { data: legend, ...pos };
+  }
+  return legend ? { ...pos } : { show: false };
+}
+
+export function makeBaseOptions(args?: {
+  legend?: string[] | boolean;
+  legendPos?: LegendPos;
+  unitLabel?: string;
+  useUTC?: boolean;
+  showToolbox?: boolean;
+  showDataZoom?: boolean;
+  metricType?: 'default' | 'percent';
+}): echarts.EChartsOption {
+  const {
+    legend = true,
+    legendPos = 'top',
+    unitLabel,
+    useUTC = true,
+    showToolbox = false,
+    showDataZoom = true,
+    metricType = 'default',
+  } = args ?? {};
+
+  const textColor = '#a1a1aa';
+  const gridColor = '#27272a';
 
   return {
-    min: (v: { min: number; max: number }) => {
-      const span = v.max - v.min;
-      if (!isFinite(span) || span <= 0) {
-        const c = isFinite(v.min) ? v.min : 0;
-        const floor = c - minSpan / 2;
-        return hardFloor != null ? Math.max(hardFloor, floor) : floor;
-      }
-      const val = v.min - span * minPad;
-      return hardFloor != null ? Math.max(hardFloor, val) : val;
-    },
-    max: (v: { min: number; max: number }) => {
-      const span = v.max - v.min;
-      if (!isFinite(span) || span <= 0) {
-        const c = isFinite(v.max) ? v.max : 0;
-        const ceil = c + minSpan / 2;
-        return hardCeil != null ? Math.min(hardCeil, ceil) : ceil;
-      }
-      const val = v.max + span * maxPad;
-      return hardCeil != null ? Math.min(hardCeil, val) : val;
-    },
-    axisLabel: { show: true, hideOverlap: false, margin: 8 },
-    splitLine: { show: true },
-    axisLine: { show: true },
-    axisTick: { show: true, length: 4 },
-    ...(integer ? { minInterval: 1 } : {}),
-  };
-};
-
-export const makeAxisTooltipFormatter =
-  (unitLabel?: string) => (params: unknown[]) => {
-    const first = params?.[0];
-    const ts = first?.value?.[0] ?? first?.data?.[0];
-    const date = ts ? new Date(ts).toUTCString() : '';
-    const lines = (params || [])
-      .map((p: unknown) => {
-        const val = Array.isArray(p.value) ? p.value[1] : p.value;
-        const unit = unitLabel ? ` ${unitLabel}` : '';
-        return `${p.marker} ${p.seriesName}: ${val}${unit}`;
-      })
-      .join('<br/>');
-    return `${date}<br/>${lines}`;
-  };
-
-export function deepMerge<T>(base: T, extra: Partial<T>): T {
-  if (Array.isArray(base) && Array.isArray(extra)) {
-    return extra as T;
-  }
-  if (typeof base === 'object' && base && typeof extra === 'object' && extra) {
-    const out: unknown = Array.isArray(base)
-      ? [...(base as unknown)]
-      : { ...(base as unknown) };
-    for (const [k, v] of Object.entries(extra)) {
-      const cur = (out as unknown)[k];
-      if (Array.isArray(v) || typeof v !== 'object' || v === null) {
-        (out as unknown)[k] = v as unknown;
-      } else {
-        (out as unknown)[k] = deepMerge(cur ?? {}, v as unknown);
-      }
-    }
-    return out;
-  }
-  return (extra as T) ?? base;
-}
-
-export const lightTheme = {
-  color: undefined,
-  textStyle: {
-    fontFamily: 'ui-sans-serif, system-ui, -apple-system, Segoe UI',
-  },
-  axisPointer: { lineStyle: { type: 'dashed' } },
-};
-
-export const darkTheme = {
-  backgroundColor: 'transparent',
-  textStyle: { color: '#e5e7eb' },
-  axisLine: { lineStyle: { color: '#374151' } },
-  splitLine: { lineStyle: { color: '#111827' } },
-  axisPointer: { lineStyle: { type: 'dashed' } },
-};
-
-export function registerGlobalThemes() {
-  try {
-    echarts.registerTheme('cp-light', lightTheme as unknown);
-  } catch {}
-  try {
-    echarts.registerTheme('cp-dark', darkTheme as unknown);
-  } catch {}
-}
-
-export interface BaseOptionArgs {
-  title?: string;
-  legend?: string[];
-  unitLabel?: string;
-  yMax?: number;
-  useUTC?: boolean;
-  showToolbox?: boolean;
-}
-
-const fmtFixed = (n: number, d = 2) =>
-  Number.isInteger(n)
-    ? String(n)
-    : Math.abs(n) >= 1e-3
-    ? n.toFixed(d)
-    : n.toString();
-
-const humanBytes = (b: number, unitLabel?: string) => {
-  if (!isFinite(b)) return '';
-  const abs = Math.abs(b);
-  if (abs >= 1024 ** 3)
-    return `${(b / 1024 ** 3).toFixed(2)} ${unitLabel ?? 'GB'}`;
-  if (abs >= 1024 ** 2)
-    return `${(b / 1024 ** 2).toFixed(2)} ${unitLabel ?? 'MB'}`;
-  if (abs >= 1024) return `${(b / 1024).toFixed(2)} ${unitLabel ?? 'KB'}`;
-  return `${Math.round(b)} ${unitLabel ?? 'Bytes'}`;
-};
-
-export const getYAxisByMetricType = (
-  metricType: MetricType,
-  unitLabel?: string
-): echarts.EChartsOption['yAxis'] => {
-  switch (metricType) {
-    case 'percent':
-      return {
-        type: 'value',
-        ...makeNiceY(0.1, 0.15, { minSpan: 1, hardFloor: 0, hardCeil: 100 }),
-        axisLabel: {
-          show: true,
-          hideOverlap: false,
-          margin: 8,
-          formatter: (v: number) => `${fmtFixed(v, 1)} ${unitLabel ?? '%'}`,
-        },
-      };
-
-    case 'count':
-      return {
-        type: 'value',
-        ...makeNiceY(0.1, 0.15, {
-          minSpan: 2,
-          hardFloor: 0,
-          hardCeil: 100,
-          // integerTicks: true,
-        }),
-        axisLabel: {
-          show: true,
-          hideOverlap: false,
-          margin: 8,
-          formatter: (v: number) =>
-            `${fmtFixed(v, 1)} ${unitLabel ?? ''}`.trim(),
-        },
-      };
-
-    case 'gb':
-      return {
-        type: 'value',
-        ...makeNiceY(0.1, 0.15, { minSpan: 1, hardFloor: 0 }),
-        axisLabel: {
-          show: true,
-          hideOverlap: false,
-          margin: 8,
-          formatter: (v: number) => `${fmtFixed(v, 2)} ${unitLabel ?? 'GB'}`,
-        },
-      };
-
-    case 'mb':
-      return {
-        type: 'value',
-        ...makeNiceY(0.1, 0.15, { minSpan: 100, hardFloor: 0 }),
-        axisLabel: {
-          show: true,
-          hideOverlap: false,
-          margin: 8,
-          formatter: (v: number) => `${fmtFixed(v, 0)} ${unitLabel ?? 'MB'}`,
-        },
-      };
-
-    case 'bytes':
-      return {
-        type: 'value',
-        ...makeNiceY(0.1, 0.15, { minSpan: 1024, hardFloor: 0 }),
-        axisLabel: {
-          show: true,
-          hideOverlap: false,
-          margin: 8,
-          formatter: (v: number) => humanBytes(v, unitLabel),
-        },
-      };
-
-    case 'default':
-    default:
-      return {
-        type: 'value',
-        ...makeNiceY(0.1, 0.15, { minSpan: 1, hardFloor: 0 }),
-        axisLabel: { show: true, hideOverlap: false, margin: 8 },
-      };
-  }
-};
-
-export function makeBaseOptions({
-  legend = [],
-  unitLabel,
-  useUTC = true,
-  showToolbox = true,
-  metricType = 'default',
-}: {
-  legend?: string[];
-  unitLabel?: string;
-  useUTC?: boolean;
-  showToolbox?: boolean;
-  metricType?: MetricType;
-}): echarts.EChartsOption {
-  const xAxis: echarts.EChartsOption['xAxis'] = {
-    type: 'time',
-    boundaryGap: false,
-    axisLabel: {
-      hideOverlap: true,
-    },
-    axisLine: { show: false },
-    axisTick: { show: false },
-  };
-
-  // const yAxis: echarts.EChartsOption['yAxis'] = {
-  //   type: 'value',
-  //   ...makeNiceY(),
-  //   axisLabel: unitLabel
-  //     ? {
-  //         hideOverlap: false,
-  //         margin: 8,
-  //         formatter: (val: number) => `${val} ${unitLabel}`,
-  //       }
-  //     : {
-  //         hideOverlap: false,
-  //         margin: 8,
-  //       },
-  //   axisLine: { show: true },
-  //   axisTick: { show: true, length: 4 },
-  //   splitLine: { show: true },
-  // };
-
-  const yAxis: echarts.EChartsOption['yAxis'] = getYAxisByMetricType(
-    metricType,
-    unitLabel
-  );
-
-  const grid: echarts.EChartsOption['grid'] = {
-    left: 44,
-    right: 10,
-    top: 40,
-    bottom: 56,
-    containLabel: true,
-  };
-
-  const toolbox: echarts.EChartsOption['toolbox'] = showToolbox
-    ? {
-        right: 6,
-        feature: {
-          // dataZoom: { yAxisIndex: 'none' },
-          restore: {},
-          saveAsImage: {},
-        },
-      }
-    : undefined;
-
-  const base: echarts.EChartsOption = {
     useUTC,
-    grid,
-    legend: { data: legend, top: 8, icon: 'circle' },
+    backgroundColor: 'transparent',
+    animation: true,
+    animationDuration: 300,
+    textStyle: { color: textColor },
+    grid: { left: 40, right: 10, top: 40, bottom: 40, containLabel: true },
+    legend: buildLegendOption(legend, legendPos),
     tooltip: {
       trigger: 'axis',
-      axisPointer: { type: 'cross' },
-      valueFormatter: unitLabel
-        ? (v) => (v == null ? '' : `${v} ${unitLabel}`)
-        : undefined,
-      confine: true,
+      axisPointer: { type: 'line' },
+      valueFormatter: (v) => {
+        if (v == null) return '-';
+        const n = Number(v);
+        if (Number.isNaN(n)) return String(v);
+        return metricType === 'percent' ? `${n.toFixed(2)}%` : `${n}`;
+      },
     },
-    xAxis,
-    yAxis,
-    dataZoom: defaultDataZoom,
-    toolbox,
-    media: [
-      {
-        query: { maxWidth: 640 },
-        option: {
-          grid: {
-            left: 56,
-            bottom: 70,
-            top: 44,
-            containLabel: true,
+    xAxis: {
+      type: 'category',
+      boundaryGap: false,
+      axisLine: { lineStyle: { color: gridColor } },
+      axisLabel: { color: textColor, hideOverlap: true },
+      splitLine: { show: false },
+    },
+    yAxis: {
+      type: 'value',
+      axisLine: { lineStyle: { color: gridColor } },
+      axisLabel: {
+        color: textColor,
+        formatter: (v: number) => (metricType === 'percent' ? `${v}%` : `${v}`),
+      },
+      splitLine: { show: true, lineStyle: { color: gridColor, opacity: 0.4 } },
+    },
+    toolbox: showToolbox
+      ? {
+          feature: {
+            saveAsImage: { show: true },
+            dataZoom: { show: true, yAxisIndex: 'none' },
+            magicType: { type: ['line', 'bar'] },
+            restore: { show: true },
           },
-          xAxis: { axisLabel: { rotate: 30 } },
-          dataZoom: [{ bottom: 30, height: 16 }, {}],
-        },
-      },
-      {
-        query: { maxHeight: 420 },
-        option: {
-          grid: { left: 48, bottom: 64, containLabel: true },
-          dataZoom: [{ bottom: 26, height: 14 }, {}],
-        },
-      },
-    ],
+        }
+      : undefined,
+    dataZoom: showDataZoom ? defaultDataZoom : undefined,
   };
-
-  return base;
 }
 
-export interface LineSeriesArgs {
+/** ============================================================
+ * Tipos de Series
+ * ============================================================ */
+
+export type ChartKind =
+  | 'line'
+  | 'area'
+  | 'bar'
+  | 'stackedBar'
+  | 'scatter'
+  | 'pie'
+  | 'doughnut'
+  | 'radar';
+
+export interface SeriesOverrides {
+  color?: string;
+  lineStyle?: Record<string, unknown>;
+  areaStyle?: Record<string, unknown>;
+  itemStyle?: Record<string, unknown>;
+  showSymbol?: boolean;
+  smooth?: boolean;
+  symbol?: unknown;
+  symbolSize?: number;
+  barWidth?: number | string;
+  stack?: string;
+  yAxisIndex?: number;
+  encode?: Record<string, unknown>;
+  label?: Record<string, unknown>;
+  emphasis?: Record<string, unknown>;
+  markPoint?: Record<string, unknown>;
+  z?: number;
+  zlevel?: number;
+}
+
+export interface BaseSeriesDef {
+  name: string;
+  /**
+   * Para (line, bar, area, stackedBar, scatter):
+   *   Array<[number | string | Date, number]>
+   * Para pie/donut:
+   *   Array<{ name: string; value: number }>
+   */
+  data: unknown[];
+  extra?: SeriesOverrides;
+}
+
+export interface CartesianSeriesDef extends BaseSeriesDef {
+  kind: Extract<ChartKind, 'line' | 'area' | 'bar' | 'stackedBar'>;
+  smooth?: boolean;
+}
+
+export interface PieSeriesDef extends BaseSeriesDef {
+  kind: Extract<ChartKind, 'pie' | 'doughnut'>;
+  radius?: [string | number, string | number] | string | number;
+  center?: [string | number, string | number];
+}
+
+export type AnySeriesDef = CartesianSeriesDef | PieSeriesDef;
+
+export type TooltipFormatter =
+  | string
+  | ((params: unknown) => string)
+  | ((params: unknown[]) => string);
+
+export type LegendOption = echarts.EChartsOption['legend'];
+
+export interface ChartFactoryInput {
+  kind: ChartKind;
+  title?: string;
+  subtitle?: string;
+  series: AnySeriesDef[];
+  legend?: boolean;
+  legendOption?: LegendOption;
+  tooltip?: boolean;
+  tooltipFormatter?: TooltipFormatter;
+  xAxisType?: 'category' | 'time' | 'value';
+  stackKey?: string;
+  extraOption?: echarts.EChartsOption;
+}
+
+/** Helpers de líneas con markPoint opcional */
+interface LineSeriesArgs {
   color?: string;
   area?: boolean | { opacity?: number };
   samplingThreshold?: number;
@@ -411,7 +272,7 @@ export function makeLineSeries(
     data,
     smooth: true,
     symbol: 'none',
-    symbolSize: 0,
+    symbolSize: 2,
     lineStyle: { color, width: 2, cap: 'round', join: 'round' },
     itemStyle: { color, borderColor: '#fff', borderWidth: 1 },
     emphasis: { focus: 'series', lineStyle: { width: 3 }, disabled: veryLarge },
@@ -419,7 +280,7 @@ export function makeLineSeries(
     large,
     largeThreshold: 1000,
     sampling: data.length > samplingThreshold ? 'lttb' : undefined,
-    progressive: large ? 0 : undefined,
+    progressive: large ? 400 : undefined,
     progressiveThreshold: large ? 500 : undefined,
     progressiveChunkMode: veryLarge ? 'mod' : undefined,
   };
@@ -449,7 +310,7 @@ export function makeLineSeries(
         show: true,
         formatter: (p: unknown) =>
           markPointLabelFormatter
-            ? markPointLabelFormatter(p?.value)
+            ? markPointLabelFormatter(p?.value as number)
             : `${p?.value}`,
       },
     };
@@ -458,6 +319,7 @@ export function makeLineSeries(
   return series as echarts.EChartsOption['series'][number];
 }
 
+/** Hook ECharts con cleanup y resize */
 export function useECharts(
   ref: React.RefObject<HTMLDivElement>,
   option: echarts.EChartsOption,
@@ -473,130 +335,52 @@ export function useECharts(
     const el = ref.current;
     if (!el) return;
 
-    chartRef.current =
-      echarts.getInstanceByDom(el) ||
-      echarts.init(el, theme ?? undefined, { renderer: 'canvas' });
+    chartRef.current = echarts.init(el, theme ?? undefined, {
+      renderer: 'canvas',
+    });
     chartRef.current.setOption(memoOption, {
       notMerge: true,
       lazyUpdate: true,
-      silent: false,
     });
 
-    resizeObs.current = new ResizeObserver(() => chartRef.current?.resize());
+    resizeObs.current = new ResizeObserver(() => {
+      chartRef.current?.resize();
+    });
     resizeObs.current.observe(el);
-    const onWinResize = () => chartRef.current?.resize();
-    window.addEventListener('resize', onWinResize);
 
     return () => {
-      window.removeEventListener('resize', onWinResize);
       resizeObs.current?.disconnect();
+      resizeObs.current = null;
       chartRef.current?.dispose();
       chartRef.current = null;
     };
-  }, [ref, memoOption, theme]);
+  }, [ref, theme]);
+
+  useEffect(() => {
+    chartRef.current?.setOption(memoOption, {
+      notMerge: true,
+      lazyUpdate: true,
+    });
+  }, [memoOption]);
 }
 
-export type ChartKind =
-  | 'line'
-  | 'area'
-  | 'bar'
-  | 'stackedBar'
-  | 'pie'
-  | 'doughnut';
+/** Fábrica principal */
+function buildSeries(def: AnySeriesDef): echarts.SeriesOption {
+  const applyOverrides = (base: echarts.SeriesOption, kind: ChartKind) => {
+    const s: Record<string, unknown> = { ...base };
+    const ex = def.extra ?? {};
 
-export interface BaseSeriesDef {
-  name: string;
-  /**
-   * Para (line, bar, area, stackedBar, scatter):
-   *   Array<[number | string | Date, number]>
-   * Para pie/donut:
-   *   Array<{ name: string; value: number }>
-   */
-  data: unknown[];
-  /**
-   * Overrides opcionales por serie (color, estilos, etc.).
-   */
-  extra?: SeriesOverrides;
-}
-
-export interface SeriesOverrides {
-  /** Color principal de la serie. */
-  color?: string;
-  /** Control fino por tipo de estilo (se aplica por encima de los defaults). */
-  lineStyle?: Record<string, unknown>;
-  areaStyle?: Record<string, unknown>;
-  itemStyle?: Record<string, unknown>;
-  /** Parámetros comunes */
-  showSymbol?: boolean;
-  smooth?: boolean;
-  symbol?: unknown;
-  symbolSize?: number;
-  /** Barras / apilado / ejes */
-  barWidth?: number | string;
-  stack?: string;
-  yAxisIndex?: number;
-  /** Otras opciones específicas */
-  encode?: Record<string, unknown>;
-  label?: Record<string, unknown>;
-  emphasis?: Record<string, unknown>;
-  markPoint?:Record<string,unknown>,
-  z?: number;
-  zlevel?: number;
-}
-
-export interface CartesianSeriesDef extends BaseSeriesDef {
-  kind: Extract<ChartKind, 'line' | 'area' | 'bar' | 'stackedBar'>;
-  smooth?: boolean;
-}
-
-export interface PieSeriesDef extends BaseSeriesDef {
-  kind: Extract<ChartKind, 'pie' | 'doughnut'>;
-  radius?: [string | number, string | number] | string | number;
-  center?: [string | number, string | number];
-}
-
-export type AnySeriesDef = CartesianSeriesDef | PieSeriesDef;
-
-export interface ChartFactoryInput {
-  kind: ChartKind;
-  title?: string;
-  subtitle?: string;
-  series: AnySeriesDef[];
-  legend?: boolean;
-  tooltip?: boolean;
-  xAxisType?: 'category' | 'time' | 'value';
-  stackKey?: string;
-  extraOption?: echarts.EChartsOption;
-}
-
-export const buildSeries = (
-  def: AnySeriesDef,
-  opts?: { stackKey?: string }
-): echarts.SeriesOption => {
-  const ex = (def as unknown as { extra?: SeriesOverrides }).extra;
-
-  const applyOverrides = (
-    series: echarts.SeriesOption,
-    kind: ChartKind | unknown
-  ): echarts.SeriesOption => {
-    const s = series as unknown as Record<string, unknown>;
-    if (!ex) return series;
-
-    // showSymbol / smooth
     if (typeof ex.showSymbol === 'boolean') s.showSymbol = ex.showSymbol;
     if (typeof ex.smooth === 'boolean') s.smooth = ex.smooth;
 
-    // yAxisIndex / barWidth / stack
     if (typeof ex.yAxisIndex === 'number') s.yAxisIndex = ex.yAxisIndex;
     if (typeof ex.barWidth !== 'undefined')
       s['barWidth'] = ex.barWidth as unknown;
     if (typeof ex.stack === 'string') s['stack'] = ex.stack;
 
-    // symbol / symbolSize
     if (typeof ex.symbol !== 'undefined') s['symbol'] = ex.symbol as unknown;
     if (typeof ex.symbolSize === 'number') s['symbolSize'] = ex.symbolSize;
 
-    // label / emphasis / encode (merge superficial)
     if (ex.label) {
       const prev = (s['label'] as Record<string, unknown> | undefined) ?? {};
       s['label'] = { ...prev, ...ex.label };
@@ -609,8 +393,12 @@ export const buildSeries = (
       const prev = (s['encode'] as Record<string, unknown> | undefined) ?? {};
       s['encode'] = { ...prev, ...ex.encode };
     }
+    if (ex.markPoint) {
+      const prev =
+        (s['markPoint'] as Record<string, unknown> | undefined) ?? {};
+      s['markPoint'] = deepMerge(prev, ex.markPoint as Record<string, unknown>);
+    }
 
-    // itemStyle / lineStyle / areaStyle
     if (ex.itemStyle) {
       const prev =
         (s['itemStyle'] as Record<string, unknown> | undefined) ?? {};
@@ -627,7 +415,6 @@ export const buildSeries = (
       s['areaStyle'] = { ...prev, ...ex.areaStyle };
     }
 
-    // Color primario
     if (typeof ex.color === 'string' && ex.color) {
       const itemPrev =
         (s['itemStyle'] as Record<string, unknown> | undefined) ?? {};
@@ -646,7 +433,6 @@ export const buildSeries = (
       }
     }
 
-    // z / zlevel
     if (typeof ex.z === 'number') s['z'] = ex.z;
     if (typeof ex.zlevel === 'number') s['zlevel'] = ex.zlevel;
 
@@ -660,10 +446,10 @@ export const buildSeries = (
         name: def.name,
         type: 'line',
         smooth: (def as CartesianSeriesDef).smooth ?? true,
-        showSymbol: false,
+        showSymbol: true,
         lineStyle: { width: 2 },
         areaStyle: def.kind === 'area' ? {} : undefined,
-        data: def.data as Array<[unknown, number]>,
+        data: def.data as Array<[unknown, number]> | Array<[number]>,
         encode: { x: 0, y: 1 },
         emphasis: { focus: 'series' },
       } as echarts.SeriesOption;
@@ -682,11 +468,10 @@ export const buildSeries = (
     }
 
     case 'stackedBar': {
-      const defaultStack = opts?.stackKey ? `${opts.stackKey}` : 'stack';
       const base = {
         name: def.name,
         type: 'bar',
-        stack: defaultStack,
+        stack: 'stack',
         data: def.data as Array<[unknown, number]>,
         encode: { x: 0, y: 1 },
         emphasis: { focus: 'series' },
@@ -705,31 +490,6 @@ export const buildSeries = (
       return applyOverrides(base, def.kind);
     }
 
-    case 'radar': {
-      const base = {
-        name: def.name,
-        type: 'radar',
-        data: [
-          {
-            value: def.data as number[],
-            name: def.name,
-          },
-        ],
-        emphasis: { focus: 'series' },
-      } as echarts.SeriesOption;
-      return applyOverrides(base, def.kind);
-    }
-
-    case 'funnel': {
-      const base = {
-        name: def.name,
-        type: 'funnel',
-        data: def.data as Array<{ name: string; value: number }>,
-        emphasis: { focus: 'series' },
-      } as echarts.SeriesOption;
-      return applyOverrides(base, def.kind);
-    }
-
     case 'pie':
     case 'doughnut': {
       const radius =
@@ -742,9 +502,8 @@ export const buildSeries = (
         radius,
         center,
         roseType: undefined,
-        label: { show: true },
         data: def.data as Array<{ name: string; value: number }>,
-        emphasis: { focus: 'data' },
+        emphasis: { focus: 'self' },
       } as echarts.SeriesOption;
       return applyOverrides(base, def.kind);
     }
@@ -753,65 +512,60 @@ export const buildSeries = (
       return {
         name: def.name,
         type: 'line',
-        data: def.data as unknown,
+        data: def.data as Array<[unknown, number]> | Array<[number]>,
       } as echarts.SeriesOption;
   }
-};
-export const createChartOption = (
+}
+
+export function createChartOption(
   input: ChartFactoryInput
-): echarts.EChartsOption => {
+): echarts.EChartsOption {
   const {
     kind,
     title,
     subtitle,
     series,
-    radarIndicators,
     legend = true,
+    legendOption,
     tooltip = true,
-    xAxisType = kind === 'line' || kind === 'area' || kind === 'scatter'
-      ? 'time'
-      : 'category',
-    stackKey,
-    extraOption = {},
+    tooltipFormatter,
+    xAxisType = 'category',
+    extraOption,
   } = input;
-  const needsCartesian = [
-    'line',
-    'area',
-    'bar',
-    'stackedBar',
-    'scatter',
-  ].includes(kind);
-
-  const builtSeries = series.map((s) => buildSeries(s, { stackKey }));
+  const resolvedLegend: LegendOption =
+    legend === false
+      ? ({ show: false } as LegendOption)
+      : legendOption ?? ({} as LegendOption);
 
   const option: echarts.EChartsOption = {
+    ...makeBaseOptions({ useUTC: true }),
     title: title ? { text: title, subtext: subtitle } : undefined,
-    legend: legend ? { top: 0 } : undefined,
+    legend: resolvedLegend,
     tooltip: tooltip
-      ? {
-          trigger:
-            kind === 'pie' || kind === 'doughnut' || kind === 'funnel'
-              ? 'item'
-              : 'axis',
-        }
-      : undefined,
-    xAxis: needsCartesian ? { type: xAxisType } : undefined,
-    yAxis: needsCartesian ? { type: 'value' } : undefined,
-    radar:
-      kind === 'radar'
-        ? {
-            indicator: radarIndicators ?? [],
-            center: ['50%', '55%'],
-            radius: '65%',
-          }
-        : undefined,
-    series: builtSeries,
-    ...extraOption,
+      ? ({
+          trigger: 'axis',
+          ...(tooltipFormatter ? { formatter: tooltipFormatter } : {}),
+        } as echarts.EChartsOption['tooltip'])
+      : { show: false },
+    xAxis:
+      kind === 'pie' || kind === 'doughnut'
+        ? undefined
+        : {
+            type: xAxisType,
+            boundaryGap: kind === 'bar' || kind === 'stackedBar',
+          },
+    yAxis:
+      kind === 'pie' || kind === 'doughnut' ? undefined : { type: 'value' },
+    series: series.map(buildSeries),
   };
 
-  return option;
-};
-export const makeSimpleChart = (
+  return extraOption
+    ? deepMerge(option, extraOption as Record<string, unknown>)
+    : option;
+}
+
+/** Atajo para una sola serie */
+export const createSeries = (
   kind: ChartKind,
   name: string,
   data: unknown[],

@@ -45,6 +45,7 @@ import {
     Boxes,
     Stars,
     Layers,
+    Table,
 } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { usePathname } from 'next/navigation'
@@ -185,6 +186,7 @@ export const SidebarComponent = ({
             { label: 'Tendencia Facturación', icon: Grid2X2, href: '/azure/facturacion/tendencia-pago-por-uso' },
             { label: 'Quotas', icon: PieChart, href: '/azure/quotas' },
             { label: 'Deployments', icon: Zap, href: '/azure/deployments' },
+            { label: 'Items Azure', icon: Table, href: '/azure/tables-azure/tablas-item-azure' },
             { label: 'Vista Advisor', icon: Pyramid, href: '/azure/advisor' },
             { label: 'Vista Saving Plans', icon: HandCoins, href: '/azure/saving-plan' },
         ],
@@ -197,6 +199,7 @@ export const SidebarComponent = ({
             { label: 'Incremento Uso de Recursos', icon: LineChart, href: '/azure/funciones/incremento-top-recursos-uso' },
             { label: 'Spot vs Regular VMs', icon: Computer, href: '/azure/funciones/spot-vs-regular-vm' },
             { label: 'Promedio de uso por localización', icon: MapPin, href: '/azure/funciones/promedio-por-localizacion' },
+            { label: 'Consumo horario hábil vs no hábil', icon: Clock, href: '/azure/funciones/analisis-vms-horario' },
             { label: 'Recursos no utilizados', subItems: infrausedAzure, icon: TrendingDown }
         ],
     }

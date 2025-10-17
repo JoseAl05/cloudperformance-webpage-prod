@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Info } from 'lucide-react';
 import { EventGroup } from '@/interfaces/vista-eventos/eventsViewInterfaces';
 import { useTheme } from 'next-themes';
+import { createChartOption, deepMerge, makeBaseOptions, useECharts } from '@/lib/echartsGlobalConfig';
 
 interface EventsViewEventCountComponentProps {
     data: EventGroup[][] | null;
@@ -22,12 +23,11 @@ export const EventsViewEventCountComponent = ({
     data,
     sortDesc = true
 }: EventsViewEventCountComponentProps) => {
-    const chartRef = useRef<HTMLDivElement>(null);
-    const chartInstance = useRef<echarts.ECharts | null>(null);
-    const resizeObserverRef = useRef<ResizeObserver | null>(null);
+    const { theme, resolvedTheme } = useTheme();
+    const currentTheme = resolvedTheme || theme;
+    const isDark = currentTheme === 'dark';
 
-    const { resolvedTheme } = useTheme();
-    const isDark = resolvedTheme === 'dark';
+    const chartRef = useRef<HTMLDivElement>(null);
 
     const [mounted, setMounted] = useState(false);
     useEffect(() => setMounted(true), []);
@@ -57,14 +57,7 @@ export const EventsViewEventCountComponent = ({
         return { legendItems, pieData: entries, totalCount };
     }, [data, sortDesc]);
 
-    const handleResize = useCallback(() => {
-        chartInstance.current?.resize();
-    }, []);
-
-    useEffect(() => {
-        if (!mounted) return;
-        if (!chartRef.current) return;
-
+    const option = useMemo(() => {
         const textColor = isDark ? '#ffffff' : '#131a22';
         const tooltipBg = isDark ? 'rgba(17, 24, 39, 0.95)' : 'rgba(50, 50, 50, 0.95)';
         const tooltipBorder = isDark ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.2)';
@@ -72,99 +65,56 @@ export const EventsViewEventCountComponent = ({
         const iconBorderEmph = isDark ? '#d1d5db' : '#666';
         const seriesBorderColor = isDark ? '#0b1220' : '#ffffff';
 
-        const option: echarts.EChartsOption = {
-            animation: true,
-            animationDuration: 300,
-            animationEasing: 'linear',
-            backgroundColor: 'transparent',
-            color: palette,
-            toolbox: {
-                right: 10,
-                top: 56,
-                feature: {
-                    saveAsImage: { pixelRatio: 2, excludeComponents: ['toolbox'] }
-                },
-                iconStyle: { borderColor: iconBorder },
-                emphasis: { iconStyle: { borderColor: iconBorderEmph } }
-            },
-            tooltip: {
-                trigger: 'item',
-                transitionDuration: 0.1,
-                hideDelay: 100,
-                backgroundColor: tooltipBg,
-                borderColor: tooltipBorder,
-                textStyle: { color: '#fff', fontSize: 12 },
-                formatter: (p: unknown) => {
-                    return `${p.marker} ${p.name}<br/><strong>${p.value}</strong> eventos (${p.percent}%)`;
-                }
-            },
-            legend: {
-                type: 'scroll',
-                orient: 'horizontal',
-                top: 10,
-                left: 'center',
-                animation: false,
-                textStyle: { fontSize: 12, color: textColor },
-                data: legendItems
-            },
+        const base = makeBaseOptions({
+            legend: legendItems,
+            legendPos: 'top',
+            unitLabel: 'Créditos',
+            useUTC: true,
+            showToolbox: true,
+            metricType: 'default'
+        });
+
+        const pie = createChartOption({
+            kind: 'pie',
+            xAxisType: 'category',
+            legend: true,
+            tooltip: true,
             series: [
                 {
                     name: 'Eventos por tipo',
-                    type: 'pie',
+                    kind: 'pie',
                     radius: ['50%', '70%'],
                     center: ['50%', '55%'],
-                    avoidLabelOverlap: true,
-                    selectedMode: false,
-                    minAngle: 3,
-                    padAngle: 1,
-                    itemStyle: {
-                        borderRadius: 4,
-                        borderColor: seriesBorderColor,
-                        borderWidth: 1
-                    },
-                    label: {
-                        show: true,
-                        formatter: (p: unknown) => `${p.name}\n${p.value} (${p.percent}%)`,
-                        fontSize: 11,
-                        color:textColor
-                    },
-                    labelLine: {
-                        show: true,
-                        length: 10,
-                        length2: 6
-                    },
-                    emphasis: {
-                        scale: true,
-                        scaleSize: 4,
-                        itemStyle: { shadowBlur: 8, shadowOffsetX: 0, shadowColor: 'rgba(0,0,0,0.2)' },
-                        label: { fontWeight: 'bold' }
+                    extra: {
+                        itemStyle: {
+                            borderRadius: 4,
+                            borderColor: seriesBorderColor,
+                            borderWidth: 1
+                        },
+                        label: {
+                            show: true,
+                            formatter: (p: unknown) => `${p.name}\n${p.value} (${p.percent}%)`,
+                            fontSize: 11,
+                            color: textColor
+                        },
+                        emphasis: {
+                            scale: true,
+                            scaleSize: 4,
+                            itemStyle: { shadowBlur: 8, shadowOffsetX: 0, shadowColor: 'rgba(0,0,0,0.2)' },
+                            label: { fontWeight: 'bold' }
+                        }
                     },
                     data: pieData
                 }
             ]
-        };
+        })
 
-        chartInstance.current?.dispose();
-        chartInstance.current = echarts.init(chartRef.current, undefined, { renderer: 'canvas' });
-        chartInstance.current.setOption(option, { notMerge: true, lazyUpdate: true, silent: false });
-
-        resizeObserverRef.current?.disconnect();
-        resizeObserverRef.current = new ResizeObserver(() => handleResize());
-        resizeObserverRef.current.observe(chartRef.current);
-
-        const onWindowResize = () => handleResize();
-        window.addEventListener('resize', onWindowResize);
-
-        return () => {
-            window.removeEventListener('resize', onWindowResize);
-            resizeObserverRef.current?.disconnect();
-            resizeObserverRef.current = null;
-            chartInstance.current?.dispose();
-            chartInstance.current = null;
-        };
-    }, [legendItems, pieData, handleResize, isDark, mounted]);
+        return deepMerge(base, pie);
+    },[data])
 
     const isEmpty = !pieData?.length || totalCount === 0;
+
+    useECharts(chartRef, option, mounted ? [option] : [], isDark ? 'cp-dark' : 'cp-light');
 
     return (
         <Card className="w-full">

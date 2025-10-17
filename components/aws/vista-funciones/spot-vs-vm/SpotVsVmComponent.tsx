@@ -5,6 +5,7 @@ import * as echarts from "echarts"
 import { Card, CardContent } from "@/components/ui/card"
 import { Server, Cloud, Percent, BarChart3 } from "lucide-react"
 import { TableComponentSpotVsVm } from "@/components/aws/vista-funciones/spot-vs-vm/table/SpotVsVmTableComponent"
+import { SpotVsVmChartComponent } from './grafico/SpotVsVmChartComponent'
 
 const fetcher = (url: string) =>
     fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
@@ -188,15 +189,9 @@ export const MainViewSpotVsVm = ({ startDate, endDate }: SpotVsVmProps) => {
       </div>
 
       {/* 📊 Gráfico*/}
-        <Card className="shadow-lg rounded-2xl">
-        <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-bold">SPOT Virtual vs Máquinas Virtuales</h2>
-            <BarChart3 className="h-6 w-6 text-blue-500" />
-            </div>
-            <div ref={chartRef} style={{ width: '100%', height: '400px' }}></div>
-        </CardContent>
-        </Card>
+      <SpotVsVmChartComponent
+        data={data}
+      />
 
 
         {/* === Tabla === */}

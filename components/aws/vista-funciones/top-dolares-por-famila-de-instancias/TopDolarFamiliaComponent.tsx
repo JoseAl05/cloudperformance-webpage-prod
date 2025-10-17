@@ -13,10 +13,11 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
+import { TopDolarFamiliaChartComponent } from './grafico/TopDolarFamiliaChartComponent'
 
 const fetcher = (url: string) =>
-    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
-        .then(r => r.json());
+  fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
+    .then(r => r.json());
 
 interface TopDolaresInstanceTypeFamilyProps {
   startDate: Date,
@@ -72,160 +73,6 @@ export const MainViewTopDolaresFamilia = ({ startDate, endDate }: TopDolaresInst
     setTopLimit(value === "all" ? "all" : Number(value));
   };
 
-  // === Gráfico ===
-  useEffect(() => {
-    if (!Array.isArray(topDolaresFamily) || !topDolaresFamily.length || !chartRef.current) return;
-
-    const chart = echarts.init(chartRef.current);
-    chartInstance.current = chart;
-
-    if (selectedFamily === null) {
-      // === Vista PRINCIPAL por Familias ===
-      const filteredData = topDolaresFamily.filter(item => toNumber(item[tipoCosto]) > 0);
-      if (!filteredData.length) return;
-
-      const services = Array.from(new Set(filteredData.map(item => item.service_dimension)));
-
-      const dataMap = new Map<string, Map<string, number>>();
-      const familyTotals: Record<string, number> = {};
-
-      filteredData.forEach((item: unknown) => {
-        const family = item.dimension;
-        const service = item.service_dimension;
-        const cost = toNumber(item[tipoCosto]);
-
-        familyTotals[family] = (familyTotals[family] || 0) + cost;
-
-        if (!dataMap.has(family)) dataMap.set(family, new Map());
-        const serviceMap = dataMap.get(family)!;
-        serviceMap.set(service, (serviceMap.get(service) || 0) + cost);
-      });
-
-      let sortedFamilies = Object.entries(familyTotals)
-        .map(([family, total]) => ({ family, total }))
-        .sort((a, b) => b.total - a.total);
-
-      if (topLimit !== "all") {
-        sortedFamilies = sortedFamilies.slice(0, topLimit);
-      }
-
-      const seriesData = services.map(service => ({
-        name: service,
-        type: 'bar',
-        stack: 'total',
-        data: sortedFamilies.map(({ family }) => dataMap.get(family)?.get(service) || 0),
-      }));
-
-      const option: echarts.EChartsOption = {
-        title: {
-          text: `Top ${topLimit === "all" ? "" : topLimit} ${tipoCosto === 'costo_neto' ? 'Costo Neto' : 'Costo Bruto'} por Familia de Instancia (USD)`,
-          left: 'center',
-        },
-        tooltip: {
-          trigger: 'axis',
-          axisPointer: { type: 'shadow' },
-          formatter: (params: unknown) => {
-            const visibleItems = params.filter((item: unknown) => Number(item.value) > 0);
-            const total = visibleItems.reduce((sum: number, item: unknown) => sum + item.value, 0);
-
-            const tooltipItems = visibleItems.map(
-              (item: unknown) => `${item.marker} ${item.seriesName}: $${item.value.toFixed(2)}`
-            );
-
-            return `<strong>${params[0].axisValue} - Total: $${total.toFixed(2)}</strong><br/>${
-              tooltipItems.length ? tooltipItems.join('<br/>') : '<em>Sin servicios significativos</em>'
-            }`;
-          },
-        },
-        legend: {
-          type: 'scroll',
-          orient: 'horizontal',
-          bottom: 0,
-          left: 'center',
-          itemWidth: 14,
-          itemHeight: 14,
-          textStyle: { fontSize: 11 },
-          data: services,
-        },
-        grid: { left: 200, right: 50, top: 100, bottom: 100 },
-        dataZoom: [
-          { type: 'slider', yAxisIndex: 0, filterMode: 'weakFilter', width: 15, right: 10, start: 0, end: 100, handleSize: '80%', showDataShadow: false, labelFormatter: '' },
-          { type: 'inside', yAxisIndex: 0, filterMode: 'weakFilter', start: 0, end: 100 }
-        ],
-        toolbox: { feature: { saveAsImage: {} } },
-        xAxis: { type: 'value', name: 'USD' },
-        yAxis: {
-          type: 'category',
-          data: sortedFamilies.map(r => r.family),
-          name: 'Familias',
-          inverse: true,
-          axisLabel: {
-            formatter: (value: string) => {
-              const total = familyTotals[value] || 0;
-              return `${value} ($${total.toFixed(2)})`;
-            },
-          },
-        },
-        series: seriesData,
-      };
-
-      chart.setOption(option);
-
-      chart.on('click', function (params: unknown) {
-        const family = params.name;
-        if (family) setSelectedFamily(family);
-      });
-    } else {
-      // === Vista DETALLE por SERVICIOS ===
-      const familyData = topDolaresFamily.filter((item: unknown) => item.dimension === selectedFamily);
-      const serviceTotals: Record<string, number> = {};
-
-      familyData.forEach(item => {
-        const service = item.service_dimension;
-        const cost = toNumber(item[tipoCosto]);
-        serviceTotals[service] = (serviceTotals[service] || 0) + cost;
-      });
-
-      const sortedServices = Object.entries(serviceTotals)
-        .map(([service, total]) => ({ service, total }))
-        .filter(s => s.total > 0)
-        .sort((a, b) => b.total - a.total);
-
-      const option: echarts.EChartsOption = {
-        title: { text: `Detalle de Costos por Servicio - ${selectedFamily}`, left: 'center' },
-        tooltip: {
-          trigger: 'axis',
-          axisPointer: { type: 'shadow' },
-          formatter: (params: unknown) => {
-            const visibleItems = params.filter((item: unknown) => Number(item.value) > 0);
-            const total = visibleItems.reduce((sum: number, item: unknown) => sum + item.value, 0);
-
-            const tooltipItems = visibleItems.map(
-              (item: unknown) => `${item.marker} ${item.name}: $${item.value.toFixed(2)}`
-            );
-
-            return `<strong>Total: $${total.toFixed(2)}</strong><br/>${
-              tooltipItems.length ? tooltipItems.join('<br/>') : '<em>Sin servicios significativos</em>'
-            }`;
-          },
-        },
-        grid: { left: 150, right: 50, top: 60, bottom: 40 },
-        xAxis: { type: 'value', name: 'USD' },
-        yAxis: { type: 'category', data: sortedServices.map(s => s.service), inverse: true },
-        series: [{ type: 'bar', data: sortedServices.map(s => s.total) }],
-      };
-
-      chart.setOption(option);
-    }
-
-    const resizeObserver = new ResizeObserver(() => chart.resize());
-    resizeObserver.observe(chartRef.current);
-
-    return () => {
-      resizeObserver.disconnect();
-      chart.dispose();
-    };
-  }, [topDolaresFamily, tipoCosto, topLimit, selectedFamily]);
 
   if (isLoading) return <p>Cargando...</p>;
   if (error) return <p>Error cargando los datos.</p>;
@@ -287,7 +134,20 @@ export const MainViewTopDolaresFamilia = ({ startDate, endDate }: TopDolaresInst
           </CardHeader>
 
           <CardContent className="relative h-[600px]">
-            {selectedFamily && (
+            <TopDolarFamiliaChartComponent
+              data={data}
+              selectedFamily={selectedFamily}
+              setSelectedFamily={setSelectedFamily}
+              tipoCosto={tipoCosto}
+              topLimit={topLimit}
+              uiTuning={{
+                yLabelStrategy: 'fit',     // o 'fit'
+                gridMinLeft: 30,
+                gridMaxLeft: 20,
+                axisLabelInterval: 'auto',      // o 1, 2, ...
+              }}
+            />
+            {/* {selectedFamily && (
               <Button
                 onClick={() => setSelectedFamily(null)}
                 className="absolute top-4 left-4 px-3 py-1 rounded text-sm z-10 bg-blue-600 text-white hover:bg-blue-700"
@@ -295,7 +155,7 @@ export const MainViewTopDolaresFamilia = ({ startDate, endDate }: TopDolaresInst
                 ← Volver
               </Button>
             )}
-            <div ref={chartRef} className="w-full h-[600px]" />
+            <div ref={chartRef} className="w-full h-[600px]" /> */}
           </CardContent>
 
           <div className="border-t bg-muted/50 px-6 py-3">

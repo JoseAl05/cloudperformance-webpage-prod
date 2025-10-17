@@ -118,20 +118,6 @@ export const InstanceEc2CpuMetricsComponent = ({ startDate, endDate, instance }:
                     <div className='flex-1 space-y-6 min-w-0 overflow-hidden'>
                         <MainEc2ResourceViewMetricsSummaryComponent data={metricsData} />
                     </div>
-                    {/* {
-                        hasInfoData && (
-                            <div className='w-full xl:max-w-sm min-w-0'>
-                                <Ec2ResourceViewInfoComponent data={infoData} />
-                            </div>
-                        )
-                    }
-                    {
-                        hasMetricsData && (
-                            <div className='flex-1 space-y-6 min-w-0 overflow-hidden'>
-                                <MainEc2ResourceViewMetricsSummaryComponent data={metricsData} />
-                            </div>
-                        )
-                    } */}
                 </div>
                 <div className='flex flex-col gap-5 mt-10'>
                     <div className="flex items-center gap-3 my-5">
@@ -147,21 +133,6 @@ export const InstanceEc2CpuMetricsComponent = ({ startDate, endDate, instance }:
                     <Ec2ResourceViewUsageNetworkComponent
                         data={metricsData}
                     />
-                    {/* {
-                        hasMetricsData && (
-                            <>
-                                <Ec2ResourceViewUsageCreditsComponent
-                                    data={metricsData}
-                                />
-                                <Ec2ResourceViewUsageCpuComponent
-                                    data={metricsData}
-                                />
-                                <Ec2ResourceViewUsageNetworkComponent
-                                    data={metricsData}
-                                />
-                            </>
-                        )
-                    } */}
                 </div>
                 <div className="flex items-center gap-3 my-10">
                     <Clock className="h-8 w-8 text-blue-500" />
@@ -173,16 +144,6 @@ export const InstanceEc2CpuMetricsComponent = ({ startDate, endDate, instance }:
                     endDate={endDate}
                     instance={instance}
                 />
-                {/* {
-                    hasEventsData && (
-                        <Ec2EventsTableComponent
-                            data={eventsData}
-                            startDate={startDate}
-                            endDate={endDate}
-                            instance={instance}
-                        />
-                    )
-                } */}
             </div>
         </>
     )

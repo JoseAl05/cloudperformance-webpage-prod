@@ -13,10 +13,11 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
+import { TopDolarFamiliaChartComponent } from '../top-dolares-por-famila-de-instancias/grafico/TopDolarFamiliaChartComponent'
 
 const fetcher = (url: string) =>
-    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
-        .then(r => r.json());
+  fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
+    .then(r => r.json());
 
 interface TopDolaresInstanceTypeProps {
   startDate: Date,
@@ -70,162 +71,9 @@ export const MainViewTopDolaresTipoInstancia = ({ startDate, endDate }: TopDolar
   );
 
   const handleTopLimitChange = (value: string) => {
-  setTopLimit(value === "all" ? "all" : Number(value));
+    setTopLimit(value === "all" ? "all" : Number(value));
   };
 
-  // === Gráfico ===
-  useEffect(() => {
-    if (!Array.isArray(topDolaresInstance) || !topDolaresInstance.length || !chartRef.current) return;
-
-    const chart = echarts.init(chartRef.current);
-    chartInstance.current = chart;
-
-    if (selectedInstance === null) {
-      // === Vista PRINCIPAL por Tipo de Instancia ===
-      const filteredData = topDolaresInstance.filter(item => toNumber(item[tipoCosto]) > 0);
-      if (!filteredData.length) return;
-
-      const services = Array.from(new Set(filteredData.map(item => item.service_dimension)));
-
-      const dataMap = new Map<string, Map<string, number>>();
-      const instanceTotals: Record<string, number> = {};
-
-      filteredData.forEach((item: unknown) => {
-        const instance = item.dimension;
-        const service = item.service_dimension;
-        const cost = toNumber(item[tipoCosto]);
-
-        instanceTotals[instance] = (instanceTotals[instance] || 0) + cost;
-
-        if (!dataMap.has(instance)) dataMap.set(instance, new Map());
-        const serviceMap = dataMap.get(instance)!;
-        serviceMap.set(service, (serviceMap.get(service) || 0) + cost);
-      });
-
-      let sortedInstances = Object.entries(instanceTotals)
-        .map(([instance, total]) => ({ instance, total }))
-        .sort((a, b) => b.total - a.total);
-
-      if (topLimit !== "all") {
-        sortedInstances = sortedInstances.slice(0, topLimit);
-      }
-
-      const seriesData = services.map(service => ({
-        name: service,
-        type: 'bar',
-        stack: 'total',
-        data: sortedInstances.map(({ instance }) => dataMap.get(instance)?.get(service) || 0),
-      }));
-
-      const option: echarts.EChartsOption = {
-        title: {
-          text: `Top ${topLimit === "all" ? "" : topLimit} ${tipoCosto === 'costo_neto' ? 'Costo Neto' : 'Costo Bruto'} por Tipo de Instancia (USD)`,
-          left: 'center',
-        },
-        tooltip: {
-          trigger: 'axis',
-          axisPointer: { type: 'shadow' },
-          formatter: (params: unknown) => {
-          //filtrar solo valores mayores a 0
-          const visibleItems = params.filter((item: unknown) => Number(item.value) > 0);
-
-          const total = visibleItems.reduce((sum: number, item: unknown) => sum + item.value, 0);
-
-          const tooltipItems = visibleItems.map(
-            (item: unknown) => `${item.marker} ${item.seriesName}: $${item.value.toPrecision(2)}`
-          );
-
-          return `<strong>${params[0].axisValue} - Total: $${total.toFixed(2)}</strong><br/>${
-            tooltipItems.length ? tooltipItems.join('<br/>') : '<em>Sin servicios significativos</em>'
-          }`;
-         },
-        },
-        legend: {
-          type: 'scroll',
-          orient: 'horizontal',
-          bottom: 0,
-          left: 'center',
-          itemWidth: 14,
-          itemHeight: 14,
-          textStyle: { fontSize: 11 },
-          data: services,
-        },
-        grid: { left: 200, right: 50, top: 100, bottom: 100 },
-        toolbox: { feature: { saveAsImage: {} } },
-        xAxis: { type: 'value', name: 'USD' },
-        yAxis: {
-          type: 'category',
-          data: sortedInstances.map(r => r.instance),
-          name: 'Tipos de Instancia',
-          inverse: true,
-          axisLabel: {
-            formatter: (value: string) => {
-              const total = instanceTotals[value] || 0;
-              return `${value} ($${total.toFixed(2)})`;
-            },
-          },
-        },
-        series: seriesData,
-      };
-
-      chart.setOption(option);
-
-      chart.on('click', function (params: unknown) {
-        const instance = params.name;
-        if (instance) setSelectedInstance(instance);
-      });
-    } else {
-      // === Vista DETALLE por Servicios ===
-      const instanceData = topDolaresInstance.filter((item: unknown) => item.dimension === selectedInstance);
-      const serviceTotals: Record<string, number> = {};
-
-      instanceData.forEach(item => {
-        const service = item.service_dimension;
-        const cost = toNumber(item[tipoCosto]);
-        serviceTotals[service] = (serviceTotals[service] || 0) + cost;
-      });
-
-      const sortedServices = Object.entries(serviceTotals)
-        .map(([service, total]) => ({ service, total }))
-        .filter(s => s.total > 0)   // filtrar servicios en 0
-        .sort((a, b) => b.total - a.total);
-
-      const option: echarts.EChartsOption = {
-        title: { text: `Detalle de Costos por Servicio - ${selectedInstance}`, left: 'center' },
-        tooltip: {
-          trigger: 'axis',
-          axisPointer: { type: 'shadow' },
-          formatter: (params: unknown) => {
-            const visibleItems = params.filter((item: unknown) => Number(item.value) > 0);
-
-            const total = visibleItems.reduce((sum: number, item: unknown) => sum + item.value, 0);
-
-            const tooltipItems = visibleItems.map(
-              (item: unknown) => `${item.marker} ${item.name}: $${item.value.toPrecision(2)}`
-            );
-
-            return `<strong>Total: $${total.toFixed(2)}</strong><br/>${
-              tooltipItems.length ? tooltipItems.join('<br/>') : '<em>Sin servicios significativos</em>'
-            }`;
-          },
-        },
-        grid: { left: 150, right: 50, top: 60, bottom: 40 },
-        xAxis: { type: 'value', name: 'USD' },
-        yAxis: { type: 'category', data: sortedServices.map(s => s.service), inverse: true },
-        series: [{ type: 'bar', data: sortedServices.map(s => s.total) }],
-      };
-
-      chart.setOption(option);
-    }
-
-    const resizeObserver = new ResizeObserver(() => chart.resize());
-    resizeObserver.observe(chartRef.current);
-
-    return () => {
-      resizeObserver.disconnect();
-      chart.dispose();
-    };
-  }, [topDolaresInstance, tipoCosto, topLimit, selectedInstance]);
 
   if (isLoading) return <p>Cargando...</p>;
   if (error) return <p>Error cargando los datos.</p>;
@@ -247,24 +95,24 @@ export const MainViewTopDolaresTipoInstancia = ({ startDate, endDate }: TopDolar
               </div>
 
               {/* === Filtros === */}
-                <div className="flex flex-col md:flex-row gap-4 items-stretch md:items-center">
-                  {/* Filtro Mostrar Top */}
-                  <div>
-                    <label className="text-sm font-medium text-muted-foreground mb-1 block">
-                      Mostrar Top
-                    </label>
-                    <Select value={topLimit.toString()} onValueChange={handleTopLimitChange}>
-                      <SelectTrigger className="w-full md:w-36">
-                        <SelectValue placeholder="Mostrar Top" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="3">3</SelectItem>
-                        <SelectItem value="5">5</SelectItem>
-                        <SelectItem value="10">10</SelectItem>
-                        <SelectItem value="all">Ver todo</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
+              <div className="flex flex-col md:flex-row gap-4 items-stretch md:items-center">
+                {/* Filtro Mostrar Top */}
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground mb-1 block">
+                    Mostrar Top
+                  </label>
+                  <Select value={topLimit.toString()} onValueChange={handleTopLimitChange}>
+                    <SelectTrigger className="w-full md:w-36">
+                      <SelectValue placeholder="Mostrar Top" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="3">3</SelectItem>
+                      <SelectItem value="5">5</SelectItem>
+                      <SelectItem value="10">10</SelectItem>
+                      <SelectItem value="all">Ver todo</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
 
                 {/* Filtro Tipo de Costo */}
                 <div>
@@ -291,15 +139,19 @@ export const MainViewTopDolaresTipoInstancia = ({ startDate, endDate }: TopDolar
           </CardHeader>
 
           <CardContent className="relative h-[600px]">
-            {selectedInstance && (
-              <Button
-                onClick={() => setSelectedInstance(null)}
-                className="absolute top-4 left-4 px-3 py-1 rounded text-sm z-10 bg-blue-600 text-white hover:bg-blue-700"
-              >
-                ← Volver
-              </Button>
-            )}
-            <div ref={chartRef} className="w-full h-[600px]" />
+            <TopDolarFamiliaChartComponent
+              data={data}
+              selectedFamily={selectedInstance}
+              setSelectedFamily={setSelectedInstance}
+              tipoCosto={tipoCosto}
+              topLimit={topLimit}
+              uiTuning={{
+                yLabelStrategy: 'truncate',
+                gridMinLeft: 10,
+                gridMaxLeft: 10,
+                axisLabelInterval: 'auto',
+              }}
+            />
           </CardContent>
 
           <div className="border-t bg-muted/50 px-6 py-3">

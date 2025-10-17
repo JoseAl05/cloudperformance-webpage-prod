@@ -1,16 +1,16 @@
 'use client'
 
 import useSWR from 'swr'
-import React, { useEffect, useRef } from 'react'
-import * as echarts from 'echarts'
+import React from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { BarChart3, Moon, Clock } from 'lucide-react'
-import { TableEC2AutoScalingMetrics } from "@/components/aws/vista-funciones/consumo-ec2-autoscaling-groups-horario-habil-vs-no-habil/table/tableComponent"
+import { TableEC2AutoScalingMetrics } from "@/components/aws/vista-funciones/consumo-horario-habil-vs-no-habil/consumo-ec2-autoscaling-groups-horario-habil-vs-no-habil/table/tableComponent"
 import { bytesToMB } from '@/lib/bytesToMbs'
+import { ConsumoHorarioChartComponent } from '../grafico/ConsumoHorarioChartComponent'
 
 const fetcher = (url: string) =>
-    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
-        .then(r => r.json());
+  fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
+    .then(r => r.json());
 
 interface ConsumoEC2HorarioProps {
   startDate: Date,
@@ -38,8 +38,7 @@ const metricUnits: Record<string, string> = {
 }
 
 export const MainViewConsumoEC2AutoscalingGroupsHorario = ({ startDate, endDate, metric, autoScalingGroup }: ConsumoEC2HorarioProps) => {
-  const chartRef = useRef<HTMLDivElement>(null)
-  const chartInstance = useRef<echarts.ECharts | null>(null)
+
 
   const startDateFormatted = startDate ? startDate.toISOString().replace('Z', '').slice(0, -4) : ''
   const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : ''
@@ -69,139 +68,6 @@ export const MainViewConsumoEC2AutoscalingGroupsHorario = ({ startDate, endDate,
     avgDataHabil = avgStatisticsFormatted.find((s: unknown) => s.Horario === "Habil")?.average?.toFixed?.(2) ?? "--"
     avgDataNoHabil = avgStatisticsFormatted.find((s: unknown) => s.Horario === "No habil")?.average?.toFixed?.(2) ?? "--"
   }
-
-  useEffect(() => {
-    if (!chartRef.current) return
-    if (!data || !Array.isArray(data.data) || data.data.length === 0) {
-      if (chartInstance.current) {
-        chartInstance.current.clear()
-      }
-      return
-    }
-
-    // Formateo de datos
-    const dataFormatted = (data.data as unknown[]).map((item: unknown) => {
-      const rawVal = item.Value ?? item.value ?? 0
-      let numericVal = Number(rawVal)
-
-      if (item.MetricLabel && (item.MetricLabel.includes("NetworkIn") || item.MetricLabel.includes("NetworkOut"))) {
-        numericVal = Number(bytesToMB(Number(rawVal)))
-      }
-
-      if (Number.isNaN(numericVal)) numericVal = null
-
-      return {
-        ...item,
-        Value: numericVal
-      }
-    })
-
-    // Agrupar por timestamp
-    const grouped: Record<string, { habil: number[]; noHabil: number[] }> = {}
-
-    dataFormatted.forEach((item: unknown) => {
-      if (!item.Timestamp) return
-      const ts = new Date(item.Timestamp).toISOString()
-      if (!grouped[ts]) grouped[ts] = { habil: [], noHabil: [] }
-
-      const v = item.Value
-      if (v === null || v === undefined) return
-
-      if (item.Horario === "Habil") {
-        grouped[ts].habil.push(Number(v))
-      } else if (item.Horario === "No habil") {
-        grouped[ts].noHabil.push(Number(v))
-      }
-    })
-
-    const times: string[] = []
-    const valoresHabil: (number | null)[] = []
-    const valoresNoHabil: (number | null)[] = []
-
-    Object.keys(grouped)
-      .sort((a, b) => new Date(a).getTime() - new Date(b).getTime())
-      .forEach((ts) => {
-        const d = new Date(ts)
-        times.push(`${d.getUTCDate()}/${d.getUTCMonth() + 1} ${d.getUTCHours()}:00`)
-
-        const habilValues = grouped[ts].habil
-        const noHabilValues = grouped[ts].noHabil
-
-        const avgHabil = habilValues.length > 0
-          ? Number((habilValues.reduce((acc, v) => acc + Number(v), 0) / habilValues.length).toFixed(2))
-          : null
-
-        const avgNoHabil = noHabilValues.length > 0
-          ? Number((noHabilValues.reduce((acc, v) => acc + Number(v), 0) / noHabilValues.length).toFixed(2))
-          : null
-
-        valoresHabil.push(avgHabil)
-        valoresNoHabil.push(avgNoHabil)
-      })
-
-    const options: echarts.EChartsOption = {
-      tooltip: {
-        trigger: "axis",
-        valueFormatter: (value: unknown) => (value != null ? Number(value).toFixed(2) : "--")
-      },
-      legend: { data: ["Horario Hábil", "Horario No Hábil"], top: 10, left: "center" },
-      grid: { left: 50, right: 30, top: 60, bottom: 80, containLabel: true },
-      xAxis: { type: "category", data: times, axisLabel: { rotate: 45 } },
-      yAxis: {
-        type: "value",
-        name: metricUnits[metric || ""] || "",
-        min: 0,
-        axisLabel: {
-          formatter: (value: unknown) => Number(value).toFixed(2)
-        }
-      },
-      dataZoom: [
-        { type: "slider", start: 80, end: 100 },
-        { type: "inside", start: 80, end: 100 }
-      ],
-      series: [
-        {
-          name: "Horario Hábil",
-          type: "line",
-          smooth: true,
-          connectNulls: false,
-          data: valoresHabil,
-          symbol: "circle",
-          symbolSize: 6,
-          lineStyle: { color: "#3b82f6" },
-          itemStyle: { color: "#3b82f6" },
-        },
-        {
-          name: "Horario No Hábil",
-          type: "line",
-          smooth: true,
-          connectNulls: false,
-          data: valoresNoHabil,
-          symbol: "circle",
-          symbolSize: 6,
-          lineStyle: { color: "#1e40af" },
-          itemStyle: { color: "#1e40af" },
-        },
-      ]
-    }
-
-    try {
-      if (!chartInstance.current) {
-        chartInstance.current = echarts.init(chartRef.current!)
-      }
-      chartInstance.current.setOption(options)
-    } catch (err) {
-      console.error('Error al inicializar ECharts:', err)
-    }
-
-    const handleResize = () => chartInstance.current?.resize()
-    window.addEventListener("resize", handleResize)
-    return () => {
-      window.removeEventListener("resize", handleResize)
-      chartInstance.current?.dispose()
-      chartInstance.current = null
-    }
-  }, [data, metric]) // 🔑 dependencias fijas
 
   if (isLoading) return <p>Cargando datos...</p>
   if (error) return <p>Error al cargar datos</p>
@@ -263,7 +129,11 @@ export const MainViewConsumoEC2AutoscalingGroupsHorario = ({ startDate, endDate,
             </h2>
             <BarChart3 className="h-6 w-6 text-blue-500" />
           </div>
-          <div ref={chartRef} style={{ width: '100%', height: '400px' }}></div>
+          <ConsumoHorarioChartComponent
+            data={data}
+            metric={metric ? metric : ''}
+            metricUnits={metricUnits}
+          />
         </CardContent>
       </Card>
 
