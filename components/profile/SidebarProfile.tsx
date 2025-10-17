@@ -38,6 +38,8 @@ import {
     Mail,
     Cloud,
     House,
+    CircleDollarSign
+
 } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { usePathname } from 'next/navigation'
@@ -151,6 +153,18 @@ export const SidebarProfileComponent = ({
                                 >
                                     <Cloud className="h-5 w-5 text-blue-500" />
                                     <span className="text-sm font-medium">Nubes</span>
+                                </Link>
+                            </SidebarMenuButton>
+                            <SidebarMenuButton asChild>
+                                <Link
+                                    href='/presupuesto'
+                                    className={cn(
+                                        'flex items-center gap-3 px-3 py-2 rounded-md cursor-pointer transition-colors duration-150',
+                                        getMenuItemClasses(isActive)
+                                    )}
+                                >
+                                    <CircleDollarSign className="h-5 w-5 text-blue-500" />
+                                    <span className="text-sm font-medium">Presupuesto</span>
                                 </Link>
                             </SidebarMenuButton>
                         </SidebarMenuItem>
