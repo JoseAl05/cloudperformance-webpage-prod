@@ -168,7 +168,7 @@ export const SavingsPlanComponent = ({ startDate, endDate }: SavingsPlanProps) =
       const sortedDates = Array.from(allDates).sort();
       const formattedDates = formatDatesAdaptive(sortedDates);
 
-      const series: any[] = [];
+      const series: unknown[] = [];
 
       instancias.forEach((instancia) => {
           const horasSP = sortedDates.map(date => {
@@ -244,7 +244,7 @@ export const SavingsPlanComponent = ({ startDate, endDate }: SavingsPlanProps) =
               confine: true,
               textStyle: { fontSize: 12, color: '#111' },
               extraCssText: 'max-width:400px; white-space:normal; box-shadow:0 4px 12px rgba(0,0,0,.08); border-radius:10px; padding:12px;',
-              formatter: (params: any[]) => {
+              formatter: (params: unknown[]) => {
                   if (!params?.length) return '';
 
                   const originalDate = toUTCDate(sortedDates[params[0].dataIndex]);
@@ -252,7 +252,7 @@ export const SavingsPlanComponent = ({ startDate, endDate }: SavingsPlanProps) =
 
                   let html = `<div style="font-weight:600;margin-bottom:10px;font-size:13px;">${dateStr}</div>`;
 
-                  const instanceGroups = new Map<string, any[]>();
+                  const instanceGroups = new Map<string, unknown[]>();
                   params.forEach(p => {
                       const instanceName = p.seriesName.split(' - ')[0];
                       if (!instanceGroups.has(instanceName)) {
@@ -329,7 +329,7 @@ export const SavingsPlanComponent = ({ startDate, endDate }: SavingsPlanProps) =
               left: 'center',
               textStyle: { fontSize: 11, color: '#666' },
               selectedMode: 'multiple',
-              data: series.map((s: any) => s.name),
+              data: series.map((s: unknown) => s.name),
           },
           grid: { left: 80, right: 60, top: 60, bottom: 100, containLabel: true },
           dataZoom: [

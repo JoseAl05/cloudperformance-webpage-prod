@@ -64,12 +64,12 @@ const formatTooltip = (info: TooltipData): string => {
   `
 }
 
-const transformData = (data: any): FormattedInstance[] => {
+const transformData = (data: unknown): FormattedInstance[] => {
   if (!data?.instancias || !Array.isArray(data.instancias)) return []
 
   return data.instancias
-    .filter((instancia: any) => instancia.totales.costo_real_ondemand > 0)
-    .map((instancia: any) => ({
+    .filter((instancia: unknown) => instancia.totales.costo_real_ondemand > 0)
+    .map((instancia: unknown) => ({
       name: instancia.instance_name,
       value: instancia.totales.costo_real_ondemand,
       tooltipData: {
@@ -98,7 +98,7 @@ const getChartOptions = (formattedData: FormattedInstance[]): echarts.EChartsOpt
     top: 1
   },
   tooltip: {
-    formatter: (params: any) => {
+    formatter: (params: unknown) => {
       if (!params.data?.tooltipData) return ''
       return formatTooltip(params.data.tooltipData)
     },
