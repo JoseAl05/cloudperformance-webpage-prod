@@ -2,7 +2,6 @@
 import { useEffect, useMemo, useRef } from 'react';
 import * as echarts from 'echarts';
 
-/** Controles de zoom por defecto (slider + inside) */
 export const defaultDataZoom: echarts.EChartsOption['dataZoom'] = [
   {
     type: 'slider',
@@ -27,8 +26,6 @@ export const defaultDataZoom: echarts.EChartsOption['dataZoom'] = [
     throttle: 50,
   },
 ];
-
-/** Merge profundo y simple */
 export function deepMerge<T extends Record<string, unknown>>(a: T, b: T): T {
   const out: Record<string, unknown> = { ...a };
   Object.keys(b ?? {}).forEach((k) => {
@@ -52,8 +49,6 @@ export function deepMerge<T extends Record<string, unknown>>(a: T, b: T): T {
   });
   return out as T;
 }
-
-/** Posición de leyenda: abreviada o detallada */
 type LegendPos =
   | 'top'
   | 'bottom'
@@ -72,7 +67,6 @@ function buildLegendOption(
   legend: string[] | boolean,
   legendPos: LegendPos
 ): echarts.EChartsOption['legend'] {
-  // Normalizar posicionamiento
   let pos: Record<string, unknown> = {};
   if (typeof legendPos === 'string') {
     const side = legendPos;
@@ -161,10 +155,6 @@ export function makeBaseOptions(args?: {
   };
 }
 
-/** ============================================================
- * Tipos de Series
- * ============================================================ */
-
 export type ChartKind =
   | 'line'
   | 'area'
@@ -241,7 +231,6 @@ export interface ChartFactoryInput {
   extraOption?: echarts.EChartsOption;
 }
 
-/** Helpers de líneas con markPoint opcional */
 interface LineSeriesArgs {
   color?: string;
   area?: boolean | { opacity?: number };
@@ -319,7 +308,6 @@ export function makeLineSeries(
   return series as echarts.EChartsOption['series'][number];
 }
 
-/** Hook ECharts con cleanup y resize */
 export function useECharts(
   ref: React.RefObject<HTMLDivElement>,
   option: echarts.EChartsOption,
@@ -364,7 +352,6 @@ export function useECharts(
   }, [memoOption]);
 }
 
-/** Fábrica principal */
 function buildSeries(def: AnySeriesDef): echarts.SeriesOption {
   const applyOverrides = (base: echarts.SeriesOption, kind: ChartKind) => {
     const s: Record<string, unknown> = { ...base };
@@ -564,7 +551,6 @@ export function createChartOption(
     : option;
 }
 
-/** Atajo para una sola serie */
 export const createSeries = (
   kind: ChartKind,
   name: string,

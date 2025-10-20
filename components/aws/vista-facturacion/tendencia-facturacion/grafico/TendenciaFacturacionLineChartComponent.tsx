@@ -152,7 +152,6 @@ export const TendenciaFacturacionLineChartComponent = ({ data }: TendenciaFactur
         const { dates, series } = processChartData(data);
         const currentTopN = topN === 'all' ? Number.POSITIVE_INFINITY : Number(topN);
 
-        // Parámetros para espaciar labels sin tocar los datos del eje
         const dateCount = dates.length;
         const start = dateCount ? toUTCDate(dates[0]) : null;
         const end = dateCount ? toUTCDate(dates[dateCount - 1]) : null;
@@ -164,10 +163,8 @@ export const TendenciaFacturacionLineChartComponent = ({ data }: TendenciaFactur
         const base = makeBaseOptions({
             legend: (series as unknown[]).map((s) => (s as { name: string }).name),
             legendPos: 'top',
-            //unitLabel: '',
             useUTC: true,
             showToolbox: true,
-            // metricType: 'default',
             showDataZoom: true
         });
 
@@ -216,7 +213,6 @@ export const TendenciaFacturacionLineChartComponent = ({ data }: TendenciaFactur
 
                 let html = `<div style="font-weight:600;margin-bottom:8px">${dateStr}</div>`;
 
-                // Contenedor scrolleable
                 html += `<div style="max-height:280px; overflow:auto; padding-right:4px;">`;
 
                 html += top.map((i) => {
@@ -257,7 +253,6 @@ export const TendenciaFacturacionLineChartComponent = ({ data }: TendenciaFactur
             },
             series: (series as unknown[]).slice().reverse(),
             extraOption: {
-                // Hover + Click para fijar; scroll interno del tooltip
                 tooltip: {
                     triggerOn: 'mousemove|click',
                     enterable: true,
@@ -266,7 +261,6 @@ export const TendenciaFacturacionLineChartComponent = ({ data }: TendenciaFactur
                 xAxis: {
                     type: 'category',
                     boundaryGap: false,
-                    // --- FIX: mantener datos crudos en el eje ---
                     data: dates,
                     axisLine: { lineStyle: { color: '#d0d0d0' } },
                     axisTick: { show: false },
@@ -359,13 +353,11 @@ export const TendenciaFacturacionLineChartComponent = ({ data }: TendenciaFactur
             if (!pinned) chart.dispatchAction({ type: 'hideTip' });
         };
 
-        // Suscripciones con guards
         chart.on?.('click', onClick);
         chart.on?.('globalout', onGlobalOut);
         chart.getZr?.()?.on?.('click', onZrClick);
 
         return () => {
-            // Relee la instancia actual y valida que siga viva
             const currentDom = chartRef.current;
             const inst = currentDom ? echarts.getInstanceByDom(currentDom) : null;
             const disposed = (inst as unknown as { isDisposed?: () => boolean })?.isDisposed?.();

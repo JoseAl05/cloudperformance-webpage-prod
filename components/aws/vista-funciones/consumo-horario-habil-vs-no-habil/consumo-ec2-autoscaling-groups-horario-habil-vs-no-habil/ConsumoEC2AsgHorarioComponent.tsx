@@ -50,7 +50,6 @@ export const MainViewConsumoEC2AutoscalingGroupsHorario = ({ startDate, endDate,
     fetcher
   )
 
-  // Promedios formateados
   const avgStatisticsFormatted = data && data.avgStatistics ? (data.avgStatistics as unknown[]).map((item: unknown) => {
     if (metric?.includes('NetworkIn') || metric?.includes('NetworkOut')) {
       return {
@@ -76,7 +75,6 @@ export const MainViewConsumoEC2AutoscalingGroupsHorario = ({ startDate, endDate,
 
   return (
     <div className="space-y-6 p-4">
-      {/* Tarjetas */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
         {avgStatisticsFormatted && (
           <Card className="border-l-4 border-l-blue-500 shadow-lg rounded-2xl">
@@ -120,7 +118,6 @@ export const MainViewConsumoEC2AutoscalingGroupsHorario = ({ startDate, endDate,
         )}
       </div>
 
-      {/* Gráfico */}
       <Card className="shadow-lg rounded-2xl">
         <CardContent className="p-6">
           <div className="flex items-center justify-between mb-4">
@@ -137,7 +134,6 @@ export const MainViewConsumoEC2AutoscalingGroupsHorario = ({ startDate, endDate,
         </CardContent>
       </Card>
 
-      {/* Tabla */}
       <div>
         <TableEC2AutoScalingMetrics
           startDateFormatted={startDateFormatted}
