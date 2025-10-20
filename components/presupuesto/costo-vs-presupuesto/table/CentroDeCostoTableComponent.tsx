@@ -70,8 +70,8 @@ export const CentroDeCostoTableComponent = ({ cloud, onEdit, onDelete }: CentroD
 
   const filteredAndSortedData = useMemo(() => {
     const centros: CentroCosto[] = Array.isArray(data) ? data : [];
-    
-    let filtered = centros.filter((centro) => {
+
+    const filtered = centros.filter((centro) => {
       const search = searchTerm.toLowerCase();
       return (
         centro.id_centro_costo.toString().includes(search) ||
@@ -85,17 +85,17 @@ export const CentroDeCostoTableComponent = ({ cloud, onEdit, onDelete }: CentroD
       filtered.sort((a, b) => {
         const aVal = a[sortField];
         const bVal = b[sortField];
-        
+
         if (aVal === null || aVal === undefined) return 1;
         if (bVal === null || bVal === undefined) return -1;
-        
+
         if (typeof aVal === "number" && typeof bVal === "number") {
           return sortOrder === "asc" ? aVal - bVal : bVal - aVal;
         }
-        
+
         const aStr = String(aVal).toLowerCase();
         const bStr = String(bVal).toLowerCase();
-        
+
         if (sortOrder === "asc") {
           return aStr.localeCompare(bStr);
         } else {
@@ -127,7 +127,7 @@ export const CentroDeCostoTableComponent = ({ cloud, onEdit, onDelete }: CentroD
   const getPageNumbers = () => {
     const pages = [];
     const maxVisible = 5;
-    
+
     if (totalPages <= maxVisible) {
       for (let i = 1; i <= totalPages; i++) {
         pages.push(i);
@@ -149,7 +149,7 @@ export const CentroDeCostoTableComponent = ({ cloud, onEdit, onDelete }: CentroD
         pages.push(totalPages);
       }
     }
-    
+
     return pages;
   };
 
@@ -231,7 +231,7 @@ export const CentroDeCostoTableComponent = ({ cloud, onEdit, onDelete }: CentroD
         <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
           <thead className="bg-gray-50 dark:bg-gray-900/50 sticky top-0 z-10">
             <tr>
-              <th 
+              <th
                 className="px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors select-none"
                 onClick={() => handleSort("id_centro_costo")}
               >
@@ -240,7 +240,7 @@ export const CentroDeCostoTableComponent = ({ cloud, onEdit, onDelete }: CentroD
                   {getSortIcon("id_centro_costo")}
                 </div>
               </th>
-              <th 
+              <th
                 className="px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors select-none"
                 onClick={() => handleSort("nombre_centro")}
               >
@@ -249,7 +249,7 @@ export const CentroDeCostoTableComponent = ({ cloud, onEdit, onDelete }: CentroD
                   {getSortIcon("nombre_centro")}
                 </div>
               </th>
-              <th 
+              <th
                 className="px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors select-none"
                 onClick={() => handleSort("responsable_centro")}
               >
@@ -258,7 +258,7 @@ export const CentroDeCostoTableComponent = ({ cloud, onEdit, onDelete }: CentroD
                   {getSortIcon("responsable_centro")}
                 </div>
               </th>
-              <th 
+              <th
                 className="px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors select-none"
                 onClick={() => handleSort("localizacion")}
               >
@@ -359,11 +359,10 @@ export const CentroDeCostoTableComponent = ({ cloud, onEdit, onDelete }: CentroD
                   <button
                     key={page}
                     onClick={() => handlePageChange(page as number)}
-                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                      currentPage === page
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${currentPage === page
                         ? 'bg-blue-600 text-white'
                         : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'
-                    }`}
+                      }`}
                   >
                     {page}
                   </button>
