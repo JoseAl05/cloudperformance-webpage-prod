@@ -324,7 +324,7 @@ import { useTheme } from 'next-themes';
 import { AdvisorApiResponse } from '@/interfaces/vista-advisor/advisorViewInterfaces';
 
 // ⬇️ IMPORTA desde tu config global (ajusta la ruta si corresponde)
-import { useECharts } from '@/lib/echartsGlobalConfig';
+import { deepMerge, makeBaseOptions, useECharts } from '@/lib/echartsGlobalConfig';
 
 interface AdvisorViewPieChartComponentProps {
     data: AdvisorApiResponse | null;
@@ -458,135 +458,147 @@ export const AdvisorViewPieChartComponent = ({
         const iconBorderEmph = isDark ? '#d1d5db' : '#666';
         const seriesBorderColor = isDark ? '#0b1220' : '#ffffff';
 
-        return {
-            animation: true,
-            animationDuration: 300,
-            animationEasing: 'linear',
-            color: palette,
-            backgroundColor: 'transparent',
-            toolbox: {
-                right: 10,
-                top: 66,
-                feature: {
-                    saveAsImage: { pixelRatio: 2, excludeComponents: ['toolbox'] },
+        const baseOption = makeBaseOptions({
+            legend: false,
+            showToolbox: false,
+            showDataZoom: false,
+            useUTC: true,
+        });
+
+        return deepMerge(
+            baseOption,
+            {
+                animationEasing: 'linear',
+                color: palette,
+                textStyle: { color: textColor },
+                xAxis: undefined,
+                yAxis: undefined,
+                toolbox: {
+                    right: 10,
+                    top: 66,
+                    feature: {
+                        saveAsImage: { pixelRatio: 2, excludeComponents: ['toolbox'] },
+                    },
+                    iconStyle: { borderColor: iconBorder },
+                    emphasis: { iconStyle: { borderColor: iconBorderEmph } },
                 },
-                iconStyle: { borderColor: iconBorder },
-                emphasis: { iconStyle: { borderColor: iconBorderEmph } },
-            },
-            tooltip: {
-                trigger: 'item',
-                transitionDuration: 0.1,
-                hideDelay: 100,
-                backgroundColor: tooltipBg,
-                borderColor: tooltipBorder,
-                textStyle: { color: '#fff', fontSize: 12 },
-                formatter: (p: unknown) => {
-                    if (p?.seriesName === 'Estados') {
-                        return `${p.marker} ${p.name}<br/><strong>${p.value}</strong> recomendaciones`;
-                    }
-                    const s = p?.data?.stateLabel;
-                    const c = p?.data?.category ?? p.name ?? '';
-                    const v = p?.value ?? 0;
-                    if (s) return `${p.marker} ${c} · ${s}<br/><strong>${v}</strong> recomendaciones`;
-                    return `${p.marker} ${c}<br/><strong>${v}</strong> recomendaciones`;
-                },
-            },
-            legend: [
-                {
-                    top: 8,
-                    left: 'center',
-                    orient: 'horizontal',
-                    type: 'plain',
-                    icon: 'circle',
-                    textStyle: { fontSize: 12, color: textColor },
-                    data: legendStates,
-                },
-                {
-                    top: 34,
-                    left: 'center',
-                    orient: 'horizontal',
-                    type: 'scroll',
-                    pageIconColor: subTextColor,
-                    pageTextStyle: { color: subTextColor },
-                    textStyle: { fontSize: 12, color: textColor },
-                    data: legendCategories,
-                },
-            ],
-            graphic: [
-                {
-                    type: 'text',
-                    left: 'center',
-                    top: '58%',
-                    style: {
-                        text: `Total\n${totalCount}`,
-                        textAlign: 'center',
-                        fill: textColor,
-                        fontSize: 14,
-                        fontWeight: 600,
+                tooltip: {
+                    trigger: 'item',
+                    transitionDuration: 0.1,
+                    hideDelay: 100,
+                    backgroundColor: tooltipBg,
+                    borderColor: tooltipBorder,
+                    textStyle: { color: '#fff', fontSize: 12 },
+                    formatter: (p: unknown) => {
+                        if (p?.seriesName === 'Estados') {
+                            return `${p.marker} ${p.name}<br/><strong>${p.value}</strong> recomendaciones`;
+                        }
+                        const s = p?.data?.stateLabel;
+                        const c = p?.data?.category ?? p.name ?? '';
+                        const v = p?.value ?? 0;
+                        if (s) {
+                            return `${p.marker} ${c} -> ${s}<br/><strong>${v}</strong> recomendaciones`;
+                        }
+                        return `${p.marker} ${c}<br/><strong>${v}</strong> recomendaciones`;
                     },
                 },
-            ],
-            series: [
-                {
-                    name: 'Estados',
-                    type: 'pie',
-                    radius: ['28%', '45%'],
-                    center: ['50%', '58%'],
-                    avoidLabelOverlap: true,
-                    selectedMode: false,
-                    minAngle: 3,
-                    padAngle: 1,
-                    itemStyle: { borderRadius: 4, borderColor: seriesBorderColor, borderWidth: 1 },
-                    label: {
-                        show: true,
-                        formatter: (p: unknown) => `${p.name}\n${p.value}`,
-                        fontSize: 11,
-                        color: textColor,
+                legend: [
+                    {
+                        top: 8,
+                        left: 'center',
+                        orient: 'horizontal',
+                        type: 'plain',
+                        icon: 'circle',
+                        textStyle: { fontSize: 12, color: textColor },
+                        data: legendStates,
                     },
-                    labelLine: { show: true, length: 8, length2: 6, lineStyle: { color: subTextColor } },
-                    emphasis: {
-                        scale: true,
-                        scaleSize: 4,
-                        itemStyle: {
-                            shadowBlur: 8,
-                            shadowOffsetX: 0,
-                            shadowColor: isDark ? 'rgba(0,0,0,0.4)' : 'rgba(0,0,0,0.2)',
+                    {
+                        top: 34,
+                        left: 'center',
+                        orient: 'horizontal',
+                        type: 'scroll',
+                        pageIconColor: subTextColor,
+                        pageTextStyle: { color: subTextColor },
+                        textStyle: { fontSize: 12, color: textColor },
+                        data: legendCategories,
+                    },
+                ],
+                graphic: [
+                    {
+                        type: 'text',
+                        left: 'center',
+                        top: '58%',
+                        style: {
+                            text: `Total\n${totalCount}`,
+                            textAlign: 'center',
+                            fill: textColor,
+                            fontSize: 14,
+                            fontWeight: 600,
                         },
-                        label: { fontWeight: 'bold' },
                     },
-                    data: innerStateData,
-                },
-                {
-                    name: 'Categoría',
-                    type: 'pie',
-                    radius: ['50%', '72%'],
-                    center: ['50%', '58%'],
-                    avoidLabelOverlap: true,
-                    selectedMode: false,
-                    minAngle: 2,
-                    padAngle: 0.6,
-                    itemStyle: { borderRadius: 3, borderColor: seriesBorderColor, borderWidth: 1 },
-                    label: {
-                        show: true,
-                        formatter: (p: unknown) => `${p?.data?.category ?? p.name}\n${p.value}`,
-                        fontSize: 11,
-                        color: textColor,
-                    },
-                    labelLine: { show: true, length: 10, length2: 6, lineStyle: { color: subTextColor } },
-                    emphasis: {
-                        scale: true,
-                        scaleSize: 4,
-                        itemStyle: {
-                            shadowBlur: 8,
-                            shadowOffsetX: 0,
-                            shadowColor: isDark ? 'rgba(0,0,0,0.4)' : 'rgba(0,0,0,0.2)',
+                ],
+                series: [
+                    {
+                        name: 'Estados',
+                        type: 'pie',
+                        radius: ['28%', '45%'],
+                        center: ['50%', '58%'],
+                        avoidLabelOverlap: true,
+                        selectedMode: false,
+                        minAngle: 3,
+                        padAngle: 1,
+                        itemStyle: { borderRadius: 4, borderColor: seriesBorderColor, borderWidth: 1 },
+                        label: {
+                            show: true,
+                            formatter: (p: unknown) => `${p.name}\n${p.value}`,
+                            fontSize: 11,
+                            color: textColor,
                         },
-                        label: { fontWeight: 'bold' },
+                        labelLine: { show: true, length: 8, length2: 6, lineStyle: { color: subTextColor } },
+                        emphasis: {
+                            scale: true,
+                            scaleSize: 4,
+                            itemStyle: {
+                                shadowBlur: 8,
+                                shadowOffsetX: 0,
+                                shadowColor: isDark ? 'rgba(0,0,0,0.4)' : 'rgba(0,0,0,0.2)',
+                            },
+                            label: { fontWeight: 'bold' },
+                        },
+                        data: innerStateData,
                     },
-                    data: outerCatStateData,
-                },
-            ],
-        } as echarts.EChartsOption;
+                    {
+                        name: 'Categoria',
+                        type: 'pie',
+                        radius: ['50%', '72%'],
+                        center: ['50%', '58%'],
+                        avoidLabelOverlap: true,
+                        selectedMode: false,
+                        minAngle: 2,
+                        padAngle: 0.6,
+                        itemStyle: { borderRadius: 3, borderColor: seriesBorderColor, borderWidth: 1 },
+                        label: {
+                            show: true,
+                            formatter: (p: unknown) => `${p?.data?.category ?? p.name}\n${p.value}`,
+                            fontSize: 11,
+                            color: textColor,
+                        },
+                        labelLine: { show: true, length: 10, length2: 6, lineStyle: { color: subTextColor } },
+                        emphasis: {
+                            scale: true,
+                            scaleSize: 4,
+                            itemStyle: {
+                                shadowBlur: 8,
+                                shadowOffsetX: 0,
+                                shadowColor: isDark ? 'rgba(0,0,0,0.4)' : 'rgba(0,0,0,0.2)',
+                            },
+                            label: { fontWeight: 'bold' },
+                        },
+                        data: outerCatStateData,
+                    },
+                ],
+            } as echarts.EChartsOption
+        );
     }, [
         isDark,
         legendStates,
