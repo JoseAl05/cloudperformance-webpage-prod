@@ -2,7 +2,7 @@
 import useSWR from 'swr'
 import React, { useEffect, useRef, useState } from "react"
 import * as echarts from "echarts"
-import { TableComponentTop } from "@/components/aws/vista-funciones/top-dolares-so/table/TopTableComponent"
+import { TableComponentTop } from "@/components/aws/vista-funciones/top-facturaciones/top-dolares-por-tipo-de-compra/table/TopTableComponent"
 import { Card, CardContent, CardTitle, CardHeader } from '@/components/ui/card'
 import { DollarSign, TrendingUp, TrendingDown } from "lucide-react"
 import {
@@ -13,62 +13,59 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
-import { TopDolarFamiliaChartComponent } from '../top-dolares-por-famila-de-instancias/grafico/TopDolarFamiliaChartComponent'
+import { TopFacturacionChartComponent } from '@/components/aws/vista-funciones/top-facturaciones/grafico/TopFacturacionChartComponent'
 
 const fetcher = (url: string) =>
   fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
     .then(r => r.json());
 
-interface TopDolaresOSComponentProps {
+interface TopDolaresPurchaseTypeProps {
   startDate: Date,
   endDate: Date
 }
 
-export const MainViewTopDolaresSO = ({ startDate, endDate }: TopDolaresOSComponentProps) => {
+export const MainViewTopDolaresTipoCompra = ({ startDate, endDate }: TopDolaresPurchaseTypeProps) => {
   const chartRef = useRef<HTMLDivElement>(null);
   const chartInstance = useRef<echarts.EChartsType | null>(null);
-  const [selectedOS, setSelectedOS] = useState<string | null>(null);
+  const [selectedPurchaseType, setSelectedPurchaseType] = useState<string | null>(null);
   const [tipoCosto, setTipoCosto] = useState<"costo_neto" | "costo_bruto">("costo_neto");
   const [topLimit, setTopLimit] = useState<number | "all">(10);
 
-  const startDateFormatted = startDate ? startDate.toISOString().replace('Z', '').slice(0, -4) : '';
-  const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : '';
+  const startDateFormatted = startDate ? startDate.toISOString().replace('Z', '').slice(0, -4) : '2025-08-31T00:00:00';
+  const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : '2025-09-01T00:00:00';
 
   const { data, error, isLoading } = useSWR(
-    `/api/aws/bridge/facturacion/top_facturacion/OPERATING_SYSTEM?date_from=${startDateFormatted}&date_to=${endDateFormatted}`,
+    `/api/aws/bridge/facturacion/top_facturacion/PURCHASE_TYPE?date_from=${startDateFormatted}&date_to=${endDateFormatted}`,
     fetcher
   )
 
-  const topDolaresOS = Array.isArray(data) ? data : (data?.data ?? [])
+  const topDolaresPurchaseType = Array.isArray(data) ? data : (data?.data ?? [])
 
-  // === Función segura para números
   const toNumber = (v: unknown) => {
     const n = Number(v);
     return Number.isFinite(n) ? n : 0;
   };
 
-  // === Agrupación por Sistema Operativo ===
   const costoKey = tipoCosto;
-  const osMap = new Map<string, number>();
+  const purchaseMap = new Map<string, number>();
 
-  for (const row of topDolaresOS) {
-    const os = row.dimension ?? "N/D";
+  for (const row of topDolaresPurchaseType) {
+    const purchase = row.dimension ?? "N/D";
     const val = toNumber(row[costoKey]);
-    osMap.set(os, (osMap.get(os) ?? 0) + val);
+    purchaseMap.set(purchase, (purchaseMap.get(purchase) ?? 0) + val);
   }
 
-  const aggregatedOS = Array.from(osMap, ([os, value]) => ({ os, value }));
+  const aggregatedPurchases = Array.from(purchaseMap, ([purchase, value]) => ({ purchase, value }));
+  const totalCosto = aggregatedPurchases.reduce((sum, r) => sum + r.value, 0);
 
-  const totalCosto = aggregatedOS.reduce((sum, r) => sum + r.value, 0);
-
-  const osMax = aggregatedOS.reduce(
+  const purchaseMax = aggregatedPurchases.reduce(
     (max, r) => (r.value > max.value ? r : max),
-    { os: null, value: -Infinity }
+    { purchase: null, value: -Infinity }
   );
 
-  const osMin = aggregatedOS.reduce(
+  const purchaseMin = aggregatedPurchases.reduce(
     (min, r) => (r.value > 0 && r.value < min.value ? r : min),
-    { os: null, value: Infinity }
+    { purchase: null, value: Infinity }
   );
 
   const handleTopLimitChange = (value: string) => {
@@ -88,16 +85,15 @@ export const MainViewTopDolaresSO = ({ startDate, endDate }: TopDolaresOSCompone
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 w-full">
               <div>
                 <CardTitle className="flex items-center gap-2">
-                  💻 Facturación por Sistema Operativo
+                  🛒 Facturación por Tipo de Compra
                 </CardTitle>
                 <p className="text-sm text-muted-foreground mt-1">
-                  Análisis de costos totales en distintos sistemas operativos
+                  Análisis de costos totales agrupados por tipo de compra
                 </p>
               </div>
 
               {/* === Filtros === */}
               <div className="flex flex-col md:flex-row gap-4 items-stretch md:items-center">
-                {/* Filtro Mostrar Top */}
                 <div>
                   <label className="text-sm font-medium text-muted-foreground mb-1 block">
                     Mostrar Top
@@ -115,16 +111,13 @@ export const MainViewTopDolaresSO = ({ startDate, endDate }: TopDolaresOSCompone
                   </Select>
                 </div>
 
-                {/* Filtro Tipo de Costo */}
                 <div>
                   <label className="text-sm font-medium text-muted-foreground mb-1 block">
                     Tipo de Costo
                   </label>
                   <Select
                     value={tipoCosto}
-                    onValueChange={(v) =>
-                      setTipoCosto(v as "costo_neto" | "costo_bruto")
-                    }
+                    onValueChange={(v) => setTipoCosto(v as "costo_neto" | "costo_bruto")}
                   >
                     <SelectTrigger className="w-full md:w-40">
                       <SelectValue placeholder="Tipo de Costo" />
@@ -140,10 +133,10 @@ export const MainViewTopDolaresSO = ({ startDate, endDate }: TopDolaresOSCompone
           </CardHeader>
 
           <CardContent className="relative h-[600px]">
-            <TopDolarFamiliaChartComponent
+            <TopFacturacionChartComponent
               data={data}
-              selectedFamily={selectedOS}
-              setSelectedFamily={setSelectedOS}
+              selectedFamily={selectedPurchaseType}
+              setSelectedFamily={setSelectedPurchaseType}
               tipoCosto={tipoCosto}
               topLimit={topLimit}
               uiTuning={{
@@ -151,7 +144,10 @@ export const MainViewTopDolaresSO = ({ startDate, endDate }: TopDolaresOSCompone
                 gridMinLeft: 10,
                 gridMaxLeft: 10,
                 axisLabelInterval: 'auto',
+                legend: { type: 'scroll', orient: 'horizontal', bottom: 8, left: 'center' },
               }}
+              isBilling
+              detailsEnabled
             />
           </CardContent>
 
@@ -164,7 +160,6 @@ export const MainViewTopDolaresSO = ({ startDate, endDate }: TopDolaresOSCompone
 
         {/* === KPIs === */}
         <div className="grid grid-cols-1 gap-6">
-          {/* Costo Total */}
           <Card className="border-l-4 border-l-indigo-500 shadow-lg rounded-2xl">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
@@ -175,29 +170,28 @@ export const MainViewTopDolaresSO = ({ startDate, endDate }: TopDolaresOSCompone
                       : "Costo Bruto Total (USD)"}
                   </p>
                   <p className="text-2xl font-bold text-indigo-600">
-                    ${totalCosto.toLocaleString("es-CL", { minimumFractionDigits: 2 })}
+                    ${totalCosto.toFixed(2)}
                   </p>
-                  <p className="text-xs text-muted-foreground">Total acumulado</p>
+                  <p className="text-xs text-muted-foreground">Total facturado acumulado</p>
                 </div>
                 <DollarSign className="h-8 w-8 text-indigo-500" />
               </div>
             </CardContent>
           </Card>
 
-          {/* S.O. más costoso */}
-          {osMax.os && (
+          {purchaseMax.purchase && (
             <Card className="border-l-4 border-l-red-500 shadow-lg rounded-2xl">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">
-                      Sistema Operativo con mayor costo de facturación
+                      Tipo de Compra con mayor costo de facturación
                     </p>
                     <p className="text-2xl font-bold text-red-600">
-                      {osMax.os}
+                      {purchaseMax.purchase}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      ${osMax.value.toFixed(2)}
+                      ${purchaseMax.value.toFixed(2)}
                     </p>
                   </div>
                   <TrendingUp className="h-8 w-8 text-red-500" />
@@ -206,20 +200,19 @@ export const MainViewTopDolaresSO = ({ startDate, endDate }: TopDolaresOSCompone
             </Card>
           )}
 
-          {/* S.O. menos costoso */}
-          {osMin.os && (
+          {purchaseMin.purchase && (
             <Card className="border-l-4 border-l-green-500 shadow-lg rounded-2xl">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">
-                      Sistema Operativo con menor costo de facturación
+                      Tipo de Compra con menor costo de facturación
                     </p>
                     <p className="text-2xl font-bold text-green-600">
-                      {osMin.os}
+                      {purchaseMin.purchase}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      ${osMin.value.toPrecision(2)}
+                      ${purchaseMin.value.toFixed(2)}
                     </p>
                   </div>
                   <TrendingDown className="h-8 w-8 text-green-500" />

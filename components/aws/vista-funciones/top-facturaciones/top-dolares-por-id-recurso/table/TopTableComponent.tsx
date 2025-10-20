@@ -2,10 +2,10 @@
 
 import useSWR from "swr"
 import { ColumnDef } from "@tanstack/react-table"
-import { DataTableGrouping } from "@/components/aws/vista-funciones/top-dolares-por-id-recurso/table/DataTableGrouping"
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ArrowUpDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { DataTableGrouping } from '@/components/general/data-table/data-table-grouping'
 
 type TableDataTopResource = {
   service_dimension: string
@@ -16,8 +16,8 @@ type TableDataTopResource = {
 }
 
 const fetcher = (url: string) =>
-    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
-        .then(r => r.json());
+  fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
+    .then(r => r.json());
 
 export const TableComponentTop = ({
   startDateFormatted,
@@ -39,7 +39,7 @@ export const TableComponentTop = ({
     return !(costoNeto === 0 && costoBruto === 0)
   })
 
-  
+
   const columns: ColumnDef<TableDataTopResource>[] = [
     {
       accessorKey: "service_dimension",
@@ -130,8 +130,8 @@ export const TableComponentTop = ({
           data={filteredData}
           filterColumn="dimension"
           filterPlaceholder="Buscar recurso…"
-          enableGrouping={true}           
-          groupByColumn="service_dimension"  
+          enableGrouping={true}
+          groupByColumn="service_dimension"
           groupPageSize={30}
         />
 

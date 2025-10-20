@@ -1,4 +1,4 @@
-import { TopDolarSOComponent } from '@/components/aws/vista-funciones/top-dolares-so/TopDolarSOComponent';
+import { TopDolarSOComponent } from '@/components/aws/vista-funciones/top-facturaciones/top-dolares-so/TopDolarSOComponent';
 import { Suspense } from 'react';
 
 export default function DashboardAwsTopDolaresSO() {

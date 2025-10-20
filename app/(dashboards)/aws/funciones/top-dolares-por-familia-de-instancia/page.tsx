@@ -1,4 +1,4 @@
-import { TopDolarFamiliaComponent } from '@/components/aws/vista-funciones/top-dolares-por-famila-de-instancias/MainViewTopDolarFamiliaComponent';
+import { TopDolarFamiliaComponent } from '@/components/aws/vista-funciones/top-facturaciones/top-dolares-por-famila-de-instancias/MainViewTopDolarFamiliaComponent';
 import { Suspense } from 'react';
 
 export default function DashboardAwsTopDolaresFamilia() {

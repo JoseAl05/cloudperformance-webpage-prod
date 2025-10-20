@@ -1,8 +1,8 @@
 'use client'
 import useSWR from 'swr'
-import React, { useEffect, useRef, useState } from "react"
+import React, { lazy, useEffect, useRef, useState } from "react"
 import * as echarts from "echarts"
-import { TableComponentTop } from "@/components/aws/vista-funciones/top-dolares-por-famila-de-instancias/table/TopTableComponent"
+import { TableComponentTop } from "@/components/aws/vista-funciones/top-facturaciones/top-dolares-por-id-recurso/table/TopTableComponent"
 import { Card, CardContent, CardTitle, CardHeader } from '@/components/ui/card'
 import { DollarSign, TrendingUp, TrendingDown } from "lucide-react"
 import {
@@ -13,65 +13,66 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
-import { TopDolarFamiliaChartComponent } from './grafico/TopDolarFamiliaChartComponent'
+import { TopFacturacionChartComponent } from '@/components/aws/vista-funciones/top-facturaciones/grafico/TopFacturacionChartComponent'
 
 const fetcher = (url: string) =>
   fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
     .then(r => r.json());
 
-interface TopDolaresInstanceTypeFamilyProps {
+interface TopDolaresResourceProps {
   startDate: Date,
   endDate: Date
 }
 
-export const MainViewTopDolaresFamilia = ({ startDate, endDate }: TopDolaresInstanceTypeFamilyProps) => {
+export const MainViewTopDolaresRecurso = ({ startDate, endDate }: TopDolaresResourceProps) => {
   const chartRef = useRef<HTMLDivElement>(null);
   const chartInstance = useRef<echarts.EChartsType | null>(null);
-  const [selectedFamily, setSelectedFamily] = useState<string | null>(null);
+  const [selectedResource, setSelectedResource] = useState<string | null>(null);
   const [tipoCosto, setTipoCosto] = useState<"costo_neto" | "costo_bruto">("costo_neto");
   const [topLimit, setTopLimit] = useState<number | "all">(10);
 
-  const startDateFormatted = startDate ? startDate.toISOString().replace('Z', '').slice(0, -4) : '2025-08-31T00:00:00';
-  const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : '2025-09-01T00:00:00';
+  const startDateFormatted = startDate ? startDate.toISOString().replace('Z', '').slice(0, -4) : '';
+  const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : '';
 
   const { data, error, isLoading } = useSWR(
-    `/api/aws/bridge/facturacion/top_facturacion/INSTANCE_TYPE_FAMILY?date_from=${startDateFormatted}&date_to=${endDateFormatted}`,
+    `/api/aws/bridge/facturacion/top_facturacion/RESOURCE_ID?date_from=${startDateFormatted}&date_to=${endDateFormatted}`,
     fetcher
   )
 
-  const topDolaresFamily = Array.isArray(data) ? data : (data?.data ?? [])
+  const topDolaresResource = Array.isArray(data) ? data : (data?.data ?? [])
 
   const toNumber = (v: unknown) => {
     const n = Number(v);
     return Number.isFinite(n) ? n : 0;
   };
 
-  // === Agrupación por familia (para KPIs y totales) ===
+  // === Agrupación por recurso (para KPIs y totales) ===
   const costoKey = tipoCosto;
-  const familyMap = new Map<string, number>();
+  const resourceMap = new Map<string, number>();
 
-  for (const row of topDolaresFamily) {
-    const family = row.dimension ?? "N/D";
+  for (const row of topDolaresResource) {
+    const resource = row.dimension ?? "N/D";
     const val = toNumber(row[costoKey]);
-    familyMap.set(family, (familyMap.get(family) ?? 0) + val);
+    resourceMap.set(resource, (resourceMap.get(resource) ?? 0) + val);
   }
 
-  const aggregatedFamilies = Array.from(familyMap, ([family, value]) => ({ family, value }));
-  const totalCosto = aggregatedFamilies.reduce((sum, r) => sum + r.value, 0);
+  const aggregatedResources = Array.from(resourceMap, ([resource, value]) => ({ resource, value }));
+  const totalCosto = aggregatedResources.reduce((sum, r) => sum + r.value, 0);
 
-  const familyMax = aggregatedFamilies.reduce(
+  const resourceMax = aggregatedResources.reduce(
     (max, r) => (r.value > max.value ? r : max),
-    { family: null, value: -Infinity }
+    { resource: null, value: -Infinity }
   );
 
-  const familyMin = aggregatedFamilies.reduce(
+  const resourceMin = aggregatedResources.reduce(
     (min, r) => (r.value > 0 && r.value < min.value ? r : min),
-    { family: null, value: Infinity }
+    { resource: null, value: Infinity }
   );
 
   const handleTopLimitChange = (value: string) => {
     setTopLimit(value === "all" ? "all" : Number(value));
   };
+
 
 
   if (isLoading) return <p>Cargando...</p>;
@@ -86,10 +87,10 @@ export const MainViewTopDolaresFamilia = ({ startDate, endDate }: TopDolaresInst
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 w-full">
               <div>
                 <CardTitle className="flex items-center gap-2">
-                  💻 Facturación por Familia de Instancia
+                  🆔 Facturación por Recurso
                 </CardTitle>
                 <p className="text-sm text-muted-foreground mt-1">
-                  Análisis de costos totales agrupados por familia de instancias
+                  Análisis de costos totales agrupados por recurso
                 </p>
               </div>
 
@@ -134,28 +135,22 @@ export const MainViewTopDolaresFamilia = ({ startDate, endDate }: TopDolaresInst
           </CardHeader>
 
           <CardContent className="relative h-[600px]">
-            <TopDolarFamiliaChartComponent
+            <TopFacturacionChartComponent
               data={data}
-              selectedFamily={selectedFamily}
-              setSelectedFamily={setSelectedFamily}
+              selectedFamily={selectedResource}
+              setSelectedFamily={setSelectedResource}
               tipoCosto={tipoCosto}
               topLimit={topLimit}
               uiTuning={{
-                yLabelStrategy: 'fit',     // o 'fit'
+                yLabelStrategy: 'truncate',
                 gridMinLeft: 30,
                 gridMaxLeft: 20,
-                axisLabelInterval: 'auto',      // o 1, 2, ...
+                axisLabelInterval: 'auto',
+                legend: { type: 'scroll', orient: 'horizontal', bottom: 8, left: 'center' },
               }}
+              isBilling
+              detailsEnabled
             />
-            {/* {selectedFamily && (
-              <Button
-                onClick={() => setSelectedFamily(null)}
-                className="absolute top-4 left-4 px-3 py-1 rounded text-sm z-10 bg-blue-600 text-white hover:bg-blue-700"
-              >
-                ← Volver
-              </Button>
-            )}
-            <div ref={chartRef} className="w-full h-[600px]" /> */}
           </CardContent>
 
           <div className="border-t bg-muted/50 px-6 py-3">
@@ -186,19 +181,19 @@ export const MainViewTopDolaresFamilia = ({ startDate, endDate }: TopDolaresInst
             </CardContent>
           </Card>
 
-          {familyMax.family && (
+          {resourceMax.resource && (
             <Card className="border-l-4 border-l-red-500 shadow-lg rounded-2xl">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">
-                      Familia de Instancia con mayor costo de facturación
+                      Recurso con mayor costo de facturación
                     </p>
                     <p className="text-2xl font-bold text-red-600">
-                      {familyMax.family}
+                      {resourceMax.resource}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      ${familyMax.value.toFixed(2)}
+                      ${resourceMax.value.toFixed(2)}
                     </p>
                   </div>
                   <TrendingUp className="h-8 w-8 text-red-500" />
@@ -207,19 +202,19 @@ export const MainViewTopDolaresFamilia = ({ startDate, endDate }: TopDolaresInst
             </Card>
           )}
 
-          {familyMin.family && (
+          {resourceMin.resource && (
             <Card className="border-l-4 border-l-green-500 shadow-lg rounded-2xl">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">
-                      Familia de Instancia con menor costo de facturación
+                      Recurso con menor costo de facturación
                     </p>
                     <p className="text-2xl font-bold text-green-600">
-                      {familyMin.family}
+                      {resourceMin.resource}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      ${familyMin.value.toFixed(2)}
+                      ${resourceMin.value.toFixed(2)}
                     </p>
                   </div>
                   <TrendingDown className="h-8 w-8 text-green-500" />

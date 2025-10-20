@@ -55,7 +55,7 @@ export const EventsViewEventCountComponent = ({
         const totalCount = entries.reduce((s, e) => s + e.value, 0);
 
         return { legendItems, pieData: entries, totalCount };
-    }, [data, sortDesc]);
+    }, [safeData, sortDesc]);
 
     const option = useMemo(() => {
         const textColor = isDark ? '#ffffff' : '#131a22';
@@ -110,11 +110,11 @@ export const EventsViewEventCountComponent = ({
         })
 
         return deepMerge(base, pie);
-    },[data])
+    }, [isDark, legendItems, pieData])
 
     const isEmpty = !pieData?.length || totalCount === 0;
 
-    useECharts(chartRef, option, mounted ? [option] : [], isDark ? 'cp-dark' : 'cp-light');
+    useECharts(chartRef, option, [option], isDark ? 'cp-dark' : 'cp-light');
 
     return (
         <Card className="w-full">

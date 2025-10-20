@@ -2,7 +2,7 @@
 import useSWR from 'swr'
 import React, { useEffect, useRef, useState } from "react"
 import * as echarts from "echarts"
-import { TableComponentTop } from "@/components/aws/vista-funciones/top-dolares-region/table/TopTableComponent"
+import { TableComponentTop } from "@/components/aws/vista-funciones/top-facturaciones/top-dolares-por-tipo-de-cobro/table/TopTableComponent"
 import { Card, CardContent, CardTitle, CardHeader } from '@/components/ui/card'
 import { DollarSign, TrendingUp, TrendingDown } from "lucide-react"
 import {
@@ -13,21 +13,21 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
-import { TopDolarFamiliaChartComponent } from '../top-dolares-por-famila-de-instancias/grafico/TopDolarFamiliaChartComponent'
+import { TopFacturacionChartComponent } from '@/components/aws/vista-funciones/top-facturaciones/grafico/TopFacturacionChartComponent'
 
 const fetcher = (url: string) =>
   fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
     .then(r => r.json());
 
-interface TopDolaresRegionComponentProps {
+interface TopDolaresRecordTypeProps {
   startDate: Date,
   endDate: Date
 }
 
-export const MainViewTopDolaresRegion = ({ startDate, endDate }: TopDolaresRegionComponentProps) => {
+export const MainViewTopDolaresTipoCobro = ({ startDate, endDate }: TopDolaresRecordTypeProps) => {
   const chartRef = useRef<HTMLDivElement>(null);
   const chartInstance = useRef<echarts.EChartsType | null>(null);
-  const [selectedRegion, setSelectedRegion] = useState<string | null>(null);
+  const [selectedRecordType, setSelectedRecordType] = useState<string | null>(null);
   const [tipoCosto, setTipoCosto] = useState<"costo_neto" | "costo_bruto">("costo_neto");
   const [topLimit, setTopLimit] = useState<number | "all">(10);
 
@@ -35,46 +35,39 @@ export const MainViewTopDolaresRegion = ({ startDate, endDate }: TopDolaresRegio
   const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : '2025-09-01T00:00:00';
 
   const { data, error, isLoading } = useSWR(
-    `/api/aws/bridge/facturacion/top_facturacion/REGION?date_from=${startDateFormatted}&date_to=${endDateFormatted}`,
+    `/api/aws/bridge/facturacion/top_facturacion/RECORD_TYPE?date_from=${startDateFormatted}&date_to=${endDateFormatted}`,
     fetcher
   )
 
-  const topDolaresRegion = Array.isArray(data) ? data : (data?.data ?? [])
+  const topDolaresRecordType = Array.isArray(data) ? data : (data?.data ?? [])
 
-  // === Función segura para números
   const toNumber = (v: unknown) => {
     const n = Number(v);
     return Number.isFinite(n) ? n : 0;
   };
 
-  // === Agrupación por región (para KPIs y totales) ===
+  // === Agrupación por tipo de cobro (para KPIs y totales) ===
   const costoKey = tipoCosto;
-  const regionMap = new Map<string, number>();
+  const recordMap = new Map<string, number>();
 
-  for (const row of topDolaresRegion) {
-    const region = row.dimension ?? "N/D";
+  for (const row of topDolaresRecordType) {
+    const record = row.dimension ?? "N/D";
     const val = toNumber(row[costoKey]);
-    regionMap.set(region, (regionMap.get(region) ?? 0) + val);
+    recordMap.set(record, (recordMap.get(record) ?? 0) + val);
   }
 
-  const aggregatedRegions = Array.from(regionMap, ([region, value]) => ({ region, value }));
+  const aggregatedRecords = Array.from(recordMap, ([record, value]) => ({ record, value }));
+  const totalCosto = aggregatedRecords.reduce((sum, r) => sum + r.value, 0);
 
-  const totalCosto = aggregatedRegions.reduce((sum, r) => sum + r.value, 0);
-
-  const regionMax = aggregatedRegions.reduce(
+  const recordMax = aggregatedRecords.reduce(
     (max, r) => (r.value > max.value ? r : max),
-    { region: null, value: -Infinity }
+    { record: null, value: -Infinity }
   );
 
-  const regionMin = aggregatedRegions.reduce(
+  const recordMin = aggregatedRecords.reduce(
     (min, r) => (r.value > 0 && r.value < min.value ? r : min),
-    { region: null, value: Infinity }
+    { record: null, value: Infinity }
   );
-
-  // const handleTopLimitChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-  //   const val = e.target.value === "all" ? "all" : Number(e.target.value);
-  //   setTopLimit(val);
-  // };
 
   const handleTopLimitChange = (value: string) => {
     setTopLimit(value === "all" ? "all" : Number(value));
@@ -93,16 +86,15 @@ export const MainViewTopDolaresRegion = ({ startDate, endDate }: TopDolaresRegio
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 w-full">
               <div>
                 <CardTitle className="flex items-center gap-2">
-                  🌍 Facturación por Región
+                  💳 Facturación por Tipo de Cobro
                 </CardTitle>
                 <p className="text-sm text-muted-foreground mt-1">
-                  Análisis de costos totales en cada región
+                  Análisis de costos totales agrupados por tipo de cobro
                 </p>
               </div>
 
               {/* === Filtros === */}
               <div className="flex flex-col md:flex-row gap-4 items-stretch md:items-center">
-                {/* Filtro Mostrar Top */}
                 <div>
                   <label className="text-sm font-medium text-muted-foreground mb-1 block">
                     Mostrar Top
@@ -120,16 +112,13 @@ export const MainViewTopDolaresRegion = ({ startDate, endDate }: TopDolaresRegio
                   </Select>
                 </div>
 
-                {/* Filtro Tipo de Costo */}
                 <div>
                   <label className="text-sm font-medium text-muted-foreground mb-1 block">
                     Tipo de Costo
                   </label>
                   <Select
                     value={tipoCosto}
-                    onValueChange={(v) =>
-                      setTipoCosto(v as "costo_neto" | "costo_bruto")
-                    }
+                    onValueChange={(v) => setTipoCosto(v as "costo_neto" | "costo_bruto")}
                   >
                     <SelectTrigger className="w-full md:w-40">
                       <SelectValue placeholder="Tipo de Costo" />
@@ -145,18 +134,21 @@ export const MainViewTopDolaresRegion = ({ startDate, endDate }: TopDolaresRegio
           </CardHeader>
 
           <CardContent className="relative h-[600px]">
-            <TopDolarFamiliaChartComponent
+            <TopFacturacionChartComponent
               data={data}
-              selectedFamily={selectedRegion}
-              setSelectedFamily={setSelectedRegion}
+              selectedFamily={selectedRecordType}
+              setSelectedFamily={setSelectedRecordType}
               tipoCosto={tipoCosto}
               topLimit={topLimit}
               uiTuning={{
                 yLabelStrategy: 'truncate',
-                gridMinLeft: 10,
-                gridMaxLeft: 10,
+                gridMinLeft: 30,
+                gridMaxLeft: 20,
                 axisLabelInterval: 'auto',
+                legend: { type: 'scroll', orient: 'horizontal', bottom: 8, left: 'center' },
               }}
+              isBilling
+              detailsEnabled
             />
           </CardContent>
 
@@ -169,7 +161,6 @@ export const MainViewTopDolaresRegion = ({ startDate, endDate }: TopDolaresRegio
 
         {/* === KPIs === */}
         <div className="grid grid-cols-1 gap-6">
-          {/* Costo Total */}
           <Card className="border-l-4 border-l-indigo-500 shadow-lg rounded-2xl">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
@@ -189,20 +180,19 @@ export const MainViewTopDolaresRegion = ({ startDate, endDate }: TopDolaresRegio
             </CardContent>
           </Card>
 
-          {/* Región más costosa */}
-          {regionMax.region && (
+          {recordMax.record && (
             <Card className="border-l-4 border-l-red-500 shadow-lg rounded-2xl">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">
-                      Región con mayor costo de facturación
+                      Tipo de Cobro con mayor costo de facturación
                     </p>
                     <p className="text-2xl font-bold text-red-600">
-                      {regionMax.region}
+                      {recordMax.record}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      ${regionMax.value.toFixed(2)}
+                      ${recordMax.value.toFixed(2)}
                     </p>
                   </div>
                   <TrendingUp className="h-8 w-8 text-red-500" />
@@ -211,20 +201,19 @@ export const MainViewTopDolaresRegion = ({ startDate, endDate }: TopDolaresRegio
             </Card>
           )}
 
-          {/* Región menos costosa */}
-          {regionMin.region && (
+          {recordMin.record && (
             <Card className="border-l-4 border-l-green-500 shadow-lg rounded-2xl">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">
-                      Región con menor costo de facturación
+                      Tipo de Cobro con menor costo de facturación
                     </p>
                     <p className="text-2xl font-bold text-green-600">
-                      {regionMin.region}
+                      {recordMin.record}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      ${regionMin.value.toPrecision(2)}
+                      ${recordMin.value.toFixed(2)}
                     </p>
                   </div>
                   <TrendingDown className="h-8 w-8 text-green-500" />

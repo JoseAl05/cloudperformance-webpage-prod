@@ -1,4 +1,4 @@
-import { TopDolarInstanciasComponent } from '@/components/aws/vista-funciones/top-dolares-por-tipo-de-instancia/TopDolarInstanciasComponent';
+import { TopDolarInstanciasComponent } from '@/components/aws/vista-funciones/top-facturaciones/top-dolares-por-tipo-de-instancia/TopDolarInstanciasComponent';
 import { Suspense } from 'react';
 
 export default function DashboardAwsTopDolaresInstancias() {

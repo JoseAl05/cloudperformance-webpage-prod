@@ -9,7 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { TopDolarFamiliaChartComponent } from '../../top-dolares-por-famila-de-instancias/grafico/TopDolarFamiliaChartComponent'
+import { TopFacturacionChartComponent } from '@/components/aws/vista-funciones/top-facturaciones/grafico/TopFacturacionChartComponent'
 
 
 const fetcher = (url: string) =>
@@ -30,7 +30,6 @@ type Row = {
 
 export const TopRecursosChart = ({ startDate, endDate, groupBy, title, icon }: TopRecursosProps) => {
   const [topLimit, setTopLimit] = useState<number | 'all'>(10)
-  // Creamos estado dummy requerido por el chart, pero NO se usará porque deshabilitamos details:
   const [selectedFamily, setSelectedFamily] = useState<string>('')
 
   const startDateFormatted = startDate.toISOString().replace('Z', '').slice(0, -4)
@@ -52,12 +51,11 @@ export const TopRecursosChart = ({ startDate, endDate, groupBy, title, icon }: T
     return topLimit === 'all' ? sorted : sorted.slice(0, topLimit)
   }, [groups, topLimit])
 
-  // Adaptación al formato que espera el chart:
   const chartData = useMemo(() => {
     return aggregated.map((r) => ({
-      dimension: r.name,                 // eje Y
-      service_dimension: 'Recursos',     // serie única
-      costo_neto: r.total,               // reusamos las keys para el valor
+      dimension: r.name,
+      service_dimension: 'Recursos',
+      costo_neto: r.total,
       costo_bruto: r.total,
     }))
   }, [aggregated])
@@ -90,7 +88,7 @@ export const TopRecursosChart = ({ startDate, endDate, groupBy, title, icon }: T
       </CardHeader>
 
       <CardContent className="relative">
-        <TopDolarFamiliaChartComponent
+        <TopFacturacionChartComponent
           data={chartData}
           selectedFamily={selectedFamily}
           setSelectedFamily={setSelectedFamily}

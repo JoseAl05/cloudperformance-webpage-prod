@@ -89,8 +89,8 @@ export const HeatmapQuotasComponent = ({ startDate, endDate }: HeatmapQuotasComp
     const isDark = currentTheme === 'dark'
 
     const chartRef = useRef<HTMLDivElement>(null)
-    const [sizeBy, setSizeBy] = useState<SizeBy>('quotas')
-    const [onlyWithUsage, setOnlyWithUsage] = useState(false)
+    const [sizeBy, setSizeBy] = useState<SizeBy>('maxUsage')
+    const [onlyWithUsage, setOnlyWithUsage] = useState(true)
 
     const startDateFormatted = startDate.toISOString().replace('Z', '').slice(0, -4)
     const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : ''

@@ -2,7 +2,7 @@
 import useSWR from 'swr'
 import React, { useEffect, useRef, useState } from "react"
 import * as echarts from "echarts"
-import { TableComponentTop } from "@/components/aws/vista-funciones/top-dolares-por-tipo-de-instancia/table/TopTableComponent"
+import { TableComponentTop } from "@/components/aws/vista-funciones/top-facturaciones/top-dolares-region/table/TopTableComponent"
 import { Card, CardContent, CardTitle, CardHeader } from '@/components/ui/card'
 import { DollarSign, TrendingUp, TrendingDown } from "lucide-react"
 import {
@@ -13,33 +13,33 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
-import { TopDolarFamiliaChartComponent } from '../top-dolares-por-famila-de-instancias/grafico/TopDolarFamiliaChartComponent'
+import { TopFacturacionChartComponent } from '@/components/aws/vista-funciones/top-facturaciones/grafico/TopFacturacionChartComponent'
 
 const fetcher = (url: string) =>
   fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
     .then(r => r.json());
 
-interface TopDolaresInstanceTypeProps {
+interface TopDolaresRegionComponentProps {
   startDate: Date,
   endDate: Date
 }
 
-export const MainViewTopDolaresTipoInstancia = ({ startDate, endDate }: TopDolaresInstanceTypeProps) => {
+export const MainViewTopDolaresRegion = ({ startDate, endDate }: TopDolaresRegionComponentProps) => {
   const chartRef = useRef<HTMLDivElement>(null);
   const chartInstance = useRef<echarts.EChartsType | null>(null);
-  const [selectedInstance, setSelectedInstance] = useState<string | null>(null);
+  const [selectedRegion, setSelectedRegion] = useState<string | null>(null);
   const [tipoCosto, setTipoCosto] = useState<"costo_neto" | "costo_bruto">("costo_neto");
   const [topLimit, setTopLimit] = useState<number | "all">(10);
 
-  const startDateFormatted = startDate ? startDate.toISOString().replace('Z', '').slice(0, -4) : '';
-  const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : '';
+  const startDateFormatted = startDate ? startDate.toISOString().replace('Z', '').slice(0, -4) : '2025-08-31T00:00:00';
+  const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : '2025-09-01T00:00:00';
 
   const { data, error, isLoading } = useSWR(
-    `/api/aws/bridge/facturacion/top_facturacion/INSTANCE_TYPE?date_from=${startDateFormatted}&date_to=${endDateFormatted}`,
+    `/api/aws/bridge/facturacion/top_facturacion/REGION?date_from=${startDateFormatted}&date_to=${endDateFormatted}`,
     fetcher
   )
 
-  const topDolaresInstance = Array.isArray(data) ? data : (data?.data ?? [])
+  const topDolaresRegion = Array.isArray(data) ? data : (data?.data ?? [])
 
   // === Función segura para números
   const toNumber = (v: unknown) => {
@@ -47,28 +47,34 @@ export const MainViewTopDolaresTipoInstancia = ({ startDate, endDate }: TopDolar
     return Number.isFinite(n) ? n : 0;
   };
 
-  // === Agrupación por Tipo de Instancia ===
+  // === Agrupación por región (para KPIs y totales) ===
   const costoKey = tipoCosto;
-  const instanceMap = new Map<string, number>();
+  const regionMap = new Map<string, number>();
 
-  for (const row of topDolaresInstance) {
-    const instance = row.dimension ?? "N/D";
+  for (const row of topDolaresRegion) {
+    const region = row.dimension ?? "N/D";
     const val = toNumber(row[costoKey]);
-    instanceMap.set(instance, (instanceMap.get(instance) ?? 0) + val);
+    regionMap.set(region, (regionMap.get(region) ?? 0) + val);
   }
 
-  const aggregatedInstances = Array.from(instanceMap, ([instance, value]) => ({ instance, value }));
-  const totalCosto = aggregatedInstances.reduce((sum, r) => sum + r.value, 0);
+  const aggregatedRegions = Array.from(regionMap, ([region, value]) => ({ region, value }));
 
-  const instanceMax = aggregatedInstances.reduce(
+  const totalCosto = aggregatedRegions.reduce((sum, r) => sum + r.value, 0);
+
+  const regionMax = aggregatedRegions.reduce(
     (max, r) => (r.value > max.value ? r : max),
-    { instance: null, value: -Infinity }
+    { region: null, value: -Infinity }
   );
 
-  const instanceMin = aggregatedInstances.reduce(
+  const regionMin = aggregatedRegions.reduce(
     (min, r) => (r.value > 0 && r.value < min.value ? r : min),
-    { instance: null, value: Infinity }
+    { region: null, value: Infinity }
   );
+
+  // const handleTopLimitChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  //   const val = e.target.value === "all" ? "all" : Number(e.target.value);
+  //   setTopLimit(val);
+  // };
 
   const handleTopLimitChange = (value: string) => {
     setTopLimit(value === "all" ? "all" : Number(value));
@@ -87,10 +93,10 @@ export const MainViewTopDolaresTipoInstancia = ({ startDate, endDate }: TopDolar
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 w-full">
               <div>
                 <CardTitle className="flex items-center gap-2">
-                  📊 Facturación por Tipo de Instancia
+                  🌍 Facturación por Región
                 </CardTitle>
                 <p className="text-sm text-muted-foreground mt-1">
-                  Análisis de costos totales en distintos tipos de instancia
+                  Análisis de costos totales en cada región
                 </p>
               </div>
 
@@ -139,18 +145,21 @@ export const MainViewTopDolaresTipoInstancia = ({ startDate, endDate }: TopDolar
           </CardHeader>
 
           <CardContent className="relative h-[600px]">
-            <TopDolarFamiliaChartComponent
+            <TopFacturacionChartComponent
               data={data}
-              selectedFamily={selectedInstance}
-              setSelectedFamily={setSelectedInstance}
+              selectedFamily={selectedRegion}
+              setSelectedFamily={setSelectedRegion}
               tipoCosto={tipoCosto}
               topLimit={topLimit}
               uiTuning={{
                 yLabelStrategy: 'truncate',
-                gridMinLeft: 10,
-                gridMaxLeft: 10,
+                gridMinLeft: 30,
+                gridMaxLeft: 100,
                 axisLabelInterval: 'auto',
+                legend: { type: 'scroll', orient: 'horizontal', bottom: 8, left: 'center' },
               }}
+              isBilling
+              detailsEnabled
             />
           </CardContent>
 
@@ -174,29 +183,29 @@ export const MainViewTopDolaresTipoInstancia = ({ startDate, endDate }: TopDolar
                       : "Costo Bruto Total (USD)"}
                   </p>
                   <p className="text-2xl font-bold text-indigo-600">
-                    ${totalCosto.toLocaleString("es-CL", { minimumFractionDigits: 2 })}
+                    ${totalCosto.toFixed(2)}
                   </p>
-                  <p className="text-xs text-muted-foreground">Total acumulado</p>
+                  <p className="text-xs text-muted-foreground">Total facturado acumulado</p>
                 </div>
                 <DollarSign className="h-8 w-8 text-indigo-500" />
               </div>
             </CardContent>
           </Card>
 
-          {/* Más costoso */}
-          {instanceMax.instance && (
+          {/* Región más costosa */}
+          {regionMax.region && (
             <Card className="border-l-4 border-l-red-500 shadow-lg rounded-2xl">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">
-                      Tipo de Instancia con mayor costo de facturación
+                      Región con mayor costo de facturación
                     </p>
                     <p className="text-2xl font-bold text-red-600">
-                      {instanceMax.instance}
+                      {regionMax.region}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      ${instanceMax.value.toLocaleString("es-CL", { minimumFractionDigits: 2 })}
+                      ${regionMax.value.toFixed(2)}
                     </p>
                   </div>
                   <TrendingUp className="h-8 w-8 text-red-500" />
@@ -205,20 +214,20 @@ export const MainViewTopDolaresTipoInstancia = ({ startDate, endDate }: TopDolar
             </Card>
           )}
 
-          {/* Menos costoso */}
-          {instanceMin.instance && (
+          {/* Región menos costosa */}
+          {regionMin.region && (
             <Card className="border-l-4 border-l-green-500 shadow-lg rounded-2xl">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">
-                      Tipo de Instancia con menor costo de facturación
+                      Región con menor costo de facturación
                     </p>
                     <p className="text-2xl font-bold text-green-600">
-                      {instanceMin.instance}
+                      {regionMin.region}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      ${instanceMin.value.toLocaleString("es-CL", { minimumFractionDigits: 2 })}
+                      ${regionMin.value.toPrecision(2)}
                     </p>
                   </div>
                   <TrendingDown className="h-8 w-8 text-green-500" />

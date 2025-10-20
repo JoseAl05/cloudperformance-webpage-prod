@@ -1,4 +1,4 @@
-import { TopDolarRegionComponent } from '@/components/aws/vista-funciones/top-dolares-region/TopDolarRegionComponent';
+import { TopDolarRegionComponent } from '@/components/aws/vista-funciones/top-facturaciones/top-dolares-region/TopDolarRegionComponent';
 import { Suspense } from 'react';
 
 export default function DashboardAwsTopDolaresRegion() {
