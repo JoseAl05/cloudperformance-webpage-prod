@@ -318,7 +318,7 @@ const VmMetricComponent = ({ startDate, endDate, vmName, metricName, title, unit
   const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : '';
 
   const { data, error, isLoading } = useSWR(
-    `/api/azure/bridge/azure/recursos/vm/consumo-metricas?date_from=${startDateFormatted}&date_to=${endDateFormatted}&vm_name=${vmName}&metric_name=${metricName}`,
+    `/api/azure/bridge/azure/recursos/vm/consumo-metricas?date_from=${startDateFormatted}&date_to=${endDateFormatted}&vm_id=${vmName}&metric_name=${metricName}`,
     fetcher,
     { revalidateOnFocus: false }
   );

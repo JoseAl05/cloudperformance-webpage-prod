@@ -64,7 +64,7 @@ export const VmDeploymentsTableComponent = ({
 
     const { data, error, isLoading } = useSWR<VmDeploymentsResponse>(
         startDateFormatted && endDateFormatted && vmName
-            ? `/api/azure/bridge/azure/recursos/vm/deployments-detalle?date_from=${startDateFormatted}&date_to=${endDateFormatted}&resource_name=${vmName}`
+            ? `/api/azure/bridge/azure/recursos/vm/deployments-detalle?date_from=${startDateFormatted}&date_to=${endDateFormatted}&resource_id=${vmName}`
             : null,
         fetcher
     )

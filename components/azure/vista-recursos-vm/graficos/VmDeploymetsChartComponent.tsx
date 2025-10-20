@@ -298,7 +298,7 @@ const VmDeploymentsComponent = ({ startDate, endDate, vmName }: VmMetricProps) =
   const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : '';
 
   const { data, error, isLoading } = useSWR(
-    `/api/azure/bridge/azure/recursos/vm/deployments-por-fecha?date_from=${startDateFormatted}&date_to=${endDateFormatted}&resource_name=${vmName}`,
+    `/api/azure/bridge/azure/recursos/vm/deployments-por-fecha?date_from=${startDateFormatted}&date_to=${endDateFormatted}&resource_id=${vmName}`,
     fetcher,
     { revalidateOnFocus: false }
   );
