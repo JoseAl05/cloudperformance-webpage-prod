@@ -37,6 +37,8 @@ export const MainViewCostoVsPresupuestoComponent = () => {
           <FiltersComponent
             Component={CostosVsPresupuestoComponent}
             cloudFilter
+            dateFilter={false}
+            anioFilter 
           />
         </div>
       </div>

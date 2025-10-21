@@ -6,6 +6,7 @@ import 'react-datepicker/dist/react-datepicker.css';
 
 import { RegionFilterComponent } from '@/components/general/filters/RegionFilterComponent';
 import { CloudFilterComponent } from '@/components/general_presupuesto/filters/CloudFilterComponent';
+import { CentroDeCostoFilterComponent } from '@/components/general_presupuesto/filters/CentroDeCostoFilterComponent';
 import { TagFilterComponent } from '@/components/general/filters/TagsFilterComponent';
 import { ServiceFilterComponent } from '@/components/general/filters/ServiceFilterComponent';
 import { VariationServiceFilterComponent } from '@/components/general/filters/VariationServiceFilterComponent';
@@ -27,6 +28,8 @@ import { RDSMetricFilterComponent } from '@/components/general/filters/RdsMetric
 import { AutoScalingGroupFilterComponent } from '@/components/general/filters/Ec2AutoscalingGroupsFilterComponent';
 import { MetricsFilterComponent } from '@/components/general/filters/MetricsFilterComponent';
 import { MetricsRDSFilterComponent } from '@/components/general/filters/MetricsRDSFilterComponent';
+import { AnioFilterComponent } from '@/components/general_presupuesto/filters/AnioFilterComponent';
+import { boolean } from 'zod';
 
 interface FiltersComponentProps {
     Component: (params: {
@@ -74,6 +77,9 @@ interface FiltersComponentProps {
     variationServiceFilter?: boolean;
     variationMetricFilter?: boolean;
     cloudFilter?: boolean;
+    centroDeCostoFilter?: boolean;
+    isCentroDeCostoMultiselect?: boolean;
+    anioFilter?: boolean;
 }
 
 export const FiltersComponent = ({
@@ -114,6 +120,9 @@ export const FiltersComponent = ({
     variationServiceFilter = false,
     variationMetricFilter = false,
     cloudFilter = false,
+    centroDeCostoFilter = false,
+    isCentroDeCostoMultiselect= false,
+    anioFilter = false,
 }: FiltersComponentProps) => {
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -156,6 +165,8 @@ export const FiltersComponent = ({
         const selectedMetricsParam = searchParams.get('metrics');
         const selectedMetricsRDSParam = searchParams.get('metricsRDS');
         const cloudParam = searchParams.get('cloud');
+        const centroDeCostoParam = searchParams.get('centroDeCosto');
+        const anioParam = searchParams.get('anio');
 
         let startDate = startDateParam ? new Date(startDateParam) : yesterday;
         let endDate = endDateParam ? new Date(endDateParam) : new Date();
@@ -203,6 +214,8 @@ export const FiltersComponent = ({
             metrics: selectedMetricsParam || '',
             metricsRDS: selectedMetricsRDSParam || '',
             cloud: cloudParam || '',
+            centroDeCosto: centroDeCostoParam || '',
+            anio: anioParam || new Date().getFullYear().toString(),
         };
     };
 
@@ -241,6 +254,8 @@ export const FiltersComponent = ({
     const [tempMetrics, setTempMetrics] = useState(filters.metrics);
     const [tempMetricsRDS, setTempMetricsRDS] = useState(filters.metrics);
     const [tempCloud, setTempCloud] = useState(filters.cloud);
+    const [tempCentroDeCosto, setTempCentroDeCosto] = useState(filters.centroDeCosto);
+    const [tempAnio, setTempAnio] = useState(filters.anio);
 
     useEffect(() => {
         const newFilters = getInitialFilters();
@@ -276,6 +291,8 @@ export const FiltersComponent = ({
             newFilters.month && newFilters.year ? new Date(newFilters.year, newFilters.month - 1, 1) : null
         );
         setTempCloud(newFilters.cloud);
+        setTempCentroDeCosto(newFilters.centroDeCosto);
+        setTempAnio(newFilters.anio);
     }, [searchParams]);
 
     const getRDSService = (): 'postgresql' | 'oracle' | 'mysql' | 'sqlserver' | 'mariadb' => {
@@ -331,13 +348,18 @@ export const FiltersComponent = ({
             metrics: tempMetrics,
             metricsRDS: tempMetricsRDS,
             cloud: tempCloud,
+            centroDeCosto: tempCentroDeCosto,
+            anio: tempAnio,
         };
 
         setFilters(newFilters as unknown);
 
         const query = new URLSearchParams();
-        query.set('startDate', newFilters.startDate.toISOString());
-        query.set('endDate', newFilters.endDate.toISOString());
+
+        if (dateFilter) {
+          query.set('startDate', newFilters.startDate.toISOString());
+          query.set('endDate', newFilters.endDate.toISOString());       
+        }
 
         if (variationServiceFilter) {
             if (newFilters.month) query.set('month', String(newFilters.month));
@@ -368,6 +390,8 @@ export const FiltersComponent = ({
         if (newFilters.metrics) query.set('metrics', newFilters.metrics);
         if (newFilters.metricsRDS) query.set('metricsRDS', newFilters.metricsRDS);
         if (newFilters.cloud && newFilters.cloud !== 'all_clouds') query.set('cloud', newFilters.cloud);
+        if (newFilters.centroDeCosto) query.set('centroDeCosto', newFilters.centroDeCosto);
+        if (newFilters.anio) query.set('anio', newFilters.anio);
 
         router.push(`${window.location.pathname}?${query.toString()}`);
     };
@@ -402,6 +426,8 @@ export const FiltersComponent = ({
             metrics: '',
             metricsRDS: '',
             cloud: 'all_clouds',
+            centroDeCosto: '',
+            anio: new Date().getFullYear().toString(),
         };
 
         setFilters({
@@ -433,6 +459,7 @@ export const FiltersComponent = ({
             metrics: defaultFilters.metrics,
             metricsRDS: defaultFilters.metricsRDS,
             cloud: defaultFilters.cloud,
+            anio: defaultFilters.anio,
         });
 
         setTempRange([defaultFilters.startDate, defaultFilters.endDate]);
@@ -464,6 +491,8 @@ export const FiltersComponent = ({
         setTempMetrics(defaultFilters.metrics);
         setTempMetricsRDS(defaultFilters.metricsRDS);
         setTempCloud(defaultFilters.cloud);
+        setTempCentroDeCosto(defaultFilters.centroDeCosto);
+        setTempAnio(defaultFilters.anio);
 
         router.push(window.location.pathname);
     };
@@ -516,6 +545,7 @@ export const FiltersComponent = ({
         } else {
             params.delete('cloud');
         }
+        params.delete('centroDeCosto');
 
         router.replace(`${window.location.pathname}?${params.toString()}`, { scroll: false });
     };
@@ -604,6 +634,34 @@ export const FiltersComponent = ({
                                     Plataforma
                                 </label>
                                 <CloudFilterComponent selectedCloud={tempCloud} setSelectedCloud={setTempCloud} isCloudMultiSelect={false} />
+                            </div>
+                        )}
+
+                        {centroDeCostoFilter && (
+                            <div className='space-y-2'>
+                                <label className='text-sm font-medium text-foreground flex items-center gap-2'>
+                                    <Cloud className='h-4 w-4' />
+                                    Centro de Costo
+                                </label>
+                                <CentroDeCostoFilterComponent 
+                                  cloudType={tempCloud} 
+                                  CentroDeCosto={tempCentroDeCosto}
+                                  setCentroDeCosto={setTempCentroDeCosto}  
+                                  isCentroDeCostoMultiselect={isCentroDeCostoMultiselect} 
+                                />
+                            </div>
+                        )}
+
+                        {anioFilter && (
+                            <div className='space-y-2'>
+                                <label className='text-sm font-medium text-foreground flex items-center gap-2'>
+                                    <Calendar className='h-4 w-4' />
+                                    Año
+                                </label>
+                                <AnioFilterComponent 
+                                    selectedAnio={tempAnio} 
+                                    setSelectedAnio={setTempAnio}
+                                />
                             </div>
                         )}
 
@@ -913,6 +971,8 @@ export const FiltersComponent = ({
                     metric={filters.metric}
                     metrics={metricsRDSFilter ? filters.metricsRDS : filters.metrics}
                     cloud={filters.cloud}
+                    centroDeCosto={filters.centroDeCosto}
+                    anio={filters.anio}
                 />
             </Card>
         </div>
