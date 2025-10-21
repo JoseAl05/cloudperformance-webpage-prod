@@ -1,4 +1,4 @@
-import { TopRecursosComponent } from '@/components/aws/vista-funciones/top-recursos/MainViewTopRecursosComponent';
+import { TopRecursosComponent } from '@/components/aws/vista-funciones/top-facturaciones/top-recursos/MainViewTopRecursosComponent';
 import { Suspense } from 'react';
 
 export default function DashboardAwsTopRecursos() {

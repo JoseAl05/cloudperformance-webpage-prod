@@ -1,4 +1,4 @@
-import { TopDolarTipoCobroComponent } from '@/components/aws/vista-funciones/top-dolares-por-tipo-de-cobro/MainViewTopDolarTipoCobroComponent';
+import { TopDolarTipoCobroComponent } from '@/components/aws/vista-funciones/top-facturaciones/top-dolares-por-tipo-de-cobro/MainViewTopDolarTipoCobroComponent';
 import { Suspense } from 'react';
 
 export default function DashboardAwsTopDolaresTipoCobro() {

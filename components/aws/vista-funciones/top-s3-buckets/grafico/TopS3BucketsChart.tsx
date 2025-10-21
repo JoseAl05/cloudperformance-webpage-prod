@@ -1,37 +1,30 @@
 'use client'
 
 import useSWR from 'swr'
-import React, { useRef, useState, useEffect } from 'react'
+import React, { useRef, useState, useEffect, useMemo } from 'react'
 import * as echarts from 'echarts'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-
-const fetcher = (url: string) =>
-    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
-        .then(r => r.json());
+import { createChartOption, deepMerge, makeBaseOptions, useECharts } from '@/lib/echartsGlobalConfig'
+import { useTheme } from 'next-themes'
 
 interface TopS3BucketsChartProps {
-  startDate: Date
-  endDate: Date
-  region?: string
-  buckets?: string
+  data:unknown[];
   metric: 'NumberOfObjects Average' | 'BucketSizeBytes Average'
   title: string
 }
 
-export const TopS3BucketsChart = ({ startDate, endDate, region, buckets, metric, title }: TopS3BucketsChartProps) => {
-  const chartRef = useRef<HTMLDivElement>(null)
+export const TopS3BucketsChart = ({ data, metric, title }: TopS3BucketsChartProps) => {
+  const { theme, resolvedTheme } = useTheme();
+  const currentTheme = resolvedTheme || theme;
+  const isDark = currentTheme === 'dark';
   const [topLimit, setTopLimit] = useState<number | 'all'>(10)
 
-  const startDateFormatted = startDate.toISOString().replace('Z', '').slice(0, -4)
-  const endDateFormatted = endDate.toISOString().replace('Z', '').slice(0, -4)
+  const chartRef = useRef<HTMLDivElement>(null);
 
-  const { data, error, isLoading } = useSWR(
-    `/api/aws/bridge/s3/top_s3_buckets/tops?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&resources=${buckets}`,
-    fetcher
-  )
+  const safeData: [] = Array.isArray(data) ? data : [];
 
-  const aggregateData = () => {
+  const aggregateData = useMemo(() => {
     if (!Array.isArray(data)) return []
     const filtered = data.filter((d: unknown) => d.metric === metric)
     const map = new Map<string, number>()
@@ -43,76 +36,79 @@ export const TopS3BucketsChart = ({ startDate, endDate, region, buckets, metric,
     aggregated.sort((a, b) => b.total - a.total)
     if (topLimit !== 'all') aggregated = aggregated.slice(0, topLimit)
     return aggregated
-  }
+  }, [data, metric, topLimit]);
 
-  const aggregated = aggregateData()
-
-  useEffect(() => {
-    if (!chartRef.current || !aggregated.length) return
-    const chart = echarts.init(chartRef.current)
-
-    chart.setOption({
+  const option = useMemo(() => {
+    const base = makeBaseOptions({
+      unitLabel: 'Objetos',
       title: { text: `${title} (${topLimit === 'all' ? 'Todos' : 'Top ' + topLimit})`, left: 'center' },
-      tooltip: {
-        trigger: 'axis',
-        axisPointer: { type: 'shadow' },
-        formatter: (params: unknown) => {
-          const val = params[0].value
-          return metric.includes('Bytes')
-            ? `${params[0].name}<br/>${(val / 1073741824).toFixed(2)} GB`
-            : `${params[0].name}<br/>${val.toLocaleString()}`
+      useUTC: true,
+      showToolbox: true,
+      metricType: 'default'
+    });
+
+    const bars = createChartOption({
+      kind: 'bar',
+      xAxisType: 'value',
+      legend: false,
+      tooltip: true,
+      series: [
+        {
+          kind: 'bar',
+          name: '',
+          data: aggregateData.map(r => r.total),
+          smooth: true,
+          extra: {
+            itemStyle: { borderRadius: [6, 6, 0, 0] },
+          }
         },
-      },
-      grid: { left: 150, right: 50, top: 60, bottom: 60 },
-      xAxis: { 
-        type: 'value', 
-        name: metric.includes('Bytes') ? 'Tamaño (GB)' : 'Objetos',
-        axisLabel: {
-          formatter: (value: number) => {
-            if (metric.includes('Bytes')) {
-              // Para bytes → mostrar en GB legibles
-              return (value / 1073741824).toFixed(0)
-            } else {
-              // Para número de objetos → formateo con K, M
-              if (value >= 1_000_000_000) return (value / 1_000_000_000).toFixed(1) + 'B'
-              if (value >= 1_000_000) return (value / 1_000_000).toFixed(1) + 'M'
-              if (value >= 1_000) return (value / 1_000).toFixed(1) + 'K'
-              return value.toString()
+      ],
+      extraOption: {
+        xAxis: {
+          type: 'value',
+          name: metric.includes('Bytes') ? 'Tamaño (GB)' : 'Objetos',
+          axisLabel: {
+            formatter: (value: number) => {
+              if (metric.includes('Bytes')) {
+                return (value / 1073741824).toFixed(0)
+              } else {
+                if (value >= 1_000_000_000) return (value / 1_000_000_000).toFixed(1) + 'B'
+                if (value >= 1_000_000) return (value / 1_000_000).toFixed(1) + 'M'
+                if (value >= 1_000) return (value / 1_000).toFixed(1) + 'K'
+                return value.toString()
+              }
             }
           }
-        }
-      },
-      yAxis: {
-        type: 'category',
-        data: aggregated.map(r => r.name),
-        inverse: true,
-        axisLabel: {
-          formatter: (val: string) => {
-            const total = aggregated.find(r => r.name === val)?.total || 0
-            return metric.includes('Bytes') ? `${val} (${(total / 1073741824).toFixed(2)} GB)` : `${val} (${total})`
+        },
+        yAxis: {
+          type: 'category',
+          data: aggregateData.map(r => r.name),
+          inverse: true,
+          axisLabel: {
+            formatter: (val: string) => {
+              const total = aggregateData.find(r => r.name === val)?.total || 0
+              return metric.includes('Bytes') ? `${val} (${(total / 1073741824).toFixed(2)} GB)` : `${val} (${total})`
+            },
+          },
+        },
+        // grid: { left: 150, right: 50, top: 60, bottom: 60 },
+        tooltip: {
+          trigger: 'axis',
+          axisPointer: { type: 'shadow' },
+          formatter: (params: unknown) => {
+            const val = params[0].value
+            return metric.includes('Bytes')
+              ? `${params[0].name}<br/>${(val / 1073741824).toFixed(2)} GB`
+              : `${params[0].name}<br/>${val.toLocaleString()} Objetos`
           },
         },
       },
-      series: [
-        {
-          type: 'bar',
-          data: aggregated.map(r => r.total),
-          itemStyle: { borderRadius: [6, 6, 0, 0] },
-        },
-      ],
-    })
+    });
 
-    const resizeObserver = new ResizeObserver(() => chart.resize())
-    resizeObserver.observe(chartRef.current)
+    return deepMerge(base, bars);
+  }, [safeData, topLimit, aggregateData, metric, title]);
 
-    return () => {
-      resizeObserver.disconnect()
-      chart.dispose()
-    }
-  }, [aggregated, topLimit, title, metric])
-
-  if (isLoading) return <p>Cargando...</p>
-  if (error) return <p>Error cargando datos</p>
+  useECharts(chartRef, option, [option], isDark ? 'cp-dark' : 'cp-light');
 
   return (
     <Card className="shadow-lg rounded-2xl">

@@ -65,9 +65,20 @@ type LegendPos =
 
 function buildLegendOption(
   legend: string[] | boolean,
-  legendPos: LegendPos
+  legendPos: LegendPos,
+  legendConfig?: echarts.EChartsOption['legend']
 ): echarts.EChartsOption['legend'] {
+  if (Array.isArray(legendConfig)) {
+    return legendConfig;
+  }
+
+  const override =
+    legendConfig && !Array.isArray(legendConfig)
+      ? ({ ...legendConfig } as Record<string, unknown>)
+      : undefined;
+
   let pos: Record<string, unknown> = {};
+
   if (typeof legendPos === 'string') {
     const side = legendPos;
     if (side === 'top') pos = { top: 0, left: 'center', orient: 'horizontal' };
@@ -79,6 +90,36 @@ function buildLegendOption(
     pos = { ...legendPos };
   }
 
+  const baseLegend: Record<string, unknown> = Array.isArray(legend)
+    ? { data: legend, ...pos }
+    : legend
+    ? { ...pos }
+    : { show: false };
+
+  if (!override) {
+    return baseLegend as echarts.EChartsOption['legend'];
+  }
+
+  if (Array.isArray(legend) && override.data === undefined) {
+    override.data = legend;
+  }
+
+  if (override.bottom !== undefined) {
+    delete baseLegend.top;
+  }
+  if (override.top !== undefined) {
+    delete baseLegend.bottom;
+  }
+  if (override.left !== undefined) {
+    delete baseLegend.right;
+  }
+  if (override.right !== undefined) {
+    delete baseLegend.left;
+  }
+
+  return { ...baseLegend, ...override } as echarts.EChartsOption['legend'];
+
+
   if (Array.isArray(legend)) {
     return { data: legend, ...pos };
   }
@@ -88,6 +129,7 @@ function buildLegendOption(
 export function makeBaseOptions(args?: {
   legend?: string[] | boolean;
   legendPos?: LegendPos;
+  legendConfig?: echarts.EChartsOption['legend'];
   unitLabel?: string;
   useUTC?: boolean;
   showToolbox?: boolean;
@@ -97,6 +139,7 @@ export function makeBaseOptions(args?: {
   const {
     legend = true,
     legendPos = 'top',
+    legendConfig,
     unitLabel,
     useUTC = true,
     showToolbox = false,
@@ -114,7 +157,7 @@ export function makeBaseOptions(args?: {
     animationDuration: 300,
     textStyle: { color: textColor },
     grid: { left: 40, right: 10, top: 40, bottom: 40, containLabel: true },
-    legend: buildLegendOption(legend, legendPos),
+    legend: buildLegendOption(legend, legendPos, legendConfig),
     tooltip: {
       trigger: 'axis',
       axisPointer: { type: 'line' },
@@ -170,12 +213,24 @@ export interface SeriesOverrides {
   lineStyle?: Record<string, unknown>;
   areaStyle?: Record<string, unknown>;
   itemStyle?: Record<string, unknown>;
+  animation?: boolean;
+  animationDuration?: number;
+  animationDurationUpdate?: number;
+  animationEasing?: string;
+  animationEasingUpdate?: string;
+  animationDelay?: number;
+  animationDelayUpdate?: number;
   showSymbol?: boolean;
   smooth?: boolean;
   symbol?: unknown;
   symbolSize?: number;
   barWidth?: number | string;
   stack?: string;
+  progressive?: number;
+  progressiveThreshold?: number;
+  progressiveChunkMode?: 'sequential' | 'mod';
+  large?: boolean;
+  largeThreshold?: number;
   yAxisIndex?: number;
   encode?: Record<string, unknown>;
   label?: Record<string, unknown>;
@@ -360,10 +415,34 @@ function buildSeries(def: AnySeriesDef): echarts.SeriesOption {
     if (typeof ex.showSymbol === 'boolean') s.showSymbol = ex.showSymbol;
     if (typeof ex.smooth === 'boolean') s.smooth = ex.smooth;
 
+    if (typeof ex.animation === 'boolean') s['animation'] = ex.animation;
+    if (typeof ex.animationDuration === 'number')
+      s['animationDuration'] = ex.animationDuration;
+    if (typeof ex.animationDurationUpdate === 'number')
+      s['animationDurationUpdate'] = ex.animationDurationUpdate;
+    if (typeof ex.animationEasing === 'string')
+      s['animationEasing'] = ex.animationEasing;
+    if (typeof ex.animationEasingUpdate === 'string')
+      s['animationEasingUpdate'] = ex.animationEasingUpdate;
+    if (typeof ex.animationDelay === 'number')
+      s['animationDelay'] = ex.animationDelay;
+    if (typeof ex.animationDelayUpdate === 'number')
+      s['animationDelayUpdate'] = ex.animationDelayUpdate;
+
     if (typeof ex.yAxisIndex === 'number') s.yAxisIndex = ex.yAxisIndex;
     if (typeof ex.barWidth !== 'undefined')
       s['barWidth'] = ex.barWidth as unknown;
     if (typeof ex.stack === 'string') s['stack'] = ex.stack;
+
+    if (typeof ex.progressive === 'number')
+      s['progressive'] = ex.progressive;
+    if (typeof ex.progressiveThreshold === 'number')
+      s['progressiveThreshold'] = ex.progressiveThreshold;
+    if (typeof ex.progressiveChunkMode === 'string')
+      s['progressiveChunkMode'] = ex.progressiveChunkMode;
+    if (typeof ex.large === 'boolean') s['large'] = ex.large;
+    if (typeof ex.largeThreshold === 'number')
+      s['largeThreshold'] = ex.largeThreshold;
 
     if (typeof ex.symbol !== 'undefined') s['symbol'] = ex.symbol as unknown;
     if (typeof ex.symbolSize === 'number') s['symbolSize'] = ex.symbolSize;

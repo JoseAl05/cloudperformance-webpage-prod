@@ -25,7 +25,7 @@ interface UiTuning {
     legend?: LegendCfg
 }
 
-interface TopDolarFamiliaChartComponentProps {
+interface TopFacturacionChartComponentProps {
     data: unknown[] | { data?: unknown[] }
     selectedFamily: string
     setSelectedFamily: React.Dispatch<React.SetStateAction<string | null>>
@@ -33,7 +33,7 @@ interface TopDolarFamiliaChartComponentProps {
     topLimit: number | 'all'
     uiTuning?: UiTuning
     detailsEnabled?: boolean
-    isBilling?:boolean;
+    isBilling?: boolean;
 }
 
 type CostKey = 'costo_neto' | 'costo_bruto'
@@ -49,7 +49,7 @@ function clamp(n: number, min: number, max: number) {
     return Math.max(min, Math.min(max, n))
 }
 
-export const TopDolarFamiliaChartComponent = ({
+export const TopFacturacionChartComponent = ({
     data,
     selectedFamily,
     setSelectedFamily,
@@ -58,7 +58,7 @@ export const TopDolarFamiliaChartComponent = ({
     uiTuning,
     detailsEnabled = true,
     isBilling = true
-}: TopDolarFamiliaChartComponentProps) => {
+}: TopFacturacionChartComponentProps) => {
     const { theme, resolvedTheme } = useTheme()
     const currentTheme = resolvedTheme || theme
     const isDark = currentTheme === 'dark'
@@ -111,11 +111,31 @@ export const TopDolarFamiliaChartComponent = ({
             sortedFamilies = sortedFamilies.slice(0, topLimit)
         }
 
+        const enableLargeMode = services.length > 14 || sortedFamilies.length > 20
+        const performanceExtra = enableLargeMode
+            ? {
+                large: true,
+                largeThreshold: 200,
+                progressive: 600,
+                progressiveThreshold: 3000,
+                progressiveChunkMode: 'mod' as const,
+                animation: false,
+                animationDuration: 0,
+                animationDurationUpdate: 0,
+            }
+            : {}
+
         const seriesData = services.map((service) => ({
             name: service,
             kind: 'bar' as const,
-            extra: { stack: 'total' },
-            data: sortedFamilies.map(({ family }) => dataMap.get(family)?.get(service) || 0),
+            extra: {
+                stack: 'total',
+                ...performanceExtra,
+            },
+            data: sortedFamilies.map(({ family }) => [
+                dataMap.get(family)?.get(service) || 0,
+                family,
+            ]),
         }))
 
         const yCategories = sortedFamilies.map((f) => f.family)
@@ -144,11 +164,24 @@ export const TopDolarFamiliaChartComponent = ({
             .sort((a, b) => b.total - a.total)
 
         const yCategories = sortedServices.map((s) => s.service)
+        const enableDetailLargeMode = yCategories.length > 32
         const seriesData = [
             {
                 name: 'Costo',
                 kind: 'bar' as const,
-                data: sortedServices.map((s) => s.total),
+                data: sortedServices.map((s) => [s.total, s.service]),
+                extra: enableDetailLargeMode
+                    ? {
+                        large: true,
+                        largeThreshold: 200,
+                        progressive: 500,
+                        progressiveThreshold: 2000,
+                        progressiveChunkMode: 'mod',
+                        animation: false,
+                        animationDuration: 0,
+                        animationDurationUpdate: 0,
+                    }
+                    : undefined,
             },
         ]
 
@@ -189,18 +222,49 @@ export const TopDolarFamiliaChartComponent = ({
                 selectedMode: 'multiple',
             },
         })
+        const performanceSeries = isDetail ? detailView?.seriesData ?? [] : mainView.seriesData
+        const visibleCategories = isDetail ? detailView?.yCategories ?? [] : mainView.yCategories
+        const shouldDisableAnimation =
+            visibleCategories.length > 25 ||
+            (!isDetail && performanceSeries.length > 20)
+        if (shouldDisableAnimation) {
+            Object.assign(base, {
+                animation: false,
+                animationDuration: 0,
+                animationDurationUpdate: 0,
+                animationEasing: 'linear',
+                animationEasingUpdate: 'linear',
+                animationDelay: 0,
+                animationDelayUpdate: 0,
+                stateAnimation: { duration: 0 },
+                universalTransition: false,
+            })
+            base.toolbox = undefined
+        }
+
+        const readValue = (raw: unknown) => {
+            if (Array.isArray(raw)) {
+                return toNumber(raw[0])
+            }
+            return toNumber(raw)
+        }
 
         const tooltipFormatter = (params: unknown) => {
             const list = Array.isArray(params) ? (params as unknown[]) : []
-            const visible = list.filter((p) => toNumber((p as Record<string, unknown>).value) > 0)
+            const visible = list.filter((p) => readValue((p as Record<string, unknown>).value) > 0)
+            const sorted = visible.slice().sort((a, b) => {
+                const aVal = readValue((a as Record<string, unknown>).value)
+                const bVal = readValue((b as Record<string, unknown>).value)
+                return bVal - aVal
+            })
 
             const axisValue = getStr((list[0] as Record<string, unknown>)?.axisValue)
-            const total = visible.reduce((sum, p) => sum + toNumber((p as Record<string, unknown>).value), 0)
-            const lines = visible.map((p) => {
+            const total = sorted.reduce((sum, p) => sum + readValue((p as Record<string, unknown>).value), 0)
+            const lines = sorted.map((p) => {
                 const pr = p as Record<string, unknown>
                 const marker = getStr(pr.marker)
                 const sName = getStr(pr.seriesName)
-                const val = toNumber(pr.value).toFixed(2)
+                const val = readValue(pr.value).toFixed(2)
                 return `${marker} ${sName}: ${unitMeasure}${val}`
             })
 
@@ -208,7 +272,10 @@ export const TopDolarFamiliaChartComponent = ({
                 ? `<strong>Total: ${unitMeasure}${total.toFixed(2)}</strong>`
                 : `<strong>${axisValue} - Total: ${unitMeasure}${total.toFixed(2)}</strong>`
 
-            return `${header}<br/>${lines.length ? lines.join('<br/>') : '<em>Sin datos</em>'}`
+            const bodyContent = lines.length ? lines.join('<br/>') : '<em>Sin datos</em>'
+            const scrollable = `<div style="max-height: 220px; overflow-y: auto; margin-top: 6px; padding-right: 6px;">${bodyContent}</div>`
+
+            return `<div>${header}${scrollable}</div>`
         }
 
         const yFormatterMain = (value: unknown) => {
@@ -256,6 +323,11 @@ export const TopDolarFamiliaChartComponent = ({
                     },
                     { type: 'inside', yAxisIndex: 0, filterMode: 'weakFilter', start: 0, end: 100 },
                 ],
+                tooltip: {
+                    triggerOn: 'mousemove|click',
+                    enterable: true,
+                    confine: true,
+                },
             }
             : {
                 grid: { left: gridLeft, right: 16, top: 56, bottom: 64, containLabel: true },
@@ -286,6 +358,11 @@ export const TopDolarFamiliaChartComponent = ({
                     },
                     { type: 'inside', yAxisIndex: 0, filterMode: 'weakFilter', start: 0, end: 100 },
                 ],
+                tooltip: {
+                    triggerOn: 'mousemove|click',
+                    enterable: true,
+                    confine: true,
+                },
             }
 
         const series = (isDetail ? detailView?.seriesData : mainView.seriesData) ?? []

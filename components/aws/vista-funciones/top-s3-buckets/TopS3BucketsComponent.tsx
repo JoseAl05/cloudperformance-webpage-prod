@@ -3,13 +3,15 @@
 import useSWR from 'swr'
 import React from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Database, Package, HardDrive } from 'lucide-react'
+import { Database, Package, HardDrive, AlertCircle } from 'lucide-react'
 import { TopS3BucketsChart } from '@/components/aws/vista-funciones/top-s3-buckets/grafico/TopS3BucketsChart'
 import { TrendLineChart } from '@/components/aws/vista-funciones/top-s3-buckets/grafico/TrendLineChart'
+import { LoaderComponent } from '@/components/general/LoaderComponent'
+import { MessageCard } from '../../cards/MessageCards'
 
 const fetcher = (url: string) =>
-    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
-        .then(r => r.json());
+  fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
+    .then(r => r.json());
 
 interface TopS3BucketsProps {
   startDate: Date
@@ -28,17 +30,57 @@ export const TopS3BucketsComponent = ({
   const endDateFormatted = endDate.toISOString().replace('Z', '').slice(0, -4)
 
   // 🔹 Endpoint para métricas globales (tarjetas)
-  const { data: dataInfo, error: errorInfo, isLoading: isLoadingInfo } = useSWR(
+  const s3Info = useSWR(
     `/api/aws/bridge/s3/top_s3_buckets/info?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&resources=${buckets}`,
     fetcher
   )
 
-  if (isLoadingInfo) return <p>Cargando...</p>
-  if (errorInfo) return <p>Error cargando datos</p>
+  const s3Tops = useSWR(
+    `/api/aws/bridge/s3/top_s3_buckets/tops?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&resources=${buckets}`,
+    fetcher
+  );
 
-  const totalSizeGB = dataInfo?.[0]?.total_size_gb ?? 0
-  const totalObjects = dataInfo?.[0]?.total_objects ?? 0
-  const totalBuckets = dataInfo?.[0]?.total_buckets ?? 0
+  const s3Metrics = useSWR(
+    `/api/aws/bridge/s3/top_s3_buckets/metrics?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&resources=${buckets}`,
+    fetcher
+  )
+
+  const anyLoading =
+    s3Info.isLoading ||
+    s3Tops.isLoading ||
+    s3Metrics.isLoading
+
+  const anyError =
+    !!s3Info.error ||
+    !!s3Tops.error ||
+    !!s3Metrics.error
+
+  const totalSizeGB = s3Info.data?.[0]?.total_size_gb ?? 0
+  const totalObjects = s3Info.data?.[0]?.total_objects ?? 0
+  const totalBuckets = s3Info.data?.[0]?.total_buckets ?? 0
+
+  const s3TopsInfo = Array.isArray(s3Tops.data) ? s3Tops.data : [];
+  const s3MetricsInfo = Array.isArray(s3Metrics.data) ? s3Metrics.data : [];
+
+
+  if (anyLoading) {
+    return (
+      <LoaderComponent />
+    )
+  }
+
+  if (anyError) {
+    return (
+      <div className="w-full min-w-0 px-4 py-10 flex flex-col items-center gap-4">
+        <MessageCard
+          icon={AlertCircle}
+          title="Error al cargar datos"
+          description="Ocurrió un problema al obtener la información desde la API. Intenta nuevamente o ajusta el rango de fechas."
+          tone="error"
+        />
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-8 p-4">
@@ -81,17 +123,13 @@ export const TopS3BucketsComponent = ({
       {/* Gráficos Top reutilizando componente independiente */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <TopS3BucketsChart
-          startDate={startDate}
-          endDate={endDate}
-          region={region}
+          data={s3TopsInfo}
           metric="NumberOfObjects Average"
           title="Top Buckets por Número de Objetos"
         />
 
         <TopS3BucketsChart
-          startDate={startDate}
-          endDate={endDate}
-          region={region}
+          data={s3TopsInfo}
           metric="BucketSizeBytes Average"
           title="Top Buckets por Tamaño"
         />
@@ -100,20 +138,14 @@ export const TopS3BucketsComponent = ({
       {/* Gráficos de Tendencia - vertical */}
       <div className="grid grid-cols-1 gap-6">
         <TrendLineChart
-          startDate={startDate}
-          endDate={endDate}
-          region={region}
-          buckets={buckets}
+          data={s3MetricsInfo}
           metric="NumberOfObjects Average"
           title="Tendencia Cantidad Objetos S3 Buckets"
           yAxisLabel="Objetos"
         />
 
         <TrendLineChart
-          startDate={startDate}
-          endDate={endDate}
-          region={region}
-          buckets={buckets}
+          data={s3MetricsInfo}
           metric="BucketSizeBytes Average"
           title="Tendencia Tamaño S3 Buckets"
           yAxisLabel="Tamaño (GB)"

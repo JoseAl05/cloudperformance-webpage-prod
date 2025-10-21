@@ -121,16 +121,6 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { LoaderComponent } from '@/components/general/LoaderComponent'
 
-/**
- * MetricsFilterComponent
- * ---
- * Rehecho para comportarse como `InstancesFilterComponent`:
- * - Soporta modo single-select y multi-select (con opción "Todas").
- * - Muestra contador cuando hay múltiples seleccionadas.
- * - Estados de carga/empty/disabled equivalentes.
- * - Mantiene compatibilidad con CSV de `selectedMetrics` (URL-encoded en el state).
- */
-
 interface MetricsFilterComponentProps {
   /** CSV URL-encoded con los grupos seleccionados. Ej: "CPU%20Utilization,Network%20In" */
   selectedMetrics: string

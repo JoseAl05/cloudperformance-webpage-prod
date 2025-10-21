@@ -35,7 +35,7 @@ export const RecursosVmComponent = ({ startDate, endDate, selectedVm }: Recursos
   const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : ''
 
   const { data, error, isLoading } = useSWR(
-    `/api/azure/bridge/azure/recursos/vm/propiedades?date_from=${startDateFormatted}&date_to=${endDateFormatted}&vm_name=${selectedVm}`,
+    `/api/azure/bridge/azure/recursos/vm/propiedades?date_from=${startDateFormatted}&date_to=${endDateFormatted}&vm_id=${selectedVm}`,
     fetcher,
     { revalidateOnFocus: false }
   )
@@ -44,7 +44,7 @@ export const RecursosVmComponent = ({ startDate, endDate, selectedVm }: Recursos
   if (error) return <div className="text-red-500 p-4">Error al cargar datos de la VM</div>
   if (!data || data.length === 0) return <div className="p-4">No hay datos disponibles</div>
 
-  const vmData = data[0]
+  const vmData = data?.[0] ?? {};
 
   return (
     <div className="w-full min-w-0 px-4 py-6 space-y-6">

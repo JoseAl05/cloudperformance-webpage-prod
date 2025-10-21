@@ -93,7 +93,7 @@ export const AVGUsoLocInstRdsOracleChartComponent = ({
 
     // Los grupos de métricas decodificados y separados por coma
     const metricGroups = metrics.split(',').map(m => decodeURIComponent(m.trim())).join(',');
-    const baseUrl = '/api/bridge';
+    const baseUrl = '/api/aws/bridge';
 
     // LÓGICA HÍBRIDA: cambiar endpoint según instancia seleccionada
     if (instance && instance !== '' && instance !== 'all') {

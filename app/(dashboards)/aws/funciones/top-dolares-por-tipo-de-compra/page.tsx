@@ -1,4 +1,4 @@
-import { TopDolarTipoCompraComponent } from '@/components/aws/vista-funciones/top-dolares-por-tipo-de-compra/MainViewTopDolarTipoCompraComponent';
+import { TopDolarTipoCompraComponent } from '@/components/aws/vista-funciones/top-facturaciones/top-dolares-por-tipo-de-compra/MainViewTopDolarTipoCompraComponent';
 import { Suspense } from 'react';
 
 export default function DashboardAwsTopDolaresTipoCompra() {

@@ -2,7 +2,7 @@
 import useSWR from 'swr'
 import React, { useEffect, useRef, useState } from "react"
 import * as echarts from "echarts"
-import { TableComponentTop } from "@/components/aws/vista-funciones/top-dolares-por-tipo-de-compra/table/TopTableComponent"
+import { TableComponentTop } from "@/components/aws/vista-funciones/top-facturaciones/top-dolares-por-tipo-de-instancia/table/TopTableComponent"
 import { Card, CardContent, CardTitle, CardHeader } from '@/components/ui/card'
 import { DollarSign, TrendingUp, TrendingDown } from "lucide-react"
 import {
@@ -13,60 +13,61 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
-import { TopDolarFamiliaChartComponent } from '../top-dolares-por-famila-de-instancias/grafico/TopDolarFamiliaChartComponent'
+import { TopFacturacionChartComponent } from '@/components/aws/vista-funciones/top-facturaciones/grafico/TopFacturacionChartComponent'
 
 const fetcher = (url: string) =>
   fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
     .then(r => r.json());
 
-interface TopDolaresPurchaseTypeProps {
+interface TopDolaresInstanceTypeProps {
   startDate: Date,
   endDate: Date
 }
 
-export const MainViewTopDolaresTipoCompra = ({ startDate, endDate }: TopDolaresPurchaseTypeProps) => {
+export const MainViewTopDolaresTipoInstancia = ({ startDate, endDate }: TopDolaresInstanceTypeProps) => {
   const chartRef = useRef<HTMLDivElement>(null);
   const chartInstance = useRef<echarts.EChartsType | null>(null);
-  const [selectedPurchaseType, setSelectedPurchaseType] = useState<string | null>(null);
+  const [selectedInstance, setSelectedInstance] = useState<string | null>(null);
   const [tipoCosto, setTipoCosto] = useState<"costo_neto" | "costo_bruto">("costo_neto");
   const [topLimit, setTopLimit] = useState<number | "all">(10);
 
-  const startDateFormatted = startDate ? startDate.toISOString().replace('Z', '').slice(0, -4) : '2025-08-31T00:00:00';
-  const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : '2025-09-01T00:00:00';
+  const startDateFormatted = startDate ? startDate.toISOString().replace('Z', '').slice(0, -4) : '';
+  const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : '';
 
   const { data, error, isLoading } = useSWR(
-    `/api/aws/bridge/facturacion/top_facturacion/PURCHASE_TYPE?date_from=${startDateFormatted}&date_to=${endDateFormatted}`,
+    `/api/aws/bridge/facturacion/top_facturacion/INSTANCE_TYPE?date_from=${startDateFormatted}&date_to=${endDateFormatted}`,
     fetcher
   )
 
-  const topDolaresPurchaseType = Array.isArray(data) ? data : (data?.data ?? [])
+  const topDolaresInstance = Array.isArray(data) ? data : (data?.data ?? [])
 
+  // === Función segura para números
   const toNumber = (v: unknown) => {
     const n = Number(v);
     return Number.isFinite(n) ? n : 0;
   };
 
-  // === Agrupación por tipo de compra (para KPIs y totales) ===
+  // === Agrupación por Tipo de Instancia ===
   const costoKey = tipoCosto;
-  const purchaseMap = new Map<string, number>();
+  const instanceMap = new Map<string, number>();
 
-  for (const row of topDolaresPurchaseType) {
-    const purchase = row.dimension ?? "N/D";
+  for (const row of topDolaresInstance) {
+    const instance = row.dimension ?? "N/D";
     const val = toNumber(row[costoKey]);
-    purchaseMap.set(purchase, (purchaseMap.get(purchase) ?? 0) + val);
+    instanceMap.set(instance, (instanceMap.get(instance) ?? 0) + val);
   }
 
-  const aggregatedPurchases = Array.from(purchaseMap, ([purchase, value]) => ({ purchase, value }));
-  const totalCosto = aggregatedPurchases.reduce((sum, r) => sum + r.value, 0);
+  const aggregatedInstances = Array.from(instanceMap, ([instance, value]) => ({ instance, value }));
+  const totalCosto = aggregatedInstances.reduce((sum, r) => sum + r.value, 0);
 
-  const purchaseMax = aggregatedPurchases.reduce(
+  const instanceMax = aggregatedInstances.reduce(
     (max, r) => (r.value > max.value ? r : max),
-    { purchase: null, value: -Infinity }
+    { instance: null, value: -Infinity }
   );
 
-  const purchaseMin = aggregatedPurchases.reduce(
+  const instanceMin = aggregatedInstances.reduce(
     (min, r) => (r.value > 0 && r.value < min.value ? r : min),
-    { purchase: null, value: Infinity }
+    { instance: null, value: Infinity }
   );
 
   const handleTopLimitChange = (value: string) => {
@@ -86,15 +87,16 @@ export const MainViewTopDolaresTipoCompra = ({ startDate, endDate }: TopDolaresP
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 w-full">
               <div>
                 <CardTitle className="flex items-center gap-2">
-                  🛒 Facturación por Tipo de Compra
+                  📊 Facturación por Tipo de Instancia
                 </CardTitle>
                 <p className="text-sm text-muted-foreground mt-1">
-                  Análisis de costos totales agrupados por tipo de compra
+                  Análisis de costos totales en distintos tipos de instancia
                 </p>
               </div>
 
               {/* === Filtros === */}
               <div className="flex flex-col md:flex-row gap-4 items-stretch md:items-center">
+                {/* Filtro Mostrar Top */}
                 <div>
                   <label className="text-sm font-medium text-muted-foreground mb-1 block">
                     Mostrar Top
@@ -112,13 +114,16 @@ export const MainViewTopDolaresTipoCompra = ({ startDate, endDate }: TopDolaresP
                   </Select>
                 </div>
 
+                {/* Filtro Tipo de Costo */}
                 <div>
                   <label className="text-sm font-medium text-muted-foreground mb-1 block">
                     Tipo de Costo
                   </label>
                   <Select
                     value={tipoCosto}
-                    onValueChange={(v) => setTipoCosto(v as "costo_neto" | "costo_bruto")}
+                    onValueChange={(v) =>
+                      setTipoCosto(v as "costo_neto" | "costo_bruto")
+                    }
                   >
                     <SelectTrigger className="w-full md:w-40">
                       <SelectValue placeholder="Tipo de Costo" />
@@ -134,18 +139,21 @@ export const MainViewTopDolaresTipoCompra = ({ startDate, endDate }: TopDolaresP
           </CardHeader>
 
           <CardContent className="relative h-[600px]">
-            <TopDolarFamiliaChartComponent
+            <TopFacturacionChartComponent
               data={data}
-              selectedFamily={selectedPurchaseType}
-              setSelectedFamily={setSelectedPurchaseType}
+              selectedFamily={selectedInstance}
+              setSelectedFamily={setSelectedInstance}
               tipoCosto={tipoCosto}
               topLimit={topLimit}
               uiTuning={{
                 yLabelStrategy: 'truncate',
-                gridMinLeft: 10,
-                gridMaxLeft: 10,
+                gridMinLeft: 30,
+                gridMaxLeft: 100,
                 axisLabelInterval: 'auto',
+                legend: { type: 'scroll', orient: 'horizontal', bottom: 8, left: 'center' },
               }}
+              isBilling
+              detailsEnabled
             />
           </CardContent>
 
@@ -158,6 +166,7 @@ export const MainViewTopDolaresTipoCompra = ({ startDate, endDate }: TopDolaresP
 
         {/* === KPIs === */}
         <div className="grid grid-cols-1 gap-6">
+          {/* Costo Total */}
           <Card className="border-l-4 border-l-indigo-500 shadow-lg rounded-2xl">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
@@ -168,28 +177,29 @@ export const MainViewTopDolaresTipoCompra = ({ startDate, endDate }: TopDolaresP
                       : "Costo Bruto Total (USD)"}
                   </p>
                   <p className="text-2xl font-bold text-indigo-600">
-                    ${totalCosto.toFixed(2)}
+                    ${totalCosto.toLocaleString("es-CL", { minimumFractionDigits: 2 })}
                   </p>
-                  <p className="text-xs text-muted-foreground">Total facturado acumulado</p>
+                  <p className="text-xs text-muted-foreground">Total acumulado</p>
                 </div>
                 <DollarSign className="h-8 w-8 text-indigo-500" />
               </div>
             </CardContent>
           </Card>
 
-          {purchaseMax.purchase && (
+          {/* Más costoso */}
+          {instanceMax.instance && (
             <Card className="border-l-4 border-l-red-500 shadow-lg rounded-2xl">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">
-                      Tipo de Compra con mayor costo de facturación
+                      Tipo de Instancia con mayor costo de facturación
                     </p>
                     <p className="text-2xl font-bold text-red-600">
-                      {purchaseMax.purchase}
+                      {instanceMax.instance}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      ${purchaseMax.value.toFixed(2)}
+                      ${instanceMax.value.toLocaleString("es-CL", { minimumFractionDigits: 2 })}
                     </p>
                   </div>
                   <TrendingUp className="h-8 w-8 text-red-500" />
@@ -198,19 +208,20 @@ export const MainViewTopDolaresTipoCompra = ({ startDate, endDate }: TopDolaresP
             </Card>
           )}
 
-          {purchaseMin.purchase && (
+          {/* Menos costoso */}
+          {instanceMin.instance && (
             <Card className="border-l-4 border-l-green-500 shadow-lg rounded-2xl">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">
-                      Tipo de Compra con menor costo de facturación
+                      Tipo de Instancia con menor costo de facturación
                     </p>
                     <p className="text-2xl font-bold text-green-600">
-                      {purchaseMin.purchase}
+                      {instanceMin.instance}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      ${purchaseMin.value.toFixed(2)}
+                      ${instanceMin.value.toLocaleString("es-CL", { minimumFractionDigits: 2 })}
                     </p>
                   </div>
                   <TrendingDown className="h-8 w-8 text-green-500" />

@@ -1,55 +1,55 @@
 'use client'
 
 import useSWR from 'swr'
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect, useMemo, useRef } from 'react'
 import * as echarts from 'echarts'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-
-const fetcher = (url: string) =>
-    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
-        .then(r => r.json());
+import { useTheme } from 'next-themes'
+import { createChartOption, deepMerge, makeBaseOptions, useECharts } from '@/lib/echartsGlobalConfig'
 
 interface TrendLineChartProps {
-  startDate: Date
-  endDate: Date
-  region?: string
-  buckets?: string
-  metric: 'NumberOfObjects Average' | 'BucketSizeBytes Average'
-  title: string
-  yAxisLabel: string
+  data: unknown[];
+  metric: 'NumberOfObjects Average' | 'BucketSizeBytes Average';
+  title: string;
+  yAxisLabel: string;
 }
 
+const parseISO = (s: string): Date => {
+  const normalized = s.replace(/(\.\d{3})\d+/, '$1').replace(/\+00:00$/, 'Z');
+  const d = new Date(normalized);
+  if (Number.isNaN(d.getTime())) throw new Error(`Fecha inválida: ${s}`);
+  return d;
+};
+
+const fmt = new Intl.DateTimeFormat('es-CL', { day: 'numeric', month: 'short',timeZone: 'UTC' });
+const fmtFull = new Intl.DateTimeFormat('es-CL', {
+  day: '2-digit',
+  month: 'short',
+  hour: '2-digit',
+  minute: '2-digit',
+  timeZone: 'UTC'
+});
+
 export const TrendLineChart = ({
-  startDate,
-  endDate,
-  region = 'all_regions',
-  buckets = 'all',
+  data,
   metric,
   title,
   yAxisLabel,
 }: TrendLineChartProps) => {
-  const chartRef = useRef<HTMLDivElement>(null)
-  const chartInstance = useRef<echarts.ECharts | null>(null)
-  const resizeObserverRef = useRef<ResizeObserver | null>(null)
+  const { theme, resolvedTheme } = useTheme();
+  const currentTheme = resolvedTheme || theme;
+  const isDark = currentTheme === 'dark';
+  const chartRef = useRef<HTMLDivElement>(null);
 
-  const startDateFormatted = startDate.toISOString().replace('Z', '').slice(0, -4)
-  const endDateFormatted = endDate.toISOString().replace('Z', '').slice(0, -4)
-
-  const { data, error, isLoading } = useSWR(
-    `/api/aws/bridge/s3/top_s3_buckets/metrics?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&resources=${buckets}`,
-    fetcher
-  )
+  const safeData: [] = Array.isArray(data) ? data : [];
 
   const toNumber = (v: unknown) => {
     const n = Number(v)
     return Number.isFinite(n) ? n : 0
   }
 
-  useEffect(() => {
-    if (!chartRef.current || !data) return
-
-    // Filtrar por métrica
-    const filtered = data.filter((d: unknown) => d.metric === metric)
+  const option = useMemo(() => {
+    const filtered = safeData.filter((d: unknown) => d.metric === metric)
     const map = new Map<string, number>()
     filtered.forEach((item: unknown) => {
       const key = item.sync_time
@@ -60,49 +60,147 @@ export const TrendLineChart = ({
       .map(([sync_time, total]) => ({ sync_time, total }))
       .sort((a, b) => new Date(a.sync_time).getTime() - new Date(b.sync_time).getTime())
 
-    const times = trendData.map(item => {
-      const d = new Date(item.sync_time)
-      return `${d.getUTCDate()}/${d.getUTCMonth() + 1}/${d.getUTCFullYear()}`
-    })
+    // const times = trendData.map(item => {
+    //   const d = new Date(item.sync_time)
+    //   return `${d.getUTCDate()}/${d.getUTCMonth() + 1}/${d.getUTCFullYear()}`
+    // })
+    const times = trendData.map(item => item.sync_time);
+    console.log(`TIMES: ${times}`)
+    const dateCount = times.length;
+    console.log(`DATECOUNT: ${dateCount}`)
+    const start = dateCount ? parseISO(times[0]) : null;
+    console.log(`START: ${start}`)
+    const end = dateCount ? parseISO(times[dateCount - 1]) : null;
+    console.log(`END: ${end}`)
+    const daysDiff = start && end ? Math.floor((+end - +start) / 86_400_000) + 1 : 0;
+    console.log(`DAYSDIFF: ${daysDiff}`)
+
+    const bigStep = Math.max(1, Math.ceil(dateCount / 12));
+    const midStep = Math.max(1, Math.ceil(dateCount / 20));
+
     const values = metric.includes('Bytes')
-      ? trendData.map(item => (item.total / 1073741824).toFixed(2)) // convertir a GB
+      ? trendData.map(item => (item.total / 1073741824).toFixed(2))
       : trendData.map(item => item.total)
 
-    if (!chartInstance.current) chartInstance.current = echarts.init(chartRef.current)
+    let metricsUnitLabel = '';
+    if (metric === 'BucketSizeBytes Average') {
+      metricsUnitLabel = 'Bytes'
+    }
+    if (metric === 'NumberOfObjects Average') {
+      metricsUnitLabel = 'Objetos'
+    }
 
-    chartInstance.current.setOption({
-      tooltip: { trigger: 'axis' },
-      xAxis: { type: 'category', data: times, axisLabel: { rotate: 45 } },
-      yAxis: { type: 'value', name: yAxisLabel },
-      grid: { left: 50, right: 50, top: 60, bottom: 60, containLabel: true },
+    const base = makeBaseOptions({
+      unitLabel: metricsUnitLabel,
+      useUTC: true,
+      showToolbox: true,
+      metricType: 'default'
+    });
+
+    const nf = new Intl.NumberFormat('es-CL', { maximumFractionDigits: 2 });
+
+    const lines = createChartOption({
+      kind: 'line',
+      xAxisType: 'category',
+      legend: false,
+      tooltip: true,
       series: [
         {
           name: yAxisLabel,
-          type: 'line',
+          kind: 'line',
           smooth: true,
           data: values,
-          symbol: 'circle',
-          symbolSize: 6,
+          extra: {
+            symbol: 'circle',
+            symbolSize: 6,
+          }
         },
       ],
-      legend: { data: [yAxisLabel], top: 10, left: 'center' },
-    })
+      extraOption: {
+        legend: { data: [yAxisLabel], top: 10, left: 'center' },
+        tooltip: {
+          trigger: 'axis',
+          formatter: (params: unknown): string => {
+            const list = (Array.isArray(params) ? params : [params]).filter(Boolean) as unknown[];
+            const first = (list[0] ?? {}) as Record<string, unknown>;
 
-    const handleResize = () => chartInstance.current?.resize()
-    resizeObserverRef.current = new ResizeObserver(handleResize)
-    resizeObserverRef.current.observe(chartRef.current)
-    window.addEventListener('resize', handleResize)
+            // Tomamos el valor crudo del eje (tu timestamp ISO)
+            const rawAxis =
+              typeof first.axisValue === 'string'
+                ? first.axisValue
+                : typeof first.name === 'string'
+                  ? first.name
+                  : '';
 
-    return () => {
-      window.removeEventListener('resize', handleResize)
-      resizeObserverRef.current?.disconnect()
-      chartInstance.current?.dispose()
-      chartInstance.current = null
-    }
-  }, [data, metric, yAxisLabel])
+            // Encabezado con la fecha formateada
+            let header = rawAxis;
+            try {
+              const d = parseISO(rawAxis);
+              header = fmtFull.format(d); // p.ej. "1 oct"
+            } catch {
+              // si falla el parseo, mostramos tal cual
+            }
 
-  if (isLoading) return <p>Cargando...</p>
-  if (error) return <p>Error cargando datos</p>
+            // Filas por serie (soporta 1+ series)
+            const rows = list
+              .map((p) => {
+                const r = p as Record<string, unknown>;
+                const marker = typeof r.marker === 'string' ? r.marker : '';
+                const seriesName = typeof r.seriesName === 'string' ? r.seriesName : '';
+
+                // value puede ser number|string|[x,y]
+                let v: unknown = r.value;
+                if (Array.isArray(v)) {
+                  const arr = v as unknown[];
+                  v = arr[arr.length - 1];
+                }
+                const valText =
+                  typeof v === 'number'
+                    ? nf.format(v)
+                    : typeof v === 'string'
+                      ? v
+                      : typeof r.data === 'number'
+                        ? nf.format(r.data as number)
+                        : typeof r.data === 'string'
+                          ? (r.data as string)
+                          : '';
+
+                return `${marker}${seriesName}: <b>${valText}</b>`;
+              })
+              .join('<br/>');
+
+            return `<div style="margin-bottom:4px;"><b>${header}</b></div>${rows}`;
+          },
+        },
+        xAxis: {
+          type: 'category',
+          data: times,
+          boundaryGap: false,
+          axisLabel: {
+            fontSize: 10,
+            color: '#666',
+            rotate: 45,
+            margin: 8,
+            formatter: (value: string, index: number) => {
+              if (!dateCount) return '';
+              const d = parseISO(value);
+              if (daysDiff > 365) return (index === 0 || index === dateCount - 1 || index % bigStep === 0) ? fmt.format(d) : '';
+              if (daysDiff > 30) return (index % midStep === 0) ? fmt.format(d) : '';
+              return fmt.format(d);
+            }
+          },
+          axisLine: { lineStyle: { color: '#d0d0d0' } },
+          axisTick: { show: false }
+        },
+        yAxis: { type: 'value', name: yAxisLabel },
+        // grid: { left: 150, right: 50, top: 60, bottom: 60 },
+      },
+    });
+
+    return deepMerge(base, lines);
+  }, [safeData, metric, yAxisLabel]);
+
+  useECharts(chartRef, option, [option], isDark ? 'cp-dark' : 'cp-light');
 
   return (
     <Card className="shadow-lg rounded-2xl">
