@@ -4,16 +4,16 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useRef, useEffect } from "react";
 import useSWR from "swr";
 import * as echarts from "echarts";
-import { Database, BarChart3, HardDrive } from "lucide-react";
+import { Database, BarChart3, HardDrive, ChartBar } from "lucide-react";
 import { RdsMariaDBResourceViewInfoComponent } from "./info/RdsMariaDBResourceViewInfoComponent";
-import { MainRdsMariaDBResourceViewMetricsSummaryComponent } from "./graficos/MainRdsMariaDBResourceViewMetricsSummaryComponent";
-import { RdsMariaDBCpuCreditsLineChart } from "./graficos/RdsMariaDBResourceViewCpuCreditsComponent";
-import { RdsMariaDBCpuUsageChart } from "./graficos/RdsMariaDBResourceViewCpuUsageComponent";
-import { RdsMariaDBDbConnectionsChart } from "./graficos/RdsMariaDBResourceViewDbConnectionsComponent";
-import { RdsMariaDBMemoryChart } from "./graficos/RdsMariaDBResourceViewMemoryComponent";
-import { RdsMariaDBIopsChart } from "./graficos/RdsMariaDBResourceViewIopsComponent";
-import { RdsMariaDBStorageChart } from "./graficos/RdsMariaDBResourceViewStorageComponent";
 import { RdsMariaDBEventsTableComponent } from "./events/RdsMariaDBEventsTable";
+import { RdsResourceViewCpuCreditsComponent } from '@/components/aws/vista-rds/graficos/RdsResourceViewCpuCreditsComponent';
+import { RdsResourceViewCpuUsageComponent } from '@/components/aws/vista-rds/graficos/RdsResourceViewCpuUsageComponent';
+import { RdsResourceViewDbConnectionsComponent } from '@/components/aws/vista-rds/graficos/RdsResourceViewDbConnectionsComponent';
+import { RdsResourceViewMemoryComponent } from '@/components/aws/vista-rds/graficos/RdsResourceViewMemoryComponent';
+import { RdsResourceViewStorageComponent } from '@/components/aws/vista-rds/graficos/RdsResourceViewStorageComponent';
+import { RdsResourceViewIopsComponent } from '@/components/aws/vista-rds/graficos/RdsResourceViewIopsComponent';
+import { MainRdsResourceViewMetricsSummaryComponentComponent } from '@/components/aws/vista-rds/graficos/MainRdsResourceViewMetricsSummaryComponent';
 
 
 interface InstanciasRdsMariaDBProps {
@@ -80,8 +80,8 @@ const transformMetricsForChart = (
 };
 
 const fetcher = (url: string) =>
-    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
-        .then(r => r.json());
+  fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
+    .then(r => r.json());
 
 export const InstanciasRdsMariaDBChartComponent = ({
   startDate,
@@ -123,8 +123,8 @@ export const InstanciasRdsMariaDBChartComponent = ({
   );
   const metricsUrl = shouldFetchMetrics
     ? `/api/aws/bridge/db/instancias-rds-mariadb-metrics?date_from=${startDateFormatted}&date_to=${endDateFormatted}&resource=${encodeURIComponent(
-        instance
-      )}`
+      instance
+    )}`
     : null;
 
   const {
@@ -270,13 +270,14 @@ export const InstanciasRdsMariaDBChartComponent = ({
       <div className="flex flex-col xl:flex-row gap-8 min-w-0">
         {/* Panel izquierdo - Información de la instancia */}
         <div className="w-full xl:max-w-sm min-w-0">
-           <RdsMariaDBResourceViewInfoComponent data={instanceData} /> 
+          <RdsMariaDBResourceViewInfoComponent data={instanceData} />
         </div>
 
         {/* Panel derecho - Resumen de métricas */}
         <div className="flex-1 space-y-6 min-w-0 overflow-hidden">
-          <MainRdsMariaDBResourceViewMetricsSummaryComponent
+          <MainRdsResourceViewMetricsSummaryComponentComponent
             data={metricsData ?? null}
+            rdsType='rds-mariadb'
           />
         </div>
       </div>
@@ -284,35 +285,37 @@ export const InstanciasRdsMariaDBChartComponent = ({
       <Card className="w-full">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <BarChart3 className="h-5 w-5 text-amber-600" />
+            <ChartBar className="h-5 w-5 text-blue-600" />
             CPU Credits - {instance}
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <RdsMariaDBCpuCreditsLineChart
+          <RdsResourceViewCpuCreditsComponent
             data={transformMetricsForChart(metricsData)}
             title="Consumo y Balance de Créditos de CPU (Burstable)"
             height="300px"
           />
         </CardContent>
       </Card>
-      {/* Gráfico 2 - Uso vs No Uso de Cores de CPU */}
+
+      {/* Gráfico 2: CPU Usage */}
       <Card className="w-full">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <BarChart3 className="h-5 w-5 text-red-600" />
+            <ChartBar className="h-5 w-5 text-red-600" />
             CPU Usage - {instance}
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <RdsMariaDBCpuUsageChart
+          <RdsResourceViewCpuUsageComponent
             data={transformMetricsForChart(metricsData)}
             title="Uso vs No Uso de Cores de CPU"
             height="300px"
           />
         </CardContent>
       </Card>
-      {/* Gráfico 3 - Conexiones a Base de Datos */}
+
+      {/* Gráfico 3: Database Connections */}
       <Card className="w-full">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -321,14 +324,14 @@ export const InstanciasRdsMariaDBChartComponent = ({
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <RdsMariaDBDbConnectionsChart
+          <RdsResourceViewDbConnectionsComponent
             data={transformMetricsForChart(metricsData)}
             title="Conexiones a Base de Datos"
             height="300px"
           />
         </CardContent>
       </Card>
-      {/* Gráfico 4 - Memoria Disponible */}
+      {/* Gráfico 4: Memory */}
       <Card className="w-full">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -337,14 +340,14 @@ export const InstanciasRdsMariaDBChartComponent = ({
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <RdsMariaDBMemoryChart
+          <RdsResourceViewMemoryComponent
             data={transformMetricsForChart(metricsData)}
             title="Memoria Disponible"
             height="300px"
           />
         </CardContent>
       </Card>
-      {/* Gráfico 5 - Operaciones Lectura/Escritura (IOPS/seg) */}        
+      {/* Gráfico 5: IOPS */}
       <Card className="w-full">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -353,14 +356,14 @@ export const InstanciasRdsMariaDBChartComponent = ({
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <RdsMariaDBIopsChart
+          <RdsResourceViewIopsComponent
             data={transformMetricsForChart(metricsData)}
             title="Operaciones Lectura/Escritura (IOPS/seg)"
             height="300px"
           />
         </CardContent>
       </Card>
-      {/* Gráfico 6 - Storage Disponible */}              
+      {/* Gráfico 6: Storage */}
       <Card className="w-full">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -369,20 +372,20 @@ export const InstanciasRdsMariaDBChartComponent = ({
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <RdsMariaDBStorageChart
+          <RdsResourceViewStorageComponent
             data={transformMetricsForChart(metricsData)}
             title="Storage Disponible"
             height="300px"
           />
         </CardContent>
-      </Card>  
+      </Card>
       {/* Tabla de Eventos RDS MariaDB */}
       <RdsMariaDBEventsTableComponent
         data={eventsData}
         startDate={startDate}
         endDate={endDate}
         instance={instance}
-      />               
+      />
     </div>
   );
 };

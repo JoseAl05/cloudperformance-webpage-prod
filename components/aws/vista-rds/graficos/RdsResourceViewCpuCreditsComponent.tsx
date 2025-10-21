@@ -2,54 +2,35 @@
 
 import { useMemo, useRef } from 'react';
 import { useTheme } from 'next-themes';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Info } from 'lucide-react';
 import { createChartOption, deepMerge, makeBaseOptions, useECharts } from '@/lib/echartsGlobalConfig';
+import { MessageCircleWarning } from 'lucide-react';
 
-interface ResourceViewUsageCreditsComponentProps {
-    data: {
-        metrics_data: { MetricLabel: string; Timestamp: string; Value: number }[];
-    } | null;
+interface MetricPoint {
+    sync_time: { $date: string };
+    Resource: string;
+    Timestamp: string;
+    Value: number;
+    total?: number;
+    unused?: number;
+    used?: number;
+    MetricId: string;
+    MetricLabel: string;
 }
 
+interface RdsResourceViewCpuCreditsComponentProps {
+    data: MetricPoint[];
+    title?: string;
+}
 
-export const Ec2ResourceViewUsageCreditsComponent = ({ data }: ResourceViewUsageCreditsComponentProps) => {
+export const RdsResourceViewCpuCreditsComponent = ({
+    data,
+    title = "Consumo y Balance de Créditos de CPU (Burstable)"
+}: RdsResourceViewCpuCreditsComponentProps) => {
     const { theme, resolvedTheme } = useTheme();
     const currentTheme = resolvedTheme || theme;
     const isDark = currentTheme === 'dark';
 
     const chartRef = useRef<HTMLDivElement>(null);
-
-    const { creditsUsageMetric, creditsBalanceMetric, yMaxRounded } = useMemo(() => {
-        const creditsUsageData = data?.metrics_data.filter(
-            item => item.MetricLabel === 'Uso de Créditos CPU (Promedio)'
-        ) || [];
-        creditsUsageData.sort((a, b) => new Date(a.Timestamp).getTime() - new Date(b.Timestamp).getTime());
-        const creditsUsageMetric: [string, number][] = creditsUsageData.map(item => [
-            item.Timestamp,
-            +item.Value.toFixed(2),
-        ]);
-
-        const creditsBalanceData = data?.metrics_data.filter(
-            item => item.MetricLabel === 'Créditos de CPU Disponibles (Promedio)'
-        ) || [];
-        creditsBalanceData.sort((a, b) => new Date(a.Timestamp).getTime() - new Date(b.Timestamp).getTime());
-        const creditsBalanceMetric: [string, number][] = creditsBalanceData.map(item => [
-            item.Timestamp,
-            +item.Value.toFixed(2),
-        ]);
-
-        const maxCreditsValue = Math.max(
-            creditsUsageData.length ? Math.max(...creditsUsageData.map(item => item.Value)) : 0,
-            creditsBalanceData.length ? Math.max(...creditsBalanceData.map(item => item.Value)) : 0
-        );
-
-        const yMaxRaw = Math.ceil(maxCreditsValue * 1.5);
-        const factor = 100;
-        const yMaxRounded = Math.max(10, Math.floor(yMaxRaw / factor) * factor);
-
-        return { creditsUsageMetric, creditsBalanceMetric, yMaxRounded };
-    }, [data]);
 
     const getThemeColors = () => {
         if (isDark) {
@@ -74,6 +55,28 @@ export const Ec2ResourceViewUsageCreditsComponent = ({ data }: ResourceViewUsage
             };
         }
     };
+
+    const { creditsUsageMetric, creditsBalanceMetric } = useMemo(() => {
+        const usageData = (data ?? []).filter(
+            item => item.MetricLabel === 'Uso de Créditos de CPU (Promedio)'
+        );
+        usageData.sort((a, b) => new Date(a.Timestamp).getTime() - new Date(b.Timestamp).getTime());
+        const creditsUsageMetric: [string, number][] = usageData.map(item => [
+            item.Timestamp,
+            +item.Value.toFixed(2),
+        ]);
+
+        const balanceData = (data ?? []).filter(
+            item => item.MetricLabel === 'Créditos de CPU Disponibles (Promedio)'
+        );
+        balanceData.sort((a, b) => new Date(a.Timestamp).getTime() - new Date(b.Timestamp).getTime());
+        const creditsBalanceMetric: [string, number][] = balanceData.map(item => [
+            item.Timestamp,
+            +item.Value.toFixed(2),
+        ]);
+
+        return { creditsUsageMetric, creditsBalanceMetric };
+    }, [data]);
 
     const option = useMemo(() => {
         const colors = getThemeColors();
@@ -113,7 +116,7 @@ export const Ec2ResourceViewUsageCreditsComponent = ({ data }: ResourceViewUsage
                             tooltip: {
                                 trigger: 'item',
                                 formatter: (param: unknown) => {
-                                    if (param.data.coord) {
+                                    if (param.data?.coord) {
                                         const date = new Date(param.data.coord[0]).toUTCString();
                                         return `${param.name}<br/>${date}<br/>${param.data.coord[1]} Créditos`;
                                     }
@@ -174,10 +177,14 @@ export const Ec2ResourceViewUsageCreditsComponent = ({ data }: ResourceViewUsage
                             tooltip: {
                                 trigger: 'item',
                                 formatter: (param: unknown) => {
-                                    if (param.data.coord) {
+
+                                    if (param.data?.coord) {
+
                                         const date = new Date(param.data.coord[0]).toUTCString();
+
                                         return `${param.name}<br/>${date}<br/>${param.data.coord[1]} Créditos`;
                                     }
+
                                     return `${param.name}: ${param.value}`;
                                 }
                             },
@@ -187,6 +194,7 @@ export const Ec2ResourceViewUsageCreditsComponent = ({ data }: ResourceViewUsage
                                     name: 'Max',
                                     label: {
                                         formatter: (params: unknown) => {
+
                                             return `Max \n${params.data.coord[1]} Créditos`;
                                         }
                                     }
@@ -196,6 +204,7 @@ export const Ec2ResourceViewUsageCreditsComponent = ({ data }: ResourceViewUsage
                                     name: 'Min',
                                     label: {
                                         formatter: (params: unknown) => {
+
                                             return `Min \n${params.data.coord[1]} Créditos`;
                                         }
                                     }
@@ -206,6 +215,7 @@ export const Ec2ResourceViewUsageCreditsComponent = ({ data }: ResourceViewUsage
                                     value: creditsBalanceMetric.length ? creditsBalanceMetric[creditsBalanceMetric.length - 1][1] : null,
                                     label: {
                                         formatter: (params: unknown) => {
+
                                             return `Último \n${params.data.coord[1]} Créditos`;
                                         }
                                     }
@@ -216,35 +226,55 @@ export const Ec2ResourceViewUsageCreditsComponent = ({ data }: ResourceViewUsage
                 }
             ],
             extraOption: {
+                tooltip: {
+                    valueFormatter(value, dataIndex) {
+                        return `${value} Créditos`
+                    },
+                },
                 xAxis: { axisLabel: { rotate: 30 } },
                 yAxis: { min: 0 },
-                grid: { left: 44, right: 12, top: 56, bottom: 64, containLabel: true },
+                grid: { left: 44, right: 12, top: 56, bottom: 64, containLabel: true }
             },
         });
 
         return deepMerge(base, lines);
-    }, [data]);
+    }, [creditsUsageMetric, creditsBalanceMetric, isDark]);
 
     useECharts(chartRef, option, [option], isDark ? 'cp-dark' : 'cp-light');
 
-    return (
-        <Card className="w-full">
-            <CardHeader>
-                <CardTitle>Consumo y Balance de Créditos</CardTitle>
-            </CardHeader>
-            <CardContent>
-                <div className="flex items-center justify-center gap-2 mb-2">
-                    <Info className="w-5 h-5 text-blue-500 flex-shrink-0" />
-                    <p className="text-xs text-muted-foreground">
-                        Las marcas de tiempo (Timestamps) están en formato <strong>UTC</strong>.
-                    </p>
+    if (!data || data.length === 0) {
+        return (
+            <div className="flex justify-center items-center h-96 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+                <div className="text-center">
+                    <div className="text-gray-400 text-lg mb-2">No data</div>
+                    <p className="text-gray-500">No hay datos disponibles para mostrar</p>
                 </div>
-                {(!data || data.metrics_data.length === 0) ? (
-                    <div className="text-center text-gray-500 py-6">No hay métricas de Créditos disponibles.</div>
-                ) : (
-                    <div ref={chartRef} className="w-full h-[400px] md:h-[450px] lg:h-[500px]" />
-                )}
-            </CardContent>
-        </Card>
+            </div>
+        );
+    }
+
+    // Verificar si existen las métricas de CPU Credits específicas
+    const allowedMetrics = [
+        "Uso de Créditos de CPU (Promedio)",
+        "Créditos de CPU Disponibles (Promedio)"
+    ];
+    console.log(data);
+
+    const hasValidMetrics = data.some(item =>
+        allowedMetrics.includes(item.MetricLabel)
     );
+
+    if (!hasValidMetrics) {
+        return (
+            <div className="flex justify-center items-center h-96 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+                <div className="flex flex-col items-center gap-5">
+                    {/* <div className="text-yellow-400 text-lg mb-2">¡Ups!</div> */}
+                    <MessageCircleWarning className='h-5 w-5 text-yellow-500'/>
+                    <p className="text-gray-500 font-medium">Métricas de CPU Credits no disponibles</p>
+                </div>
+            </div>
+        );
+    }
+
+    return <div ref={chartRef} style={{ width: '100%', height: '400px' }} />;
 };

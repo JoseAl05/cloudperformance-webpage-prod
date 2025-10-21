@@ -4,16 +4,16 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useRef, useEffect } from "react";
 import useSWR from "swr";
 import * as echarts from "echarts";
-import { Database, BarChart3, HardDrive } from "lucide-react";
+import { Database, BarChart3, HardDrive, ChartBar } from "lucide-react";
 import { RdsOracleResourceViewInfoComponent } from "./info/RdsOracleResourceViewInfoComponent";
-import { MainRdsOracleResourceViewMetricsSummaryComponent } from "./graficos/MainRdsOracleResourceViewMetricsSummaryComponent";
-import { RdsOracleCpuCreditsLineChart } from "./graficos/RdsOracleResourceViewCpuCreditsComponent";
-import { RdsOracleCpuUsageChart } from "./graficos/RdsOracleResourceViewCpuUsageComponent";
-import { RdsOracleDbConnectionsChart } from "./graficos/RdsOracleResourceViewDbConnectionsComponent";
-import { RdsOracleMemoryChart } from "./graficos/RdsOracleResourceViewMemoryComponent";
-import { RdsOracleIopsChart } from "./graficos/RdsOracleResourceViewIopsComponent";
-import { RdsOracleStorageChart } from "./graficos/RdsOracleResourceViewStorageComponent";
 import { RdsOracleEventsTableComponent } from "./events/RdsOracleEventsTable";
+import { RdsResourceViewCpuCreditsComponent } from '@/components/aws/vista-rds/graficos/RdsResourceViewCpuCreditsComponent';
+import { RdsResourceViewCpuUsageComponent } from '@/components/aws/vista-rds/graficos/RdsResourceViewCpuUsageComponent';
+import { RdsResourceViewDbConnectionsComponent } from '@/components/aws/vista-rds/graficos/RdsResourceViewDbConnectionsComponent';
+import { RdsResourceViewMemoryComponent } from '@/components/aws/vista-rds/graficos/RdsResourceViewMemoryComponent';
+import { RdsResourceViewStorageComponent } from '@/components/aws/vista-rds/graficos/RdsResourceViewStorageComponent';
+import { RdsResourceViewIopsComponent } from '@/components/aws/vista-rds/graficos/RdsResourceViewIopsComponent';
+import { MainRdsResourceViewMetricsSummaryComponentComponent } from '@/components/aws/vista-rds/graficos/MainRdsResourceViewMetricsSummaryComponent';
 
 
 interface InstanciasRdsOracleProps {
@@ -80,8 +80,8 @@ const transformMetricsForChart = (
 };
 
 const fetcher = (url: string) =>
-    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
-        .then(r => r.json());
+  fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
+    .then(r => r.json());
 
 export const InstanciasRdsOracleChartComponent = ({
   startDate,
@@ -122,8 +122,8 @@ export const InstanciasRdsOracleChartComponent = ({
   );
   const metricsUrl = shouldFetchMetrics
     ? `/api/aws/bridge/db/instancias-rds-oracle-metrics?date_from=${startDateFormatted}&date_to=${endDateFormatted}&resource=${encodeURIComponent(
-        instance
-      )}`
+      instance
+    )}`
     : null;
 
   const {
@@ -269,13 +269,14 @@ export const InstanciasRdsOracleChartComponent = ({
       <div className="flex flex-col xl:flex-row gap-8 min-w-0">
         {/* Panel izquierdo - Información de la instancia */}
         <div className="w-full xl:max-w-sm min-w-0">
-           <RdsOracleResourceViewInfoComponent data={instanceData} /> 
+          <RdsOracleResourceViewInfoComponent data={instanceData} />
         </div>
 
         {/* Panel derecho - Resumen de métricas */}
         <div className="flex-1 space-y-6 min-w-0 overflow-hidden">
-          <MainRdsOracleResourceViewMetricsSummaryComponent
+          <MainRdsResourceViewMetricsSummaryComponentComponent
             data={metricsData ?? null}
+            rdsType='rds-oracle'
           />
         </div>
       </div>
@@ -283,35 +284,37 @@ export const InstanciasRdsOracleChartComponent = ({
       <Card className="w-full">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <BarChart3 className="h-5 w-5 text-orange-600" />
+            <ChartBar className="h-5 w-5 text-blue-600" />
             CPU Credits - {instance}
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <RdsOracleCpuCreditsLineChart
+          <RdsResourceViewCpuCreditsComponent
             data={transformMetricsForChart(metricsData)}
             title="Consumo y Balance de Créditos de CPU (Burstable)"
             height="300px"
           />
         </CardContent>
       </Card>
-      {/* Uso vs No Uso de Cores de CPU */}
+
+      {/* Gráfico 2: CPU Usage */}
       <Card className="w-full">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <BarChart3 className="h-5 w-5 text-red-600" />
+            <ChartBar className="h-5 w-5 text-red-600" />
             CPU Usage - {instance}
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <RdsOracleCpuUsageChart
+          <RdsResourceViewCpuUsageComponent
             data={transformMetricsForChart(metricsData)}
             title="Uso vs No Uso de Cores de CPU"
             height="300px"
           />
         </CardContent>
-      {/* Conexiones a Base de Datos */}  
       </Card>
+
+      {/* Gráfico 3: Database Connections */}
       <Card className="w-full">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -320,14 +323,14 @@ export const InstanciasRdsOracleChartComponent = ({
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <RdsOracleDbConnectionsChart
+          <RdsResourceViewDbConnectionsComponent
             data={transformMetricsForChart(metricsData)}
             title="Conexiones a Base de Datos"
             height="300px"
           />
         </CardContent>
       </Card>
-      {/* Memoria Disponible */}  
+      {/* Gráfico 4: Memory */}
       <Card className="w-full">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -336,14 +339,14 @@ export const InstanciasRdsOracleChartComponent = ({
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <RdsOracleMemoryChart
+          <RdsResourceViewMemoryComponent
             data={transformMetricsForChart(metricsData)}
             title="Memoria Disponible"
             height="300px"
           />
         </CardContent>
       </Card>
-      {/* Operaciones Lectura/Escritura (IOPS/seg) */}        
+      {/* Gráfico 5: IOPS */}
       <Card className="w-full">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -352,14 +355,14 @@ export const InstanciasRdsOracleChartComponent = ({
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <RdsOracleIopsChart
+          <RdsResourceViewIopsComponent
             data={transformMetricsForChart(metricsData)}
             title="Operaciones Lectura/Escritura (IOPS/seg)"
             height="300px"
           />
         </CardContent>
       </Card>
-      {/* Storage Disponible */}              
+      {/* Gráfico 6: Storage */}
       <Card className="w-full">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -368,20 +371,20 @@ export const InstanciasRdsOracleChartComponent = ({
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <RdsOracleStorageChart
+          <RdsResourceViewStorageComponent
             data={transformMetricsForChart(metricsData)}
             title="Storage Disponible"
             height="300px"
           />
         </CardContent>
-      </Card>  
+      </Card>
       {/* Tabla de Eventos RDS Oracle */}
       <RdsOracleEventsTableComponent
         data={eventsData}
         startDate={startDate}
         endDate={endDate}
         instance={instance}
-      />          
+      />
     </div>
   );
 };

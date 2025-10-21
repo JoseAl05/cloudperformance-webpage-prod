@@ -26,6 +26,7 @@ import { RDSMetricFilterComponent } from '@/components/general/filters/RdsMetric
 import { AutoScalingGroupFilterComponent } from '@/components/general/filters/Ec2AutoscalingGroupsFilterComponent';
 import { MetricsFilterComponent } from '@/components/general/filters/MetricsFilterComponent';
 import { MetricsRDSFilterComponent } from '@/components/general/filters/MetricsRDSFilterComponent';
+import { VariationResourcesFilterComponent } from './VariationResourcesFilterComponent';
 
 interface FiltersComponentProps {
     Component: (params: {
@@ -51,7 +52,7 @@ interface FiltersComponentProps {
     autoScalingGroupFilter?: boolean;
     metricFilter?: boolean;
     metricsFilter?: boolean;
-    isMetricsMultiselect?:boolean;
+    isMetricsMultiselect?: boolean;
     rdsFilter?: boolean;
     engine?: string;
     metricsRDSFilter?: boolean;
@@ -73,6 +74,7 @@ interface FiltersComponentProps {
     tagColumnName?: string | null;
     variationServiceFilter?: boolean;
     variationMetricFilter?: boolean;
+    variationResourceFilter?: boolean;
 }
 
 export const FiltersComponent = ({
@@ -113,6 +115,7 @@ export const FiltersComponent = ({
     tagColumnName = null,
     variationServiceFilter = false,
     variationMetricFilter = false,
+    variationResourceFilter = false,
 }: FiltersComponentProps) => {
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -132,7 +135,6 @@ export const FiltersComponent = ({
         const endDateParam = searchParams.get('endDate');
         const monthParam = searchParams.get('month');
         const yearParam = searchParams.get('year');
-
         const instanceParam = searchParams.get('instance');
         const asgParam = searchParams.get('asg');
         const eksParam = searchParams.get('eks');
@@ -154,6 +156,7 @@ export const FiltersComponent = ({
         const autoScalingGroupParam = searchParams.get('autoScalingGroup');
         const selectedMetricsParam = searchParams.get('metrics');
         const selectedMetricsRDSParam = searchParams.get('metricsRDS');
+        const variationResourceParam = searchParams.get('variationResource');
 
         let startDate = startDateParam ? new Date(startDateParam) : yesterday;
         let endDate = endDateParam ? new Date(endDateParam) : new Date();
@@ -199,7 +202,8 @@ export const FiltersComponent = ({
             autoScalingGroup: autoScalingGroupParam || '',
             engine: engine || '',
             metrics: selectedMetricsParam || '',
-            metricsRDS: selectedMetricsRDSParam || ''
+            metricsRDS: selectedMetricsRDSParam || '',
+            variationResource: variationResourceParam || ''
         };
     };
 
@@ -237,6 +241,7 @@ export const FiltersComponent = ({
     const [tempEngine, setTempEngine] = useState(filters.engine);
     const [tempMetrics, setTempMetrics] = useState(filters.metrics);
     const [tempMetricsRDS, setTempMetricsRDS] = useState(filters.metrics);
+    const [tempVariationResource, setTempVariationResource] = useState(filters.variationResource);
 
     useEffect(() => {
         const newFilters = getInitialFilters();
@@ -271,6 +276,7 @@ export const FiltersComponent = ({
         setTempMonthYearDate(
             newFilters.month && newFilters.year ? new Date(newFilters.year, newFilters.month - 1, 1) : null
         );
+        setTempVariationResource(newFilters.variationResource);
     }, [searchParams]);
 
     const getRDSService = (): 'postgresql' | 'oracle' | 'mysql' | 'sqlserver' | 'mariadb' => {
@@ -324,7 +330,8 @@ export const FiltersComponent = ({
             autoScalingGroup: tempAutoScalingGroup,
             engine: tempEngine,
             metrics: tempMetrics,
-            metricsRDS: tempMetricsRDS
+            metricsRDS: tempMetricsRDS,
+            variationResource: tempVariationResource,
         };
 
         setFilters(newFilters as unknown);
@@ -361,6 +368,7 @@ export const FiltersComponent = ({
         if (rdsFilter && newFilters.engine) query.set('engine', newFilters.engine);
         if (newFilters.metrics) query.set('metrics', newFilters.metrics);
         if (newFilters.metricsRDS) query.set('metricsRDS', newFilters.metricsRDS);
+        if (newFilters.variationResource) query.set('variationResource', newFilters.variationResource);
 
         router.push(`${window.location.pathname}?${query.toString()}`);
     };
@@ -393,7 +401,8 @@ export const FiltersComponent = ({
             autoScalingGroup: '',
             engine: '',
             metrics: '',
-            metricsRDS: ''
+            metricsRDS: '',
+            variationResource: '',
         };
 
         setFilters({
@@ -423,7 +432,8 @@ export const FiltersComponent = ({
             autoScalingGroup: defaultFilters.autoScalingGroup,
             engine: defaultFilters.engine,
             metrics: defaultFilters.metrics,
-            metricsRDS: defaultFilters.metricsRDS
+            metricsRDS: defaultFilters.metricsRDS,
+            variationResource: defaultFilters.variationResource,
         });
 
         setTempRange([defaultFilters.startDate, defaultFilters.endDate]);
@@ -454,6 +464,7 @@ export const FiltersComponent = ({
         setTempEngine(defaultFilters.engine);
         setTempMetrics(defaultFilters.metrics);
         setTempMetricsRDS(defaultFilters.metricsRDS);
+        setTempVariationResource(defaultFilters.variationResource);
 
         router.push(window.location.pathname);
     };
@@ -587,7 +598,10 @@ export const FiltersComponent = ({
                                     <Server className='h-4 w-4' />
                                     Servicio
                                 </label>
-                                <VariationServiceFilterComponent selectedService={tempVariationService} setSelectedService={setTempVariationService} />
+                                <VariationServiceFilterComponent
+                                    selectedService={tempVariationService}
+                                    setSelectedService={setTempVariationService}
+                                />
                             </div>
                         )}
 
@@ -604,7 +618,27 @@ export const FiltersComponent = ({
                                     selectedService={tempVariationService}
                                     selectedMetric={tempVariationMetric}
                                     setSelectedMetric={setTempVariationMetric}
+                                    selectedResource={tempVariationResource}
+                                    setSelectedResource={setTempVariationResource}
                                     isAsgMultiSelect={false}
+                                />
+                            </div>
+                        )}
+                        {variationResourceFilter && (
+                            <div className='space-y-2'>
+                                <label className='text-sm font-medium text-foreground flex items-center gap-2'>
+                                    <MapPin className='h-4 w-4' />
+                                    Recurso
+                                </label>
+                                <VariationResourcesFilterComponent
+                                    startDate={tempStartDate}
+                                    endDate={tempEndDate}
+                                    region={tempRegion}
+                                    service={tempVariationService}
+                                    metric={tempVariationMetric}
+                                    resource={tempVariationResource}
+                                    setResource={setTempVariationResource}
+                                    isResourceMultiSelect={false}
                                 />
                             </div>
                         )}
@@ -837,7 +871,7 @@ export const FiltersComponent = ({
                                     <BarChart3 className='h-4 w-4' />
                                     Métrica
                                 </label>
-                                <MetricsFilterComponent selectedMetrics={tempMetrics} setSelectedMetrics={setTempMetrics} isMetricsMultiSelect={isMetricsMultiselect}/>
+                                <MetricsFilterComponent selectedMetrics={tempMetrics} setSelectedMetrics={setTempMetrics} isMetricsMultiSelect={isMetricsMultiselect} />
                             </div>
                         )}
                         {metricsRDSFilter && (
@@ -886,6 +920,9 @@ export const FiltersComponent = ({
                     variationService={filters.variationService}
                     metric={filters.metric}
                     metrics={metricsRDSFilter ? filters.metricsRDS : filters.metrics}
+                    variationResource={filters.variationResource}
+                    month={filters.month}
+                    year={filters.year}
                 />
             </Card>
         </div>

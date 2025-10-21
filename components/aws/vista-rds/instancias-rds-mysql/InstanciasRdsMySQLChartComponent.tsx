@@ -5,15 +5,15 @@ import useSWR from "swr";
 import * as echarts from "echarts";
 import { Database, ChartBar, HardDrive } from "lucide-react";
 import { RdsMysqlResourceViewInfoComponent } from "./info/RdsMysqlResourceViewInfoComponent";
-import { MainRdsMysqlResourceViewMetricsSummaryComponent } from "./graficos/MainRdsMysqlResourceViewMetricsSummaryComponent";
-import { RdsCpuCreditsLineChart } from "./graficos/RdsMySQLResourceViewCpuCreditsComponent";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { RdsCpuUsageChart } from "./graficos/RdsMySQLResourceViewCpuUsageComponent";
-import { RdsDbConnectionsChart } from "./graficos/RdsMySQLResourceViewDbConnectionsComponent";
-import { RdsMemoryChart } from "./graficos/RdsMySQLResourceViewMemoryComponent";
-import { RdsIopsChart } from "./graficos/RdsMySQLResourceViewIopsComponent";
-import { RdsStorageChart } from "./graficos/RdsMySQLResourceViewStorageComponent";
 import { RdsMysqlEventsTableComponent } from "./events/RdsMySQLEventsTable";
+import { RdsResourceViewCpuCreditsComponent } from '@/components/aws/vista-rds/graficos/RdsResourceViewCpuCreditsComponent';
+import { RdsResourceViewCpuUsageComponent } from '@/components/aws/vista-rds/graficos/RdsResourceViewCpuUsageComponent';
+import { RdsResourceViewDbConnectionsComponent } from '@/components/aws/vista-rds/graficos/RdsResourceViewDbConnectionsComponent';
+import { RdsResourceViewMemoryComponent } from '@/components/aws/vista-rds/graficos/RdsResourceViewMemoryComponent';
+import { RdsResourceViewStorageComponent } from '@/components/aws/vista-rds/graficos/RdsResourceViewStorageComponent';
+import { RdsResourceViewIopsComponent } from '@/components/aws/vista-rds/graficos/RdsResourceViewIopsComponent';
+import { MainRdsResourceViewMetricsSummaryComponentComponent } from '@/components/aws/vista-rds/graficos/MainRdsResourceViewMetricsSummaryComponent';
 
 interface InstanciasRdsMysqlProps {
   startDate: Date;
@@ -275,8 +275,9 @@ export const InstanciasRdsMySQLChartComponent = ({
 
         {/* Panel derecho - Resumen de métricas */}
         <div className="flex-1 space-y-6 min-w-0 overflow-hidden">
-          <MainRdsMysqlResourceViewMetricsSummaryComponent
+          <MainRdsResourceViewMetricsSummaryComponentComponent
             data={metricsData ?? null}
+            rdsType='rds-mysql'
           />
         </div>
       </div>
@@ -311,13 +312,14 @@ export const InstanciasRdsMySQLChartComponent = ({
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <RdsCpuCreditsLineChart
+                <RdsResourceViewCpuCreditsComponent
                   data={transformMetricsForChart(metricsData)}
                   title="Consumo y Balance de Créditos de CPU (Burstable)"
                   height="300px"
                 />
               </CardContent>
             </Card>
+
             {/* Gráfico 2: CPU Usage */}
             <Card className="w-full">
               <CardHeader>
@@ -327,13 +329,14 @@ export const InstanciasRdsMySQLChartComponent = ({
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <RdsCpuUsageChart
+                <RdsResourceViewCpuUsageComponent
                   data={transformMetricsForChart(metricsData)}
                   title="Uso vs No Uso de Cores de CPU"
                   height="300px"
                 />
               </CardContent>
             </Card>
+
             {/* Gráfico 3: Database Connections */}
             <Card className="w-full">
               <CardHeader>
@@ -343,7 +346,7 @@ export const InstanciasRdsMySQLChartComponent = ({
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <RdsDbConnectionsChart
+                <RdsResourceViewDbConnectionsComponent
                   data={transformMetricsForChart(metricsData)}
                   title="Conexiones a Base de Datos"
                   height="300px"
@@ -359,7 +362,7 @@ export const InstanciasRdsMySQLChartComponent = ({
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <RdsMemoryChart
+                <RdsResourceViewMemoryComponent
                   data={transformMetricsForChart(metricsData)}
                   title="Memoria Disponible"
                   height="300px"
@@ -375,7 +378,7 @@ export const InstanciasRdsMySQLChartComponent = ({
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <RdsIopsChart
+                <RdsResourceViewIopsComponent
                   data={transformMetricsForChart(metricsData)}
                   title="Operaciones Lectura/Escritura (IOPS/seg)"
                   height="300px"
@@ -391,7 +394,7 @@ export const InstanciasRdsMySQLChartComponent = ({
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <RdsStorageChart
+                <RdsResourceViewStorageComponent
                   data={transformMetricsForChart(metricsData)}
                   title="Storage Disponible"
                   height="300px"

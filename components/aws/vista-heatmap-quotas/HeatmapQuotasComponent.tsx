@@ -457,7 +457,7 @@ export const HeatmapQuotasComponent = ({ startDate, endDate }: HeatmapQuotasComp
         )
 
     return (
-        <div className="flex flex-col gap-4 p-5">
+        <div className="flex flex-col gap-4 p-5 mt-10">
             <div className="flex flex-wrap items-start gap-3">
                 <h1 className="text-lg font-semibold">Heatmap</h1>
 

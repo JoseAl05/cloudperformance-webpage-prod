@@ -4,16 +4,16 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useRef, useEffect } from "react";
 import useSWR from "swr";
 import * as echarts from "echarts";
-import { Database, ChartBar, HardDrive  } from "lucide-react";
+import { Database, ChartBar, HardDrive } from "lucide-react";
 import { RdsSQLServerResourceViewInfoComponent } from "./info/RdsSQLServerResourceViewInfoComponent";
-import { MainRdsSQLServerResourceViewMetricsSummaryComponent } from "./graficos/MainRdsSQLServerResourceViewMetricsSummaryComponent";
-import { RdsCpuCreditsLineChart } from "./graficos/RdsSQLServerResourceViewCpuCreditsComponent";
-import { RdsCpuUsageChart } from "./graficos/RdsSQLServerResourceViewCpuUsageComponent";
-import { RdsDbConnectionsChart } from "./graficos/RdsSQLServerResourceViewDbConnectionsComponent";
-import { RdsMemoryChart } from "./graficos/RdsSQLServerResourceViewMemoryComponent";
-import { RdsIopsChart } from "./graficos/RdsSQLServerResourceViewIopsComponent";
-import { RdsStorageChart } from "./graficos/RdsSQLServerResourceViewStorageComponent";
 import { RdsSQLServerEventsTableComponent } from "./events/RdsSQLServerEventsTable";
+import { RdsResourceViewCpuCreditsComponent } from '@/components/aws/vista-rds/graficos/RdsResourceViewCpuCreditsComponent';
+import { RdsResourceViewCpuUsageComponent } from '@/components/aws/vista-rds/graficos/RdsResourceViewCpuUsageComponent';
+import { RdsResourceViewDbConnectionsComponent } from '@/components/aws/vista-rds/graficos/RdsResourceViewDbConnectionsComponent';
+import { RdsResourceViewMemoryComponent } from '@/components/aws/vista-rds/graficos/RdsResourceViewMemoryComponent';
+import { RdsResourceViewStorageComponent } from '@/components/aws/vista-rds/graficos/RdsResourceViewStorageComponent';
+import { RdsResourceViewIopsComponent } from '@/components/aws/vista-rds/graficos/RdsResourceViewIopsComponent';
+import { MainRdsResourceViewMetricsSummaryComponentComponent } from '@/components/aws/vista-rds/graficos/MainRdsResourceViewMetricsSummaryComponent';
 
 interface InstanciasRdsSQLServerProps {
   startDate: Date;
@@ -81,8 +81,8 @@ const transformMetricsForChart = (
 };
 
 const fetcher = (url: string) =>
-    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
-        .then(r => r.json());
+  fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
+    .then(r => r.json());
 
 export const InstanciasRdsSQLServerChartComponent = ({
   startDate,
@@ -123,8 +123,8 @@ export const InstanciasRdsSQLServerChartComponent = ({
   );
   const metricsUrl = shouldFetchMetrics
     ? `/api/aws/bridge/db/instancias-rds-sqlserver-metrics?date_from=${startDateFormatted}&date_to=${endDateFormatted}&resource=${encodeURIComponent(
-        instance
-      )}`
+      instance
+    )}`
     : null;
 
   const {
@@ -148,7 +148,7 @@ export const InstanciasRdsSQLServerChartComponent = ({
     data: eventsData,
     error: eventsError,
     isLoading: eventsLoading,
-  } = useSWR(eventsUrl, fetcher);  
+  } = useSWR(eventsUrl, fetcher);
 
   // ---------- eCharts para "Estado de Instancias" (vista general) ----------
   const processChartData = (rawData: RdsInstanceData[] = []) => {
@@ -270,13 +270,14 @@ export const InstanciasRdsSQLServerChartComponent = ({
       <div className="flex flex-col xl:flex-row gap-8 min-w-0">
         {/* Panel izquierdo - Información de la instancia */}
         <div className="w-full xl:max-w-sm min-w-0">
-           <RdsSQLServerResourceViewInfoComponent data={instanceData} /> 
+          <RdsSQLServerResourceViewInfoComponent data={instanceData} />
         </div>
 
         {/* Panel derecho - Resumen de métricas */}
         <div className="flex-1 space-y-6 min-w-0 overflow-hidden">
-          <MainRdsSQLServerResourceViewMetricsSummaryComponent
+          <MainRdsResourceViewMetricsSummaryComponentComponent
             data={metricsData ?? null}
+            rdsType='rds-sqlserver'
           />
         </div>
       </div>
@@ -305,13 +306,14 @@ export const InstanciasRdsSQLServerChartComponent = ({
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <RdsCpuCreditsLineChart
+                <RdsResourceViewCpuCreditsComponent
                   data={transformMetricsForChart(metricsData)}
                   title="Consumo y Balance de Créditos de CPU (Burstable)"
                   height="300px"
                 />
               </CardContent>
             </Card>
+
             {/* Gráfico 2: CPU Usage */}
             <Card className="w-full">
               <CardHeader>
@@ -321,13 +323,14 @@ export const InstanciasRdsSQLServerChartComponent = ({
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <RdsCpuUsageChart
+                <RdsResourceViewCpuUsageComponent
                   data={transformMetricsForChart(metricsData)}
                   title="Uso vs No Uso de Cores de CPU"
                   height="300px"
                 />
               </CardContent>
-            </Card>  
+            </Card>
+
             {/* Gráfico 3: Database Connections */}
             <Card className="w-full">
               <CardHeader>
@@ -337,13 +340,13 @@ export const InstanciasRdsSQLServerChartComponent = ({
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <RdsDbConnectionsChart
+                <RdsResourceViewDbConnectionsComponent
                   data={transformMetricsForChart(metricsData)}
                   title="Conexiones a Base de Datos"
                   height="300px"
                 />
               </CardContent>
-            </Card> 
+            </Card>
             {/* Gráfico 4: Memory */}
             <Card className="w-full">
               <CardHeader>
@@ -353,13 +356,13 @@ export const InstanciasRdsSQLServerChartComponent = ({
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <RdsMemoryChart
+                <RdsResourceViewMemoryComponent
                   data={transformMetricsForChart(metricsData)}
                   title="Memoria Disponible"
                   height="300px"
                 />
               </CardContent>
-            </Card> 
+            </Card>
             {/* Gráfico 5: IOPS */}
             <Card className="w-full">
               <CardHeader>
@@ -369,13 +372,13 @@ export const InstanciasRdsSQLServerChartComponent = ({
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <RdsIopsChart
+                <RdsResourceViewIopsComponent
                   data={transformMetricsForChart(metricsData)}
                   title="Operaciones Lectura/Escritura (IOPS/seg)"
                   height="300px"
                 />
               </CardContent>
-            </Card> 
+            </Card>
             {/* Gráfico 6: Storage */}
             <Card className="w-full">
               <CardHeader>
@@ -385,7 +388,7 @@ export const InstanciasRdsSQLServerChartComponent = ({
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <RdsStorageChart
+                <RdsResourceViewStorageComponent
                   data={transformMetricsForChart(metricsData)}
                   title="Storage Disponible"
                   height="300px"
@@ -398,7 +401,7 @@ export const InstanciasRdsSQLServerChartComponent = ({
               startDate={startDate}
               endDate={endDate}
               instance={instance}
-            />                                                                   
+            />
           </div>
         )}
       </div>

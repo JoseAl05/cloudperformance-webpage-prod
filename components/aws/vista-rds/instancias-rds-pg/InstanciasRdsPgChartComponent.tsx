@@ -7,14 +7,14 @@ import { Database, ChartBar, Clock, HardDrive } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { RdsResourceViewInfoComponent } from "./info/RdsResourceViewInfoComponent";
-import { MainRdsPgResourceViewMetricsSummaryComponent } from "./graficos/MainRdsPgResourceViewMetricsSummaryComponent";
-import { RdsMemoryChart } from "./graficos/RdsPgResourceViewMemoryComponent";
-import { RdsCpuCreditsLineChart } from "./graficos/RdsPgResourceViewCpuCreditsComponent";
-import { RdsCpuUsageChart } from "./graficos/RdsPgResourceViewCpuUsageComponent";
-import { RdsDbConnectionsChart } from "./graficos/RdsPgResourceViewDbConnectionsComponent";
-import { RdsIopsChart } from "./graficos/RdsPgResourceViewIopsComponent";
-import { RdsStorageChart } from "./graficos/RdsPgResourceViewStorageComponent";
 import { RdsPgEventsTableComponent } from "./events/RdsPgEventsTable";
+import { RdsResourceViewCpuCreditsComponent } from '@/components/aws/vista-rds/graficos/RdsResourceViewCpuCreditsComponent';
+import { RdsResourceViewCpuUsageComponent } from '@/components/aws/vista-rds/graficos/RdsResourceViewCpuUsageComponent';
+import { RdsResourceViewDbConnectionsComponent } from '@/components/aws/vista-rds/graficos/RdsResourceViewDbConnectionsComponent';
+import { RdsResourceViewMemoryComponent } from '@/components/aws/vista-rds/graficos/RdsResourceViewMemoryComponent';
+import { RdsResourceViewStorageComponent } from '@/components/aws/vista-rds/graficos/RdsResourceViewStorageComponent';
+import { RdsResourceViewIopsComponent } from '@/components/aws/vista-rds/graficos/RdsResourceViewIopsComponent';
+import { MainRdsResourceViewMetricsSummaryComponentComponent } from '@/components/aws/vista-rds/graficos/MainRdsResourceViewMetricsSummaryComponent';
 
 interface InstanciasRdsPgProps {
   startDate: Date;
@@ -266,6 +266,8 @@ export const InstanciasRdsPgChartComponent = ({
     );
   }
 
+  console.log(metricsData);
+
   return (
     <>
       <div className="w-full min-w-0 px-4 py-6">
@@ -277,8 +279,9 @@ export const InstanciasRdsPgChartComponent = ({
 
           {/* Panel derecho - Resumen de métricas */}
           <div className="flex-1 space-y-6 min-w-0 overflow-hidden">
-            <MainRdsPgResourceViewMetricsSummaryComponent
+            <MainRdsResourceViewMetricsSummaryComponentComponent
               data={metricsData ?? null}
+              rdsType='rds-pg'
             />
           </div>
         </div>
@@ -314,7 +317,7 @@ export const InstanciasRdsPgChartComponent = ({
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <RdsCpuCreditsLineChart
+                  <RdsResourceViewCpuCreditsComponent
                     data={transformMetricsForChart(metricsData)}
                     title="Consumo y Balance de Créditos de CPU (Burstable)"
                     height="300px"
@@ -331,7 +334,7 @@ export const InstanciasRdsPgChartComponent = ({
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <RdsCpuUsageChart
+                  <RdsResourceViewCpuUsageComponent
                     data={transformMetricsForChart(metricsData)}
                     title="Uso vs No Uso de Cores de CPU"
                     height="300px"
@@ -348,7 +351,7 @@ export const InstanciasRdsPgChartComponent = ({
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <RdsDbConnectionsChart
+                  <RdsResourceViewDbConnectionsComponent
                     data={transformMetricsForChart(metricsData)}
                     title="Conexiones a Base de Datos"
                     height="300px"
@@ -364,7 +367,7 @@ export const InstanciasRdsPgChartComponent = ({
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <RdsMemoryChart
+                  <RdsResourceViewMemoryComponent
                     data={transformMetricsForChart(metricsData)}
                     title="Memoria Disponible"
                     height="300px"
@@ -380,7 +383,7 @@ export const InstanciasRdsPgChartComponent = ({
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <RdsIopsChart
+                  <RdsResourceViewIopsComponent
                     data={transformMetricsForChart(metricsData)}
                     title="Operaciones Lectura/Escritura (IOPS/seg)"
                     height="300px"
@@ -396,7 +399,7 @@ export const InstanciasRdsPgChartComponent = ({
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <RdsStorageChart
+                  <RdsResourceViewStorageComponent
                     data={transformMetricsForChart(metricsData)}
                     title="Storage Disponible"
                     height="300px"

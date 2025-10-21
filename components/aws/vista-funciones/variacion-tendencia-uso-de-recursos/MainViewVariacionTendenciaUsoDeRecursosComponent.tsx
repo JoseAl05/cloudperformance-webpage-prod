@@ -1,8 +1,8 @@
 import { FiltersComponent } from '@/components/general/filters/FiltersComponent'
-import { ValoracionTendenciaUsoDeRecursosComponent }  from './ValoracionTendenciaUsoDeRecursosComponent'
+import { VariacionTendenciaUsoDeRecursosComponent }  from './VariacionTendenciaUsoDeRecursosComponent'
 import { Globe } from 'lucide-react'
 
-export const ViewValoracionTendenciaUsoDeRecursos = () => {
+export const ViewVariacionTendenciaUsoDeRecursos = () => {
   return (
     <div className='w-full min-w-2 space-y-9'>
       {/* Header */}
@@ -15,10 +15,10 @@ export const ViewValoracionTendenciaUsoDeRecursos = () => {
               </div>
               <div>
                 <h1 className='text-3xl font-bold text-gray-900 dark:text-gray-100'>
-                  Variacion tendencia uso de recursos
+                  Dashboard AWS / Variacion uso de recursos
                 </h1>
                 <p className='text-gray-500 dark:text-gray-400'>
-                  Vista Variacion tendencia uso de recursos
+                  Vista Variacion uso de recursos
                 </p>
               </div>
             </div>
@@ -28,13 +28,12 @@ export const ViewValoracionTendenciaUsoDeRecursos = () => {
 
       {/* Filtros + gráfico */}
       <FiltersComponent
-        Component={ValoracionTendenciaUsoDeRecursosComponent}
+        Component={VariacionTendenciaUsoDeRecursosComponent}
         dateFilter
         regionFilter
-        // s3Filter
-        // serviceFilter
         variationServiceFilter
         variationMetricFilter
+        variationResourceFilter
       />
     </div>
   )

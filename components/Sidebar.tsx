@@ -46,6 +46,7 @@ import {
     Stars,
     Layers,
     Table,
+    Diff,
 } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { usePathname } from 'next/navigation'
@@ -165,6 +166,7 @@ export const SidebarComponent = ({
             { label: 'Spot vs Vm', href: '/aws/funciones/spot-vs-vm', icon: Zap },
             { label: 'Top S3 Buckets', href: '/aws/funciones/top-s3-buckets', icon: Box },
             { label: 'Ebs No Utilizados', href: '/aws/funciones/ebs-no-utilizados', icon: HardDrive },
+            { label: 'Variación consumo de recursos', href: '/aws/funciones/variacion-tendencia-uso-de-recursos', icon: Diff },
         ],
     }
 

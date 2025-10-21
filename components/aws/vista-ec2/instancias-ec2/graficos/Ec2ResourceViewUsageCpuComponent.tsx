@@ -27,7 +27,6 @@ export const Ec2ResourceViewUsageCpuComponent = ({ data }: ResourceViewUsageCpuC
     const totalData: [string, number][] = cpuData.map(item => [item.Timestamp, item.total]);
     const usedData: [string, number][] = cpuData.map(item => [item.Timestamp, item.used]);
     const unusedData: [string, number][] = cpuData.map(item => [item.Timestamp, item.unused]);
-    // const umbralCpu: [string, number][] = cpuData.map(item => [item.Timestamp, (90 * item.total) / 100]);
 
     const maxTotalValue = totalData.length ? Math.max(...totalData.map(item => item[1])) : 0;
     const yMaxRaw = Math.ceil(maxTotalValue * 1.5);

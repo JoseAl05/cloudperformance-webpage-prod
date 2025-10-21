@@ -36,6 +36,19 @@ interface VariationMetricFilterComponentProps {
 
 }
 
+type RawMetricItem = string | {
+    MetricLabel?: string
+    MetricName?: string
+    label?: string
+    value?: string
+    [key: string]: unknown
+}
+
+type MetricOption = {
+    value: string
+    label: string
+}
+
 const fetcherPost = (url: string, tags: { Key: string; Value: string } | null = null) =>
     fetch(url, {
         method: 'POST',
@@ -62,8 +75,6 @@ export const VariationMetricFilterComponent = ({
     const startDateFormatted = startDate.toISOString().replace('Z', '').slice(0, -4);
     const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : '';
 
-    // https://cloudperformance-desarrollo.eastus2.cloudapp.azure.com/api/recursos/getMetric?date_from=2025-01-01T02:32:18&date_to=2025-12-12T01:32:18&region=all_regions&service=DynamoDB
-    // const url = `/api/bridge/autoscaling/all-autoscaling-groups?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`;
     const url = `/api/aws/bridge/recursos/getMetric?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&service=${selectedService}`;
 
     const shouldFetch = !!region && !!selectedService;
@@ -79,28 +90,59 @@ export const VariationMetricFilterComponent = ({
     if (isLoading) return <LoaderComponent size='small' />
     if (error) return <div>Error al cargar datos</div>
 
-    const list: string[] = Array.isArray(data) ? data : []
-    const noMetric = list.length === 0
+    const rawList: RawMetricItem[] = Array.isArray(data) ? data : []
 
-    const selectedAsgArray = selectedMetric ? selectedMetric.split(',').filter(Boolean) : [];
+    const options: MetricOption[] = rawList.reduce<MetricOption[]>((acc, item) => {
+        if (typeof item === 'string') {
+            const trimmed = item.trim()
+            if (!trimmed) return acc
+            acc.push({ value: trimmed, label: trimmed })
+            return acc
+        }
+
+        const valueCandidate = [item.MetricName, item.value, item.MetricLabel, item.label]
+            .find((val): val is string => typeof val === 'string' && val.trim() !== '')
+        const labelCandidate = [item.MetricLabel, item.label, item.MetricName, item.value]
+            .find((val): val is string => typeof val === 'string' && val.trim() !== '')
+
+        const value = valueCandidate?.trim() ?? labelCandidate?.trim() ?? ''
+        const label = labelCandidate?.trim() ?? value
+
+        if (!value && !label) return acc
+
+        acc.push({ value, label })
+        return acc
+    }, [])
+
+    const optionsMap = new Map(options.map(opt => [opt.value, opt.label]))
+
+    const noMetric = options.length === 0
+
+    const selectedAsgArray = selectedMetric
+        ? selectedMetric.split(',').map(item => item.trim()).filter(Boolean)
+        : [];
 
     const getDisplayText = () => {
         if (noMetric) return 'Sin metricas para servicio seleccionado';
         if (!selectedMetric || (selectedMetric === 'all')) return 'Seleccione una metrica';
         if (isAsgMultiSelect && selectedAsgArray.includes('all')) return 'Todas las metricas';
-        if (selectedAsgArray.length === 1) return selectedAsgArray[0];
+        if (selectedAsgArray.length === 1) {
+            const selectedValue = selectedAsgArray[0];
+            return optionsMap.get(selectedValue) ?? selectedValue;
+        }
         return `${selectedAsgArray.length} Metricas seleccionadas`;
     };
 
     const handleInstanceToggle = (metricValue: string) => {
+        const normalizedValue = metricValue.trim()
         let metrics = selectedAsgArray.slice();
 
-        if (metricValue === 'all') {
+        if (normalizedValue === 'all') {
             metrics = ['all'];
         } else {
             metrics = metrics.filter((i) => i !== 'all');
-            if (metrics.includes(metricValue)) metrics = metrics.filter((i) => i !== metricValue);
-            else metrics.push(metricValue);
+            if (metrics.includes(normalizedValue)) metrics = metrics.filter((i) => i !== normalizedValue);
+            else metrics.push(normalizedValue);
         }
         setSelectedMetric(metrics.length ? metrics.join(',') : '');
     };
@@ -135,22 +177,27 @@ export const VariationMetricFilterComponent = ({
                                             Todas las metricas
                                         </CommandItem>
                                     )}
-                                    {list.map((metrics,index) => (
+                                    {options.map((option) => (
                                         <CommandItem
-                                            key={index}
-                                            value={metrics.MetricLabel}
-                                            onSelect={() => {
-                                                if (isAsgMultiSelect) handleInstanceToggle(metrics.MetricLabel);
+                                            key={option.value}
+                                            value={option.value}
+                                            onSelect={(currentValue) => {
+                                                if (isAsgMultiSelect) handleInstanceToggle(currentValue);
                                                 else {
-                                                    setSelectedMetric(metrics.MetricLabel);
+                                                    setSelectedMetric(currentValue.trim());
                                                     setOpen(false);
                                                 }
                                             }}
                                         >
                                             <Check
-                                                className={cn('mr-2 h-4 w-4', isAsgMultiSelect ? (selectedAsgArray.includes(metrics.MetricLabel) ? 'opacity-100' : 'opacity-0') : (selectedMetric === metrics.MetricLabel ? 'opacity-100' : 'opacity-0'))}
+                                                className={cn(
+                                                    'mr-2 h-4 w-4',
+                                                    isAsgMultiSelect
+                                                        ? (selectedAsgArray.includes(option.value) ? 'opacity-100' : 'opacity-0')
+                                                        : (selectedMetric === option.value ? 'opacity-100' : 'opacity-0')
+                                                )}
                                             />
-                                            {metrics.MetricLabel}
+                                            {option.label}
                                         </CommandItem>
                                     ))}
                                 </CommandGroup>

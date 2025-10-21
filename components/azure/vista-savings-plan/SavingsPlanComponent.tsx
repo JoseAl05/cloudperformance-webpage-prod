@@ -78,7 +78,7 @@ const toUTCDate = (s: string) => {
     return new Date(Date.UTC(y, m - 1, d));
 };
 
-const fmt = new Intl.DateTimeFormat('es-ES', { day: 'numeric', month: 'short', timeZone: 'UTC' });
+const fmt = new Intl.DateTimeFormat('es-CL', { day: 'numeric', month: 'short', timeZone: 'UTC' });
 
 export const SavingsPlanComponent = ({ startDate, endDate }: SavingsPlanProps) => {
   const [selectedInstance, setSelectedInstance] = useState<string>('all')
