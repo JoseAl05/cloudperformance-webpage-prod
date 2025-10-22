@@ -147,8 +147,8 @@ export function makeBaseOptions(args?: {
     metricType = 'default',
   } = args ?? {};
 
-  const textColor = '#a1a1aa';
-  const gridColor = '#27272a';
+  const textColor = '#57575e';
+  const gridColor = '#57575e';
 
   return {
     useUTC,
