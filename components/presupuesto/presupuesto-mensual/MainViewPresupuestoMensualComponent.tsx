@@ -1,7 +1,6 @@
 "use client";
 
 import { CircleDollarSign } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { SessionGate } from "@/components/general_presupuesto/session/SesionGate";
 import { FiltersComponent } from "@/components/general_presupuesto/filters/FiltersComponent";
 import { PresupuestoMensualComponent } from "@/components/presupuesto/presupuesto-mensual/PresupuestoMensualComponent";

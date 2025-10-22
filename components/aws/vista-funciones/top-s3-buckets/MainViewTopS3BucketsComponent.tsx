@@ -1,6 +1,5 @@
 import { FiltersComponent } from '@/components/general/filters/FiltersComponent'
-import { TopS3BucketsComponent }  from '@/components/aws/vista-funciones/top-s3-buckets/TopS3BucketsComponent'
-import { S3BucketFilter } from '@/components/general/S3FilterComponent'
+import { TopS3BucketsComponent } from '@/components/aws/vista-funciones/top-s3-buckets/TopS3BucketsComponent'
 import { Globe } from 'lucide-react'
 
 export const ViewTopS3Buckets = () => {

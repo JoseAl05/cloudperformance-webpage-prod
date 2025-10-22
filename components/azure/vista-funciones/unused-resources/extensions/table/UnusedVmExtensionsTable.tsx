@@ -2,7 +2,6 @@ import { createColumns } from '@/components/general/data-table/columns';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { DataTableGrouping } from '@/components/general/data-table/data-table-grouping';
 import { UnusedVmss } from '@/interfaces/vista-unused-resources/unusedVmssInterface';
-import { UnusedVmssColumns } from '@/components/azure/vista-funciones/unused-resources/extensions/table/UnusedVmssColumns';
 import { UnusedVmExtensions } from '@/interfaces/vista-unused-resources/unusedVmExtensionsInterfaces';
 import { UnusedVmExtensionsColumns } from '@/components/azure/vista-funciones/unused-resources/extensions/table/UnusedVmExtensionsColumns';
 

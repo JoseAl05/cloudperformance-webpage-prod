@@ -8,7 +8,7 @@ import { SubscriptionsFilterComponent } from '@/components/general_azure/filters
 import { TagsFilterComponent } from '@/components/general_azure/filters/TagsFilterComponent';
 import { MetricsFilterComponent } from '@/components/general_azure/filters/MetricsFilterComponent';
 import { Card, CardContent } from '@/components/ui/card';
-import { Calendar, Filter, MapPin, XCircle, Cloud, Tag, Activity, Layers, Server, Container, Cylinder, Database, Computer, Boxes, FolderTree, GitBranch, AlertTriangle } from 'lucide-react';
+import { Calendar, Filter, MapPin, XCircle, Cloud, Tag, Activity, Layers, Server, Cylinder, Database, Computer, Boxes, FolderTree, GitBranch, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { SubscriptionsFilterComponentV2 } from '@/components/general_azure/filters/SubscriptionsFilterComponentV2';

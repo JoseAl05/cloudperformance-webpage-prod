@@ -1,7 +1,6 @@
 'use client'
 
-import React, { useEffect, useMemo, useRef } from 'react'
-import * as echarts from 'echarts'
+import { useMemo, useRef } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { MetricPoint } from '@/interfaces/vista-variacion-tendencia-uso-de-recursos/variacionTendenciaUsoDeRecursosViewInterface'
 import { useTheme } from 'next-themes'
@@ -195,7 +194,6 @@ export const DualSeriesChart = ({
 
     return deepMerge(base, lines);
   }, [isDark, currentPeriodData, currentPeriodLabel, previousPeriodData, processDataForSeries, previousPeriodLabel, unit, yAxisLabel]);
-
 
   const hasData = (currentPeriodData && currentPeriodData.length > 0) ||
     (previousPeriodData && previousPeriodData.length > 0)

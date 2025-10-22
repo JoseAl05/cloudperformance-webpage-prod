@@ -1,9 +1,7 @@
 // components/aws/vista-facturacion/tendencia-facturacion/MainViewTendenciaFacturacionComponent.tsx
 import { FiltersComponent } from '@/components/general_azure/filters/FiltersComponent'
 import { TendenciaFacturacionAzureChartComponent } from '@/components/azure/vista-facturacion/tendencia-pago-por-uso/TendenciaFacturacionPagoPorUsoChartComponent'
-import { Download, Filter, TrendingUp } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-
+import { TrendingUp } from 'lucide-react'
 export const MainViewTendenciaPagoPorUsoComponent = () => {
     return (
         <div className='w-full min-w-0 space-y-4'>

@@ -2,8 +2,6 @@
 import { FiltersComponent } from '@/components/general_azure/filters/FiltersComponent'
 import  {AzureNodeMetricsComponent}  from '@/components/azure/vista-consumo-nodos/ConsumoNodosComponent'
 import { ChartLine } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-
 export const MainViewConsumoNodosComponent = () => {
     return (
         <div className='w-full min-w-0 space-y-4'>

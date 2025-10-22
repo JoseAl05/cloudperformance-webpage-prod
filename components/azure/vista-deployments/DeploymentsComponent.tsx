@@ -2,7 +2,7 @@
 
 import { useRef, useEffect, useState } from 'react';
 import * as echarts from 'echarts';
-import { TrendingUp, Activity, Download, Calendar } from 'lucide-react';
+import { TrendingUp, Activity } from 'lucide-react';
 import {DeploymentsDetailsTableComponent} from '@/components/azure/vista-deployments/table/DeploymentsTableComponent';
 
 interface DeploymentsChartProps {

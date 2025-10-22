@@ -263,8 +263,7 @@ import {
     createChartOption,
     deepMerge,
     makeBaseOptions,
-    makeLineSeries,
-    useECharts,
+    useECharts
 } from '@/lib/echartsGlobalConfig';
 import { useTheme } from 'next-themes';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';

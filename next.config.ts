@@ -28,14 +28,11 @@ const nextConfig = {
   // ⚠️ Úsalo solo si tu CI se hace lento por el lint. En local mantenlo encendido.
   eslint: { ignoreDuringBuilds: true },
   modularizeImports: {
-    'date-fns': { transform: 'date-fns/{{member}}' },
-    lodash: { transform: 'lodash/{{member}}' },
-    'lucide-react': { transform: 'lucide-react/icons/{{member}}' },
     echarts: { transform: 'echarts' },
   },
-  compiler: {
-    removeConsole: { exclude: ['error'] },
-  },
+  // compiler: {
+  //   removeConsole: { exclude: ['error'] },
+  // },
 
   images: {
     formats: ['image/avif', 'image/webp'],

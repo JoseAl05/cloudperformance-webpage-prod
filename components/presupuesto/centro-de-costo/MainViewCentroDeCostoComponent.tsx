@@ -1,12 +1,5 @@
 "use client";
-
-import { useSession } from "@/hooks/useSession";
-import { useState } from "react";
-import useSWR, { mutate } from "swr";
 import { CircleDollarSign } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { CentroDeCostoTableComponent } from "@/components/presupuesto/centro-de-costo/table/CentroDeCostoTableComponent";
-import { CentroDeCostoFormComponent, CentroCosto } from "@/components/presupuesto/centro-de-costo/form/CentroDeCostoFormComponent";
 import { SessionGate } from "@/components/general_presupuesto/session/SesionGate";
 import { FiltersComponent } from "@/components/general_presupuesto/filters/FiltersComponent";
 import { CentroDeCostoComponent } from "@/components/presupuesto/centro-de-costo/CentroDeCostoComponent";

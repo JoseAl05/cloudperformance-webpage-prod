@@ -3,9 +3,8 @@
 import { useRef, useEffect } from "react";
 import useSWR from "swr";
 import * as echarts from "echarts";
-import { Database, ChartBar, Clock, HardDrive } from "lucide-react";
+import { Database, ChartBar, HardDrive } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { RdsResourceViewInfoComponent } from "@/components/aws/vista-rds/instancias-rds-pg/info/RdsResourceViewInfoComponent";
 import { RdsPgEventsTableComponent } from "@/components/aws/vista-rds/instancias-rds-pg/events/RdsPgEventsTable";
 import { RdsResourceViewCpuCreditsComponent } from '@/components/aws/vista-rds/graficos/RdsResourceViewCpuCreditsComponent';

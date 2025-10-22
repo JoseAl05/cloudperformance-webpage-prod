@@ -1,16 +1,9 @@
 'use client'
 
 import * as React from 'react'
-import { MoreHorizontal, Eye, Copy, ExternalLink, FileText, Database } from 'lucide-react'
+import { Eye, Copy, ExternalLink, FileText, Database } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
+import { DropdownMenuItem } from '@/components/ui/dropdown-menu'
 import { Badge } from '@/components/ui/badge'
 import {
     Dialog,

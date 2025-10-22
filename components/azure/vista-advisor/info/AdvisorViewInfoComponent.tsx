@@ -2,8 +2,6 @@
 
 import { Search, X, ExternalLink, ChevronDown, ChevronRight, Info } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
-import useSWR from 'swr';
-
 interface AzureAdvisorRecommendation {
     _cq_sync_time: { $date: string }
     impact: string

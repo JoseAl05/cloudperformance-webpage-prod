@@ -1,7 +1,5 @@
 import { FiltersComponent } from '@/components/general/filters/FiltersComponent'
-import { InstanceEc2CpuMetricsComponent } from '@/components/aws/vista-funciones/unused-ebs/InstanceEc2CpuMetricsComponent'
-import { Download, Filter, HardDrive, Server } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { HardDrive } from 'lucide-react'
 import { EbsUnusedComponent } from '@/components/aws/vista-funciones/unused-ebs/EbsUnusedComponent'
 
 export const MainViewUnusedEbsComponent = () => {

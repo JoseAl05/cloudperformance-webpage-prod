@@ -9,8 +9,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
-  DialogFooter,
+  DialogDescription
 } from "@/components/ui/dialog";
 import {
   AlertDialog,

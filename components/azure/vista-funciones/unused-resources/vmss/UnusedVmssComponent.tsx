@@ -10,7 +10,6 @@ import { UnusedMemoryMetricsComponent } from '@/components/azure/vista-funciones
 import { bytesToGB } from '@/lib/bytesToMbs';
 import { UnusedDiskIopsMetricsComponent } from '@/components/azure/vista-funciones/unused-resources/grafico/UnusedDiskIopsMetricsComponent';
 import { UnusedCreditsRemainingMetricsComponent } from '@/components/azure/vista-funciones/unused-resources/grafico/UnusedCreditsRemainingMetricsComponent';
-import { UnusedTable } from '@/components/azure/vista-funciones/unused-resources/vm/table/UnusedVmTable';
 import { UnusedVmss } from '@/interfaces/vista-unused-resources/unusedVmssInterface';
 import { UnusedVmssTable } from '@/components/azure/vista-funciones/unused-resources/vmss/table/UnusedVmssTable';
 

@@ -2,8 +2,6 @@
 import { FiltersComponent } from '@/components/general_azure/filters/FiltersComponent'
 import  {AzureVmMetricsComponent}  from '@/components/azure/vista-consumo-vm/ConsumoVmComponent'
 import { ChartLine } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-
 export const MainViewConsumoVmComponent = () => {
     return (
         <div className='w-full min-w-0 space-y-4'>

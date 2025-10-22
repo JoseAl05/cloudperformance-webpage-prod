@@ -2,9 +2,6 @@
 
 import { useSession } from '@/hooks/useSession';
 import { LoaderComponent } from '@/components/general/LoaderComponent';
-import Link from 'next/link';
-import { Cloud } from 'lucide-react';
-
 export const MainProfileComponent = () => {
     const actualSession = useSession();
 

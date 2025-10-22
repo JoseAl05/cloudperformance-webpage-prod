@@ -1,9 +1,8 @@
 'use client';
 
 import { Card, CardContent } from '@/components/ui/card';
-import { bytesToMB } from '@/lib/bytesToMbs';
-import { Activity, ChevronDown, ChevronUp, Cpu, Minus, Network, Percent, TrendingUp, Zap, Ticket, MonitorCheck } from 'lucide-react';
-import { Ec2IntancesMetricsStatistics, Root } from '@/interfaces/vista-infrautilizadas/ec2ResourceInfraUsedViewInterface';
+import { Activity, Cpu, Zap, Ticket, MonitorCheck } from 'lucide-react';
+import { Root } from '@/interfaces/vista-infrautilizadas/ec2ResourceInfraUsedViewInterface';
 
 // interface MetricItem {
 //   MetricLabel: string;

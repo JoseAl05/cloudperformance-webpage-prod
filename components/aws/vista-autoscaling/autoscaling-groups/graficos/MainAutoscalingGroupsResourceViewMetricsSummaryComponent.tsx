@@ -1,7 +1,7 @@
 'use client';
 
 import { Card, CardContent } from '@/components/ui/card';
-import { Activity, Users, Clock, Globe } from 'lucide-react';
+import { Activity, Clock } from 'lucide-react';
 
 interface AutoscalingGroupData {
     sync_time: { $date: string };

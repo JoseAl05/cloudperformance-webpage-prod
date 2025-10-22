@@ -4,7 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { RdsConsumeViewInstance } from '@/interfaces/vista-consumos/rdsPgConsumeViewInterfaces';
-import { ArrowUp, Calendar, Clock, Database, ExternalLink, HardDrive, MapPin, Server, Shield, Zap } from 'lucide-react';
+import { ArrowUp, Calendar, Clock, Database, ExternalLink, MapPin, Server, Shield, Zap } from 'lucide-react';
 import Link from 'next/link';
 import { useMemo, useRef, useState } from 'react';
 

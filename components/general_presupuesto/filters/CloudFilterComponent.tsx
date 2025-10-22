@@ -1,7 +1,7 @@
 'use client';
 import { useSession } from "@/hooks/useSession";
 import { Dispatch, SetStateAction, useState } from 'react';
-import { Check, ChevronsUpDown, Cloud } from 'lucide-react';
+import { Check, ChevronsUpDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import {
@@ -17,8 +17,6 @@ import {
     PopoverContent,
     PopoverTrigger,
 } from '@/components/ui/popover';
-import { aws_regions } from '@/lib/aws_regions';
-
 interface CloudFilterComponentProps {
     selectedCloud: string;
     setSelectedCloud: Dispatch<SetStateAction<string>>;

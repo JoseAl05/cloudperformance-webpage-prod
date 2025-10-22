@@ -2,7 +2,6 @@
 import { Badge } from '@/components/ui/badge';
 import { DynamicColumn } from '@/components/general/data-table/columns';
 import { useSearchParams } from 'next/navigation';
-import Link from 'next/link';
 import { SpotVsRegularVmInstances } from '@/interfaces/vista-spot-vs-regular-vm/spotVsRegularVmInterfaces';
 
 const DateParams = () => {

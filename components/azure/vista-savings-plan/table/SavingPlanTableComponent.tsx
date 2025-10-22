@@ -3,12 +3,10 @@
 import useSWR from "swr"
 import { ColumnDef } from "@tanstack/react-table"
 import { DataTableGrouping } from "@/components/general/data-table/data-table-grouping"
-import { 
+import {
     Server,
     Database,
-    MapPin,
     Package,
-    Tag,
     DollarSign,
     Clock,
     Shield

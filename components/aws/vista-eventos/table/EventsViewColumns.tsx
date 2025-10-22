@@ -1,6 +1,4 @@
 'use client';
-
-import * as React from 'react';
 import { DynamicColumn } from '@/components/general/data-table/columns';
 import type { FlatEventRow } from '@/components/aws/vista-eventos/table/EventsViewTableComponent';
 import { Badge } from '@/components/ui/badge';

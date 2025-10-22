@@ -1,7 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef } from 'react';
-import * as echarts from 'echarts';
+import { useMemo, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Info } from 'lucide-react';
 import { UnusedEbsMetric } from '@/interfaces/vista-ebs-no-utilizados/ebsUnusedInterfaces';

@@ -8,46 +8,21 @@ import {
     SidebarMenu,
     SidebarMenuButton,
     SidebarMenuItem,
-    useSidebar,
+    useSidebar
 } from '@/components/ui/sidebar'
-import {
-    Collapsible,
-    CollapsibleContent,
-    CollapsibleTrigger,
-} from '@/components/ui/collapsible'
 import { cn } from '@/lib/utils'
 import {
-    Grid2X2,
-    PieChart,
-    Zap,
-    Box,
-    Computer,
-    Database,
-    Pyramid,
-    ChevronDown,
-    HandCoins,
-    Earth,
-    LineChart,
-    TrendingUp,
-    Server,
-    HardDrive,
-    Clock,
-    Map,
-    TrendingDown,
     Shield,
     Mail,
     Cloud,
     House,
     CircleDollarSign
-
 } from 'lucide-react'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { usePathname } from 'next/navigation'
 import Image from 'next/image'
 import { useTheme } from 'next-themes'
 import Link from 'next/link'
-import { Button } from '@/components/ui/button'
-
 const useMenuStyles = () => {
     const { resolvedTheme } = useTheme()
 

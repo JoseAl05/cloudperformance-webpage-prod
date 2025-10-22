@@ -1,10 +1,5 @@
 import { Card, CardContent } from '@/components/ui/card';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Boxes, ChevronDown, ChevronUp, Computer, Cpu, Database, HardDrive, Inbox, List, ListChecks, Minus, MonitorCheck, MonitorX, Network, Server, Table2, Zap } from 'lucide-react';
-import { Ec2ConsumeViewAttachedDiskHistoricComponent } from '@/components/aws/vista-eventos/info/Ec2ConsumeViewAttachedDiskHistoricComponent';
-import { Ec2ConsumeViewStoppedInstancesHistoricComponent } from '@/components/aws/vista-eventos/info/Ec2ConsumeViewStoppedInstancesHistoricComponent';
-import { Ec2ConsumeViewInUseInterfacesHistoricComponent } from '@/components/aws/vista-eventos/info/Ec2ConsumeViewInUseInterfacesHistoricComponent';
-import { Ec2ConsumneViewInstance } from '@/interfaces/vista-consumos/ec2ConsumeViewInterfaces';
+import { Boxes, Cpu, Database, Inbox, ListChecks, Network, Server, Table2 } from 'lucide-react';
 import { EventsApiResponse } from '@/interfaces/vista-eventos/eventsViewInterfaces';
 
 interface EventsViewInfoCardsComponentProps {

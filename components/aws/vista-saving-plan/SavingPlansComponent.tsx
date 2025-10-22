@@ -1,8 +1,5 @@
 'use client'
-
-import React, { useEffect, useRef } from "react"
 import useSWR from 'swr'
-import * as echarts from "echarts"
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
   Dialog,

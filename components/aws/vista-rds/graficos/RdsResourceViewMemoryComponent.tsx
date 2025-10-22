@@ -1,7 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useRef } from 'react';
-import * as echarts from 'echarts';
+import { useMemo, useRef } from 'react';
 import { bytesToGB } from '@/lib/bytesToMbs';
 import { createChartOption, deepMerge, makeBaseOptions, useECharts } from '@/lib/echartsGlobalConfig';
 import { useTheme } from 'next-themes';

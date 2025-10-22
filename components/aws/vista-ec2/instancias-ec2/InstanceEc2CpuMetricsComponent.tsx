@@ -5,7 +5,7 @@ import { Ec2ResourceViewUsageCpuComponent } from '@/components/aws/vista-ec2/ins
 import { Ec2ResourceViewUsageCreditsComponent } from '@/components/aws/vista-ec2/instancias-ec2/graficos/Ec2ResourceViewUsageCreditsComponent';
 import { Ec2ResourceViewUsageNetworkComponent } from '@/components/aws/vista-ec2/instancias-ec2/graficos/Ec2ResourceViewUsageNetworkComponent';
 import { Ec2ResourceViewInfoComponent } from '@/components/aws/vista-ec2/instancias-ec2/info/Ec2ResourceViewInfoComponent';
-import { AlertCircle, ChartBar, Clock, Info, Loader2 } from 'lucide-react';
+import { AlertCircle, ChartBar, Clock, Info } from 'lucide-react';
 import { MainEc2ResourceViewMetricsSummaryComponent } from '@/components/aws/vista-ec2/instancias-ec2/graficos/MainEc2ResourceViewMetricsSummaryComponent';
 import { Ec2EventsTableComponent } from '@/components/aws/vista-ec2/instancias-ec2/events/Ec2EventsTable';
 import { Ec2InstanceSummary } from '@/interfaces/vista-ec2/ec2ResourceViewInterfaces';

@@ -1,9 +1,9 @@
 'use client'
 import useSWR from 'swr'
-import React, { useEffect, useRef, useMemo } from "react"
+import { useEffect, useRef, useMemo } from "react"
 import * as echarts from "echarts"
 import { Card, CardContent } from "@/components/ui/card"
-import { Server, Cloud, Percent, BarChart3 } from "lucide-react"
+import { Server, Cloud, Percent } from "lucide-react"
 import { TableComponentSpotVsVm } from "@/components/aws/vista-funciones/spot-vs-vm/table/SpotVsVmTableComponent"
 import { SpotVsVmChartComponent } from '@/components/aws/vista-funciones/spot-vs-vm/grafico/SpotVsVmChartComponent'
 

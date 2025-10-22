@@ -1,7 +1,6 @@
 'use client'
 
 import useSWR from 'swr'
-import React from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { BarChart3, Moon, Clock } from 'lucide-react'
 import { TableEC2Metrics } from "@/components/aws/vista-funciones/consumo-horario-habil-vs-no-habil/consumo-ec2-horario-habil-vs-no-habil/table/tableComponent"

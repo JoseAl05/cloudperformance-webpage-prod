@@ -1,6 +1,6 @@
 'use client'
 import useSWR from 'swr'
-import React, { useEffect, useRef, useCallback, useMemo } from "react"
+import { useEffect, useRef, useCallback, useMemo } from "react"
 import * as echarts from "echarts"
 
 const LoaderComponent = () => (

@@ -26,7 +26,6 @@ import {
     Pyramid,
     ChevronDown,
     HandCoins,
-    Earth,
     LineChart,
     TrendingUp,
     Server,
@@ -46,15 +45,13 @@ import {
     Stars,
     Layers,
     Table,
-    Diff,
+    Diff
 } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { usePathname } from 'next/navigation'
 import Image from 'next/image'
 import { useTheme } from 'next-themes'
 import Link from 'next/link'
-import { Button } from '@/components/ui/button'
-
 const useMenuStyles = () => {
     const { resolvedTheme } = useTheme()
 

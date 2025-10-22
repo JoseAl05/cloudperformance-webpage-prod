@@ -2,7 +2,7 @@
 
 import { DataTableSingle } from '@/components/general/data-table/data-table-single'
 import { createTableDetalleHorarioColumns, HorarioData } from '@/components/azure/vista-funciones/analisis-vms-horario/table/tableDetalleHorarioColumns'
-import { useMemo, useEffect } from 'react'
+import { useMemo } from 'react'
 
 interface TableDetalleHorarioProps {
   datos: unknown[]
@@ -10,14 +10,14 @@ interface TableDetalleHorarioProps {
   onSelectVM: (vmName: string) => void
 }
 
-export const TableDetalleHorarioComponent = ({ 
-  datos, 
-  selectedVM, 
-  onSelectVM 
+export const TableDetalleHorarioComponent = ({
+  datos,
+  selectedVM,
+  onSelectVM
 }: TableDetalleHorarioProps) => {
   const datosFormateados = useMemo(() => {
     if (!datos || datos.length === 0) return []
-    
+
     const formatted = datos.map((item) => ({
       vm_name: item.vm_name,
       Tipo_Horario: item.Tipo_Horario,
@@ -30,10 +30,10 @@ export const TableDetalleHorarioComponent = ({
     return formatted.sort((a, b) => {
       const [diaA, mesA, anioA] = a.Fecha.split('/')
       const [diaB, mesB, anioB] = b.Fecha.split('/')
-      
+
       const dateA = new Date(parseInt(anioA), parseInt(mesA) - 1, parseInt(diaA))
       const dateB = new Date(parseInt(anioB), parseInt(mesB) - 1, parseInt(diaB))
-      
+
       return dateB.getTime() - dateA.getTime() // desc
     })
   }, [datos])

@@ -2,7 +2,7 @@
 
 import { LoaderComponent } from "@/components/general_presupuesto/LoaderComponent";
 import { Card, CardContent } from "@/components/ui/card";
-import { ChartBar, Database, HardDrive, Package, Search, CircleDollarSignIcon, Tickets } from "lucide-react";
+import { ChartBar, Search, CircleDollarSignIcon, Tickets } from "lucide-react";
 import useSWR from "swr";
 import { CostosVsPresupuestoChart } from "@/components/presupuesto/costo-vs-presupuesto/graficos/CostosVsPresupuestoViewSummaryComponent";
 import ComparacionMensualTableComponent from "@/components/presupuesto/costo-vs-presupuesto/table/ComparacionMensualTableComponent";

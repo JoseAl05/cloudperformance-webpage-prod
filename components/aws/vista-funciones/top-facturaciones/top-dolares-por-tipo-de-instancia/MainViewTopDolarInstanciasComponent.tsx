@@ -1,6 +1,6 @@
 'use client'
 import useSWR from 'swr'
-import React, { useEffect, useRef, useState } from "react"
+import { useRef, useState } from "react"
 import * as echarts from "echarts"
 import { TableComponentTop } from "@/components/aws/vista-funciones/top-facturaciones/top-dolares-por-tipo-de-instancia/table/TopTableComponent"
 import { Card, CardContent, CardTitle, CardHeader } from '@/components/ui/card'
@@ -10,9 +10,8 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
+  SelectValue
 } from "@/components/ui/select"
-import { Button } from "@/components/ui/button"
 import { TopFacturacionChartComponent } from '@/components/aws/vista-funciones/top-facturaciones/grafico/TopFacturacionChartComponent'
 
 const fetcher = (url: string) =>

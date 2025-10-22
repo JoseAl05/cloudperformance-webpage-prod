@@ -1,5 +1,4 @@
 import { MainViewConsumoVmComponent } from '@/components/azure/vista-consumo-vm/MainViewConsumoVmComponent';
-import { Hourglass } from 'lucide-react';
 import { Suspense } from 'react';
 
 export default function ConsumoVm() {

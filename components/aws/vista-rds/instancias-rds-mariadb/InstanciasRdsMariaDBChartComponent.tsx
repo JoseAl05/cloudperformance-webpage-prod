@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useRef, useEffect } from "react";
 import useSWR from "swr";
 import * as echarts from "echarts";
-import { Database, BarChart3, HardDrive, ChartBar } from "lucide-react";
+import { Database, HardDrive, ChartBar } from "lucide-react";
 import { RdsMariaDBResourceViewInfoComponent } from "@/components/aws/vista-rds/instancias-rds-mariadb/info/RdsMariaDBResourceViewInfoComponent";
 import { RdsMariaDBEventsTableComponent } from "@/components/aws/vista-rds/instancias-rds-mariadb/events/RdsMariaDBEventsTable";
 import { RdsResourceViewCpuCreditsComponent } from '@/components/aws/vista-rds/graficos/RdsResourceViewCpuCreditsComponent';

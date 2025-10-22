@@ -1,22 +1,10 @@
 'use client'
-
-import { useRef, useEffect, useState, useMemo } from 'react';
 import useSWR from 'swr';
 
-import { TrendingUp, DollarSign, Download, Calendar } from 'lucide-react';
+import { TrendingUp, DollarSign, Calendar } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import {
-    Select,
-    SelectTrigger,
-    SelectValue,
-    SelectContent,
-    SelectItem,
-} from "@/components/ui/select";
 import { aws_regions } from '@/lib/aws_regions';
 import { LoaderComponent } from '@/components/general/LoaderComponent';
-import { createChartOption, deepMerge, makeBaseOptions, useECharts } from '@/lib/echartsGlobalConfig';
-import { useTheme } from 'next-themes';
 import { TendenciaFacturacionLineChartComponent } from '@/components/aws/vista-facturacion/tendencia-facturacion/grafico/TendenciaFacturacionLineChartComponent';
 
 interface TendenciaFacturacionProps {

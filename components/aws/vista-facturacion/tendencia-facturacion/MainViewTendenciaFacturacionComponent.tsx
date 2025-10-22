@@ -1,9 +1,7 @@
 // components/aws/vista-facturacion/tendencia-facturacion/MainViewTendenciaFacturacionComponent.tsx
 import { FiltersComponent } from '@/components/general/filters/FiltersComponent'
 import { TendenciaFacturacionChartComponent } from '@/components/aws/vista-facturacion/tendencia-facturacion/TendenciaFacturacionChartComponent'
-import { Download, Filter, TrendingUp } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-
+import { TrendingUp } from 'lucide-react'
 export const MainViewTendenciaFacturacionComponent = () => {
     return (
         <div className='w-full min-w-0 space-y-4'>

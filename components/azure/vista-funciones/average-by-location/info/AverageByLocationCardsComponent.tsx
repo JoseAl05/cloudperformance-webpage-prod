@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { AverageByLocation, AverageByLocationData } from '@/interfaces/vista-promedio-por-localizacion/avgByLocationInterfaces'
 import { cn } from '@/lib/utils';
-import { BarChart2, Boxes, CalendarClock, ChartBar, MapPin } from 'lucide-react';
+import { Boxes, CalendarClock, ChartBar, MapPin } from 'lucide-react';
 
 interface AverageByLocationCardsComponentProps {
     data: AverageByLocation[];

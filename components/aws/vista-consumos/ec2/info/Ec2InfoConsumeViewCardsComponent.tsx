@@ -1,6 +1,6 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { ChevronDown, ChevronUp, Computer, Cpu, HardDrive, List, Minus, MonitorCheck, MonitorX, Network, Zap } from 'lucide-react';
+import { ChevronDown, ChevronUp, Computer, Cpu, HardDrive, List, Minus, MonitorX, Network, Zap } from 'lucide-react';
 import { Ec2ConsumeViewAttachedDiskHistoricComponent } from '@/components/aws/vista-consumos/ec2/info/Ec2ConsumeViewAttachedDiskHistoricComponent';
 import { Ec2ConsumeViewStoppedInstancesHistoricComponent } from '@/components/aws/vista-consumos/ec2/info/Ec2ConsumeViewStoppedInstancesHistoricComponent';
 import { Ec2ConsumeViewInUseInterfacesHistoricComponent } from '@/components/aws/vista-consumos/ec2/info/Ec2ConsumeViewInUseInterfacesHistoricComponent';

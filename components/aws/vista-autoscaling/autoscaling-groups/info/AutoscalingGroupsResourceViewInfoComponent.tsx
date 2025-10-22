@@ -2,7 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Settings, Globe, Activity, History, Network, Users, ShieldCheck } from 'lucide-react';
+import { Settings, Globe, Activity, History, Network, Users } from 'lucide-react';
 import {
     Accordion,
     AccordionContent,

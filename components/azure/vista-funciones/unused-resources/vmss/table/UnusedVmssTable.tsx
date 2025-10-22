@@ -1,6 +1,4 @@
 import { createColumns } from '@/components/general/data-table/columns';
-import { UnusedVm } from '@/interfaces/vista-unused-resources/unusedVmInterfaces'
-import { UnusedVmColumns } from '@/components/azure/vista-funciones/unused-resources/vm/table/UnusedVmColumns';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { DataTableGrouping } from '@/components/general/data-table/data-table-grouping';
 import { UnusedVmss } from '@/interfaces/vista-unused-resources/unusedVmssInterface';

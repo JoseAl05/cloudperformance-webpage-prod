@@ -1,5 +1,4 @@
 "use client";
-import React from "react";
 import { TopRecursosChart } from "@/components/aws/vista-funciones/top-facturaciones/top-recursos/grafico/topRecursosGroupBy";
 import { MapPin, Layers, Grid } from "lucide-react";
 

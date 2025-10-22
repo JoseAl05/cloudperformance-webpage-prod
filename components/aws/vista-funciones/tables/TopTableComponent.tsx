@@ -4,7 +4,6 @@ import useSWR from "swr"
 import { ColumnDef } from "@tanstack/react-table"
 import { DataTableSingle } from "@/components/general/data-table/data-table-single"
 import { ArrowUpDown } from "lucide-react"
-import { Button } from "@/components/ui/button"
 import { LoaderComponent } from '@/components/general/LoaderComponent'
 
 type TableDataTop = {

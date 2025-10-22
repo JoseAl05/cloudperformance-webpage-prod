@@ -1,6 +1,4 @@
 'use client'
-
-import { useEffect, useMemo, useState } from 'react'
 import useSWR from 'swr'
 import { LoaderComponent } from '@/components/general/LoaderComponent'
 import { MessageCard } from '@/components/azure/cards/MessageCards'

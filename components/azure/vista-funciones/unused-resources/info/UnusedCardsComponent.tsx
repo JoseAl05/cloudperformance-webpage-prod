@@ -1,12 +1,8 @@
 "use client";
 
 import React, { useMemo } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
-import { Cpu, MemoryStick, HardDrive, Network, Dot, Info, Computer, Router } from "lucide-react";
-import { format } from "date-fns";
+import { Card, CardContent } from "@/components/ui/card";
+import { Cpu, MemoryStick, HardDrive, Computer, Router } from "lucide-react";
 import { UnusedVm, UnusedVmInterfaceDataIpConfig } from '@/interfaces/vista-unused-resources/unusedVmInterfaces';
 import { UnusedVmss } from '@/interfaces/vista-unused-resources/unusedVmssInterface';
 

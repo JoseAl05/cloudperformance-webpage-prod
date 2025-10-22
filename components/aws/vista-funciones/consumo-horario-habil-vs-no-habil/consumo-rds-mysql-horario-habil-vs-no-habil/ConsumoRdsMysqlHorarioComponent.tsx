@@ -1,7 +1,6 @@
 'use client'
 
 import useSWR from 'swr'
-import React from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { BarChart3, Clock, Moon } from 'lucide-react'
 import { TableRdsMysqlMetrics } from "@/components/aws/vista-funciones/consumo-horario-habil-vs-no-habil/consumo-rds-mysql-horario-habil-vs-no-habil/table/tableComponent"

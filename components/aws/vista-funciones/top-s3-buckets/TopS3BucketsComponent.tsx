@@ -1,8 +1,7 @@
 'use client'
 
 import useSWR from 'swr'
-import React from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Database, Package, HardDrive, AlertCircle } from 'lucide-react'
 import { TopS3BucketsChart } from '@/components/aws/vista-funciones/top-s3-buckets/grafico/TopS3BucketsChart'
 import { TrendLineChart } from '@/components/aws/vista-funciones/top-s3-buckets/grafico/TrendLineChart'

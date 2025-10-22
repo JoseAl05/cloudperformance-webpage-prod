@@ -1,6 +1,6 @@
 'use client'
 import useSWR from 'swr'
-import React, { useEffect, useRef, useMemo, useCallback } from "react"
+import { useEffect, useRef, useMemo, useCallback } from "react"
 import * as echarts from "echarts"
 import { Card, CardContent } from '@/components/ui/card'
 import { AlertTriangle, CheckCircle, TrendingDown, BarChart3 } from "lucide-react"

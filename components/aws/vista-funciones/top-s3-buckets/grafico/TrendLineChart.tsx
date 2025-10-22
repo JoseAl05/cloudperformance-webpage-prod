@@ -1,8 +1,5 @@
 'use client'
-
-import useSWR from 'swr'
-import React, { useEffect, useMemo, useRef } from 'react'
-import * as echarts from 'echarts'
+import { useMemo, useRef } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useTheme } from 'next-themes'
 import { createChartOption, deepMerge, makeBaseOptions, useECharts } from '@/lib/echartsGlobalConfig'

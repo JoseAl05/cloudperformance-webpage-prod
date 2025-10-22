@@ -1,6 +1,5 @@
 'use client'
 import useSWR from 'swr'
-import React from "react"
 import { Card, CardContent } from '@/components/ui/card'
 import { Calendar, MapPin, Hash, Tag, Clock, FolderTree, Cloud } from 'lucide-react'
 import { VmCpuUsageComponent, VmMemoryUsageComponent, VmDiskUsageComponent } from '@/components/azure/vista-recursos-vm/graficos/VmMetricChartsComponent'

@@ -1,7 +1,7 @@
 'use client'
 
 import useSWR from 'swr'
-import React, { useMemo, useRef, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { useTheme } from 'next-themes'
 import type { EChartsOption } from 'echarts'
 import { LoaderComponent } from '@/components/general/LoaderComponent'

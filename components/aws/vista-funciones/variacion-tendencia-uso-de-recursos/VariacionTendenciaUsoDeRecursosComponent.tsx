@@ -1,11 +1,7 @@
 'use client'
 
 import useSWR from 'swr'
-import React, { act } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Database, Package, HardDrive, TrendingUp, TrendingDown, TrendingUpDown, CalendarClock, CalendarFold, CalendarDays, CalendarRange } from 'lucide-react'
-import { MetricPoint, ResourceMetrics } from '@/interfaces/vista-variacion-tendencia-uso-de-recursos/variacionTendenciaUsoDeRecursosViewInterface'
-import { TrendLineChart } from '@/components/aws/vista-funciones/variacion-tendencia-uso-de-recursos/grafico/TrendLineChart'
+import { MetricPoint, ResourceMetrics } from '@/interfaces/vista-variacion-tendencia-uso-de-recursos/variacionTendenciaUsoDeRecursosViewInterface';
 import { DualSeriesChart } from '@/components/aws/vista-funciones/variacion-tendencia-uso-de-recursos/grafico/TrendLineChartv2'
 import { bytesToGB } from '@/lib/bytesToMbs'
 import { VariacionTendenciaUsoDeRecursosCardsComponent } from '@/components/aws/vista-funciones/variacion-tendencia-uso-de-recursos/info/VariacionTendenciaUsoDeRecursosCardsComponent'
@@ -18,7 +14,6 @@ const fetcher = (url: string) =>
       'Content-Type': 'application/json',
     },
   }).then(res => res.json())
-
 
 interface VariacionTendenciaUsoDeRecursosProps {
   startDate: Date

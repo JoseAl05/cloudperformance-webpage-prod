@@ -1,9 +1,7 @@
 // components/aws/vista-rds/avg-uso-loc-inst-rds-pg/MainViewInstanciasAVGUsoLocInstRdsPgComponent.tsx
 import { FiltersComponent } from '@/components/general/filters/FiltersComponent'
 import { AVGUsoLocInstRdsPgChartComponent } from '@/components/aws/vista-prom-loc/avg-uso-loc-inst-rds-pg/AVGUsoLocInstRdsPgChartComponent'
-import { Download, Filter, Database } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-
+import { Database } from 'lucide-react'
 export const MainViewInstanciasAVGUsoLocInstRdsPgComponent = () => {
     return (
         <div className='w-full min-w-0 space-y-4'>

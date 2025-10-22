@@ -1,9 +1,8 @@
 "use client";
 
 import useSWR from "swr";
-import { ChartBar, ChartNoAxesColumnIcon, Clock, FileSpreadsheet } from "lucide-react";
+import { ChartBar, FileSpreadsheet } from "lucide-react";
 import { MainEc2ResourceInfraUsedViewMetricsSummaryComponent } from "@/components/aws/vista-recursos/infrautilizadas/eks/graficos/MainEc2ResourceInfraUsedViewMetricsSummaryComponent";
-import { DataTableSingle } from "@/components/general/data-table/data-table-single";
 import { Ec2ResourceInfraUsedViewColumns } from "@/components/aws/vista-recursos/infrautilizadas/eks/table/ec2ResourceInfraUsedTableColumns";
 import { DataTableGrouping } from '@/components/general/data-table/data-table-grouping';
 import { ResourceInfraUsedViewUsageCreditsComponent } from '@/components/aws/vista-recursos/infrautilizadas/graficos/ResourceInfraUsedViewUsageCreditsComponent';

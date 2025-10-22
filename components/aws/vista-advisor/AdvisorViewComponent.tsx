@@ -1,16 +1,12 @@
 'use client'
-
-import { useEffect, useMemo, useState } from 'react'
 import useSWR from 'swr'
 import { LoaderComponent } from '@/components/general/LoaderComponent'
 import { MessageCard } from '@/components/aws/cards/MessageCards'
-import { AlertCircle, ChartBar, Info, Search, ChevronDown, ChevronRight, X } from 'lucide-react'
+import { AlertCircle, ChartBar, Info } from 'lucide-react'
 import type {
     AdvisorApiResponse,
-    AdvisorCategoryGroup,
-    AdvisorCheckDetails,
     AdvisorRecommendation,
-    AllAdvisorRecommendations,
+    AllAdvisorRecommendations
 } from '@/interfaces/vista-advisor/advisorViewInterfaces'
 import { AdvisorViewPieChartComponent } from '@/components/aws/vista-advisor/grafico/AdvisorViewPieChartComponent'
 import { AdvisorViewInfoComponent } from '@/components/aws/vista-advisor/info/AdvisorViewInfoComponent'

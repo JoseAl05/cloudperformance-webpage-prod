@@ -2,15 +2,13 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Clock, Earth, Globe, HardDrive, History, Laptop, MapPin, Network, Server, Settings } from 'lucide-react';
+import { Globe, HardDrive, History, MapPin, Network, Server } from 'lucide-react';
 import {
     Accordion,
     AccordionContent,
     AccordionItem,
-    AccordionTrigger,
+    AccordionTrigger
 } from '@/components/ui/accordion'
-import { Button } from '@/components/ui/button';
-import { useState } from 'react';
 import { Ec2ResourceViewHistoricInfoComponent } from '@/components/aws/vista-recursos/infrautilizadas/ec2/info/Ec2ResourceViewHistoricInfoComponent';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { getUptime } from '@/lib/getUptimeInstance';

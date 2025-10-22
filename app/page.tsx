@@ -1,6 +1,3 @@
-import { Header } from '@/components/aws/landing/Header';
-import { HeroSection } from '@/components/aws/landing/HeroSection';
-
 export default function Home() {
   return (
     <div className="min-h-screen bg-background">

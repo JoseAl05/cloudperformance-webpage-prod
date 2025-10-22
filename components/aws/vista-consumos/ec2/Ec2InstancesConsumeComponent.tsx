@@ -1,7 +1,7 @@
 'use client'
 
 import useSWR from 'swr'
-import { ChartBar, AlertCircle, Loader2, Info, Clock } from 'lucide-react'
+import { ChartBar, AlertCircle, Info, Clock } from 'lucide-react'
 import { Ec2ResourceConsumeViewUsageCpuComponent } from '@/components/aws/vista-consumos/ec2/graficos/Ec2ResourceConsumeViewUsageCpuComponent'
 import { Ec2ResourceConsumeViewUsageCreditsComponent } from '@/components/aws/vista-consumos/ec2/graficos/Ec2ResourceConsumeViewUsageCreditsComponent'
 import { Ec2InfoConsumeViewComponent } from '@/components/aws/vista-consumos/ec2/info/Ec2InfoConsumeViewComponent'

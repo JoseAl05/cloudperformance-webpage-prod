@@ -14,9 +14,8 @@ import {
 import {
     Popover,
     PopoverContent,
-    PopoverTrigger,
+    PopoverTrigger
 } from '@/components/ui/popover';
-import { azure_regions } from '@/lib/azure_regions';
 import { azure_services } from '@/lib/azure_services';
 
 interface ServiceFilterComponentProps {

@@ -1,8 +1,7 @@
 import { createColumns } from '@/components/general/data-table/columns';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { rdsOracleEventColumns } from '@/components/aws/vista-rds/instancias-rds-oracle/events/RdsOracleEventsColumns';
-import { Calendar, Database, AlertCircle, Indent } from 'lucide-react';
-import { json } from 'stream/consumers';
+import { Calendar, Database, AlertCircle } from 'lucide-react';
 import { DataTableSingle } from '@/components/general/data-table/data-table-single';
 
 interface RdsOracleEventsTableComponentProps {

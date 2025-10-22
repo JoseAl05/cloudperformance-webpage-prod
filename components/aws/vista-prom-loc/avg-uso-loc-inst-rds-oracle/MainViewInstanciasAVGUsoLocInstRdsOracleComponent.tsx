@@ -1,9 +1,7 @@
 // components/aws/vista-rds/avg-uso-loc-inst-rds-oracle/MainViewInstanciasAVGUsoLocInstRdsOracleComponent.tsx
 import { FiltersComponent } from '@/components/general/filters/FiltersComponent'
 import { AVGUsoLocInstRdsOracleChartComponent } from '@/components/aws/vista-prom-loc/avg-uso-loc-inst-rds-oracle/AVGUsoLocInstRdsOracleChartComponent'
-import { Download, Filter, Database } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-
+import { Database } from 'lucide-react'
 export const MainViewInstanciasAVGUsoLocInstRdsOracleComponent = () => {
     return (
         <div className='w-full min-w-0 space-y-4'>

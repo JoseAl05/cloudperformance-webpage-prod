@@ -1,7 +1,7 @@
 import React from 'react'
-import { FiltersComponent } from '@/components/general/filters/FiltersComponent'
-import { Zap, CircleDollarSign } from 'lucide-react'
-import MainMenuComponent from '@/components/presupuesto/MainMenuComponent' // importa tu HomePage.tsx
+import { CircleDollarSign } from 'lucide-react'
+import MainMenuComponent from '@/components/presupuesto/MainMenuComponent'
+// importa tu HomePage.tsx
 // import { AdvisorViewComponent } from '@/components/presupuesto/AdvisorViewComponent'
 
 export const MainViewPresupuestoComponent: React.FC = () => {

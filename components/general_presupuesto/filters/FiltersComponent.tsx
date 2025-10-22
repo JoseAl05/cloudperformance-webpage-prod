@@ -29,8 +29,6 @@ import { AutoScalingGroupFilterComponent } from '@/components/general/filters/Ec
 import { MetricsFilterComponent } from '@/components/general/filters/MetricsFilterComponent';
 import { MetricsRDSFilterComponent } from '@/components/general/filters/MetricsRDSFilterComponent';
 import { AnioFilterComponent } from '@/components/general_presupuesto/filters/AnioFilterComponent';
-import { boolean } from 'zod';
-
 interface FiltersComponentProps {
     Component: (params: {
         startDate: Date;

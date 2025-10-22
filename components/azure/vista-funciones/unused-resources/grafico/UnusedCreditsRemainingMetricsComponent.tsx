@@ -3,7 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { UnusedVmSeries } from '@/interfaces/vista-unused-resources/unusedVmInterfaces'
 import { UnusedVmssSeries } from '@/interfaces/vista-unused-resources/unusedVmssInterface';
-import { createChartOption, deepMerge, makeBaseOptions, makeLineSeries, useECharts } from '@/lib/echartsGlobalConfig';
+import { createChartOption, deepMerge, makeBaseOptions, useECharts } from '@/lib/echartsGlobalConfig';
 import { Info } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { useMemo, useRef } from 'react';
