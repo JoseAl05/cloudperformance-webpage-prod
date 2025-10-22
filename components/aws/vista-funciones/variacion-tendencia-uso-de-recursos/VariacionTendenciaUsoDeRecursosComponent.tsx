@@ -106,7 +106,6 @@ export const VariacionTendenciaUsoDeRecursosComponent = ({
       metric?.includes('Average') ? 'Promedio' :
         metric?.split("\n+")[1]
 
-  console.log(safeDataActualRange)
   return (
     <div className="space-y-8 p-4">
       <VariacionTendenciaUsoDeRecursosCardsComponent

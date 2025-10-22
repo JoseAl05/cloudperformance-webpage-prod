@@ -52,7 +52,6 @@ const formatBytes = (v: number) => {
 };
 
 const formatMetricValue = (metric: string, value: number) => {
-  console.log(metric);
   if (value === null || value === undefined || Number.isNaN(value)) return 'N/A';
   const m = metric.toLowerCase();
   if (m.includes('uso de cpu') || m.includes('%') || m.includes('percent')) {

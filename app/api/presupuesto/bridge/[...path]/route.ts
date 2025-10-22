@@ -32,7 +32,6 @@ async function proxy(
     return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
   }
 
-  console.log(token)
 
   const incomingUrl = new URL(req.url);
   const targetUrl = `${BASE}/${subpath}${incomingUrl.search}`;

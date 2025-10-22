@@ -65,15 +65,15 @@ export const TrendLineChart = ({
     //   return `${d.getUTCDate()}/${d.getUTCMonth() + 1}/${d.getUTCFullYear()}`
     // })
     const times = trendData.map(item => item.sync_time);
-    console.log(`TIMES: ${times}`)
+
     const dateCount = times.length;
-    console.log(`DATECOUNT: ${dateCount}`)
+
     const start = dateCount ? parseISO(times[0]) : null;
-    console.log(`START: ${start}`)
+
     const end = dateCount ? parseISO(times[dateCount - 1]) : null;
-    console.log(`END: ${end}`)
+
     const daysDiff = start && end ? Math.floor((+end - +start) / 86_400_000) + 1 : 0;
-    console.log(`DAYSDIFF: ${daysDiff}`)
+
 
     const bigStep = Math.max(1, Math.ceil(dateCount / 12));
     const midStep = Math.max(1, Math.ceil(dateCount / 20));
