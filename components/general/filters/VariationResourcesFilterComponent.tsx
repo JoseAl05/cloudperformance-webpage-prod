@@ -145,7 +145,6 @@ export const VariationResourcesFilterComponent = ({
     const handleInstanceToggle = (val: string) => {
         const curr = selectedArray.slice();
         if (val === 'all' && resource !== 'all') {
-            // console.log(list.toString());
             setResource(list.toString());
             return;
         }
