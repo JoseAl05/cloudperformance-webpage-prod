@@ -172,7 +172,7 @@ export const CostosVsPresupuestoChart = ({ data, facturacionData }: CostosVsPres
             metricType: 'default',
         });
 
-        const series: any[] = [
+        const series: unknown[] = [
             {
                 kind: 'line',
                 name: 'Presupuesto Mensual',
@@ -191,7 +191,7 @@ export const CostosVsPresupuestoChart = ({ data, facturacionData }: CostosVsPres
                         },
                         tooltip: {
                             trigger: 'item',
-                            formatter: (param: any) => {
+                            formatter: (param: unknown) => {
                                 if (param.data.coord) {
                                     const date = new Date(param.data.coord[0]).toLocaleDateString('es-CL', { 
                                         year: 'numeric', 
@@ -207,14 +207,14 @@ export const CostosVsPresupuestoChart = ({ data, facturacionData }: CostosVsPres
                                 type: 'max',
                                 name: 'Max',
                                 label: {
-                                    formatter: (params: any) => `Max\n${params.data.coord[1].toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                                    formatter: (params: unknown) => `Max\n${params.data.coord[1].toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
                                 }
                             },
                             {
                                 type: 'min',
                                 name: 'Min',
                                 label: {
-                                    formatter: (params: any) => `Min\n${params.data.coord[1].toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                                    formatter: (params: unknown) => `Min\n${params.data.coord[1].toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
                                 }
                             }
                         ]
@@ -239,7 +239,7 @@ export const CostosVsPresupuestoChart = ({ data, facturacionData }: CostosVsPres
                         },
                         tooltip: {
                             trigger: 'item',
-                            formatter: (param: any) => {
+                            formatter: (param: unknown) => {
                                 if (param.data.coord) {
                                     const date = new Date(param.data.coord[0]).toLocaleDateString('es-CL', { 
                                         year: 'numeric', 
@@ -255,14 +255,14 @@ export const CostosVsPresupuestoChart = ({ data, facturacionData }: CostosVsPres
                                 type: 'max',
                                 name: 'Max',
                                 label: {
-                                    formatter: (params: any) => `Max\n${params.data.coord[1].toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                                    formatter: (params: unknown) => `Max\n${params.data.coord[1].toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
                                 }
                             },
                             {
                                 type: 'min',
                                 name: 'Min',
                                 label: {
-                                    formatter: (params: any) => `Min\n${params.data.coord[1].toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                                    formatter: (params: unknown) => `Min\n${params.data.coord[1].toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
                                 }
                             }
                         ]
@@ -287,7 +287,7 @@ export const CostosVsPresupuestoChart = ({ data, facturacionData }: CostosVsPres
                         },
                         tooltip: {
                             trigger: 'item',
-                            formatter: (param: any) => {
+                            formatter: (param: unknown) => {
                                 if (param.data.coord) {
                                     const date = new Date(param.data.coord[0]).toLocaleDateString('es-CL', { 
                                         year: 'numeric', 
@@ -303,14 +303,14 @@ export const CostosVsPresupuestoChart = ({ data, facturacionData }: CostosVsPres
                                 type: 'max',
                                 name: 'Max',
                                 label: {
-                                    formatter: (params: any) => `Max\n${params.data.coord[1].toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                                    formatter: (params: unknown) => `Max\n${params.data.coord[1].toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
                                 }
                             },
                             {
                                 type: 'min',
                                 name: 'Min',
                                 label: {
-                                    formatter: (params: any) => `Min\n${params.data.coord[1].toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                                    formatter: (params: unknown) => `Min\n${params.data.coord[1].toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
                                 }
                             }
                         ]
@@ -343,7 +343,7 @@ export const CostosVsPresupuestoChart = ({ data, facturacionData }: CostosVsPres
                         },
                         tooltip: {
                             trigger: 'item',
-                            formatter: (param: any) => {
+                            formatter: (param: unknown) => {
                                 if (param.data.coord) {
                                     const date = new Date(param.data.coord[0]).toLocaleDateString('es-CL', { 
                                         year: 'numeric', 
@@ -359,14 +359,14 @@ export const CostosVsPresupuestoChart = ({ data, facturacionData }: CostosVsPres
                                 type: 'max',
                                 name: 'Max',
                                 label: {
-                                    formatter: (params: any) => `Max\n${params.data.coord[1].toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                                    formatter: (params: unknown) => `Max\n${params.data.coord[1].toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
                                 }
                             },
                             {
                                 type: 'min',
                                 name: 'Min',
                                 label: {
-                                    formatter: (params: any) => `Min\n${params.data.coord[1].toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                                    formatter: (params: unknown) => `Min\n${params.data.coord[1].toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
                                 }
                             }
                         ]
@@ -399,14 +399,14 @@ export const CostosVsPresupuestoChart = ({ data, facturacionData }: CostosVsPres
                     }
                 },
                 tooltip: {
-                    formatter: (params: any) => {
+                    formatter: (params: unknown) => {
                         if (Array.isArray(params)) {
                             const date = new Date(params[0].value[0]).toLocaleDateString('es-CL', { 
                                 year: 'numeric', 
                                 month: 'long' 
                             });
                             let tooltip = `<strong>${date}</strong><br/>`;
-                            params.forEach((param: any) => {
+                            params.forEach((param: unknown) => {
                                 tooltip += `${param.marker} ${param.seriesName}: ${param.value[1].toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}<br/>`;
                             });
                             return tooltip;
