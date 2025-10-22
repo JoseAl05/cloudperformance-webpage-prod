@@ -93,8 +93,6 @@ export const PresupuestoMensualTableComponent = ({
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
 
-  console.log(data)
-  console.log(centrosCosto)
 
   // Transformar datos anuales a lista plana con nombre del centro
   const presupuestos: PresupuestoAnualMensual[] = useMemo(() => {
@@ -117,7 +115,6 @@ export const PresupuestoMensualTableComponent = ({
     );
   }, [data, centrosCosto]);
 
-  console.log(presupuestos)
 
   const handleSort = (field: keyof PresupuestoAnualMensual) => {
     if (sortField === field) {

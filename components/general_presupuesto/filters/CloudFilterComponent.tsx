@@ -40,8 +40,7 @@ export const CloudFilterComponent = ({
       ...(isAws ? [{ label: "Cloud AWS", value: "AWS" }] : []),
       ...(isAzure ? [{ label: "Cloud AZURE", value: "AZURE" }] : []),
     ];
-  
-    // console.log(cloudOptions);
+
 
     const [open, setOpen] = useState(false);
 

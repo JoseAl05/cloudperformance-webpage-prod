@@ -114,7 +114,6 @@ export const CostosVsPresupuestoComponent = ({ cloud, anio }: CentroDeCostoCompo
     );
   }
 
-  console.log(dataFacturacion)
 
   // Función para calcular totales de presupuesto anual
   const calcularTotales = (presupuesto: PresupuestoAnual) => {
