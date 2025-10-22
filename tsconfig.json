@@ -9,6 +9,7 @@
     "esModuleInterop": true,
     "module": "esnext",
     "moduleResolution": "bundler",
+    "tsBuildInfoFile": ".tsbuildinfo",
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "preserve",

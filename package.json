@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
-    "start": "next start",
+    "start": "next start -p 3005",
     "lint": "next lint"
   },
   "dependencies": {
@@ -46,6 +46,7 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "3",
+    "@next/bundle-analyzer": "^16.0.0",
     "@tailwindcss/postcss": "4",
     "@types/bcryptjs": "2.4.6",
     "@types/node": "24",
