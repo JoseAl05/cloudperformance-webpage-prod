@@ -18,7 +18,6 @@ export const MainRdsResourceViewMetricsSummaryComponentComponent = ({
     data,
     rdsType
 }: MainRdsResourceViewMetricsSummaryComponentProps) => {
-    console.log(data);
     if (!data || !data.calculated_summary) {
         return (
             <div className='text-center text-gray-500 py-6'>
@@ -27,9 +26,17 @@ export const MainRdsResourceViewMetricsSummaryComponentComponent = ({
         );
     }
 
-    const summary = data.calculated_summary ;
+    const summary = data.calculated_summary;
 
-    const today = new Date().toLocaleDateString();
+    const today = new Date();
+    const sortedMetrics = [...data.metrics_data].sort((a, b) => new Date(b.sync_time.$date).getTime() - new Date(a.sync_time.$date).getTime());
+    const latestMetric = sortedMetrics[0];
+    const referenceDate = new Date(latestMetric.sync_time.$date);
+    const isToday =
+        referenceDate.getDate() === today.getDate() &&
+        referenceDate.getMonth() === today.getMonth() &&
+        referenceDate.getFullYear() === today.getFullYear();
+    const dateLabel = referenceDate.toLocaleDateString();
     let cardCreditBalanceValue = 0;
     let cardCreditUsageValue = 0;
     let cardCreditPercentValue = 0;
@@ -117,7 +124,9 @@ export const MainRdsResourceViewMetricsSummaryComponentComponent = ({
                                         <Icon className='h-4 w-4 text-blue-600 dark:text-blue-400' />
                                     </div>
                                     <p className='text-xs text-muted-foreground font-medium'>
-                                        {today}
+                                        {
+                                            isToday ? 'Actual' : dateLabel
+                                        }
                                     </p>
                                 </div>
                                 <h3 className='text-sm font-medium text-muted-foreground mt-2'>
