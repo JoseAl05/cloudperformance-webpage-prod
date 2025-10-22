@@ -327,7 +327,7 @@ const GroupRow = ({
     onItemsPageSizeChange: (size: number) => void
     columnsLength: number
 }) => (
-    <TableRow className="bg-muted/50 hover:bg-muted/70">
+    <TableRow className="">
         <TableCell colSpan={columnsLength} className="font-semibold">
             <div className="flex flex-wrap items-center gap-2">
                 <Button
@@ -545,7 +545,7 @@ export function DataTableGrouping<TData, TValue>({
                                 }
                                 const isChild = enableGrouping && rowData.__isChildRow
                                 return (
-                                    <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'} className={isChild ? 'bg-background border-l-4 border-l-blue-200' : ''}>
+                                    <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'} className={isChild ? 'border-l-4 border-l-blue-200' : ''}>
                                         {row.getVisibleCells().map((cell) => (
                                             <TableCell key={cell.id} className={isChild ? 'pl-8' : ''}>
                                                 {flexRender(cell.column.columnDef.cell, cell.getContext())}
