@@ -266,7 +266,6 @@ export const InstanciasRdsPgChartComponent = ({
     );
   }
 
-  console.log(metricsData);
 
   return (
     <>
