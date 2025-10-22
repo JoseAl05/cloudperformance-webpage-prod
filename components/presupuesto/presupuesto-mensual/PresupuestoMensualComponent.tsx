@@ -27,11 +27,11 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { PresupuestoMensualTableComponent } from "./table/PresupuestoMensualTableComponent";
+import { PresupuestoMensualTableComponent } from "@/components/presupuesto/presupuesto-mensual/table/PresupuestoMensualTableComponent";
 import {
   PresupuestoMensualFormComponent,
   PresupuestoMensual,
-} from "./form/PresupuestoMensualFormComponent";
+} from "@/components/presupuesto/presupuesto-mensual/form/PresupuestoMensualFormComponent";
 import { SessionGate } from "@/components/general_presupuesto/session/SesionGate";
 
 interface PresupuestoMensualComponentProps {

@@ -1,6 +1,6 @@
 import { createColumns } from '@/components/general/data-table/columns';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { rdsMysqlEventColumns } from './RdsMySQLEventsColumns';
+import { rdsMysqlEventColumns } from '@/components/aws/vista-rds/instancias-rds-mysql/events/RdsMySQLEventsColumns';
 import { Calendar, Database, AlertCircle, Indent } from 'lucide-react';
 import { json } from 'stream/consumers';
 import { DataTableSingle } from '@/components/general/data-table/data-table-single';

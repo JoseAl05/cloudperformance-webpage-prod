@@ -3,11 +3,11 @@
 import { LoaderComponent } from '@/components/general/LoaderComponent'
 import { EventsApiResponse } from '@/interfaces/vista-eventos/eventsViewInterfaces'
 import useSWR from 'swr'
-import { MessageCard } from '../cards/MessageCards'
+import { MessageCard } from '@/components/aws/cards/MessageCards'
 import { AlertCircle, ChartBar, Info } from 'lucide-react'
-import { EventsViewTableComponent } from './table/EventsViewTableComponent'
-import { EventsViewInfoComponent } from './info/EventsViewInfoComponent'
-import { EventsViewEventCountComponent } from './graficos/EventsViewEventCountComponent'
+import { EventsViewTableComponent } from '@/components/aws/vista-eventos/table/EventsViewTableComponent'
+import { EventsViewInfoComponent } from '@/components/aws/vista-eventos/info/EventsViewInfoComponent'
+import { EventsViewEventCountComponent } from '@/components/aws/vista-eventos/graficos/EventsViewEventCountComponent'
 
 interface EventsViewComponentProps {
     startDate: Date

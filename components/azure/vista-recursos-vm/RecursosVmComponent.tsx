@@ -3,12 +3,12 @@ import useSWR from 'swr'
 import React from "react"
 import { Card, CardContent } from '@/components/ui/card'
 import { Calendar, MapPin, Hash, Tag, Clock, FolderTree, Cloud } from 'lucide-react'
-import { VmCpuUsageComponent, VmMemoryUsageComponent, VmDiskUsageComponent } from './graficos/VmMetricChartsComponent'
-import { VmDeploymentsChartComponent } from './graficos/VmDeploymetsChartComponent'
-import { VmDeploymentsTableComponent } from './table/VmDeploymentsTableComponent'
-import { VmBillingChartComponent } from './graficos/VmBillingChartComponent'
-import { VmMeasuresChartComponent } from './graficos/VmMeasuresChartComponent'
-import { VmBillingPropertiesComponent } from './graficos/VmBillingPropertiesComponent'
+import { VmCpuUsageComponent, VmMemoryUsageComponent, VmDiskUsageComponent } from '@/components/azure/vista-recursos-vm/graficos/VmMetricChartsComponent'
+import { VmDeploymentsChartComponent } from '@/components/azure/vista-recursos-vm/graficos/VmDeploymetsChartComponent'
+import { VmDeploymentsTableComponent } from '@/components/azure/vista-recursos-vm/table/VmDeploymentsTableComponent'
+import { VmBillingChartComponent } from '@/components/azure/vista-recursos-vm/graficos/VmBillingChartComponent'
+import { VmMeasuresChartComponent } from '@/components/azure/vista-recursos-vm/graficos/VmMeasuresChartComponent'
+import { VmBillingPropertiesComponent } from '@/components/azure/vista-recursos-vm/graficos/VmBillingPropertiesComponent'
 
 const LoaderComponent = () => (
   <div className="flex items-center justify-center h-full">

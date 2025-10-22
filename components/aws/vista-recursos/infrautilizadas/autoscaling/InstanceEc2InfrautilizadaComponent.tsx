@@ -1,12 +1,11 @@
 "use client";
 
 import useSWR from "swr";
-import { Ec2ResourceViewUsageCreditsComponent2 } from "./graficos/Ec2ResourceInfraUsedViewUsageCreditsComponent";
 import { ChartBar, ChartNoAxesColumnIcon, Clock, FileSpreadsheet } from "lucide-react";
-import { MainEc2ResourceInfraUsedViewMetricsSummaryComponent } from "./graficos/MainEc2ResourceInfraUsedViewMetricsSummaryComponent";
-import { DataTableSingle } from "@/components/general/data-table/data-table-single";
-import { Ec2ResourceInfraUsedViewColumns } from "./table/ec2ResourceInfraUsedTableColumns";
+import { MainEc2ResourceInfraUsedViewMetricsSummaryComponent } from "@/components/aws/vista-recursos/infrautilizadas/autoscaling/graficos/MainEc2ResourceInfraUsedViewMetricsSummaryComponent";
+import { Ec2ResourceInfraUsedViewColumns } from "@/components/aws/vista-recursos/infrautilizadas/autoscaling/table/ec2ResourceInfraUsedTableColumns";
 import { DataTableGrouping } from '@/components/general/data-table/data-table-grouping';
+import { ResourceInfraUsedViewUsageCreditsComponent } from '@/components/aws/vista-recursos/infrautilizadas/graficos/ResourceInfraUsedViewUsageCreditsComponent';
 
 interface InstanceEc2CInfrautilizadaComponentProps {
   startDate: Date;
@@ -99,7 +98,7 @@ export const InstanceEc2InfrautilizadaComponent = ({
               Métricas de la Instancia
             </h1>
           </div>
-          <Ec2ResourceViewUsageCreditsComponent2 data={metricsData} />
+          <ResourceInfraUsedViewUsageCreditsComponent data={metricsData} />
         </div>
 
 

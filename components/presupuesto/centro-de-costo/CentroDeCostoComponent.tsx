@@ -22,8 +22,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { CentroDeCostoTableComponent } from "./table/CentroDeCostoTableComponent";
-import { CentroDeCostoFormComponent, CentroCosto } from "./form/CentroDeCostoFormComponent";
+import { CentroDeCostoTableComponent } from "@/components/presupuesto/centro-de-costo/table/CentroDeCostoTableComponent";
+import { CentroDeCostoFormComponent, CentroCosto } from "@/components/presupuesto/centro-de-costo/form/CentroDeCostoFormComponent";
 import { SessionGate } from "@/components/general_presupuesto/session/SesionGate";
 
 interface CentroDeCostoComponentProps {

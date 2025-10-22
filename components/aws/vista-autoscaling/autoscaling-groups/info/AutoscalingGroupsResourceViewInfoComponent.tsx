@@ -17,7 +17,7 @@ import {
     DialogTitle,
     DialogTrigger,
 } from '@/components/ui/dialog'
-import { AutoscalingGroupsResourceViewHistoricInfoComponent } from './AutoscalingGroupsResourceViewHistoricInfoComponent';
+import { AutoscalingGroupsResourceViewHistoricInfoComponent } from '@/components/aws/vista-autoscaling/autoscaling-groups/info/AutoscalingGroupsResourceViewHistoricInfoComponent';
 
 interface AutoscalingGroupData {
     sync_time: { $date: string };

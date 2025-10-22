@@ -1,5 +1,5 @@
 import { FiltersComponent } from "@/components/general/filters/FiltersComponent";
-import { InstanceEc2InfrautilizadaComponent } from "./InstanceEc2InfrautilizadaComponent";
+import { InstanceEc2InfrautilizadaComponent } from "@/components/aws/vista-recursos/infrautilizadas/autoscaling/InstanceEc2InfrautilizadaComponent";
 import { Download, Filter, Server } from "lucide-react";
 import { Button } from "@/components/ui/button";
 

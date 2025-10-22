@@ -1,6 +1,6 @@
 'use client'
 import { FiltersComponent } from '@/components/general_azure/filters/FiltersComponent'
-import { AnalisisVMsHorarioChartComponent } from './AnalisisVMsHorarioChartComponent'
+import { AnalisisVMsHorarioChartComponent } from '@/components/azure/vista-funciones/analisis-vms-horario/AnalisisVMsHorarioChartComponent'
 import { TrendingUp } from 'lucide-react'
 
 export const MainViewAnalisisVMsHorarioComponent = () => {

@@ -1,6 +1,6 @@
 import { FiltersComponent } from '@/components/general_azure/filters/FiltersComponent'
 import { PieChart} from 'lucide-react'
-import DeploymentsChartComponent  from './DeploymentsComponent'
+import DeploymentsChartComponent  from '@/components/azure/vista-deployments/DeploymentsComponent'
 
 export const MainViewDeploymentsComponent = () => {
     return (

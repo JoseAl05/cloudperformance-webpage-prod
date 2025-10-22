@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import useSWR from 'swr'
 import { LoaderComponent } from '@/components/general/LoaderComponent'
-import { MessageCard } from '../cards/MessageCards'
+import { MessageCard } from '@/components/aws/cards/MessageCards'
 import { AlertCircle, ChartBar, Info, Search, ChevronDown, ChevronRight, X } from 'lucide-react'
 import type {
     AdvisorApiResponse,
@@ -12,8 +12,8 @@ import type {
     AdvisorRecommendation,
     AllAdvisorRecommendations,
 } from '@/interfaces/vista-advisor/advisorViewInterfaces'
-import { AdvisorViewPieChartComponent } from './grafico/AdvisorViewPieChartComponent'
-import { AdvisorViewInfoComponent } from './info/AdvisorViewInfoComponent'
+import { AdvisorViewPieChartComponent } from '@/components/aws/vista-advisor/grafico/AdvisorViewPieChartComponent'
+import { AdvisorViewInfoComponent } from '@/components/aws/vista-advisor/info/AdvisorViewInfoComponent'
 
 interface AdvisorViewComponentProps {
     advisorCategory: string

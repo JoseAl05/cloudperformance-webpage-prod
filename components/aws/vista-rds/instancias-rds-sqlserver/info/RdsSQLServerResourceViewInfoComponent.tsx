@@ -17,7 +17,7 @@ import {
     DialogTitle,
     DialogTrigger,
 } from '@/components/ui/dialog'
-import { RdsSQLServerResourceViewHistoricInfoComponent } from './RdsSQLServerResourceViewHistoricInfoComponent';
+import { RdsSQLServerResourceViewHistoricInfoComponent } from '@/components/aws/vista-rds/instancias-rds-sqlserver/info/RdsSQLServerResourceViewHistoricInfoComponent';
 
 interface SQLServerInstanceData {
     sync_time: { $date: string };

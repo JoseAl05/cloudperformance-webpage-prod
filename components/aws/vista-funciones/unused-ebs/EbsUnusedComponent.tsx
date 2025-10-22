@@ -3,12 +3,12 @@
 import { LoaderComponent } from '@/components/general/LoaderComponent'
 import { UnusedEbsApiResponse, UnusedEbsMetric, UnusedEbsVolumeInfo } from '@/interfaces/vista-ebs-no-utilizados/ebsUnusedInterfaces'
 import useSWR from 'swr'
-import { MessageCard } from '../../cards/MessageCards'
+import { MessageCard } from '@/components/aws/cards/MessageCards'
 import { AlertCircle, ChartBar, Clock, Info } from 'lucide-react'
-import { EbsUnusedViewInfoComponent } from './info/EbsUnusedViewInfoComponent'
+import { EbsUnusedViewInfoComponent } from '@/components/aws/vista-funciones/unused-ebs/info/EbsUnusedViewInfoComponent'
 import { useMemo } from 'react'
-import { EbsUnusedViewTableComponent } from './table/EbsUnusedViewTableComponent'
-import { EbsUnusedViewMetricsComponentComponent } from './gráficos/EbsUnusedViewMetricsComponent'
+import { EbsUnusedViewTableComponent } from '@/components/aws/vista-funciones/unused-ebs/table/EbsUnusedViewTableComponent'
+import { EbsUnusedViewMetricsComponentComponent } from '@/components/aws/vista-funciones/unused-ebs/gráficos/EbsUnusedViewMetricsComponent'
 
 interface EbsUnusedComponentProps {
     startDate: Date,

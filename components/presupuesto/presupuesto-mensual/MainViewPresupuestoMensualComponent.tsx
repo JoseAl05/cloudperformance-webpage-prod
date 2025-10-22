@@ -4,7 +4,7 @@ import { CircleDollarSign } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SessionGate } from "@/components/general_presupuesto/session/SesionGate";
 import { FiltersComponent } from "@/components/general_presupuesto/filters/FiltersComponent";
-import { PresupuestoMensualComponent } from "./PresupuestoMensualComponent";
+import { PresupuestoMensualComponent } from "@/components/presupuesto/presupuesto-mensual/PresupuestoMensualComponent";
 
 export const MainViewPresupuestoMensualComponent = () => {
   return (

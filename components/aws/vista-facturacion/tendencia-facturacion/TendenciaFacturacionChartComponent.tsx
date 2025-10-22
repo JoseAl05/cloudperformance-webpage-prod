@@ -17,7 +17,7 @@ import { aws_regions } from '@/lib/aws_regions';
 import { LoaderComponent } from '@/components/general/LoaderComponent';
 import { createChartOption, deepMerge, makeBaseOptions, useECharts } from '@/lib/echartsGlobalConfig';
 import { useTheme } from 'next-themes';
-import { TendenciaFacturacionLineChartComponent } from './grafico/TendenciaFacturacionLineChartComponent';
+import { TendenciaFacturacionLineChartComponent } from '@/components/aws/vista-facturacion/tendencia-facturacion/grafico/TendenciaFacturacionLineChartComponent';
 
 interface TendenciaFacturacionProps {
     startDate: Date;

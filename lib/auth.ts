@@ -1,8 +1,8 @@
 import { cookies } from 'next/headers';
 import { NextRequest } from 'next/server';
 import { SignJWT, jwtVerify } from 'jose';
-import { AUTH_COOKIE } from './cookies';
-import type { JWTPayload } from '../types';
+import { AUTH_COOKIE } from '@/lib/cookies';
+import type { JWTPayload } from '@/types';
 
 const secret = new TextEncoder().encode(
   process.env.JWT_SECRET || 'dev-secret-change-me'

@@ -1,5 +1,5 @@
 import { FiltersComponent } from '@/components/general/filters/FiltersComponent'
-import { InstanciasRdsMariaDBChartComponent } from './InstanciasRdsMariaDBChartComponent'
+import { InstanciasRdsMariaDBChartComponent } from '@/components/aws/vista-rds/instancias-rds-mariadb/InstanciasRdsMariaDBChartComponent'
 import { Database } from 'lucide-react'
 
 export const MainViewInstanciasRdsMariaDBComponent = () => {

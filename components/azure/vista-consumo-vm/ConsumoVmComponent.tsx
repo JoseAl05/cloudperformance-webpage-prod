@@ -2,10 +2,10 @@
 
 import useSWR from 'swr'
 import { BarChart3, AlertCircle, Info, Cpu, MemoryStick, HardDrive, PowerOff } from 'lucide-react'
-import { AzureCpuUsageComponent, AzureMemoryUsageComponent, AzureStorageUsageComponent } from './graficos/VmConsumeViewUsageComponent'
-import  VmStatusChart  from './graficos/VmStatusViewComponent';
+import { AzureCpuUsageComponent, AzureMemoryUsageComponent, AzureStorageUsageComponent } from '@/components/azure/vista-consumo-vm/graficos/VmConsumeViewUsageComponent'
+import  VmStatusChart  from '@/components/azure/vista-consumo-vm/graficos/VmStatusViewComponent';
 import { LoaderComponent } from '@/components/general/LoaderComponent'
-import { MessageCard } from '../cards/MessageCards'
+import { MessageCard } from '@/components/azure/cards/MessageCards'
 import { Card, CardContent } from '@/components/ui/card'
 
 

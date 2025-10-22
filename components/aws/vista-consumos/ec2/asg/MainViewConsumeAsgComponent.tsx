@@ -1,7 +1,7 @@
 'use client'
 import { FiltersComponent } from '@/components/general/filters/FiltersComponent'
 import { ChartLine } from 'lucide-react'
-import { AsgConsumeComponent } from './AsgConsumeComponent'
+import { AsgConsumeComponent } from '@/components/aws/vista-consumos/ec2/asg/AsgConsumeComponent'
 
 export const MainViewConsumeAsgComponent = () => {
     return (

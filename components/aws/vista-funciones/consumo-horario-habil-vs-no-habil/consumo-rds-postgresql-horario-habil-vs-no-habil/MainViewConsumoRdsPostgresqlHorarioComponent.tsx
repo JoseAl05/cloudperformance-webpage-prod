@@ -1,5 +1,5 @@
 import { FiltersComponent } from '@/components/general/filters/FiltersComponent'
-import { MainViewConsumoRdsPostgresqlHorario } from './ConsumoRdsPostgresqlHorarioComponent'
+import { MainViewConsumoRdsPostgresqlHorario } from '@/components/aws/vista-funciones/consumo-horario-habil-vs-no-habil/consumo-rds-postgresql-horario-habil-vs-no-habil/ConsumoRdsPostgresqlHorarioComponent'
 import { Database } from 'lucide-react'
 
 export const ViewConsumoRdsPostgresqlHorario = () => {

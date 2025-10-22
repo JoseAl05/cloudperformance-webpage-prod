@@ -1,5 +1,5 @@
 import { FiltersComponent } from '@/components/general/filters/FiltersComponent'
-import { InstanciasRdsSQLServerChartComponent } from './InstanciasRdsSQLServerChartComponent'
+import { InstanciasRdsSQLServerChartComponent } from '@/components/aws/vista-rds/instancias-rds-sqlserver/InstanciasRdsSQLServerChartComponent'
 import { Database } from 'lucide-react'
 
 

@@ -3,10 +3,10 @@
 import { useEffect, useMemo, useState } from 'react'
 import useSWR from 'swr'
 import { LoaderComponent } from '@/components/general/LoaderComponent'
-import { MessageCard } from '../cards/MessageCards'
+import { MessageCard } from '@/components/azure/cards/MessageCards'
 import { AlertCircle, ChartBar, Info } from 'lucide-react'
-import { AdvisorViewPieChartComponent } from './grafico/AdvisorViewPieChartComponent'
-import { AdvisorViewInfoComponent } from './info/AdvisorViewInfoComponent'
+import { AdvisorViewPieChartComponent } from '@/components/azure/vista-advisor/grafico/AdvisorViewPieChartComponent'
+import { AdvisorViewInfoComponent } from '@/components/azure/vista-advisor/info/AdvisorViewInfoComponent'
 
 interface AdvisorViewComponentProps {
     impact: string | null

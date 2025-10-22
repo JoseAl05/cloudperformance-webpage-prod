@@ -13,8 +13,8 @@ import {
     SelectContent,
     SelectItem,
 } from "@/components/ui/select"
-import {SavingsPlanInstancesTable} from './table/SavingPlanTableComponent';
-import {TreemapSavingsPlanComponent} from './graficos/TreemapSavingsPlanComponent';
+import {SavingsPlanInstancesTable} from '@/components/azure/vista-savings-plan/table/SavingPlanTableComponent';
+import {TreemapSavingsPlanComponent} from '@/components/azure/vista-savings-plan/graficos/TreemapSavingsPlanComponent';
 
 const LoaderComponent = () => (
   <div className="flex items-center justify-center h-full">

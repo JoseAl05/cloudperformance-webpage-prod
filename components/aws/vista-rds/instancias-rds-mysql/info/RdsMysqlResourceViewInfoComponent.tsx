@@ -17,7 +17,7 @@ import {
     DialogTitle,
     DialogTrigger,
 } from '@/components/ui/dialog'
-import { RdsMysqlResourceViewHistoricInfoComponent } from './RdsMysqlResourceViewHistoricInfoComponent';
+import { RdsMysqlResourceViewHistoricInfoComponent } from '@/components/aws/vista-rds/instancias-rds-mysql/info/RdsMysqlResourceViewHistoricInfoComponent';
 
 interface MysqlInstanceData {
     sync_time: { $date: string };

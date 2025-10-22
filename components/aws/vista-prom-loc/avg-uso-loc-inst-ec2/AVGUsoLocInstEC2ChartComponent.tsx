@@ -2,7 +2,7 @@
 
 import useSWR from 'swr';
 import { useMemo } from 'react';
-import { AVGUsoLocInstEC2ViewUsoPorRegionComponent } from './graficos/AVGUsoLocInstEC2ViewUsoPorRegionComponent';
+import { AVGUsoLocInstEC2ViewUsoPorRegionComponent } from '@/components/aws/vista-prom-loc/avg-uso-loc-inst-ec2/graficos/AVGUsoLocInstEC2ViewUsoPorRegionComponent';
 import { LoaderComponent } from '@/components/general/LoaderComponent';
 
 interface Props {

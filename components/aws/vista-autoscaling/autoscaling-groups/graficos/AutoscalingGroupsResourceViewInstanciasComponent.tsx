@@ -1,6 +1,6 @@
 import { createColumns } from '@/components/general/data-table/columns';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { autoscalingGroupInstanceColumns } from './AutoscalingGroupsInstancesColumns';
+import { autoscalingGroupInstanceColumns } from '@/components/aws/vista-autoscaling/autoscaling-groups/graficos/AutoscalingGroupsInstancesColumns';
 import { Calendar, Settings, AlertCircle, Users } from 'lucide-react';
 import { DataTableSingle } from '@/components/general/data-table/data-table-single';
 import { DataTableGrouping } from '@/components/general/data-table/data-table-grouping';

@@ -19,7 +19,7 @@ import { ResourcesFilterComponent } from '@/components/general_azure/filters/Res
 import { UnusedVmFilterComponent } from '@/components/general_azure/filters/UnusedVmFilterComponent';
 import { UnusedVmssFilterComponent } from '@/components/general_azure/filters/UnusedVmssFilterComponent';
 import { VmFilterComponent } from '@/components/general_azure/filters/VmFilterComponent';
-import { ServiceFilterComponent } from './ServiceFilterComponent';
+import { ServiceFilterComponent } from '@/components/general_azure/filters/ServiceFilterComponent';
 import { ResourceGroupFilterComponent } from '@/components/general_azure/filters/ResourceGroupsFilterComponent';
 import { InstancesFilterComponentV2 } from '@/components/general_azure/filters/InstancesFilterComponentV2';
 import { DeploymentOperationsFilterComponent } from '@/components/general_azure/filters/DeploymentOperationsFilterComponent';

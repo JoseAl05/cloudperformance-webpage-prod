@@ -1,6 +1,6 @@
 import { FiltersComponent } from '@/components/general_azure/filters/FiltersComponent'
 import { Computer } from 'lucide-react'
-import { SavingsPlanComponent }  from './SavingsPlanComponent'
+import { SavingsPlanComponent }  from '@/components/azure/vista-savings-plan/SavingsPlanComponent'
 
 export const MainViewSavingPlanComponent = () => {
     return (

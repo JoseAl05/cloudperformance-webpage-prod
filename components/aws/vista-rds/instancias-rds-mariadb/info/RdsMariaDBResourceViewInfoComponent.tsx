@@ -17,7 +17,7 @@ import {
     DialogTitle,
     DialogTrigger,
 } from '@/components/ui/dialog'
-import { RdsMariaDBResourceViewHistoricInfoComponent } from './RdsMariaDBResourceViewHistoricInfoComponent';
+import { RdsMariaDBResourceViewHistoricInfoComponent } from '@/components/aws/vista-rds/instancias-rds-mariadb/info/RdsMariaDBResourceViewHistoricInfoComponent';
 
 interface MariaDBInstanceData {
     sync_time: { $date: string };

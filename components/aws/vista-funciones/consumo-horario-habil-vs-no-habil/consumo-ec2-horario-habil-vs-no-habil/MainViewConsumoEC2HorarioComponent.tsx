@@ -1,5 +1,5 @@
 import { FiltersComponent } from '@/components/general/filters/FiltersComponent'
-import { MainViewConsumoEC2Horario } from './ConsumoEC2HorarioComponent'
+import { MainViewConsumoEC2Horario } from '@/components/aws/vista-funciones/consumo-horario-habil-vs-no-habil/consumo-ec2-horario-habil-vs-no-habil/ConsumoEC2HorarioComponent'
 import { Computer } from 'lucide-react'
 
 export const ViewConsumoEC2Horario = () => {

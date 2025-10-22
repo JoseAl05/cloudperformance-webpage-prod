@@ -1,6 +1,6 @@
 import { FiltersComponent } from '@/components/general_azure/filters/FiltersComponent'
 import { Zap } from 'lucide-react'
-import { AdvisorViewComponent } from './AdvisorViewComponent'
+import { AdvisorViewComponent } from '@/components/azure/vista-advisor/AdvisorViewComponent'
 
 export const MainViewAdvisorComponent = () => {
     return (

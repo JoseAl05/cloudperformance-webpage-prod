@@ -1,6 +1,6 @@
 'use client'
 import { FiltersComponent } from '@/components/general_azure/filters/FiltersComponent'
-import { TopDolaresFacturadosChartComponent } from './TopDolaresFacturadosChartComponent'
+import { TopDolaresFacturadosChartComponent } from '@/components/azure/vista-facturacion/top-dolares-facturados/TopDolaresFacturadosChartComponent'
 import { DollarSign } from 'lucide-react'
 
 export const MainViewTopDolaresFacturadosComponent = () => {

@@ -1,6 +1,6 @@
 'use client'
 import { FiltersComponent } from '@/components/general_azure/filters/FiltersComponent'
-import { IncrementoTopRecursosUsoChartComponent } from './IncrementoTopRecursosUsoChartComponent'
+import { IncrementoTopRecursosUsoChartComponent } from '@/components/azure/vista-funciones/incremento-top-recursos-uso/IncrementoTopRecursosUsoChartComponent'
 import { TrendingUp } from 'lucide-react'
 
 export const MainViewIncrementoTopRecursosUsoComponent = () => {

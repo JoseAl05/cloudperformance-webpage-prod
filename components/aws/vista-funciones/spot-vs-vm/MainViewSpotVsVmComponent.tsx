@@ -1,5 +1,5 @@
 import { FiltersComponent } from '@/components/general/filters/FiltersComponent'
-import { MainViewSpotVsVm }  from './SpotVsVmComponent'
+import { MainViewSpotVsVm }  from '@/components/aws/vista-funciones/spot-vs-vm/SpotVsVmComponent'
 import { Globe } from 'lucide-react'
 
 export const ViewSpotVsVm = () => {

@@ -4,9 +4,9 @@ import useSWR from 'swr'
 import { Card, CardContent } from '@/components/ui/card'
 import { AlertTriangle, Server, FolderTree, CreditCard } from 'lucide-react'
 import { DataTableSingle } from '@/components/general/data-table/data-table-single'
-import { tableServicesColumns } from './table/tableServicesColumns'
-import { tableResourceGroupsColumns } from './table/tableResourceGroupsColumns'
-import { tableBillingAccountsColumns } from './table/tableBillingAccountsColumns'
+import { tableServicesColumns } from '@/components/azure/tables-azure/tablas-item-azure/table/tableServicesColumns'
+import { tableResourceGroupsColumns } from '@/components/azure/tables-azure/tablas-item-azure/table/tableResourceGroupsColumns'
+import { tableBillingAccountsColumns } from '@/components/azure/tables-azure/tablas-item-azure/table/tableBillingAccountsColumns'
 
 const fetcher = (url: string) =>
   fetch(url, {

@@ -6,8 +6,8 @@ import { Button } from '@/components/ui/button'
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import useSWR from 'swr'
-import { AsgInstancesFilterComponent } from './AsgInstancesFilterComponent'
-import { LoaderComponent } from '../LoaderComponent'
+import { AsgInstancesFilterComponent } from '@/components/general/filters/AsgInstancesFilterComponent'
+import { LoaderComponent } from '@/components/general/LoaderComponent'
 
 // interface VariationMetricFilterComponentProps {
 //     asg: string,

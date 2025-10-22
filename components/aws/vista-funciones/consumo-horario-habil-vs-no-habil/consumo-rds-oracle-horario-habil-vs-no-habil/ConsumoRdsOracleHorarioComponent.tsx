@@ -6,7 +6,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { BarChart3, Clock, Moon } from 'lucide-react'
 import { TableRdsOracleMetrics } from "@/components/aws/vista-funciones/consumo-horario-habil-vs-no-habil/consumo-rds-oracle-horario-habil-vs-no-habil/table/tableComponent"
 import { bytesToMB } from '@/lib/bytesToMbs'
-import { ConsumoHorarioChartComponent } from '../grafico/ConsumoHorarioChartComponent'
+import { ConsumoHorarioChartComponent } from '@/components/aws/vista-funciones/consumo-horario-habil-vs-no-habil/grafico/ConsumoHorarioChartComponent'
 
 const fetcher = (url: string) =>
     fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })

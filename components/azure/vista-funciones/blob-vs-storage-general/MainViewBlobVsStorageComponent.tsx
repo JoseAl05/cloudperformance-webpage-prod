@@ -1,7 +1,7 @@
 import { FiltersComponent } from '@/components/general_azure/filters/FiltersComponent'
-import { InstanciasAutoscalingGroupsChartComponent } from './InstanciasAutoscalingGroupsChartComponent'
+import { InstanciasAutoscalingGroupsChartComponent } from '@/components/azure/vista-funciones/blob-vs-storage-general/InstanciasAutoscalingGroupsChartComponent'
 import { Container, TrendingUp } from 'lucide-react'
-import { BlobVsStorageGeneralComponent } from './BlobVsStorageGeneralComponent'
+import { BlobVsStorageGeneralComponent } from '@/components/azure/vista-funciones/blob-vs-storage-general/BlobVsStorageGeneralComponent'
 
 export const MainViewBlobVsStorageComponent = () => {
     return (

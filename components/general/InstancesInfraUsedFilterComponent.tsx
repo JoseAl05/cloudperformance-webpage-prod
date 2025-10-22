@@ -4,14 +4,14 @@ import { useEffect, useState } from 'react';
 import { DatePicker } from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 
-import { RegionFilterComponent } from './RegionFilterComponent';
-import { TagFilterComponent } from './TagsFilterComponent';
-import { ServiceFilterComponent } from './ServiceFilterComponent';
-import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
+import { RegionFilterComponent } from '@/components/general/RegionFilterComponent';
+import { TagFilterComponent } from '@/components/general/TagsFilterComponent';
+import { ServiceFilterComponent } from '@/components/general/ServiceFilterComponent';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Calendar, Filter, MapPin, Server, Tag, XCircle } from 'lucide-react';
-import { Button } from '../ui/button';
+import { Button } from '@/components/ui/button';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { InstancesFilterComponent } from './InstancesFilterComponent';
+import { InstancesFilterComponent } from '@/components/general/InstancesFilterComponent';
 
 interface FiltersComponentProps {
     Component: (params: {

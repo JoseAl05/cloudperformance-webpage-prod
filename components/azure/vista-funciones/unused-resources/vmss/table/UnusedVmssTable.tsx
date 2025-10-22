@@ -4,7 +4,7 @@ import { UnusedVmColumns } from '@/components/azure/vista-funciones/unused-resou
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { DataTableGrouping } from '@/components/general/data-table/data-table-grouping';
 import { UnusedVmss } from '@/interfaces/vista-unused-resources/unusedVmssInterface';
-import { UnusedVmssColumns } from './UnusedVmssColumns';
+import { UnusedVmssColumns } from '@/components/azure/vista-funciones/unused-resources/vmss/table/UnusedVmssColumns';
 
 interface UnusedVmssTableProps {
     data: UnusedVmss[];

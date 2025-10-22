@@ -1,5 +1,5 @@
 import { FiltersComponent } from '@/components/general/filters/FiltersComponent'
-import { InstanceEc2CpuMetricsComponent } from './InstanceEc2CpuMetricsComponent'
+import { InstanceEc2CpuMetricsComponent } from '@/components/aws/vista-ec2/instancias-ec2/InstanceEc2CpuMetricsComponent'
 import { Download, Filter, Server } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 

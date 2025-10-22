@@ -1,6 +1,6 @@
 // components/aws/vista-rds/avg-uso-loc-inst-rds-pg/MainViewInstanciasAVGUsoLocInstRdsPgComponent.tsx
 import { FiltersComponent } from '@/components/general/filters/FiltersComponent'
-import { AVGUsoLocInstRdsPgChartComponent } from './AVGUsoLocInstRdsPgChartComponent'
+import { AVGUsoLocInstRdsPgChartComponent } from '@/components/aws/vista-prom-loc/avg-uso-loc-inst-rds-pg/AVGUsoLocInstRdsPgChartComponent'
 import { Download, Filter, Database } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 

@@ -1,6 +1,6 @@
 import { FiltersComponent } from '@/components/general/filters/FiltersComponent';
 import { ChartLine } from 'lucide-react';
-import { RdsInstancesConsumeComponent } from './RdsInstancesConsumeComponent';
+import { RdsInstancesConsumeComponent } from '@/components/aws/vista-consumos/rds/RdsInstancesConsumeComponent';
 
 interface MainViewConsumeRdsComponentProps {
     rdsType: string;

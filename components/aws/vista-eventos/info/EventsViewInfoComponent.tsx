@@ -2,9 +2,9 @@
 
 import { Card, CardContent } from '@/components/ui/card';
 import { Activity, ChevronDown, ChevronUp, Cpu, Network, Percent, TrendingUp, Zap } from 'lucide-react';
-import { Ec2InfoConsumeViewCardsComponent } from './Ec2InfoConsumeViewCardsComponent';
+import { Ec2InfoConsumeViewCardsComponent } from '@/components/aws/vista-eventos/info/Ec2InfoConsumeViewCardsComponent';
 import { EventsApiResponse } from '@/interfaces/vista-eventos/eventsViewInterfaces';
-import { EventsViewInfoCardsComponent } from './EventsViewInfoCardsComponent';
+import { EventsViewInfoCardsComponent } from '@/components/aws/vista-eventos/info/EventsViewInfoCardsComponent';
 
 
 interface EventsViewInfoComponentProps {

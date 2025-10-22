@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/command"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import useSWR from 'swr'
-import { LoaderComponent } from '../LoaderComponent'
+import { LoaderComponent } from '@/components/general_azure/LoaderComponent'
 
 interface InstancesFilterProps {
   startDate: Date,

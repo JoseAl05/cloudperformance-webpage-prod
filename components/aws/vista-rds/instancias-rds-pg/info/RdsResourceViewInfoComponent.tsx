@@ -17,7 +17,7 @@ import {
     DialogTitle,
     DialogTrigger,
 } from '@/components/ui/dialog'
-import { RdsResourceViewHistoricInfoComponent } from './RdsResourceViewHistoricInfoComponent';
+import { RdsResourceViewHistoricInfoComponent } from '@/components/aws/vista-rds/instancias-rds-pg/info/RdsResourceViewHistoricInfoComponent';
 
 interface RdsInstanceData {
     sync_time: { $date: string };

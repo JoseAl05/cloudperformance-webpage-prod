@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { autoscalingGroupEventColumns } from './AutoscalingGroupsEventsColumns';
+import { autoscalingGroupEventColumns } from '@/components/aws/vista-autoscaling/autoscaling-groups/events/AutoscalingGroupsEventsColumns';
 import { Calendar, Settings, AlertCircle } from 'lucide-react';
 import { DataTableSingle } from '@/components/general/data-table/data-table-single';
 

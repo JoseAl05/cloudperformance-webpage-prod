@@ -1,6 +1,6 @@
 'use client'
 import { FiltersComponent } from '@/components/general_azure/filters/FiltersComponent'
-import { TopRecursosGeneralChartComponent } from './TopRecursosGeneralChartComponent'
+import { TopRecursosGeneralChartComponent } from '@/components/azure/vista-recursos/top-recursos-general/TopRecursosGeneralChartComponent'
 import { Layers } from 'lucide-react'
 
 export const MainViewTopRecursosGeneralComponent = () => {

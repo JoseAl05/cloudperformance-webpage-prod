@@ -6,7 +6,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Clock, TrendingDown, AlertTriangle, FileSpreadsheet, X } from "lucide-react"
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { TableDetalleHorarioComponent } from './table/TableDetalleHorarioComponent'
+import { TableDetalleHorarioComponent } from '@/components/azure/vista-funciones/analisis-vms-horario/table/TableDetalleHorarioComponent'
 
 const fetcher = (url: string) =>
   fetch(url, {

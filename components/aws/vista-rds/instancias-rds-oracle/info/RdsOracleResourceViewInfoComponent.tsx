@@ -17,7 +17,7 @@ import {
     DialogTitle,
     DialogTrigger,
 } from '@/components/ui/dialog'
-import { RdsOracleResourceViewHistoricInfoComponent } from './RdsOracleResourceViewHistoricInfoComponent';
+import { RdsOracleResourceViewHistoricInfoComponent } from '@/components/aws/vista-rds/instancias-rds-oracle/info/RdsOracleResourceViewHistoricInfoComponent';
 
 interface OracleInstanceData {
     sync_time: { $date: string };

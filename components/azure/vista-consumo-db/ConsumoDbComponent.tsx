@@ -2,10 +2,10 @@
 
 import useSWR from 'swr'
 import { Database, AlertCircle, Info, Cpu, MemoryStick, HardDrive, PowerOff } from 'lucide-react'
-import { AzureDbCpuUsageComponent, AzureDbMemoryUsageComponent, AzureDbStorageUsageComponent, AzureDbStoragePercentComponent} from './graficos/DbConsumeViewUsageComponent'
-import DbStatusChart from './graficos/DbStatusViewComponent'
+import { AzureDbCpuUsageComponent, AzureDbMemoryUsageComponent, AzureDbStorageUsageComponent, AzureDbStoragePercentComponent} from '@/components/azure/vista-consumo-db/graficos/DbConsumeViewUsageComponent'
+import DbStatusChart from '@/components/azure/vista-consumo-db/graficos/DbStatusViewComponent'
 import { LoaderComponent } from '@/components/general/LoaderComponent'
-import { MessageCard } from '../cards/MessageCards'
+import { MessageCard } from '@/components/azure/cards/MessageCards'
 import { Card, CardContent } from '@/components/ui/card'
 
 interface AzureDbMetricsProps {

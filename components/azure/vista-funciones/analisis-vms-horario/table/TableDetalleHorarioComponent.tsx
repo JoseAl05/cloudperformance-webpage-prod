@@ -1,7 +1,7 @@
 'use client'
 
 import { DataTableSingle } from '@/components/general/data-table/data-table-single'
-import { createTableDetalleHorarioColumns, HorarioData } from './tableDetalleHorarioColumns'
+import { createTableDetalleHorarioColumns, HorarioData } from '@/components/azure/vista-funciones/analisis-vms-horario/table/tableDetalleHorarioColumns'
 import { useMemo, useEffect } from 'react'
 
 interface TableDetalleHorarioProps {

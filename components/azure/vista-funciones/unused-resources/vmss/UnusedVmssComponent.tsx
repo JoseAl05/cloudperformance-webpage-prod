@@ -12,7 +12,7 @@ import { UnusedDiskIopsMetricsComponent } from '@/components/azure/vista-funcion
 import { UnusedCreditsRemainingMetricsComponent } from '@/components/azure/vista-funciones/unused-resources/grafico/UnusedCreditsRemainingMetricsComponent';
 import { UnusedTable } from '@/components/azure/vista-funciones/unused-resources/vm/table/UnusedVmTable';
 import { UnusedVmss } from '@/interfaces/vista-unused-resources/unusedVmssInterface';
-import { UnusedVmssTable } from './table/UnusedVmssTable';
+import { UnusedVmssTable } from '@/components/azure/vista-funciones/unused-resources/vmss/table/UnusedVmssTable';
 
 interface UnusedVmssComponentProps {
     startDate: Date;

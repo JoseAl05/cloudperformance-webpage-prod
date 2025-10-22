@@ -1,6 +1,6 @@
 // components/aws/vista-facturacion/tendencia-facturacion/MainViewTendenciaFacturacionComponent.tsx
 import { FiltersComponent } from '@/components/general/filters/FiltersComponent'
-import { AVGUsoLocInstEC2ChartComponent } from './AVGUsoLocInstEC2ChartComponent'
+import { AVGUsoLocInstEC2ChartComponent } from '@/components/aws/vista-prom-loc/avg-uso-loc-inst-ec2/AVGUsoLocInstEC2ChartComponent'
 import { Download, Filter, TrendingUp } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 

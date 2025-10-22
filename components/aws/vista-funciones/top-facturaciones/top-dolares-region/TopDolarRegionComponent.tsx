@@ -1,5 +1,5 @@
 import { FiltersComponent } from '@/components/general/filters/FiltersComponent'
-import { MainViewTopDolaresRegion } from './MainViewTopDolarRegionComponent'
+import { MainViewTopDolaresRegion } from '@/components/aws/vista-funciones/top-facturaciones/top-dolares-region/MainViewTopDolarRegionComponent'
 import { Globe } from 'lucide-react'
 
 export const TopDolarRegionComponent = () => {

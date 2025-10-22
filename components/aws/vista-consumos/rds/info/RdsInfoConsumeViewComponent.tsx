@@ -1,5 +1,5 @@
 import { ConsumeViewRdsPgCpuMetrics, ConsumeViewRdsPgCreditsMetrics, ConsumeViewRdsPgDbConnectionsMetrics, RdsConsumeViewInstance } from '@/interfaces/vista-consumos/rdsPgConsumeViewInterfaces';
-import { RdsInfoConsumeViewCardsComponent } from './RdsInfoConsumeViewCardsComponent';
+import { RdsInfoConsumeViewCardsComponent } from '@/components/aws/vista-consumos/rds/info/RdsInfoConsumeViewCardsComponent';
 
 interface RdsInfoConsumeViewComponentProps {
     infoData: RdsConsumeViewInstance[] | null;

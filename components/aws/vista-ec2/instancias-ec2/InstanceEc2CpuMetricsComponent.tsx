@@ -1,17 +1,17 @@
 'use client'
 
 import useSWR from 'swr';
-import { Ec2ResourceViewUsageCpuComponent } from './graficos/Ec2ResourceViewUsageCpuComponent';
-import { Ec2ResourceViewUsageCreditsComponent } from './graficos/Ec2ResourceViewUsageCreditsComponent';
-import { Ec2ResourceViewUsageNetworkComponent } from './graficos/Ec2ResourceViewUsageNetworkComponent';
-import { Ec2ResourceViewInfoComponent } from './info/Ec2ResourceViewInfoComponent';
+import { Ec2ResourceViewUsageCpuComponent } from '@/components/aws/vista-ec2/instancias-ec2/graficos/Ec2ResourceViewUsageCpuComponent';
+import { Ec2ResourceViewUsageCreditsComponent } from '@/components/aws/vista-ec2/instancias-ec2/graficos/Ec2ResourceViewUsageCreditsComponent';
+import { Ec2ResourceViewUsageNetworkComponent } from '@/components/aws/vista-ec2/instancias-ec2/graficos/Ec2ResourceViewUsageNetworkComponent';
+import { Ec2ResourceViewInfoComponent } from '@/components/aws/vista-ec2/instancias-ec2/info/Ec2ResourceViewInfoComponent';
 import { AlertCircle, ChartBar, Clock, Info, Loader2 } from 'lucide-react';
-import { MainEc2ResourceViewMetricsSummaryComponent } from './graficos/MainEc2ResourceViewMetricsSummaryComponent';
-import { Ec2EventsTableComponent } from './events/Ec2EventsTable';
+import { MainEc2ResourceViewMetricsSummaryComponent } from '@/components/aws/vista-ec2/instancias-ec2/graficos/MainEc2ResourceViewMetricsSummaryComponent';
+import { Ec2EventsTableComponent } from '@/components/aws/vista-ec2/instancias-ec2/events/Ec2EventsTable';
 import { Ec2InstanceSummary } from '@/interfaces/vista-ec2/ec2ResourceViewInterfaces';
 import { Ec2ResourceViewMetricsApiResponse } from '@/interfaces/vista-ec2/ec2MetricsResourceViewInterfaces';
 import { Ec2ResourceViewEventsResponse } from '@/interfaces/vista-ec2/ec2EventsResourceViewInterfaces';
-import { MessageCard } from '../../cards/MessageCards';
+import { MessageCard } from '@/components/aws/cards/MessageCards';
 import { LoaderComponent } from '@/components/general/LoaderComponent';
 
 interface InstanceEc2CpuMetricsComponentProps {

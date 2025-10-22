@@ -3,7 +3,7 @@
 import { CircleDollarSign } from "lucide-react";
 import { SessionGate } from "@/components/general_presupuesto/session/SesionGate";
 import { FiltersComponent } from "@/components/general_presupuesto/filters/FiltersComponent";
-import { PresupuestoAnualComponent } from "./PresupuestoAnualComponent";
+import { PresupuestoAnualComponent } from "@/components/presupuesto/presupuesto-anual/PresupuestoAnualComponent";
 
 export const MainViewPresupuestoAnualComponent = () => {
   return (

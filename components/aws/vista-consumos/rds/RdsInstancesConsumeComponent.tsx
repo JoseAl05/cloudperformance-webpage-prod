@@ -2,15 +2,15 @@
 
 import { LoaderComponent } from '@/components/general/LoaderComponent'
 import useSWR from 'swr'
-import { MessageCard } from '../../cards/MessageCards'
+import { MessageCard } from '@/components/aws/cards/MessageCards'
 import { AlertCircle, ChartBar, Clock, Info } from 'lucide-react'
 import { ConsumeViewRdsPgCpuMetrics, ConsumeViewRdsPgCreditsMetrics, ConsumeViewRdsPgDbConnectionsMetrics, ConsumeViewRdsPgFreeStorageMetrics, RdsConsumeViewInstance } from '@/interfaces/vista-consumos/rdsPgConsumeViewInterfaces'
-import { RdsInfoConsumeViewComponent } from './info/RdsInfoConsumeViewComponent'
-import { RdsConsumeViewUsageCpuComponent } from './graficos/RdsConsumeViewUsageCpuComponent'
-import { RdsConsumeViewUsageCreditsComponent } from './graficos/RdsConsumeViewUsageCreditsComponent'
-import { RdsConsumeViewDbConnectionsComponent } from './graficos/RdsConsumeViewDbConnectionsComponent'
-import { RdsConsumeViewFreeStorageComponent } from './graficos/RdsConsumeViewFreeStorageComponent'
-import { RdsConsumeViewInstanceTable } from './table/RdsConsumeViewInstanceTable'
+import { RdsInfoConsumeViewComponent } from '@/components/aws/vista-consumos/rds/info/RdsInfoConsumeViewComponent'
+import { RdsConsumeViewUsageCpuComponent } from '@/components/aws/vista-consumos/rds/graficos/RdsConsumeViewUsageCpuComponent'
+import { RdsConsumeViewUsageCreditsComponent } from '@/components/aws/vista-consumos/rds/graficos/RdsConsumeViewUsageCreditsComponent'
+import { RdsConsumeViewDbConnectionsComponent } from '@/components/aws/vista-consumos/rds/graficos/RdsConsumeViewDbConnectionsComponent'
+import { RdsConsumeViewFreeStorageComponent } from '@/components/aws/vista-consumos/rds/graficos/RdsConsumeViewFreeStorageComponent'
+import { RdsConsumeViewInstanceTable } from '@/components/aws/vista-consumos/rds/table/RdsConsumeViewInstanceTable'
 
 interface RdsInstancesConsumeComponentProps {
     startDate: Date

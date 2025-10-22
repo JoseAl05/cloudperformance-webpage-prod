@@ -1,7 +1,7 @@
 'use client';
 
-import { EbsUnusedViewInfoCardsComponent } from './EbsUnusedViewInfoCardsComponent';
-import { Ec2InfoConsumeViewCardsComponent } from './Ec2InfoConsumeViewCardsComponent';
+import { EbsUnusedViewInfoCardsComponent } from '@/components/aws/vista-funciones/unused-ebs/info/EbsUnusedViewInfoCardsComponent';
+import { Ec2InfoConsumeViewCardsComponent } from '@/components/aws/vista-funciones/unused-ebs/info/Ec2InfoConsumeViewCardsComponent';
 import { UnusedEbs } from '@/interfaces/vista-ebs-no-utilizados/ebsUnusedInterfaces';
 
 

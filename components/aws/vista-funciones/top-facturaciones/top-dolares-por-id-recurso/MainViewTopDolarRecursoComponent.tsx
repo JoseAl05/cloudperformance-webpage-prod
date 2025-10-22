@@ -1,5 +1,5 @@
 import { FiltersComponent } from '@/components/general/filters/FiltersComponent'
-import { MainViewTopDolaresRecurso } from './TopDolarRecursoComponent'
+import { MainViewTopDolaresRecurso } from '@/components/aws/vista-funciones/top-facturaciones/top-dolares-por-id-recurso/TopDolarRecursoComponent'
 import { Globe } from 'lucide-react'
 
 export const TopDolarRecursoComponent = () => {

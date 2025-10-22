@@ -6,9 +6,9 @@ import { SpotVsRegularVm } from '@/interfaces/vista-spot-vs-regular-vm/spotVsReg
 import { AlertCircle, ChartBar, Clock, Info } from 'lucide-react';
 import { useRef } from 'react';
 import useSWR from 'swr';
-import { SpotVsRegularVmTimelineComponent } from './grafico/SpotVsRegularVmTimelineComponent';
-import { SpotVsRegularVmCardsComponent } from './info/SpotVsRegularVmCardsComponent';
-import { SpotVsRegularVmTable } from './table/SpotVsRegularVmTable';
+import { SpotVsRegularVmTimelineComponent } from '@/components/azure/vista-funciones/spot-vs-regular-vm/grafico/SpotVsRegularVmTimelineComponent';
+import { SpotVsRegularVmCardsComponent } from '@/components/azure/vista-funciones/spot-vs-regular-vm/info/SpotVsRegularVmCardsComponent';
+import { SpotVsRegularVmTable } from '@/components/azure/vista-funciones/spot-vs-regular-vm/table/SpotVsRegularVmTable';
 
 interface SpotVsRegularVmComponentProps {
     startDate: Date;

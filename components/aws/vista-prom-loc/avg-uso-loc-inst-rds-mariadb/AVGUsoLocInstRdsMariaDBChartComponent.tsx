@@ -2,7 +2,7 @@
 
 import useSWR from 'swr';
 import { useMemo } from 'react';
-import { AVGUsoLocInstRdsMariaDBViewUsoPorRegionComponent } from './graficos/AVGUsoLocInstRdsMariaDBViewUsoPorRegionComponent';
+import { AVGUsoLocInstRdsMariaDBViewUsoPorRegionComponent } from '@/components/aws/vista-prom-loc/avg-uso-loc-inst-rds-mariadb/graficos/AVGUsoLocInstRdsMariaDBViewUsoPorRegionComponent';
 import { LoaderComponent } from '@/components/general/LoaderComponent';
 
 interface Props {

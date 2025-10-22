@@ -5,8 +5,8 @@ import { LoaderComponent } from '@/components/general/LoaderComponent';
 import { UnusedVmExtensions } from '@/interfaces/vista-unused-resources/unusedVmExtensionsInterfaces';
 import { AlertCircle, Clock, Info } from 'lucide-react';
 import useSWR from 'swr';
-import { UnusedVmExtensionsByType } from './grafico/UnusedVmExtensionsByType';
-import { UnusedVmExtensionsTable } from './table/UnusedVmExtensionsTable';
+import { UnusedVmExtensionsByType } from '@/components/azure/vista-funciones/unused-resources/extensions/grafico/UnusedVmExtensionsByType';
+import { UnusedVmExtensionsTable } from '@/components/azure/vista-funciones/unused-resources/extensions/table/UnusedVmExtensionsTable';
 
 interface UnusedVmExtensionsComponentProps {
     startDate: Date;

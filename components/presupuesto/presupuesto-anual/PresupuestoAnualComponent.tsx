@@ -21,8 +21,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { PresupuestoAnualTableComponent } from "./table/PresupuestoAnualTableComponent";
-import { PresupuestoAnualFormComponent, PresupuestoAnual } from "./form/PresupuestoAnualFormComponent";
+import { PresupuestoAnualTableComponent } from "@/components/presupuesto/presupuesto-anual/table/PresupuestoAnualTableComponent";
+import { PresupuestoAnualFormComponent, PresupuestoAnual } from "@/components/presupuesto/presupuesto-anual/form/PresupuestoAnualFormComponent";
 import { SessionGate } from "@/components/general_presupuesto/session/SesionGate";
 
 interface PresupuestoAnualComponentProps {

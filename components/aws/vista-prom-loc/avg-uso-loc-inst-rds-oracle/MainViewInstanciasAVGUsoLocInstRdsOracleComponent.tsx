@@ -1,6 +1,6 @@
 // components/aws/vista-rds/avg-uso-loc-inst-rds-oracle/MainViewInstanciasAVGUsoLocInstRdsOracleComponent.tsx
 import { FiltersComponent } from '@/components/general/filters/FiltersComponent'
-import { AVGUsoLocInstRdsOracleChartComponent } from './AVGUsoLocInstRdsOracleChartComponent'
+import { AVGUsoLocInstRdsOracleChartComponent } from '@/components/aws/vista-prom-loc/avg-uso-loc-inst-rds-oracle/AVGUsoLocInstRdsOracleChartComponent'
 import { Download, Filter, Database } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 

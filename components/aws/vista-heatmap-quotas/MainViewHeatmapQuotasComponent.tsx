@@ -1,5 +1,5 @@
 import { FiltersComponent } from '@/components/general/filters/FiltersComponent'
-import { HeatmapQuotasComponent } from './HeatmapQuotasComponent'
+import { HeatmapQuotasComponent } from '@/components/aws/vista-heatmap-quotas/HeatmapQuotasComponent'
 import { PieChart } from 'lucide-react'
 
 export const MainViewHeatmapQuotasComponent = () => {

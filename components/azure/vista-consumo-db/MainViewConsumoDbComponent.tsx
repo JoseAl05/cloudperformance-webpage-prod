@@ -1,6 +1,6 @@
 // components/azure/vista-consumo-db/MainViewConsumoDbComponent.tsx
 import { FiltersComponent } from '@/components/general_azure/filters/FiltersComponent'
-import { AzureDbMetricsComponent } from './ConsumoDbComponent'
+import { AzureDbMetricsComponent } from '@/components/azure/vista-consumo-db/ConsumoDbComponent'
 import { Database } from 'lucide-react'
 
 export const MainViewConsumoDbComponent = () => {

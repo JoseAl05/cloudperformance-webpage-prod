@@ -1,6 +1,6 @@
 import { FiltersComponent } from '@/components/general_azure/filters/FiltersComponent'
 import { Computer } from 'lucide-react'
-import { RecursosVmComponent }  from './RecursosVmComponent'
+import { RecursosVmComponent }  from '@/components/azure/vista-recursos-vm/RecursosVmComponent'
 
 export const MainViewRecursosVmComponent = () => {
     return (

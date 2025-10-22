@@ -2,7 +2,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { ConsumeViewRdsPgCpuMetrics, ConsumeViewRdsPgDbConnectionsMetrics, RdsConsumeViewInstance, RdsResource } from '@/interfaces/vista-consumos/rdsPgConsumeViewInterfaces';
 import { ChevronDown, ChevronUp, Computer, Cpu, Database, List, Minus, MonitorCheck, MonitorX, Zap } from 'lucide-react';
-import { RdsConsumeViewStoppedInstancesHistoricComponent } from './RdsConsumeViewStoppedInstancesHistoricComponent';
+import { RdsConsumeViewStoppedInstancesHistoricComponent } from '@/components/aws/vista-consumos/rds/info/RdsConsumeViewStoppedInstancesHistoricComponent';
 
 interface RdsInfoConsumeViewCardsComponentProps {
     infoData: RdsConsumeViewInstance[] | null;

@@ -5,7 +5,7 @@ import * as echarts from "echarts"
 import { Card, CardContent } from "@/components/ui/card"
 import { Server, Cloud, Percent, BarChart3 } from "lucide-react"
 import { TableComponentSpotVsVm } from "@/components/aws/vista-funciones/spot-vs-vm/table/SpotVsVmTableComponent"
-import { SpotVsVmChartComponent } from './grafico/SpotVsVmChartComponent'
+import { SpotVsVmChartComponent } from '@/components/aws/vista-funciones/spot-vs-vm/grafico/SpotVsVmChartComponent'
 
 const fetcher = (url: string) =>
     fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })

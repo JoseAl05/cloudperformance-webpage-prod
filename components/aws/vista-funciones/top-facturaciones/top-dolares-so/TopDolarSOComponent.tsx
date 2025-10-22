@@ -1,5 +1,5 @@
 import { FiltersComponent } from '@/components/general/filters/FiltersComponent'
-import {MainViewTopDolaresSO } from './MainViewTopDolarSOComponent'
+import {MainViewTopDolaresSO } from '@/components/aws/vista-funciones/top-facturaciones/top-dolares-so/MainViewTopDolarSOComponent'
 import { Globe } from 'lucide-react'
 
 export const TopDolarSOComponent = () => {

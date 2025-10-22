@@ -2,7 +2,7 @@
 
 import { Card, CardContent } from '@/components/ui/card';
 import { Activity, ChevronDown, ChevronUp, Cpu, Network, Percent, TrendingUp, Zap } from 'lucide-react';
-import { Ec2InfoConsumeViewCardsComponent } from './Ec2InfoConsumeViewCardsComponent';
+import { Ec2InfoConsumeViewCardsComponent } from '@/components/aws/vista-consumos/ec2/info/Ec2InfoConsumeViewCardsComponent';
 
 
 interface Ec2InfoConsumeViewComponentProps {

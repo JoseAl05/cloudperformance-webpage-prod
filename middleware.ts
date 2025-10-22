@@ -1,6 +1,6 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
-import { getAuthFromRequest } from './lib/auth';
+import { getAuthFromRequest } from '@/lib/auth';
 
 const PROTECTED_PATHS = ['/aws', '/azure', '/perfil'] as const;
 

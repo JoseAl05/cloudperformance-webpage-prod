@@ -25,8 +25,8 @@ import {
   Server,
   Zap
 } from "lucide-react"
-import { SavingPlansBarChartComponent } from './graficos/SavingPlansBarChartComponent'
-import { SavingPlansLineChartComponent } from './graficos/SavingPlansLineChartComponent'
+import { SavingPlansBarChartComponent } from '@/components/aws/vista-saving-plan/graficos/SavingPlansBarChartComponent'
+import { SavingPlansLineChartComponent } from '@/components/aws/vista-saving-plan/graficos/SavingPlansLineChartComponent'
 
 const fetcher = (url: string) =>
   fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })

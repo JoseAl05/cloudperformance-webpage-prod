@@ -2,7 +2,7 @@ import { createColumns } from '@/components/general/data-table/columns';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTableGrouping } from '@/components/general/data-table/data-table-grouping';
 import { RdsConsumeViewInstance } from '@/interfaces/vista-consumos/rdsPgConsumeViewInterfaces';
-import { RdsConsumeViewInstanceColumns } from './RdsConsumeViewInstanceColumns';
+import { RdsConsumeViewInstanceColumns } from '@/components/aws/vista-consumos/rds/table/RdsConsumeViewInstanceColumns';
 
 interface RdsConsumeViewInstanceTableProps {
     data: {

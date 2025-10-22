@@ -5,11 +5,11 @@ import { useState } from "react";
 import useSWR, { mutate } from "swr";
 import { CircleDollarSign } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { CentroDeCostoTableComponent } from "./table/CentroDeCostoTableComponent";
-import { CentroDeCostoFormComponent, CentroCosto } from "./form/CentroDeCostoFormComponent";
+import { CentroDeCostoTableComponent } from "@/components/presupuesto/costo-vs-presupuesto/table/CentroDeCostoTableComponent";
+import { CentroDeCostoFormComponent, CentroCosto } from "@/components/presupuesto/costo-vs-presupuesto/form/CentroDeCostoFormComponent";
 import { SessionGate } from "@/components/general_presupuesto/session/SesionGate";
 import { FiltersComponent } from "@/components/general_presupuesto/filters/FiltersComponent";
-import { CostosVsPresupuestoComponent } from "./CostosVsPresupuestoComponent";
+import { CostosVsPresupuestoComponent } from "@/components/presupuesto/costo-vs-presupuesto/CostosVsPresupuestoComponent";
 
 export const MainViewCostoVsPresupuestoComponent = () => {
   return (

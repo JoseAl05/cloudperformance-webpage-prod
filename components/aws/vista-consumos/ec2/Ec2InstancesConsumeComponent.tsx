@@ -2,11 +2,11 @@
 
 import useSWR from 'swr'
 import { ChartBar, AlertCircle, Loader2, Info, Clock } from 'lucide-react'
-import { Ec2ResourceConsumeViewUsageCpuComponent } from './graficos/Ec2ResourceConsumeViewUsageCpuComponent'
-import { Ec2ResourceConsumeViewUsageCreditsComponent } from './graficos/Ec2ResourceConsumeViewUsageCreditsComponent'
-import { Ec2InfoConsumeViewComponent } from './info/Ec2InfoConsumeViewComponent'
-import { Ec2ConsumeViewInstanceTable } from './table/Ec2ConsumeViewInstanceTable'
-import { MessageCard } from '../../cards/MessageCards';
+import { Ec2ResourceConsumeViewUsageCpuComponent } from '@/components/aws/vista-consumos/ec2/graficos/Ec2ResourceConsumeViewUsageCpuComponent'
+import { Ec2ResourceConsumeViewUsageCreditsComponent } from '@/components/aws/vista-consumos/ec2/graficos/Ec2ResourceConsumeViewUsageCreditsComponent'
+import { Ec2InfoConsumeViewComponent } from '@/components/aws/vista-consumos/ec2/info/Ec2InfoConsumeViewComponent'
+import { Ec2ConsumeViewInstanceTable } from '@/components/aws/vista-consumos/ec2/table/Ec2ConsumeViewInstanceTable'
+import { MessageCard } from '@/components/aws/cards/MessageCards';
 import { LoaderComponent } from '@/components/general/LoaderComponent'
 import { ConsumeViewEc2CpuMetrics, ConsumeViewEc2CreditsMetrics, Ec2ConsumneViewInstance } from '@/interfaces/vista-consumos/ec2ConsumeViewInterfaces'
 

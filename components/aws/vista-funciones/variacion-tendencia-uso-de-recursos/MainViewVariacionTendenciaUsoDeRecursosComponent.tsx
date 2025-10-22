@@ -1,5 +1,5 @@
 import { FiltersComponent } from '@/components/general/filters/FiltersComponent'
-import { VariacionTendenciaUsoDeRecursosComponent }  from './VariacionTendenciaUsoDeRecursosComponent'
+import { VariacionTendenciaUsoDeRecursosComponent }  from '@/components/aws/vista-funciones/variacion-tendencia-uso-de-recursos/VariacionTendenciaUsoDeRecursosComponent'
 import { Globe } from 'lucide-react'
 
 export const ViewVariacionTendenciaUsoDeRecursos = () => {

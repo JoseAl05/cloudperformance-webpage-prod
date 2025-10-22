@@ -1,6 +1,6 @@
 // components/aws/vista-rds/avg-uso-loc-inst-rds-mariadb/MainViewInstanciasAVGUsoLocInstRdsMariaDBComponent.tsx
 import { FiltersComponent } from '@/components/general/filters/FiltersComponent'
-import { AVGUsoLocInstRdsMariaDBChartComponent } from './AVGUsoLocInstRdsMariaDBChartComponent'
+import { AVGUsoLocInstRdsMariaDBChartComponent } from '@/components/aws/vista-prom-loc/avg-uso-loc-inst-rds-mariadb/AVGUsoLocInstRdsMariaDBChartComponent'
 import { Download, Filter, Database } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 

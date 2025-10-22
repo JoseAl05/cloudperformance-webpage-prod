@@ -1,5 +1,5 @@
 import { FiltersComponent } from '@/components/general/filters/FiltersComponent'
-import { InstanciasRdsOracleChartComponent } from './InstanciasRdsOracleChartComponent'
+import { InstanciasRdsOracleChartComponent } from '@/components/aws/vista-rds/instancias-rds-oracle/InstanciasRdsOracleChartComponent'
 import { Database } from 'lucide-react'
 
 

@@ -8,7 +8,7 @@ import type {
     AWSEvents as ApiDoc,
     EventsResources
 } from '@/interfaces/vista-eventos/eventsViewInterfaces';
-import { EventsViewColumns } from './EventsViewColumns';
+import { EventsViewColumns } from '@/components/aws/vista-eventos/table/EventsViewColumns';
 
 export type FlatEventRow = ApiDoc & {
     EventName: string;

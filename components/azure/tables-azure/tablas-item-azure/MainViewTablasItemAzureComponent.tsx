@@ -1,5 +1,5 @@
 'use client'
-import { TablasItemAzureComponent } from './TablasItemAzureComponent'
+import { TablasItemAzureComponent } from '@/components/azure/tables-azure/tablas-item-azure/TablasItemAzureComponent'
 import { Database } from 'lucide-react'
 
 export const MainViewTablasItemAzureComponent = () => {

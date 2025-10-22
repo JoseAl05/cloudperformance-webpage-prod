@@ -1,5 +1,5 @@
 import { FiltersComponent } from "@/components/general/filters/FiltersComponent";
-import { InstanceEksInfrautilizadaComponent } from "./InstanceEksInfrautilizadaComponent";
+import { InstanceEksInfrautilizadaComponent } from "@/components/aws/vista-recursos/infrautilizadas/eks/InstanceEksInfrautilizadaComponent";
 import { Download, Filter, Server } from "lucide-react";
 import { Button } from "@/components/ui/button";
 

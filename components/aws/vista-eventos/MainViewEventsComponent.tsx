@@ -1,6 +1,6 @@
 import { FiltersComponent } from '@/components/general/filters/FiltersComponent'
 import { Zap } from 'lucide-react'
-import { EventsViewComponent } from './EventsViewComponent'
+import { EventsViewComponent } from '@/components/aws/vista-eventos/EventsViewComponent'
 
 export const MainViewEventsComponent = () => {
     return (

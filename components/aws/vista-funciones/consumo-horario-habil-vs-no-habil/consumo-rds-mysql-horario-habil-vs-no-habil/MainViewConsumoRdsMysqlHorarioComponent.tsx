@@ -1,5 +1,5 @@
 import { FiltersComponent } from '@/components/general/filters/FiltersComponent'
-import { MainViewConsumoRdsMysqlHorario }  from './ConsumoRdsMysqlHorarioComponent'
+import { MainViewConsumoRdsMysqlHorario }  from '@/components/aws/vista-funciones/consumo-horario-habil-vs-no-habil/consumo-rds-mysql-horario-habil-vs-no-habil/ConsumoRdsMysqlHorarioComponent'
 import { Globe } from 'lucide-react'
 
 export const ViewConsumoRdsMysqlHorario = () => {

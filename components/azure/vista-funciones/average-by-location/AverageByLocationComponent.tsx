@@ -5,8 +5,8 @@ import { LoaderComponent } from '@/components/general/LoaderComponent';
 import { AverageByLocation } from '@/interfaces/vista-promedio-por-localizacion/avgByLocationInterfaces';
 import { AlertCircle, ChartBar, Info } from 'lucide-react';
 import useSWR from 'swr';
-import { AverageByLocationMetricsComponent } from './grafico/AverageByLocationMetricsComponent';
-import { AverageByLocationCardsComponent } from './info/AverageByLocationCardsComponent';
+import { AverageByLocationMetricsComponent } from '@/components/azure/vista-funciones/average-by-location/grafico/AverageByLocationMetricsComponent';
+import { AverageByLocationCardsComponent } from '@/components/azure/vista-funciones/average-by-location/info/AverageByLocationCardsComponent';
 
 interface AverageByLocationComponentProps {
     startDate: Date;

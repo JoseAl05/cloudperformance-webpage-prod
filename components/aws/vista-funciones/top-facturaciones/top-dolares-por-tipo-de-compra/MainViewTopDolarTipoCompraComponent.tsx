@@ -1,5 +1,5 @@
 import { FiltersComponent } from '@/components/general/filters/FiltersComponent'
-import { MainViewTopDolaresTipoCompra } from './TopDolarTipoCompraComponent'
+import { MainViewTopDolaresTipoCompra } from '@/components/aws/vista-funciones/top-facturaciones/top-dolares-por-tipo-de-compra/TopDolarTipoCompraComponent'
 import { Globe } from 'lucide-react'
 
 export const TopDolarTipoCompraComponent = () => {

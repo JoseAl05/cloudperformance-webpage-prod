@@ -1,6 +1,6 @@
 // components/aws/vista-facturacion/tendencia-facturacion/MainViewTendenciaFacturacionComponent.tsx
 import { FiltersComponent } from '@/components/general/filters/FiltersComponent'
-import { TendenciaFacturacionChartComponent } from './TendenciaFacturacionChartComponent'
+import { TendenciaFacturacionChartComponent } from '@/components/aws/vista-facturacion/tendencia-facturacion/TendenciaFacturacionChartComponent'
 import { Download, Filter, TrendingUp } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 

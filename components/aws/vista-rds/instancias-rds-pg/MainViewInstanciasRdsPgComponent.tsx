@@ -1,5 +1,5 @@
 import { FiltersComponent } from '@/components/general/filters/FiltersComponent'
-import { InstanciasRdsPgChartComponent } from './InstanciasRdsPgChartComponent'
+import { InstanciasRdsPgChartComponent } from '@/components/aws/vista-rds/instancias-rds-pg/InstanciasRdsPgChartComponent'
 import { Database } from 'lucide-react'
 
 export const MainViewInstanciasRdsPgComponent = () => {

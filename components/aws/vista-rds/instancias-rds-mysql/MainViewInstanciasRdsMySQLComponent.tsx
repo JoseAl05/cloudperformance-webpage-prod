@@ -1,5 +1,5 @@
 import { FiltersComponent } from '@/components/general/filters/FiltersComponent'
-import { InstanciasRdsMySQLChartComponent } from './InstanciasRdsMySQLChartComponent'
+import { InstanciasRdsMySQLChartComponent } from '@/components/aws/vista-rds/instancias-rds-mysql/InstanciasRdsMySQLChartComponent'
 import { Database } from 'lucide-react'
 
 export const MainViewInstanciasRdsMySQLComponent = () => {

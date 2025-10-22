@@ -26,7 +26,7 @@ import { RDSMetricFilterComponent } from '@/components/general/filters/RdsMetric
 import { AutoScalingGroupFilterComponent } from '@/components/general/filters/Ec2AutoscalingGroupsFilterComponent';
 import { MetricsFilterComponent } from '@/components/general/filters/MetricsFilterComponent';
 import { MetricsRDSFilterComponent } from '@/components/general/filters/MetricsRDSFilterComponent';
-import { VariationResourcesFilterComponent } from './VariationResourcesFilterComponent';
+import { VariationResourcesFilterComponent } from '@/components/general/filters/VariationResourcesFilterComponent';
 
 interface FiltersComponentProps {
     Component: (params: {

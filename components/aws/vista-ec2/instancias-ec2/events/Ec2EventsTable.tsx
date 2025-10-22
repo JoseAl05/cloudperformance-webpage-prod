@@ -1,6 +1,6 @@
 import { createColumns } from '@/components/general/data-table/columns';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { awsEventColumns } from './Ec2EventsColumns';
+import { awsEventColumns } from '@/components/aws/vista-ec2/instancias-ec2/events/Ec2EventsColumns';
 import { DataTableSingle } from '@/components/general/data-table/data-table-single';
 
 interface Ec2EventsTableComponentProps {

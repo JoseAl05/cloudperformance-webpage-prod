@@ -4,8 +4,8 @@ import { LoaderComponent } from "@/components/general_presupuesto/LoaderComponen
 import { Card, CardContent } from "@/components/ui/card";
 import { ChartBar, Database, HardDrive, Package, Search, CircleDollarSignIcon, Tickets } from "lucide-react";
 import useSWR from "swr";
-import { CostosVsPresupuestoChart } from "./graficos/CostosVsPresupuestoViewSummaryComponent";
-import ComparacionMensualTableComponent from "./table/ComparacionMensualTableComponent";
+import { CostosVsPresupuestoChart } from "@/components/presupuesto/costo-vs-presupuesto/graficos/CostosVsPresupuestoViewSummaryComponent";
+import ComparacionMensualTableComponent from "@/components/presupuesto/costo-vs-presupuesto/table/ComparacionMensualTableComponent";
 
 interface CentroDeCostoComponentProps {
   cloud: string;

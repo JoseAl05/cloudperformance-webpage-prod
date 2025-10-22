@@ -1,5 +1,5 @@
 import { FiltersComponent } from '@/components/general/filters/FiltersComponent'
-import { InstanciasAutoscalingGroupsChartComponent } from './InstanciasAutoscalingGroupsChartComponent'
+import { InstanciasAutoscalingGroupsChartComponent } from '@/components/aws/vista-autoscaling/autoscaling-groups/InstanciasAutoscalingGroupsChartComponent'
 import { TrendingUp } from 'lucide-react'
 
 export const MainViewInstanciasAutoscalingGroupsComponent = () => {
