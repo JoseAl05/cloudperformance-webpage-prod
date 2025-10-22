@@ -512,7 +512,7 @@ function buildSeries(def: AnySeriesDef): echarts.SeriesOption {
         name: def.name,
         type: 'line',
         smooth: (def as CartesianSeriesDef).smooth ?? true,
-        showSymbol: true,
+        showSymbol: false,
         lineStyle: { width: 2 },
         areaStyle: def.kind === 'area' ? {} : undefined,
         data: def.data as Array<[unknown, number]> | Array<[number]>,

@@ -1,9 +1,10 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef } from 'react';
-import * as echarts from 'echarts';
+import { useMemo, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Info } from 'lucide-react';
+import { useTheme } from 'next-themes';
+import { createChartOption, deepMerge, makeBaseOptions, useECharts } from '@/lib/echartsGlobalConfig';
 
 interface DbStatusData {
   timestamp: { $date: string };
@@ -16,64 +17,34 @@ interface DbStatusChartProps {
   data: DbStatusData[] | null;
 }
 
-const sliderConfig = [
-  {
-    type: 'slider',
-    xAxisIndex: 0,
-    bottom: 20,
-    height: 20,
-    handleSize: '100%',
-    start: 0,
-    end: 100,
-    realtime: false,
-    throttle: 100,
-    zoomOnMouseWheel: false,
-    moveOnMouseMove: false
-  },
-  {
-    type: 'inside',
-    start: 0,
-    end: 100,
-    filterMode: 'filter',
-    throttle: 100,
-    zoomOnMouseWheel: true,
-    moveOnMouseMove: true
-  },
-];
 
-const createTooltipFormatter = () => (params: unknown) => {
-  const date = new Date(params[0].value[0]).toUTCString();
-  return (
-    `${date}<br/>` +
-    params.map((p: unknown) => `${p.marker} ${p.seriesName}: ${p.value[1]} DBs<br/>`).join('')
-  );
-};
+export const DbStatusChart = ({ data }: DbStatusChartProps) => {
+  const { theme, resolvedTheme } = useTheme();
+  const currentTheme = resolvedTheme || theme;
+  const isDark = currentTheme === 'dark';
 
-const DbStatusChart = ({ data }: DbStatusChartProps) => {
   const chartRef = useRef<HTMLDivElement>(null);
-  const chartInstance = useRef<echarts.ECharts | null>(null);
-  const resizeObserverRef = useRef<ResizeObserver | null>(null);
 
   const safeData = Array.isArray(data) ? data : [];
 
   const { totalData, encendidasData, apagadasData, yMaxRounded } = useMemo(() => {
     // Ordenar por timestamp
-    const sortedData = [...safeData].sort((a, b) => 
+    const sortedData = [...safeData].sort((a, b) =>
       new Date(a.timestamp.$date).getTime() - new Date(b.timestamp.$date).getTime()
     );
 
     const totalData: [string, number][] = sortedData.map(item => [
-      item.timestamp.$date, 
+      item.timestamp.$date,
       item.total
     ]);
-    
+
     const encendidasData: [string, number][] = sortedData.map(item => [
-      item.timestamp.$date, 
+      item.timestamp.$date,
       item.encendidas
     ]);
-    
+
     const apagadasData: [string, number][] = sortedData.map(item => [
-      item.timestamp.$date, 
+      item.timestamp.$date,
       item.apagadas
     ]);
 
@@ -84,151 +55,74 @@ const DbStatusChart = ({ data }: DbStatusChartProps) => {
     return { totalData, encendidasData, apagadasData, yMaxRounded };
   }, [safeData]);
 
-  const handleResize = useCallback(() => {
-    chartInstance.current?.resize();
-  }, []);
-
-  useEffect(() => {
-    if (!chartRef.current) return;
-
-    const optionsMetrics: echarts.EChartsOption = {
-      animation: totalData.length < 1000,
-      animationDuration: 300,
-      animationEasing: 'linear',
-      progressiveThreshold: 500,
-      progressive: 200,
-      hoverLayerThreshold: 3000,
+  const option = useMemo(() => {
+    const base = makeBaseOptions({
+      legend: ['Apagadas', 'Encendidas', 'Total'],
+      unitLabel: 'VMs',
       useUTC: true,
-      dataZoom: sliderConfig,
-      tooltip: {
-        trigger: 'axis',
-        formatter: createTooltipFormatter(),
-        transitionDuration: 0.1,
-        hideDelay: 100,
-        backgroundColor: 'rgba(50, 50, 50, 0.95)',
-        borderColor: 'rgba(255, 255, 255, 0.2)',
-        textStyle: {
-          color: '#fff',
-          fontSize: 12
-        },
-        axisPointer: {
-          animation: false
-        }
-      },
-      legend: {
-        data: ['Apagadas', 'Encendidas', 'Total'],
-        top: 10,
-        left: 'center',
-        animation: false,
-        textStyle: {
-          fontSize: 12
-        }
-      },
-      grid: { left: 50, right: 30, top: 60, bottom: 60, containLabel: true },
-      toolbox: {
-        feature: {
-          saveAsImage: {
-            pixelRatio: 2,
-            excludeComponents: ['toolbox']
-          }
-        },
-        iconStyle: {
-          borderColor: '#999'
-        },
-        emphasis: {
-          iconStyle: {
-            borderColor: '#666'
-          }
-        }
-      },
-      xAxis: {
-        type: 'time',
-        boundaryGap: false,
-        axisLabel: {
-          fontSize: 11,
-          formatter: (value: number) => {
-            const date = new Date(value);
-            return `${date.getUTCDate()}/${date.getUTCMonth() + 1} ${date.getUTCHours()}:00`;
-          },
-          showMaxLabel: true,
-          showMinLabel: true
-        },
-        axisLine: {
-          lineStyle: {
-            color: '#e0e0e0'
-          }
-        },
-        axisTick: {
-          show: false
-        },
-        splitLine: {
-          show: false
-        }
-      },
-      yAxis: {
-        type: 'value',
-        max: yMaxRounded,
-        scale: true,
-        axisLabel: {
-          fontSize: 11,
-          formatter: (val: number) => `${val} DBs`,
-          showMaxLabel: true,
-          showMinLabel: true
-        },
-        axisLine: {
-          show: false
-        },
-        axisTick: {
-          show: false
-        },
-        splitLine: {
-          lineStyle: {
-            color: '#f0f0f0',
-            type: 'solid',
-            width: 1
-          }
-        }
-      },
+      showToolbox: true,
+      metricType: 'default'
+    });
+    const lines = createChartOption({
+      kind: 'line',
+      xAxisType: 'time',
+      legend: true,
+      tooltip: true,
       series: [
-        createSeries('Apagadas', apagadasData, '#FF6384', 'rgba(255, 99, 132, 0.2)'),
-        createSeries('Encendidas', encendidasData, '#28e995', 'rgba(40, 233, 149, 0.2)'),
-        createSeries('Total', totalData, '#36A2EB', 'rgba(54, 162, 235, 0.3)'),
-      ]
-    };
-
-    chartInstance.current = echarts.init(chartRef.current, null, {
-      renderer: 'canvas'
+        {
+          kind: 'line',
+          name: 'Apagadas',
+          data: apagadasData,
+          smooth: true,
+          extra: {
+            color: '#FF6384'
+          }
+        },
+        {
+          kind: 'line',
+          name: 'Encendidas',
+          data: encendidasData,
+          smooth: true,
+          extra: {
+            color: '#28e995'
+          }
+        },
+        {
+          kind: 'line',
+          name: 'Total',
+          data: totalData,
+          smooth: true,
+          extra: {
+            color: '#36A2EB'
+          }
+        },
+      ],
+      extraOption: {
+        xAxis: { axisLabel: { rotate: 30 } },
+        yAxis: { min: 0 },
+        grid: { left: 44, right: 12, top: 56, bottom: 64, containLabel: true },
+      },
     });
-    chartInstance.current.setOption(optionsMetrics, {
-      notMerge: true,
-      lazyUpdate: true,
-      silent: false
-    });
 
-    resizeObserverRef.current = new ResizeObserver(handleResize);
-    resizeObserverRef.current.observe(chartRef.current);
-    window.addEventListener('resize', handleResize);
+    return deepMerge(base, lines);
+  }, [apagadasData, encendidasData, totalData]);
 
-    return () => {
-      window.removeEventListener('resize', handleResize);
-      resizeObserverRef.current?.disconnect();
-      chartInstance.current?.dispose();
-    };
-  }, [totalData, encendidasData, apagadasData, yMaxRounded, handleResize]);
 
   const isEmpty = totalData.length === 0;
+
+  useECharts(chartRef, option, [option], isDark ? 'cp-dark' : 'cp-light');
 
   return (
     <Card className="w-full">
       <CardHeader>
-        <CardTitle>DBs Encendidas vs Apagadas</CardTitle>
+        <CardTitle>VMs Encendidas vs Apagadas</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="flex items-center justify-center gap-2 mb-2">
           <Info className="w-5 h-5 text-blue-500 flex-shrink-0" />
           <p className="text-xs text-muted-foreground">
-            Las marcas de tiempo (Timestamps) están en formato <strong>UTC</strong>. 
-            Una DB se considera apagada cuando CPU y Memoria están en 0.
+            Las marcas de tiempo (Timestamps) están en formato <strong>UTC</strong>.
+            Una VM se considera apagada cuando CPU y Memoria están en 0.
           </p>
         </div>
         {isEmpty ? (
@@ -242,39 +136,3 @@ const DbStatusChart = ({ data }: DbStatusChartProps) => {
     </Card>
   );
 };
-
-
-const createSeries = (name: string, data: [string, number][], color: string, areaColor?: string) => {
-  const len = data.length;
-  return {
-    name,
-    type: 'line',
-    data,
-    smooth: false,
-    symbol: 'none',
-    showSymbol: false,
-    lineStyle: {
-      color,
-      width: 2
-    },
-    itemStyle: {
-      color
-    },
-    emphasis: {
-      disabled: len > 1000
-    },
-    large: true,
-    largeThreshold: 500,
-    sampling: len > 1000 ? 'lttb' : undefined,
-    progressive: len > 2000 ? 200 : undefined,
-    progressiveThreshold: len > 2000 ? 300 : undefined,
-    ...(areaColor && {
-      areaStyle: {
-        color: areaColor,
-        opacity: 0.3
-      }
-    })
-  };
-};
-
-export default DbStatusChart;

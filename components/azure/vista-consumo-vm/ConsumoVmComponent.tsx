@@ -2,11 +2,13 @@
 
 import useSWR from 'swr'
 import { BarChart3, AlertCircle, Info, Cpu, MemoryStick, HardDrive, PowerOff } from 'lucide-react'
-import { AzureCpuUsageComponent, AzureMemoryUsageComponent, AzureStorageUsageComponent } from '@/components/azure/vista-consumo-vm/graficos/VmConsumeViewUsageComponent'
-import  VmStatusChart  from '@/components/azure/vista-consumo-vm/graficos/VmStatusViewComponent';
+import { VmStatusChart } from '@/components/azure/vista-consumo-vm/graficos/VmStatusViewComponent';
 import { LoaderComponent } from '@/components/general/LoaderComponent'
 import { MessageCard } from '@/components/azure/cards/MessageCards'
 import { Card, CardContent } from '@/components/ui/card'
+import { VmConsumeViewMemoryUsageComponent } from '@/components/azure/vista-consumo-vm/graficos/VmConsumeViewMemoryUsageComponent';
+import { VmConsumeViewIopsUsageComponent } from '@/components/azure/vista-consumo-vm/graficos/VmConsumeViewIopsUsageComponent';
+import { VmConsumeViewCpuUsageComponent } from '@/components/azure/vista-consumo-vm/graficos/VmConsumeViewCpuUsageComponent';
 
 
 interface AzureVmMetricsProps {
@@ -14,8 +16,8 @@ interface AzureVmMetricsProps {
     endDate: Date
     subscription: string
     region: string
-    selectedTagKey: string 
-    selectedTagValue: string 
+    selectedTagKey: string
+    selectedTagValue: string
     selectedResourceGroup: string
     selectedInstanceV2: string
 }
@@ -43,12 +45,12 @@ interface AveragesResponse {
 }
 
 const fetcher = (url: string) =>
-  fetch(url, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json'
-    }
-  }).then(res => res.json())
+    fetch(url, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    }).then(res => res.json())
 
 const isNonEmptyArray = <T,>(v: unknown): v is T[] => Array.isArray(v) && v.length > 0
 
@@ -286,16 +288,16 @@ export const AzureVmMetricsComponent = ({
                 )}
 
                 {/* Gráfico de CPU */}
-                {cpuData && <AzureCpuUsageComponent data={cpuData} />}
+                {cpuData && <VmConsumeViewCpuUsageComponent data={cpuData} title='Consumo CPU' />}
 
                 {/* Gráfico de Memoria */}
-                {memoryData && <AzureMemoryUsageComponent data={memoryData} />}
+                {memoryData && <VmConsumeViewMemoryUsageComponent data={memoryData} title='Memoria Disponible' />}
 
                 {/* Gráfico de Almacenamiento */}
-                {storageData && <AzureStorageUsageComponent data={storageData} />}
+                {storageData && <VmConsumeViewIopsUsageComponent data={storageData} title='IOPS Disco' />}
 
                 {/* Gráfico de Estado VMs (Encendidas vs Apagadas) */}
-                {vmStatusData && <VmStatusChart data={vmStatusData} />}
+                {vmStatusData && <VmStatusChart data={vmStatusData}/>}
             </div>
         </div>
     )

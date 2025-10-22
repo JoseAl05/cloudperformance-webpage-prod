@@ -2,19 +2,22 @@
 
 import useSWR from 'swr'
 import { Database, AlertCircle, Info, Cpu, MemoryStick, HardDrive, PowerOff } from 'lucide-react'
-import { AzureDbCpuUsageComponent, AzureDbMemoryUsageComponent, AzureDbStorageUsageComponent, AzureDbStoragePercentComponent} from '@/components/azure/vista-consumo-db/graficos/DbConsumeViewUsageComponent'
-import DbStatusChart from '@/components/azure/vista-consumo-db/graficos/DbStatusViewComponent'
+import { DbStatusChart } from '@/components/azure/vista-consumo-db/graficos/DbStatusViewComponent'
 import { LoaderComponent } from '@/components/general/LoaderComponent'
 import { MessageCard } from '@/components/azure/cards/MessageCards'
 import { Card, CardContent } from '@/components/ui/card'
+import { DbConsumeViewCpuUsageComponent } from '@/components/azure/vista-consumo-db/graficos/DbConsumeViewCpuUsageComponent'
+import { DbConsumeViewMemoryUsageComponent } from '@/components/azure/vista-consumo-db/graficos/DbConsumeViewMemoryUsageComponent'
+import { DbConsumeViewStorageUsageComponent } from '@/components/azure/vista-consumo-db/graficos/DbConsumeViewStorageUsageComponent'
+import { DbConsumeViewStoragePercentUsageComponent } from '@/components/azure/vista-consumo-db/graficos/DbConsumeViewStoragePercentUsageComponent'
 
 interface AzureDbMetricsProps {
     startDate: Date
     endDate: Date
     subscription: string
     region: string
-    selectedTagKey: string 
-    selectedTagValue: string 
+    selectedTagKey: string
+    selectedTagValue: string
     selectedResourceGroup: string
     selectedInstanceV2: string
 }
@@ -46,12 +49,12 @@ interface AveragesResponse {
 }
 
 const fetcher = (url: string) =>
-  fetch(url, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json'
-    }
-  }).then(res => res.json())
+    fetch(url, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    }).then(res => res.json())
 
 const isNonEmptyArray = <T,>(v: unknown): v is T[] => Array.isArray(v) && v.length > 0
 
@@ -146,15 +149,15 @@ export const AzureDbMetricsComponent = ({
     const averages = useSWR<AveragesResponse>(buildAveragesUrl(), fetcher)
     const dbStatus = useSWR(buildDbStatusUrl(), fetcher)
 
-    const anyLoading = cpuMetrics.isLoading || memoryMetrics.isLoading || 
-                       storageUsedMetrics.isLoading || storagePercentMetrics.isLoading ||
-                       backupStorageMetrics.isLoading || logStorageUsedMetrics.isLoading ||
-                       logStoragePercentMetrics.isLoading || averages.isLoading || dbStatus.isLoading
+    const anyLoading = cpuMetrics.isLoading || memoryMetrics.isLoading ||
+        storageUsedMetrics.isLoading || storagePercentMetrics.isLoading ||
+        backupStorageMetrics.isLoading || logStorageUsedMetrics.isLoading ||
+        logStoragePercentMetrics.isLoading || averages.isLoading || dbStatus.isLoading
 
-    const anyError = !!cpuMetrics.error || !!memoryMetrics.error || 
-                     !!storageUsedMetrics.error || !!storagePercentMetrics.error ||
-                     !!backupStorageMetrics.error || !!logStorageUsedMetrics.error ||
-                     !!logStoragePercentMetrics.error || !!averages.error || !!dbStatus.error
+    const anyError = !!cpuMetrics.error || !!memoryMetrics.error ||
+        !!storageUsedMetrics.error || !!storagePercentMetrics.error ||
+        !!backupStorageMetrics.error || !!logStorageUsedMetrics.error ||
+        !!logStoragePercentMetrics.error || !!averages.error || !!dbStatus.error
 
     const cpuData = isNonEmptyArray(cpuMetrics.data) ? cpuMetrics.data : null
     const memoryData = isNonEmptyArray(memoryMetrics.data) ? memoryMetrics.data : null
@@ -165,8 +168,8 @@ export const AzureDbMetricsComponent = ({
     const logStoragePercentData = isNonEmptyArray(logStoragePercentMetrics.data) ? logStoragePercentMetrics.data : null
     const dbStatusData = dbStatus.data?.datos && isNonEmptyArray(dbStatus.data.datos) ? dbStatus.data.datos : null
 
-    const hasAnyData = !!cpuData || !!memoryData || !!storageUsedData || !!storagePercentData || 
-                       !!backupStorageData || !!logStorageUsedData || !!logStoragePercentData || !!dbStatusData
+    const hasAnyData = !!cpuData || !!memoryData || !!storageUsedData || !!storagePercentData ||
+        !!backupStorageData || !!logStorageUsedData || !!logStoragePercentData || !!dbStatusData
 
     if (anyLoading) {
         return <LoaderComponent />
@@ -304,16 +307,16 @@ export const AzureDbMetricsComponent = ({
                 )}
 
                 {/* Gráfico de CPU */}
-                {cpuData && <AzureDbCpuUsageComponent data={cpuData} />}
+                {cpuData && <DbConsumeViewCpuUsageComponent data={cpuData} title='Consumo CPU' />}
 
                 {/* Gráfico de Memoria */}
-                {memoryData && <AzureDbMemoryUsageComponent data={memoryData} />}
+                {memoryData && <DbConsumeViewMemoryUsageComponent data={memoryData} title='Consumo Memoria' />}
 
                 {/* Gráfico de Storage Usado */}
-                {storageUsedData && <AzureDbStorageUsageComponent data={storageUsedData} />}
+                {storageUsedData && <DbConsumeViewStorageUsageComponent data={storageUsedData} title='Storage Utilizado' />}
 
                 {/* Gráfico de Storage Porcentaje */}
-                {storagePercentData && <AzureDbStoragePercentComponent data={storagePercentData} />}
+                {storagePercentData && <DbConsumeViewStoragePercentUsageComponent data={storagePercentData} title='Porcentaje Storage Utilizado' />}
 
                 {/* Gráfico de Estado DBs (Encendidas vs Apagadas) */}
                 {dbStatusData && <DbStatusChart data={dbStatusData} />}
