@@ -2,6 +2,171 @@
 import { useEffect, useMemo, useRef } from 'react';
 import * as echarts from 'echarts';
 
+function isDarkMode(): boolean {
+  return document.documentElement.classList.contains('dark');
+}
+
+function getThemeBG(): string {
+  // 1) intenta CSS var de shadcn
+  const root = getComputedStyle(document.documentElement);
+  const varBg = root.getPropertyValue('--background').trim();
+  if (varBg) return varBg;
+  // 2) sino, usa el fondo computado del body
+  const bodyBg = getComputedStyle(document.body).backgroundColor;
+  if (bodyBg) return bodyBg;
+  // 3) fallback
+  return isDarkMode() ? '#0b0b0b' : '#ffffff';
+}
+
+function getIconColor(): string {
+  // Colores con buen contraste en ambos temas
+  return isDarkMode()
+    ? '#e5e7eb' /* Tailwind zinc-200 */
+    : '#374151' /* slate-700 */;
+}
+
+// === Tu SVG (con color dinámico) -> data URL para ECharts ===
+function makeFullscreenIconByTheme(): string {
+  const color = getIconColor();
+  const svg = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
+         viewBox="0 0 24 24" fill="none"
+         stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M3 7V5a2 2 0 0 1 2-2h2"/>
+      <path d="M17 3h2a2 2 0 0 1 2 2v2"/>
+      <path d="M21 17v2a2 2 0 0 1-2 2h-2"/>
+      <path d="M7 21H5a2 2 0 0 1-2-2v-2"/>
+      <rect width="10" height="8" x="7" y="8" rx="1"/>
+    </svg>
+  `
+    .replace(/\s+/g, ' ')
+    .trim();
+
+  return `image://data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
+}
+
+// === Inyecta el botón en el toolbox (respeta overrides del usuario) ===
+function augmentWithFullscreenTool(
+  opt: echarts.EChartsOption,
+  el: HTMLElement
+): echarts.EChartsOption {
+  const tb = Array.isArray(opt.toolbox)
+    ? opt.toolbox[0] ?? {}
+    : opt.toolbox ?? {};
+  const userFeature = (tb as unknown).feature ?? {};
+
+  // Si el usuario lo desactiva explícitamente
+  if (userFeature.myFullscreen === false) return opt;
+
+  const icon = userFeature.myFullscreen?.icon ?? makeFullscreenIconByTheme();
+  const feature = {
+    ...userFeature,
+    myFullscreen: {
+      ...(userFeature.myFullscreen ?? {}),
+      show: true,
+      title: (userFeature.myFullscreen?.title as string) ?? 'Pantalla completa',
+      icon,
+      onclick:
+        userFeature.myFullscreen?.onclick ??
+        (() => {
+          const doc: unknown = document;
+          const isFs =
+            doc.fullscreenElement === el || doc.webkitFullscreenElement === el;
+          const enter =
+            el.requestFullscreen?.bind(el) ||
+            (el as unknown).webkitRequestFullscreen?.bind(el);
+          const exit =
+            doc.exitFullscreen?.bind(doc) ||
+            doc.webkitExitFullscreen?.bind(doc);
+          isFs ? exit?.() : enter?.();
+        }),
+    },
+  };
+
+  const iconColor = getIconColor();
+  const nextTb = {
+    ...tb,
+    top: (tb as unknown).top ?? 10,
+    iconStyle: {
+      // Asegura contraste de TODOS los íconos del toolbox (saveAsImage, etc.)
+      color: iconColor,
+      borderColor: iconColor,
+      ...(tb as unknown).iconStyle,
+    },
+    feature,
+  };
+
+  const toolboxFinal = Array.isArray(opt.toolbox) ? [nextTb] : nextTb;
+  return { ...opt, toolbox: toolboxFinal };
+}
+
+// === Fullscreen lifecycle: aplica fondo correcto del tema y hace resize ===
+function bindFullscreenLifecycle(chart: echarts.ECharts, el: HTMLElement) {
+  const doc: unknown = document;
+  const prev = {
+    width: el.style.width,
+    height: el.style.height,
+    backgroundColor: el.style.backgroundColor,
+  };
+
+  const applyBG = () => {
+    el.style.backgroundColor = getThemeBG();
+  };
+
+  const onFsChange = () => {
+    const active =
+      doc.fullscreenElement === el || doc.webkitFullscreenElement === el;
+    if (active) {
+      el.style.width = '100vw';
+      el.style.height = '100vh';
+      el.style.padding = '30px';
+      applyBG();
+    } else {
+      el.style.width = prev.width;
+      el.style.height = prev.height;
+      el.style.backgroundColor = prev.backgroundColor;
+    }
+    requestAnimationFrame(() => chart.resize());
+  };
+
+  document.addEventListener('fullscreenchange', onFsChange);
+  document.addEventListener('webkitfullscreenchange' as unknown, onFsChange);
+
+  // Observa cambios de tema (clase 'dark' en <html>) y actualiza iconos + fondo
+  const mo = new MutationObserver(() => {
+    // 1) si está fullscreen, actualiza fondo
+    const active =
+      doc.fullscreenElement === el || doc.webkitFullscreenElement === el;
+    if (active) applyBG();
+
+    // 2) actualiza iconos del toolbox para el tema actual
+    chart.setOption(
+      {
+        toolbox: {
+          iconStyle: {
+            color: getIconColor(),
+            borderColor: getIconColor(),
+          },
+          feature: {
+            myFullscreen: { icon: makeFullscreenIconByTheme() },
+          },
+        },
+      },
+      { notMerge: false, lazyUpdate: true }
+    );
+  });
+  mo.observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ['class'],
+  });
+
+  return () => {
+    document.removeEventListener('fullscreenchange', onFsChange);
+    document.removeEventListener('webkitfullscreenchange' as unknown, onFsChange);
+    mo.disconnect();
+  };
+}
+
 export const defaultDataZoom: echarts.EChartsOption['dataZoom'] = [
   {
     type: 'slider',
@@ -119,7 +284,6 @@ function buildLegendOption(
 
   return { ...baseLegend, ...override } as echarts.EChartsOption['legend'];
 
-
   if (Array.isArray(legend)) {
     return { data: legend, ...pos };
   }
@@ -142,7 +306,7 @@ export function makeBaseOptions(args?: {
     legendConfig,
     unitLabel,
     useUTC = true,
-    showToolbox = false,
+    showToolbox = true,
     showDataZoom = true,
     metricType = 'default',
   } = args ?? {};
@@ -188,10 +352,10 @@ export function makeBaseOptions(args?: {
       ? {
           feature: {
             saveAsImage: { show: true },
-            dataZoom: { show: true, yAxisIndex: 'none' },
             magicType: { type: ['line', 'bar'] },
             restore: { show: true },
           },
+          top: 10,
         }
       : undefined,
     dataZoom: showDataZoom ? defaultDataZoom : undefined,
@@ -381,6 +545,9 @@ export function useECharts(
     chartRef.current = echarts.init(el, theme ?? undefined, {
       renderer: 'canvas',
     });
+
+    const optWithFs = augmentWithFullscreenTool(memoOption, el);
+
     chartRef.current.setOption(memoOption, {
       notMerge: true,
       lazyUpdate: true,
@@ -391,7 +558,10 @@ export function useECharts(
     });
     resizeObs.current.observe(el);
 
+    const cleanupFs = bindFullscreenLifecycle(chartRef.current, el);
+
     return () => {
+      cleanupFs?.();
       resizeObs.current?.disconnect();
       resizeObs.current = null;
       chartRef.current?.dispose();
@@ -400,11 +570,10 @@ export function useECharts(
   }, [ref, theme]);
 
   useEffect(() => {
-    chartRef.current?.setOption(memoOption, {
-      notMerge: true,
-      lazyUpdate: true,
-    });
-  }, [memoOption]);
+    if (!chartRef.current || !ref.current) return;
+    const next = augmentWithFullscreenTool(memoOption, ref.current);
+    chartRef.current.setOption(next, { notMerge: true, lazyUpdate: true });
+  }, [ref, memoOption]);
 }
 
 function buildSeries(def: AnySeriesDef): echarts.SeriesOption {
@@ -434,8 +603,7 @@ function buildSeries(def: AnySeriesDef): echarts.SeriesOption {
       s['barWidth'] = ex.barWidth as unknown;
     if (typeof ex.stack === 'string') s['stack'] = ex.stack;
 
-    if (typeof ex.progressive === 'number')
-      s['progressive'] = ex.progressive;
+    if (typeof ex.progressive === 'number') s['progressive'] = ex.progressive;
     if (typeof ex.progressiveThreshold === 'number')
       s['progressiveThreshold'] = ex.progressiveThreshold;
     if (typeof ex.progressiveChunkMode === 'string')
