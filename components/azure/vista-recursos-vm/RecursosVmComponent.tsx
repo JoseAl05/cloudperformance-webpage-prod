@@ -1,19 +1,19 @@
 'use client'
 import useSWR from 'swr'
 import { Card, CardContent } from '@/components/ui/card'
-import { Calendar, MapPin, Hash, Tag, Clock, FolderTree, Cloud } from 'lucide-react'
-import { VmCpuUsageComponent, VmMemoryUsageComponent, VmDiskUsageComponent } from '@/components/azure/vista-recursos-vm/graficos/VmMetricChartsComponent'
-import { VmDeploymentsChartComponent } from '@/components/azure/vista-recursos-vm/graficos/VmDeploymetsChartComponent'
+import { Calendar, MapPin, Hash, Tag, Clock, FolderTree, Cloud, AlertCircle, Info } from 'lucide-react'
+import { VmDeploymentsChart } from '@/components/azure/vista-recursos-vm/graficos/VmDeploymetsChartComponent'
 import { VmDeploymentsTableComponent } from '@/components/azure/vista-recursos-vm/table/VmDeploymentsTableComponent'
-import { VmBillingChartComponent } from '@/components/azure/vista-recursos-vm/graficos/VmBillingChartComponent'
-import { VmMeasuresChartComponent } from '@/components/azure/vista-recursos-vm/graficos/VmMeasuresChartComponent'
+import { VmBillingChart, VmBillingChartComponent } from '@/components/azure/vista-recursos-vm/graficos/VmBillingChartComponent'
+import { VmMeasuresChart, VmMeasuresChartComponent } from '@/components/azure/vista-recursos-vm/graficos/VmMeasuresChartComponent'
 import { VmBillingPropertiesComponent } from '@/components/azure/vista-recursos-vm/graficos/VmBillingPropertiesComponent'
+import { LoaderComponent } from '@/components/general/LoaderComponent'
+import { MessageCard } from '@/components/aws/cards/MessageCards'
+import { RecursosVmCardsComponent } from '@/components/azure/vista-recursos-vm/info/RecursosVmCardsComponent'
+import { RecursosVmCpuMetricsComponent } from '@/components/azure/vista-recursos-vm/graficos/RecursosVmCpuMetricsComponent'
+import { RecursosVmMemoryMetricsComponent } from '@/components/azure/vista-recursos-vm/graficos/RecursosVmMemoryMetricsComponent'
+import { RecursosVmIopsMetrics } from '@/components/azure/vista-recursos-vm/graficos/RecursosVmIopsMetrics'
 
-const LoaderComponent = () => (
-  <div className="flex items-center justify-center h-full">
-    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
-  </div>
-)
 
 interface RecursosVmProps {
   startDate: Date;
@@ -29,31 +29,155 @@ const fetcher = (url: string) =>
     }
   }).then(res => res.json())
 
+const isNonEmptyArray = <T,>(v: unknown): v is T[] => Array.isArray(v) && v.length > 0
+const isNullish = (v: unknown) => v === null || v === undefined
+
+
+
 export const RecursosVmComponent = ({ startDate, endDate, selectedVm }: RecursosVmProps) => {
   const startDateFormatted = startDate.toISOString().replace('Z', '').slice(0, -4)
   const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : ''
 
-  const { data, error, isLoading } = useSWR(
-    `/api/azure/bridge/azure/recursos/vm/propiedades?date_from=${startDateFormatted}&date_to=${endDateFormatted}&vm_id=${selectedVm}`,
+  const vmProperties = useSWR(
+    selectedVm ? `/api/azure/bridge/azure/recursos/vm/propiedades?date_from=${startDateFormatted}&date_to=${endDateFormatted}&vm_id=${selectedVm}` : null,
     fetcher,
-    { revalidateOnFocus: false }
   )
 
-  if (isLoading) return <LoaderComponent />
-  if (error) return <div className="text-red-500 p-4">Error al cargar datos de la VM</div>
-  if (!data || data.length === 0) return <div className="p-4">No hay datos disponibles</div>
+  const vmCpuMetrics = useSWR(
+    selectedVm ? `/api/azure/bridge/azure/recursos/vm/consumo-metricas?date_from=${startDateFormatted}&date_to=${endDateFormatted}&vm_id=${selectedVm}&metric_name=Percentage%20CPU` : null,
+    fetcher
+  )
+  const vmMemoryMetrics = useSWR(
+    selectedVm ? `/api/azure/bridge/azure/recursos/vm/consumo-metricas?date_from=${startDateFormatted}&date_to=${endDateFormatted}&vm_id=${selectedVm}&metric_name=Available%20Memory` : null,
+    fetcher
+  )
+  const vmIopsMetrics = useSWR(
+    selectedVm ? `/api/azure/bridge/azure/recursos/vm/consumo-metricas?date_from=${startDateFormatted}&date_to=${endDateFormatted}&vm_id=${selectedVm}&metric_name=Disks%20IOPS` : null,
+    fetcher
+  )
 
-  const vmData = data?.[0] ?? {};
+  const vmDeployments = useSWR(
+    selectedVm ? `/api/azure/bridge/azure/recursos/vm/deployments-por-fecha?date_from=${startDateFormatted}&date_to=${endDateFormatted}&resource_id=${selectedVm}` : null,
+    fetcher
+  )
+
+  const vmMeasures = useSWR(
+    selectedVm ? `/api/azure/bridge/azure/recursos/vm/facturacion/medidas?date_from=${startDateFormatted}&date_to=${endDateFormatted}&instance_name=${selectedVm}` : null,
+    fetcher
+  )
+
+  const vmBillingProperties = useSWR(
+    selectedVm ? `/api/azure/bridge/azure/recursos/vm/facturacion/propiedades?date_from=${startDateFormatted}&date_to=${endDateFormatted}&instance_name=${selectedVm}` : null,
+    fetcher
+  )
+  const vmBilling = useSWR(
+    selectedVm ? `/api/azure/bridge/azure/recursos/vm/facturacion?date_from=${startDateFormatted}&date_to=${endDateFormatted}&instance_name=${selectedVm}` : null,
+    fetcher
+  )
+
+  const anyLoading =
+    vmProperties.isLoading ||
+    vmCpuMetrics.isLoading ||
+    vmMemoryMetrics.isLoading ||
+    vmIopsMetrics.isLoading ||
+    vmDeployments.isLoading ||
+    vmMeasures.isLoading ||
+    vmBillingProperties.isLoading ||
+    vmBilling.isLoading
+
+  const anyError =
+    !!vmProperties.error ||
+    !!vmCpuMetrics.error ||
+    !!vmMemoryMetrics.error ||
+    !!vmIopsMetrics.error ||
+    !!vmDeployments.error ||
+    !!vmMeasures.error ||
+    !!vmBillingProperties.error ||
+    !!vmBilling.error
+
+  const vmPropertiesData: unknown | null =
+    !isNullish<unknown>(vmProperties.data) ? vmProperties.data : null;
+
+  const vmCpuMetricsData: unknown | null =
+    !isNullish<unknown>(vmCpuMetrics.data) ? vmCpuMetrics.data : null;
+
+  const vmMemoryMetricsData: unknown | null =
+    !isNullish<unknown>(vmMemoryMetrics.data) ? vmMemoryMetrics.data : null;
+
+  const vmIopsMetricsData: unknown | null =
+    !isNullish<unknown>(vmIopsMetrics.data) ? vmIopsMetrics.data : null;
+
+  const vmDeploymentsData: unknown | null =
+    !isNullish<unknown>(vmDeployments.data) ? vmDeployments.data : null;
+
+  const vmMeasuresData: unknown | null =
+    !isNullish<unknown>(vmMeasures.data) ? vmMeasures.data : null;
+
+  const vmBillingPropertiesData: unknown | null =
+    !isNullish<unknown>(vmBillingProperties.data) ? vmBillingProperties.data : null;
+
+  const vmBillingData: unknown | null =
+    !isNullish<unknown>(vmBilling.data) ? vmBilling.data : null;
+
+  const hasPropertiesData = !!vmPropertiesData && vmPropertiesData.length > 0;
+  const hasCpuMetricsData = !!vmCpuMetricsData && vmCpuMetricsData.length > 0;
+  const hasMemoryMetricsData = !!vmMemoryMetricsData && vmMemoryMetricsData.length > 0;
+  const hasIopsMetricsData = !!vmIopsMetricsData && vmIopsMetricsData.length > 0;
+  const hasDeploymentsData = !!vmDeploymentsData && vmDeploymentsData.length > 0;
+  const hasMeasuresData = !!vmMeasuresData && vmMeasuresData.length > 0;
+  const hasBillingPropertiesData = !!vmBillingPropertiesData && vmBillingPropertiesData.length > 0;
+  const hasBillingData = !!vmBillingData && vmBillingData.length > 0;
+
+  if (anyLoading) {
+    return <LoaderComponent />
+  }
+
+  if (!selectedVm) {
+    return (
+      <div className="max-w-7xl mx-auto px-6 py-8">
+        <div className="text-center text-gray-500 text-lg font-medium">No se ha seleccionado ninguna VM.</div>
+      </div>
+    )
+  }
+
+  if (anyError) {
+    return (
+      <div className="w-full min-w-0 px-4 py-10 flex flex-col items-center gap-4">
+        <MessageCard
+          icon={AlertCircle}
+          title="Error al cargar datos"
+          description="Ocurrió un problema al obtener la información desde la API. Intenta nuevamente o ajusta el rango de fechas."
+          tone="error"
+        />
+      </div>
+    )
+  }
+
+  const noneHasData =
+    !hasPropertiesData && !hasCpuMetricsData && !hasMemoryMetricsData && hasIopsMetricsData && hasDeploymentsData && hasMeasuresData && hasBillingPropertiesData && hasBillingData;
+
+  if (noneHasData) {
+    return (
+      <div className="w-full min-w-0 px-4 py-6">
+        <MessageCard
+          icon={Info}
+          title="Sin datos para mostrar"
+          description="No encontramos métricas ni información de la instancia en el rango seleccionado."
+          tone="warn"
+        />
+      </div>
+    )
+  }
+  const vmData = vmPropertiesData[0] ?? {};
 
   return (
     <div className="w-full min-w-0 px-4 py-6 space-y-6">
-      {/* ========== HEADER CON NOMBRE DE VM ========== */}
       <div className="bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-950 dark:to-blue-900 p-6 rounded-lg border border-blue-200 dark:border-blue-800">
         <div className="flex items-center gap-3">
           <Cloud className="h-10 w-10 text-blue-600 dark:text-blue-400" />
           <div>
             <h1 className="text-3xl font-bold text-blue-900 dark:text-blue-100">
-                {vmData.nombre_vm}
+              {vmData.nombre_vm}
             </h1>
             <p className="text-sm text-blue-700 dark:text-blue-300 mt-1">
               Última modificación: {vmData.ultima_modificacion}
@@ -61,152 +185,45 @@ export const RecursosVmComponent = ({ startDate, endDate, selectedVm }: Recursos
           </div>
         </div>
       </div>
-
-      {/* ========== SECCIÓN: PROPIEDADES DEL RECURSO ========== */}
       <section>
         <h2 className="text-xl font-bold text-foreground mb-4 pb-2 border-b-2 border-blue-500">
           Propiedades del Recurso
         </h2>
-        
-        <div className="space-y-4">
-          {/* Grid compacto - Fila 1: 4 columnas */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {/* Ubicación */}
-            <Card className="border-l-4 border-l-blue-500">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-xs font-medium text-muted-foreground uppercase">Ubicación</p>
-                    <p className="text-lg font-bold text-blue-600 mt-1">{vmData.ubicacion}</p>
-                  </div>
-                  <MapPin className="h-6 w-6 text-blue-500" />
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Fecha de Creación */}
-            <Card className="border-l-4 border-l-green-500">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-xs font-medium text-muted-foreground uppercase">Fecha Creación</p>
-                    <p className="text-lg font-bold text-green-600 mt-1">
-                      {new Date(vmData.fecha_creacion).toLocaleDateString("es-ES")}
-                    </p>
-                  </div>
-                  <Calendar className="h-6 w-6 text-green-500" />
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Edad del Recurso */}
-            <Card className="border-l-4 border-l-purple-500">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-xs font-medium text-muted-foreground uppercase">Edad Recurso (días)</p>
-                    <p className="text-lg font-bold text-purple-600 mt-1">{vmData.edad_recurso_dias}</p>
-                  </div>
-                  <Clock className="h-6 w-6 text-purple-500" />
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Grupo de Recursos */}
-            <Card className="border-l-4 border-l-orange-500">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-xs font-medium text-muted-foreground uppercase">Grupo de Recursos</p>
-                    <p className="text-lg font-bold text-orange-600 mt-1">{vmData.grupo_recursos}</p>
-                  </div>
-                  <FolderTree className="h-6 w-6 text-orange-500" />
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* ID de Suscripción - Ancho completo */}
-          <Card className="border-l-4 border-l-cyan-500">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div className="flex-1">
-                  <p className="text-xs font-medium text-muted-foreground uppercase">ID de Suscripción</p>
-                  <p className="text-sm font-bold text-cyan-600 font-mono mt-1 break-all">
-                    {vmData.id_suscripcion}
-                  </p>
-                </div>
-                <Hash className="h-6 w-6 text-cyan-500 flex-shrink-0 ml-4" />
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Tags */}
-          {vmData.tags && Object.keys(vmData.tags).length > 0 && (
-            <Card className="border-l-4 border-l-pink-500">
-              <CardContent className="p-4">
-                <div className="flex items-start gap-3">
-                  <Tag className="h-5 w-5 text-pink-500 flex-shrink-0 mt-1" />
-                  <div className="flex-1">
-                    <p className="text-xs font-medium text-muted-foreground uppercase mb-3">Tags</p>
-                    <div className="flex flex-wrap gap-2">
-                      {Object.entries(vmData.tags).map(([key, value]) => (
-                        <div key={key} className="bg-pink-50 dark:bg-pink-950 px-3 py-2 rounded border border-pink-200 dark:border-pink-800">
-                          <span className="text-xs text-muted-foreground font-medium">{key}: </span>
-                          <span className="text-sm font-semibold text-pink-600 dark:text-pink-400">{value as string}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-        </div>
+        <RecursosVmCardsComponent
+          data={vmPropertiesData[0]}
+        />
       </section>
-
-      {/* ========== SECCIÓN: MÉTRICAS DE CONSUMO ========== */}
       <section>
         <h2 className="text-xl font-bold text-foreground mb-4 pb-2 border-b-2 border-green-500">
           Métricas de Consumo
         </h2>
         <div className="space-y-4">
-          {/* Primera fila: CPU y Memoria */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <VmCpuUsageComponent
-              startDate={startDate}
-              endDate={endDate}
-              vmName={selectedVm}
+            <RecursosVmCpuMetricsComponent
+              data={vmCpuMetricsData}
+              title='Consumo CPU'
             />
-            <VmMemoryUsageComponent
-              startDate={startDate}
-              endDate={endDate}
-              vmName={selectedVm}
+            <RecursosVmMemoryMetricsComponent
+              data={vmMemoryMetricsData}
+              title='Memoria Disponible'
             />
           </div>
-          {/* Segunda fila: Disco solo */}
           <div>
-            <VmDiskUsageComponent
-              startDate={startDate}
-              endDate={endDate}
-              vmName={selectedVm}
+            <RecursosVmIopsMetrics
+              data={vmIopsMetricsData}
+              title='IOPS Disco'
             />
           </div>
         </div>
       </section>
-
-
-
-      {/* ========== SECCIÓN: DEPLOYMENTS ========== */}
       <section>
         <h2 className="text-xl font-bold text-foreground mb-4 pb-2 border-b-2 border-purple-500">
           Historial de Deployments
         </h2>
         <div className="space-y-4">
-          <VmDeploymentsChartComponent
-            startDate={startDate}
-            endDate={endDate}
-            vmName={selectedVm}
+          <VmDeploymentsChart
+            data={vmDeploymentsData}
+            title='Deployments'
           />
           <VmDeploymentsTableComponent
             startDate={startDate}
@@ -215,37 +232,29 @@ export const RecursosVmComponent = ({ startDate, endDate, selectedVm }: Recursos
           />
         </div>
       </section>
-
-      {/* ========== SECCIÓN: FACTURACIÓN Y COSTOS ========== */}
       <section>
         <h2 className="text-xl font-bold text-foreground mb-4 pb-2 border-b-2 border-amber-500">
           Facturación Recursos Costo Acumulado Pago por Uso y Costo Acumulado Fijo
         </h2>
-        <VmBillingChartComponent 
-          startDate={startDate}
-          endDate={endDate}
-          instanceName={selectedVm}
+        <VmBillingChart
+          data={vmBillingData}
+          title='Facturación del Recurso'
         />
       </section>
-
-      {/* ========== SECCIÓN: MEDIDAS COSTOS NO CUANTIFICABLES ========== */}
       <section>
         <h2 className="text-xl font-bold text-foreground mb-4 pb-2 border-b-2 border-indigo-500">
           Medidas Costos No Cuantificables
         </h2>
-        <VmMeasuresChartComponent 
-          startDate={startDate}
-          endDate={endDate}
-          instanceName={selectedVm}
+        <VmMeasuresChart
+          data={vmMeasuresData}
+          title='Costos medidas no cuantificables'
         />
       </section>
-
-      {/* ========== SECCIÓN: PROPIEDADES DE FACTURACIÓN ========== */}
       <section>
         <h2 className="text-xl font-bold text-foreground mb-4 pb-2 border-b-2 border-cyan-500">
           Propiedades de Facturación
         </h2>
-        <VmBillingPropertiesComponent 
+        <VmBillingPropertiesComponent
           startDate={startDate}
           endDate={endDate}
           instanceName={selectedVm}

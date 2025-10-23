@@ -3,7 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { UnusedVmSeries } from '@/interfaces/vista-unused-resources/unusedVmInterfaces'
 import { UnusedVmssSeries } from '@/interfaces/vista-unused-resources/unusedVmssInterface';
-import { deepMerge, makeBaseOptions, makeLineSeries, useECharts } from '@/lib/echartsGlobalConfig';
+import { createChartOption, deepMerge, makeBaseOptions, makeLineSeries, useECharts } from '@/lib/echartsGlobalConfig';
 import { Info } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { useMemo, useRef } from 'react';
@@ -52,14 +52,31 @@ export const UnusedCreditsConsumedMetricsComponent = ({ data }: UnusedCreditsCon
             metricType: 'count'
         });
 
-        const series = [
-            makeLineSeries('Créditos Consumidos', creditsConsumedMetrics),
-        ];
+        const lines = createChartOption({
+            kind: 'line',
+            xAxisType: 'time',
+            series: [
+                {
+                    kind: 'line',
+                    name: 'Creditos Consumidos',
+                    data: creditsConsumedMetrics,
+                    smooth: true
+                }
+            ],
+            extraOption: {
+                tooltip: {
+                    valueFormatter(value) {
+                        return `${value} Créditos`
+                    },
+                },
+                xAxis: { axisLabel: { rotate: 30 } },
+                yAxis: { min: 0 },
+                grid: { left: 44, right: 12, top: 56, bottom: 64, containLabel: true },
+            },
+        })
 
-        return deepMerge(base, {
-            series
-        });
-    }, [isDark, data]);
+        return deepMerge(base, lines);
+    }, [creditsConsumedMetrics]);
 
     useECharts(chartRef, option, [option], isDark ? 'cp-dark' : 'cp-light');
 

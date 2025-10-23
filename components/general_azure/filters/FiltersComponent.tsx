@@ -373,7 +373,7 @@ export const FiltersComponent = ({
         if (newFilters.selectedInstanceV2 && newFilters.selectedInstanceV2 !== 'all_instances') {
             query.set('instanceV2', newFilters.selectedInstanceV2);
         }
-        if (newFilters.selectedOperation && newFilters.selectedOperation !== 'all_operations') {
+        if (newFilters.selectedOperation) {
             query.set('operation', newFilters.selectedOperation);
         }
         if (newFilters.selectedVm) {
@@ -381,6 +381,9 @@ export const FiltersComponent = ({
         }
         if (newFilters.selectedService) {
             query.set('service', newFilters.selectedService);
+        }
+        if (newFilters.selectedStrgAccount) {
+            query.set('strgAccount', newFilters.selectedStrgAccount);
         }
 
         router.push(`${window.location.pathname}?${query.toString()}`);

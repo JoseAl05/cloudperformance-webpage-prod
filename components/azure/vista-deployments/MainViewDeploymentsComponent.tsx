@@ -1,6 +1,6 @@
 import { FiltersComponent } from '@/components/general_azure/filters/FiltersComponent'
-import { PieChart} from 'lucide-react'
-import DeploymentsChartComponent  from '@/components/azure/vista-deployments/DeploymentsComponent'
+import { PieChart } from 'lucide-react'
+import { DeploymentsComponent } from '@/components/azure/vista-deployments/DeploymentsComponent'
 
 export const MainViewDeploymentsComponent = () => {
     return (
@@ -23,7 +23,7 @@ export const MainViewDeploymentsComponent = () => {
             </div>
             <div className='w-full min-w-0'>
                 <FiltersComponent
-                    Component={DeploymentsChartComponent}
+                    Component={DeploymentsComponent}
                     dateFilter
                     deploymentOperationsFilter
                 />

@@ -4,9 +4,9 @@ import { SpotVsRegularVm } from '@/interfaces/vista-spot-vs-regular-vm/spotVsReg
 import { useTheme } from 'next-themes';
 import {
     makeBaseOptions,
-    makeLineSeries,
     deepMerge,
     useECharts,
+    createChartOption,
 } from '@/lib/echartsGlobalConfig';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Info } from 'lucide-react';
@@ -24,43 +24,65 @@ export const SpotVsRegularVmTimelineComponent = ({ data }: SpotVsRegularVmTimeli
 
     const chartRef = useRef<HTMLDivElement>(null);
 
-    const metrics = useMemo(() => {
+    const { series } = useMemo(() => {
         if (!data || data.length === 0) {
-            return { totalVMs: null, totalSpot: null, spotPercentage: null, totalVmsSeries: null, totalSpotSeries:null }
+            return { series: null }
         }
         const totalVmsSeries =
             data
-                .sort((a,b) => new Date(a.sync_time).getTime() - new Date(b.sync_time).getTime())
-                .map(s => [s.sync_time,s.total_instancias]);
+                .sort((a, b) => new Date(a.sync_time).getTime() - new Date(b.sync_time).getTime())
+                .map(s => [s.sync_time, s.total_instancias]);
 
         const totalSpotSeries =
             data
-                .sort((a,b) => new Date(a.sync_time).getTime() - new Date(b.sync_time).getTime())
-                .map(s => [s.sync_time,s.total_spot]);
+                .sort((a, b) => new Date(a.sync_time).getTime() - new Date(b.sync_time).getTime())
+                .map(s => [s.sync_time, s.total_spot]);
 
-        return { totalVmsSeries, totalSpotSeries }
+        const series = [
+            {
+                name: 'Total VMs',
+                kind: 'line',
+                smooth: true,
+                data: totalVmsSeries
+            },
+            {
+                name: 'Total Spot VMs',
+                kind: 'line',
+                smooth: true,
+                data: totalSpotSeries
+            }
+        ]
+
+        return { series }
     }, [data])
 
     const option = useMemo(() => {
         const base = makeBaseOptions({
-            // title,
             legend: ['Total VMs', 'Total Spot VMs'],
             unitLabel: 'Instancias',
-            // yMax: yMaxRounded,
             useUTC: true,
             showToolbox: true,
-            metricType: 'count'
+            metricType: 'default'
         });
 
-        const series = [
-            makeLineSeries('Total VMs', metrics.totalVmsSeries),
-            makeLineSeries('Total Spot VMs', metrics.totalSpotSeries)
-        ];
+        const lines = createChartOption({
+            kind: 'line',
+            xAxisType: 'time',
+            series: series,
+            extraOption: {
+                tooltip: {
+                    valueFormatter(value) {
+                        return `${value} Instancias`
+                    },
+                },
+                xAxis: { axisLabel: { rotate: 30 } },
+                yAxis: { min: 0 },
+                grid: { left: 44, right: 12, top: 56, bottom: 64, containLabel: true },
+            },
+        })
 
-        return deepMerge(base, {
-            series
-        });
-    }, [isDark, data]);
+        return deepMerge(base, lines);
+    }, [series]);
 
     useECharts(chartRef, option, [option], isDark ? 'cp-dark' : 'cp-light');
     return (

@@ -4,10 +4,10 @@ import useSWR from "swr"
 import { ColumnDef } from "@tanstack/react-table"
 import { DataTableGrouping } from "@/components/general/data-table/data-table-grouping"
 import { Card, CardContent } from '@/components/ui/card'
-import { 
-    CheckCircle2, 
-    XCircle, 
-    Clock, 
+import {
+    CheckCircle2,
+    XCircle,
+    Clock,
     Package,
     Server,
     Activity
@@ -80,10 +80,10 @@ export const VmDeploymentsTableComponent = ({
                     <div className="text-sm">
                         <div className="font-medium">{date.toLocaleTimeString('es-ES')}</div>
                         <div className="text-xs text-gray-500">
-                            {date.toLocaleDateString('es-ES', { 
-                                day: 'numeric', 
-                                month: 'short', 
-                                year: 'numeric' 
+                            {date.toLocaleDateString('es-ES', {
+                                day: 'numeric',
+                                month: 'short',
+                                year: 'numeric'
                             })}
                         </div>
                     </div>
@@ -166,45 +166,47 @@ export const VmDeploymentsTableComponent = ({
     // Calcular estadísticas
     const totalDeployments = data.total_deployments
 
-return (
-    <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
-        {/* Tabla de detalles - 3 columnas */}
-        <div className="lg:col-span-3 bg-white rounded-lg border shadow-sm p-6 h-full">
-            <div className="mb-4">
-                <h2 className="text-lg font-semibold flex items-center gap-2">
-                    <Package className="h-5 w-5 text-blue-500" />
-                    Últimos Deployments
-                </h2>
-                <p className="text-sm text-gray-600 mt-1">
-                    Historial de operaciones en {vmName}
-                </p>
-            </div>
-            
-            <DataTableGrouping
-                columns={columns}
-                data={data.detalle}
-                filterColumn="operation_name"
-                filterPlaceholder="Buscar por operación"
-            />
-        </div>
+    return (
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
+            {/* Tabla de detalles - 3 columnas */}
+            <div className="lg:col-span-3 bg-white rounded-lg border shadow-sm p-6 h-full">
+                <div className="mb-4">
+                    <h2 className="text-lg font-semibold flex items-center gap-2">
+                        <Package className="h-5 w-5 text-blue-500" />
+                        Últimos Deployments
+                    </h2>
+                    <p className="text-sm text-gray-600 mt-1">
+                        Historial de operaciones en {vmName}
+                    </p>
+                </div>
 
-        {/* Tarjeta de Total - 1 columna */}
-        <div className="lg:col-span-1 h-full">
-            <Card className="border-l-4 border-l-blue-500 h-full flex flex-col">
-                <CardContent className="p-6 flex-1 flex flex-col justify-between">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <p className="text-sm font-medium text-muted-foreground">Total Deployments</p>
-                            <p className="text-6xl font-bold text-blue-600">
-                                {totalDeployments.toLocaleString('es-ES', { minimumIntegerDigits: 2 })}
-                            </p>
-                            <p className="text-xs text-muted-foreground">Operaciones registradas</p>
+                <DataTableGrouping
+                    columns={columns}
+                    data={data.detalle}
+                    enableGrouping
+                    groupByColumn='operation_name'
+                    filterColumn="operation_name"
+                    filterPlaceholder="Buscar por operación"
+                />
+            </div>
+
+            {/* Tarjeta de Total - 1 columna */}
+            <div className="lg:col-span-1 h-full">
+                <Card className="border-l-4 border-l-blue-500 h-full flex flex-col">
+                    <CardContent className="p-6 flex-1 flex flex-col justify-between">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <p className="text-sm font-medium text-muted-foreground">Total Deployments</p>
+                                <p className="text-6xl font-bold text-blue-600">
+                                    {totalDeployments.toLocaleString('es-ES', { minimumIntegerDigits: 2 })}
+                                </p>
+                                <p className="text-xs text-muted-foreground">Operaciones registradas</p>
+                            </div>
+                            <Activity className="h-12 w-12 text-blue-500" />
                         </div>
-                        <Activity className="h-12 w-12 text-blue-500" />
-                    </div>
-                </CardContent>
-            </Card>
+                    </CardContent>
+                </Card>
+            </div>
         </div>
-    </div>
- )
+    )
 }

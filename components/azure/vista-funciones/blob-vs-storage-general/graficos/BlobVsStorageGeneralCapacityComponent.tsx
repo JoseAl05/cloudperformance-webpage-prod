@@ -15,6 +15,7 @@ import {
     makeLineSeries,
     deepMerge,
     useECharts,
+    createChartOption,
 } from '@/lib/echartsGlobalConfig';
 
 interface BlobVsStorageGeneralCapacityComponentProps {
@@ -39,7 +40,7 @@ export const BlobVsStorageGeneralCapacityComponent = ({
 
     const chartRef = useRef<HTMLDivElement>(null);
 
-    const { serviceSeries, accountSeries, legendNames, yMaxRounded, anyData } = useMemo(() => {
+    const { series, legendNames, anyData } = useMemo(() => {
         const items = data ?? [];
         const allServices: StorageVsGeneralCapacityPerService[] = [];
         const allAccount: StorageVsGeneralCapacityPerService[] = [];
@@ -80,53 +81,62 @@ export const BlobVsStorageGeneralCapacityComponent = ({
             ]),
         ];
 
-        const maxVal = Math.max(
-            ...[
-                ...serviceSeries.flatMap((s) => s.data.map((d) => d[1])),
-                ...accountSeries.flatMap((s) => s.data.map((d) => d[1])),
-                0,
-            ],
-        );
-        const yMaxRaw = Math.ceil(maxVal * 1.5);
-        const step = 100;
-        const yMaxRounded = Math.max(10, Math.floor(yMaxRaw / step) * step);
+        const series = [];
+
+        serviceSeries.forEach(s => {
+            series.push({
+                name: s.name,
+                kind: 'line',
+                smooth: true,
+                data: s.data
+            })
+        })
+
+        accountSeries.forEach(s => {
+            series.push({
+                name: s.name,
+                kind: 'line',
+                smooth: true,
+                data: s.data
+            })
+        })
+
 
         return {
-            serviceSeries,
-            accountSeries,
+            series,
             legendNames,
-            yMaxRounded,
-            anyData: serviceSeries.length || accountSeries.length,
+            anyData: series.length
         };
     }, [data]);
     const option = useMemo(() => {
         const base = makeBaseOptions({
-            // title,
             legend: legendNames,
             unitLabel: 'GB',
-            yMax: yMaxRounded,
             useUTC: true,
             showToolbox: true,
-            metricType: 'gb'
+            metricType: 'default'
         });
 
-        // Series con utilizando configuracion global
-        const series = [
-            ...serviceSeries.map((s) =>
-                makeLineSeries(s.name, s.data)
-            ),
-            ...accountSeries.map((s) =>
-                makeLineSeries(s.name, s.data)
-            ),
-        ];
+        const lines = createChartOption({
+            kind: 'line',
+            xAxisType: 'time',
+            series: series,
+            extraOption: {
+                tooltip: {
+                    valueFormatter(value) {
+                        return `${value} GB`
+                    },
+                },
+                xAxis: { axisLabel: { rotate: 30 } },
+                yAxis: { min: 0 },
+                grid: { left: 44, right: 12, top: 56, bottom: 64, containLabel: true },
+            },
+        })
 
-        return deepMerge(base, {
-            series
-        });
-    }, [title, legendNames, yMaxRounded, serviceSeries, accountSeries, isDark]);
+        return deepMerge(base, lines);
+    }, [legendNames, series]);
 
-    // Hook que inicializa el gráfico con las configuraciones previas.
-    // La idea es centralizar la creación de los gráficos para no repetir el mismo codigo de configuracion en todos los componentes.
+
     useECharts(chartRef, option, [option], isDark ? 'cp-dark' : 'cp-light');
 
     return (

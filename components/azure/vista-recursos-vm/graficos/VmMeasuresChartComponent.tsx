@@ -5,6 +5,8 @@ import * as echarts from 'echarts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Info } from 'lucide-react';
 import useSWR from 'swr';
+import { useTheme } from 'next-themes';
+import { createChartOption, deepMerge, makeBaseOptions, useECharts } from '@/lib/echartsGlobalConfig';
 
 interface MeasureData {
   meter_name: string;
@@ -23,240 +25,94 @@ interface MeasuresResponseData {
 }
 
 interface VmMeasuresChartProps {
-  data: MeasuresResponseData | null;
+  data: MeasuresResponseData;
   title: string;
 }
 
-const LoaderComponent = () => (
-  <div className="flex items-center justify-center h-full">
-    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
-  </div>
-);
+export const VmMeasuresChart = ({ data, title }: VmMeasuresChartProps) => {
+  const { theme, resolvedTheme } = useTheme();
+  const currentTheme = resolvedTheme || theme;
+  const isDark = currentTheme === 'dark';
 
-const sliderConfig = [
-  {
-    type: 'slider',
-    xAxisIndex: 0,
-    bottom: 20,
-    height: 20,
-    handleSize: '100%',
-    start: 0,
-    end: 100,
-    realtime: false,
-    throttle: 100,
-    zoomOnMouseWheel: false,
-    moveOnMouseMove: false
-  },
-  {
-    type: 'inside',
-    start: 0,
-    end: 100,
-    filterMode: 'filter',
-    throttle: 100,
-    zoomOnMouseWheel: true,
-    moveOnMouseMove: true
-  },
-];
-
-const createTooltipFormatter = () => (params: unknown) => {
-  const date = new Date(params[0].value[0]).toLocaleDateString('es-CL', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric'
-  });
-  return (
-    `${date}<br/>` +
-    params.map((p: unknown) => `${p.marker} ${p.seriesName}: $${p.value[1].toFixed(2)} USD<br/>`).join('')
-  );
-};
-
-const COLORS = [
-  '#36A2EB',
-  '#FF6384',
-  '#FFCE56',
-  '#4BC0C0',
-  '#9966FF',
-  '#FF9F40',
-  '#FF6384',
-  '#C9CBCF',
-  '#4BC0C0',
-  '#FF9F40'
-];
-
-const VmMeasuresChart = ({ data, title }: VmMeasuresChartProps) => {
   const chartRef = useRef<HTMLDivElement>(null);
-  const chartInstance = useRef<echarts.ECharts | null>(null);
-  const resizeObserverRef = useRef<ResizeObserver | null>(null);
 
-  const safeData = data?.medidas_costos_no_cuantificables && Array.isArray(data.medidas_costos_no_cuantificables) 
-    ? data.medidas_costos_no_cuantificables 
+  const safeData = data?.medidas_costos_no_cuantificables && Array.isArray(data.medidas_costos_no_cuantificables)
+    ? data.medidas_costos_no_cuantificables
     : [];
   const safeMedidas = data?.medidas && Array.isArray(data.medidas) ? data.medidas : [];
 
-  const { seriesDataByMeter, yMaxRounded, meterNames } = useMemo(() => {
-    const sortedData = [...safeData].sort((a, b) => 
+  const { series, meterNames } = useMemo(() => {
+    const sortedData = [...safeData].sort((a, b) =>
       new Date(a.date).getTime() - new Date(b.date).getTime()
     );
 
     // Agrupar datos por meter_name
     const dataByMeter: { [key: string]: [string, number][] } = {};
-    
+
     sortedData.forEach(item => {
       if (!dataByMeter[item.meter_name]) {
         dataByMeter[item.meter_name] = [];
       }
-      dataByMeter[item.meter_name].push([item.date, item.total_cost_in_usd]);
+      dataByMeter[item.meter_name].push([item.date, item.total_cost_in_usd.toFixed(2)]);
     });
 
     const meterNames = Object.keys(dataByMeter);
 
-    // Calcular el máximo valor para el eje Y
-    const allValues = sortedData.map(item => item.total_cost_in_usd);
-    const maxValue = allValues.length ? Math.max(...allValues) : 0;
-    const yMaxRaw = Math.ceil(maxValue * 1.2);
-    const yMaxRounded = yMaxRaw;
+    const series = meterNames.map((meterName) => (
+      {
+        name: meterName,
+        kind: 'line',
+        smooth: true,
+        data: dataByMeter[meterName]
+      }
+    ));
 
-    return { seriesDataByMeter: dataByMeter, yMaxRounded, meterNames };
+    return { series, meterNames };
   }, [safeData]);
 
-  const handleResize = useCallback(() => {
-    chartInstance.current?.resize();
-  }, []);
-
-  useEffect(() => {
-    if (!chartRef.current) return;
-
-    const series = meterNames.map((meterName, index) => 
-      createSeries(meterName, seriesDataByMeter[meterName], COLORS[index % COLORS.length])
-    );
-
-    const optionsMetrics: echarts.EChartsOption = {
-      animation: safeData.length < 1000,
-      animationDuration: 300,
-      animationEasing: 'linear',
-      progressiveThreshold: 500,
-      progressive: 200,
-      hoverLayerThreshold: 3000,
-      useUTC: false,
-      dataZoom: sliderConfig,
-      tooltip: {
-        trigger: 'axis',
-        formatter: createTooltipFormatter(),
-        transitionDuration: 0.1,
-        hideDelay: 100,
-        backgroundColor: 'rgba(50, 50, 50, 0.95)',
-        borderColor: 'rgba(255, 255, 255, 0.2)',
-        textStyle: {
-          color: '#fff',
-          fontSize: 12
-        },
-        axisPointer: {
-          animation: false
-        }
+  const option = useMemo(() => {
+    const base = makeBaseOptions({
+      legend: meterNames,
+      legendPos: {
+        orient: 'horizontal',
+        top: 0
       },
-      legend: {
-        data: meterNames,
-        top: 10,
-        left: 'center',
-        animation: false,
-        textStyle: {
-          fontSize: 11
-        },
+      unitLabel: '$',
+      useUTC: true,
+      showToolbox: true
+    });
+    const lines = createChartOption({
+      kind: 'line',
+      xAxisType: 'time',
+      legend: true,
+      legendOption: {
         type: 'scroll',
-        pageButtonPosition: 'end'
+        orient: 'horizontal',
+        top: 0,
+        left: 'center',
+        textStyle: { fontSize: 11, color: '#666' },
+        selectedMode: 'multiple',
       },
-      grid: { left: 60, right: 30, top: 80, bottom: 60, containLabel: true },
-      toolbox: {
-        feature: {
-          saveAsImage: {
-            pixelRatio: 2,
-            excludeComponents: ['toolbox']
-          }
-        },
-        iconStyle: {
-          borderColor: '#999'
-        },
-        emphasis: {
-          iconStyle: {
-            borderColor: '#666'
-          }
-        }
-      },
-      xAxis: {
-        type: 'time',
-        boundaryGap: false,
-        axisLabel: {
-          fontSize: 11,
-          formatter: (value: number) => {
-            const date = new Date(value);
-            const month = date.toLocaleDateString('es-CL', { month: 'short' });
-            return `${month} ${date.getFullYear()}`;
-          },
-          showMaxLabel: true,
-          showMinLabel: true
-        },
-        axisLine: {
-          lineStyle: {
-            color: '#e0e0e0'
-          }
-        },
-        axisTick: {
-          show: false
-        },
-        splitLine: {
-          show: false
-        }
-      },
-      yAxis: {
-        type: 'value',
-        max: yMaxRounded,
-        min: 0,
-        scale: true,
-        axisLabel: {
-          fontSize: 11,
-          formatter: (val: number) => `$${val.toFixed(2)}`,
-          showMaxLabel: true,
-          showMinLabel: true
-        },
-        axisLine: {
-          show: false
-        },
-        axisTick: {
-          show: false
-        },
-        splitLine: {
-          lineStyle: {
-            color: '#f0f0f0',
-            type: 'solid',
-            width: 1
-          }
-        }
-      },
+      tooltip: true,
       series: series,
-      animation: true
-    };
-
-    chartInstance.current = echarts.init(chartRef.current, null, {
-      renderer: 'canvas'
+      extraOption: {
+        tooltip: {
+          valueFormatter(value) {
+            return `$${value}`
+          },
+        },
+        xAxis: { axisLabel: { rotate: 30 } },
+        yAxis: { min: 0 },
+        grid: { left: 44, right: 12, top: 56, bottom: 64, containLabel: true },
+      },
     });
-    chartInstance.current.setOption(optionsMetrics, {
-      notMerge: true,
-      lazyUpdate: true,
-      silent: false
-    });
 
-    resizeObserverRef.current = new ResizeObserver(handleResize);
-    resizeObserverRef.current.observe(chartRef.current);
-    window.addEventListener('resize', handleResize);
-
-    return () => {
-      window.removeEventListener('resize', handleResize);
-      resizeObserverRef.current?.disconnect();
-      chartInstance.current?.dispose();
-    };
-  }, [seriesDataByMeter, yMaxRounded, meterNames, handleResize, safeData.length]);
+    return deepMerge(base, lines);
+  }, [series, meterNames]);
 
   const isEmpty = safeData.length === 0;
+
+  useECharts(chartRef, option, [option], isDark ? 'cp-dark' : 'cp-light');
 
   return (
     <div className="flex gap-4 w-full">
@@ -313,75 +169,3 @@ const VmMeasuresChart = ({ data, title }: VmMeasuresChartProps) => {
     </div>
   );
 };
-
-const createSeries = (name: string, data: [string, number][], color: string) => ({
-  name,
-  type: 'line',
-  data,
-  smooth: false,
-  smoothMonotone: null,
-  symbol: 'circle',
-  symbolSize: 4,
-  lineStyle: {
-    color,
-    width: 2,
-    cap: 'round',
-    join: 'round'
-  },
-  itemStyle: { color, borderColor: '#fff', borderWidth: 1 },
-  emphasis: {
-    focus: 'series',
-    lineStyle: {
-      width: 3
-    },
-    disabled: data.length > 5000
-  },
-  blur: {
-    lineStyle: {
-      opacity: 0.2
-    }
-  },
-  large: data.length > 1000,
-  largeThreshold: 1000,
-  sampling: data.length > 2000 ? 'lttb' : null
-});
-
-const fetcher = (url: string) =>
-  fetch(url, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json'
-    }
-  }).then(res => res.json());
-
-interface VmMeasuresProps {
-  startDate: Date;
-  endDate: Date;
-  instanceName: string;
-}
-
-const VmMeasuresComponent = ({ startDate, endDate, instanceName }: VmMeasuresProps) => {
-  const startDateFormatted = startDate.toISOString().replace('Z', '').slice(0, -4)
-  const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : ''
-
-  const { data, error, isLoading } = useSWR(
-    `/api/azure/bridge/azure/recursos/vm/facturacion/medidas?date_from=${startDateFormatted}&date_to=${endDateFormatted}&instance_name=${instanceName}`,
-    fetcher,
-    { revalidateOnFocus: false }
-  );
-
-  if (isLoading) return <LoaderComponent />;
-  if (error) return <div className="text-red-500 p-4">Error al cargar medidas de facturación</div>;
-
-  return <VmMeasuresChart data={data} title="Medidas costos no cuantificables" />;
-};
-
-export const VmMeasuresChartComponent = ({ startDate, endDate, instanceName }: { startDate: Date; endDate: Date; instanceName: string }) => (
-  <VmMeasuresComponent 
-    startDate={startDate} 
-    endDate={endDate} 
-    instanceName={instanceName}
-  />
-);
-
-export default VmMeasuresChartComponent;

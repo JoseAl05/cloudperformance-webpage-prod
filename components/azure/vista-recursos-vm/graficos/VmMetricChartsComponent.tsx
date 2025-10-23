@@ -81,7 +81,7 @@ const VmMetricsChart = ({ data, title, metricUnit }: VmMetricsChartProps) => {
     }, {} as Record<string, { total: number; used: number; unused: number }>);
 
     // Convertir a arrays y ordenar
-    const sortedTimestamps = Object.keys(grouped).sort((a, b) => 
+    const sortedTimestamps = Object.keys(grouped).sort((a, b) =>
       new Date(a).getTime() - new Date(b).getTime()
     );
 
@@ -330,34 +330,34 @@ const VmMetricComponent = ({ startDate, endDate, vmName, metricName, title, unit
 };
 
 export const VmCpuUsageComponent = ({ startDate, endDate, vmName }: { startDate: Date; endDate: Date; vmName: string }) => (
-  <VmMetricComponent 
-    startDate={startDate} 
-    endDate={endDate} 
-    vmName={vmName} 
-    metricName="Percentage CPU" 
-    title="Consumo de CPU" 
-    unit="vCores" 
+  <VmMetricComponent
+    startDate={startDate}
+    endDate={endDate}
+    vmName={vmName}
+    metricName="Percentage CPU"
+    title="Consumo de CPU"
+    unit="vCores"
   />
 );
 
 export const VmMemoryUsageComponent = ({ startDate, endDate, vmName }: { startDate: Date; endDate: Date; vmName: string }) => (
-  <VmMetricComponent 
-    startDate={startDate} 
-    endDate={endDate} 
-    vmName={vmName} 
-    metricName="Available Memory" 
-    title="Consumo de Memoria" 
-    unit="GB" 
+  <VmMetricComponent
+    startDate={startDate}
+    endDate={endDate}
+    vmName={vmName}
+    metricName="Available Memory"
+    title="Consumo de Memoria"
+    unit="GB"
   />
 );
 
 export const VmDiskUsageComponent = ({ startDate, endDate, vmName }: { startDate: Date; endDate: Date; vmName: string }) => (
-  <VmMetricComponent 
-    startDate={startDate} 
-    endDate={endDate} 
-    vmName={vmName} 
-    metricName="Disks IOPS" 
-    title="Consumo de Disco" 
-    unit="IOPS" 
+  <VmMetricComponent
+    startDate={startDate}
+    endDate={endDate}
+    vmName={vmName}
+    metricName="Disks IOPS"
+    title="Consumo de Disco"
+    unit="IOPS"
   />
 );

@@ -19,7 +19,7 @@ type DeploymentDetail = {
     subscription_id: string
     event_timestamp: { $date: string }
     deployment_status: string
-    date?: string // Para agrupar
+    date?: string
 }
 
 type DeploymentGroup = {
@@ -29,9 +29,9 @@ type DeploymentGroup = {
     date: string
 }
 
-const fetcher = (url: string) =>
-    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
-        .then(r => r.json())
+interface DeploymentsDetailsTableComponentProps {
+    data:DeploymentGroup[];
+}
 
 const StatusBadge = ({ status }: { status: string }) => {
     const statusConfig = {
@@ -52,43 +52,11 @@ const StatusBadge = ({ status }: { status: string }) => {
     )
 }
 
-export const DeploymentsDetailsTableComponent = ({
-    startDateFormatted,
-    endDateFormatted,
-    selectedOperation,
-}: {
-    startDateFormatted: string
-    endDateFormatted: string
-    selectedOperation: string
-}) => {
-    const { data, error, isLoading } = useSWR<DeploymentGroup[]>(
-        startDateFormatted && endDateFormatted
-            ? `/api/azure/bridge/azure/deployments/deployments-detalles?date_from=${startDateFormatted}&date_to=${endDateFormatted}&operation_name=${selectedOperation}`
-            : null,
-        fetcher
-    )
-
+export const DeploymentsDetailsTableComponent = ({data}:DeploymentsDetailsTableComponentProps) => {
     const columns: ColumnDef<DeploymentDetail>[] = [
         {
             accessorKey: "date",
             header: "Fecha",
-            // cell: (info) => {
-            //     const value = info.getValue() as string
-            //     if (!value) return '—'
-            //     const date = new Date(value)
-            //     return (
-            //         <div className="flex items-center gap-2">
-            //             <Calendar className="h-4 w-4 text-gray-400" />
-            //             <span className="font-medium">
-            //                 {date.toLocaleDateString('es-ES', { 
-            //                     day: 'numeric', 
-            //                     month: 'short', 
-            //                     year: 'numeric' 
-            //                 })}
-            //             </span>
-            //         </div>
-            //     )
-            // },
         },
         {
             accessorKey: "event_timestamp",
@@ -148,49 +116,13 @@ export const DeploymentsDetailsTableComponent = ({
             },
         },
     ]
-
-    if (isLoading) {
-        return (
-            <div className="flex items-center justify-center p-12">
-                <div className="text-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-                    <p className="text-gray-600">Cargando detalles de deployments...</p>
-                </div>
-            </div>
-        )
-    }
-
-    if (error) {
-        return (
-            <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-                <div className="flex items-center gap-2 text-red-700">
-                    <XCircle className="h-5 w-5" />
-                    <span className="font-semibold">Error cargando datos</span>
-                </div>
-                <p className="text-sm text-red-600 mt-1">No se pudieron obtener los datos de deployments</p>
-            </div>
-        )
-    }
-
-    if (!data || !Array.isArray(data) || data.length === 0) {
-        return (
-            <div className="text-center p-12 bg-gray-50 rounded-lg">
-                <Package className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-                <h3 className="text-lg font-semibold text-gray-700 mb-2">No hay datos disponibles</h3>
-                <p className="text-gray-600">No se encontraron deployments para el período seleccionado</p>
-            </div>
-        )
-    }
-
-    // Aplanar los datos y agregar la fecha a cada detalle
-    const flattenedDetails = data.flatMap(group => 
+    const flattenedDetails = data.flatMap(group =>
         group.details.map(detail => ({
             ...detail,
-            date: group.date // Agregamos la fecha del grupo a cada detalle
+            date: group.date
         }))
     )
 
-    // Calcular estadísticas generales
     const totalDeployments = flattenedDetails.length
     const successCount = flattenedDetails.filter(d => d.deployment_status === 'Succeeded').length
     const failedCount = flattenedDetails.filter(d => d.deployment_status === 'Failed').length
@@ -198,7 +130,6 @@ export const DeploymentsDetailsTableComponent = ({
 
     return (
         <div className="space-y-6">
-            {/* Estadísticas generales */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full">
                 <div className="bg-white p-4 rounded-lg border shadow-sm border-l-4 border-l-blue-500">
                     <div className="flex items-center justify-between">
@@ -237,8 +168,6 @@ export const DeploymentsDetailsTableComponent = ({
                     </div>
                 </div>
             </div>
-
-            {/* Tabla de detalles con agrupación por fecha */}
             <div className="bg-white rounded-lg border shadow-sm p-6">
                 <div className="mb-4">
                     <h2 className="text-lg font-semibold flex items-center gap-2">
@@ -249,7 +178,6 @@ export const DeploymentsDetailsTableComponent = ({
                         Agrupados por fecha con información detallada de cada deployment
                     </p>
                 </div>
-                
                 <DataTableGrouping
                     columns={columns}
                     data={flattenedDetails}

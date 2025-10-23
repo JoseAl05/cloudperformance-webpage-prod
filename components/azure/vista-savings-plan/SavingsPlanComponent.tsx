@@ -5,16 +5,18 @@ import { useState, useRef, useEffect } from "react"
 import * as echarts from 'echarts'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { Check, AlertTriangle, X, DollarSign, Clock, Activity, TrendingUp, Server } from "lucide-react"
+import { Check, AlertTriangle, X, DollarSign, Clock, Activity, TrendingUp, Server, Info } from "lucide-react"
 import {
-    Select,
-    SelectTrigger,
-    SelectValue,
-    SelectContent,
-    SelectItem,
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
 } from "@/components/ui/select"
-import {SavingsPlanInstancesTable} from '@/components/azure/vista-savings-plan/table/SavingPlanTableComponent';
-import {TreemapSavingsPlanComponent} from '@/components/azure/vista-savings-plan/graficos/TreemapSavingsPlanComponent';
+import { SavingsPlanInstancesTable } from '@/components/azure/vista-savings-plan/table/SavingPlanTableComponent';
+import { TreemapSavingsPlanComponent } from '@/components/azure/vista-savings-plan/graficos/TreemapSavingsPlanComponent';
+import { SavingsPlanLineChartComponent } from '@/components/azure/vista-savings-plan/graficos/SavingsPlanLineChartComponent'
+import { MessageCard } from '@/components/aws/cards/MessageCards'
 
 const LoaderComponent = () => (
   <div className="flex items-center justify-center h-full">
@@ -28,41 +30,41 @@ interface SavingsPlanProps {
 }
 
 interface ConsumoDiario {
-    date: string;
-    horas_savings_plan: number;
-    horas_ondemand: number;
-    costo_hipotetico_payg_sp: number;
-    costo_real_ondemand: number;
-    total_horas: number;
-    total_costo_hipotetico: number;
-    pay_g_price: number;
+  date: string;
+  horas_savings_plan: number;
+  horas_ondemand: number;
+  costo_hipotetico_payg_sp: number;
+  costo_real_ondemand: number;
+  total_horas: number;
+  total_costo_hipotetico: number;
+  pay_g_price: number;
 }
 
 interface Instancia {
-    instance_name: string;
-    meter_category: string;
-    totales: {
-        total_horas_savings_plan: number;
-        total_horas_ondemand: number;
-        total_horas: number;
-        costo_hipotetico_payg_savings_plan: number;
-        costo_real_ondemand: number;
-        costo_total_hipotetico: number;
-        porcentaje_cobertura_sp: number;
-        dias_con_datos: number;
-    };
-    consumo_diario: ConsumoDiario[];
+  instance_name: string;
+  meter_category: string;
+  totales: {
+    total_horas_savings_plan: number;
+    total_horas_ondemand: number;
+    total_horas: number;
+    costo_hipotetico_payg_savings_plan: number;
+    costo_real_ondemand: number;
+    costo_total_hipotetico: number;
+    porcentaje_cobertura_sp: number;
+    dias_con_datos: number;
+  };
+  consumo_diario: ConsumoDiario[];
 }
 
 interface ConsumoApiResponse {
-    resumen: {
-        total_instancias: number;
-        total_horas_savings_plan: number;
-        total_horas_ondemand: number;
-        costo_hipotetico_payg_savings_plan: number;
-        costo_real_ondemand: number;
-    };
-    instancias: Instancia[];
+  resumen: {
+    total_instancias: number;
+    total_horas_savings_plan: number;
+    total_horas_ondemand: number;
+    costo_hipotetico_payg_savings_plan: number;
+    costo_real_ondemand: number;
+  };
+  instancias: Instancia[];
 }
 
 const fetcher = (url: string) =>
@@ -73,18 +75,10 @@ const fetcher = (url: string) =>
     }
   }).then(res => res.json())
 
-const toUTCDate = (s: string) => {
-    const [y, m, d] = s.split('-').map(Number);
-    return new Date(Date.UTC(y, m - 1, d));
-};
-
-const fmt = new Intl.DateTimeFormat('es-CL', { day: 'numeric', month: 'short', timeZone: 'UTC' });
+const isNullish = (v: unknown) => v === null || v === undefined
 
 export const SavingsPlanComponent = ({ startDate, endDate }: SavingsPlanProps) => {
   const [selectedInstance, setSelectedInstance] = useState<string>('all')
-  const chartRef = useRef<HTMLDivElement>(null)
-  const chartInstance = useRef<echarts.ECharts | null>(null)
-  const resizeObserverRef = useRef<ResizeObserver | null>(null)
 
   const startDateFormatted = startDate.toISOString().replace('Z', '').slice(0, -4)
   const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : ''
@@ -92,320 +86,43 @@ export const SavingsPlanComponent = ({ startDate, endDate }: SavingsPlanProps) =
   const { data: resumen, error: errorResumen, isLoading: loadingResumen } = useSWR(
     `/api/azure/bridge/azure/saving-plan/resumen?date_from=${startDateFormatted}&date_to=${endDateFormatted}`,
     fetcher,
-    { revalidateOnFocus: false }
   )
 
   const { data: analisis, error: errorAnalisis, isLoading: loadingAnalisis } = useSWR(
     `/api/azure/bridge/azure/saving-plan/analisis?date_from=${startDateFormatted}&date_to=${endDateFormatted}`,
     fetcher,
-    { revalidateOnFocus: false }
   )
 
   const { data: recursos, error: errorRecursos, isLoading: loadingRecursos } = useSWR(
     `/api/azure/bridge/azure/saving-plan/recursos_activos?date_from=${startDateFormatted}&date_to=${endDateFormatted}`,
     fetcher,
-    { revalidateOnFocus: false }
   )
 
   const { data: consumo, error: errorConsumo, isLoading: loadingConsumo } = useSWR<ConsumoApiResponse>(
     `/api/azure/bridge/azure/saving-plan/instancias_consumo_diario?date_from=${startDateFormatted}&date_to=${endDateFormatted}`,
     fetcher,
-    { revalidateOnFocus: false }
   )
 
-  const formatDatesAdaptive = (dates: string[]) => {
-    if (!Array.isArray(dates) || !dates.length) return [] as string[];
+  const consumoData: ConsumoApiResponse | null =
+    !isNullish<ConsumoApiResponse>(consumo) ? consumo : null;
 
-    const dateCount = dates.length;
-    const start = toUTCDate(dates[0]);
-    const end = toUTCDate(dates[dateCount - 1]);
-    const daysDiff = Math.floor((+end - +start) / 86_400_000) + 1;
+  const hasConsumoData = !!consumoData;
 
-    const bigStep = Math.max(1, Math.ceil(dateCount / 12));
-    const midStep = Math.max(1, Math.ceil(dateCount / 20));
+  const noneHasData =
+    !hasConsumoData
 
-    return dates.map((s, i) => {
-        const d = toUTCDate(s);
-        if (daysDiff > 365) return i === 0 || i === dateCount - 1 || i % bigStep === 0 ? fmt.format(d) : '';
-        if (daysDiff > 30) return i % midStep === 0 ? fmt.format(d) : '';
-        return fmt.format(d);
-    });
-  };
-
-  useEffect(() => {
-      if (!consumo?.instancias?.length || !chartRef.current) return;
-
-      const instancias = selectedInstance === 'all' 
-          ? consumo.instancias 
-          : consumo.instancias.filter(inst => inst.instance_name === selectedInstance);
-
-      if (!instancias.length || !instancias[0]?.consumo_diario?.length) {
-        if (chartInstance.current) chartInstance.current.dispose();
-        const chart = echarts.init(chartRef.current);
-        chartInstance.current = chart;
-        chart.setOption({
-          title: {
-            text: 'No hay datos disponibles para el periodo seleccionado',
-            left: 'center',
-            top: 'center',
-            textStyle: { color: '#999', fontSize: 14 }
-          },
-          xAxis: { type: 'category', show: false },
-          yAxis: { type: 'value', show: false },
-          series: []
-        });
-        return;
-      }
-
-      if (chartInstance.current) chartInstance.current.dispose();
-      const chart = echarts.init(chartRef.current);
-      chartInstance.current = chart;
-
-      const allDates = new Set<string>();
-      instancias.forEach(inst => {
-          inst.consumo_diario.forEach(dia => allDates.add(dia.date));
-      });
-      const sortedDates = Array.from(allDates).sort();
-      const formattedDates = formatDatesAdaptive(sortedDates);
-
-      const series: unknown[] = [];
-
-      instancias.forEach((instancia) => {
-          const horasSP = sortedDates.map(date => {
-              const dia = instancia.consumo_diario.find(d => d.date === date);
-              return dia ? dia.horas_savings_plan : 0;
-          });
-
-          const horasOD = sortedDates.map(date => {
-              const dia = instancia.consumo_diario.find(d => d.date === date);
-              return dia ? dia.horas_ondemand : 0;
-          });
-
-          const costoSP = sortedDates.map(date => {
-              const dia = instancia.consumo_diario.find(d => d.date === date);
-              return dia ? dia.costo_hipotetico_payg_sp : 0;
-          });
-
-          const costoOD = sortedDates.map(date => {
-              const dia = instancia.consumo_diario.find(d => d.date === date);
-              return dia ? dia.costo_real_ondemand : 0;
-          });
-
-          series.push({
-              name: `${instancia.instance_name} - SavingsPlan`,
-              type: 'line',
-              data: costoSP,
-              smooth: true,
-              lineStyle: { width: 2, color: '#0078D4' },
-              itemStyle: { color: '#0078D4' },
-              areaStyle: { color: 'rgba(0, 120, 212, 0.1)' },
-              symbol: 'circle',
-              symbolSize: 6,
-              emphasis: { focus: 'series', lineStyle: { width: 3 } },
-              instanceData: {
-                  instance: instancia.instance_name,
-                  type: 'SavingsPlan',
-                  horas: horasSP,
-                  costos: costoSP,
-                  porcentajeCobertura: instancia.totales.porcentaje_cobertura_sp
-              }
-          });
-
-          series.push({
-              name: `${instancia.instance_name} - OnDemand`,
-              type: 'line',
-              data: costoOD,
-              smooth: true,
-              lineStyle: { width: 2, color: '#FF6B35', type: 'dashed' },
-              itemStyle: { color: '#FF6B35' },
-              areaStyle: { color: 'rgba(255, 107, 53, 0.1)' },
-              symbol: 'diamond',
-              symbolSize: 6,
-              emphasis: { focus: 'series', lineStyle: { width: 3 } },
-              instanceData: {
-                  instance: instancia.instance_name,
-                  type: 'OnDemand',
-                  horas: horasOD,
-                  costos: costoOD,
-                  porcentajeCobertura: instancia.totales.porcentaje_cobertura_sp
-              }
-          });
-      });
-
-      const option = {
-          backgroundColor: 'transparent',
-          tooltip: {
-              trigger: 'axis',
-              axisPointer: { type: 'line', snap: true },
-              backgroundColor: 'rgba(255, 255, 255, 0.98)',
-              borderColor: '#ddd',
-              borderWidth: 1,
-              enterable: true,
-              confine: true,
-              textStyle: { fontSize: 12, color: '#111' },
-              extraCssText: 'max-width:400px; white-space:normal; box-shadow:0 4px 12px rgba(0,0,0,.08); border-radius:10px; padding:12px;',
-              formatter: (params: unknown[]) => {
-                  if (!params?.length) return '';
-
-                  const originalDate = toUTCDate(sortedDates[params[0].dataIndex]);
-                  const dateStr = fmt.format(originalDate);
-
-                  let html = `<div style="font-weight:600;margin-bottom:10px;font-size:13px;">${dateStr}</div>`;
-
-                  const instanceGroups = new Map<string, unknown[]>();
-                  params.forEach(p => {
-                      const instanceName = p.seriesName.split(' - ')[0];
-                      if (!instanceGroups.has(instanceName)) {
-                          instanceGroups.set(instanceName, []);
-                      }
-                      instanceGroups.get(instanceName)!.push(p);
-                  });
-
-                  instanceGroups.forEach((items, instanceName) => {
-                      const spItem = items.find(i => i.seriesName.includes('SavingsPlan'));
-                      const odItem = items.find(i => i.seriesName.includes('OnDemand'));
-
-                      const costoHipoteticoSP = spItem?.value || 0;
-                      const costoRealOD = odItem?.value || 0;
-                      const totalCostoHipotetico = costoHipoteticoSP + costoRealOD;
-
-                      const horasSP = spItem?.seriesName ? series.find(s => s.name === spItem.seriesName)?.instanceData?.horas?.[spItem.dataIndex] || 0 : 0;
-                      const horasOD = odItem?.seriesName ? series.find(s => s.name === odItem.seriesName)?.instanceData?.horas?.[odItem.dataIndex] || 0 : 0;
-                      const totalHoras = horasSP + horasOD;
-
-                      const porcentajeSP = totalHoras > 0 ? ((horasSP / totalHoras) * 100).toFixed(1) : '0.0';
-                      const porcentajeCostoSP = totalCostoHipotetico > 0 ? ((costoHipoteticoSP / totalCostoHipotetico) * 100).toFixed(1) : '0.0';
-
-                      html += `
-                      <div style="margin-bottom:12px;padding:8px;background:#f8f9fa;border-radius:6px;">
-                          <div style="font-weight:600;margin-bottom:6px;color:#333;">${instanceName}</div>
-                          
-                          <div style="display:flex;align-items:center;gap:8px;margin:4px 0;">
-                              <span style="color:#0078D4;">●</span>
-                              <span style="flex:1;">Costo Hipotético SP:</span>
-                              <span style="font-weight:600;">$${costoHipoteticoSP.toFixed(2)}</span>
-                          </div>
-                          
-                          <div style="display:flex;align-items:center;gap:8px;margin:4px 0;">
-                              <span style="color:#0078D4;font-size:11px;margin-left:18px;">Horas:</span>
-                              <span style="flex:1;"></span>
-                              <span style="font-weight:500;color:#0078D4;">${horasSP.toFixed(2)}h</span>
-                              <span style="color:#666;font-size:11px;">(${porcentajeSP}%)</span>
-                          </div>
-                          
-                          <div style="display:flex;align-items:center;gap:8px;margin:4px 0;margin-top:6px;">
-                              <span style="color:#FF6B35;">◆</span>
-                              <span style="flex:1;">Costo Real OD:</span>
-                              <span style="font-weight:600;">$${costoRealOD.toFixed(2)}</span>
-                          </div>
-                          
-                          <div style="display:flex;align-items:center;gap:8px;margin:4px 0;">
-                              <span style="color:#FF6B35;font-size:11px;margin-left:18px;">Horas:</span>
-                              <span style="flex:1;"></span>
-                              <span style="font-weight:500;color:#FF6B35;">${horasOD.toFixed(2)}h</span>
-                              <span style="color:#666;font-size:11px;">(${(100 - parseFloat(porcentajeSP)).toFixed(1)}%)</span>
-                          </div>
-                          
-                          <div style="border-top:1px solid #ddd;margin-top:6px;padding-top:6px;">
-                              <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
-                                  <span style="font-weight:600;">Total Costo Hipotético:</span>
-                                  <span style="font-weight:600;">$${totalCostoHipotetico.toFixed(2)}</span>
-                              </div>
-                              <div style="display:flex;justify-content:space-between;">
-                                  <span style="font-weight:600;">Total Horas:</span>
-                                  <span style="font-weight:600;">${totalHoras.toFixed(2)}h</span>
-                              </div>
-                          </div>
-                      </div>`;
-                  });
-
-                  return html;
-              },
-          },
-          legend: {
-              type: 'scroll',
-              orient: 'horizontal',
-              top: 10,
-              left: 'center',
-              textStyle: { fontSize: 11, color: '#666' },
-              selectedMode: 'multiple',
-              data: series.map((s: unknown) => s.name),
-          },
-          grid: { left: 80, right: 60, top: 60, bottom: 100, containLabel: true },
-          dataZoom: [
-              { type: 'inside', start: 0, end: 100, filterMode: 'filter' },
-              {
-                  type: 'slider',
-                  start: 0,
-                  end: 100,
-                  height: 20,
-                  bottom: 30,
-                  handleStyle: { color: '#0078D4' },
-                  dataBackground: { 
-                      areaStyle: { color: 'rgba(0, 120, 212, 0.3)' }, 
-                      lineStyle: { opacity: 0.8, color: '#0078D4' } 
-                  },
-                  selectedDataBackground: { 
-                      areaStyle: { color: 'rgba(0, 120, 212, 0.5)' }, 
-                      lineStyle: { color: '#0078D4' } 
-                  },
-              },
-          ],
-          xAxis: {
-              type: 'category',
-              boundaryGap: false,
-              data: formattedDates,
-              axisLine: { lineStyle: { color: '#d0d0d0' } },
-              axisTick: { show: false },
-              axisLabel: { 
-                  fontSize: 10, 
-                  color: '#666', 
-                  rotate: 45, 
-                  margin: 8 
-              },
-              splitLine: { show: true, lineStyle: { color: '#f5f5f5', type: 'dashed' } },
-          },
-          yAxis: {
-              type: 'value',
-              name: 'Costo de Facturación',
-              nameTextStyle: { color: '#666', fontSize: 12, padding: [0, 0, 10, 0] },
-              nameGap: 25,
-              axisLine: { show: false },
-              axisTick: { show: false },
-              axisLabel: {
-                  formatter: (value: number) => {
-                      return '$' + value.toFixed(2);
-                  },
-                  color: '#666',
-                  fontSize: 10,
-              },
-              splitLine: { lineStyle: { color: '#f5f5f5', type: 'dashed' } },
-          },
-          series: series,
-          animation: true,
-          animationDuration: 1000,
-          animationEasing: 'cubicOut',
-      } as echarts.EChartsOption;
-
-      chart.setOption(option);
-      chart.resize();
-
-      if (resizeObserverRef.current) resizeObserverRef.current.disconnect();
-      if (chartRef.current) {
-        resizeObserverRef.current = new ResizeObserver(() => {
-          if (chart && !chart.isDisposed()) chart.resize();
-        });
-        resizeObserverRef.current.observe(chartRef.current);
-      }
-
-      return () => {
-        resizeObserverRef.current?.disconnect();
-        if (chartInstance.current) {
-          chartInstance.current.dispose();
-          chartInstance.current = null;
-        }
-      };
-  }, [consumo, selectedInstance]);
+  if (noneHasData) {
+    return (
+      <div className="w-full min-w-0 px-4 py-6">
+        <MessageCard
+          icon={Info}
+          title="Sin datos para mostrar"
+          description="No encontramos métricas ni información de la instancia en el rango seleccionado."
+          tone="warn"
+        />
+      </div>
+    )
+  }
 
   if (loadingResumen || loadingAnalisis || loadingRecursos || loadingConsumo) return <LoaderComponent />
   if (errorResumen || errorAnalisis || errorRecursos || errorConsumo) return <div className="text-red-500 p-4">Error al cargar datos</div>
@@ -473,12 +190,12 @@ export const SavingsPlanComponent = ({ startDate, endDate }: SavingsPlanProps) =
           {/* ========== TREEMAP - VISUALIZACIÓN DE EXCESO ========== */}
           <div className="space-y-4">
             <Card className="border-l-4">
-                <div style={{ height: '500px' }}>
-                  <TreemapSavingsPlanComponent 
-                    startDate={startDate}
-                    endDate={endDate}
-                  />
-                </div>
+              <div style={{ height: '500px' }}>
+                <TreemapSavingsPlanComponent
+                  startDate={startDate}
+                  endDate={endDate}
+                />
+              </div>
             </Card>
           </div>
         </div>
@@ -494,7 +211,7 @@ export const SavingsPlanComponent = ({ startDate, endDate }: SavingsPlanProps) =
                     {(() => {
                       const compromiso = resumen.valor_compromiso_por_hora;
                       const precio = analisis.suma_pay_g_price_instancias;
-                      
+
                       if (compromiso > precio) {
                         return (
                           <>
@@ -534,7 +251,7 @@ export const SavingsPlanComponent = ({ startDate, endDate }: SavingsPlanProps) =
                 <div>
                   <h4 className="font-semibold text-sm mb-3">Detalle del Saving Plan</h4>
                 </div>
-                
+
                 <div className="space-y-1">
                   <p className="text-xs text-muted-foreground">Compromiso por hora</p>
                   <p className="text-lg font-bold">
@@ -552,21 +269,20 @@ export const SavingsPlanComponent = ({ startDate, endDate }: SavingsPlanProps) =
                 <div className="border-t pt-3">
                   {(() => {
                     const diferencia = resumen.valor_compromiso_por_hora - analisis.suma_pay_g_price_instancias;
-                    
+
                     return (
                       <>
                         <p className="text-xs text-muted-foreground mb-1">Diferencia</p>
-                        <p className={`text-2xl font-bold ${
-                          diferencia > 0 ? 'text-yellow-600' : 
-                          diferencia < 0 ? 'text-red-600' : 
-                          'text-green-600'
-                        }`}>
+                        <p className={`text-2xl font-bold ${diferencia > 0 ? 'text-yellow-600' :
+                          diferencia < 0 ? 'text-red-600' :
+                            'text-green-600'
+                          }`}>
                           {diferencia > 0 ? '+' : ''}{diferencia.toFixed(2)} {resumen.unidad_monetaria}
                         </p>
                         <p className="text-xs text-muted-foreground mt-1">
-                          {diferencia > 0 ? '⚠️ Excedente de capacidad contratada' : 
-                          diferencia < 0 ? '❌ Falta cobertura del plan' : 
-                          '✅ Cobertura óptima'}
+                          {diferencia > 0 ? '⚠️ Excedente de capacidad contratada' :
+                            diferencia < 0 ? '❌ Falta cobertura del plan' :
+                              '✅ Cobertura óptima'}
                         </p>
                       </>
                     );
@@ -614,7 +330,7 @@ export const SavingsPlanComponent = ({ startDate, endDate }: SavingsPlanProps) =
       </div>
 
       {/* ========== SECCIÓN: GRÁFICO DE CONSUMO DIARIO ========== */}
-      <div className="mt-8 space-y-6">      
+      <div className="mt-8 space-y-6">
         {/* Tarjetas de Resumen de Consumo */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <Card className="border-l-4 border-l-blue-500">
@@ -689,21 +405,9 @@ export const SavingsPlanComponent = ({ startDate, endDate }: SavingsPlanProps) =
         </div>
 
         {/* Gráfico */}
-        <Card className="shadow-lg">
-          <CardHeader className="pb-2">
-            <CardTitle className="flex items-center gap-2">
-              <TrendingUp className="h-5 w-5 text-blue-500" />
-              Consumo Diario: SavingsPlan vs OnDemand
-            </CardTitle>
-            <p className="text-sm text-muted-foreground">
-              Comparación de horas cubiertas por SavingsPlan y horas facturadas como OnDemand por instancia
-            </p>
-          </CardHeader>
-
-          <CardContent>
-            <div ref={chartRef} className="w-full" style={{ height: '500px', minHeight: '500px' }} />
-          </CardContent>
-        </Card>
+        <SavingsPlanLineChartComponent
+          data={consumoData}
+        />
 
         {/* Tabla de Instancias y Detalles */}
         <Card className="shadow-lg mt-6">
@@ -718,7 +422,7 @@ export const SavingsPlanComponent = ({ startDate, endDate }: SavingsPlanProps) =
           </CardHeader>
 
           <CardContent>
-            <SavingsPlanInstancesTable 
+            <SavingsPlanInstancesTable
               startDateFormatted={startDateFormatted}
               endDateFormatted={endDateFormatted}
             />
