@@ -10,6 +10,7 @@ import type {
 } from '@/interfaces/vista-advisor/advisorViewInterfaces'
 import { AdvisorViewPieChartComponent } from '@/components/aws/vista-advisor/grafico/AdvisorViewPieChartComponent'
 import { AdvisorViewInfoComponent } from '@/components/aws/vista-advisor/info/AdvisorViewInfoComponent'
+import { AIComponentAws } from '@/components/aws/vista-advisor/ia-recommendations/AIComponentAws'
 
 interface AdvisorViewComponentProps {
     advisorCategory: string
@@ -140,6 +141,10 @@ export const AdvisorViewComponent = ({
             <AdvisorViewInfoComponent
                 data={data as AllAdvisorRecommendations[] | null}
             />
+
+            <div className="mt-12">
+                <AIComponentAws />
+            </div>
         </div>
     )
 }

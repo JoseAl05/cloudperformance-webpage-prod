@@ -1,13 +1,53 @@
+'use client'
 import React from 'react';
-import { Bot, Download, AlertTriangle } from 'lucide-react'; 
+import { Bot, AlertTriangle, AlertCircle, Info } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import useSWR from 'swr';
+import { LoaderComponent } from '@/components/general/LoaderComponent';
+import { MessageCard } from '@/components/aws/cards/MessageCards';
+
+const fetcher = (url: string) =>
+  fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
+    .then(r => r.json());
+
+export const AIComponentAws = () => {
+  const documentName = "report_aws.pdf";
+
+  const { data, error, isLoading } = useSWR(
+    `/api/blob?file=${documentName}`,
+    fetcher,
+  )
+
+  if (isLoading) return <LoaderComponent />
+
+  if (error) {
+    return (
+      <div className="w-full min-w-0 px-4 py-10 flex flex-col items-center gap-4">
+        <MessageCard
+          icon={AlertCircle}
+          title="Error al cargar datos"
+          description="Ocurrió un problema al obtener la información desde la API. Intenta nuevamente o ajusta el rango de fechas."
+          tone="error"
+        />
+      </div>
+    )
+  }
+
+  if (!data) {
+    return (
+      <div className="w-full min-w-0 px-4 py-6">
+        <MessageCard
+          icon={Info}
+          title="Sin datos para mostrar"
+          description="No encontramos información del advisor en el rango seleccionado."
+          tone="warn"
+        />
+      </div>
+    )
+  }
 
 
-
-export const AIComponent = () => {
-  const documentPath = "/report_azure.pdf";
-
-return (
+  return (
     <Card className="w-full">
       <CardHeader>
         <div className="flex items-center space-x-4">
@@ -19,13 +59,13 @@ return (
               Recomendaciones de Inteligencia Artificial
             </CardTitle>
             <p className="text-sm text-gray-500 mt-1">
-              Informe generado por IA basado en las recomendaciones de Azure Advisor. 
+              Informe generado por IA basado en las recomendaciones de Azure Advisor.
             </p>
           </div>
         </div>
-      </CardHeader> 
+      </CardHeader>
 
-      <CardContent className="space-y-4"> 
+      <CardContent className="space-y-4">
         <div className="bg-blue-50 border-l-4 border-blue-500 p-3 rounded-md">
           <div className="flex items-start gap-2">
             <AlertTriangle className="h-5 w-5 text-blue-700 flex-shrink-0 mt-0.5" />
@@ -36,25 +76,14 @@ return (
         </div>
 
         <div className="space-y-3 pt-2">
-          {/* Botón Ver Reporte */}
           <a
-            href={documentPath}
+            href={data.url}
             target="_blank"
             rel="noopener noreferrer"
             className="w-full flex items-center justify-center space-x-2 px-4 py-2 border border-transparent text-sm font-semibold rounded-md text-white bg-indigo-600 hover:bg-indigo-700 transition duration-200"
           >
             <Bot className="h-5 w-5" />
             <span>Ver Reporte de Recomendaciones</span>
-          </a>
-
-          {/* Botón Descargar Informe */}
-          <a
-            href={documentPath}
-            download
-            className="w-full flex items-center justify-center space-x-2 px-4 py-2 border border-gray-300 text-sm font-semibold rounded-md text-gray-700 bg-white hover:bg-gray-50 transition duration-200"
-          >
-            <Download className="h-5 w-5" />
-            <span>Descargar Informe IA</span>
           </a>
         </div>
       </CardContent>

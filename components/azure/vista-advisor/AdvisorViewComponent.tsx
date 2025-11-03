@@ -2,10 +2,10 @@
 import useSWR from 'swr'
 import { LoaderComponent } from '@/components/general/LoaderComponent'
 import { MessageCard } from '@/components/azure/cards/MessageCards'
-import { AlertCircle, ChartBar, Info, Bot, AlertTriangle } from 'lucide-react'
+import { AlertCircle, ChartBar, Info } from 'lucide-react'
 import { AdvisorViewPieChartComponent } from '@/components/azure/vista-advisor/grafico/AdvisorViewPieChartComponent'
 import { AdvisorViewInfoComponent } from '@/components/azure/vista-advisor/info/AdvisorViewInfoComponent'
-import { AIComponent } from '@/components/azure/vista-advisor/ia-recommedations/AIComponent'
+import { AIComponentAzure } from '@/components/azure/vista-advisor/ia-recommedations/AIComponentAzure'
 
 interface AdvisorViewComponentProps {
     impact: string | null
@@ -126,7 +126,7 @@ export const AdvisorViewComponent = ({
             />
 
             <div className="mt-12">
-                <AIComponent /> 
+                <AIComponentAzure />
             </div>
         </div>
     )
