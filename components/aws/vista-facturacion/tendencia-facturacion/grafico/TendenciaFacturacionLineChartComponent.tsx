@@ -175,7 +175,7 @@ export const TendenciaFacturacionLineChartComponent = ({ data }: TendenciaFactur
             legendOption: {
                 type: 'scroll',
                 orient: 'horizontal',
-                top: 10,
+                top: 6,
                 left: 'center',
                 textStyle: { fontSize: 11, color: '#666' },
                 selectedMode: 'multiple',
@@ -258,6 +258,9 @@ export const TendenciaFacturacionLineChartComponent = ({ data }: TendenciaFactur
                     enterable: true,
                     confine: true,
                 },
+                toolbox:{
+                    top:30
+                },
                 xAxis: {
                     type: 'category',
                     boundaryGap: false,
@@ -303,7 +306,7 @@ export const TendenciaFacturacionLineChartComponent = ({ data }: TendenciaFactur
                         return Math.max(0, obj.min - (obj.max - obj.min) * 0.1);
                     },
                 },
-                grid: { left: 60, right: 60, top: 50, bottom: 80, containLabel: true },
+                grid: { left: 60, right: 60, top: 80, bottom: 80, containLabel: true },
             },
         });
 

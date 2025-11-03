@@ -11,6 +11,9 @@ interface RecursosVmIopsMetricsProps {
     title: string;
 }
 
+const fmt = new Intl.DateTimeFormat('es-CL', { day: 'numeric', month: 'long', hour: 'numeric', minute: 'numeric', second: 'numeric', timeZone: 'UTC' });
+
+
 export const RecursosVmIopsMetrics = ({ data, title }: RecursosVmIopsMetricsProps) => {
     const { theme, resolvedTheme } = useTheme();
     const currentTheme = resolvedTheme || theme;
@@ -74,7 +77,60 @@ export const RecursosVmIopsMetrics = ({ data, title }: RecursosVmIopsMetricsProp
                     data: usedData,
                     smooth: true,
                     extra: {
-                        color: '#28e995'
+                        color: '#28e995',
+                        markPoint: {
+                            symbol: 'pin',
+                            symbolSize: usedData.length > 2000 ? 10 : 25,
+                            label: {
+                                show: false,
+                            },
+                            itemStyle: {
+                                color: '#28e995',
+                                borderColor: isDark ? '#18181b' : '#ffffff',
+                                borderWidth: 2
+                            },
+                            tooltip: {
+                                trigger: 'item',
+                                formatter: (param: unknown) => {
+                                    if (param.data.coord) {
+                                        const date = new Date(param.data.coord[0]);
+                                        const dateFormatted = fmt.format(date);
+                                        return `${param.name}<br/>${dateFormatted}<br/>${param.data.coord[1]} GB`;
+                                    }
+                                    return `${param.name}: ${param.value}`;
+                                }
+                            },
+                            data: [
+                                {
+                                    type: 'max',
+                                    name: 'Max',
+                                    label: {
+                                        formatter: (params: unknown) => {
+                                            return `Max \n${params.data.coord[1]} IOPS`;
+                                        }
+                                    }
+                                },
+                                {
+                                    type: 'min',
+                                    name: 'Min',
+                                    label: {
+                                        formatter: (params: unknown) => {
+                                            return `Min \n${params.data.coord[1]} IOPS`;
+                                        }
+                                    }
+                                },
+                                {
+                                    coord: usedData.length ? [usedData[usedData.length - 1][0], usedData[usedData.length - 1][1]] : null,
+                                    name: 'Último',
+                                    value: usedData.length ? usedData[usedData.length - 1][1] : null,
+                                    label: {
+                                        formatter: (params: unknown) => {
+                                            return `Último \n${params.data.coord[1]} IOPS`;
+                                        }
+                                    }
+                                }
+                            ]
+                        }
                     }
                 },
                 {
@@ -83,7 +139,60 @@ export const RecursosVmIopsMetrics = ({ data, title }: RecursosVmIopsMetricsProp
                     data: unusedData,
                     smooth: true,
                     extra: {
-                        color: '#FF6384'
+                        color: '#FF6384',
+                        markPoint: {
+                            symbol: 'pin',
+                            symbolSize: unusedData.length > 2000 ? 10 : 25,
+                            label: {
+                                show: false,
+                            },
+                            itemStyle: {
+                                color: '#FF6384',
+                                borderColor: isDark ? '#18181b' : '#ffffff',
+                                borderWidth: 2
+                            },
+                            tooltip: {
+                                trigger: 'item',
+                                formatter: (param: unknown) => {
+                                    if (param.data.coord) {
+                                        const date = new Date(param.data.coord[0]);
+                                        const dateFormatted = fmt.format(date);
+                                        return `${param.name}<br/>${dateFormatted}<br/>${param.data.coord[1]} GB`;
+                                    }
+                                    return `${param.name}: ${param.value}`;
+                                }
+                            },
+                            data: [
+                                {
+                                    type: 'max',
+                                    name: 'Max',
+                                    label: {
+                                        formatter: (params: unknown) => {
+                                            return `Max \n${params.data.coord[1]} IOPS`;
+                                        }
+                                    }
+                                },
+                                {
+                                    type: 'min',
+                                    name: 'Min',
+                                    label: {
+                                        formatter: (params: unknown) => {
+                                            return `Min \n${params.data.coord[1]} IOPS`;
+                                        }
+                                    }
+                                },
+                                {
+                                    coord: unusedData.length ? [unusedData[unusedData.length - 1][0], unusedData[unusedData.length - 1][1]] : null,
+                                    name: 'Último',
+                                    value: unusedData.length ? unusedData[unusedData.length - 1][1] : null,
+                                    label: {
+                                        formatter: (params: unknown) => {
+                                            return `Último \n${params.data.coord[1]} IOPS`;
+                                        }
+                                    }
+                                }
+                            ]
+                        }
                     }
                 },
             ],

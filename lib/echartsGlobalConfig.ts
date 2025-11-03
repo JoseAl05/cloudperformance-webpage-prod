@@ -567,7 +567,7 @@ export function useECharts(
       chartRef.current?.dispose();
       chartRef.current = null;
     };
-  }, [ref, theme]);
+  }, [memoOption,ref,theme]);
 
   useEffect(() => {
     if (!chartRef.current || !ref.current) return;

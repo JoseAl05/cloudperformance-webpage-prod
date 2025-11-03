@@ -114,7 +114,6 @@ export const CostosVsPresupuestoComponent = ({ cloud, anio }: CentroDeCostoCompo
     );
   }
 
-
   // Función para calcular totales de presupuesto anual
   const calcularTotales = (presupuesto: PresupuestoAnual) => {
     if (!presupuesto.presupuestos_mensuales || presupuesto.presupuestos_mensuales.length === 0) {
