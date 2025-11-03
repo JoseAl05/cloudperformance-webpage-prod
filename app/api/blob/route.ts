@@ -21,9 +21,13 @@ const blobServiceClient = new BlobServiceClient(
 
 export async function GET(req: NextRequest) {
   const searchparams = req.nextUrl.searchParams;
-  const file = searchparams.get('file')
+  const file = searchparams.get('file');
   if (!file) {
-    return res.status(400).json({ error: 'No se especificó el archivo' });
+    return NextResponse.json({
+      ok: false,
+      url: '',
+      message: 'Nombre de archivo incorrecto.',
+    });
   }
 
   const containerClient = blobServiceClient.getContainerClient(containerName);
