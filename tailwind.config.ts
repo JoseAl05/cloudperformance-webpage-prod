@@ -4,8 +4,14 @@ const config = {
     './pages/**/*.{ts,tsx}',
     './components/**/*.{ts,tsx}',
   ],
-  safelist: [], // mantén esto corto
-  theme: { extend: {} },
+  safelist: [],
+  theme: {
+    extend: {
+      listStyleType: {
+        square: 'square',
+      },
+    },
+  },
   plugins: [],
 };
 export default config;

@@ -1,6 +1,6 @@
 'use client'
 import React from 'react';
-import { Bot, AlertTriangle, AlertCircle, Info, Download } from 'lucide-react';
+import { Bot, AlertTriangle, AlertCircle, Info, Download, Square } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import useSWR from 'swr';
 import { LoaderComponent } from '@/components/general/LoaderComponent';
@@ -49,6 +49,30 @@ export const AIComponentAws = () => {
 
   return (
     <div className="flex flex-col gap-5">
+      <div className='flex gap-5 border rounded-lg p-2 bg-blue-400/10'>
+        <Info className='text-yellow-500 w-10 h-10 lg:w-10 lg:h-10' />
+        <ul className='list-disc list-inside text-sm'>
+          <li className='my-2'>El documento fue generado a partir de la información de recomendaciones presentes en esta vista.</li>
+          <li className='my-2'>
+            Un recurso solo puede tener <strong>un modelo de precios aplicado a la vez</strong>:
+            <ol className='list-inside list-decimal pl-2 marker:font-bold'>
+              <li>On-Demand (Pago por uso)</li>
+              <li>Reservado</li>
+              <li>Saving Plan</li>
+            </ol>
+          </li>
+          <li>
+            La jeraquia con la que se aplican estos modelos de precios a los recursos es la siguiente:
+          </li>
+          <ol className='list-inside list-decimal pl-2 marker:font-bold'>
+            <li>El sistema busca todos los recursos que coincidan exactamente con las <strong>Reservas</strong> que se compran. Esos recursos quedan <strong>cubiertos por las Reservas</strong> o dicho de otra forma, ya están pagados.</li>
+            <li>Luego el sistema mira todo el gasto restante que se está pagando como <strong>On-Demand (pago por uso) </strong> y aplica el descuento del Savings Plan sobre ese gasto, <strong>hasta agotar el compromiso por hora</strong>.</li>
+            <li>Finalmente el sistema cataloga como On-Demand el resto de recursos que no aplican a los 2 puntos anteriores.</li>
+          </ol>
+          <li className='my-2'><strong>[NE]</strong> significa `No excluyente`</li>
+          <li className='my-2'><strong>[E]</strong> significa `Excluyente`</li>
+        </ul>
+      </div>
       <div className="flex justify-start">
         <a
           href={data.url}
