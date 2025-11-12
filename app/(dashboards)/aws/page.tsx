@@ -59,19 +59,21 @@ export default function DashboardAwsPage() {
                         </p>
 
                         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 w-full mt-4">
-                            <Card className="relative border-2 border-primary/50 shadow-lg hover:shadow-xl transition-shadow duration-300 bg-gradient-to-br from-white to-primary/5 dark:from-slate-900 dark:to-primary/10">
-                                <div className="absolute right-4 top-4">
-                                    <Badge className="bg-gradient-to-r from-green-600 to-emerald-600 text-white shadow-md px-3 py-1">
-                                        ⭐ Recomendado
-                                    </Badge>
-                                </div>
+                            <Card className="border-2 border-primary/50 shadow-lg hover:shadow-xl transition-shadow duration-300 bg-gradient-to-br from-white to-primary/5 dark:from-slate-900 dark:to-primary/10">
                                 <CardHeader className="pb-3">
-                                    <CardTitle className="text-xl font-bold flex items-center gap-2">
-                                        <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/30">
-                                            <LineChart className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                                    <div className="flex flex-wrap items-start justify-between gap-4">
+                                        <CardTitle className="text-xl font-bold flex items-center gap-2">
+                                            <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/30">
+                                                <LineChart className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                                            </div>
+                                            Tendencia de Facturación
+                                        </CardTitle>
+                                        <div className="flex flex-wrap gap-2">
+                                            <Badge className="bg-gradient-to-r from-green-600 to-emerald-600 text-white shadow-md px-3 py-1">
+                                                ⭐ Recomendado
+                                            </Badge>
                                         </div>
-                                        Tendencia de Facturación
-                                    </CardTitle>
+                                    </div>
                                     <CardDescription className="text-base">
                                         Visualiza y analiza la evolución de tus costos en AWS a lo largo del tiempo.
                                     </CardDescription>
@@ -91,21 +93,26 @@ export default function DashboardAwsPage() {
                                     </div>
                                 </CardContent>
                             </Card>
-                            <Card className="relative border-2 border-primary/50 shadow-lg hover:shadow-xl transition-shadow duration-300 bg-gradient-to-br from-white to-primary/5 dark:from-slate-900 dark:to-primary/10">
-                                <div className="absolute right-4 top-4">
-                                    <Badge className="bg-gradient-to-r from-green-600 to-emerald-600 text-white shadow-md px-3 py-1">
-                                        ⭐ Recomendado
-                                    </Badge>
-                                </div>
+                            <Card className="border-2 border-primary/50 shadow-lg hover:shadow-xl transition-shadow duration-300 bg-gradient-to-br from-white to-primary/5 dark:from-slate-900 dark:to-primary/10">
                                 <CardHeader className="pb-3">
-                                    <CardTitle className="text-xl font-bold flex items-center gap-2">
-                                        <div className="p-2 rounded-lg bg-purple-100 dark:bg-purple-900/30">
-                                            <Pyramid className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                                    <div className="flex flex-wrap items-start justify-between gap-4">
+                                        <CardTitle className="text-xl font-bold flex items-center gap-2">
+                                            <div className="p-2 rounded-lg bg-purple-100 dark:bg-purple-900/30">
+                                                <Pyramid className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                                            </div>
+                                            Recomendaciones
+                                        </CardTitle>
+                                        <div className="flex flex-wrap gap-2">
+                                            <Badge className="bg-gradient-to-r from-green-600 to-emerald-600 text-white shadow-md px-3 py-1">
+                                                ⭐ Recomendado
+                                            </Badge>
+                                            <Badge className="bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-md px-3 py-1">
+                                                ⭐ Nuevo
+                                            </Badge>
                                         </div>
-                                        Recomendaciones
-                                    </CardTitle>
+                                    </div>
                                     <CardDescription className="text-base">
-                                        Obtén consejos personalizados de AWS Advisor para optimizar costos y rendimiento.
+                                        Consejos potenciados por IA de tu AWS Advisor para optimizar costos y rendimiento.
                                     </CardDescription>
                                 </CardHeader>
                                 <CardContent className="space-y-3">
@@ -123,19 +130,21 @@ export default function DashboardAwsPage() {
                                     </div>
                                 </CardContent>
                             </Card>
-                            <Card className="relative lg:col-span-2 border-2 border-primary/50 shadow-lg hover:shadow-xl transition-shadow duration-300 bg-gradient-to-br from-white to-primary/5 dark:from-slate-900 dark:to-primary/10">
-                                <div className="absolute right-4 top-4">
-                                    <Badge className="bg-gradient-to-r from-green-600 to-emerald-600 text-white shadow-md px-3 py-1">
-                                        ⭐ Recomendado
-                                    </Badge>
-                                </div>
+                            <Card className="lg:col-span-2 border-2 border-primary/50 shadow-lg hover:shadow-xl transition-shadow duration-300 bg-gradient-to-br from-white to-primary/5 dark:from-slate-900 dark:to-primary/10">
                                 <CardHeader className="pb-3">
-                                    <CardTitle className="text-xl font-bold flex items-center gap-2">
-                                        <div className="p-2 rounded-lg bg-emerald-100 dark:bg-emerald-900/30">
-                                            <HandCoins className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+                                    <div className="flex flex-wrap items-start justify-between gap-4">
+                                        <CardTitle className="text-xl font-bold flex items-center gap-2">
+                                            <div className="p-2 rounded-lg bg-emerald-100 dark:bg-emerald-900/30">
+                                                <HandCoins className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+                                            </div>
+                                            Ahorro y Optimización
+                                        </CardTitle>
+                                        <div className="flex flex-wrap gap-2">
+                                            <Badge className="bg-gradient-to-r from-green-600 to-emerald-600 text-white shadow-md px-3 py-1">
+                                                ⭐ Recomendado
+                                            </Badge>
                                         </div>
-                                        Ahorro y Optimización
-                                    </CardTitle>
+                                    </div>
                                     <CardDescription className="text-base">
                                         Maximiza tus ahorros con Saving Plans y comparativas de costos.
                                     </CardDescription>
@@ -170,19 +179,21 @@ export default function DashboardAwsPage() {
                                     </div>
                                 </CardContent>
                             </Card>
-                            <Card className="relative lg:col-span-2 border-2 border-primary/50 shadow-lg hover:shadow-xl transition-shadow duration-300 bg-gradient-to-br from-white to-primary/5 dark:from-slate-900 dark:to-primary/10">
-                                <div className="absolute right-4 top-4">
-                                    <Badge className="bg-gradient-to-r from-green-600 to-emerald-600 text-white shadow-md px-3 py-1">
-                                        ⭐ Recomendado
-                                    </Badge>
-                                </div>
+                            <Card className="lg:col-span-2 border-2 border-primary/50 shadow-lg hover:shadow-xl transition-shadow duration-300 bg-gradient-to-br from-white to-primary/5 dark:from-slate-900 dark:to-primary/10">
                                 <CardHeader className="pb-3">
-                                    <CardTitle className="text-xl font-bold flex items-center gap-2">
-                                        <div className="p-2 rounded-lg bg-emerald-100 dark:bg-emerald-900/30">
-                                            <HardDrive className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+                                    <div className="flex flex-wrap items-start justify-between gap-4">
+                                        <CardTitle className="text-xl font-bold flex items-center gap-2">
+                                            <div className="p-2 rounded-lg bg-emerald-100 dark:bg-emerald-900/30">
+                                                <HardDrive className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+                                            </div>
+                                            Storage
+                                        </CardTitle>
+                                        <div className="flex flex-wrap gap-2">
+                                            <Badge className="bg-gradient-to-r from-green-600 to-emerald-600 text-white shadow-md px-3 py-1">
+                                                ⭐ Recomendado
+                                            </Badge>
                                         </div>
-                                        Storage
-                                    </CardTitle>
+                                    </div>
                                     <CardDescription className="text-base">
                                         Identifica recursos de storage e identifica y soluciona sobre o infra utilización de tus servicios de Storage.
                                     </CardDescription>

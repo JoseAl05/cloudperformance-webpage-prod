@@ -50,21 +50,110 @@ export default function DashboardAzurePage() {
                         <p className="text-sm text-muted-foreground">
                             Modulos recomendados para el analisis de consumo y buscar posibilidades de ahorro.
                         </p>
-
-                        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 w-full mt-4">
-                            <Card className="relative border-2 border-primary/50 shadow-lg hover:shadow-xl transition-shadow duration-300 bg-gradient-to-br from-white to-primary/5 dark:from-slate-900 dark:to-primary/10">
-                                <div className="absolute right-4 top-4">
-                                    <Badge className="bg-gradient-to-r from-green-600 to-emerald-600 text-white shadow-md px-3 py-1">
-                                        ⭐ Recomendado
-                                    </Badge>
-                                </div>
+                        <div className="grid grid-cols-1 gap-6 w-full mt-4 lg:grid-cols-2">
+                            <Card className="border-2 border-primary/50 shadow-lg hover:shadow-xl transition-shadow duration-300 bg-gradient-to-br from-white to-primary/5 dark:from-slate-900 dark:to-primary/10">
                                 <CardHeader className="pb-3">
-                                    <CardTitle className="text-xl font-bold flex items-center gap-2">
-                                        <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/30">
-                                            <Cylinder className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                                    <div className="flex flex-wrap items-start justify-between gap-4">
+                                        <CardTitle className="text-xl font-bold flex items-center gap-2">
+                                            <div className="p-2 rounded-lg bg-purple-100 dark:bg-purple-900/30">
+                                                <Pyramid className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                                            </div>
+                                            Recomendaciones
+                                        </CardTitle>
+                                        <div className="flex flex-wrap gap-2">
+                                            <Badge className="bg-gradient-to-r from-green-600 to-emerald-600 text-white shadow-md px-3 py-1">
+                                                ⭐ Recomendado
+                                            </Badge>
+                                            <Badge className="bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-md px-3 py-1">
+                                                ⭐ Nuevo
+                                            </Badge>
                                         </div>
-                                        Storage
-                                    </CardTitle>
+                                    </div>
+                                    <CardDescription className="text-base">
+                                        Consejos potenciados por IA de tu Azure Advisor para optimizar costos y rendimiento.
+                                    </CardDescription>
+                                </CardHeader>
+                                <CardContent className="space-y-3">
+                                    <div className="text-xs uppercase tracking-wider text-primary font-semibold">Acciones Rápidas</div>
+                                    <div className="flex flex-col gap-2 rounded-xl border-2 border-primary/30 bg-gradient-to-br from-primary/5 to-primary/10 p-4 dark:from-primary/10 dark:to-primary/20">
+                                        <Link href="/azure/advisor">
+                                            <Button
+                                                size="default"
+                                                variant="default"
+                                                className="w-full gap-2 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+                                            >
+                                                <Pyramid className="h-4 w-4" /> Ver Recomendaciones
+                                            </Button>
+                                        </Link>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                            <Card className="border-2 border-primary/50 shadow-lg hover:shadow-xl transition-shadow duration-300 bg-gradient-to-br from-white to-primary/5 dark:from-slate-900 dark:to-primary/10">
+                                <CardHeader className="pb-3">
+                                    <div className="flex flex-wrap items-start justify-between gap-4">
+                                        <CardTitle className="text-xl font-bold flex items-center gap-2">
+                                            <div className="p-2 rounded-lg bg-emerald-100 dark:bg-emerald-900/30">
+                                                <FileChartColumn className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+                                            </div>
+                                            Facturaciones
+                                        </CardTitle>
+                                        <div className="flex flex-wrap gap-2">
+                                            <Badge className="bg-gradient-to-r from-green-600 to-emerald-600 text-white shadow-md px-3 py-1">
+                                                ⭐ Recomendado
+                                            </Badge>
+                                        </div>
+                                    </div>
+                                    <CardDescription className="text-base">
+                                        Tendencia de pago por uso, análisis de costos y oportunidades de ahorro con planes.
+                                    </CardDescription>
+                                </CardHeader>
+                                <CardContent className="space-y-3">
+                                    <div className="text-xs uppercase tracking-wider text-primary font-semibold">Acciones Rápidas</div>
+                                    <div className="grid md:grid-cols-2 gap-4">
+                                        <div className="flex flex-col gap-2 rounded-xl border-2 border-primary/30 bg-gradient-to-br from-primary/5 to-primary/10 p-4 dark:from-primary/10 dark:to-primary/20">
+                                            {/* <div className="text-xs font-semibold text-primary mb-1">Tendencia de Costos</div> */}
+                                            <Link href="/azure/facturacion/tendencia-pago-por-uso">
+                                                <Button
+                                                    size="default"
+                                                    variant="default"
+                                                    className="w-full gap-2 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+                                                >
+                                                    <LineChart className="h-4 w-4" /> Tendencia de Facturación
+                                                </Button>
+                                            </Link>
+                                        </div>
+                                        <div className="flex flex-col gap-2 rounded-xl border-2 border-primary/30 bg-gradient-to-br from-primary/5 to-primary/10 p-4 dark:from-primary/10 dark:to-primary/20">
+                                            {/* <div className="text-xs font-semibold text-primary mb-1">Saving Plans</div> */}
+                                            <Link href="/azure/saving-plan">
+                                                <Button
+                                                    size="default"
+                                                    variant="default"
+                                                    className="w-full gap-2 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+                                                >
+                                                    <HandCoins className="h-4 w-4" /> Cobertura (Saving Plans)
+                                                </Button>
+                                            </Link>
+                                        </div>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        </div>
+                        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 w-full mt-4">
+                            <Card className="border-2 border-primary/50 shadow-lg hover:shadow-xl transition-shadow duration-300 bg-gradient-to-br from-white to-primary/5 dark:from-slate-900 dark:to-primary/10">
+                                <CardHeader className="pb-3">
+                                    <div className="flex flex-wrap items-start justify-between gap-4">
+                                        <CardTitle className="text-xl font-bold flex items-center gap-2">
+                                            <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/30">
+                                                <Cylinder className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                                            </div>
+                                            Storage
+                                        </CardTitle>
+                                        <div className="flex flex-wrap gap-2">
+                                            <Badge className="bg-gradient-to-r from-green-600 to-emerald-600 text-white shadow-md px-3 py-1">
+                                                ⭐ Recomendado
+                                            </Badge>
+                                        </div>
+                                    </div>
                                     <CardDescription className="text-base">
                                         Comparativas de almacenamiento y variaciones de capacidad/uso.
                                     </CardDescription>
@@ -93,19 +182,21 @@ export default function DashboardAzurePage() {
                                     </div>
                                 </CardContent>
                             </Card>
-                            <Card className="relative border-2 border-primary/50 shadow-lg hover:shadow-xl transition-shadow duration-300 bg-gradient-to-br from-white to-primary/5 dark:from-slate-900 dark:to-primary/10">
-                                <div className="absolute right-4 top-4">
-                                    <Badge className="bg-gradient-to-r from-green-600 to-emerald-600 text-white shadow-md px-3 py-1">
-                                        ⭐ Recomendado
-                                    </Badge>
-                                </div>
+                            <Card className="border-2 border-primary/50 shadow-lg hover:shadow-xl transition-shadow duration-300 bg-gradient-to-br from-white to-primary/5 dark:from-slate-900 dark:to-primary/10">
                                 <CardHeader className="pb-3">
-                                    <CardTitle className="text-xl font-bold flex items-center gap-2">
-                                        <div className="p-2 rounded-lg bg-purple-100 dark:bg-purple-900/30">
-                                            <Layers className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                                    <div className="flex flex-wrap items-start justify-between gap-4">
+                                        <CardTitle className="text-xl font-bold flex items-center gap-2">
+                                            <div className="p-2 rounded-lg bg-purple-100 dark:bg-purple-900/30">
+                                                <Layers className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                                            </div>
+                                            Spot vs Regular VMs
+                                        </CardTitle>
+                                        <div className="flex flex-wrap gap-2">
+                                            <Badge className="bg-gradient-to-r from-green-600 to-emerald-600 text-white shadow-md px-3 py-1">
+                                                ⭐ Recomendado
+                                            </Badge>
                                         </div>
-                                        Spot vs Regular VMs
-                                    </CardTitle>
+                                    </div>
                                     <CardDescription className="text-base">
                                         Analiza ahorros potenciales y cobertura con instancias Spot.
                                     </CardDescription>
@@ -122,54 +213,6 @@ export default function DashboardAzurePage() {
                                                 <Layers className="h-4 w-4" /> Comparativa Spot vs Regular
                                             </Button>
                                         </Link>
-                                    </div>
-                                </CardContent>
-                            </Card>
-
-                            <Card className="relative lg:col-span-2 border-2 border-primary/50 shadow-lg hover:shadow-xl transition-shadow duration-300 bg-gradient-to-br from-white to-primary/5 dark:from-slate-900 dark:to-primary/10">
-                                <div className="absolute right-4 top-4">
-                                    <Badge className="bg-gradient-to-r from-green-600 to-emerald-600 text-white shadow-md px-3 py-1">
-                                        ⭐ Recomendado
-                                    </Badge>
-                                </div>
-                                <CardHeader className="pb-3">
-                                    <CardTitle className="text-xl font-bold flex items-center gap-2">
-                                        <div className="p-2 rounded-lg bg-emerald-100 dark:bg-emerald-900/30">
-                                            <FileChartColumn className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
-                                        </div>
-                                        Facturaciones
-                                    </CardTitle>
-                                    <CardDescription className="text-base">
-                                        Tendencia de pago por uso, análisis de costos y oportunidades de ahorro con planes.
-                                    </CardDescription>
-                                </CardHeader>
-                                <CardContent className="space-y-3">
-                                    <div className="text-xs uppercase tracking-wider text-primary font-semibold">Acciones Rápidas</div>
-                                    <div className="grid md:grid-cols-2 gap-4">
-                                        <div className="flex flex-col gap-2 rounded-xl border-2 border-primary/30 bg-gradient-to-br from-primary/5 to-primary/10 p-4 dark:from-primary/10 dark:to-primary/20">
-                                            <div className="text-xs font-semibold text-primary mb-1">Tendencia de Costos</div>
-                                            <Link href="/azure/facturacion/tendencia-pago-por-uso">
-                                                <Button
-                                                    size="default"
-                                                    variant="default"
-                                                    className="w-full gap-2 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
-                                                >
-                                                    <LineChart className="h-4 w-4" /> Tendencia de Facturación
-                                                </Button>
-                                            </Link>
-                                        </div>
-                                        <div className="flex flex-col gap-2 rounded-xl border-2 border-primary/30 bg-gradient-to-br from-primary/5 to-primary/10 p-4 dark:from-primary/10 dark:to-primary/20">
-                                            <div className="text-xs font-semibold text-primary mb-1">Saving Plans</div>
-                                            <Link href="/azure/saving-plan">
-                                                <Button
-                                                    size="default"
-                                                    variant="default"
-                                                    className="w-full gap-2 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
-                                                >
-                                                    <HandCoins className="h-4 w-4" /> Cobertura (Saving Plans)
-                                                </Button>
-                                            </Link>
-                                        </div>
                                     </div>
                                 </CardContent>
                             </Card>
