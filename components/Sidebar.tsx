@@ -45,7 +45,8 @@ import {
     Stars,
     Layers,
     Table,
-    Diff
+    Diff,
+    Scale
 } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { usePathname } from 'next/navigation'
@@ -170,7 +171,8 @@ export const SidebarComponent = ({
     const infrausedAzure = [
         { label: 'VM', icon: Computer, href: '/azure/funciones/unused-resources/vm' },
         { label: 'VMSS', icon: Computer, href: '/azure/funciones/unused-resources/vmss' },
-        { label: 'Extensiones VM', icon: Puzzle, href: '/azure/funciones/unused-resources/extensions' }
+        { label: 'Extensiones VM', icon: Puzzle, href: '/azure/funciones/unused-resources/extensions' },
+        { label: 'Loadbalancers', icon: Scale, href: '/azure/funciones/loadbalancers-infrautilizados'}
     ]
     const consumeSubItemsAzure = [
         { label: 'Maquinas Virtuales', icon: Computer, href: '/azure/consumo-vm' },

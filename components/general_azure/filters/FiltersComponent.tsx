@@ -25,6 +25,7 @@ import { InstancesFilterComponentV2 } from '@/components/general_azure/filters/I
 import { DeploymentOperationsFilterComponent } from '@/components/general_azure/filters/DeploymentOperationsFilterComponent';
 import { ImpactFilterComponent } from '@/components/general_azure/filters/ImpactFilterComponent';
 import { CategoryFilterComponent } from '@/components/general_azure/filters/CategoryFilterComponent';
+import { LoadbalancerFilterComponent } from '@/components/general_azure/filters/LoadbalancerFilterComponent';
 
 interface FiltersComponentProps {
     Component: (params: {
@@ -88,6 +89,8 @@ interface FiltersComponentProps {
     deploymentOperationsFilter?: boolean;
     impactFilter?: boolean;
     categoryFilter?: boolean;
+    lbFilter?: boolean;
+    isLoadbalancerFilterMultiselect?: boolean;
 }
 
 export const FiltersComponent = ({
@@ -128,6 +131,8 @@ export const FiltersComponent = ({
     deploymentOperationsFilter = false,
     impactFilter = false,
     categoryFilter = false,
+    lbFilter = false,
+    isLoadbalancerFilterMultiselect = false
 }: FiltersComponentProps) => {
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -166,6 +171,7 @@ export const FiltersComponent = ({
         const selectedOperationParam = searchParams.get('operation');
         const impactParam = searchParams.get('impact');
         const categoryParam = searchParams.get('category');
+        const selectedLbparam = searchParams.get('loadbalancer');
 
         let startDate = startDateParam ? new Date(startDateParam) : yesterday;
         let endDate = endDateParam ? new Date(endDateParam) : new Date();
@@ -209,6 +215,7 @@ export const FiltersComponent = ({
             selectedOperation: selectedOperationParam || '',
             impact: impactParam !== null ? impactParam : null,
             category: categoryParam !== null ? categoryParam : null,
+            selectedLbparam: selectedLbparam || ''
         };
     };
 
@@ -238,6 +245,7 @@ export const FiltersComponent = ({
     const [tempOperation, setTempOperation] = useState<string>(filters.selectedOperation);
     const [tempImpact, setTempImpact] = useState<string | null>(filters.impact);
     const [tempCategory, setTempCategory] = useState<string | null>(filters.category);
+    const [tempLb, setTempLb] = useState<string>(filters.selectedLbparam);
 
     useEffect(() => {
         const newFilters = getInitialFilters();
@@ -267,6 +275,7 @@ export const FiltersComponent = ({
         setTempOperation(newFilters.selectedOperation);
         setTempImpact(newFilters.impact);
         setTempCategory(newFilters.category);
+        setTempLb(newFilters.selectedLbparam);
     }, [searchParams]);
 
     const onChange = (dates: [Date | null, Date | null]) => setTempRange(dates);
@@ -312,6 +321,7 @@ export const FiltersComponent = ({
             selectedOperation: tempOperation,
             impact: tempImpact,
             category: tempCategory,
+            selectedLb: tempLb
         };
 
         setFilters(newFilters as unknown);
@@ -385,6 +395,9 @@ export const FiltersComponent = ({
         if (newFilters.selectedStrgAccount) {
             query.set('strgAccount', newFilters.selectedStrgAccount);
         }
+        if (newFilters.selectedLb) {
+            query.set('loadbalancer', newFilters.selectedLb);
+        }
 
         router.push(`${window.location.pathname}?${query.toString()}`);
     };
@@ -413,7 +426,8 @@ export const FiltersComponent = ({
             selectedInstanceV2: '',
             selectedOperation: '',
             impact: '',
-            category: ''
+            category: '',
+            selectedLb: ''
         };
 
         setFilters(defaultFilters as unknown);
@@ -439,6 +453,7 @@ export const FiltersComponent = ({
         setTempOperation(defaultFilters.selectedOperation);
         setTempImpact(defaultFilters.impact as string);
         setTempCategory(defaultFilters.category as string);
+        setTempLb(defaultFilters.selectedLb);
 
         router.push(window.location.pathname);
     };
@@ -800,6 +815,23 @@ export const FiltersComponent = ({
                                 />
                             </div>
                         )}
+                        {lbFilter && (
+                            <div className='space-y-2'>
+                                <label className='text-sm font-medium text-foreground flex items-center gap-2'>
+                                    <Boxes className='h-4 w-4' />
+                                    Loadbalancers
+                                </label>
+                                <LoadbalancerFilterComponent
+                                    startDate={tempStartDate}
+                                    endDate={tempEndDate}
+                                    region={tempRegion}
+                                    subscription={tempSubscription}
+                                    lb={tempLb}
+                                    setLb={setTempLb}
+                                    isLoadbalancerFilterMultiselect={isLoadbalancerFilterMultiselect}
+                                />
+                            </div>
+                        )}
                     </div>
 
                     <div className='flex items-center gap-4'>
@@ -838,6 +870,7 @@ export const FiltersComponent = ({
                     selectedOperation={(filters as unknown).selectedOperation}
                     impact={(filters as unknown).impact}
                     category={(filters as unknown).category}
+                    selectedLb={filters.selectedLbparam}
                 />
             </Card>
         </div>
