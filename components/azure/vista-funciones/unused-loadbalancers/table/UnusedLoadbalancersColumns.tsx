@@ -47,24 +47,18 @@ const DetailsDialog = ({ details }: { details: UnusedLbDetail[] }) => {
 
                         {details.map((d, i) => (
                             <div key={i} className="rounded-lg border bg-card p-4 space-y-4 hover:shadow-sm transition-shadow">
-
-                                {/* Fecha de observación */}
                                 <div>
                                     <div className="text-xs text-muted-foreground">Fecha Observación</div>
                                     <Badge variant="secondary" className="mt-1">
                                         {new Date(d.sync_time).toLocaleString('es-CL')}
                                     </Badge>
                                 </div>
-
-                                {/* SKU */}
                                 <div>
                                     <div className="text-xs text-muted-foreground">SKU</div>
                                     <Badge variant="outline" className="mt-1">
                                         {d.sku}
                                     </Badge>
                                 </div>
-
-                                {/* Tags */}
                                 <div>
                                     <div className="text-xs text-muted-foreground mb-1">Tags</div>
                                     {Object.keys(d.tags).length > 0 ? (
@@ -79,21 +73,16 @@ const DetailsDialog = ({ details }: { details: UnusedLbDetail[] }) => {
                                         <div className="text-xs italic text-muted-foreground">Sin tags</div>
                                     )}
                                 </div>
-
-                                {/* Backend Instance Count */}
                                 <div>
                                     <div className="text-xs text-muted-foreground">Backend Instances</div>
                                     <Badge variant="outline" className="mt-1">
                                         {d.backend_instance_count}
                                     </Badge>
                                 </div>
-
-                                {/* BACKEND ADDRESS POOLS */}
                                 <div>
                                     <div className="flex items-center gap-2 mb-1 text-xs text-muted-foreground">
                                         <ListTree className="h-4 w-4" /> Backend Address Pools
                                     </div>
-
                                     {d.backend_address_pools && d.backend_address_pools.length > 0 ? (
                                         <div className="space-y-2">
                                             {d.backend_address_pools.map((b, idx) => (
@@ -110,8 +99,6 @@ const DetailsDialog = ({ details }: { details: UnusedLbDetail[] }) => {
                                         <div className="text-xs italic text-muted-foreground">Sin backend pools</div>
                                     )}
                                 </div>
-
-                                {/* LB RULES */}
                                 <div>
                                     <div className="flex items-center gap-2 mb-1 text-xs text-muted-foreground">
                                         <ListTree className="h-4 w-4" /> Load Balancing Rules
@@ -130,11 +117,8 @@ const DetailsDialog = ({ details }: { details: UnusedLbDetail[] }) => {
                                         <div className="text-xs italic text-muted-foreground">Sin LB rules</div>
                                     )}
                                 </div>
-
-                                {/* NAT RULES */}
                                 <div>
                                     <div className="text-xs text-muted-foreground mb-1">Inbound NAT Rules</div>
-
                                     {d.inbound_nat_rules && d.inbound_nat_rules.length > 0 ? (
                                         <div className="space-y-2">
                                             {d.inbound_nat_rules.map((r, idx) => (
@@ -148,8 +132,6 @@ const DetailsDialog = ({ details }: { details: UnusedLbDetail[] }) => {
                                         <div className="text-xs italic text-muted-foreground">Sin NAT rules</div>
                                     )}
                                 </div>
-
-                                {/* NAT POOLS */}
                                 <div>
                                     <div className="text-xs text-muted-foreground mb-1">Inbound NAT Pools</div>
 

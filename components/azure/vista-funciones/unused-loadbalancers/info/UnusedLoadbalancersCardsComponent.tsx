@@ -52,13 +52,7 @@ export const UnusedLoadbalancersCardsComponent = ({ data }: UnusedLoadbalancersC
             </Card>
         );
     }
-
-    console.log(data);
-
-    // Total de LB considerados
     const totalUnused = data.length;
-
-    // Sumar TODO lo que entrega la API
     const totals = data.reduce(
         (acc, lb) => {
             if (!lb.details) return acc;
@@ -67,8 +61,6 @@ export const UnusedLoadbalancersCardsComponent = ({ data }: UnusedLoadbalancersC
                 acc.total_backend_instance_count += d.backend_instance_count || 0;
                 acc.total_lb_rule_count += d.lb_rule_count || 0;
                 acc.total_nat_rule_count += d.nat_rule_count || 0;
-
-                // Clasificación por snapshot
                 if (d.backend_instance_count === 0) {
                     acc.orphaned += 1;
                 }
