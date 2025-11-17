@@ -11,7 +11,7 @@ import useSWR from 'swr';
 interface UnusedLoadbalancersComponentProps {
     startDate: Date;
     endDate: Date;
-    selectedLb: string;
+    selectedUnusedLb: string;
     subscription: string;
     region: string;
 }
@@ -22,13 +22,13 @@ const fetcher = (url: string) =>
 
 const isNonEmptyArray = <T,>(v: unknown): v is T[] => Array.isArray(v) && v.length > 0
 
-export const UnusedLoadbalancersComponent = ({ startDate, endDate, selectedLb, subscription, region }: UnusedLoadbalancersComponentProps) => {
+export const UnusedLoadbalancersComponent = ({ startDate, endDate, selectedUnusedLb, subscription, region }: UnusedLoadbalancersComponentProps) => {
 
     const startDateFormatted = startDate ? startDate.toISOString().replace('Z', '').slice(0, -4) : '';
     const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : '';
 
     const { data, isLoading, error } = useSWR(
-        selectedLb ? `/api/azure/bridge/azure/loadbalancers/loadbalancers_unused?date_from=${startDateFormatted}&date_to=${endDateFormatted}&location=${region}&subscription_id=${subscription}&loadbalancer=${selectedLb}` : null,
+        selectedUnusedLb ? `/api/azure/bridge/azure/loadbalancers/loadbalancers_unused?date_from=${startDateFormatted}&date_to=${endDateFormatted}&location=${region}&subscription_id=${subscription}&loadbalancer=${selectedUnusedLb}` : null,
         fetcher
     )
 
@@ -42,7 +42,7 @@ export const UnusedLoadbalancersComponent = ({ startDate, endDate, selectedLb, s
         isNonEmptyArray<UnusedLb>(data) ? data : null;
 
     const hasUnusedLbData = !!unusedLbData && unusedLbData.length > 0;
-    const hasSelectedUnusedLb = !!selectedLb && selectedLb.length > 0;
+    const hasSelectedUnusedLb = !!selectedUnusedLb && selectedUnusedLb.length > 0;
 
     if (anyLoading) {
         return <LoaderComponent />

@@ -27,8 +27,8 @@ export const MainViewUnusedLoadbalancers = () => {
                     dateFilter
                     regionFilter
                     subscriptionIdFilter
-                    lbFilter
-                    isLoadbalancerFilterMultiselect
+                    unusedLbFilter
+                    isUnusedLoadbalancerFilterMultiselect
                 />
             </div>
         </div>
