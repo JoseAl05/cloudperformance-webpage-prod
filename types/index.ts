@@ -1,8 +1,11 @@
+import { UserRole } from './db';
+
 export interface UserDoc {
   _id: string;
   email: string;
   username: string;
   client: string;
+  role: UserRole;
   user_db: string;
   passwordHash: string;
   createdAt: Date;
@@ -31,6 +34,7 @@ export interface JWTPayload {
   sub: string;
   username: string;
   client: string;
+  role: UserRole; 
   user_db_aws: string;
   user_db_azure: string;
   is_azure:boolean;

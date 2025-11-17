@@ -1,14 +1,11 @@
-
 import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar"
-import { Navbar } from '@/components/Navbar';
+import { Navbar } from '@/components/Navbar'; 
 import { cookies } from 'next/headers';
 import { AUTH_COOKIE } from '@/lib/cookies';
 import { verifyAuthToken } from '@/lib/auth';
-import { SidebarProfileComponent } from '@/components/profile/SidebarProfile';
-import { PresupuestoClientLayout } from './PresupuestoClientLayout';
+import { SidebarProfileComponent } from '@/components/profile/SidebarProfile'; 
 
-
-export default async function ProfileLayout({
+export default async function PerfilamientoLayout({
     children,
 }: Readonly<{
     children: React.ReactNode;
@@ -16,6 +13,7 @@ export default async function ProfileLayout({
     const cookieStore = await cookies();
     const token = cookieStore.get(AUTH_COOKIE)?.value;
     const payload = token ? await verifyAuthToken(token) : null;
+    
     return (
         <SidebarProvider
             style={
@@ -26,6 +24,7 @@ export default async function ProfileLayout({
             }
         >
             <SidebarProfileComponent />
+            
             <SidebarInset className="min-w-0">
                 <div className='flex items-center gap-3 p-5'>
                     {
@@ -39,10 +38,11 @@ export default async function ProfileLayout({
                         payload={payload}
                     />
                 </div>
+                
                 <div className="flex flex-col">
                     <div className="@container/main flex flex-col gap-2">
                         <div className="flex flex-col gap-4 p-4 md:gap-6 md:p-6">
-                            <PresupuestoClientLayout>{children}</PresupuestoClientLayout>
+                            {children}
                         </div>
                     </div>
                 </div>

@@ -16,13 +16,16 @@ import {
     Mail,
     Cloud,
     House,
-    CircleDollarSign
+    CircleDollarSign,
+    Users, 
 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { usePathname } from 'next/navigation'
 import Image from 'next/image'
 import { useTheme } from 'next-themes'
 import Link from 'next/link'
+import { useSession } from '@/hooks/useSession' 
+
 const useMenuStyles = () => {
     const { resolvedTheme } = useTheme()
 
@@ -49,16 +52,23 @@ export const SidebarProfileComponent = ({
     const { getMenuItemClasses } = useMenuStyles();
     const [isMounted, setIsMounted] = useState(false);
     const [isActive, setIsActive] = useState(false);
+    
+    // CARGAR SESIÓN para obtener el rol
+    const { user, isLoading } = useSession(); 
+    
+    // Determinar si el usuario tiene permiso para ver el enlace de perfilamiento
+    const canAccessProfiling = user && (user.role === 'admin_global' || user.role === 'admin_empresa');
 
     useEffect(() => {
-        setIsActive(pathname === '/azure/profile')
-    })
+        // Asegúrate de que este chequeo de pathname también verifique las nuevas rutas
+        setIsActive(pathname.startsWith('/perfil/nubes') || pathname.startsWith('/presupuesto') || pathname.startsWith('/perfilamiento'));
+    }, [pathname]) // Se actualiza cada vez que la ruta cambia
 
     useEffect(() => {
         setIsMounted(true);
     }, []);
 
-    if (!isMounted) {
+    if (!isMounted || isLoading) {
         return null;
     }
 
@@ -87,7 +97,7 @@ export const SidebarProfileComponent = ({
                                     href="/perfil"
                                     className={cn(
                                         'flex items-center gap-3 px-3 py-2 rounded-md cursor-pointer transition-colors duration-150',
-                                        getMenuItemClasses(isActive)
+                                        getMenuItemClasses(pathname === '/perfil') // Corregir chequeo de activación
                                     )}
                                 >
                                     <House className="h-5 w-5 text-blue-500" />
@@ -99,7 +109,7 @@ export const SidebarProfileComponent = ({
                                     href="#"
                                     className={cn(
                                         'flex items-center gap-3 px-3 py-2 rounded-md cursor-pointer transition-colors duration-150',
-                                        getMenuItemClasses(isActive)
+                                        getMenuItemClasses(false) // Dejar inactivo
                                     )}
                                 >
                                     <Shield className="h-5 w-5 text-blue-500" />
@@ -111,7 +121,7 @@ export const SidebarProfileComponent = ({
                                     href="#"
                                     className={cn(
                                         'flex items-center gap-3 px-3 py-2 rounded-md cursor-pointer transition-colors duration-150',
-                                        getMenuItemClasses(isActive)
+                                        getMenuItemClasses(false) // Dejar inactivo
                                     )}
                                 >
                                     <Mail className="h-5 w-5 text-blue-500" />
@@ -123,7 +133,7 @@ export const SidebarProfileComponent = ({
                                     href='/perfil/nubes'
                                     className={cn(
                                         'flex items-center gap-3 px-3 py-2 rounded-md cursor-pointer transition-colors duration-150',
-                                        getMenuItemClasses(isActive)
+                                        getMenuItemClasses(pathname.startsWith('/perfil/nubes'))
                                     )}
                                 >
                                     <Cloud className="h-5 w-5 text-blue-500" />
@@ -135,13 +145,31 @@ export const SidebarProfileComponent = ({
                                     href='/presupuesto'
                                     className={cn(
                                         'flex items-center gap-3 px-3 py-2 rounded-md cursor-pointer transition-colors duration-150',
-                                        getMenuItemClasses(isActive)
+                                        getMenuItemClasses(pathname.startsWith('/presupuesto'))
                                     )}
                                 >
                                     <CircleDollarSign className="h-5 w-5 text-blue-500" />
                                     <span className="text-sm font-medium">Presupuesto</span>
                                 </Link>
                             </SidebarMenuButton>
+
+                            {/* =================================================== */}
+                            {/* NUEVA SECCIÓN: PERFILAMIENTO */}
+                            {/* =================================================== */}
+                            {canAccessProfiling && (
+                                <SidebarMenuButton asChild>
+                                    <Link
+                                        href='/perfilamiento' 
+                                        className={cn(
+                                            'flex items-center gap-3 px-3 py-2 rounded-md cursor-pointer transition-colors duration-150',
+                                            getMenuItemClasses(pathname.startsWith('/perfilamiento'))
+                                        )}
+                                    >
+                                        <Users className="h-5 w-5 text-blue-500" /> 
+                                        <span className="text-sm font-medium">Perfilamiento</span>
+                                    </Link>
+                                </SidebarMenuButton>
+                            )}
                         </SidebarMenuItem>
                     </SidebarMenu>
                 </SidebarGroup>
