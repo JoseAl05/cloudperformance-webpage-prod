@@ -1,8 +1,8 @@
 'use client';
 
 import React from 'react';
-import { Lock} from 'lucide-react'; 
-import { useFeatureAccess } from '@/hooks/useFeatureAccess'; 
+import { Lock } from 'lucide-react';
+import { useFeatureAccess } from '@/hooks/useFeatureAccess';
 
 const AccessDeniedComponent = ({ planName }: { planName: string }) => (
     <div className="flex flex-col items-center justify-center min-h-[60vh] p-8 bg-gray-50 rounded-xl">
@@ -14,7 +14,7 @@ const AccessDeniedComponent = ({ planName }: { planName: string }) => (
                     Tu plan actual {planName.toUpperCase()} no incluye las herramientas de presupuesto.
                 </p>
                 <p className="text-sm text-gray-500 mt-2">
-                    Esta función es exclusiva para el plan "Business". Considera actualizar tu suscripción para acceder a todas las funcionalidades.
+                    Esta función es exclusiva para el plan Business. Considera actualizar tu suscripción para acceder a todas las funcionalidades.
                 </p>
             </div>
         </div>
@@ -26,9 +26,9 @@ interface PresupuestoClientLayoutProps {
 }
 
 export function PresupuestoClientLayout({ children }: PresupuestoClientLayoutProps) {
-    const { 
-        loading, 
-        canAccessPresupuesto, 
+    const {
+        loading,
+        canAccessPresupuesto,
         currentPlanName
     } = useFeatureAccess();
 

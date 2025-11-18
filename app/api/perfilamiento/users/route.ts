@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCollection, getDb } from '@/lib/mongodb';
-import { authorizeRequest } from '@/lib/authUtils'; 
+import { authorizeRequest } from '@/lib/authUtils';
 import { Empresa, User } from '@/types/db'; // Asegúrate que estos tipos están bien importados
 import bcrypt from 'bcryptjs';
 
@@ -9,126 +9,153 @@ import bcrypt from 'bcryptjs';
 // =========================================================================
 
 export async function GET(req: NextRequest) {
- // 1. Autorización: Permitir solo a admin_global y admin_empresa
-    const auth = await authorizeRequest(req, ['admin_global', 'admin_empresa']);
-    if (!auth.authorized) {
-        return NextResponse.json({ message: auth.message }, { status: auth.status });
-    }
+  // 1. Autorización: Permitir solo a admin_global y admin_empresa
+  const auth = await authorizeRequest(req, ['admin_global', 'admin_empresa']);
+  if (!auth.authorized) {
+    return NextResponse.json(
+      { message: auth.message },
+      { status: auth.status }
+    );
+  }
 
-    const userLoggedIn = auth.user;
-    let query: any = {};
-    
-    // 2. Aplicar Filtro de Empresa si el rol es admin_empresa
-    if (userLoggedIn.role === 'admin_empresa') {
-        query = { client: userLoggedIn.client };
-    } 
+  const userLoggedIn = auth.user;
+  let query: unknown = {};
 
-    try {
-        const usersCollection = await getCollection<User>('Users');
-        
-     // 3. Ejecutar la consulta con el filtro
-        const users = await usersCollection
-            .find(query)
-            .project({ passwordHash: 0 }) 
-            .toArray();
+  // 2. Aplicar Filtro de Empresa si el rol es admin_empresa
+  if (userLoggedIn.role === 'admin_empresa') {
+    query = { client: userLoggedIn.client };
+  }
 
-        return NextResponse.json(users, { status: 200 });
+  try {
+    const usersCollection = await getCollection<User>('Users');
 
-    } catch (error) {
-        console.error('Error al listar usuarios:', error);
-        return NextResponse.json({ message: 'Error interno del servidor al obtener la lista de usuarios.' }, { status: 500 });
-    }
+    // 3. Ejecutar la consulta con el filtro
+    const users = await usersCollection
+      .find(query)
+      .project({ passwordHash: 0 })
+      .toArray();
+
+    return NextResponse.json(users, { status: 200 });
+  } catch (error) {
+    console.error('Error al listar usuarios:', error);
+    return NextResponse.json(
+      {
+        message: 'Error interno del servidor al obtener la lista de usuarios.',
+      },
+      { status: 500 }
+    );
+  }
 }
-
 
 // =========================================================================
 // RUTA: POST /api/perfilamiento/users (Creación de Usuarios - CORREGIDA)
 // =========================================================================
 
 export async function POST(req: NextRequest) {
-    const auth = await authorizeRequest(req, ['admin_global', 'admin_empresa']);
-    if (!auth.authorized) {
-        return NextResponse.json({ message: auth.message }, { status: 403 });
+  const auth = await authorizeRequest(req, ['admin_global', 'admin_empresa']);
+  if (!auth.authorized) {
+    return NextResponse.json({ message: auth.message }, { status: 403 });
+  }
+
+  const userCreating = auth.user;
+  const body = await req.json();
+
+  // 1. Extraer datos (is_aws y is_azure NO vienen del Front-end, solo se usan en la creación para la herencia)
+  const { email, password, username, client, role = 'usuario' } = body;
+
+  // Validación básica
+  if (!email || !password || !client) {
+    return NextResponse.json(
+      { message: 'Faltan campos esenciales (email, password, client).' },
+      { status: 400 }
+    );
+  }
+
+  try {
+    const db = await getDb();
+    const usersCollection = db.collection<User>('Users');
+    const empresasCollection = db.collection<Empresa>('Empresas');
+
+    if (await usersCollection.findOne({ email })) {
+      return NextResponse.json(
+        { message: 'El correo electrónico ya está en uso.' },
+        { status: 409 }
+      );
     }
 
-    const userCreating = auth.user;
-    const body = await req.json();
-    
-    // 1. Extraer datos (is_aws y is_azure NO vienen del Front-end, solo se usan en la creación para la herencia)
-    const { 
-        email, password, username, client, role = 'usuario'
-    } = body;
+    const passwordHash = await bcrypt.hash(password, 12);
 
-    // Validación básica
-    if (!email || !password || !client) {
-        return NextResponse.json({ message: 'Faltan campos esenciales (email, password, client).' }, { status: 400 });
+    // 2. Buscar la empresa (para verificar límite y HEREDAR LA CONFIGURACIÓN DE DB)
+    const empresa = await empresasCollection.findOne({ name: client });
+
+    if (!empresa) {
+      return NextResponse.json(
+        {
+          message: `La empresa '${client}' no existe. Debe crear la licencia primero.`,
+        },
+        { status: 400 }
+      );
     }
 
-    try {
-        const db = await getDb(); 
-        const usersCollection = db.collection<User>('Users');
-        const empresasCollection = db.collection<Empresa>('Empresas'); 
+    // 3. HERENCIA DE CONEXIONES (Lógica Clave)
+    const inherited_aws_db = empresa.user_db_aws || null;
+    const inherited_azure_db = empresa.user_db_azure || null;
 
-        if (await usersCollection.findOne({ email })) {
-            return NextResponse.json({ message: 'El correo electrónico ya está en uso.' }, { status: 409 });
-        }
-        
-        const passwordHash = await bcrypt.hash(password, 12);
-        
-        // 2. Buscar la empresa (para verificar límite y HEREDAR LA CONFIGURACIÓN DE DB)
-        const empresa = await empresasCollection.findOne({ name: client });
+    // Los booleanos is_aws/is_azure se heredan directamente de los booleanos de la empresa
+    // o se infieren de la existencia de la cadena de conexión.
+    const inherited_is_aws = empresa.is_aws || inherited_aws_db !== null;
+    const inherited_is_azure = empresa.is_azure || inherited_azure_db !== null;
 
-        if (!empresa) {
-            return NextResponse.json({ message: `La empresa '${client}' no existe. Debe crear la licencia primero.` }, { status: 400 });
-        }
-        
-        // 3. HERENCIA DE CONEXIONES (Lógica Clave)
-        const inherited_aws_db = empresa.user_db_aws || null;
-        const inherited_azure_db = empresa.user_db_azure || null;
-        
-        // Los booleanos is_aws/is_azure se heredan directamente de los booleanos de la empresa
-        // o se infieren de la existencia de la cadena de conexión.
-        const inherited_is_aws = empresa.is_aws || (inherited_aws_db !== null);
-        const inherited_is_azure = empresa.is_azure || (inherited_azure_db !== null);
-
-
-        // 4. Verificación de Límites (si es admin_empresa)
-        if (userCreating.role === 'admin_empresa') {
-            if (client !== userCreating.client) {
-                 return NextResponse.json({ message: "No puedes crear usuarios fuera de tu empresa." }, { status: 403 });
-            }
-            if (empresa.currentUsers >= empresa.userLimit) {
-                throw new Error(`Límite de ${empresa.userLimit} usuarios alcanzado.`);
-            }
-        } 
-        
-        // 5. Construir el nuevo usuario
-        const newUser: Omit<User, '_id'> = {
-            email, username: username || email, client, role, passwordHash,
-            createdAt: new Date(), updatedAt: new Date(),
-            is_active: true, 
-            
-            // ASIGNACIÓN DE VALORES HEREDADOS COMPLETOS
-            is_aws: inherited_is_aws, 
-            user_db_aws: inherited_aws_db, 
-            
-            is_azure: inherited_is_azure,
-            user_db_azure: inherited_azure_db, 
-        };
-
-        // 6. Insertar y Actualizar
-        await usersCollection.insertOne(newUser);
-        
-        await empresasCollection.updateOne(
-            { _id: empresa._id },
-            { $inc: { currentUsers: 1 } } 
+    // 4. Verificación de Límites (si es admin_empresa)
+    if (userCreating.role === 'admin_empresa') {
+      if (client !== userCreating.client) {
+        return NextResponse.json(
+          { message: 'No puedes crear usuarios fuera de tu empresa.' },
+          { status: 403 }
         );
-
-        return NextResponse.json({ message: "Usuario creado y licencia actualizada." }, { status: 201 });
-        
-    } catch (error: any) {
-        console.error('Error en la creación de usuario:', error);
-        const status = error.message.includes('Límite') ? 400 : 500;
-        return NextResponse.json({ message: error.message || "Error interno del servidor." }, { status: status });
+      }
+      if (empresa.currentUsers >= empresa.userLimit) {
+        throw new Error(`Límite de ${empresa.userLimit} usuarios alcanzado.`);
+      }
     }
+
+    // 5. Construir el nuevo usuario
+    const newUser: Omit<User, '_id'> = {
+      email,
+      username: username || email,
+      client,
+      role,
+      passwordHash,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      is_active: true,
+
+      // ASIGNACIÓN DE VALORES HEREDADOS COMPLETOS
+      is_aws: inherited_is_aws,
+      user_db_aws: inherited_aws_db,
+
+      is_azure: inherited_is_azure,
+      user_db_azure: inherited_azure_db,
+    };
+
+    // 6. Insertar y Actualizar
+    await usersCollection.insertOne(newUser);
+
+    await empresasCollection.updateOne(
+      { _id: empresa._id },
+      { $inc: { currentUsers: 1 } }
+    );
+
+    return NextResponse.json(
+      { message: 'Usuario creado y licencia actualizada.' },
+      { status: 201 }
+    );
+  } catch (error: unknown) {
+    console.error('Error en la creación de usuario:', error);
+    const status = error.message.includes('Límite') ? 400 : 500;
+    return NextResponse.json(
+      { message: error.message || 'Error interno del servidor.' },
+      { status: status }
+    );
+  }
 }

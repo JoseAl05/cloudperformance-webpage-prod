@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import useSWR from 'swr';
-import { Trash2, Edit, X } from 'lucide-react'; 
-import EditLicenseModal from './EditLicenseModal'; 
+import { Trash2, Edit, X } from 'lucide-react';
+import EditLicenseModal from './EditLicenseModal';
 
 interface EmpresaData {
     _id: string;
@@ -18,9 +18,9 @@ const fetcher = (url: string) => fetch(url, { credentials: 'include' }).then(res
 const ToastNotification = ({ message, type, onClose }) => {
     const bgColor = type === 'success' ? 'bg-green-600' : 'bg-red-600';
     const borderColor = type === 'success' ? 'border-green-800' : 'border-red-800';
-    
+
     return (
-        <div 
+        <div
             className={`fixed bottom-4 right-4 p-4 rounded-lg shadow-xl text-white border-l-4 ${bgColor} ${borderColor}`}
             style={{ minWidth: '300px', zIndex: 1200 }}
         >
@@ -35,17 +35,17 @@ const ToastNotification = ({ message, type, onClose }) => {
 };
 
 export default function LicenseTable() {
-    const [selectedEmpresa, setSelectedEmpresa] = useState<EmpresaData | null>(null); 
-    const [statusMessage, setStatusMessage] = useState<{ message: string, type: 'success' | 'error' } | null>(null); 
+    const [selectedEmpresa, setSelectedEmpresa] = useState<EmpresaData | null>(null);
+    const [statusMessage, setStatusMessage] = useState<{ message: string, type: 'success' | 'error' } | null>(null);
     const [loadingAction, setLoadingAction] = useState(false);
 
     // Fetch de licencias (GET /api/perfilamiento/empresas)
     const { data: empresas, error, isLoading, mutate: refreshEmpresas } = useSWR<EmpresaData[]>(
-        '/api/perfilamiento/empresas', 
+        '/api/perfilamiento/empresas',
         fetcher
     );
 
-    const empresaList: EmpresaData[] = (empresas || []) as EmpresaData[]; 
+    const empresaList: EmpresaData[] = (empresas || []) as EmpresaData[];
 
 
     const handleDelete = async (empresa: EmpresaData) => {
@@ -63,37 +63,37 @@ export default function LicenseTable() {
             });
 
             if (response.ok) {
-                setStatusMessage({ 
+                setStatusMessage({
                     message: `Licencia de ${empresa.name} y sus usuarios eliminados exitosamente.`,
                     type: 'success'
                 });
-                refreshEmpresas(); 
+                refreshEmpresas();
             } else {
                 const data = await response.json();
-                setStatusMessage({ 
+                setStatusMessage({
                     message: `Error al eliminar: ${data.message}`,
                     type: 'error'
                 });
             }
         } catch (err) {
-            setStatusMessage({ 
+            setStatusMessage({
                 message: 'Error de conexión con la API de eliminación.',
                 type: 'error'
             });
         } finally {
             setLoadingAction(false);
-            setTimeout(() => setStatusMessage(null), 5000); 
+            setTimeout(() => setStatusMessage(null), 5000);
         }
     };
 
     const handleEdit = (empresa: EmpresaData) => {
-        setSelectedEmpresa(empresa); 
+        setSelectedEmpresa(empresa);
     };
-    
+
 
     if (isLoading) return <div className="text-center py-6 text-gray-500">Cargando listado de licencias...</div>;
     if (error) return <div className="bg-red-100 text-red-700 p-3 rounded">Error al cargar el listado de empresas.</div>;
-    if (empresaList.length === 0) return <div className="text-center py-6 text-gray-500">No hay licencias registradas. Utilice la opción 'Crear Nueva Licencia'.</div>;
+    if (empresaList.length === 0) return <div className="text-center py-6 text-gray-500">No hay licencias registradas. Utilice la opción Crear Nueva Licencia.</div>;
 
     return (
         <>
@@ -125,7 +125,7 @@ export default function LicenseTable() {
                                         <td className="px-4 py-3 whitespace-nowrap text-sm">
                                             <span className={limitColor}>
                                                 {activeUsers}
-                                            </span> 
+                                            </span>
                                             <span> / </span>
                                             <span className="text-gray-500">
                                                 {empresa.userLimit}
@@ -135,14 +135,14 @@ export default function LicenseTable() {
                                             {cloudStatus || <span className="text-gray-400">Ninguna</span>}
                                         </td>
                                         <td className="px-4 py-3 whitespace-nowrap text-right text-sm font-medium space-x-3">
-                                            <button 
+                                            <button
                                                 onClick={() => handleEdit(empresa)}
                                                 className="text-blue-600 hover:text-blue-800 transition"
                                                 disabled={loadingAction}
                                             >
-                                                <Edit className="h-4 w-4 inline mr-1" /> 
+                                                <Edit className="h-4 w-4 inline mr-1" />
                                             </button>
-                                            <button 
+                                            <button
                                                 onClick={() => handleDelete(empresa)}
                                                 className="text-red-600 hover:text-red-800 transition"
                                                 disabled={loadingAction}
@@ -157,9 +157,9 @@ export default function LicenseTable() {
                     </table>
                 </div>
             </div>
-            
+
             {selectedEmpresa && (
-                <EditLicenseModal 
+                <EditLicenseModal
                     empresa={selectedEmpresa}
                     onClose={() => setSelectedEmpresa(null)}
                     refreshList={refreshEmpresas}
@@ -167,10 +167,10 @@ export default function LicenseTable() {
             )}
 
             {statusMessage && (
-                <ToastNotification 
-                    message={statusMessage.message} 
-                    type={statusMessage.type} 
-                    onClose={() => setStatusMessage(null)} 
+                <ToastNotification
+                    message={statusMessage.message}
+                    type={statusMessage.type}
+                    onClose={() => setStatusMessage(null)}
                 />
             )}
         </>

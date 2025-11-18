@@ -1,8 +1,8 @@
-'use client'; 
+'use client';
 import { MainViewAdvisorComponent } from '@/components/aws/vista-advisor/MainViewAdvisorComponent';
 import { Suspense } from 'react';
 import { useFeatureAccess } from '@/hooks/useFeatureAccess';
-import { Lock } from 'lucide-react'; 
+import { Lock } from 'lucide-react';
 
 
 const AccessDeniedComponent = ({ planName }: { planName: string }) => (
@@ -11,17 +11,17 @@ const AccessDeniedComponent = ({ planName }: { planName: string }) => (
             <Lock className="h-10 w-10 text-red-600 mb-4 mx-auto" />
             <h3 className="text-xl font-bold text-red-700">Función Exclusiva</h3>
             <p className="text-gray-600 mt-2 text-center">
-                La Vista Avanzada requiere el plan "Business". Tu plan actual ({planName}) no lo incluye.
+                La Vista Avanzada requiere el plan Business. Tu plan actual ({planName}) no lo incluye.
             </p>
         </div>
     </div>
 );
 
 export default function DashboardAwsEventsPage() {
-    const { 
-        loading, 
+    const {
+        loading,
         canAccessVistaAdvisor,
-        currentPlanName 
+        currentPlanName
     } = useFeatureAccess();
 
     if (loading) {
@@ -35,7 +35,7 @@ export default function DashboardAwsEventsPage() {
             </div>
         );
     }
-    
+
     // Si tiene el permisos, renderiza la vista.
     return (
         <div className=''>

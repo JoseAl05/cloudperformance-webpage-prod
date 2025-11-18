@@ -1,30 +1,28 @@
 import React, { useState, FormEvent } from 'react';
 import { useSession } from '@/hooks/useSession';
-import { PLAN_CONFIG } from '@/lib/plans'; 
+import { PLAN_CONFIG } from '@/lib/plans';
 import { cn } from '@/lib/utils';
-import { Cloud } from 'lucide-react'; 
+import { Cloud } from 'lucide-react';
 
 // Obtener los nombres de los planes disponibles
 const PLAN_NAMES = Object.keys(PLAN_CONFIG);
 
 export default function LicenseCreationForm({ refreshLicenseStatus }) {
     const { user: userLoggedIn } = useSession();
-    
-    // Solo mostramos este formulario si el usuario es admin_global
-    if (userLoggedIn?.role !== 'admin_global') {
-        return null;
-    }
-
     const [formData, setFormData] = useState({
-        name: '', 
-        planName: PLAN_NAMES[0] || '', 
-        user_db_aws: '', 
-        user_db_azure: '', 
-        is_aws: true, 
+        name: '',
+        planName: PLAN_NAMES[0] || '',
+        user_db_aws: '',
+        user_db_azure: '',
+        is_aws: true,
         is_azure: true,
     });
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState('');
+    // Solo mostramos este formulario si el usuario es admin_global
+    if (userLoggedIn?.role !== 'admin_global') {
+        return null;
+    }
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value, type } = e.target;
@@ -53,7 +51,7 @@ export default function LicenseCreationForm({ refreshLicenseStatus }) {
             setLoading(false);
             return;
         }
-        
+
         if (formData.is_aws && !formData.user_db_aws) {
             setMessage('Error: El campo Nombre DB AWS es requerido si el acceso AWS está activado.');
             setLoading(false);
@@ -87,7 +85,7 @@ export default function LicenseCreationForm({ refreshLicenseStatus }) {
                 setMessage(`Éxito: ${data.message} Límite asignado: ${data.userLimit}.`);
 
                 setFormData({ name: '', planName: PLAN_NAMES[0] || '', is_aws: true, is_azure: true, user_db_aws: '', user_db_azure: '' });
-                if (refreshLicenseStatus) refreshLicenseStatus(); 
+                if (refreshLicenseStatus) refreshLicenseStatus();
             } else {
                 setMessage(`Error al crear licencia: ${data.message}`);
             }
@@ -100,7 +98,7 @@ export default function LicenseCreationForm({ refreshLicenseStatus }) {
 
     return (
         <form onSubmit={handleSubmit} className="space-y-4">
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                     <label htmlFor="name" className="text-sm font-medium">Nombre de la Empresa</label>
@@ -136,16 +134,16 @@ export default function LicenseCreationForm({ refreshLicenseStatus }) {
             <h6 className="text-sm font-bold text-gray-600 flex items-center space-x-2 border-t pt-4">
                 <Cloud className="h-4 w-4" /> <span>Configuración de Conexiones Maestras</span>
             </h6>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                
+
                 {/* AWS CONFIGURATION */}
                 <div className={cn("rounded-lg p-3 border", formData.is_aws ? "border-amber-400 bg-amber-50" : "bg-gray-50")}>
                     <div className="flex items-center space-x-2 mb-3">
                         <input type="checkbox" name="is_aws" id="is_aws" checked={formData.is_aws} onChange={handleChange} className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
                         <label htmlFor="is_aws" className="text-sm font-medium">Habilitar Acceso AWS</label>
                     </div>
-                    
+
                     {formData.is_aws && (
                         <div className="space-y-2">
                             <label htmlFor="user_db_aws" className="text-xs font-medium text-amber-700">Nombre DB AWS (Requerido)</label>
@@ -193,7 +191,7 @@ export default function LicenseCreationForm({ refreshLicenseStatus }) {
                     {loading ? 'Creando Licencia...' : 'Crear Licencia y Límite'}
                 </button>
             </div>
-            
+
             {message && <p className={`mt-3 p-2 rounded text-sm ${message.startsWith('Éxito') ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>{message}</p>}
         </form>
     );
