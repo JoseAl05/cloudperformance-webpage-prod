@@ -26,6 +26,7 @@ import { DeploymentOperationsFilterComponent } from '@/components/general_azure/
 import { ImpactFilterComponent } from '@/components/general_azure/filters/ImpactFilterComponent';
 import { CategoryFilterComponent } from '@/components/general_azure/filters/CategoryFilterComponent';
 import { UnusedLoadbalancerFilterComponent } from '@/components/general_azure/filters/UnusedLoadbalancerFilterComponent';
+import { UnusedAppGwFilterComponent } from '@/components/general_azure/filters/UnusedAppGwFilterComponent';
 
 interface FiltersComponentProps {
     Component: (params: {
@@ -91,6 +92,8 @@ interface FiltersComponentProps {
     categoryFilter?: boolean;
     unusedLbFilter?: boolean;
     isUnusedLoadbalancerFilterMultiselect?: boolean;
+    unusedAppGFilter?: boolean;
+    isUnusedAppGFilterMultiselect?: boolean;
 }
 
 export const FiltersComponent = ({
@@ -132,7 +135,9 @@ export const FiltersComponent = ({
     impactFilter = false,
     categoryFilter = false,
     unusedLbFilter = false,
-    isUnusedLoadbalancerFilterMultiselect = false
+    isUnusedLoadbalancerFilterMultiselect = false,
+    unusedAppGFilter = false,
+    isUnusedAppGFilterMultiselect = false
 }: FiltersComponentProps) => {
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -172,6 +177,7 @@ export const FiltersComponent = ({
         const impactParam = searchParams.get('impact');
         const categoryParam = searchParams.get('category');
         const selectedUnusedLbParam = searchParams.get('unused_loadbalancer');
+        const selectedUnusedAppGParam = searchParams.get('unused_appgateway');
 
         let startDate = startDateParam ? new Date(startDateParam) : yesterday;
         let endDate = endDateParam ? new Date(endDateParam) : new Date();
@@ -215,7 +221,8 @@ export const FiltersComponent = ({
             selectedOperation: selectedOperationParam || '',
             impact: impactParam !== null ? impactParam : null,
             category: categoryParam !== null ? categoryParam : null,
-            selectedUnusedLbParam: selectedUnusedLbParam || ''
+            selectedUnusedLbParam: selectedUnusedLbParam || '',
+            selectedUnusedAppGParam: selectedUnusedAppGParam || ''
         };
     };
 
@@ -246,6 +253,7 @@ export const FiltersComponent = ({
     const [tempImpact, setTempImpact] = useState<string | null>(filters.impact);
     const [tempCategory, setTempCategory] = useState<string | null>(filters.category);
     const [tempUnusedLb, setTempUnusedLb] = useState<string>(filters.selectedUnusedLbParam);
+    const [tempUnusedAppGw, setTempUnusedAppGw] = useState<string>(filters.selectedUnusedAppGParam);
 
     useEffect(() => {
         const newFilters = getInitialFilters();
@@ -275,7 +283,8 @@ export const FiltersComponent = ({
         setTempOperation(newFilters.selectedOperation);
         setTempImpact(newFilters.impact);
         setTempCategory(newFilters.category);
-        setTempUnusedLb(newFilters.selectedLbParam);
+        setTempUnusedLb(newFilters.selectedUnusedLbParam);
+        setTempUnusedAppGw(newFilters.selectedUnusedAppGParam);
     }, [searchParams]);
 
     const onChange = (dates: [Date | null, Date | null]) => setTempRange(dates);
@@ -321,7 +330,8 @@ export const FiltersComponent = ({
             selectedOperation: tempOperation,
             impact: tempImpact,
             category: tempCategory,
-            selectedUnusedLb: tempUnusedLb
+            selectedUnusedLb: tempUnusedLb,
+            selectedUnusedAppG: tempUnusedAppGw
         };
 
         setFilters(newFilters as unknown);
@@ -398,6 +408,9 @@ export const FiltersComponent = ({
         if (newFilters.selectedUnusedLb) {
             query.set('unused_loadbalancer', newFilters.selectedUnusedLb);
         }
+        if (newFilters.selectedUnusedAppG) {
+            query.set('unused_appgateway', newFilters.selectedUnusedAppG);
+        }
 
         router.push(`${window.location.pathname}?${query.toString()}`);
     };
@@ -427,7 +440,8 @@ export const FiltersComponent = ({
             selectedOperation: '',
             impact: '',
             category: '',
-            selectedUnusedLb: ''
+            selectedUnusedLb: '',
+            selectedUnusedAppG: ''
         };
 
         setFilters(defaultFilters as unknown);
@@ -454,6 +468,7 @@ export const FiltersComponent = ({
         setTempImpact(defaultFilters.impact as string);
         setTempCategory(defaultFilters.category as string);
         setTempUnusedLb(defaultFilters.selectedUnusedLb);
+        setTempUnusedAppGw(defaultFilters.selectedUnusedAppG);
 
         router.push(window.location.pathname);
     };
@@ -832,6 +847,23 @@ export const FiltersComponent = ({
                                 />
                             </div>
                         )}
+                        {unusedAppGFilter && (
+                            <div className='space-y-2'>
+                                <label className='text-sm font-medium text-foreground flex items-center gap-2'>
+                                    <Boxes className='h-4 w-4' />
+                                    Applications Gateway
+                                </label>
+                                <UnusedAppGwFilterComponent
+                                    startDate={tempStartDate}
+                                    endDate={tempEndDate}
+                                    region={tempRegion}
+                                    subscription={tempSubscription}
+                                    unusedAppGw={tempUnusedAppGw}
+                                    setUnusedAppGw={setTempUnusedAppGw}
+                                    isUnusedAppGFilterMultiselect={isUnusedAppGFilterMultiselect}
+                                />
+                            </div>
+                        )}
                     </div>
 
                     <div className='flex items-center gap-4'>
@@ -871,6 +903,7 @@ export const FiltersComponent = ({
                     impact={(filters as unknown).impact}
                     category={(filters as unknown).category}
                     selectedUnusedLb={filters.selectedUnusedLbParam}
+                    selectedUnusedAppG={filters.selectedUnusedAppGParam}
                 />
             </Card>
         </div>
