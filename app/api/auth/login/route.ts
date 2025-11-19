@@ -18,10 +18,10 @@ function generateCode() {
 export async function POST(req: Request) {
   const ip =
     (req.headers.get('x-forwarded-for') || '').split(',')[0] || 'unknown';
-  const rl = rateLimit(`login:${ip}`, 10, 60_000);
+  const rl = rateLimit(`login:${ip}`, 3, 5 * 60000);
   if (!rl.allowed)
     return NextResponse.json(
-      { error: 'Demasiados intentos, espera un minuto.' },
+      { error: 'Demasiados intentos, espera 5 minutos para reintentar.' },
       { status: 429 }
     );
 
