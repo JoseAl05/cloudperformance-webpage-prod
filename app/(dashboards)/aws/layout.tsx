@@ -1,8 +1,8 @@
-'use client'; 
+'use client';
 
 import React from 'react';
-import { Lock, FileText} from 'lucide-react'; 
-import { useFeatureAccess } from '@/hooks/useFeatureAccess'; 
+import { Lock, FileText } from 'lucide-react';
+import { useFeatureAccess } from '@/hooks/useFeatureAccess';
 
 const AwsPdfReportComponent = ({ planName }: { planName: string }) => (
     <div className="min-h-screen p-8 bg-gray-50 flex flex-col items-center">
@@ -39,37 +39,37 @@ const AccessDeniedComponent = ({ planName }: { planName: string }) => (
 );
 
 interface AwsLayoutProps {
-    children: React.ReactNode;
+    children: React.ReactNode;
 }
 
 export default function AwsLayout({ children }: AwsLayoutProps) {
-    const { 
-        loading, 
-        canAccessFullDashboardAws, // Permiso para Dashboard Completo
-        canAccessPdfReportAws, // Permiso para Reporte PDF
-        currentPlanName 
-    } = useFeatureAccess();
+    const {
+        loading,
+        canAccessFullDashboardAws, // Permiso para Dashboard Completo
+        canAccessPdfReportAws, // Permiso para Reporte PDF
+        currentPlanName
+    } = useFeatureAccess();
 
-    if (loading) {
-        return <p className="p-8 text-center text-gray-500">Cargando permisos de licencia...</p>;
-    }
+    if (loading) {
+        return <p className="p-8 text-center text-gray-500">Cargando permisos de licencia...</p>;
+    }
 
-    // 1. SIN ACCESO (ni siquiera al PDF)
-    if (!canAccessPdfReportAws) {
-        return <AccessDeniedComponent planName={currentPlanName || 'PLAN NO DISPONIBLE'} />;
-    }
+    // 1. SIN ACCESO (ni siquiera al PDF)
+    if (!canAccessPdfReportAws) {
+        return <AccessDeniedComponent planName={currentPlanName || 'PLAN NO DISPONIBLE'} />;
+    }
 
-    // 2. ACCESO COMPLETO (Pro o Business)
-    if (canAccessFullDashboardAws) {
-        return <>{children}</>;
-    }
+    // 2. ACCESO COMPLETO (Pro o Business)
+    if (canAccessFullDashboardAws) {
+        return <>{children}</>;
+    }
 
-    // 3. ACCESO LIMITADO (Starter Freemium o Starter)
-    // Mostramos solo el componente de reporte PDF
-    if (canAccessPdfReportAws && !canAccessFullDashboardAws) {
-        return <AwsPdfReportComponent planName={currentPlanName || 'Starter'} />;
-    }
-    
-    // Fallback de seguridad
-    return <AccessDeniedComponent planName={currentPlanName || 'ERROR'} />;
+    // 3. ACCESO LIMITADO (Starter Freemium o Starter)
+    // Mostramos solo el componente de reporte PDF
+    if (canAccessPdfReportAws && !canAccessFullDashboardAws) {
+        return <AwsPdfReportComponent planName={currentPlanName || 'Starter'} />;
+    }
+
+    // Fallback de seguridad
+    return <AccessDeniedComponent planName={currentPlanName || 'ERROR'} />;
 }
