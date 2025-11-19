@@ -110,7 +110,11 @@ function bindFullscreenLifecycle(chart: echarts.ECharts, el: HTMLElement) {
   };
 
   const applyBG = () => {
-    el.style.backgroundColor = getThemeBG();
+    const isFullscreen =
+      doc.fullscreenElement === el || doc.webkitFullscreenElement === el;
+    if (isFullscreen) {
+      el.style.backgroundColor = getThemeBG();
+    }
   };
 
   const onFsChange = () => {
@@ -133,37 +137,41 @@ function bindFullscreenLifecycle(chart: echarts.ECharts, el: HTMLElement) {
   document.addEventListener('webkitfullscreenchange' as unknown, onFsChange);
 
   // Observa cambios de tema (clase 'dark' en <html>) y actualiza iconos + fondo
-  const mo = new MutationObserver(() => {
-    // 1) si está fullscreen, actualiza fondo
-    const active =
-      doc.fullscreenElement === el || doc.webkitFullscreenElement === el;
-    if (active) applyBG();
+  // COMENTADO POR POSIBLE CONFLICTO CON DARK MODE
+  // const mo = new MutationObserver(() => {
+  //   // 1) si está fullscreen, actualiza fondo
+  //   const active =
+  //     doc.fullscreenElement === el || doc.webkitFullscreenElement === el;
+  //   if (active) applyBG();
 
-    // 2) actualiza iconos del toolbox para el tema actual
-    chart.setOption(
-      {
-        toolbox: {
-          iconStyle: {
-            color: getIconColor(),
-            borderColor: getIconColor(),
-          },
-          feature: {
-            myFullscreen: { icon: makeFullscreenIconByTheme() },
-          },
-        },
-      },
-      { notMerge: false, lazyUpdate: true }
-    );
-  });
-  mo.observe(document.documentElement, {
-    attributes: true,
-    attributeFilter: ['class'],
-  });
+  //   // 2) actualiza iconos del toolbox para el tema actual
+  //   chart.setOption(
+  //     {
+  //       toolbox: {
+  //         iconStyle: {
+  //           color: getIconColor(),
+  //           borderColor: getIconColor(),
+  //         },
+  //         feature: {
+  //           myFullscreen: { icon: makeFullscreenIconByTheme() },
+  //         },
+  //       },
+  //     },
+  //     { notMerge: false, lazyUpdate: true }
+  //   );
+  // });
+  // mo.observe(document.documentElement, {
+  //   attributes: true,
+  //   attributeFilter: ['class'],
+  // });
 
   return () => {
     document.removeEventListener('fullscreenchange', onFsChange);
-    document.removeEventListener('webkitfullscreenchange' as unknown, onFsChange);
-    mo.disconnect();
+    document.removeEventListener(
+      'webkitfullscreenchange' as unknown,
+      onFsChange
+    );
+    // mo.disconnect();
   };
 }
 
@@ -548,7 +556,7 @@ export function useECharts(
 
     const optWithFs = augmentWithFullscreenTool(memoOption, el);
 
-    chartRef.current.setOption(memoOption, {
+    chartRef.current.setOption(optWithFs, {
       notMerge: true,
       lazyUpdate: true,
     });
@@ -567,7 +575,7 @@ export function useECharts(
       chartRef.current?.dispose();
       chartRef.current = null;
     };
-  }, [memoOption,ref,theme]);
+  }, [memoOption, ref, theme]);
 
   useEffect(() => {
     if (!chartRef.current || !ref.current) return;
