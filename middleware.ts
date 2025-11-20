@@ -18,6 +18,11 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(url);
   }
 
+  // OBTENER EL ROL DEL USUARIO
+  const userRole = (
+    session as unknown as { role?: string }
+  ).role;
+
   const isAwsAllowed = !!(
     session as unknown as { is_aws?: boolean | string | number }
   ).is_aws;
@@ -25,13 +30,18 @@ export async function middleware(req: NextRequest) {
     session as unknown as { is_azure?: boolean | string | number }
   ).is_azure;
 
-  if (pathname.startsWith('/aws') && !isAwsAllowed) {
+  // APLICAR LA EXCEPCIÓN: Si es 'admin_global', NO bloquear.
+  const isGlobalAdmin = userRole === 'admin_global';
+
+  // Bloquear AWS si: NO tiene permiso AWS Y NO es Admin Global
+  if (pathname.startsWith('/aws') && !isAwsAllowed && !isGlobalAdmin) {
     const url = req.nextUrl.clone();
     url.pathname = '/unauthorized';
     return NextResponse.redirect(url);
   }
 
-  if (pathname.startsWith('/azure') && !isAzureAllowed) {
+  // Bloquear Azure si: NO tiene permiso Azure Y NO es Admin Global
+  if (pathname.startsWith('/azure') && !isAzureAllowed && !isGlobalAdmin) {
     const url = req.nextUrl.clone();
     url.pathname = '/unauthorized';
     return NextResponse.redirect(url);
