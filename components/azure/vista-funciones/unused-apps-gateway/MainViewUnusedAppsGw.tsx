@@ -1,3 +1,4 @@
+import { UnusedAppsGwComponent } from '@/components/azure/vista-funciones/unused-apps-gateway/UnusedAppsGwComponent'
 import { UnusedLoadbalancersComponent } from '@/components/azure/vista-funciones/unused-loadbalancers/UnusedLoadbalancersComponent'
 import { FiltersComponent } from '@/components/general_azure/filters/FiltersComponent'
 import { Container } from 'lucide-react'
@@ -23,7 +24,7 @@ export const MainViewUnusedAppsGw = () => {
             </div>
             <div className='w-full min-w-0'>
                 <FiltersComponent
-                    Component={UnusedLoadbalancersComponent}
+                    Component={UnusedAppsGwComponent}
                     dateFilter
                     regionFilter
                     subscriptionIdFilter
