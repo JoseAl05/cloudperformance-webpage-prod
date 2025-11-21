@@ -9,7 +9,7 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
-  serverExternalPackages: ['newrelic']
+  serverExternalPackages: ['newrelic'],
   // webpack: (config, { isServer }) => {
   //   if (isServer) {
   //     // Asegurar que newrelic no sea empaquetado por webpack
