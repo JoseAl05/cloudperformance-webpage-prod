@@ -57,7 +57,7 @@ export const ResourceGroupFilterComponent = ({
       subscription_id: subscription,
       collection: collection,
       subscription_field: subscriptionField,
-      resource_group_field: "resource_group" 
+      resource_group_field: "resource_group"
     })
 
     if (selectedTagKey) params.append('nombre_tag', selectedTagKey)
@@ -75,7 +75,7 @@ export const ResourceGroupFilterComponent = ({
   )
 
   useEffect(() => { setIsMounted(true) }, [])
-
+  console.log(selectedResourceGroup);
   // Resetear el resource group seleccionado cuando cambian región o suscripción
   useEffect(() => {
     if (!shouldFetch && selectedResourceGroup && selectedResourceGroup !== 'all_resource_groups') {
@@ -89,9 +89,9 @@ export const ResourceGroupFilterComponent = ({
   // Si no se puede hacer fetch, mostrar mensaje informativo
   if (!shouldFetch) {
     return (
-      <Button 
-        variant="outline" 
-        disabled 
+      <Button
+        variant="outline"
+        disabled
         className="w-full justify-between bg-transparent opacity-60"
       >
         Selecciona región y suscripción primero

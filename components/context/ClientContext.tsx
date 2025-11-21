@@ -1,6 +1,6 @@
 'use client';
 import React, { createContext, useState, useContext, useMemo } from 'react';
-import { Empresa } from '@/types/db'; 
+import { Empresa } from '@/types/db';
 
 
 interface ClientContextType {

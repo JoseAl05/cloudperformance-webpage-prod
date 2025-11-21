@@ -27,6 +27,7 @@ import { ImpactFilterComponent } from '@/components/general_azure/filters/Impact
 import { CategoryFilterComponent } from '@/components/general_azure/filters/CategoryFilterComponent';
 import { UnusedLoadbalancerFilterComponent } from '@/components/general_azure/filters/UnusedLoadbalancerFilterComponent';
 import { UnusedAppGwFilterComponent } from '@/components/general_azure/filters/UnusedAppGwFilterComponent';
+import { AppGwFilterComponent } from '@/components/general_azure/filters/AppGwFilterComponent';
 
 interface FiltersComponentProps {
     Component: (params: {
@@ -94,6 +95,8 @@ interface FiltersComponentProps {
     isUnusedLoadbalancerFilterMultiselect?: boolean;
     unusedAppGFilter?: boolean;
     isUnusedAppGFilterMultiselect?: boolean;
+    appGFilter?: boolean;
+    isAppGFilterMultiselect?: boolean;
 }
 
 export const FiltersComponent = ({
@@ -137,7 +140,9 @@ export const FiltersComponent = ({
     unusedLbFilter = false,
     isUnusedLoadbalancerFilterMultiselect = false,
     unusedAppGFilter = false,
-    isUnusedAppGFilterMultiselect = false
+    isUnusedAppGFilterMultiselect = false,
+    appGFilter = false,
+    isAppGFilterMultiselect = false
 }: FiltersComponentProps) => {
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -178,6 +183,7 @@ export const FiltersComponent = ({
         const categoryParam = searchParams.get('category');
         const selectedUnusedLbParam = searchParams.get('unused_loadbalancer');
         const selectedUnusedAppGParam = searchParams.get('unused_appgateway');
+        const selectedAppGParam = searchParams.get('appgateway');
 
         let startDate = startDateParam ? new Date(startDateParam) : yesterday;
         let endDate = endDateParam ? new Date(endDateParam) : new Date();
@@ -204,8 +210,8 @@ export const FiltersComponent = ({
             year,
             region: regionParam || 'all_regions',
             subscription: subscriptionParam || 'all_subscriptions',
-            selectedTagKey: selectedTagKeyParam || '',
-            selectedTagValue: selectedTagValueParam || '',
+            selectedTagKey: selectedTagKeyParam || 'allKeys',
+            selectedTagValue: selectedTagValueParam || 'allValues',
             selectedMetric: selectedMetricParam || '',
             selectedResourceType: selectedResourceTypeParam || '',
             selectedMeterCategory: selectedMeterCategoryParam || null,
@@ -216,13 +222,14 @@ export const FiltersComponent = ({
             selectedUnusedVmssParam: selectedUnusedVmssParam || '',
             selectedVmParam: selectedVmParam || '',
             selectedServiceParam: selectedServiceParam || '',
-            selectedResourceGroup: selectedResourceGroupParam || '',
+            selectedResourceGroup: selectedResourceGroupParam || 'all_resource_groups',
             selectedInstanceV2: selectedInstanceV2Param || '',
-            selectedOperation: selectedOperationParam || '',
+            selectedOperation: selectedOperationParam || 'all_operations',
             impact: impactParam !== null ? impactParam : null,
             category: categoryParam !== null ? categoryParam : null,
             selectedUnusedLbParam: selectedUnusedLbParam || '',
-            selectedUnusedAppGParam: selectedUnusedAppGParam || ''
+            selectedUnusedAppGParam: selectedUnusedAppGParam || '',
+            selectedAppGParam: selectedAppGParam || ''
         };
     };
 
@@ -254,6 +261,7 @@ export const FiltersComponent = ({
     const [tempCategory, setTempCategory] = useState<string | null>(filters.category);
     const [tempUnusedLb, setTempUnusedLb] = useState<string>(filters.selectedUnusedLbParam);
     const [tempUnusedAppGw, setTempUnusedAppGw] = useState<string>(filters.selectedUnusedAppGParam);
+    const [tempAppGw, setTempAppGw] = useState<string>(filters.selectedAppGParam);
 
     useEffect(() => {
         const newFilters = getInitialFilters();
@@ -285,6 +293,7 @@ export const FiltersComponent = ({
         setTempCategory(newFilters.category);
         setTempUnusedLb(newFilters.selectedUnusedLbParam);
         setTempUnusedAppGw(newFilters.selectedUnusedAppGParam);
+        setTempAppGw(newFilters.selectedAppGParam);
     }, [searchParams]);
 
     const onChange = (dates: [Date | null, Date | null]) => setTempRange(dates);
@@ -331,7 +340,8 @@ export const FiltersComponent = ({
             impact: tempImpact,
             category: tempCategory,
             selectedUnusedLb: tempUnusedLb,
-            selectedUnusedAppG: tempUnusedAppGw
+            selectedUnusedAppG: tempUnusedAppGw,
+            selectedAppGw: tempAppGw
         };
 
         setFilters(newFilters as unknown);
@@ -339,78 +349,57 @@ export const FiltersComponent = ({
         const query = new URLSearchParams();
         query.set('startDate', newFilters.startDate.toISOString());
         query.set('endDate', newFilters.endDate.toISOString());
+
         if (monthYearFilter) {
             if (newFilters.month) query.set('month', String(newFilters.month));
             if (newFilters.year) query.set('year', String(newFilters.year));
         }
+        const filterConfigs = [
+            // Estructura: { flag: boolean, key: string, value: any, ignoreValue?: string }
+            { flag: regionFilter, key: 'region', value: newFilters.region, ignoreValue: 'all_regions' },
+            { flag: subscriptionFilter || subscriptionIdFilter, key: 'subscription', value: newFilters.subscription, ignoreValue: 'all_subscriptions' },
 
-        if (newFilters.region && newFilters.region !== 'all_regions') {
-            query.set('region', newFilters.region);
-        }
+            // Tags
+            { flag: tagsFilter, key: 'tagKey', value: newFilters.selectedTagKey },
+            { flag: tagsFilter, key: 'tagValue', value: newFilters.selectedTagValue },
 
-        if (newFilters.subscription && newFilters.subscription !== 'all_subscriptions') {
-            query.set('subscription', newFilters.subscription);
-        }
+            // Métricas y Recursos
+            { flag: metricsFilter, key: 'metric', value: newFilters.selectedMetric },
+            { flag: resourceTypeFilter, key: 'resourceType', value: newFilters.selectedResourceType },
+            { flag: resourcesFilter, key: 'resource', value: newFilters.selectedResource },
 
-        if (newFilters.selectedTagKey) {
-            query.set('tagKey', newFilters.selectedTagKey);
-        }
+            // Instancias
+            { flag: instancesFilter, key: 'meterCategory', value: newFilters.selectedMeterCategory },
+            { flag: instancesFilter, key: 'instance', value: newFilters.selectedInstance },
+            { flag: instancesFilterV2, key: 'instanceV2', value: newFilters.selectedInstanceV2, ignoreValue: 'all_instances' },
 
-        if (newFilters.selectedTagValue) {
-            query.set('tagValue', newFilters.selectedTagValue);
-        }
+            // Impacto y Categoría
+            { flag: impactFilter, key: 'impact', value: newFilters.impact },
+            { flag: categoryFilter, key: 'category', value: newFilters.category },
 
-        if (newFilters.selectedMetric) {
-            query.set('metric', newFilters.selectedMetric);
-        }
-        if (newFilters.selectedResourceType) {
-            query.set('resourceType', newFilters.selectedResourceType);
-        }
-        if (newFilters.selectedResource) {
-            query.set('resource', newFilters.selectedResource);
-        }
-        if (newFilters.selectedMeterCategory) {
-            query.set('meterCategory', newFilters.selectedMeterCategory);
-        }
-        if (newFilters.selectedInstance) {
-            query.set('instance', newFilters.selectedInstance);
-        }
-        if (newFilters.impact !== null && newFilters.impact !== undefined) {
-            query.set('impact', String(newFilters.impact));
-        }
-        if (newFilters.category !== null && newFilters.category !== undefined) {
-            query.set('category', String(newFilters.category));
-        }
-        if (newFilters.selectedUnusedVm) {
-            query.set('unusedVm', newFilters.selectedUnusedVm);
-        }
-        if (newFilters.selectedUnusedVmss) {
-            query.set('unusedVmss', newFilters.selectedUnusedVmss);
-        }
-        if (newFilters.selectedResourceGroup && newFilters.selectedResourceGroup !== 'all_resource_groups') {
-            query.set('resourceGroup', newFilters.selectedResourceGroup);
-        }
-        if (newFilters.selectedInstanceV2 && newFilters.selectedInstanceV2 !== 'all_instances') {
-            query.set('instanceV2', newFilters.selectedInstanceV2);
-        }
-        if (newFilters.selectedOperation) {
-            query.set('operation', newFilters.selectedOperation);
-        }
-        if (newFilters.selectedVm) {
-            query.set('vm', newFilters.selectedVm);
-        }
-        if (newFilters.selectedService) {
-            query.set('service', newFilters.selectedService);
-        }
-        if (newFilters.selectedStrgAccount) {
-            query.set('strgAccount', newFilters.selectedStrgAccount);
-        }
-        if (newFilters.selectedUnusedLb) {
-            query.set('unused_loadbalancer', newFilters.selectedUnusedLb);
-        }
-        if (newFilters.selectedUnusedAppG) {
-            query.set('unused_appgateway', newFilters.selectedUnusedAppG);
-        }
+            // VMs y VMSS
+            { flag: unusedVmFilter, key: 'unusedVm', value: newFilters.selectedUnusedVm },
+            { flag: unusedVmssFilter, key: 'unusedVmss', value: newFilters.selectedUnusedVmss },
+            { flag: vmFilter, key: 'vm', value: newFilters.selectedVm },
+
+            // Grupos y Servicios
+            { flag: resourceGroupFilter, key: 'resourceGroup', value: newFilters.selectedResourceGroup, ignoreValue: 'all_resource_groups' },
+            { flag: serviceFilter, key: 'service', value: newFilters.selectedService },
+
+            // Operaciones
+            { flag: deploymentOperationsFilter, key: 'operation', value: newFilters.selectedOperation, ignoreValue: 'all_operations' },
+
+            // Storage y Redes
+            { flag: strgAccountFilter, key: 'strgAccount', value: newFilters.selectedStrgAccount },
+            { flag: unusedLbFilter, key: 'unused_loadbalancer', value: newFilters.selectedUnusedLb },
+            { flag: unusedAppGFilter, key: 'unused_appgateway', value: newFilters.selectedUnusedAppG },
+            { flag: appGFilter, key: 'appgateway', value: newFilters.selectedAppGw },
+        ];
+        filterConfigs.forEach(({ flag, key, value, ignoreValue }) => {
+            if (flag && value !== null && value !== undefined && value !== '' && value !== ignoreValue) {
+                query.set(key, String(value));
+            }
+        });
 
         router.push(`${window.location.pathname}?${query.toString()}`);
     };
@@ -423,8 +412,8 @@ export const FiltersComponent = ({
             year: null as number | null,
             region: 'all_regions',
             subscription: 'all_subscriptions',
-            selectedTagKey: null,
-            selectedTagValue: null,
+            selectedTagKey: 'allKeys',
+            selectedTagValue: 'allValues',
             selectedMetric: '',
             selectedResourceType: '',
             selectedMeterCategory: null,
@@ -435,13 +424,14 @@ export const FiltersComponent = ({
             selectedUnusedVmss: '',
             selectedVm: '',
             selectedService: '',
-            selectedResourceGroup: '',
+            selectedResourceGroup: 'all_resource_groups',
             selectedInstanceV2: '',
-            selectedOperation: '',
+            selectedOperation: 'all_operations',
             impact: '',
             category: '',
             selectedUnusedLb: '',
-            selectedUnusedAppG: ''
+            selectedUnusedAppG: '',
+            selectedAppGw: ''
         };
 
         setFilters(defaultFilters as unknown);
@@ -469,6 +459,7 @@ export const FiltersComponent = ({
         setTempCategory(defaultFilters.category as string);
         setTempUnusedLb(defaultFilters.selectedUnusedLb);
         setTempUnusedAppGw(defaultFilters.selectedUnusedAppG);
+        setTempAppGw(defaultFilters.selectedAppGw);
 
         router.push(window.location.pathname);
     };
@@ -590,7 +581,26 @@ export const FiltersComponent = ({
                                 />
                             </div>
                         )}
-
+                        {resourceGroupFilter && (
+                            <div className='space-y-2'>
+                                <label className='text-sm font-medium text-foreground flex items-center gap-2'>
+                                    <FolderTree className='h-4 w-4' />
+                                    Grupo de Recursos
+                                </label>
+                                <ResourceGroupFilterComponent
+                                    startDate={tempRange[0] ?? filters.startDate}
+                                    endDate={tempRange[1] ?? filters.endDate}
+                                    region={tempRegion}
+                                    subscription={tempSubscription}
+                                    collection={resourceGroupCollection}
+                                    subscriptionField={resourceGroupSubscriptionField}
+                                    selectedTagKey={tempTagKey}
+                                    selectedTagValue={tempTagValue}
+                                    selectedResourceGroup={tempResourceGroup}
+                                    setSelectedResourceGroup={setTempResourceGroup}
+                                />
+                            </div>
+                        )}
                         {metricsFilter && (
                             <div className='space-y-2'>
                                 <label className='text-sm font-medium text-foreground flex items-center gap-2'>
@@ -703,28 +713,6 @@ export const FiltersComponent = ({
                                 />
                             </div>
                         )}
-
-                        {resourceGroupFilter && (
-                            <div className='space-y-2'>
-                                <label className='text-sm font-medium text-foreground flex items-center gap-2'>
-                                    <FolderTree className='h-4 w-4' />
-                                    Grupo de Recursos
-                                </label>
-                                <ResourceGroupFilterComponent
-                                    startDate={tempRange[0] ?? filters.startDate}
-                                    endDate={tempRange[1] ?? filters.endDate}
-                                    region={tempRegion}
-                                    subscription={tempSubscription}
-                                    collection={resourceGroupCollection}
-                                    subscriptionField={resourceGroupSubscriptionField}
-                                    selectedTagKey={tempTagKey}
-                                    selectedTagValue={tempTagValue}
-                                    selectedResourceGroup={tempResourceGroup}
-                                    setSelectedResourceGroup={setTempResourceGroup}
-                                />
-                            </div>
-                        )}
-
                         {instancesFilterV2 && (
                             <div className='space-y-2'>
                                 <label className='text-sm font-medium text-foreground flex items-center gap-2'>
@@ -864,6 +852,24 @@ export const FiltersComponent = ({
                                 />
                             </div>
                         )}
+                        {appGFilter && (
+                            <div className='space-y-2'>
+                                <label className='text-sm font-medium text-foreground flex items-center gap-2'>
+                                    <Boxes className='h-4 w-4' />
+                                    Applications Gateway
+                                </label>
+                                <AppGwFilterComponent
+                                    startDate={tempStartDate}
+                                    endDate={tempEndDate}
+                                    region={tempRegion}
+                                    subscription={tempSubscription}
+                                    appGw={tempAppGw}
+                                    setAppGw={setTempAppGw}
+                                    resourceGroup={tempResourceGroup}
+                                    isAppGFilterMultiselect={isAppGFilterMultiselect}
+                                />
+                            </div>
+                        )}
                     </div>
 
                     <div className='flex items-center gap-4'>
@@ -904,6 +910,7 @@ export const FiltersComponent = ({
                     category={(filters as unknown).category}
                     selectedUnusedLb={filters.selectedUnusedLbParam}
                     selectedUnusedAppG={filters.selectedUnusedAppGParam}
+                    selectedAppg={filters.selectedAppGParam}
                 />
             </Card>
         </div>

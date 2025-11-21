@@ -1,5 +1,5 @@
 'use client'
-import { Dispatch, SetStateAction, useMemo, useState } from 'react'
+import { Dispatch, SetStateAction, useMemo, useState, useEffect } from 'react'
 import { Check, ChevronsUpDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
@@ -42,7 +42,20 @@ export const SubscriptionsFilterComponentV2 = ({
         }))
     }, [data])
 
-    const noSubscriptions = subscriptions.length === 0
+    const hasData = subscriptions.length > 0
+
+    useEffect(() => {
+        if (isLoading || !data) return
+
+        if (!hasData) {
+            if (subscription) setSubscription('')
+            return
+        }
+
+        if (hasData && !subscription) {
+            setSubscription('all_subscriptions')
+        }
+    }, [data, isLoading, hasData, subscription, setSubscription])
 
     const selectedIds = useMemo(
         () => (subscription ? subscription.split(',').filter(Boolean) : []),
@@ -59,8 +72,10 @@ export const SubscriptionsFilterComponentV2 = ({
     if (error) return <div>Error al cargar suscripciones</div>
 
     const getDisplayText = () => {
-        if (noSubscriptions) return 'Sin suscripciones disponibles'
-        if (!subscription || selectedIds.includes('all_subscriptions')) return 'Todas las Suscripciones'
+        if (!hasData) return 'Sin suscripciones disponibles'
+
+        if (selectedIds.includes('all_subscriptions') || (!subscription && hasData)) return 'Todas las Suscripciones'
+
         if (selectedIds.length === 1) return idToName.get(selectedIds[0]) ?? selectedIds[0]
         return `${selectedIds.length} suscripciones seleccionadas`
     }
@@ -79,6 +94,7 @@ export const SubscriptionsFilterComponentV2 = ({
         }
         setSubscription(subs.length ? subs.join(',') : '')
     }
+
     return (
         <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
@@ -87,7 +103,7 @@ export const SubscriptionsFilterComponentV2 = ({
                     role="combobox"
                     aria-expanded={open}
                     className="w-full justify-between bg-transparent"
-                    disabled={noSubscriptions}
+                    disabled={!hasData}
                 >
                     <span className="truncate text-left max-w-[85%]">{getDisplayText()}</span>
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -97,10 +113,10 @@ export const SubscriptionsFilterComponentV2 = ({
                 <Command>
                     <CommandInput placeholder="Buscar suscripción..." />
                     <CommandEmpty>
-                        {noSubscriptions ? 'No hay suscripciones disponibles.' : 'No se encontró suscripción.'}
+                        {!hasData ? 'No hay suscripciones disponibles.' : 'No se encontró suscripción.'}
                     </CommandEmpty>
 
-                    {!noSubscriptions && (
+                    {hasData && (
                         <CommandGroup className="max-h-[200px] overflow-y-auto">
                             <CommandItem
                                 value="all_subscriptions"
@@ -124,7 +140,7 @@ export const SubscriptionsFilterComponentV2 = ({
                                     <Check
                                         className={cn(
                                             'mr-2 h-4 w-4',
-                                            selectedIds.includes(id) ? 'opacity-100' : 'opacity-0'
+                                            (selectedIds.includes(id) && !selectedIds.includes('all_subscriptions')) ? 'opacity-100' : 'opacity-0'
                                         )}
                                     />
                                     <span className="truncate">{name}</span>

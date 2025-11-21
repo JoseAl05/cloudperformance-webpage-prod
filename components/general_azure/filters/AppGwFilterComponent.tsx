@@ -1,0 +1,207 @@
+'use client'
+import { Dispatch, SetStateAction, useMemo, useState } from 'react'
+import { Check, ChevronsUpDown } from 'lucide-react'
+import { cn } from '@/lib/utils'
+import { Button } from '@/components/ui/button'
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import useSWR from 'swr'
+import { LoaderComponent } from '@/components/general_azure/LoaderComponent'
+
+interface AppGwFilterComponentProps {
+    startDate: Date;
+    endDate: Date;
+    region: string;
+    subscription: string;
+    appGw: string;
+    setAppGw: Dispatch<SetStateAction<string>>;
+    isAppGFilterMultiselect: boolean;
+    resourceGroup:string;
+}
+
+type ApiAppGw =
+    | { gw_id_lowercase: string; gw_name: string }
+    | string
+
+const fetcher = (url: string) =>
+    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
+        .then(r => r.json());
+
+export const AppGwFilterComponent = ({
+    startDate,
+    endDate,
+    region,
+    subscription,
+    appGw,
+    setAppGw,
+    resourceGroup,
+    isAppGFilterMultiselect
+}: AppGwFilterComponentProps) => {
+    const [open, setOpen] = useState(false);
+    const startDateFormatted = startDate ? startDate.toISOString().replace('Z', '').slice(0, -4) : '';
+    const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : '';
+    const url = `/api/azure/bridge/azure/apps_gateway/all_application_gateways?date_from=${startDateFormatted}&date_to=${endDateFormatted}&subscription_id=${subscription}&location=${region}&resource_groups=${resourceGroup}`
+    const { data, error, isLoading } = useSWR<ApiAppGw[]>(url,fetcher)
+
+    const appsGw = useMemo(() => {
+        if (!Array.isArray(data)) return [] as { id: string; name: string }[]
+        if (data.length === 0) return []
+        if (typeof data[0] === 'string') {
+            return (data as string[]).map((id) => ({ id, name: id }))
+        }
+        return (data as { gw_id_lowercase: string; gw_name: string }[]).map((s) => ({
+            id: s.gw_id_lowercase,
+            name: s.gw_name,
+        }))
+    }, [data])
+
+    const noAppsGw = appsGw.length === 0
+
+    const selectedIds = useMemo(
+        () => (appGw ? appGw.split(',').filter(Boolean) : []),
+        [appGw]
+    )
+
+    const allIds = useMemo(() => appsGw.map((appg) => appg.id), [appsGw]);
+
+    const isAllSelected = appsGw.length > 0 && selectedIds.length === appsGw.length;
+
+    const idToName = useMemo(() => {
+        const map = new Map<string, string>()
+        for (const s of appsGw) map.set(s.id, s.name)
+        return map
+    }, [appsGw])
+
+    if (isLoading) return <LoaderComponent size='small' />
+    if (error) return <div>Error al cargar applications gateway</div>
+
+    const getDisplayText = () => {
+        if (noAppsGw) return 'Sin applications gateway disponibles'
+        if (isAppGFilterMultiselect) {
+            if (!appGw) return 'Seleccione application gateway'
+
+            if (selectedIds.includes('all') || isAllSelected) return 'Todos los applications gateway'
+
+            if (selectedIds.length === 1) return idToName.get(selectedIds[0]) ?? selectedIds[0]
+            return `${selectedIds.length} applications gateway seleccionados`
+        } else {
+            if (!appGw) return 'Selecciona application gateway'
+            return idToName.get(appGw) ?? appGw
+        }
+    }
+
+    const handleAppsGwToggle = (appGwId: string) => {
+        if (appGwId === 'all') {
+            setAppGw(isAllSelected ? '' : allIds.join(','))
+        } else {
+            let appsGw = [...selectedIds]
+            appsGw = appsGw.filter((s) => s !== 'all')
+
+            if (appsGw.includes(appGwId)) {
+                appsGw = appsGw.filter((s) => s !== appGwId)
+            } else {
+                appsGw.push(appGwId)
+            }
+            setAppGw(appsGw.join(','))
+        }
+    }
+    return isAppGFilterMultiselect ? (
+        <Popover open={open} onOpenChange={setOpen}>
+            <PopoverTrigger asChild>
+                <Button
+                    variant='outline'
+                    role='combobox'
+                    aria-expanded={open}
+                    className='w-full justify-between bg-transparent'
+                    disabled={noAppsGw}
+                >
+                    <span className='truncate text-left max-w-[85%]'>{getDisplayText()}</span>
+                    <ChevronsUpDown className='ml-2 h-4 w-4 shrink-0 opacity-50' />
+                </Button>
+            </PopoverTrigger>
+            <PopoverContent className='w-full p-0'>
+                <Command>
+                    <CommandInput placeholder='Buscar application gateway...' />
+                    <CommandEmpty>
+                        {noAppsGw ? 'No hay application gateways disponibles.' : 'No se encontró application gateway.'}
+                    </CommandEmpty>
+
+                    {!noAppsGw && (
+                        <CommandGroup className='max-h-[200px] overflow-y-auto'>
+                            <CommandItem
+                                value='all'
+                                onSelect={() => handleAppsGwToggle('all')}
+                            >
+                                <Check
+                                    className={cn(
+                                        'mr-2 h-4 w-4',
+                                        isAllSelected ? 'opacity-100' : 'opacity-0'
+                                    )}
+                                />
+                                Todos los Applications Gateway
+                            </CommandItem>
+
+                            {appsGw.map(({ id, name }) => (
+                                <CommandItem
+                                    key={id}
+                                    value={`${name} ${id}`}
+                                    onSelect={() => handleAppsGwToggle(id)}
+                                >
+                                    <Check
+                                        className={cn(
+                                            'mr-2 h-4 w-4',
+                                            selectedIds.includes(id) ? 'opacity-100' : 'opacity-0'
+                                        )}
+                                    />
+                                    <span className='truncate'>{name}</span>
+                                </CommandItem>
+                            ))}
+                        </CommandGroup>
+                    )}
+                </Command>
+            </PopoverContent>
+        </Popover>
+    ) : (
+        <Popover open={open} onOpenChange={setOpen}>
+            <PopoverTrigger asChild>
+                <Button
+                    variant='outline'
+                    role='combobox'
+                    aria-expanded={open}
+                    className='w-full justify-between bg-transparent'
+                    disabled={noAppsGw}
+                >
+                    <span className='truncate text-left max-w-[85%]'>{getDisplayText()}</span>
+                    <ChevronsUpDown className='ml-2 h-4 w-4 shrink-0 opacity-50' />
+                </Button>
+            </PopoverTrigger>
+            <PopoverContent className='w-full p-0'>
+                <Command>
+                    <CommandInput placeholder='Buscar application gateway...' />
+                    <CommandList>
+                        <CommandEmpty>
+                            {noAppsGw ? 'No hay applications gateway disponibles.' : 'No se encontró application gateway.'}
+                        </CommandEmpty>
+                        {!noAppsGw && (
+                            <CommandGroup className='max-h-[250px] overflow-y-auto'>
+                                {appsGw.map(({ id, name }) => (
+                                    <CommandItem
+                                        key={id}
+                                        value={`${name} ${id}`}
+                                        onSelect={() => {
+                                            setappGw(id)
+                                            setOpen(false)
+                                        }}
+                                    >
+                                        <Check className={cn('mr-2 h-4 w-4', appGw === id ? 'opacity-100' : 'opacity-0')} />
+                                        <span className='truncate'>{name}</span>
+                                    </CommandItem>
+                                ))}
+                            </CommandGroup>
+                        )}
+                    </CommandList>
+                </Command>
+            </PopoverContent>
+        </Popover>
+    )
+}

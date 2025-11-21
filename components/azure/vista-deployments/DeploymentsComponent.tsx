@@ -13,6 +13,7 @@ interface DeploymentsProps {
     startDate: Date;
     endDate: Date;
     selectedOperation: string;
+    selectedResourceGroup: string;
 }
 
 interface DeploymentData {
@@ -32,18 +33,18 @@ const fetcher = (url: string) =>
 const isNonEmptyArray = <T,>(v: unknown): v is T[] => Array.isArray(v) && v.length > 0
 const isNullish = (v: unknown) => v === null || v === undefined
 
-export const DeploymentsComponent = ({ startDate, endDate, selectedOperation }: DeploymentsProps) => {
+export const DeploymentsComponent = ({ startDate, endDate, selectedOperation,selectedResourceGroup }: DeploymentsProps) => {
 
     const startDateFormatted = startDate.toISOString().split('.')[0];
     const endDateFormatted = endDate.toISOString().split('.')[0];
 
     const deployments = useSWR(
-        selectedOperation ? `/api/azure/bridge/azure/deployments/deployments?date_from=${startDateFormatted}&date_to=${endDateFormatted}&operation_name=${selectedOperation}` : null,
+        selectedOperation ? `/api/azure/bridge/azure/deployments/deployments?date_from=${startDateFormatted}&date_to=${endDateFormatted}&resource_groups=${selectedResourceGroup}&operation_name=${selectedOperation}` : null,
         fetcher,
     );
 
     const deploymentsDetails = useSWR(
-        selectedOperation ? `/api/azure/bridge/azure/deployments/deployments-detalles?date_from=${startDateFormatted}&date_to=${endDateFormatted}&operation_name=${selectedOperation}` : null,
+        selectedOperation ? `/api/azure/bridge/azure/deployments/deployments-detalles?date_from=${startDateFormatted}&date_to=${endDateFormatted}&resource_groups=${selectedResourceGroup}&operation_name=${selectedOperation}` : null,
         fetcher
     );
 

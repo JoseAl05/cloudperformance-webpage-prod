@@ -36,6 +36,20 @@ interface FiltersComponentProps {
         region: string;
         selectedKey?: string | null;
         selectedValue?: string | null;
+        services?: string;
+        buckets?: string;
+        ebs?: string;
+        eventType?: string;
+        advisorCategory?: string;
+        advisorStatus?: string;
+        variationMetric?: string;
+        variationService?: string;
+        metric?: string;
+        metrics?: string;
+        variationResource?: string;
+        month?: number | null;
+        year?: number | null;
+        eksAsgInstance?: string;
     }) => React.JSX.Element;
     dateFilter?: boolean;
     regionFilter?: boolean;
@@ -160,8 +174,9 @@ export const FiltersComponent = ({
 
         let startDate = startDateParam ? new Date(startDateParam) : yesterday;
         let endDate = endDateParam ? new Date(endDateParam) : new Date();
-        let month: number | null = null;
-        let year: number | null = null;
+        const now = new Date();
+        let month: number = now.getMonth() + 1;
+        let year: number = now.getFullYear();
 
         if (variationServiceFilter && monthParam && yearParam) {
             const m = Number(monthParam);
@@ -178,8 +193,8 @@ export const FiltersComponent = ({
         return {
             startDate,
             endDate,
-            month,
-            year,
+            month: variationServiceFilter ? month : null,
+            year: variationServiceFilter ? year : null,
             instance: instanceParam || '',
             asg: asgParam || '',
             asgInstance: asgInstanceParam || '',
@@ -208,9 +223,7 @@ export const FiltersComponent = ({
     };
 
     const [filters, setFilters] = useState(getInitialFilters);
-
     const [tempRange, setTempRange] = useState<[Date | null, Date | null]>([filters.startDate, filters.endDate]);
-
     const [tempMonth, setTempMonth] = useState<number | null>(filters.month ?? null);
     const [tempYear, setTempYear] = useState<number | null>(filters.year ?? null);
     const [tempMonthYearDate, setTempMonthYearDate] = useState<Date | null>(
@@ -227,7 +240,7 @@ export const FiltersComponent = ({
     const [tempRegion, setTempRegion] = useState(filters.region);
     const [tempKey, setTempKey] = useState<string | null>(filters.selectedKey);
     const [tempValue, setTempValue] = useState<string | null>(filters.selectedValue);
-    const [tagsData, setTagsData] = useState<unknown[]>([]);
+    const [tagsData, setTagsData] = useState<unknown[]>([]); // Se mantiene para compatibilidad con el componente de tags
     const [tempService, setTempService] = useState(filters.service);
     const [tempS3Bucket, setTempS3Bucket] = useState(filters.s3Bucket);
     const [tempEbs, setTempEbs] = useState(filters.ebs);
@@ -240,7 +253,7 @@ export const FiltersComponent = ({
     const [tempAutoScalingGroup, setTempAutoScalingGroup] = useState(filters.autoScalingGroup);
     const [tempEngine, setTempEngine] = useState(filters.engine);
     const [tempMetrics, setTempMetrics] = useState(filters.metrics);
-    const [tempMetricsRDS, setTempMetricsRDS] = useState(filters.metrics);
+    const [tempMetricsRDS, setTempMetricsRDS] = useState(filters.metricsRDS);
     const [tempVariationResource, setTempVariationResource] = useState(filters.variationResource);
 
     useEffect(() => {
@@ -268,7 +281,7 @@ export const FiltersComponent = ({
         setTempMetric(newFilters.metric);
         setTempAutoScalingGroup(newFilters.autoScalingGroup);
         setTempEngine(newFilters.engine);
-        setTempMetricsRDS(newFilters.metrics);
+        setTempMetrics(newFilters.metrics);
         setTempMetricsRDS(newFilters.metricsRDS);
 
         setTempMonth(newFilters.month ?? null);
@@ -288,6 +301,22 @@ export const FiltersComponent = ({
     };
 
     const onChange = (dates: [Date | null, Date | null]) => setTempRange(dates);
+
+    const tempStartDate = useMemo(() => (tempRange[0] ?? filters.startDate), [tempRange, filters.startDate]);
+    const tempEndDate = useMemo(() => (tempRange[1] ?? filters.endDate), [tempRange, filters.endDate]);
+
+    // Handle Tag Change logic replicated but updating temp state instead of immediate push
+    const handleTagChange = (nextKey: string | null, nextValue: string | null) => {
+        setTempKey(nextKey);
+        setTempValue(nextValue);
+        // Cuando cambian los tags, se suelen resetear las instancias seleccionadas
+        setTempInstance('');
+        setTempAsg('');
+        setTempAsgInstance('');
+        setTempEks('');
+        setTempEksAsg('');
+        setTempEksAsgInstance('');
+    };
 
     const applyFilters = () => {
         let [start, end] = tempRange;
@@ -345,30 +374,51 @@ export const FiltersComponent = ({
             if (newFilters.year) query.set('year', String(newFilters.year));
         }
 
-        if (newFilters.asg) query.set('asg', newFilters.asg);
-        if (newFilters.eks) query.set('eks', newFilters.eks);
-        if (newFilters.eksAsg) query.set('eksAsg', newFilters.eksAsg);
-        if (newFilters.eksAsgInstance) query.set('eksAsgInstance', newFilters.eksAsgInstance);
-        if (newFilters.asgInstance) query.set('asgInstance', newFilters.asgInstance);
-        if (!newFilters.asg && newFilters.instance) query.set('instance', newFilters.instance);
-        if (newFilters.instanceService) query.set('instanceService', String(newFilters.instanceService));
-        if (newFilters.region && newFilters.region !== 'all_regions') query.set('region', newFilters.region);
-        if (newFilters.selectedKey) query.set('selectedKey', newFilters.selectedKey);
-        if (newFilters.selectedValue) query.set('selectedValue', newFilters.selectedValue);
-        if (newFilters.service) query.set('services', newFilters.service);
-        if (newFilters.s3Bucket) query.set('s3Bucket', newFilters.s3Bucket);
-        if (newFilters.ebs) query.set('ebs', newFilters.ebs);
-        if (newFilters.eventsTypes) query.set('eventsTypes', newFilters.eventsTypes);
-        if (newFilters.advisorCategory) query.set('advisorCategory', newFilters.advisorCategory);
-        if (newFilters.advisorStatus) query.set('advisorStatus', newFilters.advisorStatus);
-        if (newFilters.variationService) query.set('variationService', newFilters.variationService);
-        if (newFilters.variationMetric) query.set('variationMetric', newFilters.variationMetric);
-        if (newFilters.metric) query.set('metric', newFilters.metric);
-        if (newFilters.autoScalingGroup) query.set('autoScalingGroup', newFilters.autoScalingGroup);
-        if (rdsFilter && newFilters.engine) query.set('engine', newFilters.engine);
-        if (newFilters.metrics) query.set('metrics', newFilters.metrics);
-        if (newFilters.metricsRDS) query.set('metricsRDS', newFilters.metricsRDS);
-        if (newFilters.variationResource) query.set('variationResource', newFilters.variationResource);
+        const filterConfigs = [
+            // Estructura: { flag: boolean, key: string, value: any, ignoreValue?: string }
+            { flag: regionFilter, key: 'region', value: newFilters.region, ignoreValue: 'all_regions' },
+            { flag: instancesFilter || asgFilter, key: 'selectedKey', value: newFilters.selectedKey },
+            { flag: instancesFilter || asgFilter, key: 'selectedValue', value: newFilters.selectedValue },
+
+            // Instances & ASG
+            { flag: asgFilter, key: 'asg', value: newFilters.asg },
+            { flag: asgFilter, key: 'asgInstance', value: newFilters.asgInstance },
+            { flag: instancesFilter && !newFilters.asg, key: 'instance', value: newFilters.instance },
+            { flag: instancesFilter, key: 'instanceService', value: newFilters.instanceService },
+            { flag: autoScalingGroupFilter, key: 'autoScalingGroup', value: newFilters.autoScalingGroup },
+
+            // EKS
+            { flag: eksFilter, key: 'eks', value: newFilters.eks },
+            { flag: eksFilter, key: 'eksAsg', value: newFilters.eksAsg },
+            { flag: eksFilter, key: 'eksAsgInstance', value: newFilters.eksAsgInstance },
+
+            // Services & Variation
+            { flag: serviceFilter, key: 'services', value: newFilters.service },
+            { flag: variationServiceFilter, key: 'variationService', value: newFilters.variationService },
+            { flag: variationMetricFilter, key: 'variationMetric', value: newFilters.variationMetric },
+            { flag: variationResourceFilter, key: 'variationResource', value: newFilters.variationResource },
+
+            // Storage & Events
+            { flag: s3Filter, key: 's3Bucket', value: newFilters.s3Bucket },
+            { flag: ebsFilter, key: 'ebs', value: newFilters.ebs },
+            { flag: eventsTypesFilter, key: 'eventsTypes', value: newFilters.eventsTypes },
+
+            // Advisor
+            { flag: advisorCategoriesFilter, key: 'advisorCategory', value: newFilters.advisorCategory },
+            { flag: advisorStatusFilter, key: 'advisorStatus', value: newFilters.advisorStatus },
+
+            // Metrics
+            { flag: metricFilter, key: 'metric', value: newFilters.metric },
+            { flag: metricsFilter, key: 'metrics', value: newFilters.metrics },
+            { flag: metricsRDSFilter, key: 'metricsRDS', value: newFilters.metricsRDS },
+            { flag: rdsFilter, key: 'engine', value: newFilters.engine },
+        ];
+
+        filterConfigs.forEach(({ flag, key, value, ignoreValue }) => {
+            if (flag && value !== null && value !== undefined && value !== '' && value !== ignoreValue) {
+                query.set(key, String(value));
+            }
+        });
 
         router.push(`${window.location.pathname}?${query.toString()}`);
     };
@@ -405,42 +455,13 @@ export const FiltersComponent = ({
             variationResource: '',
         };
 
-        setFilters({
-            startDate: defaultFilters.startDate,
-            endDate: defaultFilters.endDate,
-            month: defaultFilters.month,
-            year: defaultFilters.year,
-            instance: defaultFilters.instance,
-            asg: defaultFilters.asg,
-            eks: defaultFilters.eks,
-            eksAsg: defaultFilters.eksAsg,
-            eksAsgInstance: defaultFilters.eksAsgInstance,
-            asgInstance: defaultFilters.asgInstance,
-            instanceService: defaultFilters.instancesService,
-            region: defaultFilters.region,
-            selectedKey: defaultFilters.selectedKey,
-            selectedValue: defaultFilters.selectedValue,
-            service: defaultFilters.service,
-            s3Bucket: defaultFilters.s3Bucket,
-            ebs: defaultFilters.ebs,
-            eventsTypes: defaultFilters.eventsTypes,
-            advisorCategory: defaultFilters.advisorCategory,
-            advisorStatus: defaultFilters.advisorStatus,
-            variationService: defaultFilters.variationService,
-            variationMetric: defaultFilters.variationMetric,
-            metric: defaultFilters.metric,
-            autoScalingGroup: defaultFilters.autoScalingGroup,
-            engine: defaultFilters.engine,
-            metrics: defaultFilters.metrics,
-            metricsRDS: defaultFilters.metricsRDS,
-            variationResource: defaultFilters.variationResource,
-        });
+        setFilters({ ...defaultFilters, instanceService: defaultFilters.instancesService }); // Adjust type mismatch
 
+        // Reset Temp State
         setTempRange([defaultFilters.startDate, defaultFilters.endDate]);
         setTempMonth(defaultFilters.month);
         setTempYear(defaultFilters.year);
         setTempMonthYearDate(null);
-
         setTempInstance(defaultFilters.instance);
         setTempAsg(defaultFilters.asg);
         setTempEks(defaultFilters.eks);
@@ -468,68 +489,6 @@ export const FiltersComponent = ({
 
         router.push(window.location.pathname);
     };
-
-    const handleTagChange = (nextKey: string | null, nextValue: string | null) => {
-        setTempKey(nextKey);
-        setTempValue(nextValue);
-        setTempInstance('');
-        setTempAsg('');
-        setTempAsgInstance('');
-        setTempEks('');
-        setTempEksAsg('');
-        setTempEksAsgInstance('');
-
-        const params = new URLSearchParams(searchParams.toString());
-
-        const start = (tempRange[0] ?? filters.startDate) as unknown;
-        const end = (tempRange[1] ?? filters.endDate) as unknown;
-        params.set('startDate', start);
-        params.set('endDate', end);
-
-        if (variationServiceFilter) {
-            if (tempMonth) params.set('month', String(tempMonth));
-            else params.delete('month');
-            if (tempYear) params.set('year', String(tempYear));
-            else params.delete('year');
-        } else {
-            params.delete('month');
-            params.delete('year');
-        }
-
-        if (tempRegion && tempRegion !== 'all_regions') {
-            params.set('region', tempRegion);
-        } else {
-            params.delete('region');
-        }
-
-        if (nextKey) params.set('selectedKey', nextKey); else params.delete('selectedKey');
-        if (nextValue) params.set('selectedValue', nextValue); else params.delete('selectedValue');
-
-        params.delete('instance');
-        params.delete('asg');
-        params.delete('asgInstance');
-        params.delete('eks');
-        params.delete('eksAsg');
-        params.delete('eksAsgInstance');
-
-        router.replace(`${window.location.pathname}?${params.toString()}`, { scroll: false });
-    };
-
-    const tempStartDate = useMemo(() => (tempRange[0] ?? filters.startDate), [tempRange, filters.startDate]);
-    const tempEndDate = useMemo(() => (tempRange[1] ?? filters.endDate), [tempRange, filters.endDate]);
-
-    const canFetchByInstances = instancesFilter && !!tempInstance;
-    const canFetchByAsg = asgFilter && (!!tempAsgInstance || (!!tempAsg && tempAsg.includes('all')));
-    const canFetch = (asgFilter ? canFetchByAsg : canFetchByInstances) || (!instancesFilter && !asgFilter);
-
-    const EmptyState = ({ text }: { text: string }) => (
-        <div className="w-full min-w-0 px-4 py-6">
-            <div className="flex items-center justify-center gap-2 text-muted-foreground">
-                <Ban className="h-5 w-5" />
-                <span className="text-sm">{text}</span>
-            </div>
-        </div>
-    );
 
     return (
         <div className='space-y-6'>

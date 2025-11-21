@@ -18,20 +18,21 @@ import { cn } from "@/lib/utils";
 
 
 export default function ClientSelectorComponent() {
-    const { isGlobalAdmin, companiesList, loading, swapContextToken, setSelectedCompany } = useFeatureAccess(); 
+    const { isGlobalAdmin, companiesList, loading, swapContextToken, setSelectedCompany } = useFeatureAccess();
     const { selectedCompany } = useClientContext();
 
     const [open, setOpen] = useState(false);
 
-    if (!isGlobalAdmin) return null;
-
-    // Seleccionar el primero automáticamente
     useEffect(() => {
         if (!selectedCompany && companiesList.length > 0) {
             setSelectedCompany(companiesList[0]);
             swapContextToken(companiesList[0].name);
         }
     }, [companiesList, selectedCompany, setSelectedCompany, swapContextToken]);
+
+    if (!isGlobalAdmin) return null;
+
+
 
     const handleSelect = (clientName: string) => {
         const selected = companiesList.find(c => c.name === clientName) || null;

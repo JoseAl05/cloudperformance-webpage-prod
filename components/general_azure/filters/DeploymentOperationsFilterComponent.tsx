@@ -1,5 +1,5 @@
 'use client'
-import { Dispatch, SetStateAction, useMemo, useState } from 'react'
+import { Dispatch, SetStateAction, useMemo, useState, useEffect } from 'react'
 import { Check, ChevronsUpDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
@@ -26,7 +26,7 @@ export const DeploymentOperationsFilterComponent = ({
     endDate,
 }: DeploymentOperationsFilterComponentProps) => {
     const [open, setOpen] = useState(false)
-    
+
     const startDateFormatted = startDate.toISOString().replace('Z', '').slice(0, -4)
     const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : ''
     const url = `/api/azure/bridge/azure/deployments/deployments/operations?date_from=${startDateFormatted}&date_to=${endDateFormatted}`
@@ -37,7 +37,20 @@ export const DeploymentOperationsFilterComponent = ({
         return data.map((op) => ({ id: op, name: op }))
     }, [data])
 
-    const noOperations = operations.length === 0
+    const hasData = operations.length > 0
+
+    useEffect(() => {
+        if (isLoading || !data) return
+
+        if (!hasData) {
+            if (operation) setOperation('')
+            return
+        }
+
+        if (hasData && !operation) {
+            setOperation('all_operations')
+        }
+    }, [data, isLoading, hasData, operation, setOperation])
 
     const selectedIds = useMemo(
         () => (operation ? operation.split(',').filter(Boolean) : []),
@@ -48,8 +61,10 @@ export const DeploymentOperationsFilterComponent = ({
     if (error) return <div>Error al cargar operaciones</div>
 
     const getDisplayText = () => {
-        if (noOperations) return 'Sin operaciones disponibles'
-        if (!operation || selectedIds.includes('all_operations')) return 'Todas las Operaciones'
+        if (!hasData) return 'Sin operaciones disponibles'
+
+        if (selectedIds.includes('all_operations') || (!operation && hasData)) return 'Todas las Operaciones'
+
         if (selectedIds.length === 1) return selectedIds[0]
         return `${selectedIds.length} operaciones seleccionadas`
     }
@@ -60,6 +75,7 @@ export const DeploymentOperationsFilterComponent = ({
             ops = ['all_operations']
         } else {
             ops = ops.filter((o) => o !== 'all_operations')
+
             if (ops.includes(operationIdOrAll)) {
                 ops = ops.filter((o) => o !== operationIdOrAll)
             } else {
@@ -77,7 +93,7 @@ export const DeploymentOperationsFilterComponent = ({
                     role="combobox"
                     aria-expanded={open}
                     className="w-full justify-between bg-transparent"
-                    disabled={noOperations}
+                    disabled={!hasData}
                 >
                     <span className="truncate text-left max-w-[85%]">{getDisplayText()}</span>
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -87,10 +103,10 @@ export const DeploymentOperationsFilterComponent = ({
                 <Command>
                     <CommandInput placeholder="Buscar operación..." />
                     <CommandEmpty>
-                        {noOperations ? 'No hay operaciones disponibles.' : 'No se encontró operación.'}
+                        {!hasData ? 'No hay operaciones disponibles.' : 'No se encontró operación.'}
                     </CommandEmpty>
 
-                    {!noOperations && (
+                    {hasData && (
                         <CommandGroup className="max-h-[200px] overflow-y-auto">
                             <CommandItem
                                 value="all_operations"
@@ -114,7 +130,7 @@ export const DeploymentOperationsFilterComponent = ({
                                     <Check
                                         className={cn(
                                             'mr-2 h-4 w-4',
-                                            selectedIds.includes(id) ? 'opacity-100' : 'opacity-0'
+                                            (selectedIds.includes(id) && !selectedIds.includes('all_operations')) ? 'opacity-100' : 'opacity-0'
                                         )}
                                     />
                                     <span className="truncate">{name}</span>

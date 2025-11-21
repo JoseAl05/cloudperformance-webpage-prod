@@ -112,8 +112,8 @@ export const TendenciaFacturacionPagoPorUsoComponent = ({
     const metrics = calculateMetrics(data);
 
     return (
-        <div className="w-full min-w-0 px-4 py-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="w-full min-w-0 px-4 py-2">
+            <div className="grid grid-cols-1 py-5 md:grid-cols-3 gap-6">
                 <Card className="border-l-4 border-l-blue-500">
                     <CardContent className="p-6">
                         <div className="flex items-center justify-between">
