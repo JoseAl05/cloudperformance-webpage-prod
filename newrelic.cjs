@@ -11,6 +11,7 @@ exports.config = {
   // Logging detallado
   logging: {
     level: process.env.NEW_RELIC_LOG_LEVEL || 'info',
+    enabled: false,
     filepath: 'stdout',
   },
 
@@ -25,7 +26,7 @@ exports.config = {
   },
 
   application_logging: {
-    enabled: false,
+    enabled: true,
     forwarding: {
       enabled: true,
       max_samples_stored: 10000,
