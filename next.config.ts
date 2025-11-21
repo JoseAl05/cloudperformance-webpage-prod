@@ -9,6 +9,16 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+
+  webpack: (config, { isServer }) => {
+    if (isServer) {
+      // Asegurar que newrelic no sea empaquetado por webpack
+      config.externals = config.externals || [];
+      config.externals.push('newrelic');
+    }
+    return config;
+  },
+
 };
 
 export default nextConfig;
