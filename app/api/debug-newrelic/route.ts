@@ -1,10 +1,8 @@
 import { NextResponse } from 'next/server';
+import newrelic from 'newrelic';
 
 export async function GET() {
   try {
-    // Cargamos new relic dinámicamente en Node
-    const { default: newrelic } = await import('newrelic');
-
     const diagnostics = {
       newrelicLoaded: !!newrelic,
       agentEnabled: newrelic.agent?.config?.agent_enabled || false,
