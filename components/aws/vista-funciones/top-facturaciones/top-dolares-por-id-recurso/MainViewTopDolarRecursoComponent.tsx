@@ -1,4 +1,4 @@
-import { FiltersComponent } from '@/components/general/filters/FiltersComponent'
+import { FiltersComponent } from '@/components/general_aws/filters/FiltersComponent'
 import { MainViewTopDolaresRecurso } from '@/components/aws/vista-funciones/top-facturaciones/top-dolares-por-id-recurso/TopDolarRecursoComponent'
 import { Globe } from 'lucide-react'
 

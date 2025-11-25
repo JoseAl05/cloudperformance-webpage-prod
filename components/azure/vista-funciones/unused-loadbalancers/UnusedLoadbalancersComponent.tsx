@@ -3,7 +3,7 @@
 import { MessageCard } from '@/components/aws/cards/MessageCards';
 import { UnusedLoadbalancersCardsComponent } from '@/components/azure/vista-funciones/unused-loadbalancers/info/UnusedLoadbalancersCardsComponent';
 import { UnusedLoadbalancersTable } from '@/components/azure/vista-funciones/unused-loadbalancers/table/UnusedLoadbalancersTable';
-import { LoaderComponent } from '@/components/general/LoaderComponent';
+import { LoaderComponent } from '@/components/general_aws/LoaderComponent';
 import { UnusedLb } from '@/interfaces/vista-unused-resources/unusedLbInterfaces';
 import { AlertCircle, Clock, Info } from 'lucide-react';
 import useSWR from 'swr';

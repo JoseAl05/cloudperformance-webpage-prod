@@ -3,7 +3,7 @@
 import useSWR from 'swr'
 import { Database, AlertCircle, Info, Cpu, MemoryStick, HardDrive, PowerOff } from 'lucide-react'
 import { DbStatusChart } from '@/components/azure/vista-consumo-db/graficos/DbStatusViewComponent'
-import { LoaderComponent } from '@/components/general/LoaderComponent'
+import { LoaderComponent } from '@/components/general_aws/LoaderComponent'
 import { MessageCard } from '@/components/azure/cards/MessageCards'
 import { Card, CardContent } from '@/components/ui/card'
 import { DbConsumeViewCpuUsageComponent } from '@/components/azure/vista-consumo-db/graficos/DbConsumeViewCpuUsageComponent'

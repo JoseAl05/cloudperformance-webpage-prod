@@ -12,7 +12,7 @@ import { Ec2InstanceSummary } from '@/interfaces/vista-ec2/ec2ResourceViewInterf
 import { Ec2ResourceViewMetricsApiResponse } from '@/interfaces/vista-ec2/ec2MetricsResourceViewInterfaces';
 import { Ec2ResourceViewEventsResponse } from '@/interfaces/vista-ec2/ec2EventsResourceViewInterfaces';
 import { MessageCard } from '@/components/aws/cards/MessageCards';
-import { LoaderComponent } from '@/components/general/LoaderComponent';
+import { LoaderComponent } from '@/components/general_aws/LoaderComponent';
 
 interface InstanceEc2CpuMetricsComponentProps {
     startDate: Date,

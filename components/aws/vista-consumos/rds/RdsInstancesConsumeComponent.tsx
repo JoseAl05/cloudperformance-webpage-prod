@@ -1,6 +1,6 @@
 'use client'
 
-import { LoaderComponent } from '@/components/general/LoaderComponent'
+import { LoaderComponent } from '@/components/general_aws/LoaderComponent'
 import useSWR from 'swr'
 import { MessageCard } from '@/components/aws/cards/MessageCards'
 import { AlertCircle, ChartBar, Clock, Info } from 'lucide-react'

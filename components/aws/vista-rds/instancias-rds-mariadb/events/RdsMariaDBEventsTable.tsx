@@ -1,8 +1,8 @@
-import { createColumns } from '@/components/general/data-table/columns';
+import { createColumns } from '@/components/general_aws/data-table/columns';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { rdsMariaDBEventColumns } from '@/components/aws/vista-rds/instancias-rds-mariadb/events/RdsMariaDBEventsColumns';
 import { Calendar, Database, AlertCircle } from 'lucide-react';
-import { DataTableSingle } from '@/components/general/data-table/data-table-single';
+import { DataTableSingle } from '@/components/general_aws/data-table/data-table-single';
 
 interface RdsMariaDBEventsTableComponentProps {
     data?: unknown;

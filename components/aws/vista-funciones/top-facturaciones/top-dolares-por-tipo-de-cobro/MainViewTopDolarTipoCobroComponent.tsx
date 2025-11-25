@@ -1,4 +1,4 @@
-import { FiltersComponent } from '@/components/general/filters/FiltersComponent'
+import { FiltersComponent } from '@/components/general_aws/filters/FiltersComponent'
 import { MainViewTopDolaresTipoCobro } from '@/components/aws/vista-funciones/top-facturaciones/top-dolares-por-tipo-de-cobro/TopDolarTipoCobroComponent'
 import { Globe } from 'lucide-react'
 

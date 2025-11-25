@@ -1,4 +1,4 @@
-import { FiltersComponent } from '@/components/general/filters/FiltersComponent'
+import { FiltersComponent } from '@/components/general_aws/filters/FiltersComponent'
 import { HardDrive } from 'lucide-react'
 import { EbsUnusedComponent } from '@/components/aws/vista-funciones/unused-ebs/EbsUnusedComponent'
 

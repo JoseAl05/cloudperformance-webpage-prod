@@ -4,7 +4,7 @@ import useSWR from 'swr'
 import { useMemo, useRef, useState } from 'react'
 import { useTheme } from 'next-themes'
 import type { EChartsOption } from 'echarts'
-import { LoaderComponent } from '@/components/general/LoaderComponent'
+import { LoaderComponent } from '@/components/general_aws/LoaderComponent'
 
 import {
     Select,

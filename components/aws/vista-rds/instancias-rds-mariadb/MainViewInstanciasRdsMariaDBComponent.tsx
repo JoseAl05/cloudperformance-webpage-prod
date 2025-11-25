@@ -1,4 +1,4 @@
-import { FiltersComponent } from '@/components/general/filters/FiltersComponent'
+import { FiltersComponent } from '@/components/general_aws/filters/FiltersComponent'
 import { InstanciasRdsMariaDBChartComponent } from '@/components/aws/vista-rds/instancias-rds-mariadb/InstanciasRdsMariaDBChartComponent'
 import { Database } from 'lucide-react'
 

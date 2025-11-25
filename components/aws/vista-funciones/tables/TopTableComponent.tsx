@@ -2,9 +2,9 @@
 
 import useSWR from "swr"
 import { ColumnDef } from "@tanstack/react-table"
-import { DataTableSingle } from "@/components/general/data-table/data-table-single"
+import { DataTableSingle } from "@/components/general_aws/data-table/data-table-single"
 import { ArrowUpDown } from "lucide-react"
-import { LoaderComponent } from '@/components/general/LoaderComponent'
+import { LoaderComponent } from '@/components/general_aws/LoaderComponent'
 
 type TableDataTop = {
   service_dimension: string

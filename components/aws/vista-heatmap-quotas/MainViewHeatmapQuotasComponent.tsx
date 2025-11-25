@@ -1,4 +1,4 @@
-import { FiltersComponent } from '@/components/general/filters/FiltersComponent'
+import { FiltersComponent } from '@/components/general_aws/filters/FiltersComponent'
 import { HeatmapQuotasComponent } from '@/components/aws/vista-heatmap-quotas/HeatmapQuotasComponent'
 import { PieChart } from 'lucide-react'
 

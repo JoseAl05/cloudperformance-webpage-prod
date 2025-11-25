@@ -1,4 +1,4 @@
-import { FiltersComponent } from '@/components/general/filters/FiltersComponent'
+import { FiltersComponent } from '@/components/general_aws/filters/FiltersComponent'
 import { TopS3BucketsComponent } from '@/components/aws/vista-funciones/top-s3-buckets/TopS3BucketsComponent'
 import { Globe } from 'lucide-react'
 

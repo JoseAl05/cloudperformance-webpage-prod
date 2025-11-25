@@ -1,7 +1,7 @@
-import { createColumns } from '@/components/general/data-table/columns';
+import { createColumns } from '@/components/general_aws/data-table/columns';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Ec2ConsumeViewInstanceColumns } from '@/components/aws/vista-consumos/ec2/table/Ec2ConsumeViewInstanceColumns';
-import { DataTableGrouping } from '@/components/general/data-table/data-table-grouping';
+import { DataTableGrouping } from '@/components/general_aws/data-table/data-table-grouping';
 import { Ec2ConsumneViewInstance } from '@/interfaces/vista-consumos/ec2ConsumeViewInterfaces';
 
 interface Ec2ConsumeViewInstanceTableProps {

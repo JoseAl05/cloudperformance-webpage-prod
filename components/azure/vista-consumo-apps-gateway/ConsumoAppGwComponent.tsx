@@ -4,7 +4,7 @@ import { MessageCard } from '@/components/aws/cards/MessageCards';
 import { ConsumeAppGwChartsComponent } from '@/components/azure/vista-consumo-apps-gateway/graficos/ConsumeAppGwChartsComponent';
 import { ConsumoAppGwCardsComponent } from '@/components/azure/vista-consumo-apps-gateway/info/ConsumoAppGwCardsComponent';
 import { ConsumoAppGwTable } from '@/components/azure/vista-consumo-apps-gateway/table/ConsumoAppGwTable';
-import { LoaderComponent } from '@/components/general/LoaderComponent';
+import { LoaderComponent } from '@/components/general_aws/LoaderComponent';
 import { ConsumeViewAppGwApiResponse, ConsumeViewAppGwSummaryApiResponse } from '@/interfaces/vista-consumos/appGwConsumeViewInterface';
 import { AlertCircle, BarChart3, ChartBar, Clock, Info, Layers } from 'lucide-react'; // Añadido icono Layers
 import useSWR from 'swr';

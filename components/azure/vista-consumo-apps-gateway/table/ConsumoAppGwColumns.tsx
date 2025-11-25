@@ -1,6 +1,6 @@
 'use client'
 
-import { DynamicColumn } from '@/components/general/data-table/columns';
+import { DynamicColumn } from '@/components/general_aws/data-table/columns';
 import { ConsumeViewAppGwSummaryApiResponse } from '@/interfaces/vista-consumos/appGwConsumeViewInterface';
 
 const formatCurrency = (value: number) => {

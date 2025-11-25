@@ -1,6 +1,6 @@
 'use client'
 
-import { LoaderComponent } from '@/components/general/LoaderComponent'
+import { LoaderComponent } from '@/components/general_aws/LoaderComponent'
 import { UnusedEbsApiResponse, UnusedEbsMetric, UnusedEbsVolumeInfo } from '@/interfaces/vista-ebs-no-utilizados/ebsUnusedInterfaces'
 import useSWR from 'swr'
 import { MessageCard } from '@/components/aws/cards/MessageCards'

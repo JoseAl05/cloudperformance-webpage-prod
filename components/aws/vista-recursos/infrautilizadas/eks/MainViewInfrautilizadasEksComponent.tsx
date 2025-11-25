@@ -1,4 +1,4 @@
-import { FiltersComponent } from "@/components/general/filters/FiltersComponent";
+import { FiltersComponent } from "@/components/general_aws/filters/FiltersComponent";
 import { InstanceEksInfrautilizadaComponent } from "@/components/aws/vista-recursos/infrautilizadas/eks/InstanceEksInfrautilizadaComponent";
 import { Server } from "lucide-react";
 

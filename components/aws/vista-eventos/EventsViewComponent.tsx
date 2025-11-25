@@ -1,6 +1,6 @@
 'use client'
 
-import { LoaderComponent } from '@/components/general/LoaderComponent'
+import { LoaderComponent } from '@/components/general_aws/LoaderComponent'
 import { EventsApiResponse } from '@/interfaces/vista-eventos/eventsViewInterfaces'
 import useSWR from 'swr'
 import { MessageCard } from '@/components/aws/cards/MessageCards'

@@ -1,4 +1,4 @@
-import { FiltersComponent } from '@/components/general/filters/FiltersComponent'
+import { FiltersComponent } from '@/components/general_aws/filters/FiltersComponent'
 import { MainViewConsumoRdsOracleHorario } from '@/components/aws/vista-funciones/consumo-horario-habil-vs-no-habil/consumo-rds-oracle-horario-habil-vs-no-habil/ConsumoRdsOracleHorarioComponent'
 import { Database } from 'lucide-react'
 

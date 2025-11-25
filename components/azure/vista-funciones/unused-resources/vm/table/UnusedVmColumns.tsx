@@ -1,6 +1,6 @@
 'use client'
 import { Badge } from '@/components/ui/badge';
-import { DynamicColumn } from '@/components/general/data-table/columns';
+import { DynamicColumn } from '@/components/general_aws/data-table/columns';
 import { useSearchParams } from 'next/navigation';
 import { UnusedVm, UnusedVmDiskDetails, UnusedVmDisksData, UnusedVmInterfaceData, UnusedVmInterfaceDetails } from '@/interfaces/vista-unused-resources/unusedVmInterfaces';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';

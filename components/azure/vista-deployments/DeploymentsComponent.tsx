@@ -6,7 +6,7 @@ import { TrendingUp, Activity, Info, AlertCircle } from 'lucide-react';
 import { DeploymentsDetailsTableComponent } from '@/components/azure/vista-deployments/table/DeploymentsTableComponent';
 import useSWR from 'swr';
 import { MessageCard } from '@/components/aws/cards/MessageCards';
-import { LoaderComponent } from '@/components/general/LoaderComponent';
+import { LoaderComponent } from '@/components/general_aws/LoaderComponent';
 import { DeploymentsChartComponent } from '@/components/azure/vista-deployments/grafico/DeploymentsChartComponent';
 
 interface DeploymentsProps {

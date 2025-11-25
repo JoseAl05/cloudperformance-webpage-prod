@@ -4,29 +4,29 @@ import { useEffect, useState, useMemo } from 'react';
 import { DatePicker } from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 
-import { RegionFilterComponent } from '@/components/general/filters/RegionFilterComponent';
-import { TagFilterComponent } from '@/components/general/filters/TagsFilterComponent';
-import { ServiceFilterComponent } from '@/components/general/filters/ServiceFilterComponent';
-import { VariationServiceFilterComponent } from '@/components/general/filters/VariationServiceFilterComponent';
+import { RegionFilterComponent } from '@/components/general_aws/filters/RegionFilterComponent';
+import { TagFilterComponent } from '@/components/general_aws/filters/TagsFilterComponent';
+import { ServiceFilterComponent } from '@/components/general_aws/filters/ServiceFilterComponent';
+import { VariationServiceFilterComponent } from '@/components/general_aws/filters/VariationServiceFilterComponent';
 import { Card, CardContent } from '@/components/ui/card';
 import { Calendar, Filter, MapPin, Server, Tag, XCircle, Ban, Box, Activity, BarChart3 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { InstancesFilterComponent } from '@/components/general/filters/InstancesFilterComponent';
-import { AsgFilterComponent } from '@/components/general/filters/AsgFilterComponent';
-import { EksFilterComponent } from '@/components/general/filters/EksFilterComponent';
-import { S3BucketFilter } from '@/components/general/filters/S3FilterComponent';
-import { EbsFilterComponent } from '@/components/general/filters/EbsFilterComponent';
-import { EventsTypeFilterComponent } from '@/components/general/filters/EventsTypeFilterComponent';
-import { AdvisorCategoriesFilterComponent } from '@/components/general/filters/AdvisorCategoriesFilterComponent';
-import { AdvisorStatusFilterComponent } from '@/components/general/filters/AdvisorStatusFilterComponent';
-import { VariationMetricFilterComponent } from '@/components/general/filters/VariationMetricFilterComponent';
-import { EC2MetricFilterComponent } from '@/components/general/filters/Ec2MetricLabelFilterComponent';
-import { RDSMetricFilterComponent } from '@/components/general/filters/RdsMetricFilterComponent';
-import { AutoScalingGroupFilterComponent } from '@/components/general/filters/Ec2AutoscalingGroupsFilterComponent';
-import { MetricsFilterComponent } from '@/components/general/filters/MetricsFilterComponent';
-import { MetricsRDSFilterComponent } from '@/components/general/filters/MetricsRDSFilterComponent';
-import { VariationResourcesFilterComponent } from '@/components/general/filters/VariationResourcesFilterComponent';
+import { InstancesFilterComponent } from '@/components/general_aws/filters/InstancesFilterComponent';
+import { AsgFilterComponent } from '@/components/general_aws/filters/AsgFilterComponent';
+import { EksFilterComponent } from '@/components/general_aws/filters/EksFilterComponent';
+import { S3BucketFilter } from '@/components/general_aws/filters/S3FilterComponent';
+import { EbsFilterComponent } from '@/components/general_aws/filters/EbsFilterComponent';
+import { EventsTypeFilterComponent } from '@/components/general_aws/filters/EventsTypeFilterComponent';
+import { AdvisorCategoriesFilterComponent } from '@/components/general_aws/filters/AdvisorCategoriesFilterComponent';
+import { AdvisorStatusFilterComponent } from '@/components/general_aws/filters/AdvisorStatusFilterComponent';
+import { VariationMetricFilterComponent } from '@/components/general_aws/filters/VariationMetricFilterComponent';
+import { EC2MetricFilterComponent } from '@/components/general_aws/filters/Ec2MetricLabelFilterComponent';
+import { RDSMetricFilterComponent } from '@/components/general_aws/filters/RdsMetricFilterComponent';
+import { AutoScalingGroupFilterComponent } from '@/components/general_aws/filters/Ec2AutoscalingGroupsFilterComponent';
+import { MetricsFilterComponent } from '@/components/general_aws/filters/MetricsFilterComponent';
+import { MetricsRDSFilterComponent } from '@/components/general_aws/filters/MetricsRDSFilterComponent';
+import { VariationResourcesFilterComponent } from '@/components/general_aws/filters/VariationResourcesFilterComponent';
 
 interface FiltersComponentProps {
     Component: (params: {

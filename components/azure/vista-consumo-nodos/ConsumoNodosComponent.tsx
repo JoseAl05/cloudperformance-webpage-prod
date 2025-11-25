@@ -4,7 +4,7 @@ import useSWR from 'swr'
 import { BarChart3, AlertCircle, Info, Cpu, MemoryStick, HardDrive, PowerOff } from 'lucide-react'
 import { AzureCpuUsageComponent, AzureMemoryUsageComponent, AzureStorageUsageComponent } from '@/components/azure/vista-consumo-nodos/graficos/NodosConsumeViewUsageComponent'
 import  NodeStatusChart  from '@/components/azure/vista-consumo-nodos/graficos/NodosStatusViewComponent';
-import { LoaderComponent } from '@/components/general/LoaderComponent'
+import { LoaderComponent } from '@/components/general_aws/LoaderComponent'
 import { MessageCard } from '@/components/azure/cards/MessageCards'
 import { Card, CardContent } from '@/components/ui/card'
 

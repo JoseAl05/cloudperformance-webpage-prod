@@ -14,7 +14,7 @@ import {
   CommandList,
 } from '@/components/ui/command'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { LoaderComponent } from '@/components/general/LoaderComponent'
+import { LoaderComponent } from '@/components/general_aws/LoaderComponent'
 
 interface MetricsRDSFilterComponentProps {
   /** CSV URL-encoded con los grupos seleccionados. Ej: "CPU%20Utilization,Network%20In" */
