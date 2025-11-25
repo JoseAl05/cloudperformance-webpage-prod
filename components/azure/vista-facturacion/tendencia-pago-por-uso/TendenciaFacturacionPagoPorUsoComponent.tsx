@@ -3,7 +3,7 @@
 import useSWR from 'swr';
 import { TrendingUp, DollarSign, Calendar } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { LoaderComponent } from '@/components/general/LoaderComponent';
+import { LoaderComponent } from '@/components/general_aws/LoaderComponent';
 import { TendenciaFacturacionPagoPorUsoLineChartComponent } from './grafico/TendenciaFacturacionPagoPorUsoLineChartComponent';
 
 interface TendenciaFacturacionAzureProps {

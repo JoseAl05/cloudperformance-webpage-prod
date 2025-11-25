@@ -1,4 +1,4 @@
-import { FiltersComponent } from '@/components/general/filters/FiltersComponent'
+import { FiltersComponent } from '@/components/general_aws/filters/FiltersComponent'
 import { MainViewTopDolaresFamilia } from '@/components/aws/vista-funciones/top-facturaciones/top-dolares-por-famila-de-instancias/TopDolarFamiliaComponent'
 import { Globe } from 'lucide-react'
 

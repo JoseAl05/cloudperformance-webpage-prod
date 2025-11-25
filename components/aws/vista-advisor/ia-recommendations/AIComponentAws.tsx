@@ -3,7 +3,7 @@ import React from 'react';
 import { Bot, AlertTriangle, AlertCircle, Info, Download, Square } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import useSWR from 'swr';
-import { LoaderComponent } from '@/components/general/LoaderComponent';
+import { LoaderComponent } from '@/components/general_aws/LoaderComponent';
 import { MessageCard } from '@/components/aws/cards/MessageCards';
 
 const fetcher = (url: string) =>

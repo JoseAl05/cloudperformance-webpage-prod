@@ -1,4 +1,4 @@
-import { FiltersComponent } from '@/components/general/filters/FiltersComponent'
+import { FiltersComponent } from '@/components/general_aws/filters/FiltersComponent'
 import { InstanciasRdsMySQLChartComponent } from '@/components/aws/vista-rds/instancias-rds-mysql/InstanciasRdsMySQLChartComponent'
 import { Database } from 'lucide-react'
 

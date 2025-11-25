@@ -3,7 +3,7 @@
 import useSWR from 'swr'
 import { BarChart3, AlertCircle, Info, Cpu, MemoryStick, HardDrive, PowerOff } from 'lucide-react'
 import { VmStatusChart } from '@/components/azure/vista-consumo-vm/graficos/VmStatusViewComponent';
-import { LoaderComponent } from '@/components/general/LoaderComponent'
+import { LoaderComponent } from '@/components/general_aws/LoaderComponent'
 import { MessageCard } from '@/components/azure/cards/MessageCards'
 import { Card, CardContent } from '@/components/ui/card'
 import { VmConsumeViewMemoryUsageComponent } from '@/components/azure/vista-consumo-vm/graficos/VmConsumeViewMemoryUsageComponent';

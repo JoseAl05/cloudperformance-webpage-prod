@@ -1,4 +1,4 @@
-import { FiltersComponent } from '@/components/general/filters/FiltersComponent'
+import { FiltersComponent } from '@/components/general_aws/filters/FiltersComponent'
 import { Zap } from 'lucide-react'
 import { AdvisorViewComponent } from '@/components/aws/vista-advisor/AdvisorViewComponent'
 

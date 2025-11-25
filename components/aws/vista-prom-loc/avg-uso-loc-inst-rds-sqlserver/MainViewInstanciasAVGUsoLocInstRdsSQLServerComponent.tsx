@@ -1,5 +1,5 @@
 // components/aws/vista-rds/avg-uso-loc-inst-rds-sqlserver/MainViewInstanciasAVGUsoLocInstRdsSQLServerComponent.tsx
-import { FiltersComponent } from '@/components/general/filters/FiltersComponent'
+import { FiltersComponent } from '@/components/general_aws/filters/FiltersComponent'
 import { AVGUsoLocInstRdsSQLServerChartComponent } from '@/components/aws/vista-prom-loc/avg-uso-loc-inst-rds-sqlserver/AVGUsoLocInstRdsSQLServerChartComponent'
 import { Database } from 'lucide-react'
 export const MainViewInstanciasAVGUsoLocInstRdsSQLServerComponent = () => {

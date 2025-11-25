@@ -5,7 +5,7 @@ import { Check, ChevronsUpDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { LoaderComponent } from '@/components/general/LoaderComponent';
+import { LoaderComponent } from '@/components/general_aws/LoaderComponent';
 
 interface ServiceFilterComponentProps {
   selectedServices: string;

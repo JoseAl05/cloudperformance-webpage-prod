@@ -5,7 +5,7 @@
 // import { Button } from '@/components/ui/button';
 // import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from '@/components/ui/command';
 // import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-// import { LoaderComponent } from '@/components/general/LoaderComponent';
+// import { LoaderComponent } from '@/components/general_aws/LoaderComponent';
 
 // interface MetricsFilterComponentProps {
 //   selectedMetrics: string;
@@ -119,7 +119,7 @@ import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { LoaderComponent } from '@/components/general/LoaderComponent'
+import { LoaderComponent } from '@/components/general_aws/LoaderComponent'
 
 interface MetricsFilterComponentProps {
   /** CSV URL-encoded con los grupos seleccionados. Ej: "CPU%20Utilization,Network%20In" */

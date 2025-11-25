@@ -1,5 +1,5 @@
 'use client'
-import { FiltersComponent } from '@/components/general/filters/FiltersComponent'
+import { FiltersComponent } from '@/components/general_aws/filters/FiltersComponent'
 import { ChartLine } from 'lucide-react'
 import { Ec2InstancesConsumeComponent } from '@/components/aws/vista-consumos/ec2/Ec2InstancesConsumeComponent'
 

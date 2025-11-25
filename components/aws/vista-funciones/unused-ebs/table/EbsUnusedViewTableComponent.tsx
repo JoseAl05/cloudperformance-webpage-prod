@@ -1,8 +1,8 @@
-import { createColumns } from '@/components/general/data-table/columns';
+import { createColumns } from '@/components/general_aws/data-table/columns';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { EbsUnusedViewColumns } from '@/components/aws/vista-funciones/unused-ebs/table/EbsUnusedViewColumns';
 import { UnusedEbsVolumeInfo } from '@/interfaces/vista-ebs-no-utilizados/ebsUnusedInterfaces';
-import { DataTableGrouping } from '@/components/general/data-table/data-table-grouping';
+import { DataTableGrouping } from '@/components/general_aws/data-table/data-table-grouping';
 
 interface EbsUnusedViewTableComponentProps {
     data: UnusedEbsVolumeInfo[] | null,

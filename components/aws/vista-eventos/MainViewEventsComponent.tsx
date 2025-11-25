@@ -1,4 +1,4 @@
-import { FiltersComponent } from '@/components/general/filters/FiltersComponent'
+import { FiltersComponent } from '@/components/general_aws/filters/FiltersComponent'
 import { Zap } from 'lucide-react'
 import { EventsViewComponent } from '@/components/aws/vista-eventos/EventsViewComponent'
 

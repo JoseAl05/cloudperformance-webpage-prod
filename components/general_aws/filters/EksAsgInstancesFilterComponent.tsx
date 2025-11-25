@@ -6,54 +6,62 @@ import { Button } from '@/components/ui/button'
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import useSWR from 'swr'
-import { LoaderComponent } from '@/components/general/LoaderComponent'
+import { LoaderComponent } from '@/components/general_aws/LoaderComponent'
 
-interface AsgInstancesFilterComponentProps {
-    asg: string,
-    asgInstance: string,
-    setAsgInstance: Dispatch<SetStateAction<string>>,
+interface EksAsgInstancesFilterComponentProps {
+    eksAsg: string,
+    eksAsgInstance: string,
+    setEksAsgInstance: Dispatch<SetStateAction<string>>,
     region: string,
     startDate: string,
     endDate: string,
-    isInstanceMultiSelect: boolean,
-    isInstancesService?: string
+    isInstanceMultiselect: boolean,
+    isEksAsgInstanceMultiselect: boolean,
+    isInstancesService?: string,
 }
 
 const fetcher = (url: string) =>
     fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
         .then(r => r.json());
 
-export const AsgInstancesFilterComponent = ({
-    asg, asgInstance, setAsgInstance, startDate, endDate, region, isInstanceMultiSelect, isInstancesService
-}: AsgInstancesFilterComponentProps) => {
+export const EksAsgInstancesFilterComponent = ({
+    eksAsg,
+    eksAsgInstance,
+    setEksAsgInstance,
+    startDate,
+    endDate,
+    region,
+    isEksAsgInstanceMultiselect,
+    isInstancesService
+}: EksAsgInstancesFilterComponentProps) => {
     const [open, setOpen] = useState(false);
 
-    const shouldFetch = !!asg && !!region
+    const shouldFetch = !!eksAsg && !!region
     let url = '';
     switch (isInstancesService) {
         case 'infraUsed':
-            // /api/aws/ec2/unused/autoscaling/getInstances?date_from=2025-08-01T00:00:00&date_to=2025-09-02T23:59:59&autoscaling_group=AutoscalingWeb,awseb-e-2heftjv3ym-stack-AWSEBAutoScalingGroup-132MCA73CRXKS
-            url = shouldFetch ? `/api/aws/bridge/aws/ec2/unused/autoscaling/getInstances?date_from=${startDate}&date_to=${endDate}&region=${region}&autoscaling_group=${encodeURIComponent(asg)}` : null;
+            url = shouldFetch ? `/api/aws/bridge/aws/ec2/unused/autoscaling/getInstances?date_from=${startDate}&date_to=${endDate}&region=${region}&autoscaling_group=${encodeURIComponent(eksAsg)}`
+            // url = shouldFetch ? `/api/aws/bridge/autoscaling/all-asg-instances-ec2?date_from=${startDate}&date_to=${endDate}&region=${region}&autoscaling_group=${encodeURIComponent(asg)}`
+            : null;
             break;
         default:
             url = shouldFetch
-                ? `/api/aws/bridge/autoscaling/all-asg-instances-ec2?date_from=${startDate}&date_to=${endDate}&region=${region}&autoscaling_group=${encodeURIComponent(asg)}`
+                ? `/api/aws/bridge/eks/all-eks-asg-instances-ec2?date_from=${startDate}&date_to=${endDate}&region=${region}&autoscaling_group=${encodeURIComponent(eksAsg)}`
                 : null;
             break;
     }
     // const url = shouldFetch
-    //     ? `/api/aws/bridge/autoscaling/all-asg-instances-ec2?date_from=${startDate}&date_to=${endDate}&region=${region}&autoscaling_group=${encodeURIComponent(asg)}`
+    //     ? `/api/aws/bridge/eks/all-eks-asg-instances-ec2?date_from=${startDate}&date_to=${endDate}&region=${region}&autoscaling_group=${encodeURIComponent(eksAsg)}`
     //     : null
 
     const { data, error, isLoading } = useSWR<string[]>(url, fetcher);
-
     useEffect(() => {
         if (!isLoading && !error && shouldFetch) {
             if (!Array.isArray(data) || data.length === 0) {
-                setAsgInstance('');
+                setEksAsgInstance('');
             }
         }
-    }, [data, isLoading, error, shouldFetch, setAsgInstance]);
+    }, [data, isLoading, error, shouldFetch, setEksAsgInstance]);
 
 
     if (isLoading) return <LoaderComponent size='small' />
@@ -62,35 +70,29 @@ export const AsgInstancesFilterComponent = ({
     const list: string[] = Array.isArray(data) ? data : []
     const noInstances = shouldFetch && list.length === 0
 
-    const selectedArray = asgInstance ? asgInstance.split(',').filter(Boolean) : [];
+    const selectedArray = eksAsgInstance ? eksAsgInstance.split(',').filter(Boolean) : [];
     const getDisplayText = () => {
         if (noInstances) return 'Sin instancias para el ASG seleccionado';
-        if (!asgInstance || (!isInstanceMultiSelect && asgInstance === 'all')) return 'Seleccione una instancia';
-        if (isInstanceMultiSelect && selectedArray.includes('all')) return 'Todas las Instancias';
+        if (!eksAsgInstance || (!isEksAsgInstanceMultiselect && eksAsgInstance === 'all')) return 'Seleccione una instancia';
+        if (isEksAsgInstanceMultiselect && selectedArray.includes('all')) return 'Todas las Instancias';
         if (selectedArray.length === 1) return selectedArray[0];
         return `${selectedArray.length} instancias seleccionadas`;
     };
 
     const handleInstanceToggle = (val: string) => {
         const curr = selectedArray.slice();
-        if (val === 'all' && asg !== 'all') {
-            setAsgInstance(list.toString());
+        if (val === 'all' && eksAsg !== 'all') {
+            setEksAsgInstance(list.toString());
             return;
         }
         if (val === 'all') {
-            setAsgInstance('all');
+            setEksAsgInstance('all');
             return;
-        }
-        if (val !== 'all' && asg === 'all') {
-            if (curr.includes('all')) {
-                const idx = curr.indexOf('all');
-                curr.splice(idx, 1);
-            }
         }
         const idx = curr.indexOf(val);
         if (idx >= 0) curr.splice(idx, 1);
         else curr.push(val);
-        setAsgInstance(curr.length ? curr.join(',') : '');
+        setEksAsgInstance(curr.length ? curr.join(',') : '');
     };
 
     return (
@@ -117,7 +119,7 @@ export const AsgInstancesFilterComponent = ({
                             <CommandEmpty>{noInstances ? 'No hay instancias disponibles.' : 'No se encontró instancia.'}</CommandEmpty>
                             {!noInstances && shouldFetch && (
                                 <CommandGroup className='max-h-[200px] overflow-y-auto'>
-                                    {isInstanceMultiSelect && (
+                                    {isEksAsgInstanceMultiselect && (
                                         <CommandItem value='all' onSelect={() => handleInstanceToggle('all')}>
                                             <Check className={cn('mr-2 h-4 w-4', selectedArray.includes('all') ? 'opacity-100' : 'opacity-0')} />
                                             Todas las Instancias
@@ -125,13 +127,13 @@ export const AsgInstancesFilterComponent = ({
                                     )}
                                     {list.map((i) => (
                                         <CommandItem key={i} value={i} onSelect={() => {
-                                            if (isInstanceMultiSelect) handleInstanceToggle(i)
+                                            if (isEksAsgInstanceMultiselect) handleInstanceToggle(i)
                                             else {
-                                                setAsgInstance(i)
+                                                setEksAsgInstance(i)
                                                 setOpen(false)
                                             }
                                         }}>
-                                            <Check className={cn('mr-2 h-4 w-4', isInstanceMultiSelect ? (selectedArray.includes(i) ? 'opacity-100' : 'opacity-0') : (asgInstance === i ? 'opacity-100' : 'opacity-0'))} />
+                                            <Check className={cn('mr-2 h-4 w-4', isEksAsgInstanceMultiselect ? (selectedArray.includes(i) ? 'opacity-100' : 'opacity-0') : (eksAsgInstance === i ? 'opacity-100' : 'opacity-0'))} />
                                             {i}
                                         </CommandItem>
                                     ))}

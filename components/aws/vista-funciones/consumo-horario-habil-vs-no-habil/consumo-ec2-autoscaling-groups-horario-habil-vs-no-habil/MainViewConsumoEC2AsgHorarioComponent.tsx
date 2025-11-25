@@ -1,4 +1,4 @@
-import { FiltersComponent } from '@/components/general/filters/FiltersComponent'
+import { FiltersComponent } from '@/components/general_aws/filters/FiltersComponent'
 import { MainViewConsumoEC2AutoscalingGroupsHorario }  from '@/components/aws/vista-funciones/consumo-horario-habil-vs-no-habil/consumo-ec2-autoscaling-groups-horario-habil-vs-no-habil/ConsumoEC2AsgHorarioComponent'
 import { Computer } from 'lucide-react'
 

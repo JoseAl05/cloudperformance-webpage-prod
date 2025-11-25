@@ -1,13 +1,13 @@
 'use client'
 
 import { Dispatch, SetStateAction, useEffect, useState } from 'react';
-import { LoaderComponent } from '@/components/general/LoaderComponent';
+import { LoaderComponent } from '@/components/general_aws/LoaderComponent';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils'
 import { Check, ChevronsUpDown } from 'lucide-react';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
-import { EksAsgFilterComponent } from '@/components/general/filters/EksAsgFilterComponent';
+import { EksAsgFilterComponent } from '@/components/general_aws/filters/EksAsgFilterComponent';
 import useSWR from 'swr';
 
 interface EksFilterComponentProps {

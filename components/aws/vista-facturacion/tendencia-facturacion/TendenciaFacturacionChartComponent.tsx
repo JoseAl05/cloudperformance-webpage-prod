@@ -4,7 +4,7 @@ import useSWR from 'swr';
 import { TrendingUp, DollarSign, Calendar } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { aws_regions } from '@/lib/aws_regions';
-import { LoaderComponent } from '@/components/general/LoaderComponent';
+import { LoaderComponent } from '@/components/general_aws/LoaderComponent';
 import { TendenciaFacturacionLineChartComponent } from '@/components/aws/vista-facturacion/tendencia-facturacion/grafico/TendenciaFacturacionLineChartComponent';
 
 interface TendenciaFacturacionProps {

@@ -7,7 +7,7 @@ import { VmDeploymentsTableComponent } from '@/components/azure/vista-recursos-v
 import { VmBillingChart, VmBillingChartComponent } from '@/components/azure/vista-recursos-vm/graficos/VmBillingChartComponent'
 import { VmMeasuresChart, VmMeasuresChartComponent } from '@/components/azure/vista-recursos-vm/graficos/VmMeasuresChartComponent'
 import { VmBillingPropertiesComponent } from '@/components/azure/vista-recursos-vm/graficos/VmBillingPropertiesComponent'
-import { LoaderComponent } from '@/components/general/LoaderComponent'
+import { LoaderComponent } from '@/components/general_aws/LoaderComponent'
 import { MessageCard } from '@/components/aws/cards/MessageCards'
 import { RecursosVmCardsComponent } from '@/components/azure/vista-recursos-vm/info/RecursosVmCardsComponent'
 import { RecursosVmCpuMetricsComponent } from '@/components/azure/vista-recursos-vm/graficos/RecursosVmCpuMetricsComponent'
