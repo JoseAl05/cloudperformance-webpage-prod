@@ -8,105 +8,105 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import useSWR from 'swr'
 import { LoaderComponent } from '@/components/general_azure/LoaderComponent'
 
-interface UnusedAppGwFilterComponentProps {
+interface UnusedTrafficManagerFilterProps {
     startDate: Date;
     endDate: Date;
     region: string;
     subscription: string;
-    unusedAppGw: string;
+    unusedTm: string;
     resourceGroup: string;
-    setUnusedAppGw: Dispatch<SetStateAction<string>>;
-    isUnusedAppGFilterMultiselect: boolean;
+    setUnusedTm: Dispatch<SetStateAction<string>>;
+    isUnusedTmFilterMultiselect: boolean;
 }
 
-type ApiUnusedAppGw =
-    | { gw_id_lowercase: string; gw_name: string }
+type ApiUnusedTm =
+    | { tm_id_lowercase: string; tm_name: string }
     | string
 
 const fetcher = (url: string) =>
     fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
         .then(r => r.json());
 
-export const UnusedAppGwFilterComponent = ({
+export const UnusedTrafficManagerFilter = ({
     startDate,
     endDate,
     region,
     subscription,
-    unusedAppGw,
+    unusedTm,
+    setUnusedTm,
     resourceGroup,
-    setUnusedAppGw,
-    isUnusedAppGFilterMultiselect
-}: UnusedAppGwFilterComponentProps) => {
+    isUnusedTmFilterMultiselect
+}: UnusedTrafficManagerFilterProps) => {
     const [open, setOpen] = useState(false);
     const startDateFormatted = startDate ? startDate.toISOString().replace('Z', '').slice(0, -4) : '';
     const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : '';
 
-    const url = `/api/azure/bridge/azure/apps_gateway/all_unused_application_gateways?date_from=${startDateFormatted}&date_to=${endDateFormatted}&subscription_id=${subscription}&location=${region}&resource_groups=${resourceGroup}`
-    const { data, error, isLoading } = useSWR<ApiUnusedAppGw[]>(url, fetcher)
+    const url = `/api/azure/bridge/azure/traffic_managers/all_unused_traffic_managers?date_from=${startDateFormatted}&date_to=${endDateFormatted}&subscription_id=${subscription}&location=${region}&resource_groups=${resourceGroup}`
+    const { data, error, isLoading } = useSWR<ApiUnusedTm[]>(url, fetcher)
 
-    const unusedAppsGw = useMemo(() => {
+    const unusedTms = useMemo(() => {
         if (!Array.isArray(data)) return [] as { id: string; name: string }[]
         if (data.length === 0) return []
         if (typeof data[0] === 'string') {
             return (data as string[]).map((id) => ({ id, name: id }))
         }
-        return (data as { gw_id_lowercase: string; gw_name: string }[]).map((s) => ({
-            id: s.gw_id_lowercase,
-            name: s.gw_name,
+        return (data as { tm_id_lowercase: string; tm_name: string }[]).map((s) => ({
+            id: s.tm_id_lowercase,
+            name: s.tm_name,
         }))
     }, [data])
 
-    const nounusedAppsGw = unusedAppsGw.length === 0
+    const noUnusedTms = unusedTms.length === 0
 
     const selectedIds = useMemo(
-        () => (unusedAppGw ? unusedAppGw.split(',').filter(Boolean) : []),
-        [unusedAppGw]
+        () => (unusedTm ? unusedTm.split(',').filter(Boolean) : []),
+        [unusedTm]
     )
 
-    const allIds = useMemo(() => unusedAppsGw.map((lb) => lb.id), [unusedAppsGw]);
+    const allIds = useMemo(() => unusedTms.map((lb) => lb.id), [unusedTms]);
 
-    const isAllSelected = unusedAppsGw.length > 0 && selectedIds.length === unusedAppsGw.length;
+    const isAllSelected = unusedTms.length > 0 && selectedIds.length === unusedTms.length;
 
     const idToName = useMemo(() => {
         const map = new Map<string, string>()
-        for (const s of unusedAppsGw) map.set(s.id, s.name)
+        for (const s of unusedTms) map.set(s.id, s.name)
         return map
-    }, [unusedAppsGw])
+    }, [unusedTms])
 
     if (isLoading) return <LoaderComponent size='small' />
-    if (error) return <div>Error al cargar applications gateway infrautilizados</div>
+    if (error) return <div>Error al cargar traffic managers infrautilizados</div>
 
     const getDisplayText = () => {
-        if (nounusedAppsGw) return 'Sin applications gateway infrautilizados disponibles'
-        if (isUnusedAppGFilterMultiselect) {
-            if (!unusedAppGw) return 'Seleccione application gateway'
+        if (noUnusedTms) return 'Sin traffic managers infrautilizados disponibles'
+        if (isUnusedTmFilterMultiselect) {
+            if (!unusedTm) return 'Seleccione traffic manager'
 
-            if (selectedIds.includes('all') || isAllSelected) return 'Todos los applications gateway infrautilizados'
+            if (selectedIds.includes('all') || isAllSelected) return 'Todos los traffic managers infrautilizados'
 
             if (selectedIds.length === 1) return idToName.get(selectedIds[0]) ?? selectedIds[0]
-            return `${selectedIds.length} applications gateway seleccionados`
+            return `${selectedIds.length} traffic managers seleccionados`
         } else {
-            if (!unusedAppGw) return 'Selecciona application gateway infrautilizado'
-            return idToName.get(unusedAppGw) ?? unusedAppGw
+            if (!unusedTm) return 'Selecciona traffic manager infrautilizado'
+            return idToName.get(unusedTm) ?? unusedTm
         }
     }
 
-    const handleunusedAppsGwToggle = (unusedAppGwId: string) => {
-        if (unusedAppGwId === 'all') {
-            setUnusedAppGw(isAllSelected ? '' : allIds.join(','))
+    const handleUnusedTmsToggle = (unusedTmId: string) => {
+        if (unusedTmId === 'all') {
+            setUnusedTm(isAllSelected ? '' : allIds.join(','))
         } else {
-            let appsGw = [...selectedIds]
-            appsGw = appsGw.filter((s) => s !== 'all')
+            let tms = [...selectedIds]
+            tms = tms.filter((s) => s !== 'all')
 
-            if (appsGw.includes(unusedAppGwId)) {
-                appsGw = appsGw.filter((s) => s !== unusedAppGwId)
+            if (tms.includes(unusedTmId)) {
+                tms = tms.filter((s) => s !== unusedTmId)
             } else {
-                appsGw.push(unusedAppGwId)
+                tms.push(unusedTmId)
             }
-            setUnusedAppGw(appsGw.join(','))
+            setUnusedTm(tms.join(','))
         }
     }
-    return isUnusedAppGFilterMultiselect ? (
+    return isUnusedTmFilterMultiselect ? (
         <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
                 <Button
@@ -114,7 +114,7 @@ export const UnusedAppGwFilterComponent = ({
                     role='combobox'
                     aria-expanded={open}
                     className='w-full justify-between bg-transparent'
-                    disabled={nounusedAppsGw}
+                    disabled={noUnusedTms}
                 >
                     <span className='truncate text-left max-w-[85%]'>{getDisplayText()}</span>
                     <ChevronsUpDown className='ml-2 h-4 w-4 shrink-0 opacity-50' />
@@ -122,16 +122,16 @@ export const UnusedAppGwFilterComponent = ({
             </PopoverTrigger>
             <PopoverContent className='w-full p-0'>
                 <Command>
-                    <CommandInput placeholder='Buscar application gateway...' />
+                    <CommandInput placeholder='Buscar traffic manager...' />
                     <CommandEmpty>
-                        {nounusedAppsGw ? 'No hay application gateways disponibles.' : 'No se encontró application gateway.'}
+                        {noUnusedTms ? 'No hay traffic managers disponibles.' : 'No se encontró traffic manager.'}
                     </CommandEmpty>
 
-                    {!nounusedAppsGw && (
+                    {!noUnusedTms && (
                         <CommandGroup className='max-h-[200px] overflow-y-auto'>
                             <CommandItem
                                 value='all'
-                                onSelect={() => handleunusedAppsGwToggle('all')}
+                                onSelect={() => handleUnusedTmsToggle('all')}
                             >
                                 <Check
                                     className={cn(
@@ -139,14 +139,14 @@ export const UnusedAppGwFilterComponent = ({
                                         isAllSelected ? 'opacity-100' : 'opacity-0'
                                     )}
                                 />
-                                Todos los Applications Gateway
+                                Todos los Traffic managers
                             </CommandItem>
 
-                            {unusedAppsGw.map(({ id, name }) => (
+                            {unusedTms.map(({ id, name }) => (
                                 <CommandItem
                                     key={id}
                                     value={`${name} ${id}`}
-                                    onSelect={() => handleunusedAppsGwToggle(id)}
+                                    onSelect={() => handleUnusedTmsToggle(id)}
                                 >
                                     <Check
                                         className={cn(
@@ -170,7 +170,7 @@ export const UnusedAppGwFilterComponent = ({
                     role='combobox'
                     aria-expanded={open}
                     className='w-full justify-between bg-transparent'
-                    disabled={nounusedAppsGw}
+                    disabled={noUnusedTms}
                 >
                     <span className='truncate text-left max-w-[85%]'>{getDisplayText()}</span>
                     <ChevronsUpDown className='ml-2 h-4 w-4 shrink-0 opacity-50' />
@@ -178,23 +178,23 @@ export const UnusedAppGwFilterComponent = ({
             </PopoverTrigger>
             <PopoverContent className='w-full p-0'>
                 <Command>
-                    <CommandInput placeholder='Buscar application gateway...' />
+                    <CommandInput placeholder='Buscar traffic manager...' />
                     <CommandList>
                         <CommandEmpty>
-                            {nounusedAppsGw ? 'No hay applications gateway disponibles.' : 'No se encontró application gateway.'}
+                            {noUnusedTms ? 'No hay traffic managers disponibles.' : 'No se encontró traffic manager.'}
                         </CommandEmpty>
-                        {!nounusedAppsGw && (
+                        {!noUnusedTms && (
                             <CommandGroup className='max-h-[250px] overflow-y-auto'>
-                                {unusedAppsGw.map(({ id, name }) => (
+                                {unusedTms.map(({ id, name }) => (
                                     <CommandItem
                                         key={id}
                                         value={`${name} ${id}`}
                                         onSelect={() => {
-                                            setUnusedAppGw(id)
+                                            setUnusedTm(id)
                                             setOpen(false)
                                         }}
                                     >
-                                        <Check className={cn('mr-2 h-4 w-4', unusedAppGw === id ? 'opacity-100' : 'opacity-0')} />
+                                        <Check className={cn('mr-2 h-4 w-4', unusedTm === id ? 'opacity-100' : 'opacity-0')} />
                                         <span className='truncate'>{name}</span>
                                     </CommandItem>
                                 ))}

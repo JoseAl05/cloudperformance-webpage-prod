@@ -75,7 +75,6 @@ export const ResourceGroupFilterComponent = ({
   )
 
   useEffect(() => { setIsMounted(true) }, [])
-  console.log(selectedResourceGroup);
   // Resetear el resource group seleccionado cuando cambian región o suscripción
   useEffect(() => {
     if (!shouldFetch && selectedResourceGroup && selectedResourceGroup !== 'all_resource_groups') {
