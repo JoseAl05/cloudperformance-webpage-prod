@@ -5,7 +5,7 @@ import bcrypt from 'bcryptjs';
 import { rateLimit } from '@/lib/rateLimit';
 import { send2FACodeEmail } from '@/lib/email';
 import { createLogger } from '@/lib/logger';
-import newrelic from 'newrelic';
+// import newrelic from 'newrelic';
 
 const logger = createLogger('LoginAPI');
 

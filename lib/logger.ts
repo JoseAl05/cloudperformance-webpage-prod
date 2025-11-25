@@ -30,7 +30,7 @@ class Logger {
     return true;
   }
 
-  private async write(level: LogLevel, message: string, metadata?: LogMetadata) {
+  private write(level: LogLevel, message: string, metadata?: LogMetadata) {
     if (!this.shouldLog(level)) return;
 
     const logEntry = this.formatLog(level, message, metadata);
@@ -43,53 +43,87 @@ class Logger {
         debug: '\x1b[90m',
       }[level];
 
+      const reset = '\x1b[0m';
+
       console[level === 'error' ? 'error' : level === 'warn' ? 'warn' : 'log'](
-        `${color}[${logEntry.timestamp}] [${logEntry.level}] [${logEntry.context}] \x1b[0m ${message}`,
+        `${color}[${logEntry.timestamp}] [${logEntry.level}] [${logEntry.context}]${reset} ${message}`,
         metadata ?? ''
       );
     } else {
       console.log(JSON.stringify(logEntry));
     }
 
-    await this.sendToNewRelic(level, message, metadata);
+    this.sendToNewRelic(level, message, metadata);
   }
 
-  private async sendToNewRelic(level: LogLevel, message: string, metadata?: LogMetadata) {
+  private sendToNewRelic(level: LogLevel, message: string, metadata?: LogMetadata) {
+    if (process.env.NEW_RELIC_ENABLED !== 'true') return;
+
+    // Solo en entorno server (Next.js evita Webpack bundle)
+    if (typeof window !== 'undefined') return;
+
     try {
-      if (typeof window === 'undefined') {
-        // Import dinámico (no require)
-        const newrelic = await import('newrelic');
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const newrelic = require('newrelic') as {
+        agent?: { config?: { agent_enabled?: boolean } };
+        addCustomAttribute: (k: string, v: unknown) => void;
+        noticeError: (err: Error, meta?: Record<string, unknown>) => void;
+        recordCustomEvent: (name: string, data: Record<string, unknown>) => void;
+      };
 
-        if (metadata) {
-          Object.entries(metadata).forEach(([key, value]) => {
-            if (value === undefined) return; // evita mandar undefined
+      if (!newrelic?.agent?.config?.agent_enabled) {
+        if (process.env.NODE_ENV === 'development') {
+          console.debug('New Relic cargado pero el agente no está activo');
+        }
+        return;
+      }
 
+      // Agregar metadata personalizada
+      if (metadata) {
+        Object.entries(metadata).forEach(([key, value]) => {
+          try {
             newrelic.addCustomAttribute(
               key,
-              typeof value === 'object' ? JSON.stringify(value) : (value as string | number | boolean)
+              typeof value === 'object' ? JSON.stringify(value) : value
             );
-          });
-
-        }
-
-        if (level === 'error' && metadata?.error instanceof Error) {
-          newrelic.noticeError(metadata.error, {
-            context: this.context,
-            customMessage: message,
-            ...metadata
-          });
-        }
-
-        newrelic.recordCustomEvent('ApplicationLog', {
-          level: level.toUpperCase(),
-          context: this.context,
-          message,
-          timestamp: new Date().toISOString(),
-          ...metadata
+          } catch {
+            /* ignorado */
+          }
         });
       }
-    } catch (err: unknown) {
-      console.error('Error enviando log a New Relic:', err);
+
+      // Registrar errores
+      const metadataError = metadata as { error?: Error };
+
+      if (level === 'error' && metadataError?.error instanceof Error) {
+        newrelic.noticeError(metadataError.error, {
+          context: this.context,
+          customMessage: message,
+          ...(metadata ?? {})
+        });
+      }
+
+      // Crear evento personalizado
+      const eventData: Record<string, unknown> = {
+        level: level.toUpperCase(),
+        context: this.context,
+        message,
+        timestamp: new Date().toISOString(),
+        ...(metadata ?? {})
+      };
+
+      newrelic.recordCustomEvent('ApplicationLog', eventData);
+
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Evento enviado a New Relic:', {
+          type: 'ApplicationLog',
+          data: eventData,
+        });
+      }
+    } catch (error) {
+      if (process.env.NODE_ENV === 'development') {
+        console.debug('New Relic no disponible:', error);
+      }
     }
   }
 
@@ -101,18 +135,19 @@ class Logger {
     this.write('warn', message, metadata);
   }
 
-  error(message: string, error?: Error | LogMetadata, metadata?: LogMetadata) {
+  error(message: string, errorOrMeta?: Error | LogMetadata, metadata?: LogMetadata) {
     const errorMetadata: LogMetadata = {};
 
-    if (error instanceof Error) {
+    if (errorOrMeta instanceof Error) {
       errorMetadata.error = {
-        name: error.name,
-        message: error.message,
-        stack: error.stack,
+        name: errorOrMeta.name,
+        message: errorOrMeta.message,
+        stack: errorOrMeta.stack,
       };
+
       if (metadata) Object.assign(errorMetadata, metadata);
-    } else if (error) {
-      Object.assign(errorMetadata, error);
+    } else if (errorOrMeta) {
+      Object.assign(errorMetadata, errorOrMeta);
     }
 
     this.write('error', message, errorMetadata);
@@ -131,13 +166,14 @@ class Logger {
       const duration = Date.now() - start;
       this.info(`${label} - completado`, { duration: `${duration}ms` });
       return result;
-    } catch (error: unknown) {
+    } catch (err) {
       const duration = Date.now() - start;
-      this.error(`${label} - fallido`, { error, duration: `${duration}ms` });
-      throw error;
+      this.error(`${label} - fallido`, err as Error, { duration: `${duration}ms` });
+      throw err;
     }
   }
 }
 
 export const createLogger = (context: string) => new Logger(context);
+
 export const logger = createLogger('App');
