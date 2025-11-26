@@ -7,6 +7,7 @@ import { useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { UnusedTm } from '@/interfaces/vista-unused-resources/unusedTmInterfaces';
 import { UnusedTrafficManagerInsightModal } from '@/components/azure/vista-funciones/unused-traffic-managers/info/UnusedTrafficManagerInsightModal';
+import Link from 'next/link';
 
 const DetailsCell = ({ tm }: { tm: UnusedTm }) => {
     const [open, setOpen] = useState(false);
@@ -38,8 +39,20 @@ const QueryParams = () => {
     const startDateParam = searchParams.get('startDate');
     const endDateParam = searchParams.get('endDate');
     const resourceGroupParam = searchParams.get('resourceGroup');
+    const tagKeyParam = searchParams.get('tagKey');
+    const tagValueParam = searchParams.get('tagValue');
+    const unusedTmParam = searchParams.get('unused_tm');
 
-    return { startDateParam: startDateParam, endDateParam: endDateParam, resourceGroup: resourceGroupParam }
+
+
+    return {
+        startDateParam: startDateParam || '',
+        endDateParam: endDateParam || '',
+        resourceGroup: resourceGroupParam || '',
+        tagKey: tagKeyParam || '',
+        tagValue: tagValueParam || '',
+        unusedTm: unusedTmParam || ''
+    }
 }
 
 export const UnusedTrafficManagerColumns: DynamicColumn<UnusedTm>[] = [
@@ -48,19 +61,32 @@ export const UnusedTrafficManagerColumns: DynamicColumn<UnusedTm>[] = [
         accessorKey: "name",
         cell: ({ row, getValue }) => {
             const name = getValue() as string;
-            // const startDate = QueryParams().startDateParam;
-            // const endDate = QueryParams().endDateParam;
-            // const resourceGroup = QueryParams().resourceGroup;
+            const startDate = QueryParams().startDateParam;
+            const endDate = QueryParams().endDateParam;
+            const resourceGroup = QueryParams().resourceGroup;
+            const tagKey = QueryParams().tagKey;
+            const tagValue = QueryParams().tagValue;
 
             const resourceId = row.original.resource_id;
 
             return (
                 <div className="flex flex-col">
-                    {/* <Link
-                        href={{ pathname: '/azure/consumo-apps-gateway/', query: { appgateway: resourceId, startDate: startDate, endDate: endDate, resourceGroup: resourceGroup } }}
+                    <Link
+                        href={{
+                            pathname: '/azure/recursos-traffic-manager',
+                            query: {
+                                startDate: startDate,
+                                endDate: endDate,
+                                resourceGroup: resourceGroup,
+                                tagKey: tagKey,
+                                tagValue: tagValue,
+                                tm_profile: resourceId
+                            }
+                        }}
+                        className='cursor-pointer'
                         rel="noopener noreferrer"
                         target="_blank"
-                    > */}
+                    >
                         <span className="font-medium">
                             {name}
                         </span>
@@ -70,7 +96,7 @@ export const UnusedTrafficManagerColumns: DynamicColumn<UnusedTm>[] = [
                                 {resourceId}
                             </span>
                         </div>
-                    {/* </Link> */}
+                    </Link>
                 </div>
             )
         }
