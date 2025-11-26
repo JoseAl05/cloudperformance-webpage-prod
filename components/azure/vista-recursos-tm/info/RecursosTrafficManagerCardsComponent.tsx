@@ -22,8 +22,8 @@ export const RecursosTrafficManagerCardsComponent = ({ latestData }: RecursosTra
         syncTime.getFullYear() === today.getFullYear();
 
     const cardTitle = isToday
-        ? 'Estado Actual del Recurso'
-        : `Estado registrado el: ${syncTime.toLocaleDateString()} ${syncTime.toLocaleTimeString()}`;
+        ? 'Actual del Recurso'
+        : `registrado el: ${syncTime.toLocaleDateString()} ${syncTime.toLocaleTimeString()}`;
 
     const isEnabled = latestData.profile_status === 'Enabled';
     const monitorStatus = latestData.monitor_config.profile_monitor_status;
@@ -45,7 +45,7 @@ export const RecursosTrafficManagerCardsComponent = ({ latestData }: RecursosTra
                 <CardHeader className="pb-2">
                     <CardTitle className="text-lg flex items-center gap-2">
                         <Server className="h-5 w-5 text-blue-500" />
-                        {cardTitle}
+                        Estado {cardTitle}
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4 pt-4">
@@ -87,7 +87,7 @@ export const RecursosTrafficManagerCardsComponent = ({ latestData }: RecursosTra
                 <CardHeader className="pb-2">
                     <CardTitle className="text-lg flex items-center gap-2">
                         <Activity className="h-5 w-5 text-orange-500" />
-                        Salud y Monitoreo
+                        Salud y Monitoreo {cardTitle}
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4 pt-4">
@@ -139,7 +139,7 @@ export const RecursosTrafficManagerCardsComponent = ({ latestData }: RecursosTra
                 <CardHeader className="pb-2">
                     <CardTitle className="text-lg flex items-center gap-2">
                         <ShieldAlert className="h-5 w-5 text-purple-500" />
-                        Análisis de Uso
+                        Análisis de Uso {cardTitle}
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3 pt-4">
