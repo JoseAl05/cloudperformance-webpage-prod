@@ -29,6 +29,7 @@ import { UnusedLoadbalancerFilterComponent } from '@/components/general_azure/fi
 import { UnusedAppGwFilterComponent } from '@/components/general_azure/filters/UnusedAppGwFilterComponent';
 import { AppGwFilterComponent } from '@/components/general_azure/filters/AppGwFilterComponent';
 import { UnusedTrafficManagerFilter } from '@/components/general_azure/filters/UnusedTrafficManagerFilter';
+import { TrafficManagerFilterComponent } from '@/components/general_azure/filters/TrafficManagerFilterComponent';
 
 interface FiltersComponentProps {
     Component: (params: {
@@ -100,6 +101,8 @@ interface FiltersComponentProps {
     isAppGFilterMultiselect?: boolean;
     unusedTmFilter?: boolean;
     isUnusedTmFilterMultiselect?: boolean;
+    tmFilter?: boolean;
+    isTmFilterMultiselect?: boolean;
 }
 
 export const FiltersComponent = ({
@@ -147,7 +150,9 @@ export const FiltersComponent = ({
     appGFilter = false,
     isAppGFilterMultiselect = false,
     unusedTmFilter = false,
-    isUnusedTmFilterMultiselect = false
+    isUnusedTmFilterMultiselect = false,
+    tmFilter = false,
+    isTmFilterMultiselect = false
 }: FiltersComponentProps) => {
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -189,7 +194,8 @@ export const FiltersComponent = ({
         const selectedUnusedLbParam = searchParams.get('unused_loadbalancer');
         const selectedUnusedAppGParam = searchParams.get('unused_appgateway');
         const selectedAppGParam = searchParams.get('appgateway');
-        const selectedUnusedTmParam = searchParams.get('unused_tm')
+        const selectedUnusedTmParam = searchParams.get('unused_tm');
+        const selectedTmParam = searchParams.get('tm_profile');
 
         let startDate = startDateParam ? new Date(startDateParam) : yesterday;
         let endDate = endDateParam ? new Date(endDateParam) : new Date();
@@ -236,7 +242,8 @@ export const FiltersComponent = ({
             selectedUnusedLbParam: selectedUnusedLbParam || '',
             selectedUnusedAppGParam: selectedUnusedAppGParam || '',
             selectedAppGParam: selectedAppGParam || '',
-            selectedUnusedTmParam: selectedUnusedTmParam || ''
+            selectedUnusedTmParam: selectedUnusedTmParam || '',
+            selectedTmParam: selectedTmParam || ''
         };
     };
 
@@ -270,7 +277,7 @@ export const FiltersComponent = ({
     const [tempUnusedAppGw, setTempUnusedAppGw] = useState<string>(filters.selectedUnusedAppGParam);
     const [tempAppGw, setTempAppGw] = useState<string>(filters.selectedAppGParam);
     const [tempUnusedTm, setTempUnusedTm] = useState<string>(filters.selectedUnusedTmParam);
-
+    const [tempTm, setTempTm] = useState<string>(filters.selectedTmParam);
 
     useEffect(() => {
         const newFilters = getInitialFilters();
@@ -304,6 +311,7 @@ export const FiltersComponent = ({
         setTempUnusedAppGw(newFilters.selectedUnusedAppGParam);
         setTempAppGw(newFilters.selectedAppGParam);
         setTempUnusedTm(newFilters.selectedUnusedTmParam);
+        setTempTm(newFilters.selectedTmParam);
     }, [searchParams]);
 
     const onChange = (dates: [Date | null, Date | null]) => setTempRange(dates);
@@ -352,7 +360,8 @@ export const FiltersComponent = ({
             selectedUnusedLb: tempUnusedLb,
             selectedUnusedAppG: tempUnusedAppGw,
             selectedAppGw: tempAppGw,
-            selectedUnusedTm: tempUnusedTm
+            selectedUnusedTm: tempUnusedTm,
+            selectedTm: tempTm
         };
 
         setFilters(newFilters as unknown);
@@ -405,7 +414,8 @@ export const FiltersComponent = ({
             { flag: unusedLbFilter, key: 'unused_loadbalancer', value: newFilters.selectedUnusedLb },
             { flag: unusedAppGFilter, key: 'unused_appgateway', value: newFilters.selectedUnusedAppG },
             { flag: appGFilter, key: 'appgateway', value: newFilters.selectedAppGw },
-            { flag: unusedTmFilter, key: 'unused_tm', value: newFilters.selectedUnusedTm }
+            { flag: unusedTmFilter, key: 'unused_tm', value: newFilters.selectedUnusedTm },
+            { flag: tmFilter, key: 'tm_profile', value: newFilters.selectedTm }
         ];
         filterConfigs.forEach(({ flag, key, value, ignoreValue }) => {
             if (flag && value !== null && value !== undefined && value !== '' && value !== ignoreValue) {
@@ -444,7 +454,8 @@ export const FiltersComponent = ({
             selectedUnusedLb: '',
             selectedUnusedAppG: '',
             selectedAppGw: '',
-            selectedUnusedTm: ''
+            selectedUnusedTm: '',
+            selectedTm: ''
         };
 
         setFilters(defaultFilters as unknown);
@@ -474,6 +485,8 @@ export const FiltersComponent = ({
         setTempUnusedAppGw(defaultFilters.selectedUnusedAppG);
         setTempAppGw(defaultFilters.selectedAppGw);
         setTempUnusedTm(defaultFilters.selectedUnusedTm);
+        setTempTm(defaultFilters.selectedTm);
+
         router.push(window.location.pathname);
     };
 
@@ -884,6 +897,24 @@ export const FiltersComponent = ({
                                 />
                             </div>
                         )}
+                        {tmFilter && (
+                            <div className='space-y-2'>
+                                <label className='text-sm font-medium text-foreground flex items-center gap-2'>
+                                    <Boxes className='h-4 w-4' />
+                                    Traffic Managers
+                                </label>
+                                <TrafficManagerFilterComponent
+                                    startDate={tempStartDate}
+                                    endDate={tempEndDate}
+                                    region={tempRegion}
+                                    subscription={tempSubscription}
+                                    tm={tempTm}
+                                    resourceGroup={tempResourceGroup}
+                                    setTm={setTempTm}
+                                    isTmFilterMultiselect={isTmFilterMultiselect}
+                                />
+                            </div>
+                        )}
                         {appGFilter && (
                             <div className='space-y-2'>
                                 <label className='text-sm font-medium text-foreground flex items-center gap-2'>
@@ -944,6 +975,7 @@ export const FiltersComponent = ({
                     selectedUnusedAppG={filters.selectedUnusedAppGParam}
                     selectedAppg={filters.selectedAppGParam}
                     selectedUnusedTm={filters.selectedUnusedTmParam}
+                    selectedTm={filters.selectedTmParam}
                 />
             </Card>
         </div>

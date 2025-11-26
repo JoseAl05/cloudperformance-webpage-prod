@@ -201,7 +201,10 @@ export const SidebarComponent = ({
             { label: 'Vista Advisor', icon: Pyramid, href: '/azure/advisor' },
             { label: 'Vista Saving Plans', icon: HandCoins, href: '/azure/saving-plan' },
         ],
-        recursos: [{ label: 'Maquinas Virtuales', icon: Computer, href: '/azure/recursos-vm' }],
+        recursos: [
+            { label: 'Maquinas Virtuales', icon: Computer, href: '/azure/recursos-vm' },
+            { label: 'Traffic Managers', icon: Workflow, href: '/azure/recursos-traffic-manager' }
+        ],
         consumes: [{ label: 'Consumos', subItems: consumeSubItemsAzure, icon: Zap }],
         funciones: [
             { label: 'Blob Storage vs Storage General', icon: Cylinder, href: '/azure/funciones/blob-vs-storage-general' },
