@@ -63,7 +63,7 @@ export const TrafficManagerFilterComponent = ({
         [tm]
     )
 
-    const allIds = useMemo(() => tms.map((lb) => lb.id), [tms]);
+    const allIds = useMemo(() => tms.map((tm) => tm.id), [tms]);
 
     const isAllSelected = tms.length > 0 && selectedIds.length === tms.length;
 
@@ -87,7 +87,7 @@ export const TrafficManagerFilterComponent = ({
             return `${selectedIds.length} traffic managers seleccionados`
         } else {
             if (!tm) return 'Selecciona traffic manager'
-            return idToName.get(tm) ?? tm
+            return idToName.get(tm.toLowerCase()) ?? tm
         }
     }
 
