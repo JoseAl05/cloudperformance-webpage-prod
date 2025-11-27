@@ -24,7 +24,7 @@ export const UnusedTrafficManagerTable = ({ data }: UnusedTrafficManagerTablePro
                     <div>
                         <CardTitle className="flex items-center gap-2">
                             <Server className="h-5 w-5 text-blue-500" />
-                            Listado de Oportunidades
+                            Historial Traffic Managers infrautilizados
                         </CardTitle>
                     </div>
                 </div>
