@@ -1,9 +1,8 @@
 'use client'
 import useSWR from 'swr';
 import { useState, useMemo } from 'react';
-import { TrendingUp, DollarSign, Calendar } from 'lucide-react';
+import { TrendingUp, DollarSign, Calendar, Info } from 'lucide-react'; // Agregamos Info
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { aws_regions } from '@/lib/aws_regions';
 import { LoaderComponent } from '@/components/general_aws/LoaderComponent';
 import { TendenciaFacturacionLineChartComponent } from '@/components/aws/vista-facturacion/tendencia-facturacion/grafico/TendenciaFacturacionLineChartComponent';
 import {
@@ -13,6 +12,12 @@ import {
     SelectContent,
     SelectItem,
 } from "@/components/ui/select";
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from "@/components/ui/popover";
+import { Button } from '@/components/ui/button';
 
 interface TendenciaFacturacionProps {
     startDate: Date;
@@ -35,16 +40,10 @@ const fetcher = (url: string) =>
         .then(r => r.json());
 
 export const TendenciaFacturacionChartComponent = ({ startDate, endDate, services, region }: TendenciaFacturacionProps) => {
-    const [topN, setTopN] = useState<string>("8");
+    const [topN, setTopN] = useState<string>("all");
 
     const startDateFormatted = startDate.toISOString().split('.')[0];
     const endDateFormatted = endDate.toISOString().split('.')[0];
-
-    const params = new URLSearchParams();
-    params.set('date_from', startDateFormatted);
-    params.set('date_to', endDateFormatted);
-    if (services) params.set('services', services);
-    if (region) params.set('region', region);
 
     const apiUrl = `/api/aws/bridge/facturacion/tendencia-facturacion?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&services=${services}`;
 
@@ -60,7 +59,6 @@ export const TendenciaFacturacionChartComponent = ({ startDate, endDate, service
             serviceTotals.set(item.SERVICE, current + item.unblendedcost);
         });
 
-
         const topServicesNames = Array.from(serviceTotals.entries())
             .sort((a, b) => b[1] - a[1])
             .slice(0, Number(topN))
@@ -69,13 +67,14 @@ export const TendenciaFacturacionChartComponent = ({ startDate, endDate, service
         return data.filter(item => topServicesNames.includes(item.SERVICE));
     }, [data, topN]);
 
-
     const calculateMetrics = (processedData: FacturacionData[]) => {
-        if (!processedData?.length) return { total: 0, services: 0, regions: 0 };
+        if (!processedData?.length) return { total: 0, servicesList: [], regionsList: [] };
+
         const total = processedData.reduce((sum, item) => sum + item.unblendedcost, 0);
-        const servicesCount = new Set(processedData.map((i) => i.SERVICE)).size;
-        const regionsCount = new Set(processedData.map((i) => i.REGION)).size;
-        return { total, services: servicesCount, regions: regionsCount };
+        const servicesList = Array.from(new Set(processedData.map((i) => i.SERVICE))).sort();
+        const regionsList = Array.from(new Set(processedData.map((i) => i.REGION))).sort();
+
+        return { total, servicesList, regionsList };
     };
 
     if (isLoading) return <LoaderComponent />;
@@ -96,7 +95,40 @@ export const TendenciaFacturacionChartComponent = ({ startDate, endDate, service
                 <p>No se encontraron datos de facturación para el período seleccionado</p>
             </div>
         );
+
     const metrics = calculateMetrics(filteredData);
+
+    const DetailPopover = ({ title, items, icon: Icon }: { title: string, items: string[], icon: unknown }) => (
+        <Popover>
+            <PopoverTrigger asChild>
+                <Button variant='ghost' className="ml-2 p-1 rounded-full cursor-pointer hover:bg-muted transition-colors text-muted-foreground hover:text-foreground focus:outline-none">
+                    <Info className="h-4 w-4" />
+                    <span className="sr-only">Ver detalles de {title}</span>
+                </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-64 p-0" align="start">
+                <div className="p-3 border-b bg-muted/30">
+                    <h4 className="font-medium text-sm flex items-center gap-2">
+                        <Icon className="h-4 w-4" />
+                        {title} ({items.length})
+                    </h4>
+                </div>
+                <div className="max-h-[250px] overflow-y-auto p-2">
+                    {items.length > 0 ? (
+                        <ul className="text-sm space-y-1">
+                            {items.map((item) => (
+                                <li key={item} className="px-2 py-1 rounded hover:bg-muted/50 truncate" title={item}>
+                                    {item}
+                                </li>
+                            ))}
+                        </ul>
+                    ) : (
+                        <p className="text-sm text-muted-foreground p-2">No hay datos visibles.</p>
+                    )}
+                </div>
+            </PopoverContent>
+        </Popover>
+    );
 
     return (
         <div className="w-full min-w-0 px-4 py-6">
@@ -132,8 +164,9 @@ export const TendenciaFacturacionChartComponent = ({ startDate, endDate, service
                     </Select>
                 </div>
             </div>
+
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 py-5">
-                <Card className="border-l-4 border-l-green-500">
+                <Card className="border-l-4 border-l-green-500 shadow-sm hover:shadow-md transition-shadow">
                     <CardContent className="p-6">
                         <div className="flex items-center justify-between">
                             <div>
@@ -143,35 +176,54 @@ export const TendenciaFacturacionChartComponent = ({ startDate, endDate, service
                                 </p>
                                 <p className="text-xs text-muted-foreground">En los servicios visibles</p>
                             </div>
-                            <DollarSign className="h-8 w-8 text-green-500" />
+                            <DollarSign className="h-8 w-8 text-green-500 opacity-80" />
                         </div>
                     </CardContent>
                 </Card>
-                <Card className="border-l-4 border-l-blue-500">
+
+                <Card className="border-l-4 border-l-blue-500 shadow-sm hover:shadow-md transition-shadow">
                     <CardContent className="p-6">
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-sm font-medium text-muted-foreground">Servicios</p>
-                                <p className="text-2xl font-bold text-blue-600">{metrics.services}</p>
+                                <div className="flex items-center">
+                                    <p className="text-2xl font-bold text-blue-600">{metrics.servicesList.length}</p>
+                                    {/* 3. Integración de Popover de Detalles */}
+                                    <DetailPopover
+                                        title="Servicios Mostrados"
+                                        items={metrics.servicesList}
+                                        icon={TrendingUp}
+                                    />
+                                </div>
                                 <p className="text-xs text-muted-foreground">Servicios mostrados</p>
                             </div>
-                            <TrendingUp className="h-8 w-8 text-blue-500" />
+                            <TrendingUp className="h-8 w-8 text-blue-500 opacity-80" />
                         </div>
                     </CardContent>
                 </Card>
-                <Card className="border-l-4 border-l-purple-500">
+
+                <Card className="border-l-4 border-l-purple-500 shadow-sm hover:shadow-md transition-shadow">
                     <CardContent className="p-6">
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-sm font-medium text-muted-foreground">Regiones</p>
-                                <p className="text-2xl font-bold text-purple-600">{metrics.regions}</p>
+                                <div className="flex items-center">
+                                    <p className="text-2xl font-bold text-purple-600">{metrics.regionsList.length}</p>
+                                    {/* 3. Integración de Popover de Detalles */}
+                                    <DetailPopover
+                                        title="Regiones Involucradas"
+                                        items={metrics.regionsList}
+                                        icon={Calendar}
+                                    />
+                                </div>
                                 <p className="text-xs text-muted-foreground">Regiones involucradas</p>
                             </div>
-                            <Calendar className="h-8 w-8 text-purple-500" />
+                            <Calendar className="h-8 w-8 text-purple-500 opacity-80" />
                         </div>
                     </CardContent>
                 </Card>
             </div>
+
             <Card className="shadow-lg">
                 <CardHeader className="pb-2">
                     <div className="flex items-center justify-between gap-2">
@@ -192,6 +244,7 @@ export const TendenciaFacturacionChartComponent = ({ startDate, endDate, service
                     />
                 </CardContent>
             </Card>
+
             <Card className="mt-5">
                 <CardHeader>
                     <CardTitle className="text-sm">Información del Período</CardTitle>
@@ -208,11 +261,11 @@ export const TendenciaFacturacionChartComponent = ({ startDate, endDate, service
                         </div>
                         <div>
                             <span className="text-muted-foreground">Región:</span>
-                            <p className="font-medium">{metrics.regions}</p>
+                            <p className="font-medium">{metrics.regionsList.length}</p>
                         </div>
                         <div>
                             <span className="text-muted-foreground">Servicios:</span>
-                            <p className="font-medium">{metrics.services}</p>
+                            <p className="font-medium">{metrics.servicesList.length}</p>
                         </div>
                     </div>
                 </CardContent>
