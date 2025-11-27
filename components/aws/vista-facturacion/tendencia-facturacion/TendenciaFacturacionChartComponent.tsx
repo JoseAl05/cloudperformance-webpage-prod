@@ -170,7 +170,7 @@ export const TendenciaFacturacionChartComponent = ({ startDate, endDate, service
                     <CardContent className="p-6">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-sm font-medium text-muted-foreground">Costo Acumulado (Filtrado)</p>
+                                <p className="text-sm font-medium text-muted-foreground">Costo Acumulado</p>
                                 <p className="text-2xl font-bold text-green-600">
                                     $ {metrics.total < 0.01 ? metrics.total.toPrecision(2) : metrics.total.toLocaleString('es-ES', { minimumFractionDigits: 2 })}
                                 </p>
