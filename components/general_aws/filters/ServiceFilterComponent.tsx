@@ -17,8 +17,8 @@ interface ServiceData {
 }
 
 const fetcher = (url: string) =>
-    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
-        .then(r => r.json());
+  fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
+    .then(r => r.json());
 
 export const ServiceFilterComponent = ({ selectedServices, setSelectedServices }: ServiceFilterComponentProps) => {
   const [open, setOpen] = useState(false);
@@ -27,23 +27,33 @@ export const ServiceFilterComponent = ({ selectedServices, setSelectedServices }
 
   const handleServiceToggle = (serviceValue: string) => {
     if (serviceValue === 'all_services') {
-      setSelectedServices('');
+      setSelectedServices('all_services');
       return;
     }
-    const servicesArray = selectedServices
-      ? selectedServices.split(',').map((item) => decodeURIComponent(item).trim()).filter(Boolean)
+
+    let servicesArray = selectedServices
+      ? selectedServices.split(',').map((item) => item.trim()).filter(Boolean)
       : [];
+
+    if (servicesArray.includes('all_services')) {
+      servicesArray = [];
+    }
+
     if (servicesArray.includes(serviceValue)) {
       const updated = servicesArray.filter((s) => s !== serviceValue);
-      setSelectedServices(updated.map((s) => encodeURIComponent(s)).join(','));
+      if (updated.length === 0) {
+        setSelectedServices('all_services');
+      } else {
+        setSelectedServices(updated.map((s) => s).join(','));
+      }
     } else {
       const updated = [...servicesArray, serviceValue];
-      setSelectedServices(updated.map((s) => encodeURIComponent(s)).join(','));
+      setSelectedServices(updated.map((s) => s).join(','));
     }
   };
 
   const getDisplayText = () => {
-    if (!selectedServices || selectedServices.trim() === '') return 'Todos los Servicios';
+    if (!selectedServices || selectedServices.trim() === 'all_services') return 'Todos los Servicios';
     const servicesArray = selectedServices
       .split(',')
       .map((item) => decodeURIComponent(item).trim())
@@ -52,7 +62,7 @@ export const ServiceFilterComponent = ({ selectedServices, setSelectedServices }
   };
 
   if (isLoading) {
-    return <LoaderComponent size='small'/>
+    return <LoaderComponent size='small' />
   }
 
   if (error || !services) {
@@ -65,7 +75,7 @@ export const ServiceFilterComponent = ({ selectedServices, setSelectedServices }
   }
 
   const selectedArray = selectedServices
-    ? selectedServices.split(',').map((item) => decodeURIComponent(item).trim()).filter(Boolean)
+    ? selectedServices.split(',').map((item) => item.trim()).filter(Boolean)
     : [];
 
   return (

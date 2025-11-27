@@ -205,7 +205,7 @@ export const FiltersComponent = ({
             region: regionParam || 'all_regions',
             selectedKey: selectedKeyParam || null,
             selectedValue: selectedValueParam || null,
-            service: selectedServiceParam || '',
+            service: selectedServiceParam || 'all_services',
             s3Bucket: s3BucketParam || '',
             ebs: ebsParam || '',
             eventsTypes: eventsTypesParam || '',
@@ -393,7 +393,7 @@ export const FiltersComponent = ({
             { flag: eksFilter, key: 'eksAsgInstance', value: newFilters.eksAsgInstance },
 
             // Services & Variation
-            { flag: serviceFilter, key: 'services', value: newFilters.service },
+            { flag: serviceFilter, key: 'services', value: newFilters.service, ignoreValue: 'all_services' },
             { flag: variationServiceFilter, key: 'variationService', value: newFilters.variationService },
             { flag: variationMetricFilter, key: 'variationMetric', value: newFilters.variationMetric },
             { flag: variationResourceFilter, key: 'variationResource', value: newFilters.variationResource },
