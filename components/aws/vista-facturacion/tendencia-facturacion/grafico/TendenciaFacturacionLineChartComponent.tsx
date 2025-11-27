@@ -2,17 +2,10 @@
 
 import * as echarts from 'echarts';
 import { Button } from '@/components/ui/button';
-import {
-    Select,
-    SelectTrigger,
-    SelectValue,
-    SelectContent,
-    SelectItem,
-} from "@/components/ui/select";
 import { createChartOption, deepMerge, makeBaseOptions, useECharts } from '@/lib/echartsGlobalConfig';
 import { Download } from 'lucide-react';
 import { useTheme } from 'next-themes';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 
 interface FacturacionData {
     SERVICE: string;
@@ -76,7 +69,6 @@ const toUTCDate = (s: string) => {
 const fmt = new Intl.DateTimeFormat('es-CL', { day: 'numeric', month: 'short', timeZone: 'UTC' });
 
 export const TendenciaFacturacionLineChartComponent = ({ data }: TendenciaFacturacionLineChartComponentProps) => {
-    const [topN, setTopN] = useState<number | "all">(8);
 
     const { theme, resolvedTheme } = useTheme();
     const currentTheme = resolvedTheme || theme;
@@ -150,7 +142,8 @@ export const TendenciaFacturacionLineChartComponent = ({ data }: TendenciaFactur
 
     const option = useMemo(() => {
         const { dates, series } = processChartData(data);
-        const currentTopN = topN === 'all' ? Number.POSITIVE_INFINITY : Number(topN);
+
+        const currentTopN = Number.POSITIVE_INFINITY;
 
         const dateCount = dates.length;
         const start = dateCount ? toUTCDate(dates[0]) : null;
@@ -258,8 +251,8 @@ export const TendenciaFacturacionLineChartComponent = ({ data }: TendenciaFactur
                     enterable: true,
                     confine: true,
                 },
-                toolbox:{
-                    top:30
+                toolbox: {
+                    top: 30
                 },
                 xAxis: {
                     type: 'category',
@@ -272,7 +265,6 @@ export const TendenciaFacturacionLineChartComponent = ({ data }: TendenciaFactur
                         color: '#666',
                         rotate: 45,
                         margin: 8,
-                        // formateo visual sin alterar data del eje
                         formatter: (value: string, index: number) => {
                             if (!dateCount) return '';
                             const d = toUTCDate(value);
@@ -311,7 +303,7 @@ export const TendenciaFacturacionLineChartComponent = ({ data }: TendenciaFactur
         });
 
         return deepMerge(base, lines);
-    }, [data, topN]);
+    }, [data]);
 
     useECharts(chartRef, option, [option], isDark ? 'cp-dark' : 'cp-light');
 
@@ -379,25 +371,6 @@ export const TendenciaFacturacionLineChartComponent = ({ data }: TendenciaFactur
                     <Download className="h-4 w-4" />
                     Exportar
                 </Button>
-            </div>
-            <div className="flex items-center gap-2">
-                <span className="text-sm text-muted-foreground">Tooltip Top:</span>
-                <Select
-                    value={topN === 'all' ? 'all' : String(topN)}
-                    onValueChange={(val) => setTopN(val === 'all' ? 'all' : parseInt(val, 10))}
-                >
-                    <SelectTrigger className="h-8 w-[90px]">
-                        <SelectValue placeholder="Top N" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="5">5</SelectItem>
-                        <SelectItem value="8">8</SelectItem>
-                        <SelectItem value="10">10</SelectItem>
-                        <SelectItem value="15">15</SelectItem>
-                        <SelectItem value="20">20</SelectItem>
-                        <SelectItem value="all">Todos</SelectItem>
-                    </SelectContent>
-                </Select>
             </div>
             <div ref={chartRef} className="w-full h-[400px] md:h-[450px] lg:h-[500px]" />
         </>
