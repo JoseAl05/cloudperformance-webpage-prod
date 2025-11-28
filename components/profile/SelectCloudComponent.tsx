@@ -1,8 +1,8 @@
 'use client'
 
 import { useFeatureAccess } from '@/hooks/useFeatureAccess'
-import { LoaderComponent } from '@/components/general/LoaderComponent'
-import ClientSelectorComponent from '@/components/general/ClientSelectorComponent'
+import { LoaderComponent } from '@/components/general_aws/LoaderComponent'
+import ClientSelectorComponent from '@/components/profile/ClientSelectorComponent'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { Cloud, ArrowRight, Briefcase, ChevronDown } from 'lucide-react'
