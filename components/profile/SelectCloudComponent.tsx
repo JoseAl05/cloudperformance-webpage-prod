@@ -10,17 +10,17 @@ import { cn } from '@/lib/utils'
 
 export const SelectCloudComponent = () => {
     const router = useRouter();
-    
-    const { 
-        loading, 
-        isGlobalAdmin, 
-        connectionData, 
+
+    const {
+        loading,
+        isGlobalAdmin,
+        connectionData,
         currentPlanName,
         activeAzureAccountId,
         setActiveAzureAccountId,
-        activeAwsAccountId,      
-        setActiveAwsAccountId,   
-        swapContextToken 
+        activeAwsAccountId,
+        setActiveAwsAccountId,
+        swapContextToken
     } = useFeatureAccess()
 
     if (loading) return <LoaderComponent />
@@ -32,14 +32,14 @@ export const SelectCloudComponent = () => {
     const clientName = connectionData.client
 
     const azureAccounts = connectionData.azureAccountsList || [];
-    const awsAccounts = connectionData.awsAccountsList || []; 
-    
+    const awsAccounts = connectionData.awsAccountsList || [];
+
     const hasMultipleAzureAccounts = azureAccounts.length > 1;
-    const hasMultipleAwsAccounts = awsAccounts.length > 1; 
+    const hasMultipleAwsAccounts = awsAccounts.length > 1;
 
     const handleAccountChange = (
         e: React.ChangeEvent<HTMLSelectElement>,
-        cloud: 'azure' | 'aws' 
+        cloud: 'azure' | 'aws'
     ) => {
         const newId = e.target.value;
         const targetAccounts = (cloud === 'azure') ? azureAccounts : awsAccounts;
@@ -55,17 +55,17 @@ export const SelectCloudComponent = () => {
 
         // TOKEN SWAP CALL (CORRECCIÓN: Se activa si hay una cuenta seleccionada)
         if (selectedAccount) { // Se activa si seleccionamos una cuenta
-            const client = connectionData.client; 
-            
+            const client = connectionData.client;
+
             // Usamos la nueva selección para la nube actual, y la antigua para la otra nube.
-            const newDbConnectionAzure = (cloud === 'azure') ? selectedAccount.db : connectionData.dbAzureName; 
-            const newDbConnectionAws = (cloud === 'aws') ? selectedAccount.db : connectionData.dbAwsName; 
+            const newDbConnectionAzure = (cloud === 'azure') ? selectedAccount.db : connectionData.dbAzureName;
+            const newDbConnectionAws = (cloud === 'aws') ? selectedAccount.db : connectionData.dbAwsName;
 
             // Llamamos al swap con las cadenas de conexión explícitas
             swapContextToken(client, newDbConnectionAzure, newDbConnectionAws);
         }
     };
-    
+
     // Funciones de interacción
     const handleEnterAzure = () => {
         router.push(`/azure?client=${clientName}`);
@@ -76,12 +76,12 @@ export const SelectCloudComponent = () => {
     };
 
     const handleSelectClick = (e: React.MouseEvent) => {
-        e.stopPropagation(); 
+        e.stopPropagation();
     };
 
     return (
         <section className="mx-auto max-w-5xl px-4">
-            
+
             {/* Selector Global Admin */}
             {isGlobalAdmin && (
                 <div className="pb-4 mb-4 border-b">
@@ -96,7 +96,7 @@ export const SelectCloudComponent = () => {
             </header>
 
             <div className={cn("grid gap-4", isAzure && isAws ? "grid-cols-1 md:grid-cols-2" : "grid-cols-1")}>
-                
+
                 {/*  TARJETA AZURE  */}
                 {isAzure && (
                     <div
@@ -113,7 +113,7 @@ export const SelectCloudComponent = () => {
                             </div>
                             <div className="flex-1 z-10">
                                 <h3 className="text-lg font-semibold">Microsoft Azure</h3>
-                                
+
                                 {hasMultipleAzureAccounts && (
                                     <div className="mt-1 flex items-center gap-2" onClick={handleSelectClick}>
                                         <span className="text-xs text-muted-foreground">Cuenta:</span>
@@ -145,9 +145,9 @@ export const SelectCloudComponent = () => {
                 {/* TARJETA AWS */}
                 {isAws && (
                     <div
-                        onClick={handleEnterAws} 
+                        onClick={handleEnterAws}
                         className={cn(
-                             "group relative overflow-hidden rounded-2xl border bg-card p-5 shadow-sm transition hover:shadow-md cursor-pointer",
+                            "group relative overflow-hidden rounded-2xl border bg-card p-5 shadow-sm transition hover:shadow-md cursor-pointer",
                             hasMultipleAwsAccounts ? "border-amber-400" : ""
                         )}
                     >
@@ -158,7 +158,7 @@ export const SelectCloudComponent = () => {
                             </div>
                             <div className="flex-1 z-10">
                                 <h3 className="text-lg font-semibold">Amazon Web Services</h3>
-                                
+
                                 {hasMultipleAwsAccounts && (
                                     <div className="mt-1 flex items-center gap-2" onClick={handleSelectClick}>
                                         <span className="text-xs text-muted-foreground">Cuenta:</span>
