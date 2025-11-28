@@ -27,10 +27,13 @@ export default function ForgotPasswordPage() {
                 throw new Error(data.message || 'Ocurrió un error.');
             }
 
-            // Éxito: Cambiamos a la vista de confirmación
             setSubmitted(true);
-        } catch (err: any) {
-            setError(err.message);
+        } catch (err: unknown) { 
+            if (err instanceof Error) {
+                setError(err.message);
+            } else {
+                setError('Ocurrió un error inesperado al intentar recuperar la contraseña.');
+            }
         } finally {
             setLoading(false);
         }
