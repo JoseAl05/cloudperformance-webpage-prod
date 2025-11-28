@@ -28,7 +28,7 @@ export default function ForgotPasswordPage() {
             }
 
             setSubmitted(true);
-        } catch (err: unknown) { 
+        } catch (err: unknown) {
             if (err instanceof Error) {
                 setError(err.message);
             } else {
@@ -42,7 +42,7 @@ export default function ForgotPasswordPage() {
     return (
         <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 px-4">
             <div className="w-full max-w-md bg-white rounded-xl shadow-lg border border-gray-100 p-8">
-                
+
                 <div className="text-center mb-8">
                     <h1 className="text-2xl font-bold text-gray-900">Recuperar Contraseña</h1>
                     {!submitted && (
@@ -65,8 +65,8 @@ export default function ForgotPasswordPage() {
                                 Si existe una cuenta asociada a <strong>{email}</strong>, recibirás las instrucciones en breve. Revisa tu bandeja de entrada o spam.
                             </p>
                         </div>
-                        <Link 
-                            href="/login" 
+                        <Link
+                            href="/login"
                             className="inline-flex items-center justify-center w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition font-medium"
                         >
                             Volver al Login
