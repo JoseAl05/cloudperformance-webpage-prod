@@ -9,7 +9,6 @@ type CloudAccount = { id: string; alias: string; db: string; };
 const PLAN_NAMES = Object.keys(PLAN_CONFIG);
 const generateAccountId = () => 'clp-' + Date.now().toString(36);
 
-// Componente AccountRow
 interface AccountRowProps {
     account: CloudAccount;
     cloud: 'azure' | 'aws';
@@ -58,7 +57,6 @@ const AccountRow = memo(({ account, cloud, onUpdate, onRemove }: AccountRowProps
 
 AccountRow.displayName = 'AccountRow';
 
-// Componente AccountListEditor
 interface AccountListEditorProps {
     cloud: 'azure' | 'aws';
     accounts: CloudAccount[];
@@ -94,7 +92,6 @@ const AccountListEditor = memo(({ cloud, accounts, onUpdate, onRemove, onAdd }: 
 
 AccountListEditor.displayName = 'AccountListEditor';
 
-// Modal Principal
 interface EditLicenseModalProps {
     empresa: Empresa;
     onClose: () => void;
@@ -279,7 +276,9 @@ export default function EditLicenseModal({ empresa, onClose, refreshList }: Edit
                 credentials: 'include',
             });
 
-            let data: any = {};
+            // --- CORRECCIÓN: Definir tipo en lugar de any ---
+            let data: { message?: string } = {}; 
+
             try {
                 if (response.headers.get('content-length') !== '0') {
                     data = await response.json();

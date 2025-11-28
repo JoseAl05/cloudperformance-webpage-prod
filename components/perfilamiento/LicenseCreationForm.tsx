@@ -87,12 +87,12 @@ const AccountListEditor = memo(({ cloud, accounts, onUpdate, onRemove, onAdd }: 
 
 AccountListEditor.displayName = 'AccountListEditor';
 
-export default function LicenseCreationForm({ refreshLicenseStatus }) {
+interface LicenseCreationFormProps {
+    refreshLicenseStatus?: () => void;
+}
+
+export default function LicenseCreationForm({ refreshLicenseStatus }: LicenseCreationFormProps) {
     const { user: userLoggedIn } = useSession();
-    
-    if (userLoggedIn?.role !== 'admin_global') {
-        return null;
-    }
     const [azureAccountsData, setAzureAccountsData] = useState<CloudAccount[]>([]);
     const [awsAccountsData, setAwsAccountsData] = useState<CloudAccount[]>([]);
     const [formData, setFormData] = useState({
@@ -117,12 +117,10 @@ export default function LicenseCreationForm({ refreshLicenseStatus }) {
         setFormData(prev => {
             const newState = { ...prev, [name]: finalValue };
 
-            // Lógica para actualizar límite de usuarios
             if (name === 'planName' && typeof finalValue === 'string' && PLAN_CONFIG[finalValue]) {
                  newState.userLimit = PLAN_CONFIG[finalValue].userLimit;
             }
             
-            // Lógica para limpiar cadenas y arrays al desactivar acceso o multi-tenant
             if (name === 'is_aws' && !finalValue) {
                 newState.user_db_aws = '';
                 newState.is_aws_multi_tenant = false;
@@ -143,7 +141,7 @@ export default function LicenseCreationForm({ refreshLicenseStatus }) {
     
     const handleAddAccount = useCallback((cloud: 'azure' | 'aws') => {
         const newAccount: CloudAccount = {
-            id: generateAccountId(), // ID único generado
+            id: generateAccountId(),
             alias: `Nueva Cuenta ${cloud.toUpperCase()}`,
             db: '',
         };
@@ -163,7 +161,6 @@ export default function LicenseCreationForm({ refreshLicenseStatus }) {
         const setter = cloud === 'azure' ? setAzureAccountsData : setAwsAccountsData;
         setter(prev => prev.filter(acc => acc.id !== id));
     }, []);
-
 
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
@@ -228,7 +225,6 @@ export default function LicenseCreationForm({ refreshLicenseStatus }) {
             if (response.ok) {
                 setMessage(`Éxito: ${data.message} Límite asignado: ${data.userLimit}.`);
 
-                // Resetear el formulario y vaciar arrays
                 setFormData(prev => ({ 
                     name: '', 
                     planName: PLAN_NAMES[0] || '', 
@@ -253,6 +249,10 @@ export default function LicenseCreationForm({ refreshLicenseStatus }) {
         }
     };
 
+    if (userLoggedIn?.role !== 'admin_global') {
+        return null;
+    }
+
     return (
         <form onSubmit={handleSubmit} className="space-y-4">
             <h3 className="text-xl font-semibold text-gray-800 flex items-center gap-2 border-b pb-3 mb-3">
@@ -268,11 +268,11 @@ export default function LicenseCreationForm({ refreshLicenseStatus }) {
                 <div className="space-y-2">
                     <label htmlFor="planName" className="text-sm font-medium">Plan Contratado</label>
                     <select name="planName" id="planName" value={formData.planName} onChange={handleChange} required className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
-                        {PLAN_NAMES.map(plan => (<option key={plan} value={plan}>{plan} (Límite: {PLAN_CONFIG[plan].userLimit})</option>))}
+                        {PLAN_NAMES.map(plan => (<option key={plan} value={plan}>{plan}</option>))}
                     </select>
                 </div>
                  <div className="space-y-2">
-                    <label htmlFor="userLimit" className="text-sm font-medium">Límite de Usuarios (Automático)</label>
+                    <label htmlFor="userLimit" className="text-sm font-medium">Límite de Usuarios</label>
                     <input
                         type="number"
                         name="userLimit"

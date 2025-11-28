@@ -7,7 +7,7 @@ import { Empresa, User } from '@/types/db';
 
 // Define el tipo para los parámetros dinámicos de la ruta
 interface Params {
-    params: { id: string };
+    params: { id: string };
 }
 
 // =========================================================================
@@ -15,36 +15,35 @@ interface Params {
 // =========================================================================
 
 export async function GET(req: NextRequest, { params }: Params) {
-    // CORRECCIÓN: Desestructuración para acceso directo
     const { id } = await params;
     
-    // 1. Autorización: Exclusivo para admin_global
-    const auth = await authorizeRequest(req, ['admin_global']);
-    if (!auth.authorized) {
-        return NextResponse.json({ message: auth.message }, { status: 403 });
-    }
+    // 1. Autorización: Exclusivo para admin_global
+    const auth = await authorizeRequest(req, ['admin_global']);
+    if (!auth.authorized) {
+        return NextResponse.json({ message: auth.message }, { status: 403 });
+    }
 
-    try {
-        if (!ObjectId.isValid(id)) {
-            return NextResponse.json({ message: 'ID de empresa inválido.' }, { status: 400 });
-        }
-        
-        const _id = new ObjectId(id);
-        const empresasCollection = await getCollection<Empresa>('Empresas');
-        
-        // Buscar la empresa por ID
-        const empresa = await empresasCollection.findOne({ _id });
+    try {
+        if (!ObjectId.isValid(id)) {
+            return NextResponse.json({ message: 'ID de empresa inválido.' }, { status: 400 });
+        }
+        
+        const _id = new ObjectId(id);
+        const empresasCollection = await getCollection<Empresa>('Empresas');
+        
+        // Buscar la empresa por ID
+        const empresa = await empresasCollection.findOne({ _id });
 
-        if (!empresa) {
-            return NextResponse.json({ message: 'Licencia no encontrada.' }, { status: 404 });
-        }
+        if (!empresa) {
+            return NextResponse.json({ message: 'Licencia no encontrada.' }, { status: 404 });
+        }
 
-        return NextResponse.json(empresa, { status: 200 });
+        return NextResponse.json(empresa, { status: 200 });
 
-    } catch (error) {
-        console.error('Error al obtener licencia:', error);
-        return NextResponse.json({ message: 'Error interno del servidor al obtener la licencia.' }, { status: 500 });
-    }
+    } catch (error) {
+        console.error('Error al obtener licencia:', error);
+        return NextResponse.json({ message: 'Error interno del servidor al obtener la licencia.' }, { status: 500 });
+    }
 }
 
 
@@ -227,7 +226,8 @@ export async function PUT(req: NextRequest, { params }: Params) {
         // 6. PROPAGACIÓN DE CAMBIOS A USUARIOS ASOCIADOS
         const usersCollection = await getCollection<User>('Users'); 
         
-        const fieldsToPropagate: any = {
+        // --- CORRECCIÓN: Usar Partial<User> en lugar de any ---
+        const fieldsToPropagate: Partial<User> = {
             is_aws: updateFields.is_aws,
             is_azure: updateFields.is_azure,
             is_aws_multi_tenant: updateFields.is_aws_multi_tenant,
@@ -274,50 +274,47 @@ export async function PUT(req: NextRequest, { params }: Params) {
 // =========================================================================
 
 export async function DELETE(req: NextRequest, { params }: Params) {
-    // 🔥 CORRECCIÓN CLAVE: Desestructurar 'id' para evitar la advertencia
     const { id } = await params;
     
-    // 1. Autorización: Exclusivo para admin_global
-    const auth = await authorizeRequest(req, ['admin_global']);
-    if (!auth.authorized) {
-        return NextResponse.json({ message: auth.message }, { status: 403 });
-    }
+    // 1. Autorización: Exclusivo para admin_global
+    const auth = await authorizeRequest(req, ['admin_global']);
+    if (!auth.authorized) {
+        return NextResponse.json({ message: auth.message }, { status: 403 });
+    }
 
-    try {
-        if (!ObjectId.isValid(id)) {
-            return NextResponse.json({ message: 'ID de empresa inválido.' }, { status: 400 });
-        }
-        
-        const _id = new ObjectId(id);
-        const empresasCollection = await getCollection<Empresa>('Empresas');
-        // CORRECCIÓN: Usar la interfaz 'User' para la colección de usuarios
-        const usersCollection = await getCollection<User>('Users'); 
+    try {
+        if (!ObjectId.isValid(id)) {
+            return NextResponse.json({ message: 'ID de empresa inválido.' }, { status: 400 });
+        }
+        
+        const _id = new ObjectId(id);
+        const empresasCollection = await getCollection<Empresa>('Empresas');
+        const usersCollection = await getCollection<User>('Users'); 
 
-        // 2. Buscar la empresa antes de eliminar (necesitamos el nombre para eliminar usuarios)
-        const empresaToDelete = await empresasCollection.findOne({ _id });
+        // 2. Buscar la empresa antes de eliminar (necesitamos el nombre para eliminar usuarios)
+        const empresaToDelete = await empresasCollection.findOne({ _id });
 
-        if (!empresaToDelete) {
-            return NextResponse.json({ message: 'Licencia no encontrada.' }, { status: 404 });
-        }
-        
-        // 3. Eliminar todos los usuarios asociados a esa empresa/cliente
-        // Los usuarios se eliminan con la clave 'client'
-        const deleteUsersResult = await usersCollection.deleteMany({ client: empresaToDelete.name });
+        if (!empresaToDelete) {
+            return NextResponse.json({ message: 'Licencia no encontrada.' }, { status: 404 });
+        }
+        
+        // 3. Eliminar todos los usuarios asociados a esa empresa/cliente
+        const deleteUsersResult = await usersCollection.deleteMany({ client: empresaToDelete.name });
 
-        // 4. Eliminar la licencia (empresa)
-        const deleteEmpresaResult = await empresasCollection.deleteOne({ _id });
+        // 4. Eliminar la licencia (empresa)
+        const deleteEmpresaResult = await empresasCollection.deleteOne({ _id });
 
-        if (deleteEmpresaResult.deletedCount === 0) {
-            return NextResponse.json({ message: 'Licencia no encontrada o no se pudo eliminar.' }, { status: 404 });
-        }
-        
-        return NextResponse.json({ 
-            message: `Licencia de ${empresaToDelete.name} y ${deleteUsersResult.deletedCount} usuarios asociados eliminados exitosamente.`,
-            deletedUsers: deleteUsersResult.deletedCount 
-        }, { status: 200 });
+        if (deleteEmpresaResult.deletedCount === 0) {
+            return NextResponse.json({ message: 'Licencia no encontrada o no se pudo eliminar.' }, { status: 404 });
+        }
+        
+        return NextResponse.json({ 
+            message: `Licencia de ${empresaToDelete.name} y ${deleteUsersResult.deletedCount} usuarios asociados eliminados exitosamente.`,
+            deletedUsers: deleteUsersResult.deletedCount 
+        }, { status: 200 });
 
-    } catch (error) {
-        console.error('Error al eliminar licencia:', error);
-        return NextResponse.json({ message: 'Error interno del servidor al eliminar la licencia.' }, { status: 500 });
-    }
+    } catch (error) {
+        console.error('Error al eliminar licencia:', error);
+        return NextResponse.json({ message: 'Error interno del servidor al eliminar la licencia.' }, { status: 500 });
+    }
 }
