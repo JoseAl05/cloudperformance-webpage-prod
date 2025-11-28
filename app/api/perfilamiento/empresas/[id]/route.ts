@@ -226,14 +226,17 @@ export async function PUT(req: NextRequest, { params }: Params) {
         // 6. PROPAGACIÓN DE CAMBIOS A USUARIOS ASOCIADOS
         const usersCollection = await getCollection<User>('Users'); 
         
-        // --- CORRECCIÓN: Usar Partial<User> en lugar de any ---
+
         const fieldsToPropagate: Partial<User> = {
             is_aws: updateFields.is_aws,
             is_azure: updateFields.is_azure,
             is_aws_multi_tenant: updateFields.is_aws_multi_tenant,
-            is_azure_multi_tenant: updateFields.is_azure_multi_tenant,
+            is_azure_multi_tenant: updateFields.is_azure_multi_tenant
         };
 
+        if (updateFields.planName !== undefined) {
+            fieldsToPropagate.planName = updateFields.planName;
+}
         // Propagar según el modo
         if (updateFields.is_aws_multi_tenant) {
             fieldsToPropagate.user_db_aws = null; // Usuarios en multi-tenant no usan DB maestra
