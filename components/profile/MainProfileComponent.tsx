@@ -1,7 +1,7 @@
 'use client'
 
 import { useSession } from '@/hooks/useSession';
-import { LoaderComponent } from '@/components/general/LoaderComponent';
+import { LoaderComponent } from '@/components/general_aws/LoaderComponent';
 export const MainProfileComponent = () => {
     const actualSession = useSession();
 

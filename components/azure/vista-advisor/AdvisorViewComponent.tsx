@@ -1,6 +1,6 @@
 'use client'
 import useSWR from 'swr'
-import { LoaderComponent } from '@/components/general/LoaderComponent'
+import { LoaderComponent } from '@/components/general_aws/LoaderComponent'
 import { MessageCard } from '@/components/azure/cards/MessageCards'
 import { AlertCircle, ChartBar, Info } from 'lucide-react'
 import { AdvisorViewPieChartComponent } from '@/components/azure/vista-advisor/grafico/AdvisorViewPieChartComponent'

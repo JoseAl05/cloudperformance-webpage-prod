@@ -1,4 +1,4 @@
-import { FiltersComponent } from '@/components/general/filters/FiltersComponent'
+import { FiltersComponent } from '@/components/general_aws/filters/FiltersComponent'
 import { MainViewSpotVsVm }  from '@/components/aws/vista-funciones/spot-vs-vm/SpotVsVmComponent'
 import { Globe } from 'lucide-react'
 

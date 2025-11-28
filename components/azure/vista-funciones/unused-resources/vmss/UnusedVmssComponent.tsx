@@ -1,7 +1,7 @@
 'use client'
 
 import { MessageCard } from '@/components/aws/cards/MessageCards';
-import { LoaderComponent } from '@/components/general/LoaderComponent';
+import { LoaderComponent } from '@/components/general_aws/LoaderComponent';
 import { AlertCircle, ChartBar, Clock, Info } from 'lucide-react';
 import useSWR from 'swr';
 import { UnusedCardsComponent } from '@/components/azure/vista-funciones/unused-resources/info/UnusedCardsComponent';

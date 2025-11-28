@@ -6,12 +6,12 @@ import { findCompanyByName } from '@/lib/db-utils';
 import type { AuthUserPayload } from '@/types/db';
 
 export async function POST(request: Request) {
-    const cookieStore = await cookies();
-    const token = cookieStore.get(AUTH_COOKIE)?.value;
+  const cookieStore = await cookies();
+  const token = cookieStore.get(AUTH_COOKIE)?.value;
 
-    if (!token) {
-        return NextResponse.json({ message: 'No autenticado.' }, { status: 401 });
-    }
+  if (!token) {
+    return NextResponse.json({ message: 'No autenticado.' }, { status: 401 });
+  }
 
     let originalPayload: any = null; 
     
@@ -30,9 +30,12 @@ export async function POST(request: Request) {
         user_db_aws: explicitAwsDb,     
     } = body; 
 
-    if (!clientName) {
-        return NextResponse.json({ message: 'Falta el campo clientName.' }, { status: 400 });
-    }
+  if (!clientName) {
+    return NextResponse.json(
+      { message: 'Falta el campo clientName.' },
+      { status: 400 }
+    );
+  }
 
     // 🛑 2. VALIDACIÓN DE PERMISOS CORREGIDA 🛑
     // - Si es Admin Global: Pasa siempre.

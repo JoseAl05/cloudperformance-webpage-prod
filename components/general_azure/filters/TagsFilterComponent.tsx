@@ -33,12 +33,12 @@ interface AzureTagItem {
 }
 
 const fetcher = (url: string) =>
-  fetch(url, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json'
-    }
-  }).then(res => res.json())
+    fetch(url, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    }).then(res => res.json())
 
 export const TagsFilterComponent = ({
     startDate,
@@ -64,7 +64,7 @@ export const TagsFilterComponent = ({
     const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : ''
 
     const shouldFetch = !!subscription && !!region
-    
+
     const { data, error, isLoading } = useSWR(
         shouldFetch
             ? `/api/azure/bridge/azure/get-all-tags?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&region_field=${regionField}&subscription=${subscription}&subscription_field=${subscriptionField}&collection=${collection}&tag_column_name=${tagColumnName}`
@@ -80,11 +80,11 @@ export const TagsFilterComponent = ({
     if (Array.isArray(data)) {
         data.forEach((item: AzureTagItem) => {
             if (!item || !item.Key || !item.Values) return;
-            
+
             if (!tagMap[item.Key]) {
                 tagMap[item.Key] = new Set<string>();
             }
-            
+
             item.Values.forEach(value => {
                 tagMap[item.Key].add(value);
             });
@@ -97,15 +97,23 @@ export const TagsFilterComponent = ({
         [selectedKey, tagMap]
     )
 
-    const isValidKey = !!(selectedKey && keys.includes(selectedKey))
-    const isValidValue = !!(selectedValue && isValidKey && valuesForKey.includes(selectedValue))
+    const noTags = (data && data.length === 0) || keys.length === 0
+    const isValidKey = !!(selectedKey && !noTags && (keys.includes(selectedKey) || selectedKey === 'allKeys'))
+    const isValidValue = !!(selectedValue && isValidKey && (valuesForKey.includes(selectedValue) || selectedValue === 'allValues'))
 
     useEffect(() => {
         if (!data || isLoading) return
-        if (selectedKey && !keys.includes(selectedKey)) {
+
+        if (keys.length === 0) {
+            if (selectedKey) setSelectedKey(null)
+            if (selectedValue) setSelectedValue(null)
+            return
+        }
+
+        if (selectedKey && selectedKey !== 'allKeys' && !keys.includes(selectedKey)) {
             setSelectedKey(null)
             setSelectedValue(null)
-        } else if (selectedValue && selectedKey && !valuesForKey.includes(selectedValue)) {
+        } else if (selectedValue && selectedValue !== 'allValues' && selectedKey && !valuesForKey.includes(selectedValue)) {
             setSelectedValue(null)
         }
     }, [data, isLoading, keys, valuesForKey, selectedKey, selectedValue, setSelectedKey, setSelectedValue])
@@ -121,14 +129,17 @@ export const TagsFilterComponent = ({
     if (isLoading) return <LoaderComponent size='small' />
     if (error) return <div>Error al cargar tags de Azure</div>
 
-    const noTags = (data && data.length === 0) || keys.length === 0
 
     return (
         <div className="space-y-2">
             <Popover open={openKey} onOpenChange={setOpenKey}>
                 <PopoverTrigger asChild>
                     <Button variant="outline" role="combobox" aria-expanded={openKey} className="w-full justify-between bg-transparent">
-                        {noTags ? 'Sin tags disponibles' : (isValidKey ? selectedKey : 'Selecciona una Key')}
+                        {noTags
+                            ? 'Sin tags disponibles'
+                            : (isValidKey
+                                ? (selectedKey === 'allKeys' ? 'Todas las claves' : selectedKey)
+                                : 'Selecciona una Key')}
                         <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                     </Button>
                 </PopoverTrigger>
@@ -172,11 +183,13 @@ export const TagsFilterComponent = ({
                 </PopoverContent>
             </Popover>
 
-            {isValidKey && (
+            {isValidKey && selectedKey !== 'allKeys' && (
                 <Popover open={openValue} onOpenChange={setOpenValue}>
                     <PopoverTrigger asChild>
                         <Button variant="outline" className="w-full justify-between">
-                            {isValidValue ? selectedValue : "Selecciona un Value"}
+                            {isValidValue
+                                ? (selectedValue === 'allValues' ? 'Todos los valores' : selectedValue)
+                                : "Selecciona un Value"}
                             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                         </Button>
                     </PopoverTrigger>

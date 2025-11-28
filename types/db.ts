@@ -11,9 +11,9 @@ export interface CloudAccount {
 export interface Empresa {
   _id: ObjectId;
   name: string;
-  planName: string; 
-  userLimit: number; 
-  currentUsers: number; 
+  planName: string;
+  userLimit: number;
+  currentUsers: number;
   is_aws: boolean;
   user_db_aws: string | null;
   is_azure: boolean;
@@ -29,9 +29,9 @@ export interface User {
   _id: ObjectId;
   email: string;
   username: string;
-  client: string; 
+  client: string;
   passwordHash: string;
-  role: UserRole; 
+  role: UserRole;
   createdAt: Date;
   updatedAt: Date;
   is_aws: boolean;
@@ -45,7 +45,7 @@ export interface User {
 }
 
 export interface AuthUserPayload {
-  userId: string; 
+  userId: string;
   username: string;
   client: string;
   role: UserRole; 

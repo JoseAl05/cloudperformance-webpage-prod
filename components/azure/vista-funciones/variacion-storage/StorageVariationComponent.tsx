@@ -1,7 +1,7 @@
 'use client'
 
 import { MessageCard } from '@/components/aws/cards/MessageCards';
-import { LoaderComponent } from '@/components/general/LoaderComponent';
+import { LoaderComponent } from '@/components/general_aws/LoaderComponent';
 import { StorageVariation, StorageVariationsRangesMetrics } from '@/interfaces/vista-variacion-storage/variationStorageInterfaces';
 import { AlertCircle, ChartBar, Info } from 'lucide-react';
 import { StorageVariationCardsComponent } from '@/components/azure/vista-funciones/variacion-storage/info/StorageVariationCardsComponent';

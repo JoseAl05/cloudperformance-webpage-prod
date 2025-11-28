@@ -1,7 +1,7 @@
 'use client'
 
 import { MessageCard } from '@/components/aws/cards/MessageCards';
-import { LoaderComponent } from '@/components/general/LoaderComponent';
+import { LoaderComponent } from '@/components/general_aws/LoaderComponent';
 import { AllStorageCapacity } from '@/interfaces/vista-blob-vs-storage/allStorageCapacityInterfaces';
 import useSWR from 'swr';
 import { BlobVsStorageCardsComponent } from '@/components/azure/vista-funciones/blob-vs-storage-general/info/BlobVsStorageCardsComponent';

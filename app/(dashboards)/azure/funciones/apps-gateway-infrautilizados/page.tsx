@@ -1,7 +1,7 @@
 import { MainViewUnusedAppsGw } from '@/components/azure/vista-funciones/unused-apps-gateway/MainViewUnusedAppsGw';
 import { Suspense } from 'react';
 
-export default function IncrementoTopRecursosUso() {
+export default function AppsGatewayUnused() {
     return (
         <div className=''>
             <Suspense fallback={<div>Cargando...</div>}>

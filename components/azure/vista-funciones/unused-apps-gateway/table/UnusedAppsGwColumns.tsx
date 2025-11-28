@@ -1,28 +1,15 @@
 'use client'
 
 import { Badge } from '@/components/ui/badge';
-import { DynamicColumn } from '@/components/general/data-table/columns';
+import { DynamicColumn } from '@/components/general_aws/data-table/columns';
 import { Button } from '@/components/ui/button';
 import { Eye, Copy } from 'lucide-react';
 import { useState } from 'react';
 import { UnusedAppGw } from '@/interfaces/vista-unused-resources/unusedAppGInterfaces';
 import { UnusedAppGwInsightModal } from '@/components/azure/vista-funciones/unused-apps-gateway/info/UnusedAppGwInsightModal'; // Asegúrate de importar el modal que creamos
+import { useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 
-const CopyBtn = ({ text }: { text: string }) => (
-    <Button
-        variant="ghost"
-        size="sm"
-        className="h-7 px-2 ml-2"
-        onClick={(e) => {
-            e.stopPropagation();
-            navigator.clipboard.writeText(text);
-        }}
-    >
-        <Copy className="h-3.5 w-3.5" />
-    </Button>
-);
-
-// Componente wrapper para el modal dentro de la celda
 const DetailsCell = ({ appGw }: { appGw: UnusedAppGw }) => {
     const [open, setOpen] = useState(false);
 
@@ -47,15 +34,48 @@ const DetailsCell = ({ appGw }: { appGw: UnusedAppGw }) => {
     );
 };
 
+const QueryParams = () => {
+    const searchParams = useSearchParams();
+
+    const startDateParam = searchParams.get('startDate');
+    const endDateParam = searchParams.get('endDate');
+    const resourceGroupParam = searchParams.get('resourceGroup');
+
+    return { startDateParam: startDateParam, endDateParam: endDateParam, resourceGroup: resourceGroupParam }
+}
+
 export const UnusedAppsGwColumns: DynamicColumn<UnusedAppGw>[] = [
     {
         header: "Nombre Gateway",
         accessorKey: "name",
-        cell: (info) => (
-            <div className="font-medium">
-                {info.getValue() as string}
-            </div>
-        )
+        cell: ({ row, getValue }) => {
+            const name = getValue() as string;
+            const startDate = QueryParams().startDateParam;
+            const endDate = QueryParams().endDateParam;
+            const resourceGroup = QueryParams().resourceGroup;
+
+            const resourceId = row.original.resource_id;
+
+            return (
+                <div className="flex flex-col">
+                    <Link
+                        href={{ pathname: '/azure/consumo-apps-gateway/', query: { appgateway: resourceId, startDate: startDate, endDate: endDate, resourceGroup: resourceGroup } }}
+                        rel="noopener noreferrer"
+                        target="_blank"
+                    >
+                        <span className="font-medium">
+                            {name}
+                        </span>
+                        <div className="flex items-center text-xs text-muted-foreground">
+
+                            <span className="truncate max-w-[200px]" title={resourceId}>
+                                {resourceId}
+                            </span>
+                        </div>
+                    </Link>
+                </div>
+            )
+        }
     },
     {
         header: "Ubicación",
@@ -68,7 +88,6 @@ export const UnusedAppsGwColumns: DynamicColumn<UnusedAppGw>[] = [
     },
     {
         header: "SKU Actual",
-        // Usamos un accessorFn para obtener el SKU más reciente para el ordenamiento/filtrado
         accessorFn: (row) => {
             const latest = [...row.details].sort((a, b) =>
                 new Date(b.sync_time).getTime() - new Date(a.sync_time).getTime()
@@ -87,14 +106,10 @@ export const UnusedAppsGwColumns: DynamicColumn<UnusedAppGw>[] = [
     },
     {
         header: "Estado",
-        // Lógica para mostrar una etiqueta rápida en la tabla
         accessorFn: (row) => {
             const latest = [...row.details].sort((a, b) =>
                 new Date(b.sync_time).getTime() - new Date(a.sync_time).getTime()
             )[0];
-
-            // Replicamos la lógica de diagnóstico para la etiqueta
-            // (Necesitamos las métricas para "Zombie" real, aquí usamos una aprox rápida basada en config)
             if (latest.backend_instance_count === 0) return "Sin uso (Sin Backends)";
             if (latest.sku.includes('v1')) return "Legacy V1";
             if (latest.autoscale_configuration?.min_capacity > 2) return "Sobreaprovisionado";

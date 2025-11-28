@@ -1,7 +1,7 @@
 'use client'
 
 import { MessageCard } from '@/components/aws/cards/MessageCards';
-import { LoaderComponent } from '@/components/general/LoaderComponent';
+import { LoaderComponent } from '@/components/general_aws/LoaderComponent';
 import { AverageByLocation } from '@/interfaces/vista-promedio-por-localizacion/avgByLocationInterfaces';
 import { AlertCircle, ChartBar, Info } from 'lucide-react';
 import useSWR from 'swr';

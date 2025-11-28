@@ -67,8 +67,14 @@ const useMenuStyles = () => {
             ? 'hover:bg-blue-800 hover:text-blue-100 text-gray-300'
             : 'hover:bg-blue-50 hover:text-blue-900 text-gray-700'
     }
+    const getIconClasses = (isActive: boolean, defaultColor: string = 'text-blue-500') => {
+        if (isActive) {
+            return 'text-white'
+        }
+        return defaultColor
+    }
 
-    return { getMenuItemClasses }
+    return { getMenuItemClasses, getIconClasses }
 }
 
 export const SidebarComponent = ({
@@ -77,7 +83,7 @@ export const SidebarComponent = ({
     const pathname = usePathname();
     const { state, open } = useSidebar()
     const isExpanded = open || state === 'mobile'
-    const { getMenuItemClasses } = useMenuStyles();
+    const { getMenuItemClasses, getIconClasses } = useMenuStyles();
     const [isMounted, setIsMounted] = useState(false);
     const [isAzure, setIsAzure] = useState(false);
     const [isAws, setIsAws] = useState(false);
@@ -173,13 +179,15 @@ export const SidebarComponent = ({
         { label: 'VM', icon: Computer, href: '/azure/funciones/unused-resources/vm' },
         { label: 'VMSS', icon: Computer, href: '/azure/funciones/unused-resources/vmss' },
         { label: 'Extensiones VM', icon: Puzzle, href: '/azure/funciones/unused-resources/extensions' },
-        { label: 'Loadbalancers', icon: Scale, href: '/azure/funciones/loadbalancers-infrautilizados'},
-        { label: 'Applications Gateway', icon: Workflow, href: '/azure/funciones/apps-gateway-infrautilizados' }
+        { label: 'Loadbalancers', icon: Scale, href: '/azure/funciones/loadbalancers-infrautilizados' },
+        { label: 'Applications Gateway', icon: Workflow, href: '/azure/funciones/apps-gateway-infrautilizados' },
+        { label: 'Traffic Managers', icon: Workflow, href: '/azure/funciones/traffic-managers-infrautilizados' }
     ]
     const consumeSubItemsAzure = [
         { label: 'Maquinas Virtuales', icon: Computer, href: '/azure/consumo-vm' },
         { label: 'Base de Datos', icon: Database, href: '/azure/consumo-db' },
         { label: 'Nodos', icon: Server, href: '/azure/consumo-nodos' },
+        { label: 'Applications Gateway', icon: Workflow, href: '/azure/consumo-apps-gateway' }
     ]
 
     const AzureRoutes = {
@@ -193,7 +201,10 @@ export const SidebarComponent = ({
             { label: 'Vista Advisor', icon: Pyramid, href: '/azure/advisor' },
             { label: 'Vista Saving Plans', icon: HandCoins, href: '/azure/saving-plan' },
         ],
-        recursos: [{ label: 'Maquinas Virtuales', icon: Computer, href: '/azure/recursos-vm' }],
+        recursos: [
+            { label: 'Maquinas Virtuales', icon: Computer, href: '/azure/recursos-vm' },
+            { label: 'Traffic Managers', icon: Workflow, href: '/azure/recursos-traffic-manager' }
+        ],
         consumes: [{ label: 'Consumos', subItems: consumeSubItemsAzure, icon: Zap }],
         funciones: [
             { label: 'Blob Storage vs Storage General', icon: Cylinder, href: '/azure/funciones/blob-vs-storage-general' },
@@ -299,7 +310,7 @@ export const SidebarComponent = ({
                                                 getMenuItemClasses(isActive)
                                             )}
                                         >
-                                            <item.icon className="h-5 w-5 text-blue-500" />
+                                            <item.icon className={cn("h-5 w-5", getIconClasses(isActive))} />
                                             <span className="text-sm font-medium">{item.label}</span>
                                         </Link>
                                     </SidebarMenuButton>
@@ -343,7 +354,7 @@ export const SidebarComponent = ({
                                                             "hover:scale-[1.02] hover:translate-x-1",
                                                         )}
                                                     >
-                                                        <sub.icon className="h-4 w-4 text-blue-400 transition-transform duration-200 group-hover:scale-110" />
+                                                        <sub.icon className={cn("h-4 w-4 transition-transform duration-200 group-hover:scale-110", getIconClasses(isSubActive, "text-blue-400"))} />
                                                         <span className="text-sm">{sub.label}</span>
                                                     </Link>
                                                 )
@@ -434,7 +445,7 @@ export const SidebarComponent = ({
                                                             "hover:scale-[1.02] hover:translate-x-1",
                                                         )}
                                                     >
-                                                        <f.icon className="h-4 w-4 text-blue-400" />
+                                                        <f.icon className={cn("h-4 w-4", getIconClasses(isActive, "text-blue-400"))} />
                                                         <span className="text-sm">{f.label}</span>
                                                     </Link>
                                                 )
@@ -472,7 +483,7 @@ export const SidebarComponent = ({
                                                             "hover:scale-[1.02] hover:translate-x-1",
                                                         )}
                                                     >
-                                                        <subItem.icon className={cn("h-4 w-4 text-blue-400 transition-transform duration-200 hover:scale-110", subItem.color)} />
+                                                        <subItem.icon className={cn("h-4 w-4 transition-transform duration-200 hover:scale-110", getIconClasses(isActive, subItem.color || "text-blue-400"))} />
                                                         <span className="text-sm">{subItem.label}</span>
                                                     </Link>
                                                 )

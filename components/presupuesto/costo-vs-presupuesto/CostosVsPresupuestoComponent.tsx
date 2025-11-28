@@ -83,6 +83,16 @@ export const CostosVsPresupuestoComponent = ({ cloud, anio }: CentroDeCostoCompo
     fetcher
   );
 
+  const facturacionArray = Array.isArray(dataFacturacion)
+    ? dataFacturacion
+    : Array.isArray(dataFacturacion?.data)
+    ? dataFacturacion.data
+    : [];
+  
+  console.log("RAW FACTURACION", dataFacturacion);
+  console.log("NORMALIZADO", facturacionArray);
+
+
   // Loader
   if (isLoadingPresupuesto || isLoadingFacturacion) {
     return <LoaderComponent size="small" />;
@@ -172,7 +182,9 @@ export const CostosVsPresupuestoComponent = ({ cloud, anio }: CentroDeCostoCompo
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Facturación Anual</p>
                 <p className="text-2xl font-bold text-purple-600">
-                  {formatCurrency(dataFacturacion?.reduce((acc, f) => acc + f.total_cost, 0) || 0)}
+                  {/* {formatCurrency(dataFacturacion?.reduce((acc, f) => acc + f.total_cost, 0) || 0)} */}
+                  {formatCurrency(facturacionArray.reduce((acc, f) => acc + f.total_cost, 0))}
+
                 </p>
                 <p className="text-xs text-muted-foreground">Total Facturado</p>
               </div>
@@ -233,11 +245,13 @@ export const CostosVsPresupuestoComponent = ({ cloud, anio }: CentroDeCostoCompo
       <div className="flex flex-col gap-5 mt-10 p-6">
         <CostosVsPresupuestoChart 
           data={dataPresupuesto || []} 
-          facturacionData={dataFacturacion || []}
+          // facturacionData={dataFacturacion || []}
+          facturacionData={facturacionArray}
         />
         <ComparacionMensualTableComponent 
           dataPresupuesto={dataPresupuesto} 
-          dataFacturacion={dataFacturacion}
+          // dataFacturacion={dataFacturacion}
+          dataFacturacion={facturacionArray}
         />
 
       {/* Presupuestos por Centro de Costo */}

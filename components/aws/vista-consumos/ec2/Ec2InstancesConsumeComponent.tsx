@@ -7,7 +7,7 @@ import { Ec2ResourceConsumeViewUsageCreditsComponent } from '@/components/aws/vi
 import { Ec2InfoConsumeViewComponent } from '@/components/aws/vista-consumos/ec2/info/Ec2InfoConsumeViewComponent'
 import { Ec2ConsumeViewInstanceTable } from '@/components/aws/vista-consumos/ec2/table/Ec2ConsumeViewInstanceTable'
 import { MessageCard } from '@/components/aws/cards/MessageCards';
-import { LoaderComponent } from '@/components/general/LoaderComponent'
+import { LoaderComponent } from '@/components/general_aws/LoaderComponent'
 import { ConsumeViewEc2CpuMetrics, ConsumeViewEc2CreditsMetrics, Ec2ConsumneViewInstance } from '@/interfaces/vista-consumos/ec2ConsumeViewInterfaces'
 
 interface Ec2InstancesConsumeComponentProps {

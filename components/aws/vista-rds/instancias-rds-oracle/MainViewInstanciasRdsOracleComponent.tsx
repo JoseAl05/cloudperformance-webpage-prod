@@ -1,4 +1,4 @@
-import { FiltersComponent } from '@/components/general/filters/FiltersComponent'
+import { FiltersComponent } from '@/components/general_aws/filters/FiltersComponent'
 import { InstanciasRdsOracleChartComponent } from '@/components/aws/vista-rds/instancias-rds-oracle/InstanciasRdsOracleChartComponent'
 import { Database } from 'lucide-react'
 

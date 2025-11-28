@@ -24,6 +24,7 @@ export const SelectCloudComponent = () => {
     } = useFeatureAccess()
 
     if (loading) return <LoaderComponent />
+    if (loading) return <LoaderComponent />
 
     const isAzure = connectionData.isAzureActive
     const isAws = connectionData.isAwsActive

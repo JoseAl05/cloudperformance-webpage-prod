@@ -1,4 +1,4 @@
-import { FiltersComponent } from '@/components/general/filters/FiltersComponent'
+import { FiltersComponent } from '@/components/general_aws/filters/FiltersComponent'
 import { InstanceEc2CpuMetricsComponent } from '@/components/aws/vista-ec2/instancias-ec2/InstanceEc2CpuMetricsComponent'
 import { Server } from 'lucide-react'
 export const MainViewInstancesEc2Component = () => {

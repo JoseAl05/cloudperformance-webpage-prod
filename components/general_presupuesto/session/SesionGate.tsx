@@ -3,7 +3,7 @@
 import { ReactNode, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "@/hooks/useSession";
-import { LoaderComponent } from "@/components/general/LoaderComponent";
+import { LoaderComponent } from "@/components/general_aws/LoaderComponent";
 
 interface SessionGateProps {
   children: ReactNode;

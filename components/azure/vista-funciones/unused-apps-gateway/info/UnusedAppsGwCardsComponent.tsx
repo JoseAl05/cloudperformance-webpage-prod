@@ -170,7 +170,6 @@ export const UnusedAppsGwCardsComponent = ({ data }: UnusedAppsGwCardsComponentP
 
     }, [data]);
 
-
     if (metrics.total === 0) {
         return (
             <Card className="border-dashed">

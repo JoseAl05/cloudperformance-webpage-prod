@@ -1,4 +1,4 @@
-import { FiltersComponent } from '@/components/general/filters/FiltersComponent'
+import { FiltersComponent } from '@/components/general_aws/filters/FiltersComponent'
 import { VariacionTendenciaUsoDeRecursosComponent }  from '@/components/aws/vista-funciones/variacion-tendencia-uso-de-recursos/VariacionTendenciaUsoDeRecursosComponent'
 import { Globe } from 'lucide-react'
 

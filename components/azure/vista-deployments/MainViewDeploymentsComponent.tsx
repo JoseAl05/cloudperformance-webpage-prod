@@ -25,6 +25,10 @@ export const MainViewDeploymentsComponent = () => {
                 <FiltersComponent
                     Component={DeploymentsComponent}
                     dateFilter
+                    subscriptionIdFilter
+                    resourceGroupFilter
+                    resourceGroupCollection='custom_activity_logs_deployments'
+                    resourceGroupSubscriptionField='subscription_id'
                     deploymentOperationsFilter
                 />
             </div>

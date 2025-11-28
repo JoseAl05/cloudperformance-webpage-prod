@@ -1,5 +1,5 @@
 
-import { FiltersComponent } from '@/components/general/filters/FiltersComponent'
+import { FiltersComponent } from '@/components/general_aws/filters/FiltersComponent'
 import { SavingPlansViewComponent } from '@/components/aws/vista-saving-plan/SavingPlansComponent'
 import { HandCoins } from 'lucide-react';
  

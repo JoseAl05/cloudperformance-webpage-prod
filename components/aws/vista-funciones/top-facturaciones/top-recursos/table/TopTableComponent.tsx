@@ -2,7 +2,7 @@
 
 import useSWR from "swr"
 import { ColumnDef } from "@tanstack/react-table"
-import { DataTableGrouping } from "@/components/general/data-table/data-table-grouping"
+import { DataTableGrouping } from "@/components/general_aws/data-table/data-table-grouping"
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ArrowUpDown } from "lucide-react"
 import { Button } from "@/components/ui/button"

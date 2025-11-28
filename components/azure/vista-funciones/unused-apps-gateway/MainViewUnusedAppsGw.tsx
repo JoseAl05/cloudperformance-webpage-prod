@@ -30,6 +30,14 @@ export const MainViewUnusedAppsGw = () => {
                     subscriptionIdFilter
                     unusedAppGFilter
                     isUnusedAppGFilterMultiselect
+                    tagsFilter
+                    tagsCollection='azure_app_gateways'
+                    tagsColumnName='tags'
+                    tagsRegionField='location'
+                    tagsSubscriptionField='subscription_id'
+                    resourceGroupFilter
+                    resourceGroupCollection='azure_app_gateways'
+                    resourceGroupSubscriptionField='subscription_id'
                 />
             </div>
         </div>

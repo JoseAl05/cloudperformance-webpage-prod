@@ -14,6 +14,7 @@ interface UnusedAppGwFilterComponentProps {
     region: string;
     subscription: string;
     unusedAppGw: string;
+    resourceGroup: string;
     setUnusedAppGw: Dispatch<SetStateAction<string>>;
     isUnusedAppGFilterMultiselect: boolean;
 }
@@ -32,6 +33,7 @@ export const UnusedAppGwFilterComponent = ({
     region,
     subscription,
     unusedAppGw,
+    resourceGroup,
     setUnusedAppGw,
     isUnusedAppGFilterMultiselect
 }: UnusedAppGwFilterComponentProps) => {
@@ -39,7 +41,7 @@ export const UnusedAppGwFilterComponent = ({
     const startDateFormatted = startDate ? startDate.toISOString().replace('Z', '').slice(0, -4) : '';
     const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : '';
 
-    const url = `/api/azure/bridge/azure/apps_gateway/all_unused_application_gateways?date_from=${startDateFormatted}&date_to=${endDateFormatted}&subscription_id=${subscription}&location=${region}`
+    const url = `/api/azure/bridge/azure/apps_gateway/all_unused_application_gateways?date_from=${startDateFormatted}&date_to=${endDateFormatted}&subscription_id=${subscription}&location=${region}&resource_groups=${resourceGroup}`
     const { data, error, isLoading } = useSWR<ApiUnusedAppGw[]>(url, fetcher)
 
     const unusedAppsGw = useMemo(() => {

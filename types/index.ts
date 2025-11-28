@@ -34,9 +34,9 @@ export interface JWTPayload {
   sub: string;
   username: string;
   client: string;
-  role: UserRole; 
+  role: UserRole;
   user_db_aws: string;
   user_db_azure: string;
-  is_azure:boolean;
-  is_aws:boolean;
+  is_azure: boolean;
+  is_aws: boolean;
 }
