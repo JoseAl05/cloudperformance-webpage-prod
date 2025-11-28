@@ -5,6 +5,7 @@ import { Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
+import Link from 'next/link';
 
 export const LoginFormComponent = () => {
     const [emailOrUsername, setEmailOrUsername] = useState('');
@@ -29,6 +30,7 @@ export const LoginFormComponent = () => {
             alert(data.error || 'Error');
         }
     }
+    
     return (
         <form onSubmit={onSubmit} className='flex flex-col gap-6'>
             <div className='flex flex-col items-center gap-2 text-center'>
@@ -39,14 +41,33 @@ export const LoginFormComponent = () => {
             </div>
             <div className='grid gap-6'>
                 <div className='grid gap-3'>
-                    <Label htmlFor='correo'>Correo</Label>
-                    <Input id='email' type='email' placeholder='m@example.com' value={emailOrUsername} onChange={e => setEmailOrUsername(e.target.value)} required />
+                    <Label htmlFor='email'>Correo</Label>
+                    <Input 
+                        id='email' 
+                        type='email' 
+                        placeholder='m@example.com' 
+                        value={emailOrUsername} 
+                        onChange={e => setEmailOrUsername(e.target.value)} 
+                        required 
+                    />
                 </div>
                 <div className='grid gap-3'>
-                    <div className='flex items-center'>
+                    <div className='flex items-center justify-between'>
                         <Label htmlFor='password'>Password</Label>
+                        <Link
+                            href="/forgot-password"
+                            className="text-sm font-medium text-blue-600 hover:text-blue-500 hover:underline"
+                        >
+                            ¿Olvidaste tu contraseña?
+                        </Link>
                     </div>
-                    <Input id='password' type='password' value={password} onChange={e => setPassword(e.target.value)} required />
+                    <Input 
+                        id='password' 
+                        type='password' 
+                        value={password} 
+                        onChange={e => setPassword(e.target.value)} 
+                        required 
+                    />
                 </div>
                 {
                     loading ? (

@@ -20,7 +20,6 @@ const AzurePdfReportComponent = ({ planName }: { planName: string }) => (
     </div>
 );
 
-
 const AccessDeniedComponent = ({ planName }: { planName: string }) => (
     // ... (El componente de denegación sin acceso total es el mismo)
     <div className="min-h-screen flex flex-col items-center justify-center p-8 bg-gray-50">
@@ -59,7 +58,14 @@ export default function AzureLayout({ children }: AzureLayoutProps) {
 
     // 2. ACCESO COMPLETO (Pro o Business)
     if (canAccessFullDashboardAzure) {
-        return <>{children}</>;
+        return (
+            <div className="flex flex-col min-h-screen">
+                {/* Contenido principal del Dashboard */}
+                <div className="flex-1">
+                    {children}
+                </div>
+            </div>
+        );
     }
 
     // 3. ACCESO LIMITADO (Starter Freemium o Starter)
@@ -68,6 +74,5 @@ export default function AzureLayout({ children }: AzureLayoutProps) {
         return <AzurePdfReportComponent planName={currentPlanName || 'Starter (Freemium)'} />;
     }
     
-    // Fallback de seguridad (nunca debería llegar aquí)
     return <AccessDeniedComponent planName={currentPlanName || 'ERROR'} />;
 }

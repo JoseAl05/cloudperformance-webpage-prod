@@ -21,15 +21,17 @@ import { cookies } from 'next/headers';
 import { AUTH_COOKIE } from '@/lib/cookies';
 import { verifyAuthToken } from '@/lib/auth';
 import { getCollection } from '@/lib/mongodb';
-import { ObjectId } from 'mongodb'; // Necesario para buscar por _id
-// Importa los tipos necesarios de tus archivos
-import type { User, Empresa, UserRole } from '@/types/db'; 
+import { ObjectId } from 'mongodb'; 
+import type { User, CloudAccount } from '@/types/db'; 
 
-// Define la estructura de la respuesta para el Front-end (useSession)
-type SessionUser = Omit<User, 'passwordHash' | 'user_db'> & { 
+// Definimos la respuesta extendida para el frontend
+type SessionUser = Omit<User, 'passwordHash'> & { 
     planName?: string;
-    userLimit?: number;
-    currentUsers?: number;
+    // Aseguramos el tipado de los campos opcionales en el frontend
+    is_aws_multi_tenant?: boolean;
+    is_azure_multi_tenant?: boolean;
+    azure_accounts?: CloudAccount[];
+    aws_accounts?: CloudAccount[];
 };
 
 export async function GET() {
@@ -38,7 +40,7 @@ export async function GET() {
     
     if (!token) return NextResponse.json({ user: null });
     
-    // 1. Verificar el token y obtener el payload básico (incluye sub: userId)
+    // 1. Verificar token
     const payload = await verifyAuthToken(token);
     if (!payload) return NextResponse.json({ user: null });
 
@@ -46,50 +48,40 @@ export async function GET() {
         const userId = new ObjectId(payload.sub);
         const usersCollection = await getCollection<User>('Users');
         
-        // 2. Consultar la BD para obtener el usuario completo (incluyendo 'role')
+        // 2. Obtener usuario (ÚNICA CONSULTA A LA DB)
         const user = await usersCollection.findOne(
             { _id: userId },
-            { projection: { passwordHash: 0 } } // Excluir el hash por seguridad
+            { projection: { passwordHash: 0 } } 
         );
 
         if (!user) {
             return NextResponse.json({ user: null }, { status: 404 });
         }
         
-        const { client } = user;
-        let companyData = {};
-
-        // 3. Consultar la BD para obtener la data de Licencia (Empresa)
-        if (client) {
-            const empresasCollection = await getCollection<Empresa>('Empresas');
-            // Nota: Se asume que el nombre del cliente es la clave para buscar la licencia.
-            const empresa = await empresasCollection.findOne({ name: client });
-
-            if (empresa) {
-                // Datos cruciales para Feature Gates y límites
-                companyData = {
-                    planName: empresa.planName,
-                    userLimit: empresa.userLimit,
-                    currentUsers: empresa.currentUsers,
-                };
-            }
-        }
-        
-        // 4. Construir y retornar la sesión completa
+        // 3. Construir la respuesta usando SOLO los datos del usuario
+        // Como el usuario ya heredó todo al crearse, no necesitamos consultar la Empresa.
         const sessionUser: SessionUser = {
-            _id: user._id.toHexString(), 
+            _id: user._id, 
             email: user.email,
             username: user.username,
             client: user.client,
-            role: user.role, // <-- INCLUIDO DESDE LA BD
+            role: user.role,
+            planName: user.planName,
+            is_active: user.is_active,
+            createdAt: user.createdAt,
+            updatedAt: user.updatedAt,
+            
+            // Credenciales de conexión
             is_aws: user.is_aws,
             is_azure: user.is_azure,
             user_db_aws: user.user_db_aws,
             user_db_azure: user.user_db_azure,
-            createdAt: user.createdAt,
-            updatedAt: user.updatedAt,
-            // Aquí se agregan los datos de la licencia
-            ...companyData 
+
+            // 🛑 DATOS MULTI-TENANT (Leídos directamente del documento User) 🛑
+            is_aws_multi_tenant: (user as any).is_aws_multi_tenant || false,
+            is_azure_multi_tenant: (user as any).is_azure_multi_tenant || false,
+            azure_accounts: user.azure_accounts || [],
+            aws_accounts: user.aws_accounts || [],
         };
 
         return NextResponse.json({ user: sessionUser });

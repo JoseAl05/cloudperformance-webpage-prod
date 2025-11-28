@@ -1,4 +1,5 @@
 import nodemailer from 'nodemailer';
+import type { SentMessageInfo } from 'nodemailer';
 
 const host = process.env.SMTP_HOST!;
 const port = Number(process.env.SMTP_PORT || 587);
@@ -36,4 +37,31 @@ export async function send2FACodeEmail(to: string, code: string) {
     `,
   });
   return res.messageId;
+}
+
+// NUEVA FUNCIÓN PARA RECUPERACIÓN DE CONTRASEÑA 
+export async function sendRecoveryEmail(to: string, token: string): Promise<SentMessageInfo> {
+    const appName = process.env.APP_NAME || 'Cloudperformance';
+    const resetLink = `${process.env.NEXT_PUBLIC_APP_URL}/reset-password?token=${token}`;
+
+    const res = await mailer.sendMail({
+        from,
+        to,
+        subject: `[${appName}] Restablecer Contraseña`,
+        html: `
+            <div style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
+                <h2 style="color: #2563eb;">Solicitud de Restablecimiento de Contraseña</h2>
+                <p>Hemos recibido una solicitud para cambiar la contraseña asociada a esta dirección de correo.</p>
+                <p>Haz clic en el siguiente botón para continuar:</p>
+                <a href="${resetLink}" 
+                   style="background-color: #2563eb; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block; margin-top: 15px; font-weight: bold;">
+                   Restablecer Contraseña
+                </a>
+                <p style="margin-top: 25px; font-size: 12px; color: #666;">
+                    Este enlace es válido solo por una hora. Si no solicitaste un cambio de contraseña, ignora este correo.
+                </p>
+            </div>
+        `,
+    });
+    return res;
 }

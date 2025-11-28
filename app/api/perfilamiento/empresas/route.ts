@@ -18,7 +18,6 @@ export async function GET(req: NextRequest) {
     try {
         const empresasCollection = await getCollection<Empresa>('Empresas');
 
-        // 2. CORRECCIÓN CLAVE: Proyectar todos los campos necesarios para la herencia y la tabla
         const empresas = await empresasCollection
             .find({})
             .project({ 
@@ -28,8 +27,13 @@ export async function GET(req: NextRequest) {
                 planName: 1, 
                 is_aws: 1, 
                 is_azure: 1, 
-                user_db_aws: 1,   // <-- AÑADIDO PARA LA HERENCIA
-                user_db_azure: 1, // <-- AÑADIDO PARA LA HERENCIA
+                user_db_aws: 1,   
+                user_db_azure: 1, 
+                is_aws_multi_tenant: 1,
+                is_azure_multi_tenant: 1,
+                azure_accounts: 1, 
+                aws_accounts: 1,   
+                
                 _id: 1 
             })
             .toArray();
@@ -43,7 +47,7 @@ export async function GET(req: NextRequest) {
 }
 
 // =========================================================================
-// RUTA: POST /api/perfilamiento/empresas (Creación de Licencia y Conexiones DB)
+// RUTA: POST /api/perfilamiento/empresas (Creación de Licencia)
 // =========================================================================
 
 export async function POST(req: NextRequest) {
@@ -54,9 +58,15 @@ export async function POST(req: NextRequest) {
 
     const body = await req.json();
     const { 
-        name, planName, 
+        name, planName, userLimit, 
+        
         is_aws = false, user_db_aws, 
-        is_azure = false, user_db_azure 
+        is_azure = false, user_db_azure,
+        is_aws_multi_tenant = false, 
+        is_azure_multi_tenant = false,
+        azure_accounts,
+        aws_accounts,   
+        
     } = body;
 
     if (!name || !planName) {
@@ -69,12 +79,12 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ message: `Plan de servicio '${planName}' no reconocido.` }, { status: 400 });
     }
     
-    // 2. Validación de Cadenas de Conexión (Backend)
-    if (is_aws && (!user_db_aws || user_db_aws.trim() === '')) {
-        return NextResponse.json({ message: 'El campo user_db_aws es requerido si el acceso AWS está activado.' }, { status: 400 });
+    // 2. Validación de Cadenas de Conexión (Asegurar que la DB principal exista si NO es Multi-Tenant)
+    if (!is_aws_multi_tenant && is_aws && (!user_db_aws || user_db_aws.trim() === '')) {
+        return NextResponse.json({ message: 'El campo Nombre DB AWS Maestra es requerido.' }, { status: 400 });
     }
-    if (is_azure && (!user_db_azure || user_db_azure.trim() === '')) {
-        return NextResponse.json({ message: 'El campo user_db_azure es requerido si el acceso Azure está activado.' }, { status: 400 });
+    if (!is_azure_multi_tenant && is_azure && (!user_db_azure || user_db_azure.trim() === '')) {
+        return NextResponse.json({ message: 'El campo Nombre DB Azure Maestra es requerido.' }, { status: 400 });
     }
 
 
@@ -85,18 +95,24 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ message: `La empresa '${name}' ya tiene una licencia activa.` }, { status: 409 });
         }
 
-        // 3. Construir la nueva empresa con las cadenas de conexión maestras
+        // 3. Construir el objeto final para la DB
         const newEmpresa: Omit<Empresa, '_id'> = {
             name,
             planName,
-            userLimit: planConfig.userLimit, 
+            userLimit: userLimit || planConfig.userLimit, 
             currentUsers: 0, 
             
-            // CAMPOS DE CONEXIÓN MAESTRA
+            // CAMPOS DE CONEXIÓN MAESTRA (Legacy/Principal)
             is_aws: is_aws,
-            user_db_aws: is_aws ? user_db_aws : null, // Guarda la cadena o null
+            user_db_aws: is_aws ? user_db_aws : null, 
             is_azure: is_azure,
-            user_db_azure: is_azure ? user_db_azure : null, // Guarda la cadena o null
+            user_db_azure: is_azure ? user_db_azure : null, 
+            
+            is_aws_multi_tenant: is_aws_multi_tenant,
+            is_azure_multi_tenant: is_azure_multi_tenant,
+
+            azure_accounts: azure_accounts,
+            aws_accounts: aws_accounts,
             
             createdAt: new Date(),
         };
@@ -106,7 +122,7 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ 
             message: 'Licencia de empresa creada y conexiones maestras registradas.',
             empresaId: result.insertedId,
-            userLimit: planConfig.userLimit
+            userLimit: newEmpresa.userLimit
         }, { status: 201 });
 
     } catch (error) {

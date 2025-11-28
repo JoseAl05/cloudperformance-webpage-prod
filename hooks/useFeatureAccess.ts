@@ -3,8 +3,6 @@ import useSWR from 'swr';
 import { Empresa } from '@/types/db'; 
 import { useClientContext } from '@/components/context/ClientContext'; 
 
-type EmpresaOption = Empresa;
-
 const fetcher = (url: string) => fetch(url, { credentials: 'include' }).then(res => res.json());
 
 const PLAN_ACCESS_CONFIG: Record<string, { 
@@ -20,13 +18,22 @@ const PLAN_ACCESS_CONFIG: Record<string, {
     'global access': { aws: 'full_dashboard', azure: 'full_dashboard', presupuesto: true, vistaAdvisor: true },
 };
 
+
 export const useFeatureAccess = () => {
     const { user: userLoggedIn, isLoading: loadingSession, refresh: refreshSession } = useSession();
-    const { selectedCompany, setSelectedCompany } = useClientContext(); 
+    const { 
+        selectedCompany, 
+        setSelectedCompany,
+        activeAzureAccountId, 
+        setActiveAzureAccountId,
+        activeAwsAccountId, 
+        setActiveAwsAccountId 
+    } = useClientContext(); 
+
     const isGlobalAdmin = userLoggedIn?.role === 'admin_global';
     const isCompanyAdmin = userLoggedIn?.role === 'admin_empresa';
-    const shouldFetchCompanyData = isGlobalAdmin;
     
+    const shouldFetchCompanyData = isGlobalAdmin; 
     const { data: empresas, isLoading: loadingEmpresas } = useSWR<Empresa[]>(
         shouldFetchCompanyData ? '/api/perfilamiento/empresas' : null, 
         fetcher,
@@ -34,47 +41,45 @@ export const useFeatureAccess = () => {
     );
     const companiesList = isGlobalAdmin ? (empresas || []) : [];
 
-    // FUNCIÓN CLAVE: Solicitar al backend que cambie el token
-    const swapContextToken = async (targetClientName: string) => {
-        if (!isGlobalAdmin || !targetClientName) return;
-        
-        try {
-            const response = await fetch('/api/auth/swap-client-context', { 
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ clientName: targetClientName }),
-                credentials: 'include',
-            });
-
-            if (!response.ok) {
-                throw new Error('Error al obtener el token de contexto.');
-            }
-            
-            refreshSession(); 
-
-        } catch (error) {
-            console.error("Fallo al cambiar el contexto del cliente:", error);
-        }
-    };
-    
     let activeCredentials;
-    
+
     if (isGlobalAdmin && selectedCompany) {
-        activeCredentials = {
-            client: selectedCompany.name,
-            is_aws: selectedCompany.is_aws,
-            user_db_aws: selectedCompany.user_db_aws,
-            is_azure: selectedCompany.is_azure,
-            user_db_azure: selectedCompany.user_db_azure,
-            planName: selectedCompany.planName,
-        };
+        // Caso 1: Admin Global visualizando una empresa seleccionada
+        activeCredentials = selectedCompany;
     } else if (userLoggedIn) {
+        // Caso 2: Admin Empresa o Usuario  (usando su propia sesión)
         activeCredentials = userLoggedIn;
     } else {
-        activeCredentials = {};
+        activeCredentials = null;
     }
 
-    const sourcePlanName = activeCredentials.planName || (isGlobalAdmin ? 'Global Access' : undefined);
+    //  LÓGICA MULTI-TENANT 
+    
+    const normalizeAccounts = (rawAccounts: any[] | undefined, legacyDb: string | null | undefined) => {
+        let list = rawAccounts || [];
+        if (list.length === 0 && legacyDb) {
+            list = [{ id: 'default-legacy', alias: 'Cuenta Principal', db: legacyDb }];
+        }
+        return list;
+    };
+    
+    // Normalizar ambas nubes
+    const azureAccountsList = normalizeAccounts(activeCredentials?.azure_accounts, activeCredentials?.user_db_azure);
+    const awsAccountsList = normalizeAccounts(activeCredentials?.aws_accounts, activeCredentials?.user_db_aws);
+
+    let currentDbAzure = null;
+    if (azureAccountsList.length > 0) {
+        const selectedAccount = azureAccountsList.find(acc => acc.id === activeAzureAccountId);
+        currentDbAzure = selectedAccount ? selectedAccount.db : azureAccountsList[0].db;
+    }
+    
+    let currentDbAws = null;
+    if (awsAccountsList.length > 0) {
+        const selectedAccount = awsAccountsList.find(acc => acc.id === activeAwsAccountId);
+        currentDbAws = selectedAccount ? selectedAccount.db : awsAccountsList[0].db;
+    }
+
+    const sourcePlanName = activeCredentials?.planName || (isGlobalAdmin ? 'Global Access' : undefined);
     const currentPlanNameKey = sourcePlanName?.toLowerCase() || '';
 
     const planRestrictions = PLAN_ACCESS_CONFIG[currentPlanNameKey] || { 
@@ -82,31 +87,65 @@ export const useFeatureAccess = () => {
     };
     
     const connectionData = {
-        client: activeCredentials.client || userLoggedIn?.client,
-        isAwsActive: activeCredentials.is_aws || false,
-        dbAwsName: activeCredentials.user_db_aws,
-        isAzureActive: activeCredentials.is_azure || false,
-        dbAzureName: activeCredentials.user_db_azure,
+        client: activeCredentials?.name || activeCredentials?.client,
+        
+        isAwsActive: activeCredentials?.is_aws || false,
+        dbAwsName: currentDbAws, 
+        awsAccountsList, 
+        
+        isAzureActive: activeCredentials?.is_azure || false,
+        dbAzureName: currentDbAzure, 
+        azureAccountsList, 
     };
+
+
+    const swapContextToken = async (targetClientName: string, explicitAzureDb: string | null = null, explicitAwsDb: string | null = null) => {
+        if (!targetClientName) return;
+   
+        try {
+            const payload = { 
+                clientName: targetClientName,
+                user_db_azure: explicitAzureDb, 
+                user_db_aws: explicitAwsDb,      
+            };
+
+            const response = await fetch('/api/auth/swap-client-context', { 
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload), 
+                credentials: 'include',
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({ message: 'Error desconocido.' }));
+                throw new Error(errorData.message || 'Error al cambiar contexto.');
+            }
+            refreshSession(); 
+
+        } catch (error) {
+            console.error("Fallo al cambiar el contexto:", error);
+        }
+   };
 
 
     return { 
         loading: loadingSession || (isGlobalAdmin && loadingEmpresas), 
-        
         connectionData, 
         companiesList, 
-        swapContextToken, // <-- Función para cambiar el JWT temporal
-        setSelectedCompany, // <-- Función para actualizar el Contexto Visual
-        
+        swapContextToken,
+        setSelectedCompany,
+        activeAzureAccountId, setActiveAzureAccountId, 
+        activeAwsAccountId, setActiveAwsAccountId,  
+
+        canAccessFullDashboardAws: isGlobalAdmin || (planRestrictions.aws === 'full_dashboard'),
         canAccessFullDashboardAzure: isGlobalAdmin || (planRestrictions.azure === 'full_dashboard'),
         canAccessPdfReportAzure: isGlobalAdmin || (planRestrictions.azure !== 'none'),
-        canAccessFullDashboardAws: isGlobalAdmin || (planRestrictions.aws === 'full_dashboard'),
         canAccessPdfReportAws: isGlobalAdmin || (planRestrictions.aws !== 'none'),
         canAccessPresupuesto: isGlobalAdmin || planRestrictions.presupuesto,
         canAccessVistaAdvisor: isGlobalAdmin || planRestrictions.vistaAdvisor,
         
         currentPlanName: sourcePlanName || 'SIN PLAN DEFINIDO', 
         isGlobalAdmin,
-        isCompanyAdmin
+        isCompanyAdmin: activeCredentials?.role === 'admin_empresa',
     };
 };

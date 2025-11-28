@@ -53,118 +53,219 @@ export async function GET(req: NextRequest, { params }: Params) {
 // =========================================================================
 
 export async function PUT(req: NextRequest, { params }: Params) {
-    // 🔥 CORRECCIÓN CLAVE: Desestructurar 'id' para evitar la advertencia
     const { id } = await params;
     
-    // 1. Autorización: Exclusivo para admin_global
-    const auth = await authorizeRequest(req, ['admin_global']);
-    if (!auth.authorized) {
-        return NextResponse.json({ message: auth.message }, { status: 403 });
-    }
+    // 1. Autorización: Exclusivo para admin_global
+    const auth = await authorizeRequest(req, ['admin_global']);
+    if (!auth.authorized) {
+        return NextResponse.json({ message: auth.message }, { status: 403 });
+    }
 
-    try {
-        if (!ObjectId.isValid(id)) {
-            return NextResponse.json({ message: 'ID de empresa inválido.' }, { status: 400 });
-        }
+    try {
+        if (!ObjectId.isValid(id)) {
+            return NextResponse.json({ message: 'ID de empresa inválido.' }, { status: 400 });
+        }
 
-        const body = await req.json();
-        
-        // CAMPOS DE LICENCIA Y CONEXIÓN
-        const { planName, userLimit: rawUserLimit, is_aws, user_db_aws, is_azure, user_db_azure } = body; 
-        
-        const _id = new ObjectId(id);
-        const empresasCollection = await getCollection<Empresa>('Empresas');
+        const body = await req.json();
+        
+        // CAMPOS DE LICENCIA Y CONEXIÓN (AMPLIADOS)
+        const { 
+            planName, 
+            userLimit: rawUserLimit, 
+            is_aws, 
+            user_db_aws, 
+            is_azure, 
+            user_db_azure,
+            is_aws_multi_tenant,
+            is_azure_multi_tenant,
+            aws_accounts,
+            azure_accounts
+        } = body; 
+        
+        const _id = new ObjectId(id);
+        const empresasCollection = await getCollection<Empresa>('Empresas');
 
-        const currentEmpresa = await empresasCollection.findOne({ _id });
+        const currentEmpresa = await empresasCollection.findOne({ _id });
 
-        if (!currentEmpresa) {
-            return NextResponse.json({ message: 'Licencia no encontrada.' }, { status: 404 });
-        }
-        
-        const updateFields: Partial<Empresa> = {};
-        let newLimit: number = currentEmpresa.userLimit;
+        if (!currentEmpresa) {
+            return NextResponse.json({ message: 'Licencia no encontrada.' }, { status: 404 });
+        }
+        
+        const updateFields: Partial<Empresa> = {};
+        let newLimit: number = currentEmpresa.userLimit;
 
-        // 2. VALIDACIÓN Y ASIGNACIÓN DE PLAN/LÍMITE
-        if (planName && planName !== currentEmpresa.planName) {
-            const planConfig = PLAN_CONFIG[planName as keyof typeof PLAN_CONFIG];
-            if (!planConfig) {
-                return NextResponse.json({ message: `Plan de servicio '${planName}' no reconocido.` }, { status: 400 });
-            }
-            updateFields.planName = planName;
-            newLimit = planConfig.userLimit; 
-        }
+        // 2. VALIDACIÓN Y ASIGNACIÓN DE PLAN/LÍMITE
+        if (planName && planName !== currentEmpresa.planName) {
+            const planConfig = PLAN_CONFIG[planName as keyof typeof PLAN_CONFIG];
+            if (!planConfig) {
+                return NextResponse.json({ message: `Plan de servicio '${planName}' no reconocido.` }, { status: 400 });
+            }
+            updateFields.planName = planName;
+            newLimit = planConfig.userLimit; 
+        }
 
-        // ... (Lógica de Límite y validación de usuarios activos - sin cambios) ...
-        if (typeof rawUserLimit === 'number' && rawUserLimit >= 0) {
-            newLimit = rawUserLimit;
-        }
-        if (newLimit < currentEmpresa.currentUsers) {
-             return NextResponse.json({ 
-                message: `El nuevo límite (${newLimit}) no puede ser menor a los usuarios activos (${currentEmpresa.currentUsers}).`,
-                currentUsers: currentEmpresa.currentUsers 
-            }, { status: 409 });
-        }
-        updateFields.userLimit = newLimit;
-
-
-        // 3. LÓGICA CLAVE: ASIGNACIÓN DE CADENAS DE CONEXIÓN
-        // AWS
-        if (typeof is_aws === 'boolean') {
-            updateFields.is_aws = is_aws;
-            updateFields.user_db_aws = is_aws ? user_db_aws : null;
-            if (is_aws && (!user_db_aws || user_db_aws.trim() === '')) {
-                return NextResponse.json({ message: 'La cadena de conexión AWS es requerida si el acceso está habilitado.' }, { status: 400 });
-            }
-        }
-        
-        // AZURE
-        if (typeof is_azure === 'boolean') {
-            updateFields.is_azure = is_azure;
-            updateFields.user_db_azure = is_azure ? user_db_azure : null;
-            if (is_azure && (!user_db_azure || user_db_azure.trim() === '')) {
-                return NextResponse.json({ message: 'La cadena de conexión Azure es requerida si el acceso está habilitado.' }, { status: 400 });
-            }
-        }
-        
-        // Agregar la fecha de actualización de la licencia
-        updateFields.updatedAt = new Date();
+        if (typeof rawUserLimit === 'number' && rawUserLimit >= 0) {
+            newLimit = rawUserLimit;
+        }
+        if (newLimit < currentEmpresa.currentUsers) {
+             return NextResponse.json({ 
+                message: `El nuevo límite (${newLimit}) no puede ser menor a los usuarios activos (${currentEmpresa.currentUsers}).`,
+                currentUsers: currentEmpresa.currentUsers 
+            }, { status: 409 });
+        }
+        updateFields.userLimit = newLimit;
 
 
-        // 4. Ejecutar la actualización de la LICENCIA MAESTRA
-        if (Object.keys(updateFields).length === 0) {
-            return NextResponse.json({ message: 'No se proporcionaron campos válidos para actualizar.' }, { status: 200 });
-        }
+        // 3. LÓGICA AMPLIADA: CONFIGURACIÓN AWS
+        if (typeof is_aws === 'boolean') {
+            updateFields.is_aws = is_aws;
+            
+            if (is_aws) {
+                // Verificar si es multi-tenant
+                if (is_aws_multi_tenant === true) {
+                    updateFields.is_aws_multi_tenant = true;
+                    updateFields.user_db_aws = null; // No usa DB maestra
+                    
+                    // Validar que hay cuentas
+                    if (!aws_accounts || !Array.isArray(aws_accounts) || aws_accounts.length === 0) {
+                        return NextResponse.json({ 
+                            message: 'Debe proporcionar al menos una cuenta AWS en modo multi-tenant.' 
+                        }, { status: 400 });
+                    }
+                    
+                    // Validar estructura de cuentas
+                    for (const acc of aws_accounts) {
+                        if (!acc.id || !acc.alias || !acc.db) {
+                            return NextResponse.json({ 
+                                message: 'Todas las cuentas AWS deben tener id, alias y db.' 
+                            }, { status: 400 });
+                        }
+                    }
+                    
+                    updateFields.aws_accounts = aws_accounts;
+                } else {
+                    // Modo single-tenant tradicional
+                    updateFields.is_aws_multi_tenant = false;
+                    updateFields.aws_accounts = undefined; // Limpiar array
+                    updateFields.user_db_aws = user_db_aws;
+                    
+                    if (!user_db_aws || user_db_aws.trim() === '') {
+                        return NextResponse.json({ 
+                            message: 'La cadena de conexión AWS es requerida si el acceso está habilitado.' 
+                        }, { status: 400 });
+                    }
+                }
+            } else {
+                // AWS desactivado - limpiar todo
+                updateFields.user_db_aws = null;
+                updateFields.is_aws_multi_tenant = false;
+                updateFields.aws_accounts = undefined;
+            }
+        }
+        
+        // 4. LÓGICA AMPLIADA: CONFIGURACIÓN AZURE
+        if (typeof is_azure === 'boolean') {
+            updateFields.is_azure = is_azure;
+            
+            if (is_azure) {
+                // Verificar si es multi-tenant
+                if (is_azure_multi_tenant === true) {
+                    updateFields.is_azure_multi_tenant = true;
+                    updateFields.user_db_azure = null; // No usa DB maestra
+                    
+                    // Validar que hay cuentas
+                    if (!azure_accounts || !Array.isArray(azure_accounts) || azure_accounts.length === 0) {
+                        return NextResponse.json({ 
+                            message: 'Debe proporcionar al menos una cuenta Azure en modo multi-tenant.' 
+                        }, { status: 400 });
+                    }
+                    
+                    // Validar estructura de cuentas
+                    for (const acc of azure_accounts) {
+                        if (!acc.id || !acc.alias || !acc.db) {
+                            return NextResponse.json({ 
+                                message: 'Todas las cuentas Azure deben tener id, alias y db.' 
+                            }, { status: 400 });
+                        }
+                    }
+                    
+                    updateFields.azure_accounts = azure_accounts;
+                } else {
+                    // Modo single-tenant tradicional
+                    updateFields.is_azure_multi_tenant = false;
+                    updateFields.azure_accounts = undefined; // Limpiar array
+                    updateFields.user_db_azure = user_db_azure;
+                    
+                    if (!user_db_azure || user_db_azure.trim() === '') {
+                        return NextResponse.json({ 
+                            message: 'La cadena de conexión Azure es requerida si el acceso está habilitado.' 
+                        }, { status: 400 });
+                    }
+                }
+            } else {
+                // Azure desactivado - limpiar todo
+                updateFields.user_db_azure = null;
+                updateFields.is_azure_multi_tenant = false;
+                updateFields.azure_accounts = undefined;
+            }
+        }
+        
+        // Agregar la fecha de actualización de la licencia
+        updateFields.updatedAt = new Date();
 
-        const result = await empresasCollection.updateOne(
-            { _id },
-            { $set: updateFields }
-        );
-        
-        // 5. PROPAGACIÓN DE CAMBIOS A USUARIOS ASOCIADOS (HERENCIA INMEDIATA)
-        const usersCollection = await getCollection<User>('Users'); 
-        
-        const fieldsToPropagate = {
-            is_aws: updateFields.is_aws,
-            user_db_aws: updateFields.user_db_aws,
-            is_azure: updateFields.is_azure,
-            user_db_azure: updateFields.user_db_azure,
-        };
 
-        const updateUsersResult = await usersCollection.updateMany(
-            { client: currentEmpresa.name }, 
-            { $set: fieldsToPropagate } 
-        );
-        
+        // 5. Ejecutar la actualización de la LICENCIA MAESTRA
+        if (Object.keys(updateFields).length === 0) {
+            return NextResponse.json({ message: 'No se proporcionaron campos válidos para actualizar.' }, { status: 200 });
+        }
 
-        return NextResponse.json({ 
-            message: `Licencia de ${currentEmpresa.name} y ${updateUsersResult.modifiedCount} usuarios asociados actualizados exitosamente.`, 
-            updatedFields: updateFields 
-        }, { status: 200 });
+        const result = await empresasCollection.updateOne(
+            { _id },
+            { $set: updateFields }
+        );
+        
+        // 6. PROPAGACIÓN DE CAMBIOS A USUARIOS ASOCIADOS
+        const usersCollection = await getCollection<User>('Users'); 
+        
+        const fieldsToPropagate: any = {
+            is_aws: updateFields.is_aws,
+            is_azure: updateFields.is_azure,
+            is_aws_multi_tenant: updateFields.is_aws_multi_tenant,
+            is_azure_multi_tenant: updateFields.is_azure_multi_tenant,
+        };
 
-    } catch (error) {
-        console.error('Error al editar licencia:', error);
-        return NextResponse.json({ message: 'Error interno del servidor al editar la licencia.' }, { status: 500 });
-    }
+        // Propagar según el modo
+        if (updateFields.is_aws_multi_tenant) {
+            fieldsToPropagate.user_db_aws = null; // Usuarios en multi-tenant no usan DB maestra
+            fieldsToPropagate.aws_accounts = updateFields.aws_accounts;
+        } else if (updateFields.is_aws) {
+            fieldsToPropagate.user_db_aws = updateFields.user_db_aws;
+            fieldsToPropagate.aws_accounts = undefined;
+        }
+
+        if (updateFields.is_azure_multi_tenant) {
+            fieldsToPropagate.user_db_azure = null; // Usuarios en multi-tenant no usan DB maestra
+            fieldsToPropagate.azure_accounts = updateFields.azure_accounts;
+        } else if (updateFields.is_azure) {
+            fieldsToPropagate.user_db_azure = updateFields.user_db_azure;
+            fieldsToPropagate.azure_accounts = undefined;
+        }
+
+        const updateUsersResult = await usersCollection.updateMany(
+            { client: currentEmpresa.name }, 
+            { $set: fieldsToPropagate } 
+        );
+        
+
+        return NextResponse.json({ 
+            message: `Licencia de ${currentEmpresa.name} y ${updateUsersResult.modifiedCount} usuarios asociados actualizados exitosamente.`, 
+            updatedFields: updateFields 
+        }, { status: 200 });
+
+    } catch (error) {
+        console.error('Error al editar licencia:', error);
+        return NextResponse.json({ message: 'Error interno del servidor al editar la licencia.' }, { status: 500 });
+    }
 }
 
 

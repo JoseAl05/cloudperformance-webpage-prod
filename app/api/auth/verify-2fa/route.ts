@@ -28,7 +28,7 @@ export async function POST(req: Request) {
  );
 
     // =======================================================
-    // 🛑 NUEVA LÓGICA DE VERIFICACIÓN DE ESTADO ACTIVO
+    //  NUEVA LÓGICA DE VERIFICACIÓN DE ESTADO ACTIVO
     // =======================================================
     // Si el campo is_active es explícitamente `false`, denegar el acceso.
     if (user.is_active === false) {
@@ -58,7 +58,12 @@ export async function POST(req: Request) {
     user_db_aws: user.user_db_aws,
     user_db_azure: user.user_db_azure,
     is_aws: user.is_aws,
-    is_azure: user.is_azure
+    is_azure: user.is_azure,
+    is_aws_multi_tenant: user.is_aws_multi_tenant,
+    is_azure_multi_tenant: user.is_azure_multi_tenant,
+    azure_accounts: user.azure_accounts || [],
+    aws_accounts: user.aws_accounts || [],
+    planName: user.planName,
   });
 
   const sessions = await getCollection('sessions');
