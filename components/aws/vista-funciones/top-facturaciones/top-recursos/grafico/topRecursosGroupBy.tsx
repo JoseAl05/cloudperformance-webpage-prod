@@ -16,8 +16,6 @@ const fetcher = (url: string) =>
   fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } }).then((r) => r.json())
 
 interface TopRecursosProps {
-  startDate: Date
-  endDate: Date
   groupBy: 'ResourceRegion' | 'ResourceType' | 'ResourceService'
   title: string
   icon?: React.ReactNode
@@ -28,15 +26,13 @@ type Row = {
   total_unique_resources: unknown
 }
 
-export const TopRecursosChart = ({ startDate, endDate, groupBy, title, icon }: TopRecursosProps) => {
+export const TopRecursosChart = ({ groupBy, title, icon }: TopRecursosProps) => {
   const [topLimit, setTopLimit] = useState<number | 'all'>(10)
   const [selectedFamily, setSelectedFamily] = useState<string>('')
 
-  const startDateFormatted = startDate.toISOString().replace('Z', '').slice(0, -4)
-  const endDateFormatted = endDate.toISOString().replace('Z', '').slice(0, -4)
 
   const { data, error, isLoading } = useSWR(
-    `/api/aws/bridge/recursos/top_recursos_unicos?date_from=${startDateFormatted}&date_to=${endDateFormatted}&group_by=${groupBy}`,
+    `/api/aws/bridge/recursos/top_recursos_unicos?group_by=${groupBy}`,
     fetcher
   )
   console.log(data);

@@ -1,5 +1,5 @@
 import { FiltersComponent } from '@/components/general_aws/filters/FiltersComponent'
-import { MainViewTopRecursos }  from '@/components/aws/vista-funciones/top-facturaciones/top-recursos/TopRecursosComponent'
+import { MainViewTopRecursos } from '@/components/aws/vista-funciones/top-facturaciones/top-recursos/TopRecursosComponent'
 import { Globe } from 'lucide-react'
 
 export const TopRecursosComponent = () => {
@@ -27,10 +27,11 @@ export const TopRecursosComponent = () => {
       </div>
 
       {/* Filtros + gráfico */}
-      <FiltersComponent
+      {/* <FiltersComponent
         Component={MainViewTopRecursos}
-        dateFilter
-      />
+        dateFilter={false}
+      /> */}
+      <MainViewTopRecursos />
     </div>
   )
 }
