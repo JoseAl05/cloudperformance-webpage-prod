@@ -121,6 +121,10 @@ export async function POST(req: NextRequest) {
     const inherited_aws_accounts = empresa.aws_accounts || [];
     const inherited_azure_accounts = empresa.azure_accounts || [];
 
+    const inherited_planName = empresa.planName || null;
+
+
+
     // 4. Verificación de Límites
     if (userCreating.role === 'admin_empresa') {
       if (client !== userCreating.client) {
@@ -156,6 +160,8 @@ export async function POST(req: NextRequest) {
       is_azure_multi_tenant: inherited_is_azure_multi_tenant,
       aws_accounts: inherited_aws_accounts,
       azure_accounts: inherited_azure_accounts,
+
+      planName: inherited_planName,
     };
 
     // 6. Insertar y Actualizar
