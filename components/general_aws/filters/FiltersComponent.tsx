@@ -27,6 +27,7 @@ import { AutoScalingGroupFilterComponent } from '@/components/general_aws/filter
 import { MetricsFilterComponent } from '@/components/general_aws/filters/MetricsFilterComponent';
 import { MetricsRDSFilterComponent } from '@/components/general_aws/filters/MetricsRDSFilterComponent';
 import { VariationResourcesFilterComponent } from '@/components/general_aws/filters/VariationResourcesFilterComponent';
+import { UnusedNatGatewaysFilterComponent } from '@/components/general_aws/filters/UnusedNatGatewaysFilterComponent';
 
 interface FiltersComponentProps {
     Component: (params: {
@@ -89,6 +90,10 @@ interface FiltersComponentProps {
     variationServiceFilter?: boolean;
     variationMetricFilter?: boolean;
     variationResourceFilter?: boolean;
+    natGatewaysFilter?: boolean;
+    isNatGatewaysMultiselect?: boolean;
+    unusedNatGatewaysFilter?: boolean;
+    isUnusedNatGatewaysMultiselect?: boolean;
 }
 
 export const FiltersComponent = ({
@@ -130,6 +135,10 @@ export const FiltersComponent = ({
     variationServiceFilter = false,
     variationMetricFilter = false,
     variationResourceFilter = false,
+    natGatewaysFilter = false,
+    isNatGatewaysMultiselect = false,
+    unusedNatGatewaysFilter = false,
+    isUnusedNatGatewaysMultiselect = false
 }: FiltersComponentProps) => {
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -171,6 +180,8 @@ export const FiltersComponent = ({
         const selectedMetricsParam = searchParams.get('metrics');
         const selectedMetricsRDSParam = searchParams.get('metricsRDS');
         const variationResourceParam = searchParams.get('variationResource');
+        const natGatewayParam = searchParams.get('natGateway');
+        const unusedNatGatewayParam = searchParams.get('unusedNatGateway');
 
         let startDate = startDateParam ? new Date(startDateParam) : yesterday;
         let endDate = endDateParam ? new Date(endDateParam) : new Date();
@@ -218,7 +229,9 @@ export const FiltersComponent = ({
             engine: engine || '',
             metrics: selectedMetricsParam || '',
             metricsRDS: selectedMetricsRDSParam || '',
-            variationResource: variationResourceParam || ''
+            variationResource: variationResourceParam || '',
+            natGateway: natGatewayParam || '',
+            unusedNatGateway: unusedNatGatewayParam || '',
         };
     };
 
@@ -255,6 +268,9 @@ export const FiltersComponent = ({
     const [tempMetrics, setTempMetrics] = useState(filters.metrics);
     const [tempMetricsRDS, setTempMetricsRDS] = useState(filters.metricsRDS);
     const [tempVariationResource, setTempVariationResource] = useState(filters.variationResource);
+    const [tempNatGateway, setTempNatGateway] = useState(filters.natGateway);
+    const [tempUnusedNatGateway, setTempUnusedNatGateway] = useState(filters.unusedNatGateway);
+
 
     useEffect(() => {
         const newFilters = getInitialFilters();
@@ -290,6 +306,8 @@ export const FiltersComponent = ({
             newFilters.month && newFilters.year ? new Date(newFilters.year, newFilters.month - 1, 1) : null
         );
         setTempVariationResource(newFilters.variationResource);
+        setTempNatGateway(newFilters.natGateway);
+        setTempUnusedNatGateway(newFilters.unusedNatGateway);
     }, [searchParams]);
 
     const getRDSService = (): 'postgresql' | 'oracle' | 'mysql' | 'sqlserver' | 'mariadb' => {
@@ -305,17 +323,17 @@ export const FiltersComponent = ({
     const tempStartDate = useMemo(() => (tempRange[0] ?? filters.startDate), [tempRange, filters.startDate]);
     const tempEndDate = useMemo(() => (tempRange[1] ?? filters.endDate), [tempRange, filters.endDate]);
 
-    // Handle Tag Change logic replicated but updating temp state instead of immediate push
     const handleTagChange = (nextKey: string | null, nextValue: string | null) => {
         setTempKey(nextKey);
         setTempValue(nextValue);
-        // Cuando cambian los tags, se suelen resetear las instancias seleccionadas
         setTempInstance('');
         setTempAsg('');
         setTempAsgInstance('');
         setTempEks('');
         setTempEksAsg('');
         setTempEksAsgInstance('');
+        setTempNatGateway('');
+        setTempUnusedNatGateway('');
     };
 
     const applyFilters = () => {
@@ -361,6 +379,8 @@ export const FiltersComponent = ({
             metrics: tempMetrics,
             metricsRDS: tempMetricsRDS,
             variationResource: tempVariationResource,
+            natGateway: tempNatGateway,
+            unusedNatGateway: tempUnusedNatGateway,
         };
 
         setFilters(newFilters as unknown);
@@ -412,6 +432,10 @@ export const FiltersComponent = ({
             { flag: metricsFilter, key: 'metrics', value: newFilters.metrics },
             { flag: metricsRDSFilter, key: 'metricsRDS', value: newFilters.metricsRDS },
             { flag: rdsFilter, key: 'engine', value: newFilters.engine },
+
+            //Network
+            { flag: natGatewaysFilter, key: 'natGateway', value: newFilters.natGateway },
+            { flag: unusedNatGatewaysFilter, key: 'unusedNatGateway', value: newFilters.unusedNatGateway },
         ];
 
         filterConfigs.forEach(({ flag, key, value, ignoreValue }) => {
@@ -453,6 +477,8 @@ export const FiltersComponent = ({
             metrics: '',
             metricsRDS: '',
             variationResource: '',
+            natGateway: '',
+            unusedNatGateway: '',
         };
 
         setFilters({ ...defaultFilters, instanceService: defaultFilters.instancesService }); // Adjust type mismatch
@@ -486,6 +512,8 @@ export const FiltersComponent = ({
         setTempMetrics(defaultFilters.metrics);
         setTempMetricsRDS(defaultFilters.metricsRDS);
         setTempVariationResource(defaultFilters.variationResource);
+        setTempNatGateway(defaultFilters.natGateway);
+        setTempUnusedNatGateway(defaultFilters.unusedNatGateway);
 
         router.push(window.location.pathname);
     };
@@ -846,6 +874,26 @@ export const FiltersComponent = ({
                                 />
                             </div>
                         )}
+                        {
+                            unusedNatGatewaysFilter && (
+                                <div key="metrics-rds-filter" className='space-y-2 ml-8'>
+                                    <label className='text-sm font-medium text-foreground flex items-center gap-2'>
+                                        <BarChart3 className='h-4 w-4' />
+                                        Nat Gateways Infrautilizados
+                                    </label>
+                                    <UnusedNatGatewaysFilterComponent
+                                        startDate={tempStartDate}
+                                        endDate={tempEndDate}
+                                        region={tempRegion}
+                                        selectedKey={tempKey}
+                                        selectedValue={tempValue}
+                                        unusedNatGateway={tempUnusedNatGateway}
+                                        setUnusedNatGateway={setTempUnusedNatGateway}
+                                        isUnusedNatGatewaysMultiselect={isUnusedNatGatewaysMultiselect}
+                                    />
+                                </div>
+                            )
+                        }
                     </div>
 
                     <div className='flex items-center gap-4'>
@@ -882,6 +930,8 @@ export const FiltersComponent = ({
                     variationResource={filters.variationResource}
                     month={filters.month}
                     year={filters.year}
+                    unusedNatGateway={filters.unusedNatGateway}
+                    natGateway={filters.natGateway}
                 />
             </Card>
         </div>

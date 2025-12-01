@@ -130,7 +130,9 @@ export const SidebarComponent = ({
     const infrausedAws = [
         { label: 'Instancias EC2', icon: Computer, href: '/aws/recursos/infrautilizadas/ec2' },
         { label: 'Instancias EC2 AutoscalingGroups', icon: Computer, href: '/aws/recursos/infrautilizadas/autoscaling' },
-        { label: 'Instancias EC2 Nodos EKS', icon: Computer, href: '/aws/recursos/infrautilizadas/eks' }
+        { label: 'Instancias EC2 Nodos EKS', icon: Computer, href: '/aws/recursos/infrautilizadas/eks' },
+        { label: 'Vólumenes EBS', icon: HardDrive, href: '/aws/funciones/ebs-no-utilizados' },
+        { label: 'Nat Gateways', icon: Workflow, href: '/aws/funciones/nat-gateways-no-utilizados'}
     ]
 
     const consumeSubItems = [
@@ -170,7 +172,6 @@ export const SidebarComponent = ({
             { label: 'Recursos no utilizados', subItems: infrausedAws, icon: TrendingDown },
             { label: 'Spot vs Vm', href: '/aws/funciones/spot-vs-vm', icon: Zap },
             { label: 'Top S3 Buckets', href: '/aws/funciones/top-s3-buckets', icon: Box },
-            { label: 'Ebs No Utilizados', href: '/aws/funciones/ebs-no-utilizados', icon: HardDrive },
             { label: 'Variación consumo de recursos', href: '/aws/funciones/variacion-tendencia-uso-de-recursos', icon: Diff },
         ],
     }
