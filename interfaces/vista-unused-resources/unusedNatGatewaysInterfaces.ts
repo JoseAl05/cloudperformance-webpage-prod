@@ -21,6 +21,10 @@ export interface UnusedNatGatewaysDetails {
         [key: string]: string;
     };
     NatGatewayAddresses: UnusedNatGatewaysAddresses[];
+    metrics_summary: {
+        avg_active_connections: number;
+        total_bytes_out: number;
+    }
 }
 
 export interface UnusedNatGatewaysAddresses {
