@@ -2,10 +2,12 @@
 
 import { MessageCard } from '@/components/aws/cards/MessageCards';
 import { NatGatewaysConsumeChartsComponent } from '@/components/aws/vista-consumos/nat-gateways/graficos/NatGatewaysConsumeChartsComponent';
+import { NatGatewaysConsumeCardsComponent } from '@/components/aws/vista-consumos/nat-gateways/info/NatGatewaysConsumeCardsComponent';
+import { NatGatewaysConsumeTable } from '@/components/aws/vista-consumos/nat-gateways/table/NatGatewaysConsumeTable';
 import { UnusedNatGatewaysCardsComponent } from '@/components/aws/vista-funciones/unused-nat-gateways/info/UnusedNatGatewaysCardsComponent';
 import { UnusedNatGatewaysTable } from '@/components/aws/vista-funciones/unused-nat-gateways/table/UnusedNatGatewaysTable';
 import { LoaderComponent } from '@/components/general_aws/LoaderComponent';
-import { NatGatewayMetrics } from '@/interfaces/vista-consumos/natGwConsumeViewInterfaces';
+import { NatGatewayMetrics, NatGatewaysMetricsSummary } from '@/interfaces/vista-consumos/natGwConsumeViewInterfaces';
 import { UnusedNatGatewaysMetrics } from '@/interfaces/vista-unused-resources/unusedNatGwMetricsInterfaces';
 import { AlertCircle, ChartBar, Clock, Info } from 'lucide-react';
 import useSWR from 'swr';
@@ -34,18 +36,30 @@ export const NatGatewaysConsumeComponent = ({ startDate, endDate, region, natGat
         fetcher
     )
 
+    const natGwMetricsSummary = useSWR(
+        natGateway ? `/api/aws/bridge/nat_gateways/nat_gateways_usage_summary?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&nat_gw_id=${natGateway}` : null,
+        fetcher
+    )
+
     const anyLoading =
-        natGwMetrics.isLoading;
+        natGwMetrics.isLoading ||
+        natGwMetricsSummary.isLoading;
 
 
     const anyError =
-        !!natGwMetrics.error;
+        !!natGwMetrics.error ||
+        !!natGwMetricsSummary.error;
 
 
     const natGwMetricsData: NatGatewayMetrics[] | null =
         isNonEmptyArray<NatGatewayMetrics>(natGwMetrics.data) ? natGwMetrics.data : null;
 
+    const natGwMetricsSummaryData: NatGatewaysMetricsSummary[] | null =
+        isNonEmptyArray<NatGatewaysMetricsSummary>(natGwMetricsSummary.data) ? natGwMetricsSummary.data : null;
+
+
     const hasData = !!natGwMetricsData && natGwMetricsData.length > 0;
+    const hasSummaryData = !!natGwMetricsSummaryData && natGwMetricsSummaryData.length > 0;
 
     if (!natGateway) {
         return (
@@ -71,7 +85,7 @@ export const NatGatewaysConsumeComponent = ({ startDate, endDate, region, natGat
             </div>
         )
     }
-    const noneHasData = !hasData;
+    const noneHasData = !hasData && !hasSummaryData;
 
     if (noneHasData) {
         return (
@@ -89,7 +103,9 @@ export const NatGatewaysConsumeComponent = ({ startDate, endDate, region, natGat
         <>
             <div className='w-full min-w-0 px-4 py-6'>
                 <div className="flex-1 space-y-6 min-w-0 overflow-hidden">
-
+                    <NatGatewaysConsumeCardsComponent
+                        data={natGwMetricsSummaryData}
+                    />
                 </div>
                 <div className="flex items-center gap-3 my-5">
                     <ChartBar className="h-8 w-8 text-blue-500" />
@@ -102,7 +118,9 @@ export const NatGatewaysConsumeComponent = ({ startDate, endDate, region, natGat
                     <Clock className="h-8 w-8 text-blue-500" />
                     <h1 className="text-3xl font-bold text-foreground">Detalle Nat Gateways</h1>
                 </div>
-
+                <NatGatewaysConsumeTable
+                    data={natGwMetricsSummaryData}
+                />
             </div>
         </>
     )

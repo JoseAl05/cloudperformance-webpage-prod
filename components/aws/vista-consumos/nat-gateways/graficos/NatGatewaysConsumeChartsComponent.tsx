@@ -1,6 +1,6 @@
 'use client'
 
-import { ConsumeAppGwSingleChartComponent } from '@/components/azure/vista-consumo-apps-gateway/graficos/ConsumeAppGwSingleChartComponent';
+import { NatGatewaysConsumeSingleChartComponent } from '@/components/aws/vista-consumos/nat-gateways/graficos/NatGatewaysConsumeSingleChartComponent';
 import { NatGatewayMetrics } from '@/interfaces/vista-consumos/natGwConsumeViewInterfaces';
 import { bytesToMB } from '@/lib/bytesToMbs';
 import { Info } from 'lucide-react';
@@ -11,10 +11,10 @@ interface NatGatewaysConsumeChartsComponentProps {
 }
 
 const ALLOWED_METRICS = new Set([
-    'ActiveConnectionCount Average',
-    'BytesOutToDestination Average',
-    'BytesInFromSource Average',
-    'ErrorPortAllocation Average'
+    'ActiveConnectionCount Maximum',
+    'BytesOutToDestination Maximum',
+    'BytesInFromSource Maximum',
+    'ErrorPortAllocation Maximum'
 ]);
 
 export const NatGatewaysConsumeChartsComponent = ({ data }: NatGatewaysConsumeChartsComponentProps) => {
@@ -22,15 +22,14 @@ export const NatGatewaysConsumeChartsComponent = ({ data }: NatGatewaysConsumeCh
         const groups = new Map<string, [string, string][]>();
 
         data.forEach((item: NatGatewayMetrics) => {
-            console.log(item.metric_name);
             if (ALLOWED_METRICS.has(item.metric_name)) {
                 if (!groups.has(item.metric_name)) {
                     groups.set(item.metric_name, []);
                 }
 
-                const value = (item.metric_name === 'BytesOutToDestination Average' || item.metric_name === 'BytesInFromSource Average')
-                    ? bytesToMB(item.sum_value)
-                    : item.sum_value.toFixed(2);
+                const value = (item.metric_name === 'BytesOutToDestination Maximum' || item.metric_name === 'BytesInFromSource Maximum')
+                    ? bytesToMB(item.avg_value)
+                    : item.avg_value.toFixed(2);
 
                 groups.get(item.metric_name)?.push([item.timestamp, value]);
             }
@@ -53,7 +52,7 @@ export const NatGatewaysConsumeChartsComponent = ({ data }: NatGatewaysConsumeCh
 
             <div className="grid grid-cols-1 gap-3 xl:grid-cols-2">
                 {Array.from(groupedMetrics.entries()).map(([metricName, dataPoints]) => (
-                    <ConsumeAppGwSingleChartComponent
+                    <NatGatewaysConsumeSingleChartComponent
                         key={metricName}
                         metricName={metricName}
                         dataPoints={dataPoints}
