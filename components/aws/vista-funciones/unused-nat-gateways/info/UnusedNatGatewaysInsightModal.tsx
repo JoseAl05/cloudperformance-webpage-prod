@@ -52,7 +52,6 @@ export const UnusedNatGatewaysInsightModal = ({ natGw, asociatedResources, isOpe
 
     if (!natGw) return null;
 
-    // Ordenar historial (Más reciente primero)
     const sortedHistory = [...natGw.details].sort((a, b) =>
         new Date(b.sync_time).getTime() - new Date(a.sync_time).getTime()
     );
@@ -61,7 +60,6 @@ export const UnusedNatGatewaysInsightModal = ({ natGw, asociatedResources, isOpe
     const diagnosis = natGw.diagnosis;
     const metrics = diagnosis.metrics_summary;
 
-    // Totales de recursos
     const totalEc2 = asociatedResources?.resources?.ec2?.length || 0;
     const totalRds = (asociatedResources?.resources?.mysql?.length || 0) +
         (asociatedResources?.resources?.postgresql?.length || 0) +
@@ -70,7 +68,6 @@ export const UnusedNatGatewaysInsightModal = ({ natGw, asociatedResources, isOpe
 
     const hasDependencies = totalEc2 > 0 || totalRds > 0;
 
-    // Función auxiliar para filtrar recursos por fecha
     const getResourcesAtSyncTime = (targetTime: string) => {
         if (!asociatedResources) return { ec2: [], rds: [] };
 
@@ -109,8 +106,6 @@ export const UnusedNatGatewaysInsightModal = ({ natGw, asociatedResources, isOpe
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent className="max-w-4xl h-[85vh] flex flex-col p-0 gap-0 overflow-hidden">
-
-                {/* HEADER (Fijo) */}
                 <div className="px-6 py-4 border-b">
                     <DialogHeader>
                         <div className="flex items-start justify-between mr-4">
@@ -130,8 +125,6 @@ export const UnusedNatGatewaysInsightModal = ({ natGw, asociatedResources, isOpe
                         </div>
                     </DialogHeader>
                 </div>
-
-                {/* TABS (Cuerpo Flexible) */}
                 <Tabs defaultValue="analysis" className="flex-1 flex flex-col min-h-0">
                     <div className="px-6 pt-2 pb-0">
                         <TabsList className="grid w-full grid-cols-3">
@@ -144,8 +137,6 @@ export const UnusedNatGatewaysInsightModal = ({ natGw, asociatedResources, isOpe
                             </TabsTrigger>
                         </TabsList>
                     </div>
-
-                    {/* --- TAB 1: ANÁLISIS --- */}
                     <TabsContent value="analysis" className="flex-1 min-h-0 data-[state=active]:flex flex-col">
                         <ScrollArea className="flex-1">
                             <div className="p-6 grid gap-6">
@@ -197,8 +188,6 @@ export const UnusedNatGatewaysInsightModal = ({ natGw, asociatedResources, isOpe
                             </div>
                         </ScrollArea>
                     </TabsContent>
-
-                    {/* --- TAB 2: DEPENDENCIAS --- */}
                     <TabsContent value="dependencies" className="flex-1 min-h-0 data-[state=active]:flex flex-col overflow-y-auto">
                         <ScrollArea className="flex-1">
                             <div className="p-6 space-y-6">
@@ -243,7 +232,6 @@ export const UnusedNatGatewaysInsightModal = ({ natGw, asociatedResources, isOpe
                                         <p className="text-sm text-muted-foreground italic">No se encontraron instancias EC2.</p>
                                     )}
                                 </div>
-                                {/* RDS (Iteramos motores) */}
                                 {['mysql', 'postgresql', 'sqlserver', 'oracle'].map((engineKey) => {
                                     const rdsList = (asociatedResources?.resources as unknown)?.[engineKey] || [];
                                     if (rdsList.length === 0) return null;
@@ -305,8 +293,6 @@ export const UnusedNatGatewaysInsightModal = ({ natGw, asociatedResources, isOpe
                             </div>
                         </ScrollArea>
                     </TabsContent>
-
-                    {/* --- TAB 3: HISTORIAL --- */}
                     <TabsContent value="history" className="flex-1 min-h-0 data-[state=active]:flex flex-col">
                         <ScrollArea className="flex-1">
                             <div className="p-6 space-y-4">
@@ -316,7 +302,6 @@ export const UnusedNatGatewaysInsightModal = ({ natGw, asociatedResources, isOpe
 
                                     return (
                                         <div key={index} className="flex gap-4 items-start group">
-                                            {/* Fix Visual: Alineación del timeline */}
                                             <div className="flex flex-col items-center mt-5">
                                                 <div className="w-2 h-2 rounded-full bg-slate-300 group-first:bg-blue-500 ring-4 ring-white dark:ring-slate-950 flex-shrink-0" />
                                                 {index !== sortedHistory.length - 1 && (
@@ -351,8 +336,6 @@ export const UnusedNatGatewaysInsightModal = ({ natGw, asociatedResources, isOpe
                                                         <span className="font-mono text-[10px] break-all">{detail.VpcId} / {detail.SubnetId}</span>
                                                     </div>
                                                 </div>
-
-                                                {/* Fix Visual: Scroll interno para lista larga */}
                                                 <div className="pt-3 border-t border-slate-100 dark:border-slate-800">
                                                     <div className="flex items-center gap-2 mb-2">
                                                         <LinkIcon className="h-3 w-3 text-slate-400" />
@@ -366,22 +349,60 @@ export const UnusedNatGatewaysInsightModal = ({ natGw, asociatedResources, isOpe
                                                             {resourcesAtDate.ec2.map((ec2, i) => (
                                                                 <div key={i} className="flex items-center justify-between text-[10px] bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded">
                                                                     <div className="flex items-center gap-1.5 min-w-0">
-                                                                        <Server className="h-3 w-3 text-slate-500 flex-shrink-0" />
-                                                                        <span className="truncate max-w-[180px]" title={ec2.name}>{ec2.name}</span>
+                                                                        <Link
+                                                                            href={{ pathname: '/aws/recursos/instancias-ec2', query: { startDate: startDateParam, endDate: endDateParam, instance: ec2.name, region: regionParam, selectedKey: keyParam, selectedValue: valueParam } }}
+                                                                            className='text-blue-500 hover:text-blue-500/80'
+                                                                            rel="noopener noreferrer"
+                                                                            target="_blank"
+                                                                        >
+                                                                            <div className='flex items-center gap-2'>
+                                                                                <Server className="h-3 w-3 text-slate-500 flex-shrink-0" />
+                                                                                <span className="truncate max-w-[180px]" title={ec2.name}>{ec2.name}</span>
+                                                                            </div>
+                                                                        </Link>
                                                                     </div>
                                                                     <span className="font-mono text-muted-foreground whitespace-nowrap ml-2">{ec2.type}</span>
                                                                 </div>
                                                             ))}
 
-                                                            {resourcesAtDate.rds.map((db, i) => (
-                                                                <div key={i} className="flex items-center justify-between text-[10px] bg-blue-50 dark:bg-blue-900/20 px-2 py-1 rounded border border-blue-100 dark:border-blue-900">
-                                                                    <div className="flex items-center gap-1.5 min-w-0">
-                                                                        <Database className="h-3 w-3 text-blue-500 flex-shrink-0" />
-                                                                        <span className="truncate max-w-[180px]" title={db.id}>{db.id}</span>
+                                                            {resourcesAtDate.rds.map((db, i) => {
+                                                                let redirectUrl = '';
+                                                                switch (db.engine) {
+                                                                    case 'mysql':
+                                                                        redirectUrl = '/aws/recursos/instancias-rds-mysql';
+                                                                        break;
+                                                                    case 'postgresql':
+                                                                        redirectUrl = '/aws/recursos/instancias-rds-pg';
+                                                                        break;
+                                                                    case 'sqlserver':
+                                                                        redirectUrl = '/aws/recursos/instancias-rds-sqlserver';
+                                                                        break;
+                                                                    case 'oracle':
+                                                                        redirectUrl = '/aws/recursos/instancias-rds-oracle';
+                                                                        break;
+                                                                    default:
+                                                                        redirectUrl = '#';
+                                                                        break;
+                                                                }
+                                                                return (
+                                                                    <div key={i} className="flex items-center justify-between text-[10px] bg-blue-50 dark:bg-blue-900/20 px-2 py-1 rounded border border-blue-100 dark:border-blue-900">
+                                                                        <div className="flex items-center gap-1.5 min-w-0">
+                                                                            <Link
+                                                                                href={{ pathname: redirectUrl, query: { startDate: startDateParam, endDate: endDateParam, instance: db.id, region: regionParam, selectedKey: keyParam, selectedValue: valueParam } }}
+                                                                                className='text-blue-500 hover:text-blue-500/80'
+                                                                                rel="noopener noreferrer"
+                                                                                target="_blank"
+                                                                            >
+                                                                                <div className='flex items-center gap-2'>
+                                                                                    <Database className="h-3 w-3 text-blue-500 flex-shrink-0" />
+                                                                                    <span className="truncate max-w-[180px]" title={db.id}>{db.id}</span>
+                                                                                </div>
+                                                                            </Link>
+                                                                        </div>
+                                                                        <span className="text-blue-700 dark:text-blue-300 whitespace-nowrap ml-2">{db.status}</span>
                                                                     </div>
-                                                                    <span className="text-blue-700 dark:text-blue-300 whitespace-nowrap ml-2">{db.status}</span>
-                                                                </div>
-                                                            ))}
+                                                                )
+                                                            })}
                                                         </div>
                                                     ) : (
                                                         <span className="text-[10px] text-muted-foreground italic">Sin recursos asociados registrados en este snapshot.</span>
@@ -396,6 +417,6 @@ export const UnusedNatGatewaysInsightModal = ({ natGw, asociatedResources, isOpe
                     </TabsContent>
                 </Tabs>
             </DialogContent>
-        </Dialog>
+        </Dialog >
     );
 };

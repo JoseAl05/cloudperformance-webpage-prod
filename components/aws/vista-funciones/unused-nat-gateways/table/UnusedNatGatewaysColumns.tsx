@@ -9,15 +9,11 @@ import { UnusedNatGateways } from '@/interfaces/vista-unused-resources/unusedNat
 import { UnusedNatGatewaysInsightModal } from '@/components/aws/vista-funciones/unused-nat-gateways/info/UnusedNatGatewaysInsightModal'; // Ruta a tu modal
 import useSWR from 'swr';
 
-// Fetcher simple
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
-// Componente de celda inteligente: Carga los recursos asociados al abrir
 const DetailsCell = ({ natGw, dateParams }: { natGw: UnusedNatGateways, dateParams: { from: string, to: string } }) => {
     const [isOpen, setIsOpen] = useState(false);
 
-    // Solo cargamos los recursos asociados si el modal está abierto (Lazy Loading)
-    // Esto optimiza mucho el rendimiento inicial de la tabla
     const { data: asociatedData, isLoading } = useSWR(
         isOpen ? `/api/aws/bridge/nat_gateways/get_associated_resources?nat_gw_id=${natGw.nat_gw_id}&date_from=${dateParams.from}&date_to=${dateParams.to}` : null,
         fetcher
@@ -35,10 +31,9 @@ const DetailsCell = ({ natGw, dateParams }: { natGw: UnusedNatGateways, datePara
                 Ver Análisis
             </Button>
 
-            {/* Renderizamos el modal, pasándole la data cargada */}
             <UnusedNatGatewaysInsightModal
                 natGw={natGw}
-                asociatedResources={asociatedData} // Puede ser undefined mientras carga
+                asociatedResources={asociatedData}
                 isOpen={isOpen}
                 onClose={() => setIsOpen(false)}
             />
@@ -46,8 +41,6 @@ const DetailsCell = ({ natGw, dateParams }: { natGw: UnusedNatGateways, datePara
     );
 };
 
-// Necesitamos pasar las fechas a las columnas para que el DetailsCell pueda hacer el fetch
-// Así que exportamos una función creadora de columnas en lugar de un array estático
 export const getUnusedNatGwColumns = (dateFrom: string, dateTo: string): DynamicColumn<UnusedNatGateways>[] => [
     {
         header: "Nombre / ID",

@@ -28,6 +28,7 @@ import { MetricsFilterComponent } from '@/components/general_aws/filters/Metrics
 import { MetricsRDSFilterComponent } from '@/components/general_aws/filters/MetricsRDSFilterComponent';
 import { VariationResourcesFilterComponent } from '@/components/general_aws/filters/VariationResourcesFilterComponent';
 import { UnusedNatGatewaysFilterComponent } from '@/components/general_aws/filters/UnusedNatGatewaysFilterComponent';
+import { NatGatewaysFilterComponent } from '@/components/general_aws/filters/NatGatewaysFilterComponent';
 
 interface FiltersComponentProps {
     Component: (params: {
@@ -889,6 +890,26 @@ export const FiltersComponent = ({
                                         unusedNatGateway={tempUnusedNatGateway}
                                         setUnusedNatGateway={setTempUnusedNatGateway}
                                         isUnusedNatGatewaysMultiselect={isUnusedNatGatewaysMultiselect}
+                                    />
+                                </div>
+                            )
+                        }
+                        {
+                            natGatewaysFilter && (
+                                <div key="metrics-rds-filter" className='space-y-2 ml-8'>
+                                    <label className='text-sm font-medium text-foreground flex items-center gap-2'>
+                                        <BarChart3 className='h-4 w-4' />
+                                        Nat Gateways
+                                    </label>
+                                    <NatGatewaysFilterComponent
+                                        startDate={tempStartDate}
+                                        endDate={tempEndDate}
+                                        region={tempRegion}
+                                        selectedKey={tempKey}
+                                        selectedValue={tempValue}
+                                        natGateway={tempNatGateway}
+                                        setNatGateway={setTempNatGateway}
+                                        isNatGatewaysMultiselect={isNatGatewaysMultiselect}
                                     />
                                 </div>
                             )

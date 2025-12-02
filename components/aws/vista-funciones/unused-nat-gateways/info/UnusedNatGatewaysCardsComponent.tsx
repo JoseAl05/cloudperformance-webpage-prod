@@ -4,15 +4,12 @@ import React, { useMemo, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { UnusedNatGateways } from '@/interfaces/vista-unused-resources/unusedNatGatewaysInterfaces';
 import {
-    Wallet,
-    Ghost,
     Activity,
     LucideIcon,
     Server,
     Clock,
     CheckCircle2,
-    Eye, // Icono para el botón
-    X
+    Eye,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -34,10 +31,9 @@ interface StatCardProps {
     variant?: CardVariant;
     actionLabel?: string;
     dateLabel?: string;
-    onViewList?: () => void; // Nueva prop opcional para el click
+    onViewList?: () => void;
 }
 
-// --- 1. Componente Modal de Lista Rápida ---
 const ResourceListDialog = ({
     isOpen,
     onClose,
@@ -64,9 +60,6 @@ const ResourceListDialog = ({
                         {resources.map((res) => (
                             <div key={res.nat_gw_id} className="p-3 border rounded-md text-sm hover:bg-slate-50 dark:hover:bg-slate-900 transition-colors flex justify-between items-center group">
                                 <div>
-                                    {/* <div className="font-medium text-foreground">
-                                        {res.details[0]. || "Sin Nombre"}
-                                    </div> */}
                                     <div className="text-xs text-muted-foreground font-mono mt-0.5">
                                         {res.nat_gw_id}
                                     </div>
@@ -86,7 +79,6 @@ const ResourceListDialog = ({
     );
 };
 
-// --- 2. Componente de Tarjeta Actualizado ---
 const getVariantStyles = (variant: CardVariant) => {
     switch (variant) {
         case 'destructive':
@@ -211,7 +203,6 @@ export const UnusedNatGatewaysCardsComponent = ({ data }: UnusedNatGatewaysCards
     }, [data]);
 
     const dateLabelText = useMemo(() => {
-        // ... (Lógica de fecha igual que antes) ...
         if (!data || data.length === 0) return null;
         const latestTimestamp = data.reduce((maxTime, item) => {
             const itemLatestTime = item.details?.reduce((dMax, detail) => {
@@ -229,18 +220,11 @@ export const UnusedNatGatewaysCardsComponent = ({ data }: UnusedNatGatewaysCards
         return isToday ? 'Datos Actualizados: Hoy' : `Datos a fecha de: ${latestSyncTime.toLocaleDateString()}`;
     }, [data]);
 
-    // Handlers para abrir el modal
     const handleViewTotal = () => {
         setListType('total');
         setListModalOpen(true);
     };
 
-    const handleViewZombies = () => {
-        setListType('zombie');
-        setListModalOpen(true);
-    };
-
-    // Determinar qué datos pasar al modal
     const modalData = listType === 'zombie' ? metrics.unusedList : data;
     const modalTitle = listType === 'zombie' ? 'Recursos Zombie Detectados' : 'Total NAT Gateways Infrautilizados';
 
@@ -260,8 +244,6 @@ export const UnusedNatGatewaysCardsComponent = ({ data }: UnusedNatGatewaysCards
         <>
             <div className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-
-                    {/* 1. Total Recursos (Con botón de ver lista) */}
                     <StatCard
                         title="NAT Gateways Infrautilizados"
                         value={metrics.total}
@@ -269,22 +251,9 @@ export const UnusedNatGatewaysCardsComponent = ({ data }: UnusedNatGatewaysCards
                         icon={Server}
                         variant="default"
                         dateLabel={dateLabelText || undefined}
-                        onViewList={handleViewTotal} // Activa el botón
+                        onViewList={handleViewTotal}
                     />
 
-                    {/* 2. Conteo de Zombies (Con botón de ver lista) */}
-                    {/* <StatCard
-                        title="Recursos Zombie"
-                        value={metrics.totalUnused}
-                        description="Gateways 'Available' con ~0 conexiones y tráfico."
-                        icon={Ghost}
-                        variant="destructive"
-                        actionLabel="RECOMENDACIÓN: ELIMINAR"
-                        dateLabel={dateLabelText || undefined}
-                        onViewList={handleViewZombies} // Activa el botón
-                    /> */}
-
-                    {/* 3. Actividad Residual */}
                     <StatCard
                         title="Conexiones Promedio"
                         value={metrics.avgConnections.toFixed(2)}
@@ -306,7 +275,6 @@ export const UnusedNatGatewaysCardsComponent = ({ data }: UnusedNatGatewaysCards
                 </div>
             </div>
 
-            {/* Renderizado del Modal de Lista */}
             <ResourceListDialog
                 isOpen={listModalOpen}
                 onClose={() => setListModalOpen(false)}
