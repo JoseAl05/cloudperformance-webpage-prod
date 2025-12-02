@@ -478,12 +478,11 @@ export const FiltersComponent = ({
             metricsRDS: '',
             variationResource: '',
             natGateway: '',
-            unusedNatGateway: '',
+            unusedNatGateway: ''
         };
 
-        setFilters({ ...defaultFilters, instanceService: defaultFilters.instancesService }); // Adjust type mismatch
+        setFilters({ ...defaultFilters, instanceService: defaultFilters.instancesService });
 
-        // Reset Temp State
         setTempRange([defaultFilters.startDate, defaultFilters.endDate]);
         setTempMonth(defaultFilters.month);
         setTempYear(defaultFilters.year);
