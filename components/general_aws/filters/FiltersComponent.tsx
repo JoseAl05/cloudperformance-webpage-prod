@@ -30,6 +30,7 @@ import { VariationResourcesFilterComponent } from '@/components/general_aws/filt
 import { UnusedNatGatewaysFilterComponent } from '@/components/general_aws/filters/UnusedNatGatewaysFilterComponent';
 import { NatGatewaysFilterComponent } from '@/components/general_aws/filters/NatGatewaysFilterComponent';
 import { UnusedLoadbalancersV2FilterComponent } from '@/components/general_aws/filters/UnusedLoadbalancersV2FilterComponent';
+import { LoadbalancersV2FilterComponent } from '@/components/general_aws/filters/LoadbalancersV2FilterComponent';
 
 interface FiltersComponentProps {
     Component: (params: {
@@ -98,6 +99,8 @@ interface FiltersComponentProps {
     isUnusedNatGatewaysMultiselect?: boolean;
     unusedElbV2Filter?: boolean;
     isUnusedElbV2Multiselect?: boolean;
+    elbV2Filter?: boolean;
+    isElbV2Multiselect?: boolean;
 }
 
 export const FiltersComponent = ({
@@ -145,6 +148,8 @@ export const FiltersComponent = ({
     isUnusedNatGatewaysMultiselect = false,
     unusedElbV2Filter = false,
     isUnusedElbV2Multiselect = false,
+    elbV2Filter = false,
+    isElbV2Multiselect = false
 }: FiltersComponentProps) => {
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -189,6 +194,7 @@ export const FiltersComponent = ({
         const natGatewayParam = searchParams.get('natGateway');
         const unusedNatGatewayParam = searchParams.get('unusedNatGateway');
         const unusedElbV2Param = searchParams.get('unusedElbV2');
+        const elbV2Param = searchParams.get('elbV2');
 
         let startDate = startDateParam ? new Date(startDateParam) : yesterday;
         let endDate = endDateParam ? new Date(endDateParam) : new Date();
@@ -239,7 +245,8 @@ export const FiltersComponent = ({
             variationResource: variationResourceParam || '',
             natGateway: natGatewayParam || '',
             unusedNatGateway: unusedNatGatewayParam || '',
-            unusedElbV2: unusedElbV2Param || ''
+            unusedElbV2: unusedElbV2Param || '',
+            elbV2: elbV2Param || ''
         };
     };
 
@@ -279,6 +286,7 @@ export const FiltersComponent = ({
     const [tempNatGateway, setTempNatGateway] = useState(filters.natGateway);
     const [tempUnusedNatGateway, setTempUnusedNatGateway] = useState(filters.unusedNatGateway);
     const [tempUnusedElbV2, setTempUnusedElbV2] = useState(filters.unusedElbV2);
+    const [tempElbV2, setTempElbV2] = useState(filters.elbV2);
 
 
 
@@ -319,6 +327,8 @@ export const FiltersComponent = ({
         setTempNatGateway(newFilters.natGateway);
         setTempUnusedNatGateway(newFilters.unusedNatGateway);
         setTempUnusedElbV2(newFilters.unusedElbV2);
+        setTempElbV2(newFilters.elbV2);
+
     }, [searchParams]);
 
     const getRDSService = (): 'postgresql' | 'oracle' | 'mysql' | 'sqlserver' | 'mariadb' => {
@@ -393,7 +403,8 @@ export const FiltersComponent = ({
             variationResource: tempVariationResource,
             natGateway: tempNatGateway,
             unusedNatGateway: tempUnusedNatGateway,
-            unusedElbV2: tempUnusedElbV2
+            unusedElbV2: tempUnusedElbV2,
+            elbV2: tempElbV2
         };
 
         setFilters(newFilters as unknown);
@@ -449,7 +460,8 @@ export const FiltersComponent = ({
             //Network
             { flag: natGatewaysFilter, key: 'natGateway', value: newFilters.natGateway },
             { flag: unusedNatGatewaysFilter, key: 'unusedNatGateway', value: newFilters.unusedNatGateway },
-            { flag: unusedElbV2Filter, key: 'unusedElbV2', value: newFilters.unusedElbV2 }
+            { flag: unusedElbV2Filter, key: 'unusedElbV2', value: newFilters.unusedElbV2 },
+            { flag: elbV2Filter, key: 'elbV2', value: newFilters.elbV2 }
         ];
 
         filterConfigs.forEach(({ flag, key, value, ignoreValue }) => {
@@ -493,7 +505,8 @@ export const FiltersComponent = ({
             variationResource: '',
             natGateway: '',
             unusedNatGateway: '',
-            unusedElbV2: ''
+            unusedElbV2: '',
+            elbV2: ''
         };
 
         setFilters({ ...defaultFilters, instanceService: defaultFilters.instancesService });
@@ -529,6 +542,7 @@ export const FiltersComponent = ({
         setTempNatGateway(defaultFilters.natGateway);
         setTempUnusedNatGateway(defaultFilters.unusedNatGateway);
         setTempUnusedElbV2(defaultFilters.unusedElbV2);
+        setTempElbV2(defaultFilters.elbV2);
 
         router.push(window.location.pathname);
     };
@@ -947,6 +961,24 @@ export const FiltersComponent = ({
                                 </div>
                             )
                         }
+                        {
+                            elbV2Filter && (
+                                <div key="metrics-rds-filter" className='space-y-2 ml-8'>
+                                    <label className='text-sm font-medium text-foreground flex items-center gap-2'>
+                                        <BarChart3 className='h-4 w-4' />
+                                        Loadbalancers
+                                    </label>
+                                    <LoadbalancersV2FilterComponent
+                                        startDate={tempStartDate}
+                                        endDate={tempEndDate}
+                                        region={tempRegion}
+                                        elbV2={tempElbV2}
+                                        setElbV2={setTempElbV2}
+                                        isElbV2Multiselect={isElbV2Multiselect}
+                                    />
+                                </div>
+                            )
+                        }
                     </div>
 
                     <div className='flex items-center gap-4'>
@@ -986,6 +1018,7 @@ export const FiltersComponent = ({
                     unusedNatGateway={filters.unusedNatGateway}
                     natGateway={filters.natGateway}
                     unusedElbV2={filters.unusedElbV2}
+                    elbV2={filters.elbV2}
                 />
             </Card>
         </div>

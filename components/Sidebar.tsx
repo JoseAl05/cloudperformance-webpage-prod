@@ -145,7 +145,8 @@ export const SidebarComponent = ({
         { label: 'Instancias RDS Oracle', icon: Database, href: '/aws/consumos/rds/oracle' },
         { label: 'Instancias RDS SQL Server', icon: Database, href: '/aws/consumos/rds/sqlserver' },
         { label: 'Instancias RDS MariaDB', icon: Database, href: '/aws/consumos/rds/mariadb' },
-        { label: 'Nat Gateways', icon: Workflow, href: '/aws/consumos/nat_gateways' }
+        { label: 'Nat Gateways', icon: Workflow, href: '/aws/consumos/nat_gateways' },
+        { label: 'Loadbalancers V2', icon: Workflow, href: '/aws/consumos/elbv2' }
     ]
 
     const AwsRoutes = {
