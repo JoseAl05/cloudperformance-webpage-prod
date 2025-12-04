@@ -14,7 +14,7 @@ export const MainViewNatGatewaysConsumeComponent = () => {
                             </div>
                             <div>
                                 <h1 className='text-3xl font-bold text-gray-900 dark:text-gray-100'>
-                                    Nat Gateways Infrautilizados
+                                    Consumo/No Consumo Nat Gateways
                                 </h1>
                             </div>
                         </div>
