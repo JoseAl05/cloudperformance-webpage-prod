@@ -8,6 +8,9 @@ import { useState } from 'react';
 import { UnusedNatGateways } from '@/interfaces/vista-unused-resources/unusedNatGatewaysInterfaces';
 import { UnusedNatGatewaysInsightModal } from '@/components/aws/vista-funciones/unused-nat-gateways/info/UnusedNatGatewaysInsightModal'; // Ruta a tu modal
 import useSWR from 'swr';
+import { useSearchParams } from 'next/navigation';
+import Link from 'next/link';
+import { LoaderComponent } from '@/components/general_aws/LoaderComponent';
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
@@ -24,7 +27,7 @@ const DetailsCell = ({ natGw, dateParams }: { natGw: UnusedNatGateways, datePara
             <Button
                 variant="ghost"
                 size="sm"
-                className="h-8 px-2 hover:bg-accent text-blue-600"
+                className="h-8 px-2 cursor-pointer hover:bg-accent text-blue-600"
                 onClick={() => setIsOpen(true)}
             >
                 <Eye className="h-4 w-4 mr-2" />
@@ -34,6 +37,7 @@ const DetailsCell = ({ natGw, dateParams }: { natGw: UnusedNatGateways, datePara
             <UnusedNatGatewaysInsightModal
                 natGw={natGw}
                 asociatedResources={asociatedData}
+                isLoading={isLoading}
                 isOpen={isOpen}
                 onClose={() => setIsOpen(false)}
             />
@@ -41,17 +45,43 @@ const DetailsCell = ({ natGw, dateParams }: { natGw: UnusedNatGateways, datePara
     );
 };
 
+const GetParameters = () => {
+    const searchParams = useSearchParams();
+    const startDateParam = searchParams.get('startDate');
+    const endDateParam = searchParams.get('endDate');
+    const keyParam = searchParams.get('selectedKey');
+    const valueParam = searchParams.get('selectedValue');
+    const regionParam = searchParams.get('region');
+
+    return {
+        startDateParam,
+        endDateParam,
+        keyParam,
+        valueParam,
+        regionParam
+    }
+}
+
 export const getUnusedNatGwColumns = (dateFrom: string, dateTo: string): DynamicColumn<UnusedNatGateways>[] => [
     {
         header: "Nombre / ID",
         accessorKey: "nat_gw_id",
         cell: (info) => {
             const val = info.getValue() as string;
-            const nameTag = info.row.original.details[0]?.Tags?.Name;
+            const startDateParam = GetParameters().startDateParam;
+            const endDateParam = GetParameters().endDateParam;
+            const keyParam = GetParameters().keyParam;
+            const valueParam = GetParameters().valueParam;
+            const regionParam = GetParameters().regionParam;
             return (
                 <div>
-                    <div className="font-medium">{nameTag || val}</div>
-                    {nameTag && <div className="text-xs text-muted-foreground font-mono">{val}</div>}
+                    <Link
+                        href={{ pathname: '/aws/consumos/nat_gateways', query: { startDate: startDateParam, endDate: endDateParam, natGateway: val, region: regionParam, selectedKey: keyParam, selectedValue: valueParam } }}
+                        rel="noopener noreferrer"
+                        target="_blank"
+                    >
+                        <div className="font-medium text-blue-500 hover:text-blue-500/80">{val}</div>
+                    </Link>
                 </div>
             );
         }
