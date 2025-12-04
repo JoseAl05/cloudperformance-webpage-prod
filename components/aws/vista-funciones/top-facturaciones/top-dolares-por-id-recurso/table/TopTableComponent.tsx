@@ -38,6 +38,8 @@ export const TableComponentTop = ({
     return !(costoNeto === 0 && costoBruto === 0)
   })
 
+  console.log(filteredData);
+
 
   const columns: ColumnDef<TableDataTopResource>[] = [
     {

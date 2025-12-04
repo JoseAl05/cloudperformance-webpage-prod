@@ -408,9 +408,18 @@ export function DataTableGrouping<TData, TValue>({
     const [itemsPageSize, setItemsPageSize] = useState(pageSizeItems)
 
     const safeData = Array.isArray(data) ? data : []
+    const filteredData = useMemo(() => {
+        const filterValue = columnFilters.find(f => f.id === filterColumn)?.value as string
+        if (!filterColumn || !filterValue) return safeData
+
+        return safeData.filter(item => {
+            const val = item[filterColumn as keyof TData]
+            return String(val ?? '').toLowerCase().includes(filterValue.toLowerCase())
+        })
+    }, [safeData, columnFilters, filterColumn])
     const totalGroupsForPagination = enableGrouping
-        ? new Set(safeData.map((r: unknown) => String(r[groupByColumn] ?? '—'))).size
-        : safeData.length
+        ? new Set(filteredData.map((r: unknown) => String(r[groupByColumn] ?? '—'))).size
+        : filteredData.length
 
     const { currentPage, totalPages, canPrevious, canNext, goToPrevious, goToNext, resetPage } =
         usePagination(totalGroupsForPagination, groupPageSize)
@@ -426,7 +435,7 @@ export function DataTableGrouping<TData, TValue>({
     }, [sorting, resetPage])
 
     const { processedData, totalGroups, groupMetadata } = useGroupedData(
-        safeData as AnyRow[],
+        filteredData as AnyRow[],
         sorting,
         enableGrouping,
         groupByColumn,
@@ -492,11 +501,12 @@ export function DataTableGrouping<TData, TValue>({
         state: { columnFilters, sorting },
         getRowId: (row: ProcessedRow) => row.__rowId,
         manualPagination: true,
+        manualFiltering: true
     })
 
     const outerTotalPages = enableGrouping
         ? Math.max(1, Math.ceil(totalGroups / groupPageSize))
-        : Math.max(1, Math.ceil(safeData.length / groupPageSize))
+        : Math.max(1, Math.ceil(filteredData.length / groupPageSize))
 
     return (
         <div className="space-y-4">
