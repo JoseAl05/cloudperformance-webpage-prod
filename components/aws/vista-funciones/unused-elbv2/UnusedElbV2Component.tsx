@@ -1,20 +1,16 @@
 'use client'
 
 import { MessageCard } from '@/components/aws/cards/MessageCards';
-import { UnusedNatGatewaysCardsComponent } from '@/components/aws/vista-funciones/unused-nat-gateways/info/UnusedNatGatewaysCardsComponent';
-import { UnusedNatGatewaysTable } from '@/components/aws/vista-funciones/unused-nat-gateways/table/UnusedNatGatewaysTable';
 import { LoaderComponent } from '@/components/general_aws/LoaderComponent';
-import { AsociatedResourcesNatGw } from '@/interfaces/vista-unused-resources/asociatedNatGwResourcesInterfaces';
-import { UnusedNatGateways } from '@/interfaces/vista-unused-resources/unusedNatGatewaysInterfaces';
-import { UnusedNatGatewaysMetrics } from '@/interfaces/vista-unused-resources/unusedNatGwMetricsInterfaces';
-import { AlertCircle, ChartBar, Clock, Info, Wallet } from 'lucide-react';
+import { UnusedElbV2 } from '@/interfaces/vista-unused-resources/unusedElbV2Interfaces';
+import { AlertCircle, Clock, Info } from 'lucide-react';
 import useSWR from 'swr';
 
-interface UnusedNatGatewaysComponentProps {
+interface UnusedElbV2ComponentProps {
     startDate: Date;
     endDate: Date;
     region: string;
-    unusedNatGateway: string;
+    unusedElbV2: string;
 }
 
 const fetcher = (url: string) =>
@@ -24,36 +20,36 @@ const fetcher = (url: string) =>
 const isNonEmptyArray = <T,>(v: unknown): v is T[] => Array.isArray(v) && v.length > 0
 const isNullish = (v: unknown) => v === null || v === undefined
 
-export const UnusedNatGatewaysComponent = ({ startDate, endDate, region, unusedNatGateway }: UnusedNatGatewaysComponentProps) => {
+export const UnusedElbV2Component = ({ startDate, endDate, region, unusedElbV2 }: UnusedElbV2ComponentProps) => {
 
     const startDateFormatted = startDate.toISOString().replace('Z', '').slice(0, -4);
     const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : '';
 
-    const unusedNatGw = useSWR(
-        unusedNatGateway ? `/api/aws/bridge/nat_gateways/get_unused_nat_gateways?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&nat_gw_id=${unusedNatGateway}` : null,
+    const allUnusedElbV2 = useSWR(
+        unusedElbV2 ? `/api/aws/bridge/loadbalancersv2/get_unused_load_balancersv2?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&elb_arn=${unusedElbV2}` : null,
         fetcher
     )
 
-
     const anyLoading =
-        unusedNatGw.isLoading
+        allUnusedElbV2.isLoading
 
 
     const anyError =
-        !!unusedNatGw.error
+        !!allUnusedElbV2.error
 
-    const unusedNatGwData: UnusedNatGateways[] | null =
-        isNonEmptyArray<UnusedNatGateways>(unusedNatGw.data) ? unusedNatGw.data : null;
+    const allUnusedElbV2Data: UnusedElbV2[] | null =
+        isNonEmptyArray<UnusedElbV2>(allUnusedElbV2.data) ? allUnusedElbV2.data : null;
 
-    const hasUnusedData = !!unusedNatGwData && unusedNatGwData.length > 0;
+    const hasUnusedData = !!allUnusedElbV2Data && allUnusedElbV2Data.length > 0;
 
-    if (!unusedNatGateway) {
+    if (!unusedElbV2) {
         return (
             <div className="max-w-7xl mx-auto px-6 py-8">
-                <div className="text-center text-gray-500 text-lg font-medium">No se ha seleccionado ningún nat gateway.</div>
+                <div className="text-center text-gray-500 text-lg font-medium">No se ha seleccionado ningún loadbalancer.</div>
             </div>
         )
     }
+
     if (anyLoading) {
         return <LoaderComponent />
     }
@@ -78,29 +74,26 @@ export const UnusedNatGatewaysComponent = ({ startDate, endDate, region, unusedN
                 <MessageCard
                     icon={Info}
                     title="Sin datos para mostrar"
-                    description="No encontramos métricas ni información del/los nat gateway/s en el rango seleccionado."
+                    description="No encontramos métricas ni información del/los loadbalancer/s en el rango seleccionado."
                     tone="warn"
                 />
             </div>
         )
     }
+
+    console.log(allUnusedElbV2Data)
+
     return (
         <>
             <div className='w-full min-w-0 px-4 py-6'>
                 <div className="flex-1 space-y-6 min-w-0 overflow-hidden">
-                    <UnusedNatGatewaysCardsComponent
-                        data={unusedNatGwData}
-                    />
+
                 </div>
                 <div className="flex items-center gap-3 my-10">
                     <Clock className="h-8 w-8 text-blue-500" />
-                    <h1 className="text-3xl font-bold text-foreground">Detalle Nat Gateways no utilizados</h1>
+                    <h1 className="text-3xl font-bold text-foreground">Detalle Loadbalancers no utilizados</h1>
                 </div>
-                <UnusedNatGatewaysTable
-                    data={unusedNatGwData}
-                    dateFrom={startDateFormatted}
-                    dateTo={endDateFormatted}
-                />
+
             </div>
         </>
     )
