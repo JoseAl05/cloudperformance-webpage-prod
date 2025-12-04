@@ -1,6 +1,8 @@
 'use client'
 
 import { MessageCard } from '@/components/aws/cards/MessageCards';
+import { UnusedElbV2CardsComponent } from '@/components/aws/vista-funciones/unused-elbv2/info/UnusedElbV2CardsComponent';
+import { UnusedElbV2Table } from '@/components/aws/vista-funciones/unused-elbv2/table/UnusedElbV2Table';
 import { LoaderComponent } from '@/components/general_aws/LoaderComponent';
 import { UnusedElbV2 } from '@/interfaces/vista-unused-resources/unusedElbV2Interfaces';
 import { AlertCircle, Clock, Info } from 'lucide-react';
@@ -81,19 +83,28 @@ export const UnusedElbV2Component = ({ startDate, endDate, region, unusedElbV2 }
         )
     }
 
-    console.log(allUnusedElbV2Data)
+    const mainData = allUnusedElbV2Data ? allUnusedElbV2Data[0] : null;
+    const detailsList = mainData ? mainData.details : [];
+    const globalMetrics = mainData ? mainData.diagnosis.metrics_summary : undefined;
 
     return (
         <>
             <div className='w-full min-w-0 px-4 py-6'>
                 <div className="flex-1 space-y-6 min-w-0 overflow-hidden">
-
+                    <UnusedElbV2CardsComponent
+                        data={allUnusedElbV2Data}
+                    />
                 </div>
                 <div className="flex items-center gap-3 my-10">
                     <Clock className="h-8 w-8 text-blue-500" />
                     <h1 className="text-3xl font-bold text-foreground">Detalle Loadbalancers no utilizados</h1>
                 </div>
-
+                <UnusedElbV2Table
+                    data={detailsList}
+                    globalMetrics={globalMetrics}
+                    dateFrom={startDateFormatted}
+                    dateTo={endDateFormatted}
+                />
             </div>
         </>
     )

@@ -1,6 +1,4 @@
 export interface UnusedElbV2 {
-  elb_arn: string;
-  region: string;
   diagnosis: {
     status: string;
     elb_type: string;
@@ -8,7 +6,7 @@ export interface UnusedElbV2 {
     metrics_summary: {
       avg_requests: number;
       avg_active_connections: number;
-      acg_new_flows: number;
+      avg_new_flows: number;
       avg_active_flows: number;
       avg_consumed_lcus: number;
     };
@@ -17,6 +15,20 @@ export interface UnusedElbV2 {
 }
 
 export interface UnusedElbV2Details {
+  elb_arn: string;
+  elb_type: string;
+  region: string;
+  metrics_summary: {
+    request_count_avg: number;
+    active_connections_avg: number;
+    new_flows_avg: number;
+    active_flows_avg: number;
+    consumed_lcus_avg: number;
+  };
+  history: UnusedElbV2DetailsHistory[];
+}
+
+export interface UnusedElbV2DetailsHistory {
   sync_time: string;
   DNSName: string;
   Type: string;
@@ -26,16 +38,16 @@ export interface UnusedElbV2Details {
   };
   AvailabilityZones: UnusedElbV2DetailsAvailabilityZones[];
   metrics_summary: {
-    avg_requests: number;
-    avg_active_connections: number;
-    acg_new_flows: number;
-    avg_active_flows: number;
-    avg_consumed_lcus: number;
+    request_count_avg: number;
+    active_connections_avg: number;
+    new_flows_avg: number;
+    active_flows_avg: number;
+    consumed_lcus_avg: number;
   };
 }
 
-export interface UnusedElbV2DetailsAvailabilityZones{
-    ZoneName: string;
-    SubnetId: string;
-    LoadBalancerAddresses?: string[];
+export interface UnusedElbV2DetailsAvailabilityZones {
+  ZoneName: string;
+  SubnetId: string;
+  LoadBalancerAddresses?: string[];
 }
