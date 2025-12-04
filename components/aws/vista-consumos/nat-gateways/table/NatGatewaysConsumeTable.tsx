@@ -1,9 +1,12 @@
+'use client'
+
 import { createColumns } from '@/components/general_aws/data-table/columns';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { DataTableGrouping } from '@/components/general_aws/data-table/data-table-grouping';
 import { Server } from 'lucide-react';
-import { NatGatewaysConsumeColumns } from '@/components/aws/vista-consumos/nat-gateways/table/NatGatewaysConsumeColumns';
+import { getNatGatewaysConsumeColumns } from '@/components/aws/vista-consumos/nat-gateways/table/NatGatewaysConsumeColumns';
 import { NatGatewaysMetricsSummary } from '@/interfaces/vista-consumos/natGwConsumeViewInterfaces';
+import { useMemo } from 'react';
 
 interface NatGatewaysConsumeTableProps {
     data: NatGatewaysMetricsSummary[];
@@ -11,7 +14,36 @@ interface NatGatewaysConsumeTableProps {
 
 export const NatGatewaysConsumeTable = ({ data }: NatGatewaysConsumeTableProps) => {
 
-    const natGwColumns = createColumns(NatGatewaysConsumeColumns);
+    // 1. Calcular Totales Globales para las barras relativas
+    const globalTotals = useMemo(() => {
+        const acc = {
+            totalBytesOut: 0,
+            totalBytesIn: 0,
+            totalConnections: 0,
+            totalErrors: 0
+        };
+
+        if (!data || !Array.isArray(data)) return acc;
+
+        data.forEach(resource => {
+            resource.metrics.forEach(m => {
+                const name = m.metric_name; // Nombre exacto (ej: BytesOutToDestination Maximum)
+                const val = m.value || 0;
+
+                if (name === 'BytesOutToDestination Maximum') acc.totalBytesOut += val;
+                else if (name === 'BytesInFromSource Maximum') acc.totalBytesIn += val;
+                else if (name === 'ActiveConnectionCount Maximum') acc.totalConnections += val;
+                else if (name === 'ErrorPortAllocation Maximum') acc.totalErrors += val;
+            });
+        });
+
+        return acc;
+    }, [data]);
+
+    // 2. Generar las columnas dinámicamente con los totales
+    const natGwColumns = useMemo(() => {
+        return createColumns(getNatGatewaysConsumeColumns(globalTotals));
+    }, [globalTotals]);
 
     return (
         <Card>
