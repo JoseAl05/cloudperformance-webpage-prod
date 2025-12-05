@@ -2,8 +2,8 @@
 
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
-import { LoadbalancerV2MetricsSummary } from '@/interfaces/vista-consumos/elbV2ConsumeViewInterfaces';
-import { bytesToGB, bytesToMB } from '@/lib/bytesToMbs'; // Asumiendo que tienes esta utilidad, sino usa bytesToMB
+import { LoadbalancerV2CardsSummary } from '@/interfaces/vista-consumos/elbV2ConsumeViewInterfaces';
+import { bytesToMB } from '@/lib/bytesToMbs';
 import {
     Activity,
     AlertTriangle,
@@ -15,11 +15,11 @@ import {
     LucideIcon,
     Network,
     ServerCrash
-} from 'lucide-react'; // Iconos sugeridos para mejor contexto
+} from 'lucide-react';
 import { useMemo } from 'react';
 
 interface ElbV2ConsumeCardsComponentProps {
-    data: LoadbalancerV2MetricsSummary[]
+    data: LoadbalancerV2CardsSummary[]
 }
 
 type CardVariant = 'default' | 'destructive' | 'warning' | 'info' | 'success';
@@ -28,9 +28,10 @@ interface StatCardProps {
     title: string;
     value: string | number;
     description: string;
-    icon: LucideIcon; // LucideIcon type
+    icon: LucideIcon;
     variant?: CardVariant;
     actionLabel?: string;
+    footer?: string;
 }
 
 const getVariantStyles = (variant: CardVariant) => {
@@ -73,7 +74,7 @@ const getVariantStyles = (variant: CardVariant) => {
     }
 };
 
-const StatCard = ({ title, value, description, icon: Icon, variant = 'default', actionLabel }: StatCardProps) => {
+const StatCard = ({ title, value, description, icon: Icon, variant = 'default', actionLabel, footer }: StatCardProps) => {
     const styles = getVariantStyles(variant);
 
     return (
@@ -93,11 +94,18 @@ const StatCard = ({ title, value, description, icon: Icon, variant = 'default', 
                     <p className="text-xs text-muted-foreground leading-snug line-clamp-2">
                         {description}
                     </p>
-                    {actionLabel && (
-                        <Badge variant="outline" className={`text-[10px] font-semibold px-2 py-0.5 h-auto ${styles.badge}`}>
-                            {actionLabel}
-                        </Badge>
-                    )}
+                    <div className="flex items-center justify-between">
+                        {actionLabel && (
+                            <Badge variant="outline" className={`text-[10px] font-semibold px-2 py-0.5 h-auto ${styles.badge}`}>
+                                {actionLabel}
+                            </Badge>
+                        )}
+                        {footer && (
+                            <span className="text-[10px] font-mono text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
+                                {footer}
+                            </span>
+                        )}
+                    </div>
                 </div>
             </CardContent>
         </Card>
@@ -107,133 +115,150 @@ const StatCard = ({ title, value, description, icon: Icon, variant = 'default', 
 export const ElbV2ConsumeCardsComponent = ({ data }: ElbV2ConsumeCardsComponentProps) => {
 
     const kpis = useMemo(() => {
-        const acc = {
-            totalNewFlows: 0,
-            totalActiveFlow: 0,
-            totalProcessedBytes: 0,
-            totalTcpClientReset: 0,
-            totalConsumedLcu: 0,
-            totalActiveConnections: 0,
-            totalCode5xx: 0,
-            totalNewConnections: 0,
-            totalRequestCount: 0,
-            totalRuleEvaluations: 0,
-            resourceCount: data?.length || 0
+        const result = {
+            totalNewFlows: { val: 0, peak: 0 },
+            totalActiveFlow: { val: 0, peak: 0 },
+            totalProcessedBytes: { val: 0, peak: 0 },
+            totalTcpClientReset: { val: 0, peak: 0 },
+            totalConsumedLcu: { val: 0, peak: 0 },
+            totalActiveConnections: { val: 0, peak: 0 },
+            totalCode5xx: { val: 0, peak: 0 },
+            totalNewConnections: { val: 0, peak: 0 },
+            totalRequestCount: { val: 0, peak: 0 },
+            totalRuleEvaluations: { val: 0, peak: 0 },
         };
 
-        if (!data || data.length === 0) return acc;
+        if (!data || data.length === 0) return result;
 
-        data.forEach(resource => {
-            resource.metrics.forEach(metric => {
-                const name = metric.metric_name.toLowerCase();
-                const val = metric.value || 0;
+        const findMetric = (namePart: string) => {
+            return data.find(m => m.metric_name.toLowerCase().includes(namePart.toLowerCase()));
+        };
 
-                if (name.includes('activeconnectioncount average')) {
-                    acc.totalActiveConnections += val;
-                } else if (name.includes('activeflowcount average')) {
-                    acc.totalActiveFlow += val;
-                } else if (name.includes('consumedlcus average')) {
-                    acc.totalConsumedLcu += val;
-                } else if (name.includes('httpcode_target_5xx_count average')) {
-                    acc.totalCode5xx += val;
-                } else if (name.includes('newconnectioncount average')) {
-                    acc.totalNewConnections += val;
-                } else if (name.includes('newflowcount average')) {
-                    acc.totalNewFlows += val;
-                } else if (name.includes('processedbytes average')) {
-                    acc.totalProcessedBytes += val;
-                } else if (name.includes('requestcount average')) {
-                    acc.totalRequestCount += val;
-                } else if (name.includes('ruleevaluations average')) {
-                    acc.totalRuleEvaluations += val;
-                } else if (name.includes('tcp_client_reset_count average')) {
-                    acc.totalTcpClientReset += val;
-                }
-            });
-        });
+        const activeConn = findMetric('activeconnectioncount');
+        if (activeConn) result.totalActiveConnections = { val: activeConn.value, peak: activeConn.peak_value };
 
-        return acc;
+        const activeFlow = findMetric('activeflowcount');
+        if (activeFlow) result.totalActiveFlow = { val: activeFlow.value, peak: activeFlow.peak_value };
+
+        const lcus = findMetric('consumedlcus');
+        if (lcus) result.totalConsumedLcu = { val: lcus.value, peak: lcus.peak_value };
+
+        const code5xx = findMetric('5xx_count');
+        if (code5xx) result.totalCode5xx = { val: code5xx.value, peak: code5xx.peak_value };
+
+        const newConn = findMetric('newconnectioncount');
+        if (newConn) result.totalNewConnections = { val: newConn.value, peak: newConn.peak_value };
+
+        const newFlow = findMetric('newflowcount');
+        if (newFlow) result.totalNewFlows = { val: newFlow.value, peak: newFlow.peak_value };
+
+        const bytes = findMetric('processedbytes');
+        if (bytes) result.totalProcessedBytes = { val: bytes.value, peak: bytes.peak_value };
+
+        const reqCount = findMetric('requestcount');
+        if (reqCount) result.totalRequestCount = { val: reqCount.value, peak: reqCount.peak_value };
+
+        const rules = findMetric('ruleevaluations');
+        if (rules) result.totalRuleEvaluations = { val: rules.value, peak: rules.peak_value };
+
+        const tcpReset = findMetric('tcp_client_reset');
+        if (tcpReset) result.totalTcpClientReset = { val: tcpReset.value, peak: tcpReset.peak_value };
+
+        return result;
     }, [data]);
 
-    const formatNumber = (num: number) => new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 }).format(num);
+    const formatNumber = (num: number) => new Intl.NumberFormat('en-US', { maximumFractionDigits: 5 }).format(num);
     const formatDecimals = (num: number) => new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 }).format(num);
 
-    // Helper simple para bytes si no tienes la librería a mano, si la tienes usa la importada
     const formatBytes = (bytes: number) => {
         if (bytes === 0) return '0 GB';
-        const gb = bytes / (1024 * 1024 * 1024);
-        return `${gb.toFixed(2)} GB`;
+        const mb = bytesToMB(bytes);
+        return `${new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 }).format(mb)} MB`;
     };
+
+    const formatBytesPeak = (bytes: number) => {
+        if (bytes === 0) return '0 MB';
+        const mb = bytesToMB(bytes);
+        // if (mb < 1) return `${(mb * 1024).toFixed(0)} KB`;
+        return mb;
+    }
 
     return (
         <div className="space-y-6">
-
-            {/* SECCIÓN 1: MÉTRICAS DE ALTO IMPACTO (Costo, Salud, Volumen) */}
             <div>
                 <h3 className="text-sm font-semibold text-muted-foreground mb-3 flex items-center gap-2">
                     <Activity className="h-4 w-4" />
-                    Impacto y Salud
+                    Impacto y Salud (Totales)
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <StatCard
-                        title="LCUs Consumidos"
-                        value={formatDecimals(kpis.totalConsumedLcu)}
-                        description="Load Balancer Capacity Units totales consumidas. Impacto directo en facturación."
+                        title="Total LCUs"
+                        value={formatDecimals(kpis.totalConsumedLcu.val)}
+                        description="LCUs consumidas (Promedio global por hora/recurso)."
+                        footer={`Peak: ${formatDecimals(kpis.totalConsumedLcu.peak)}`}
                         icon={Coins}
-                        variant="default" // Neutro/Principal
+                        variant="default"
                     />
                     <StatCard
-                        title="Volumen Procesado"
-                        value={`${bytesToMB(kpis.totalProcessedBytes)}`}
-                        description="Total de datos procesados por los balanceadores seleccionados."
+                        title="Volumen Total"
+                        value={formatBytes(kpis.totalProcessedBytes.val)}
+                        description="Promedio Datos procesados acumulados en el periodo."
+                        footer={`Peak: ${formatBytesPeak(kpis.totalProcessedBytes.peak)}`}
                         icon={Database}
                         variant="info"
                     />
                     <StatCard
-                        title="Errores 5xx (Backend)"
-                        value={formatNumber(kpis.totalCode5xx)}
-                        description="Errores devueltos por las instancias/targets traseros. Indica problemas de aplicación."
+                        title="Total Errores 5xx"
+                        value={formatNumber(kpis.totalCode5xx.val)}
+                        description="Promedio Errores backend."
+                        footer={`Peak: ${formatNumber(kpis.totalCode5xx.peak)}`}
                         icon={AlertTriangle}
-                        variant={kpis.totalCode5xx > 0 ? 'destructive' : 'success'}
-                        actionLabel={kpis.totalCode5xx > 0 ? "Revisar Targets" : "Saludable"}
+                        variant={kpis.totalCode5xx.val > 0 ? 'destructive' : 'success'}
+                        actionLabel={kpis.totalCode5xx.val > 0 ? "Incidentes" : "Estable"}
                     />
                 </div>
             </div>
-
-            {/* SECCIÓN 2: DETALLE DE TRÁFICO (ALB vs NLB) */}
             <div>
                 <h3 className="text-sm font-semibold text-muted-foreground mb-3 flex items-center gap-2">
                     <Network className="h-4 w-4" />
-                    Detalle de Tráfico
+                    Carga de Tráfico (Acumulado)
                 </h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    {/* Métricas ALB */}
                     <StatCard
-                        title="Requests (ALB)"
-                        value={formatNumber(kpis.totalRequestCount)}
-                        description="Peticiones HTTP/HTTPS procesadas (Application Load Balancers)."
+                        title="Total Requests (ALB)"
+                        value={formatNumber(kpis.totalRequestCount.val)}
+                        description="Promedio Peticiones HTTP/HTTPS totales."
+                        footer={`Peak: ${formatNumber(kpis.totalRequestCount.peak)}`}
                         icon={Globe}
                     />
                     <StatCard
                         title="Conexiones Activas"
-                        value={formatNumber(kpis.totalActiveConnections)}
-                        description="Conexiones concurrentes mantenidas hacia los targets."
+                        value={formatNumber(kpis.totalActiveConnections.val)}
+                        description="Promedio de concurrencia."
+                        footer={`Peak: ${formatNumber(kpis.totalActiveConnections.peak)}`}
                         icon={ArrowRightLeft}
                     />
-
-                    {/* Métricas NLB */}
                     <StatCard
-                        title="Nuevos Flujos (NLB)"
-                        value={formatNumber(kpis.totalNewFlows)}
-                        description="Nuevas conexiones TCP/UDP establecidas (Network Load Balancers)."
+                        title="Nuevos Flujos"
+                        value={formatNumber(kpis.totalNewFlows.val)}
+                        description="Promedio Flujos iniciados."
+                        footer={`Peak: ${kpis.totalNewFlows.peak}`}
+                        icon={BarChart3}
+                    />
+                    <StatCard
+                        title="Flujos Activos"
+                        value={formatNumber(kpis.totalActiveFlow.val)}
+                        description="Promedio Flujos Activos."
+                        footer={`Peak: ${formatNumber(kpis.totalActiveFlow.peak)}`}
                         icon={BarChart3}
                     />
                     <StatCard
                         title="Resets TCP"
-                        value={formatNumber(kpis.totalTcpClientReset)}
-                        description="Conexiones reiniciadas por el cliente. Puede indicar problemas de red."
+                        value={formatNumber(kpis.totalTcpClientReset.val)}
+                        description="Promedio Reinicios de conexión total."
+                        footer={`Peak: ${formatNumber(kpis.totalTcpClientReset.peak)}`}
                         icon={ServerCrash}
-                        variant={kpis.totalTcpClientReset > 100 ? 'warning' : 'default'}
+                        variant={kpis.totalTcpClientReset.val > 100 ? 'warning' : 'default'}
                     />
                 </div>
             </div>

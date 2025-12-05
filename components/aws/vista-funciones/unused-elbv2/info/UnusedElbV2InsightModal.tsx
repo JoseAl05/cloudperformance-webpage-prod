@@ -1,3 +1,4 @@
+'use client'
 import {
     Dialog,
     DialogContent,
@@ -23,6 +24,8 @@ import { AsociatedElbV2Resources } from "@/interfaces/vista-unused-resources/aso
 import { GlobalMetricsSummary } from "../table/UnusedElbV2Columns";
 import { Activity, CalendarDays, CheckCircle2, History, Network, Server, XCircle, BarChart3, Radio } from "lucide-react";
 import { formatMetric } from '@/lib/metricUtils';
+import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 
 interface UnusedElbV2InsightModalProps {
     elbData: UnusedElbV2Details;
@@ -74,6 +77,12 @@ export const UnusedElbV2InsightModal = ({
     isOpen,
     onClose,
 }: UnusedElbV2InsightModalProps) => {
+
+    const searchParams = useSearchParams();
+
+    const startDateParam = searchParams.get('startDate');
+    const endDateParam = searchParams.get('endDate');
+    const regionParam = searchParams.get('region');
 
     const latestHistory = elbData.history && elbData.history.length > 0 ? elbData.history[0] : null;
     const resources = asociatedResources && asociatedResources.length > 0 ? asociatedResources[0] : null;
@@ -350,7 +359,14 @@ export const UnusedElbV2InsightModal = ({
                                                                             {new Date(item.sync_time).toLocaleString()}
                                                                         </TableCell>
                                                                         <TableCell className="font-mono text-xs font-medium">
-                                                                            {item.target_id}
+                                                                            <Link
+                                                                                href={{ pathname: '/aws/recursos/instancias-ec2', query: { startDate: startDateParam, endDate: endDateParam, instance: item.target_id, region: regionParam } }}
+                                                                                className='text-blue-500 hover:text-blue-500/80'
+                                                                                rel="noopener noreferrer"
+                                                                                target="_blank"
+                                                                            >
+                                                                                {item.target_id}
+                                                                            </Link>
                                                                         </TableCell>
                                                                         <TableCell className="text-xs">
                                                                             {item.Target?.Port}

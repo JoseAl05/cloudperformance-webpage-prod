@@ -5,12 +5,20 @@ import { createChartOption, deepMerge, makeBaseOptions, useECharts } from '@/lib
 import { useTheme } from 'next-themes';
 import { useMemo, useRef } from 'react';
 
+const METRIC_TRANSLATIONS: Record<string, string> = {
+    'BytesOutToDestination Average': 'Volumen Saliente (Internet)',
+    'BytesInFromSource Average': 'Volumen Entrante (VPC)',
+    'ActiveConnectionCount Average': 'Conexiones Activas',
+    'ErrorPortAllocation Average': 'Errores de Puerto (SNAT)',
+};
+
 interface NatGatewaysConsumeSingleChartComponentProps {
     metricName: string;
-    dataPoints: [string, number][];
+    dataPoints: [string, string | number][];
+    className?: string;
 }
 
-export const NatGatewaysConsumeSingleChartComponent = ({ metricName, dataPoints }: NatGatewaysConsumeSingleChartComponentProps) => {
+export const NatGatewaysConsumeSingleChartComponent = ({ metricName, dataPoints, className }: NatGatewaysConsumeSingleChartComponentProps) => {
     const { theme, resolvedTheme } = useTheme();
     const currentTheme = resolvedTheme || theme;
     const isDark = currentTheme === 'dark';
@@ -25,15 +33,7 @@ export const NatGatewaysConsumeSingleChartComponent = ({ metricName, dataPoints 
         }
     };
 
-    const getCardTitle = (name: string) => {
-        if (!name) return 'Sin Título';
-        const lowerName = name.toLowerCase();
-        if (lowerName.includes('bytesout')) return 'Volumen Saliente (Internet)';
-        if (lowerName.includes('bytesin')) return 'Volumen Entrante (VPC)';
-        if (lowerName.includes('activeconnection')) return 'Carga de Conexiones (Total)';
-        if (lowerName.includes('errorport')) return 'Errores de Asignación de Puerto';
-        return name;
-    };
+    const cardTitle = METRIC_TRANSLATIONS[metricName] || metricName;
 
     const getUnitLabel = (name: string) => {
         const lowerName = name.toLowerCase();
@@ -41,7 +41,6 @@ export const NatGatewaysConsumeSingleChartComponent = ({ metricName, dataPoints 
         return 'Count';
     };
 
-    const cardTitle = getCardTitle(metricName);
     const unitLabel = getUnitLabel(metricName);
     const metricType = 'default';
 
@@ -50,7 +49,7 @@ export const NatGatewaysConsumeSingleChartComponent = ({ metricName, dataPoints 
         const sortedData = [...dataPoints].sort((a, b) => new Date(a[0]).getTime() - new Date(b[0]).getTime());
 
         const series = [{
-            name: metricName,
+            name: cardTitle,
             data: sortedData,
             smooth: true,
             kind: 'line',
@@ -61,7 +60,7 @@ export const NatGatewaysConsumeSingleChartComponent = ({ metricName, dataPoints 
         }];
 
         const base = makeBaseOptions({
-            legend: [metricName],
+            legend: [cardTitle],
             unitLabel: unitLabel,
             useUTC: true,
             showToolbox: true,
@@ -88,17 +87,17 @@ export const NatGatewaysConsumeSingleChartComponent = ({ metricName, dataPoints 
         });
 
         return deepMerge(base, lines);
-    }, [dataPoints, isDark, metricName, unitLabel]);
+    }, [dataPoints, isDark, cardTitle, unitLabel]);
 
     useECharts(chartRef, option, [option], isDark ? 'cp-dark' : 'cp-light');
 
     return (
-        <Card className="w-full shadow-sm">
-            <CardHeader className='pb-2'>
-                <CardTitle className="text-lg">{cardTitle}</CardTitle>
+        <Card className={`w-full shadow-sm ${className || ''}`}>
+            <CardHeader className='pb-2 border-b mb-2 bg-muted/5'>
+                <CardTitle className="text-base font-medium text-foreground/80">{cardTitle}</CardTitle>
             </CardHeader>
             <CardContent>
-                <div ref={chartRef} className="w-full h-[400px] md:h-[450px] lg:h-[500px]" />
+                <div ref={chartRef} className="w-full h-[350px] md:h-[400px]" />
             </CardContent>
         </Card>
     );

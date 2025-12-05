@@ -11,7 +11,6 @@ interface ElbV2ConsumeChartsComponentProps {
     data: LoadbalancerV2Metrics[];
 }
 
-// ... (CHART_GROUPS se mantiene igual) ...
 const CHART_GROUPS = [
     {
         id: 'traffic',
@@ -67,7 +66,7 @@ export const ElbV2ConsumeChartsComponent = ({ data }: ElbV2ConsumeChartsComponen
                 groups.set(item.metric_name, []);
             }
 
-            const value = (item.metric_name === 'ProcessedBytes Average')
+            const value = (item.metric_name.includes('ProcessedBytes'))
                 ? bytesToMB(item.avg_value)
                 : formatMetric(item.avg_value);
 
@@ -117,8 +116,6 @@ export const ElbV2ConsumeChartsComponent = ({ data }: ElbV2ConsumeChartsComponen
 
                         <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
                             {groupMetrics.map((metricName, index) => {
-                                // LÓGICA DE CORRECCIÓN DE ESPACIOS
-                                // Si hay un número impar de gráficos y es el último elemento, expandir a 2 columnas
                                 const isLastItem = index === groupMetrics.length - 1;
                                 const spanClass = (isOddCount && isLastItem) ? "xl:col-span-2" : "";
 
@@ -127,7 +124,7 @@ export const ElbV2ConsumeChartsComponent = ({ data }: ElbV2ConsumeChartsComponen
                                         key={metricName}
                                         metricName={metricName}
                                         dataPoints={metricsMap.get(metricName)!}
-                                        className={spanClass} // Pasamos la clase aquí
+                                        className={spanClass}
                                     />
                                 );
                             })}

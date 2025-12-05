@@ -5,7 +5,7 @@ import { ElbV2ConsumeChartsComponent } from '@/components/aws/vista-consumos/elb
 import { ElbV2ConsumeCardsComponent } from '@/components/aws/vista-consumos/elbv2/info/ElbV2ConsumeCardsComponent';
 import { ElbV2ConsumeTable } from '@/components/aws/vista-consumos/elbv2/table/ElbV2ConsumeTable';
 import { LoaderComponent } from '@/components/general_aws/LoaderComponent';
-import { LoadbalancerV2Metrics, LoadbalancerV2MetricsSummary } from '@/interfaces/vista-consumos/elbV2ConsumeViewInterfaces';
+import { LoadbalancerV2CardsSummary, LoadbalancerV2Metrics, LoadbalancerV2MetricsSummary } from '@/interfaces/vista-consumos/elbV2ConsumeViewInterfaces';
 import { AlertCircle, ChartBar, Clock, Info } from 'lucide-react';
 import useSWR from 'swr';
 
@@ -38,15 +38,22 @@ export const ElbV2ConsumeComponent = ({ startDate, endDate, region, elbV2 }: Elb
         fetcher
     )
 
+    const elbv2CardsMetrics = useSWR(
+        elbV2 ? `/api/aws/bridge/loadbalancersv2/cards/metrics_summary?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&elb_arn=${elbV2}` : null,
+        fetcher
+    )
+
     const anyLoading =
         elbv2Metrics.isLoading ||
-        elbv2MetricsSummary.isLoading;
+        elbv2MetricsSummary.isLoading ||
+        elbv2CardsMetrics.isLoading;
+
 
 
     const anyError =
         !!elbv2Metrics.error ||
-        !!elbv2MetricsSummary.error;
-
+        !!elbv2MetricsSummary.error ||
+        !!elbv2CardsMetrics.error;
 
     const elbv2MetricsData: LoadbalancerV2Metrics[] | null =
         isNonEmptyArray<LoadbalancerV2Metrics>(elbv2Metrics.data) ? elbv2Metrics.data : null;
@@ -54,9 +61,12 @@ export const ElbV2ConsumeComponent = ({ startDate, endDate, region, elbV2 }: Elb
     const elbv2MetricsSummaryData: LoadbalancerV2MetricsSummary[] | null =
         isNonEmptyArray<LoadbalancerV2MetricsSummary>(elbv2MetricsSummary.data) ? elbv2MetricsSummary.data : null;
 
+    const elbv2CardsData: LoadbalancerV2CardsSummary[] | null =
+        isNonEmptyArray<LoadbalancerV2CardsSummary>(elbv2CardsMetrics.data) ? elbv2CardsMetrics.data : null;
+
 
     const hasData = !!elbv2MetricsData && elbv2MetricsData.length > 0;
-    const hasSummaryData = !!elbv2MetricsSummaryData && elbv2MetricsSummaryData.length > 0;
+    const hasSummaryData = (!!elbv2MetricsSummaryData && elbv2MetricsSummaryData.length > 0) || (!!elbv2CardsData && elbv2CardsData.length > 0);
 
     if (!elbV2) {
         return (
@@ -101,7 +111,7 @@ export const ElbV2ConsumeComponent = ({ startDate, endDate, region, elbV2 }: Elb
             <div className='w-full min-w-0 px-4 py-6'>
                 <div className="flex-1 space-y-6 min-w-0 overflow-hidden">
                     <ElbV2ConsumeCardsComponent
-                        data={elbv2MetricsSummaryData}
+                        data={elbv2CardsData}
                     />
                 </div>
                 <div className="flex items-center gap-3 my-5">

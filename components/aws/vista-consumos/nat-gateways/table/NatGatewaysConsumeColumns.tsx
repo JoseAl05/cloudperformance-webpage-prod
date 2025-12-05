@@ -13,7 +13,7 @@ import {
     CheckCircle2
 } from 'lucide-react';
 
-const formatNumber = (num: number) => new Intl.NumberFormat('es-CL', { maximumFractionDigits: 0 }).format(num);
+const formatNumber = (num: number) => new Intl.NumberFormat('es-CL', { AverageFractionDigits: 0 }).format(num);
 
 // Definición de los totales que necesitamos
 export interface NatGwGlobalMetrics {
@@ -126,14 +126,12 @@ const MetricsCell = ({ data, metric_name, globalTotal, type, unitLabel }: Metric
     );
 }
 
-// Convertimos a función generadora de columnas
 export const getNatGatewaysConsumeColumns = (globalMetrics: NatGwGlobalMetrics): DynamicColumn<NatGatewaysMetricsSummary>[] => [
     {
         header: "Nombre/ID Nat Gateway",
         accessorKey: "resource",
         cell: ({ row, getValue }) => {
             const name = getValue() as string;
-            // Opcional: Lógica para acortar nombres largos si es necesario
             return (
                 <div className="flex flex-col py-1 max-w-[200px]">
                     <span className="font-semibold text-sm text-foreground truncate" title={name}>
@@ -160,7 +158,7 @@ export const getNatGatewaysConsumeColumns = (globalMetrics: NatGwGlobalMetrics):
         cell: ({ row }) => {
             return <MetricsCell
                 data={row.original.metrics}
-                metric_name="BytesOutToDestination Maximum"
+                metric_name="BytesOutToDestination Average"
                 globalTotal={globalMetrics.totalBytesOut}
                 type="out"
             />
@@ -173,7 +171,7 @@ export const getNatGatewaysConsumeColumns = (globalMetrics: NatGwGlobalMetrics):
         cell: ({ row }) => {
             return <MetricsCell
                 data={row.original.metrics}
-                metric_name="BytesInFromSource Maximum"
+                metric_name="BytesInFromSource Average"
                 globalTotal={globalMetrics.totalBytesIn}
                 type='in'
             />
@@ -186,7 +184,7 @@ export const getNatGatewaysConsumeColumns = (globalMetrics: NatGwGlobalMetrics):
         cell: ({ row }) => {
             return <MetricsCell
                 data={row.original.metrics}
-                metric_name="ActiveConnectionCount Maximum"
+                metric_name="ActiveConnectionCount Average"
                 globalTotal={globalMetrics.totalConnections}
                 type='connection'
             />
@@ -197,9 +195,10 @@ export const getNatGatewaysConsumeColumns = (globalMetrics: NatGwGlobalMetrics):
         header: "Errores Puerto",
         accessorKey: "error_metric", // key virtual
         cell: ({ row }) => {
+            console.log(row.original.metrics)
             return <MetricsCell
                 data={row.original.metrics}
-                metric_name="ErrorPortAllocation Maximum"
+                metric_name="ErrorPortAllocation Average"
                 globalTotal={globalMetrics.totalErrors}
                 type='error'
             />

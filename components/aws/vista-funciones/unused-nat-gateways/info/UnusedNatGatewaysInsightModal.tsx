@@ -105,7 +105,7 @@ export const UnusedNatGatewaysInsightModal = ({ natGw, asociatedResources, isLoa
         <Dialog open={isOpen} onOpenChange={onClose}>
             {
                 isLoading ? (
-                    <DialogContent className="max-w-4xl h-[85vh] flex flex-col p-0 gap-0 overflow-hidden">
+                    <DialogContent className="max-w-4xl h-[85vh] flex flex-col p-0 gap-0 obverflow-y-scroll">
                         <div className="px-6 py-4 border-b">
                             <DialogHeader>
                                 <DialogTitle>Cargando Datos...</DialogTitle>
@@ -114,7 +114,7 @@ export const UnusedNatGatewaysInsightModal = ({ natGw, asociatedResources, isLoa
                         </div>
                     </DialogContent>
                 ) : (
-                    <DialogContent className="max-w-4xl h-[85vh] flex flex-col p-0 gap-0 overflow-hidden">
+                    <DialogContent className="max-w-[95vw] md:max-w-6xl h-[90vh] flex flex-col p-0 gap-0 overflow-y-scroll">
                         <div className="px-6 py-4 border-b">
                             <DialogHeader>
                                 <div className="flex items-start justify-between mr-4">

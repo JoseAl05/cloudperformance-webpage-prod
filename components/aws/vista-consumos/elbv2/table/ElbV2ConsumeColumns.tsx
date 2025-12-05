@@ -16,7 +16,6 @@ import {
     Globe
 } from 'lucide-react';
 
-// Definimos la interfaz de los totales globales que necesitamos pasar a las columnas
 export interface ElbV2GlobalMetrics {
     totalConsumedLCUs: number;
     totalProcessedBytes: number;
@@ -31,7 +30,7 @@ interface MetricsCellProps {
     data: LoadbalancerV2MetricsSummaryMetrics[];
     primaryMetric: string;
     secondaryMetric?: string;
-    globalTotal: number; // El valor total contra el que comparamos
+    globalTotal: number;
     type: 'cost' | 'volume' | 'traffic' | 'connection' | 'error';
     unitLabel?: string;
 }
@@ -39,11 +38,9 @@ interface MetricsCellProps {
 const MetricsCell = ({ data, primaryMetric, secondaryMetric, globalTotal, type, unitLabel }: MetricsCellProps) => {
     if (!data || !Array.isArray(data)) return <span className="text-muted-foreground">-</span>;
 
-    // 1. Encontrar el valor del recurso
     let metricItem = data.find(item => item.metric_name.includes(primaryMetric));
     let usedMetricName = primaryMetric;
 
-    // Fallback para NLB si la métrica primaria (ALB) no existe
     if (!metricItem && secondaryMetric) {
         metricItem = data.find(item => item.metric_name.includes(secondaryMetric));
         usedMetricName = secondaryMetric;
@@ -51,16 +48,11 @@ const MetricsCell = ({ data, primaryMetric, secondaryMetric, globalTotal, type, 
 
     const value = metricItem?.value || 0;
 
-    // 2. Calcular porcentaje de contribución al total
-    // Si el total es 0, evitamos división por cero.
-    // Usamos el value como tope si por error de redondeo supera al total.
     const maxVal = globalTotal > 0 ? (value > globalTotal ? value : globalTotal) : (value > 0 ? value : 1);
     const percentage = globalTotal > 0 ? (value / globalTotal) * 100 : 0;
 
-    // Si contribuye con más del 30% del tráfico total, lo destacamos en naranja
     const isMajorContributor = percentage > 30;
 
-    // 3. Configuración visual (Iconos y colores base)
     const config = {
         cost: {
 
@@ -94,8 +86,6 @@ const MetricsCell = ({ data, primaryMetric, secondaryMetric, globalTotal, type, 
         }
     }[type];
 
-    // Colores de la barra de progreso
-    // Si es error, siempre rojo si hay valor. Si no, lógica de contribución.
     let progressColorClass = isMajorContributor
         ? '[&::-webkit-progress-value]:bg-orange-500 [&::-moz-progress-bar]:bg-orange-500'
         : '[&::-webkit-progress-value]:bg-blue-500 [&::-moz-progress-bar]:bg-blue-500';
@@ -119,7 +109,6 @@ const MetricsCell = ({ data, primaryMetric, secondaryMetric, globalTotal, type, 
         <div className="flex flex-col w-full min-w-[140px] gap-1.5">
             <div className="flex items-center gap-2 mb-1">
                 <div className={cn("p-1.5 rounded-md shrink-0", config.bg, config.color)}>
-                    {/* <Icon className="w-3.5 h-3.5" /> */}
                 </div>
                 <div className="flex flex-col w-full">
                     <div className="flex justify-between items-baseline">
@@ -129,8 +118,6 @@ const MetricsCell = ({ data, primaryMetric, secondaryMetric, globalTotal, type, 
                     </div>
                 </div>
             </div>
-
-            {/* Barra de Progreso Nativa */}
             <progress
                 value={value}
                 max={maxVal}
@@ -188,9 +175,8 @@ export const getElbV2ConsumeColumns = (globalMetrics: ElbV2GlobalMetrics): Dynam
         size: 100
     },
     {
-        // JERARQUÍA 1: Costo (LCUs)
         header: "Consumo LCU",
-        accessorKey: "lcu_metric", // Clave virtual para evitar conflictos
+        accessorKey: "lcu_metric",
         cell: ({ row }) => {
             return <MetricsCell
                 data={row.original.metrics}
@@ -202,7 +188,6 @@ export const getElbV2ConsumeColumns = (globalMetrics: ElbV2GlobalMetrics): Dynam
 
     },
     {
-        // JERARQUÍA 2: Volumen (Bytes)
         header: "Volumen Proc.",
         accessorKey: "bytes_metric",
         cell: ({ row }) => {
@@ -216,7 +201,6 @@ export const getElbV2ConsumeColumns = (globalMetrics: ElbV2GlobalMetrics): Dynam
 
     },
     {
-        // JERARQUÍA 3: Tráfico (Requests o Flows)
         header: "Tráfico / Carga",
         accessorKey: "traffic_metric",
         cell: ({ row }) => {
@@ -224,14 +208,13 @@ export const getElbV2ConsumeColumns = (globalMetrics: ElbV2GlobalMetrics): Dynam
                 data={row.original.metrics}
                 primaryMetric="RequestCount Average"
                 secondaryMetric="NewFlowCount Average"
-                globalTotal={globalMetrics.totalRequestCount + globalMetrics.totalNewFlowCount} // Suma de ambos tipos para referencia relativa
+                globalTotal={globalMetrics.totalRequestCount + globalMetrics.totalNewFlowCount}
                 type="traffic"
             />
         },
 
     },
     {
-        // JERARQUÍA 4: Conexiones
         header: "Conexiones Activas",
         accessorKey: "conn_metric",
         cell: ({ row }) => {
@@ -245,16 +228,27 @@ export const getElbV2ConsumeColumns = (globalMetrics: ElbV2GlobalMetrics): Dynam
 
     },
     {
-        // JERARQUÍA 5: Salud (Errores 5xx o TCP Resets)
-        header: "Salud / Errores",
+        header: "Reseteos de clientes TCP",
+        accessorKey: "tcp_reset",
+        cell: ({ row }) => {
+            const totalTcpReset = globalMetrics.totalTcpReset;
+            return <MetricsCell
+                data={row.original.metrics}
+                primaryMetric="TCP_Client_Reset_Count Average"
+                globalTotal={totalTcpReset}
+                type="error"
+            />
+        },
+
+    },
+    {
+        header: "Errores",
         accessorKey: "error_metric",
         cell: ({ row }) => {
-            // Aquí sumamos los errores globales para la barra relativa
-            const totalErrors = globalMetrics.totalTarget5xx + globalMetrics.totalTcpReset;
+            const totalErrors = globalMetrics.totalTarget5xx;
             return <MetricsCell
                 data={row.original.metrics}
                 primaryMetric="HTTPCode_Target_5XX_Count Average"
-                secondaryMetric="TCP_Client_Reset_Count Average"
                 globalTotal={totalErrors}
                 type="error"
             />

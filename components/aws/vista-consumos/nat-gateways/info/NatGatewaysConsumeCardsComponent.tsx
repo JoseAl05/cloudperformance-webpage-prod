@@ -2,13 +2,13 @@
 
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
-import { NatGatewaysMetricsSummary } from '@/interfaces/vista-consumos/natGwConsumeViewInterfaces'
-import { bytesToGB, bytesToMB } from '@/lib/bytesToMbs';
-import { Activity, AlertOctagon, ArrowDownToLine, ArrowUpFromLine } from 'lucide-react';
+import { NatGatewayCardsSummary } from '@/interfaces/vista-consumos/natGwConsumeViewInterfaces';
+import { bytesToMB } from '@/lib/bytesToMbs';
+import { Activity, AlertOctagon, ArrowDownToLine, ArrowUpFromLine, LucideIcon } from 'lucide-react';
 import { useMemo } from 'react';
 
 interface NatGatewaysConsumeCardsComponentProps {
-    data: NatGatewaysMetricsSummary[]
+    data: NatGatewayCardsSummary[]
 }
 
 type CardVariant = 'default' | 'destructive' | 'warning' | 'info' | 'success';
@@ -20,6 +20,7 @@ interface StatCardProps {
     icon: LucideIcon;
     variant?: CardVariant;
     actionLabel?: string;
+    footer?: string; // Agregado para el Peak
 }
 
 const getVariantStyles = (variant: CardVariant) => {
@@ -62,31 +63,38 @@ const getVariantStyles = (variant: CardVariant) => {
     }
 };
 
-const StatCard = ({ title, value, description, icon: Icon, variant = 'default', actionLabel }: StatCardProps) => {
+const StatCard = ({ title, value, description, icon: Icon, variant = 'default', actionLabel, footer }: StatCardProps) => {
     const styles = getVariantStyles(variant);
 
     return (
-        <Card className={`border-l-4 shadow-sm hover:shadow-md transition-all duration-200 ${styles.border} flex flex-col justify-between`}>
-            <CardContent className="p-6">
+        <Card className={`border-l-4 shadow-sm hover:shadow-md transition-all duration-200 ${styles.border} flex flex-col justify-between h-full`}>
+            <CardContent className="p-5">
                 <div className="flex items-start justify-between mb-4">
                     <div>
-                        <p className="text-sm font-medium text-muted-foreground mb-1">{title}</p>
-                        <h4 className="text-3xl font-bold tracking-tight">{value}</h4>
+                        <p className="text-sm font-medium text-muted-foreground mb-1 uppercase tracking-tight">{title}</p>
+                        <h4 className="text-2xl font-bold tracking-tight text-foreground">{value}</h4>
                     </div>
-                    <div className={`p-3 rounded-xl ${styles.bgIcon}`}>
-                        <Icon className={`w-6 h-6 ${styles.textIcon}`} />
+                    <div className={`p-2.5 rounded-xl ${styles.bgIcon}`}>
+                        <Icon className={`w-5 h-5 ${styles.textIcon}`} />
                     </div>
                 </div>
 
-                <div className="space-y-2">
-                    <p className="text-xs text-muted-foreground leading-relaxed">
+                <div className="space-y-3">
+                    <p className="text-xs text-muted-foreground leading-snug line-clamp-2">
                         {description}
                     </p>
-                    {actionLabel && (
-                        <Badge variant="outline" className={`text-[10px] font-semibold ${styles.badge}`}>
-                            {actionLabel}
-                        </Badge>
-                    )}
+                    <div className="flex items-center justify-between">
+                        {actionLabel && (
+                            <Badge variant="outline" className={`text-[10px] font-semibold px-2 py-0.5 h-auto ${styles.badge}`}>
+                                {actionLabel}
+                            </Badge>
+                        )}
+                        {footer && (
+                            <span className="text-[10px] font-mono text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
+                                {footer}
+                            </span>
+                        )}
+                    </div>
                 </div>
             </CardContent>
         </Card>
@@ -96,71 +104,77 @@ const StatCard = ({ title, value, description, icon: Icon, variant = 'default', 
 export const NatGatewaysConsumeCardsComponent = ({ data }: NatGatewaysConsumeCardsComponentProps) => {
 
     const kpis = useMemo(() => {
-        const acc = {
-            totalBytesIn: 0,
-            totalBytesOut: 0,
-            totalConnections: 0,
-            totalErrors: 0,
-            resourceCount: data?.length || 0
+        const result = {
+            bytesIn: { val: 0, peak: 0 },
+            bytesOut: { val: 0, peak: 0 },
+            connections: { val: 0, peak: 0 },
+            errors: { val: 0, peak: 0 },
         };
 
-        if (!data || data.length === 0) return acc;
+        if (!data || data.length === 0) return result;
 
-        data.forEach(resource => {
-            resource.metrics.forEach(metric => {
-                const name = metric.metric_name.toLowerCase();
-                const val = metric.value || 0;
+        const findMetric = (namePart: string) => {
+            return data.find(m => m.metric_name.toLowerCase().includes(namePart.toLowerCase()));
+        };
 
-                if (name.includes('bytesinfromsource maximum')) {
-                    acc.totalBytesIn += val;
-                } else if (name.includes('bytesouttodestination maximum')) {
-                    acc.totalBytesOut += val;
-                } else if (name.includes('activeconnectioncount maximum')) {
-                    acc.totalConnections += val;
-                } else if (name.includes('errorportallocation maximum')) {
-                    acc.totalErrors += val;
-                }
-            });
-        });
+        const mIn = findMetric('bytesinfromsource');
+        if (mIn) result.bytesIn = { val: mIn.value, peak: mIn.peak_value };
 
-        return acc;
+        const mOut = findMetric('bytesouttodestination');
+        if (mOut) result.bytesOut = { val: mOut.value, peak: mOut.peak_value };
+
+        const mConn = findMetric('activeconnectioncount');
+        if (mConn) result.connections = { val: mConn.value, peak: mConn.peak_value };
+
+        const mErr = findMetric('errorportallocation');
+        if (mErr) result.errors = { val: mErr.value, peak: mErr.peak_value };
+
+        return result;
     }, [data]);
 
     const formatNumber = (num: number) => new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 }).format(num);
+
+    const formatBytes = (bytes: number) => {
+        if (bytes === 0) return '0 MB';
+        const mb = bytesToMB(bytes);
+        return `${new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 }).format(mb)} MB`;
+    };
 
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
             <StatCard
                 title="Tráfico Saliente (Internet)"
-                value={`${bytesToMB(kpis.totalBytesOut)} MBs`}
-                description="Volumen total de datos procesados hacia internet (Costo Variable)."
+                value={formatBytes(kpis.bytesOut.val)}
+                description="Promedio Volumen de datos procesados hacia internet."
+                footer={`Peak: ${formatBytes(kpis.bytesOut.peak)}`}
                 icon={ArrowUpFromLine}
                 variant="info"
             />
             <StatCard
                 title="Tráfico Entrante (VPC)"
-                value={`${bytesToMB(kpis.totalBytesIn)} MBs`}
-                description="Datos recibidos desde las subnets privadas."
+                value={formatBytes(kpis.bytesIn.val)}
+                description="Promedio Datos recibidos desde subnets privadas."
+                footer={`Peak: ${formatBytes(kpis.bytesIn.peak)}`}
                 icon={ArrowDownToLine}
                 variant="default"
             />
             <StatCard
                 title="Conexiones Concurrentes"
-                value={formatNumber(kpis.totalConnections)}
-                description={`Carga simultánea total soportada ${kpis.resourceCount > 1 ? `por los ${kpis.resourceCount} gateways seleccionados` : `por el gateway seleccionado.`}`}
+                value={formatNumber(kpis.connections.val)}
+                description="Promedio Conexiones activas simultáneas."
+                footer={`Peak: ${formatNumber(kpis.connections.peak)}`}
                 icon={Activity}
                 variant="success"
-                actionLabel="Acumulado de recursos seleccionados"
             />
             <StatCard
                 title="Errores de Puerto (SNAT)"
-                value={formatNumber(kpis.totalErrors)}
-                description="Fallos de asignación de puertos. Indica saturación crítica."
+                value={formatNumber(kpis.errors.val)}
+                description="Promedio Fallos de asignación de puertos."
+                footer={`Peak: ${formatNumber(kpis.errors.peak)}`}
                 icon={AlertOctagon}
-                variant={kpis.totalErrors > 0 ? 'destructive' : 'default'} // Rojo si hay errores
-                actionLabel={kpis.totalErrors > 0 ? "ATENCIÓN REQUERIDA" : "ESTADO SALUDABLE"}
+                variant={kpis.errors.val > 0 ? 'destructive' : 'default'}
+                actionLabel={kpis.errors.val > 0 ? "ATENCIÓN" : "ESTABLE"}
             />
-
         </div>
     );
 }

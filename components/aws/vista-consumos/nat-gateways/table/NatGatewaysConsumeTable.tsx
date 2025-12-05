@@ -14,36 +14,53 @@ interface NatGatewaysConsumeTableProps {
 
 export const NatGatewaysConsumeTable = ({ data }: NatGatewaysConsumeTableProps) => {
 
-    // 1. Calcular Totales Globales para las barras relativas
+    const processedData = useMemo(() => {
+        if (!data || !Array.isArray(data)) return [];
+
+        return data.map(item => {
+            const metrics = item.metrics || [];
+
+            const getVal = (primary: string, secondary?: string) => {
+                let m = metrics.find(x => x.metric_name.includes(primary));
+                if (!m && secondary) m = metrics.find(x => x.metric_name.includes(secondary));
+                return m?.value || 0;
+            };
+
+            return {
+                ...item,
+                bytesOut: getVal('BytesOutToDestination Average'),
+                bytesIn: getVal('BytesInFromSource Average'),
+                connections: getVal('ActiveConnectionCount Average'),
+                errors: getVal('ErrorPortAllocation Average')
+            };
+        });
+    }, [data]);
+
     const globalTotals = useMemo(() => {
-        const acc = {
+        return processedData.reduce((acc, row) => {
+            return {
+                totalBytesOut: acc.totalBytesOut + row.bytesOut,
+                totalBytesIn: acc.totalBytesIn + row.bytesIn,
+                totalConnections: acc.totalConnections + row.connections,
+                totalErrorsPort: acc.totalErrorsPort + row.errors
+            };
+        }, {
             totalBytesOut: 0,
             totalBytesIn: 0,
             totalConnections: 0,
-            totalErrors: 0
-        };
-
-        if (!data || !Array.isArray(data)) return acc;
-
-        data.forEach(resource => {
-            resource.metrics.forEach(m => {
-                const name = m.metric_name; // Nombre exacto (ej: BytesOutToDestination Maximum)
-                const val = m.value || 0;
-
-                if (name === 'BytesOutToDestination Maximum') acc.totalBytesOut += val;
-                else if (name === 'BytesInFromSource Maximum') acc.totalBytesIn += val;
-                else if (name === 'ActiveConnectionCount Maximum') acc.totalConnections += val;
-                else if (name === 'ErrorPortAllocation Maximum') acc.totalErrors += val;
-            });
+            totalErrorsPort: 0
         });
+    }, [processedData]);
 
-        return acc;
-    }, [data]);
-
-    // 2. Generar las columnas dinámicamente con los totales
-    const natGwColumns = useMemo(() => {
-        return createColumns(getNatGatewaysConsumeColumns(globalTotals));
+    const columns = useMemo(() => {
+        return createColumns(getNatGatewaysConsumeColumns({
+            totalBytesOut: globalTotals.totalBytesOut,
+            totalBytesIn: globalTotals.totalBytesIn,
+            totalConnections: globalTotals.totalConnections,
+            totalErrorsPort: globalTotals.totalErrorsPort
+        }));
     }, [globalTotals]);
+
 
     return (
         <Card>
@@ -59,8 +76,8 @@ export const NatGatewaysConsumeTable = ({ data }: NatGatewaysConsumeTableProps) 
             </CardHeader>
             <CardContent>
                 <DataTableGrouping
-                    columns={natGwColumns}
-                    data={data}
+                    columns={columns}
+                    data={processedData}
                     filterColumn="resource"
                     filterPlaceholder="Buscar nat gateway por nombre..."
                     enableGrouping={false}

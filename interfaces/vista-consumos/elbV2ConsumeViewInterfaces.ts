@@ -17,3 +17,10 @@ export interface LoadbalancerV2MetricsSummaryMetrics {
     value: number;
     max_value: number;
 }
+
+export interface LoadbalancerV2CardsSummary {
+  metric_name: string;
+  value: number;
+  peak_value: number;
+  unit: string;
+}
