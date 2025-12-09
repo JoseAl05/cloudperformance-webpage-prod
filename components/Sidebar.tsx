@@ -133,7 +133,8 @@ export const SidebarComponent = ({
         { label: 'Instancias EC2 Nodos EKS', icon: Computer, href: '/aws/recursos/infrautilizadas/eks' },
         { label: 'Vólumenes EBS', icon: HardDrive, href: '/aws/funciones/ebs-no-utilizados' },
         { label: 'Nat Gateways', icon: Workflow, href: '/aws/funciones/nat-gateways-no-utilizados'},
-        { label: 'Loadbalancers V2', icon: Workflow, href: '/aws/funciones/elbv2-no-utilizados' }
+        { label: 'Loadbalancers V2', icon: Workflow, href: '/aws/funciones/elbv2-no-utilizados' },
+        { label: 'Route 53', icon: Workflow, href: '/aws/funciones/routes53-no-utilizados' }
     ]
 
     const consumeSubItems = [

@@ -31,6 +31,7 @@ import { UnusedNatGatewaysFilterComponent } from '@/components/general_aws/filte
 import { NatGatewaysFilterComponent } from '@/components/general_aws/filters/NatGatewaysFilterComponent';
 import { UnusedLoadbalancersV2FilterComponent } from '@/components/general_aws/filters/UnusedLoadbalancersV2FilterComponent';
 import { LoadbalancersV2FilterComponent } from '@/components/general_aws/filters/LoadbalancersV2FilterComponent';
+import { UnusedRoute53FilterComponent } from '@/components/general_aws/filters/UnusedRoute53FilterComponent';
 
 interface FiltersComponentProps {
     Component: (params: {
@@ -101,6 +102,8 @@ interface FiltersComponentProps {
     isUnusedElbV2Multiselect?: boolean;
     elbV2Filter?: boolean;
     isElbV2Multiselect?: boolean;
+    unusedR53Filter?: boolean;
+    isUnusedR53Multiselect?: boolean;
 }
 
 export const FiltersComponent = ({
@@ -149,7 +152,9 @@ export const FiltersComponent = ({
     unusedElbV2Filter = false,
     isUnusedElbV2Multiselect = false,
     elbV2Filter = false,
-    isElbV2Multiselect = false
+    isElbV2Multiselect = false,
+    unusedR53Filter = false,
+    isUnusedR53Multiselect = false
 }: FiltersComponentProps) => {
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -195,6 +200,7 @@ export const FiltersComponent = ({
         const unusedNatGatewayParam = searchParams.get('unusedNatGateway');
         const unusedElbV2Param = searchParams.get('unusedElbV2');
         const elbV2Param = searchParams.get('elbV2');
+        const unusedR53Param = searchParams.get('unusedR53');
 
         let startDate = startDateParam ? new Date(startDateParam) : yesterday;
         let endDate = endDateParam ? new Date(endDateParam) : new Date();
@@ -246,7 +252,8 @@ export const FiltersComponent = ({
             natGateway: natGatewayParam || '',
             unusedNatGateway: unusedNatGatewayParam || '',
             unusedElbV2: unusedElbV2Param || '',
-            elbV2: elbV2Param || ''
+            elbV2: elbV2Param || '',
+            unusedR53: unusedR53Param || ''
         };
     };
 
@@ -287,6 +294,7 @@ export const FiltersComponent = ({
     const [tempUnusedNatGateway, setTempUnusedNatGateway] = useState(filters.unusedNatGateway);
     const [tempUnusedElbV2, setTempUnusedElbV2] = useState(filters.unusedElbV2);
     const [tempElbV2, setTempElbV2] = useState(filters.elbV2);
+    const [tempUnusedR53, setTempUnusedR53] = useState(filters.unusedR53);
 
 
 
@@ -328,6 +336,7 @@ export const FiltersComponent = ({
         setTempUnusedNatGateway(newFilters.unusedNatGateway);
         setTempUnusedElbV2(newFilters.unusedElbV2);
         setTempElbV2(newFilters.elbV2);
+        setTempUnusedR53(newFilters.unusedR53);
 
     }, [searchParams]);
 
@@ -404,7 +413,8 @@ export const FiltersComponent = ({
             natGateway: tempNatGateway,
             unusedNatGateway: tempUnusedNatGateway,
             unusedElbV2: tempUnusedElbV2,
-            elbV2: tempElbV2
+            elbV2: tempElbV2,
+            unusedR53: tempUnusedR53
         };
 
         setFilters(newFilters as unknown);
@@ -461,7 +471,8 @@ export const FiltersComponent = ({
             { flag: natGatewaysFilter, key: 'natGateway', value: newFilters.natGateway },
             { flag: unusedNatGatewaysFilter, key: 'unusedNatGateway', value: newFilters.unusedNatGateway },
             { flag: unusedElbV2Filter, key: 'unusedElbV2', value: newFilters.unusedElbV2 },
-            { flag: elbV2Filter, key: 'elbV2', value: newFilters.elbV2 }
+            { flag: elbV2Filter, key: 'elbV2', value: newFilters.elbV2 },
+            { flag: unusedR53Filter, key: 'unusedR53', value: newFilters.unusedR53 }
         ];
 
         filterConfigs.forEach(({ flag, key, value, ignoreValue }) => {
@@ -506,7 +517,8 @@ export const FiltersComponent = ({
             natGateway: '',
             unusedNatGateway: '',
             unusedElbV2: '',
-            elbV2: ''
+            elbV2: '',
+            unusedR53: ''
         };
 
         setFilters({ ...defaultFilters, instanceService: defaultFilters.instancesService });
@@ -543,6 +555,7 @@ export const FiltersComponent = ({
         setTempUnusedNatGateway(defaultFilters.unusedNatGateway);
         setTempUnusedElbV2(defaultFilters.unusedElbV2);
         setTempElbV2(defaultFilters.elbV2);
+        setTempUnusedR53(defaultFilters.unusedR53);
 
         router.push(window.location.pathname);
     };
@@ -979,6 +992,24 @@ export const FiltersComponent = ({
                                 </div>
                             )
                         }
+                        {
+                            unusedR53Filter && (
+                                <div key="metrics-rds-filter" className='space-y-2 ml-8'>
+                                    <label className='text-sm font-medium text-foreground flex items-center gap-2'>
+                                        <BarChart3 className='h-4 w-4' />
+                                        Hosted Zones
+                                    </label>
+                                    <UnusedRoute53FilterComponent
+                                        startDate={tempStartDate}
+                                        endDate={tempEndDate}
+                                        region={tempRegion}
+                                        unusedR53={tempUnusedR53}
+                                        setUnusedR53={setTempUnusedR53}
+                                        isUnusedR53Multiselect={isUnusedR53Multiselect}
+                                    />
+                                </div>
+                            )
+                        }
                     </div>
 
                     <div className='flex items-center gap-4'>
@@ -1019,6 +1050,7 @@ export const FiltersComponent = ({
                     natGateway={filters.natGateway}
                     unusedElbV2={filters.unusedElbV2}
                     elbV2={filters.elbV2}
+                    unusedR53={filters.unusedR53}
                 />
             </Card>
         </div>
