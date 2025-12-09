@@ -5,6 +5,7 @@ import { DynamicColumn } from '@/components/general_aws/data-table/columns';
 import { Ec2Instance } from '@/interfaces/vista-infrautilizadas/ec2ResourceInfraUsedViewInterface';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
+import { ResourceBillingActionCell } from '@/components/aws/facturacion-recurso/table/ResourceBillingActionCell';
 
 const DateParams = () => {
     const searchParams = useSearchParams();
@@ -17,6 +18,18 @@ const DateParams = () => {
 
 
 export const Ec2ResourceInfraUsedViewColumns: DynamicColumn<Ec2Instance>[] = [
+    {
+        header: "Sync Time",
+        accessorKey: "sync_time_formatted",
+        cell: (info) => {
+            const value = info.getValue() as string;
+            return (
+                <div className="text-sm text-muted-foreground font-mono">
+                    {value ? value : '-'}
+                </div>
+            );
+        }
+    },
     {
         header: "ID Instancia",
         accessorKey: "InstanceId",
@@ -110,17 +123,14 @@ export const Ec2ResourceInfraUsedViewColumns: DynamicColumn<Ec2Instance>[] = [
         }
     },
     {
-        header: "Sync Time",
-        accessorKey: "sync_time",
-        cell: (info) => {
-            const value = info.getValue() as string;
-            return (
-                <div className="text-sm text-muted-foreground font-mono">
-                    {value ? new Date(value).toLocaleString('es-CL') : '-'}
-                </div>
-            );
+        header: "Facturación",
+        accessorKey: "billing_action",
+        cell: ({ row }) => {
+            const startDateHistoryFormatted = new Date(row.original.sync_time).toISOString().split('.')[0]
+            console.log(startDateHistoryFormatted)
+            return <ResourceBillingActionCell resourceId={row.original.InstanceId} startDateHistory={startDateHistoryFormatted} />;
         }
-    },
+    }
 
     // {
     //     header: "Eficiencia",

@@ -4,6 +4,7 @@ import { DynamicColumn } from '@/components/general_aws/data-table/columns';
 import { RdsConsumeViewInstance } from '@/interfaces/vista-consumos/rdsPgConsumeViewInterfaces';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
+import { ResourceBillingActionCell } from '@/components/aws/facturacion-recurso/table/ResourceBillingActionCell';
 
 const DateParams = () => {
     const searchParams = useSearchParams();
@@ -140,6 +141,14 @@ export const RdsConsumeViewInstanceColumns: DynamicColumn<RdsConsumeViewInstance
                     {value !== null && value !== undefined ? value.toFixed(2) : '-'}
                 </div>
             );
+        }
+    },
+    {
+        header: "Facturación",
+        accessorKey: "billing_action",
+        cell: ({ row }) => {
+            const startDateHistoryFormatted = new Date(row.original.metric_sync_time).toISOString().split('.')[0];
+            return <ResourceBillingActionCell resourceId={row.original.resource} startDateHistory={startDateHistoryFormatted} />;
         }
     }
 ];

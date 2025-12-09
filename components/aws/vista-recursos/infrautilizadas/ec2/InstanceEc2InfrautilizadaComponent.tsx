@@ -79,6 +79,11 @@ export const InstanceEc2InfrautilizadaComponent = ({
     );
   }
 
+  const formattedMetricsData = metricsData.ec2Intances.map((item) => ({
+    ...item,
+    sync_time_formatted: new Date(item.sync_time).toLocaleString('es-CL'),
+  }))
+
   return (
     <>
       <div className="w-full min-w-0 px-4 py-6">
@@ -109,10 +114,11 @@ export const InstanceEc2InfrautilizadaComponent = ({
           </div>
           <DataTableGrouping
             columns={Ec2ResourceInfraUsedViewColumns}
-            data={metricsData.ec2Intances}
+            data={formattedMetricsData}
             filterColumn="InstanceId"
             filterPlaceholder="Buscar instancia...."
-            enableGrouping={false}
+            enableGrouping
+            groupByColumn='sync_time_formatted'
           />
         </div>
       </div>

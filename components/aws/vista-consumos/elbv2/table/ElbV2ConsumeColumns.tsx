@@ -1,5 +1,6 @@
 'use client'
 
+import { ResourceBillingActionCell } from '@/components/aws/facturacion-recurso/table/ResourceBillingActionCell';
 import { DynamicColumn } from '@/components/general_aws/data-table/columns';
 import { LoadbalancerV2MetricsSummary, LoadbalancerV2MetricsSummaryMetrics } from '@/interfaces/vista-consumos/elbV2ConsumeViewInterfaces';
 import { bytesToMB } from '@/lib/bytesToMbs';
@@ -253,6 +254,12 @@ export const getElbV2ConsumeColumns = (globalMetrics: ElbV2GlobalMetrics): Dynam
                 type="error"
             />
         },
-
+    },
+    {
+        header: "Facturación",
+        accessorKey: "billing_action",
+        cell: ({ row }) => {
+            return <ResourceBillingActionCell resourceId={row.original.resource} />;
+        }
     }
 ];

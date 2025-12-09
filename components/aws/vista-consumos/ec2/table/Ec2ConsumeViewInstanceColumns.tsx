@@ -4,6 +4,8 @@ import { DynamicColumn } from '@/components/general_aws/data-table/columns';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Ec2ConsumneViewInstance } from '@/interfaces/vista-consumos/ec2ConsumeViewInterfaces';
+import { ModalResourceBillingComponent } from '@/components/aws/facturacion-recurso/info/ModalResourceBillingComponent'
+import { ResourceBillingActionCell } from '@/components/aws/facturacion-recurso/table/ResourceBillingActionCell';
 
 const DateParams = () => {
     const searchParams = useSearchParams();
@@ -13,6 +15,8 @@ const DateParams = () => {
 
     return { startDateParam: startDateParam, endDateParam: endDateParam }
 }
+
+
 
 export const Ec2ConsumeViewInstanceColumns: DynamicColumn<Ec2ConsumneViewInstance>[] = [
     {
@@ -109,6 +113,14 @@ export const Ec2ConsumeViewInstanceColumns: DynamicColumn<Ec2ConsumneViewInstanc
                     {value !== null && value !== undefined ? value.toFixed(2) : '-'}
                 </div>
             );
+        }
+    },
+    {
+        header: "Facturación",
+        accessorKey: "billing_action",
+        cell: ({ row }) => {
+            const startDateHistoryFormatted = new Date(row.original.metric_sync_time).toISOString().split('.')[0];
+            return <ResourceBillingActionCell resourceId={row.original.resource} startDateHistory={startDateHistoryFormatted} />;
         }
     }
 ];
