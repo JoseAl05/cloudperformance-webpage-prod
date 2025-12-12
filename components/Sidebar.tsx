@@ -128,7 +128,8 @@ export const SidebarComponent = ({
     ]
 
     const infrausedAws = [
-        { label: 'Instancias EC2', icon: Computer, href: '/aws/recursos/infrautilizadas/ec2' },
+        { label: 'Instancias EC2 Antiguo', icon: Computer, href: '/aws/recursos/infrautilizadas/ec2' },
+        { label: 'Instancias EC2', icon: Computer, href: '/aws/funciones/ec2-no-utilizados' },
         { label: 'Instancias EC2 AutoscalingGroups', icon: Computer, href: '/aws/recursos/infrautilizadas/autoscaling' },
         { label: 'Instancias EC2 Nodos EKS', icon: Computer, href: '/aws/recursos/infrautilizadas/eks' },
         { label: 'Vólumenes EBS', icon: HardDrive, href: '/aws/funciones/ebs-no-utilizados' },
