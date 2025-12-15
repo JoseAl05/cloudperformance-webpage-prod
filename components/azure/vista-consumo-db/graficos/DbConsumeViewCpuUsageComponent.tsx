@@ -59,7 +59,6 @@ export const DbConsumeViewCpuUsageComponent = ({ data, title, metricUnit }: DbCo
 
     return { totalData, usedData, unusedData, yMaxRounded };
   }, [safeData]);
-  console.log(title);
 
   const option = useMemo(() => {
     const base = makeBaseOptions({

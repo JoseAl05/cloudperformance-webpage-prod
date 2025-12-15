@@ -40,7 +40,6 @@ export const VmDeploymentsChart = ({ data, title }: VmDeploymentsChartProps) => 
     return { deploymentsData };
   }, [safeData]);
 
-  console.log(deploymentsData);
 
   const option = useMemo(() => {
     const base = makeBaseOptions({

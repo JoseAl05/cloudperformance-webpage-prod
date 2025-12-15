@@ -189,7 +189,6 @@ export const ElbV2ConsumeTable = ({ data }: ElbV2ConsumeTableProps) => {
         }));
     }, [globalTotals]);
 
-    console.log(processedData);
 
     return (
         <Card>

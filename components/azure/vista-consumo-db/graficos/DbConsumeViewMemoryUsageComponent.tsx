@@ -59,7 +59,6 @@ export const DbConsumeViewMemoryUsageComponent = ({ data, title, metricUnit }: D
 
     return { totalData, usedData, unusedData, yMaxRounded };
   }, [safeData]);
-  console.log(title);
 
   const option = useMemo(() => {
     const base = makeBaseOptions({
