@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCollection, getDb } from '@/lib/mongodb';
 import { authorizeRequest } from '@/lib/authUtils';
-import { Empresa, User } from '@/types/db'; 
+import { Empresa, User } from '@/types/db';
 import bcrypt from 'bcryptjs';
-import { Filter } from 'mongodb'; 
+import { Filter } from 'mongodb';
 
 // =========================================================================
 // RUTA: GET /api/perfilamiento/users (Listado de Usuarios) - FUNCIONANDO
@@ -20,7 +20,7 @@ export async function GET(req: NextRequest) {
   }
 
   const userLoggedIn = auth.user;
-  
+
   // --- CORRECCIÓN: Tipar explícitamente el filtro de MongoDB ---
   let query: Filter<User> = {};
 
@@ -63,7 +63,7 @@ export async function POST(req: NextRequest) {
   const userCreating = auth.user;
   const body = await req.json();
 
-  // 1. Extraer datos 
+  // 1. Extraer datos
   const { email, password, username, client, role = 'usuario' } = body;
 
   // Validación básica
@@ -86,7 +86,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const passwordHash = await bcrypt.hash(password, 12); 
+    const passwordHash = await bcrypt.hash(password, 12);
 
     // 2. Buscar la empresa
     const empresa = await empresasCollection.findOne({ name: client });
@@ -102,9 +102,9 @@ export async function POST(req: NextRequest) {
 
     // --- CORRECCIÓN: Definir tipo extendido para evitar 'as any' ---
     // Esto asegura que TS reconozca las propiedades multi-tenant si no están en la interfaz base
-    type EmpresaWithTenancy = Empresa & { 
-        is_aws_multi_tenant?: boolean; 
-        is_azure_multi_tenant?: boolean; 
+    type EmpresaWithTenancy = Empresa & {
+      is_aws_multi_tenant?: boolean;
+      is_azure_multi_tenant?: boolean;
     };
     const empresaTyped = empresa as EmpresaWithTenancy;
 
@@ -116,14 +116,14 @@ export async function POST(req: NextRequest) {
     const inherited_is_azure = empresa.is_azure || inherited_azure_db !== null;
 
     // 💡 NUEVA HERENCIA MULTI-TENANT (Ahora sin 'any')
-    const inherited_is_aws_multi_tenant = empresaTyped.is_aws_multi_tenant || false;
-    const inherited_is_azure_multi_tenant = empresaTyped.is_azure_multi_tenant || false;
+    const inherited_is_aws_multi_tenant =
+      empresaTyped.is_aws_multi_tenant || false;
+    const inherited_is_azure_multi_tenant =
+      empresaTyped.is_azure_multi_tenant || false;
     const inherited_aws_accounts = empresa.aws_accounts || [];
     const inherited_azure_accounts = empresa.azure_accounts || [];
 
     const inherited_planName = empresa.planName || null;
-
-
 
     // 4. Verificación de Límites
     if (userCreating.role === 'admin_empresa') {
@@ -155,7 +155,7 @@ export async function POST(req: NextRequest) {
 
       is_azure: inherited_is_azure,
       user_db_azure: inherited_azure_db,
-    
+
       is_aws_multi_tenant: inherited_is_aws_multi_tenant,
       is_azure_multi_tenant: inherited_is_azure_multi_tenant,
       aws_accounts: inherited_aws_accounts,
@@ -178,20 +178,17 @@ export async function POST(req: NextRequest) {
     );
   } catch (error: unknown) {
     console.error('Error en la creación de usuario:', error);
-    
+
     let errorMessage = 'Error interno del servidor.';
     let status = 500;
 
     if (error instanceof Error) {
-        errorMessage = error.message;
-        if (errorMessage.includes('Límite')) {
-            status = 400;
-        }
+      errorMessage = error.message;
+      if (errorMessage.includes('Límite')) {
+        status = 400;
+      }
     }
 
-    return NextResponse.json(
-      { message: errorMessage },
-      { status: status }
-    );
+    return NextResponse.json({ message: errorMessage }, { status: status });
   }
 }

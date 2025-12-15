@@ -20,24 +20,32 @@ export async function POST(req: Request) {
   const user = await users.findOne({
     _id: { $eq: new (await import('mongodb')).ObjectId(userId) } as unknown,
   });
- 
+
   if (!user)
     return NextResponse.json(
       { error: 'Usuario no encontrado' },
       { status: 404 }
- );
+    );
 
-    // =======================================================
-    //  NUEVA LÓGICA DE VERIFICACIÓN DE ESTADO ACTIVO
-    // =======================================================
-    // Si el campo is_active es explícitamente `false`, denegar el acceso.
-    if (user.is_active === false) {
-        return NextResponse.json(
-            { error: 'Tu cuenta ha sido bloqueada por un administrador. Contacta al soporte para más detalles.' }, 
-            { status: 403 } // 403 Forbidden
-        );
-    }
-    // =======================================================
+  // =======================================================
+  //  NUEVA LÓGICA DE VERIFICACIÓN DE ESTADO ACTIVO
+  // =======================================================
+  // Si el campo is_active es explícitamente `false`, denegar el acceso.
+  if (user.is_active === false) {
+    return NextResponse.json(
+      {
+        error:
+          'Tu cuenta ha sido bloqueada por un administrador. Contacta al soporte para más detalles.',
+      },
+      { status: 403 } // 403 Forbidden
+    );
+  }
+  // =======================================================
+
+  // Obtener datos de cliente asociado a usuario
+  const clients = await getCollection('Empresas')
+  const clientData = await clients.findOne({ name: user.client });
+
 
   const codes = await getCollection('twofactor_codes');
   const tf = await codes.findOne({ userId, code, purpose: 'login' });
@@ -59,10 +67,10 @@ export async function POST(req: Request) {
     user_db_azure: user.user_db_azure,
     is_aws: user.is_aws,
     is_azure: user.is_azure,
-    is_aws_multi_tenant: user.is_aws_multi_tenant,
-    is_azure_multi_tenant: user.is_azure_multi_tenant,
-    azure_accounts: user.azure_accounts || [],
-    aws_accounts: user.aws_accounts || [],
+    is_aws_multi_tenant: clientData.is_aws_multi_tenant,
+    is_azure_multi_tenant: clientData.is_azure_multi_tenant,
+    azure_accounts: clientData.azure_accounts || [],
+    aws_accounts: clientData.aws_accounts || [],
     planName: user.planName,
   });
 
