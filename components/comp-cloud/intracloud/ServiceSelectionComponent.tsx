@@ -2,40 +2,31 @@
 
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { BadgeDollarSign, Cpu, HardDrive } from 'lucide-react';
+import { BadgeDollarSign, Cpu, HardDrive, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+
+export type ServiceType = 'billing' | 'compute' | 'storage';
 
 interface ServiceSelectionComponentProps {
     cloudType: string;
-    sourceId: string;
-    targetId: string;
+    onServiceSelected: (service: ServiceType) => void;
 }
 
-type ServiceType = 'billing' | 'compute' | 'storage';
-
-export const ServiceSelectionComponent = ({ cloudType, sourceId, targetId }: ServiceSelectionComponentProps) => {
+export const ServiceSelectionComponent = ({ cloudType, onServiceSelected }: ServiceSelectionComponentProps) => {
     const [selectedService, setSelectedService] = useState<ServiceType | null>(null);
+    const [isGenerating, setIsGenerating] = useState(false);
 
     const services = [
-        {
-            id: 'billing',
-            label: 'Facturación y Tendencias',
-            icon: BadgeDollarSign,
-            description: 'Análisis de costos y proyecciones.'
-        },
-        {
-            id: 'compute',
-            label: 'Cómputo',
-            icon: Cpu,
-            description: 'VMs, Bases de Datos, K8s, Scaling.'
-        },
-        {
-            id: 'storage',
-            label: 'Storage y Discos',
-            icon: HardDrive,
-            description: 'Volúmenes, Buckets y retención.'
-        }
+        { id: 'billing', label: 'Facturación y Tendencias', icon: BadgeDollarSign, description: 'Análisis de costos y proyecciones.' },
+        { id: 'compute', label: 'Cómputo', icon: Cpu, description: 'VMs, Bases de Datos, K8s, Scaling.' },
+        { id: 'storage', label: 'Storage y Discos', icon: HardDrive, description: 'Volúmenes, Buckets y retención.' }
     ];
+
+    const handleGenerateClick = () => {
+        if (!selectedService) return;
+        setIsGenerating(true);
+        onServiceSelected(selectedService as ServiceType);
+    };
 
     return (
         <Card className="border-l-4 border-l-green-500 shadow-sm animate-in slide-in-from-top-4 fade-in duration-700 fill-mode-forwards">
@@ -50,7 +41,6 @@ export const ServiceSelectionComponent = ({ cloudType, sourceId, targetId }: Ser
                     {services.map((service) => {
                         const Icon = service.icon;
                         const isSelected = selectedService === service.id;
-
                         return (
                             <div
                                 key={service.id}
@@ -71,10 +61,16 @@ export const ServiceSelectionComponent = ({ cloudType, sourceId, targetId }: Ser
                         )
                     })}
                 </div>
+
                 {selectedService && (
                     <div className="mt-6 flex justify-end animate-in fade-in">
-                        <button className="bg-slate-900 text-white px-6 py-2 rounded-md hover:bg-slate-800 transition-colors text-sm font-medium">
-                            Generar Auditoría de {cloudType}
+                        <button
+                            onClick={handleGenerateClick}
+                            disabled={isGenerating}
+                            className="bg-slate-900 text-white px-6 py-2 rounded-md hover:bg-slate-800 transition-colors text-sm font-medium flex items-center gap-2"
+                        >
+                            {isGenerating && <Loader2 className="animate-spin h-4 w-4" />}
+                            {isGenerating ? 'Generando Reporte...' : `Ir a comparacion`}
                         </button>
                     </div>
                 )}

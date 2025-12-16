@@ -1,19 +1,27 @@
 'use client'
 
 import { useState } from 'react';
-import { ServiceSelectionComponent } from '@/components/comp-cloud/intracloud/ServiceSelectionComponent';
+import { ServiceSelectionComponent, ServiceType } from '@/components/comp-cloud/intracloud/ServiceSelectionComponent';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { CloudAccount } from '@/types/db';
 import { ArrowRightLeft, Eraser } from 'lucide-react';
 
+export interface AuditPayload {
+    db_tenant_a: string;
+    db_tenant_b: string;
+    cloud_provider: string;
+    service_type: ServiceType;
+}
+
 interface IntraCloudConfigComponentProps {
     cloudType: string;
     accounts: CloudAccount[];
+    onAuditReady: (payload: AuditPayload) => void;
 }
 
-export const IntraCloudConfigComponent = ({ cloudType, accounts }: IntraCloudConfigComponentProps) => {
+export const IntraCloudConfigComponent = ({ cloudType, accounts, onAuditReady }: IntraCloudConfigComponentProps) => {
     const [sourceId, setSourceId] = useState<string>('');
     const [targetId, setTargetId] = useState<string>('');
 
@@ -23,6 +31,17 @@ export const IntraCloudConfigComponent = ({ cloudType, accounts }: IntraCloudCon
     const handleLocalReset = () => {
         setSourceId('');
         setTargetId('');
+    };
+
+    const handleServiceSelected = (service: ServiceType) => {
+        const finalPayload: AuditPayload = {
+            db_tenant_a: sourceId,
+            db_tenant_b: targetId,
+            cloud_provider: cloudType,
+            service_type: service
+        };
+
+        onAuditReady(finalPayload);
     };
 
     return (
@@ -35,13 +54,10 @@ export const IntraCloudConfigComponent = ({ cloudType, accounts }: IntraCloudCon
                     </CardTitle>
                     {(sourceId || targetId) && (
                         <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={handleLocalReset}
+                            variant="ghost" size="sm" onClick={handleLocalReset}
                             className="text-gray-400 hover:text-purple-600 transition-colors flex gap-2 text-xs"
                         >
-                            <Eraser size={14} />
-                            Limpiar Selección
+                            <Eraser size={14} /> Limpiar Selección
                         </Button>
                     )}
                 </CardHeader>
@@ -50,46 +66,31 @@ export const IntraCloudConfigComponent = ({ cloudType, accounts }: IntraCloudCon
                         <div className="w-full">
                             <label className="text-xs text-gray-500 mb-1 block">Origen A</label>
                             <Select onValueChange={setSourceId} value={sourceId}>
-                                <SelectTrigger>
-                                    <SelectValue placeholder={`Seleccionar ${unitLabel} A`} />
-                                </SelectTrigger>
+                                <SelectTrigger><SelectValue placeholder={`Seleccionar ${unitLabel} A`} /></SelectTrigger>
                                 <SelectContent>
-                                    {accounts.map(acc => (
-                                        <SelectItem key={acc.id} value={acc.id} disabled={acc.id === targetId}>
-                                            {acc.alias}
-                                        </SelectItem>
-                                    ))}
+                                    {accounts.map(acc => <SelectItem key={acc.id} value={acc.id} disabled={acc.id === targetId}>{acc.alias}</SelectItem>)}
                                 </SelectContent>
                             </Select>
                         </div>
-
-                        <div className="text-gray-400 pt-4">
-                            <ArrowRightLeft size={20} />
-                        </div>
+                        <div className="text-gray-400 pt-4"><ArrowRightLeft size={20} /></div>
                         <div className="w-full">
                             <label className="text-xs text-gray-500 mb-1 block">Origen B</label>
                             <Select onValueChange={setTargetId} value={targetId}>
-                                <SelectTrigger>
-                                    <SelectValue placeholder={`Seleccionar ${unitLabel} B`} />
-                                </SelectTrigger>
+                                <SelectTrigger><SelectValue placeholder={`Seleccionar ${unitLabel} B`} /></SelectTrigger>
                                 <SelectContent>
-                                    {accounts.map(acc => (
-                                        <SelectItem key={acc.id} value={acc.id} disabled={acc.id === sourceId}>
-                                            {acc.alias}
-                                        </SelectItem>
-                                    ))}
+                                    {accounts.map(acc => <SelectItem key={acc.id} value={acc.id} disabled={acc.id === sourceId}>{acc.alias}</SelectItem>)}
                                 </SelectContent>
                             </Select>
                         </div>
                     </div>
                 </CardContent>
             </Card>
+
             {isStepComplete && (
                 <ServiceSelectionComponent
                     key={`${sourceId}-${targetId}`}
                     cloudType={cloudType}
-                    sourceId={sourceId}
-                    targetId={targetId}
+                    onServiceSelected={handleServiceSelected}
                 />
             )}
         </div>

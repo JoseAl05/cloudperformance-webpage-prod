@@ -1,7 +1,9 @@
 'use client'
 
 import { useState } from 'react';
-import { IntraCloudConfigComponent } from '@/components/comp-cloud/intracloud/IntraCloudConfigComponent';
+import { useRouter, usePathname } from 'next/navigation';
+import { IntraCloudConfigComponent, AuditPayload } from '@/components/comp-cloud/intracloud/IntraCloudConfigComponent';
+import { MainViewIntraCloudBillingComponent } from '@/components/comp-cloud/intracloud/billing/MainViewIntraCloudBillingComponent';
 import { LoaderComponent } from '@/components/general_aws/LoaderComponent';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
@@ -14,11 +16,40 @@ export const CloudSelectionComponent = () => {
     const { user, isLoading } = useSession();
     const [selectedCloud, setSelectedCloud] = useState<string>('');
 
+    const [auditPayload, setAuditPayload] = useState<AuditPayload | null>(null);
+
+    const router = useRouter();
+    const pathname = usePathname();
+
     const handleGlobalReset = () => {
         setSelectedCloud('');
+        setAuditPayload(null);
+        router.replace(pathname);
+    };
+
+    const handleBackToConfig = () => {
+        setAuditPayload(null);
+        router.replace(pathname);
     };
 
     if (isLoading) return <LoaderComponent size='small' />
+
+    if (auditPayload) {
+        return (
+            <div className="animate-in fade-in zoom-in-95 duration-500">
+                <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleBackToConfig}
+                    className="mb-6 gap-2 text-gray-600"
+                >
+                    <RotateCcw size={14} />
+                    Volver a la configuración
+                </Button>
+                <MainViewIntraCloudBillingComponent payload={auditPayload} />
+            </div>
+        );
+    }
 
     const isAwsMultitenant = user && user.is_aws_multi_tenant;
     const isAzureMultitenant = user && user.is_azure_multi_tenant;
@@ -40,9 +71,7 @@ export const CloudSelectionComponent = () => {
                     </CardTitle>
                     {selectedCloud && (
                         <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={handleGlobalReset}
+                            variant="ghost" size="sm" onClick={handleGlobalReset}
                             className="text-gray-400 hover:text-red-500 transition-colors h-8 w-8 p-0"
                             title="Reiniciar todo"
                         >
@@ -62,11 +91,13 @@ export const CloudSelectionComponent = () => {
                     </Select>
                 </CardContent>
             </Card>
+
             {selectedCloud && activeAccounts.length > 0 && (
                 <IntraCloudConfigComponent
                     key={selectedCloud}
                     cloudType={selectedCloud}
                     accounts={activeAccounts}
+                    onAuditReady={setAuditPayload}
                 />
             )}
         </div>
