@@ -17,14 +17,16 @@ import {
     Cloud,
     House,
     CircleDollarSign,
-    Users, 
+    Users,
+    SplitSquareHorizontal,
 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { usePathname } from 'next/navigation'
 import Image from 'next/image'
 import { useTheme } from 'next-themes'
 import Link from 'next/link'
-import { useSession } from '@/hooks/useSession' 
+import { useSession } from '@/hooks/useSession'
+import { User } from '@/types/db'
 
 const useMenuStyles = () => {
     const { resolvedTheme } = useTheme()
@@ -52,12 +54,17 @@ export const SidebarProfileComponent = ({
     const { getMenuItemClasses } = useMenuStyles();
     const [isMounted, setIsMounted] = useState(false);
     const [isActive, setIsActive] = useState(false);
-    
+
     // CARGAR SESIÓN para obtener el rol
-    const { user, isLoading } = useSession(); 
-    
+    const { user, isLoading } = useSession();
+
     // Determinar si el usuario tiene permiso para ver el enlace de perfilamiento
     const canAccessProfiling = user && (user.role === 'admin_global' || user.role === 'admin_empresa');
+
+    const isAwsMultiTenant = user && user.is_aws_multi_tenant;
+    const isAzureMultiTenant = user && user.is_azure_multi_tenant;
+
+    const hasMultitenant = isAwsMultiTenant || isAzureMultiTenant;
 
     useEffect(() => {
         // Asegúrate de que este chequeo de pathname también verifique las nuevas rutas
@@ -152,6 +159,22 @@ export const SidebarProfileComponent = ({
                                     <span className="text-sm font-medium">Presupuesto</span>
                                 </Link>
                             </SidebarMenuButton> */}
+                            {
+                                hasMultitenant && (
+                                    <SidebarMenuButton asChild>
+                                        <Link
+                                            href='/comparacion-nubes'
+                                            className={cn(
+                                                'flex items-center gap-3 px-3 py-2 rounded-md cursor-pointer transition-colors duration-150',
+                                                getMenuItemClasses(pathname.startsWith('/comparacion-nubes'))
+                                            )}
+                                        >
+                                            <SplitSquareHorizontal className="h-5 w-5 text-blue-500" />
+                                            <span className="text-sm font-medium">Comparación Nubes</span>
+                                        </Link>
+                                    </SidebarMenuButton>
+                                )
+                            }
 
                             {/* =================================================== */}
                             {/* NUEVA SECCIÓN: PERFILAMIENTO */}
@@ -159,13 +182,13 @@ export const SidebarProfileComponent = ({
                             {canAccessProfiling && (
                                 <SidebarMenuButton asChild>
                                     <Link
-                                        href='/perfilamiento' 
+                                        href='/perfilamiento'
                                         className={cn(
                                             'flex items-center gap-3 px-3 py-2 rounded-md cursor-pointer transition-colors duration-150',
                                             getMenuItemClasses(pathname.startsWith('/perfilamiento'))
                                         )}
                                     >
-                                        <Users className="h-5 w-5 text-blue-500" /> 
+                                        <Users className="h-5 w-5 text-blue-500" />
                                         <span className="text-sm font-medium">Perfilamiento</span>
                                     </Link>
                                 </SidebarMenuButton>

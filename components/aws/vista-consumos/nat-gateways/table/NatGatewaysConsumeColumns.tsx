@@ -196,7 +196,6 @@ export const getNatGatewaysConsumeColumns = (globalMetrics: NatGwGlobalMetrics):
         header: "Errores Puerto",
         accessorKey: "error_metric", // key virtual
         cell: ({ row }) => {
-            console.log(row.original.metrics)
             return <MetricsCell
                 data={row.original.metrics}
                 metric_name="ErrorPortAllocation Average"

@@ -42,31 +42,30 @@ export const InstancesFilterComponent = ({
     let url = ''
     const startDateFormatted = startDate.toISOString().replace('Z', '').slice(0, -4);
     const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : '';
-
     switch (service) {
         case 'ec2':
-            url = `/api/aws/bridge/vm/all-instances-ec2?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`;
+            url = region ? `/api/aws/bridge/vm/all-instances-ec2?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}` : null;
             break;
         case 'rds-pg':
-            url = `/api/aws/bridge/db/all-instances-rds-pg?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`;
+            url = region ? `/api/aws/bridge/db/all-instances-rds-pg?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}` : null;
             break;
         case 'rds-mysql':
-            url = `/api/aws/bridge/db/all-instances-rds-mysql?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`;
+            url = region ? `/api/aws/bridge/db/all-instances-rds-mysql?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}` : null;
             break;
         case 'rds-oracle':
-            url = `/api/aws/bridge/db/all-instances-rds-oracle?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`;
+            url = region ? `/api/aws/bridge/db/all-instances-rds-oracle?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}` : null;
             break;
         case 'rds-sqlserver':
-            url = `/api/aws/bridge/db/all-instances-rds-sqlserver?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`;
+            url = region ? `/api/aws/bridge/db/all-instances-rds-sqlserver?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}` : null;
             break;
         case 'rds-mariadb':
-            url = `/api/aws/bridge/db/all-instances-rds-mariadb?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`;
+            url = region ? `/api/aws/bridge/db/all-instances-rds-mariadb?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}` : null;
             break;
         case 'asg':
-            url = `/api/aws/bridge/autoscaling/all-autoscaling-groups?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`;
+            url = region ? `/api/aws/bridge/autoscaling/all-autoscaling-groups?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}` : null;
             break;
         case "infraUsed":
-            url = `/api/aws/bridge/aws/ec2/unused/getInstances?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`;
+            url = region ? `/api/aws/bridge/ec2/all_unused_ec2_instances?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}` : null;
             break;
         default:
             url = '';
@@ -74,24 +73,23 @@ export const InstancesFilterComponent = ({
 
     const tagsBody = selectedKey !== 'allKeys' && selectedValue ? { Key: selectedKey, Value: selectedValue } : null;
 
-    const shouldFetch = !!url && !!region
     const apiMethod = service === "infraUsed" ? fetcherGet : fetcherPost;
-    const { data, error, isLoading } = useSWR<unknown[]>(shouldFetch ? [url, tagsBody] : null, ([u, t]) => apiMethod(u, t));
+    const { data, error, isLoading } = useSWR<unknown[]>([url, tagsBody], ([u, t]) => fetcherPost(u, t));
 
     useEffect(() => {
-        if (!isLoading && !error && shouldFetch) {
+        if (!isLoading && !error) {
             if (!Array.isArray(data) || data.length === 0) {
                 setInstance('');
             }
         }
-    }, [data, isLoading, error, shouldFetch, setInstance]);
+    }, [data, isLoading, error, setInstance]);
 
 
     if (isLoading) return <LoaderComponent size='small'/>
     if (error) return <div>Error al cargar datos</div>
 
     const list: string[] = Array.isArray(data) ? data : []
-    const noInstances = shouldFetch && list.length === 0
+    const noInstances = list.length === 0
 
     const selectedInstancesArray = instance ? instance.split(',').filter(Boolean) : [];
 
@@ -125,7 +123,7 @@ export const InstancesFilterComponent = ({
                     role='combobox'
                     aria-expanded={open}
                     className='w-full justify-between bg-transparent'
-                    disabled={noInstances || !shouldFetch}
+                    disabled={noInstances}
                 >
                     <span className="truncate text-left max-w-[85%]">
                         {getDisplayText()}
@@ -138,7 +136,7 @@ export const InstancesFilterComponent = ({
                     <CommandInput placeholder='Buscar instancia...' />
                     <CommandList>
                         <CommandEmpty>{noInstances ? 'No hay instancias disponibles.' : 'No se encontró instancia.'}</CommandEmpty>
-                        {!noInstances && shouldFetch && (
+                        {!noInstances && (
                             <CommandGroup className='max-h-[250px] overflow-y-auto'>
                                 {list.map((i: string) => (
                                     <CommandItem key={i} value={i} onSelect={() => { setInstance(i); setOpen(false); }}>
@@ -160,7 +158,7 @@ export const InstancesFilterComponent = ({
                     role='combobox'
                     aria-expanded={open}
                     className='w-full justify-between bg-transparent'
-                    disabled={noInstances || !shouldFetch}
+                    disabled={noInstances}
                 >
                     <span className="truncate text-left max-w-[85%]">
                         {getDisplayText()}
@@ -172,7 +170,7 @@ export const InstancesFilterComponent = ({
                 <Command>
                     <CommandInput placeholder='Buscar instancia...' />
                     <CommandEmpty>{noInstances ? 'No hay instancias disponibles.' : 'No se encontró instancia.'}</CommandEmpty>
-                    {!noInstances && shouldFetch && (
+                    {!noInstances && (
                         <CommandGroup className='max-h-[200px] overflow-y-auto'>
                             <CommandItem value='all' onSelect={() => handleInstanceToggle('all')}>
                                 <Check className={cn('mr-2 h-4 w-4', selectedInstancesArray.includes('all') ? 'opacity-100' : 'opacity-0')} />

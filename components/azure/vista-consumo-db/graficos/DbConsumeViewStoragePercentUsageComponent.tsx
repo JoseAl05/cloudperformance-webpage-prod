@@ -59,7 +59,6 @@ export const DbConsumeViewStoragePercentUsageComponent = ({ data, title, metricU
 
     return { totalData, usedData, unusedData, yMaxRounded };
   }, [safeData]);
-  console.log(title);
 
   const option = useMemo(() => {
     const base = makeBaseOptions({

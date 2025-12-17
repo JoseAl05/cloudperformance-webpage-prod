@@ -707,8 +707,8 @@ export const FiltersComponent = ({
                                     startDate={tempStartDate}
                                     endDate={tempEndDate}
                                     region={tempRegion}
-                                    selectedKey={tempKey ?? ''}
-                                    selectedValue={tempValue ?? ''}
+                                    selectedKey={tempKey}
+                                    selectedValue={tempValue}
                                     isInstanceMultiSelect={isInstanceMultiSelect}
                                 />
                             </div>

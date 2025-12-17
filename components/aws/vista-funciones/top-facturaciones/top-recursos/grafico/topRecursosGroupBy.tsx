@@ -35,7 +35,6 @@ export const TopRecursosChart = ({ groupBy, title, icon }: TopRecursosProps) => 
     `/api/aws/bridge/recursos/top_recursos_unicos?group_by=${groupBy}`,
     fetcher
   )
-  console.log(data);
 
   const groups: Row[] = Array.isArray(data) ? (data as Row[]) : []
 
@@ -60,7 +59,6 @@ export const TopRecursosChart = ({ groupBy, title, icon }: TopRecursosProps) => 
   if (isLoading) return <p>Cargando...</p>
   if (error) return <p>Error cargando los datos</p>
 
-  console.log(chartData);
 
   return (
     <Card className="shadow-lg rounded-2xl">

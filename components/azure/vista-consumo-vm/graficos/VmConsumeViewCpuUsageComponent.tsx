@@ -59,7 +59,6 @@ export const VmConsumeViewCpuUsageComponent = ({ data, title, metricUnit }: VmCo
 
     return { totalData, usedData, unusedData, yMaxRounded };
   }, [safeData]);
-  console.log(title);
 
   const option = useMemo(() => {
     const base = makeBaseOptions({

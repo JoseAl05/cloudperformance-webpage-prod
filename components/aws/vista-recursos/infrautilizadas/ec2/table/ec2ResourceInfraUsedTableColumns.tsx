@@ -127,7 +127,6 @@ export const Ec2ResourceInfraUsedViewColumns: DynamicColumn<Ec2Instance>[] = [
         accessorKey: "billing_action",
         cell: ({ row }) => {
             const startDateHistoryFormatted = new Date(row.original.sync_time).toISOString().split('.')[0]
-            console.log(startDateHistoryFormatted)
             return <ResourceBillingActionCell resourceId={row.original.InstanceId} startDateHistory={startDateHistoryFormatted} />;
         }
     }

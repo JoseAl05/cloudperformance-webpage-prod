@@ -5,8 +5,16 @@ import { LoaderComponent } from '@/components/general_aws/LoaderComponent'
 import ClientSelectorComponent from '@/components/profile/ClientSelectorComponent'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
-import { Cloud, ArrowRight, Briefcase, ChevronDown } from 'lucide-react'
+import { Cloud, ArrowRight } from 'lucide-react'
 import { cn } from '@/lib/utils'
+
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select"
 
 export const SelectCloudComponent = () => {
     const router = useRouter();
@@ -24,7 +32,6 @@ export const SelectCloudComponent = () => {
     } = useFeatureAccess()
 
     if (loading) return <LoaderComponent />
-    if (loading) return <LoaderComponent />
 
     const isAzure = connectionData.isAzureActive
     const isAws = connectionData.isAwsActive
@@ -38,10 +45,9 @@ export const SelectCloudComponent = () => {
     const hasMultipleAwsAccounts = awsAccounts.length > 1;
 
     const handleAccountChange = (
-        e: React.ChangeEvent<HTMLSelectElement>,
+        newId: string,
         cloud: 'azure' | 'aws'
     ) => {
-        const newId = e.target.value;
         const targetAccounts = (cloud === 'azure') ? azureAccounts : awsAccounts;
         const selectedAccount = targetAccounts.find((acc) => acc.id === newId);
 
@@ -53,20 +59,15 @@ export const SelectCloudComponent = () => {
             setActiveAwsAccountId(newId);
         }
 
-        // TOKEN SWAP CALL (CORRECCIÓN: Se activa si hay una cuenta seleccionada)
-        if (selectedAccount) { // Se activa si seleccionamos una cuenta
+        if (selectedAccount) {
             const client = connectionData.client;
-
-            // Usamos la nueva selección para la nube actual, y la antigua para la otra nube.
             const newDbConnectionAzure = (cloud === 'azure') ? selectedAccount.db : connectionData.dbAzureName;
             const newDbConnectionAws = (cloud === 'aws') ? selectedAccount.db : connectionData.dbAwsName;
 
-            // Llamamos al swap con las cadenas de conexión explícitas
             swapContextToken(client, newDbConnectionAzure, newDbConnectionAws);
         }
     };
 
-    // Funciones de interacción
     const handleEnterAzure = () => {
         router.push(`/azure?client=${clientName}`);
     };
@@ -75,14 +76,12 @@ export const SelectCloudComponent = () => {
         router.push(`/aws?client=${clientName}`);
     };
 
-    const handleSelectClick = (e: React.MouseEvent) => {
+    const stopProp = (e: React.MouseEvent) => {
         e.stopPropagation();
     };
 
     return (
         <section className="mx-auto max-w-5xl px-4">
-
-            {/* Selector Global Admin */}
             {isGlobalAdmin && (
                 <div className="pb-4 mb-4 border-b">
                     <ClientSelectorComponent />
@@ -96,8 +95,6 @@ export const SelectCloudComponent = () => {
             </header>
 
             <div className={cn("grid gap-4", isAzure && isAws ? "grid-cols-1 md:grid-cols-2" : "grid-cols-1")}>
-
-                {/*  TARJETA AZURE  */}
                 {isAzure && (
                     <div
                         onClick={handleEnterAzure}
@@ -115,22 +112,23 @@ export const SelectCloudComponent = () => {
                                 <h3 className="text-lg font-semibold">Microsoft Azure</h3>
 
                                 {hasMultipleAzureAccounts && (
-                                    <div className="mt-1 flex items-center gap-2" onClick={handleSelectClick}>
+                                    <div className="mt-1 flex items-center gap-2" onClick={stopProp}>
                                         <span className="text-xs text-muted-foreground">Cuenta:</span>
-                                        <div className="relative">
-                                            <select
-                                                className="appearance-none bg-white/50 border border-gray-200 rounded px-2 py-1 text-xs font-bold text-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 pr-6 cursor-pointer"
-                                                value={activeAzureAccountId || azureAccounts[0].id}
-                                                onChange={(e) => handleAccountChange(e, 'azure')} // 🛑 LLAMADA AZURE
-                                            >
+                                        <Select
+                                            value={activeAzureAccountId || azureAccounts[0].id}
+                                            onValueChange={(val) => handleAccountChange(val, 'azure')}
+                                        >
+                                            <SelectTrigger className="h-7 w-[160px] text-xs font-bold text-blue-700 bg-white/50 border-blue-200 focus:ring-blue-500 hover:bg-white/80">
+                                                <SelectValue placeholder="Seleccionar" />
+                                            </SelectTrigger>
+                                            <SelectContent>
                                                 {azureAccounts.map((acc) => (
-                                                    <option key={acc.id} value={acc.id}>
+                                                    <SelectItem key={acc.id} value={acc.id} className="text-xs">
                                                         {acc.alias}
-                                                    </option>
+                                                    </SelectItem>
                                                 ))}
-                                            </select>
-                                            <ChevronDown className="absolute right-1 top-1/2 -translate-y-1/2 h-3 w-3 text-blue-700 pointer-events-none" />
-                                        </div>
+                                            </SelectContent>
+                                        </Select>
                                     </div>
                                 )}
                                 {!hasMultipleAzureAccounts && (
@@ -141,8 +139,6 @@ export const SelectCloudComponent = () => {
                         </div>
                     </div>
                 )}
-
-                {/* TARJETA AWS */}
                 {isAws && (
                     <div
                         onClick={handleEnterAws}
@@ -160,20 +156,23 @@ export const SelectCloudComponent = () => {
                                 <h3 className="text-lg font-semibold">Amazon Web Services</h3>
 
                                 {hasMultipleAwsAccounts && (
-                                    <div className="mt-1 flex items-center gap-2" onClick={handleSelectClick}>
+                                    <div className="mt-1 flex items-center gap-2" onClick={stopProp}>
                                         <span className="text-xs text-muted-foreground">Cuenta:</span>
-                                        <div className="relative">
-                                            <select
-                                                className="appearance-none bg-white/50 border border-gray-200 rounded px-2 py-1 text-xs font-bold text-amber-700 focus:outline-none focus:ring-2 focus:ring-amber-500 pr-6 cursor-pointer"
-                                                value={activeAwsAccountId || awsAccounts[0].id}
-                                                onChange={(e) => handleAccountChange(e, 'aws')} // 🛑 LLAMADA AWS
-                                            >
+                                        <Select
+                                            value={activeAwsAccountId || awsAccounts[0].id}
+                                            onValueChange={(val) => handleAccountChange(val, 'aws')}
+                                        >
+                                            <SelectTrigger className="h-7 w-[160px] text-xs font-bold text-amber-700 bg-white/50 border-amber-200 focus:ring-amber-500 hover:bg-white/80">
+                                                <SelectValue placeholder="Seleccionar" />
+                                            </SelectTrigger>
+                                            <SelectContent>
                                                 {awsAccounts.map((acc) => (
-                                                    <option key={acc.id} value={acc.id}>{acc.alias}</option>
+                                                    <SelectItem key={acc.id} value={acc.id} className="text-xs">
+                                                        {acc.alias}
+                                                    </SelectItem>
                                                 ))}
-                                            </select>
-                                            <ChevronDown className="absolute right-1 top-1/2 -translate-y-1/2 h-3 w-3 text-amber-700 pointer-events-none" />
-                                        </div>
+                                            </SelectContent>
+                                        </Select>
                                     </div>
                                 )}
                                 {!hasMultipleAwsAccounts && (
