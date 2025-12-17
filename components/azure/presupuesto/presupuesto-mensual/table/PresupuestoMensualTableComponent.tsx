@@ -2,38 +2,89 @@
 
 import { useState, useMemo } from "react";
 import useSWR from "swr";
-import { CircleDollarSign, Pencil, Trash2, Search, ArrowUpDown, ArrowUp, ArrowDown, ChevronLeft, ChevronRight, Tag } from "lucide-react";
+import {
+  CircleDollarSign,
+  Pencil,
+  Trash2,
+  Search,
+  ArrowUpDown,
+  ArrowUp,
+  ArrowDown,
+  ChevronLeft,
+  ChevronRight,
+  Calendar,
+  TrendingUp,
+  Building2,
+} from "lucide-react";
 
 interface CentroCosto {
   id_centro_costo: number;
   nombre_centro: string;
   responsable_centro: string;
   localizacion: string;
-  tags?: string[];
 }
 
-interface CentroDeCostoTableComponentProps {
+export interface PresupuestoMensual {
+  id_presupuesto_mensual: number;
+  mes: number;
+  anio: number;
+  monto_mensual_asociado: string;
+  monto_real_mes: string;
+  monto_forecast_mes: string;
+}
+
+export interface PresupuestoAnual {
+  id_presupuesto_anual: number;
+  id_centro_costo: number;
+  anio: number;
+  monto_anual_asociado: string;
+  presupuestos_mensuales: PresupuestoMensual[] | null;
+}
+
+export interface PresupuestoAnualMensual {
+  id_centro_costo: number;
+  nombre_centro: string;
+  id_presupuesto_anual: number;
+  id_presupuesto_mensual: number;
+  mes: number;
+  anio: number;
+  monto_mensual_asociado: string;
+  monto_real_mes: string;
+  monto_forecast_mes: string;
+}
+
+interface PresupuestoMensualTableComponentProps {
   cloud?: string;
-  onEdit?: (data: CentroCosto) => void;
+  onEdit?: (data: PresupuestoAnualMensual) => void;
   onDelete?: (id: number | string) => void;
 }
 
-type SortField = keyof CentroCosto | null;
+type SortField = keyof PresupuestoAnualMensual | null;
 type SortOrder = "asc" | "desc" | null;
 
-const fetcher = (url: string) =>
-  fetch(url, { method: "GET", headers: { "Content-Type": "application/json" } })
-    .then((r) => r.json());
+const MES_LETRAS = [
+  "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+  "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
+];
 
-export const CentroDeCostoTableComponent = ({ cloud, onEdit, onDelete }: CentroDeCostoTableComponentProps) => {
-  const { data, error, isLoading } = useSWR<CentroCosto[]>(
-    cloud ? `/api/presupuesto/bridge/${cloud}/centro-costo` : null,
+const fetcher = (url: string) =>
+  fetch(url, { method: "GET", headers: { "Content-Type": "application/json" } }).then((r) => r.json());
+
+export const PresupuestoMensualTableComponent = ({
+  cloud,
+  onEdit,
+  onDelete,
+}: PresupuestoMensualTableComponentProps) => {
+  const { data, error } = useSWR<PresupuestoAnual[]>(
+    cloud ? `/api/presupuesto/bridge/${cloud}/presupuesto/anual` : null,
     fetcher,
-    {
-      revalidateOnFocus: false,
-      revalidateOnReconnect: true,
-      revalidateIfStale: true,
-    }
+    { revalidateOnFocus: true, revalidateOnReconnect: true, revalidateIfStale: true }
+  );
+
+  // Fetch centros de costo
+  const { data: centrosCosto } = useSWR<CentroCosto[]>(
+    cloud ? `/api/presupuesto/bridge/${cloud}/centro-costo` : null,
+    fetcher
   );
 
   const [searchTerm, setSearchTerm] = useState("");
@@ -42,7 +93,30 @@ export const CentroDeCostoTableComponent = ({ cloud, onEdit, onDelete }: CentroD
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
 
-  const handleSort = (field: keyof CentroCosto) => {
+
+  // Transformar datos anuales a lista plana con nombre del centro
+  const presupuestos: PresupuestoAnualMensual[] = useMemo(() => {
+    if (!Array.isArray(data)) return [];
+    return data.flatMap((anual) =>
+      (anual.presupuestos_mensuales || []).map((mensual) => {
+        const centro = centrosCosto?.find(c => c.id_centro_costo === anual.id_centro_costo);
+        return {
+          id_centro_costo: anual.id_centro_costo,
+          nombre_centro: centro?.nombre_centro ?? "—",
+          id_presupuesto_anual: anual.id_presupuesto_anual,
+          id_presupuesto_mensual: mensual.id_presupuesto_mensual,
+          mes: mensual.mes,
+          anio: anual.anio,
+          monto_mensual_asociado: mensual.monto_mensual_asociado,
+          monto_real_mes: mensual.monto_real_mes,
+          monto_forecast_mes: mensual.monto_forecast_mes,
+        };
+      })
+    );
+  }, [data, centrosCosto]);
+
+
+  const handleSort = (field: keyof PresupuestoAnualMensual) => {
     if (sortField === field) {
       if (sortOrder === "asc") {
         setSortOrder("desc");
@@ -59,7 +133,7 @@ export const CentroDeCostoTableComponent = ({ cloud, onEdit, onDelete }: CentroD
     setCurrentPage(1);
   };
 
-  const getSortIcon = (field: keyof CentroCosto) => {
+  const getSortIcon = (field: keyof PresupuestoAnualMensual) => {
     if (sortField !== field) {
       return <ArrowUpDown className="w-4 h-4 opacity-40" />;
     }
@@ -70,17 +144,18 @@ export const CentroDeCostoTableComponent = ({ cloud, onEdit, onDelete }: CentroD
   };
 
   const filteredAndSortedData = useMemo(() => {
-    const centros: CentroCosto[] = Array.isArray(data) ? data : [];
-    
-    const filtered = centros.filter((centro) => {
+    const filtered = presupuestos.filter((p) => {
       const search = searchTerm.toLowerCase();
-      const tagsString = centro.tags?.join(" ").toLowerCase() || "";
       return (
-        centro.id_centro_costo.toString().includes(search) ||
-        centro.nombre_centro.toLowerCase().includes(search) ||
-        centro.responsable_centro?.toLowerCase().includes(search) ||
-        centro.localizacion?.toLowerCase().includes(search) ||
-        tagsString.includes(search)
+        p.id_centro_costo.toString().includes(search) ||
+        p.nombre_centro.toLowerCase().includes(search) ||
+        p.id_presupuesto_anual.toString().includes(search) ||
+        p.id_presupuesto_mensual.toString().includes(search) ||
+        MES_LETRAS[p.mes - 1].toLowerCase().includes(search) ||
+        p.anio.toString().includes(search) ||
+        p.monto_mensual_asociado.toLowerCase().includes(search) ||
+        p.monto_real_mes.toLowerCase().includes(search) ||
+        p.monto_forecast_mes.toLowerCase().includes(search)
       );
     });
 
@@ -96,6 +171,13 @@ export const CentroDeCostoTableComponent = ({ cloud, onEdit, onDelete }: CentroD
           return sortOrder === "asc" ? aVal - bVal : bVal - aVal;
         }
         
+        // Para strings numéricos (montos)
+        if (["monto_mensual_asociado", "monto_real_mes", "monto_forecast_mes"].includes(sortField)) {
+          const aNum = parseFloat(String(aVal));
+          const bNum = parseFloat(String(bVal));
+          return sortOrder === "asc" ? aNum - bNum : bNum - aNum;
+        }
+        
         const aStr = String(aVal).toLowerCase();
         const bStr = String(bVal).toLowerCase();
         
@@ -108,7 +190,7 @@ export const CentroDeCostoTableComponent = ({ cloud, onEdit, onDelete }: CentroD
     }
 
     return filtered;
-  }, [data, searchTerm, sortField, sortOrder]);
+  }, [presupuestos, searchTerm, sortField, sortOrder]);
 
   const paginatedData = useMemo(() => {
     const startIndex = (currentPage - 1) * itemsPerPage;
@@ -156,6 +238,16 @@ export const CentroDeCostoTableComponent = ({ cloud, onEdit, onDelete }: CentroD
     return pages;
   };
 
+  const formatCurrency = (amount: string) => {
+    const num = parseFloat(amount);
+    return num.toLocaleString('es-CL', {
+      style: 'currency',
+      currency: 'CLP',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    });
+  };
+
   if (!data && !error) {
     return (
       <div className="flex justify-center items-center p-12 bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700">
@@ -178,13 +270,11 @@ export const CentroDeCostoTableComponent = ({ cloud, onEdit, onDelete }: CentroD
     );
   }
 
-  const centros: CentroCosto[] = Array.isArray(data) ? data : [];
-
-  if (centros.length === 0) {
+  if (presupuestos.length === 0) {
     return (
       <div className="bg-gray-50 dark:bg-gray-800 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-2xl p-12 text-center">
         <CircleDollarSign className="w-16 h-16 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
-        <p className="text-gray-500 dark:text-gray-400 text-lg font-medium">No hay centros de costo disponibles</p>
+        <p className="text-gray-500 dark:text-gray-400 text-lg font-medium">No hay presupuestos mensuales disponibles</p>
         <p className="text-gray-400 dark:text-gray-500 text-sm mt-2">Los datos aparecerán aquí una vez que se carguen</p>
       </div>
     );
@@ -199,7 +289,7 @@ export const CentroDeCostoTableComponent = ({ cloud, onEdit, onDelete }: CentroD
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 w-5 h-5" />
             <input
               type="text"
-              placeholder="Buscar por ID, nombre, responsable, localización o tags..."
+              placeholder="Buscar por centro de costo, mes, año o montos..."
               value={searchTerm}
               onChange={(e) => {
                 setSearchTerm(e.target.value);
@@ -224,7 +314,7 @@ export const CentroDeCostoTableComponent = ({ cloud, onEdit, onDelete }: CentroD
         </div>
         {searchTerm && (
           <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
-            Mostrando {filteredAndSortedData.length} de {centros.length} registros
+            Mostrando {filteredAndSortedData.length} de {presupuestos.length} registros
           </p>
         )}
       </div>
@@ -236,44 +326,56 @@ export const CentroDeCostoTableComponent = ({ cloud, onEdit, onDelete }: CentroD
             <tr>
               <th 
                 className="px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors select-none"
-                onClick={() => handleSort("id_centro_costo")}
-              >
-                <div className="flex items-center gap-2">
-                  ID Centro
-                  {getSortIcon("id_centro_costo")}
-                </div>
-              </th>
-              <th 
-                className="px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors select-none"
                 onClick={() => handleSort("nombre_centro")}
               >
                 <div className="flex items-center gap-2">
-                  Nombre
+                  Centro de Costo
                   {getSortIcon("nombre_centro")}
                 </div>
               </th>
               <th 
                 className="px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors select-none"
-                onClick={() => handleSort("responsable_centro")}
+                onClick={() => handleSort("mes")}
               >
                 <div className="flex items-center gap-2">
-                  Responsable
-                  {getSortIcon("responsable_centro")}
+                  Mes
+                  {getSortIcon("mes")}
                 </div>
               </th>
               <th 
                 className="px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors select-none"
-                onClick={() => handleSort("localizacion")}
+                onClick={() => handleSort("anio")}
               >
                 <div className="flex items-center gap-2">
-                  Localización
-                  {getSortIcon("localizacion")}
+                  Año
+                  {getSortIcon("anio")}
                 </div>
               </th>
-              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
+              <th 
+                className="px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors select-none"
+                onClick={() => handleSort("monto_mensual_asociado")}
+              >
                 <div className="flex items-center gap-2">
-                  <Tag className="w-4 h-4" />
-                  Tags
+                  Monto Asociado
+                  {getSortIcon("monto_mensual_asociado")}
+                </div>
+              </th>
+              <th 
+                className="px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors select-none"
+                onClick={() => handleSort("monto_real_mes")}
+              >
+                <div className="flex items-center gap-2">
+                  Monto Real
+                  {getSortIcon("monto_real_mes")}
+                </div>
+              </th>
+              <th 
+                className="px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors select-none"
+                onClick={() => handleSort("monto_forecast_mes")}
+              >
+                <div className="flex items-center gap-2">
+                  Monto Forecast
+                  {getSortIcon("monto_forecast_mes")}
                 </div>
               </th>
               <th className="px-6 py-4 text-center text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
@@ -284,75 +386,69 @@ export const CentroDeCostoTableComponent = ({ cloud, onEdit, onDelete }: CentroD
           <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
             {paginatedData.length === 0 ? (
               <tr>
-                <td colSpan={6} className="px-6 py-12 text-center">
+                <td colSpan={7} className="px-6 py-12 text-center">
                   <Search className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-3" />
                   <p className="text-gray-500 dark:text-gray-400 font-medium">No se encontraron resultados</p>
                   <p className="text-gray-400 dark:text-gray-500 text-sm mt-1">Intenta con otros términos de búsqueda</p>
                 </td>
               </tr>
             ) : (
-              paginatedData.map((centro) => (
+              paginatedData.map((p) => (
                 <tr
-                  key={centro.id_centro_costo}
+                  key={p.id_presupuesto_mensual}
                   className="hover:bg-blue-50 dark:hover:bg-gray-700/50 transition-colors duration-150"
                 >
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center">
-                      <div className="bg-blue-100 dark:bg-blue-900/30 rounded-lg px-3 py-1 flex items-center justify-center">
-                        <span className="text-blue-600 dark:text-blue-400 font-semibold text-sm">
-                          {centro.id_centro_costo}
-                        </span>
-                      </div>
+                    <div className="flex items-center gap-2">
+                      <Building2 className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                      <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                        {p.nombre_centro}
+                      </span>
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-gray-900 dark:text-gray-100">{centro.nombre_centro}</div>
+                    <div className="flex items-center gap-2">
+                      <Calendar className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                      <span className="text-sm font-semibold text-purple-600 dark:text-purple-400">
+                        {MES_LETRAS[p.mes - 1]}
+                      </span>
+                    </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-600 dark:text-gray-400">{centro.responsable_centro || "-"}</div>
+                    <div className="bg-gray-100 dark:bg-gray-700 rounded-lg px-3 py-1 inline-flex">
+                      <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                        {p.anio}
+                      </span>
+                    </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-600 dark:text-gray-400">{centro.localizacion || "-"}</div>
+                    <div className="flex items-center gap-2">
+                      <TrendingUp className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                      <span className="text-sm font-semibold text-blue-600 dark:text-blue-400">
+                        {formatCurrency(p.monto_mensual_asociado)}
+                      </span>
+                    </div>
                   </td>
-                  <td className="px-6 py-4">
-                    <div className="flex flex-wrap gap-1.5 max-w-xs">
-                      {centro.tags && centro.tags.length > 0 ? (
-                        centro.tags.slice(0, 3).map((tag, index) => {
-                          const [key, value] = tag.includes(':') ? tag.split(':') : [tag, null];
-                          return (
-                            <span
-                              key={index}
-                              className="inline-flex items-center px-2 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300 rounded-md text-xs font-medium"
-                              title={tag}
-                            >
-                              {value ? (
-                                <>
-                                  <span className="font-semibold">{key}:</span>
-                                  <span className="ml-1">{value.length > 10 ? value.substring(0, 10) + '...' : value}</span>
-                                </>
-                              ) : (
-                                <span>{key.length > 15 ? key.substring(0, 15) + '...' : key}</span>
-                              )}
-                            </span>
-                          );
-                        })
-                      ) : (
-                        <span className="text-xs text-gray-400 dark:text-gray-500 italic">Sin tags</span>
-                      )}
-                      {centro.tags && centro.tags.length > 3 && (
-                        <span 
-                          className="inline-flex items-center px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded-md text-xs font-medium"
-                          title={centro.tags.slice(3).join(', ')}
-                        >
-                          +{centro.tags.length - 3}
-                        </span>
-                      )}
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="flex items-center gap-2">
+                      <TrendingUp className="w-4 h-4 text-green-600 dark:text-green-400" />
+                      <span className="text-sm font-semibold text-green-600 dark:text-green-400">
+                        {formatCurrency(p.monto_real_mes)}
+                      </span>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="flex items-center gap-2">
+                      <TrendingUp className="w-4 h-4 text-orange-600 dark:text-orange-400" />
+                      <span className="text-sm font-semibold text-orange-600 dark:text-orange-400">
+                        {formatCurrency(p.monto_forecast_mes)}
+                      </span>
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-center">
                     <div className="flex items-center justify-center gap-2">
                       <button
-                        onClick={() => onEdit && onEdit(centro)}
+                        onClick={() => onEdit && onEdit(p)}
                         className="inline-flex items-center gap-1.5 px-3 py-2 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors duration-150 font-medium text-sm"
                         title="Editar"
                       >
@@ -362,7 +458,7 @@ export const CentroDeCostoTableComponent = ({ cloud, onEdit, onDelete }: CentroD
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          onDelete && onDelete(centro.id_centro_costo);
+                          onDelete && onDelete(p.id_presupuesto_mensual);
                         }}
                         className="inline-flex items-center gap-1.5 px-3 py-2 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-lg hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors duration-150 font-medium text-sm"
                         title="Eliminar"
@@ -429,4 +525,4 @@ export const CentroDeCostoTableComponent = ({ cloud, onEdit, onDelete }: CentroD
   );
 };
 
-export default CentroDeCostoTableComponent;
+export default PresupuestoMensualTableComponent;

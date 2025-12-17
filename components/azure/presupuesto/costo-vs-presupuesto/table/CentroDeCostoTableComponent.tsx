@@ -2,14 +2,13 @@
 
 import { useState, useMemo } from "react";
 import useSWR from "swr";
-import { CircleDollarSign, Pencil, Trash2, Search, ArrowUpDown, ArrowUp, ArrowDown, ChevronLeft, ChevronRight, Tag } from "lucide-react";
+import { CircleDollarSign, Pencil, Trash2, Search, ArrowUpDown, ArrowUp, ArrowDown, ChevronLeft, ChevronRight } from "lucide-react";
 
 interface CentroCosto {
   id_centro_costo: number;
   nombre_centro: string;
   responsable_centro: string;
   localizacion: string;
-  tags?: string[];
 }
 
 interface CentroDeCostoTableComponentProps {
@@ -71,16 +70,14 @@ export const CentroDeCostoTableComponent = ({ cloud, onEdit, onDelete }: CentroD
 
   const filteredAndSortedData = useMemo(() => {
     const centros: CentroCosto[] = Array.isArray(data) ? data : [];
-    
+
     const filtered = centros.filter((centro) => {
       const search = searchTerm.toLowerCase();
-      const tagsString = centro.tags?.join(" ").toLowerCase() || "";
       return (
         centro.id_centro_costo.toString().includes(search) ||
         centro.nombre_centro.toLowerCase().includes(search) ||
         centro.responsable_centro?.toLowerCase().includes(search) ||
-        centro.localizacion?.toLowerCase().includes(search) ||
-        tagsString.includes(search)
+        centro.localizacion?.toLowerCase().includes(search)
       );
     });
 
@@ -88,17 +85,17 @@ export const CentroDeCostoTableComponent = ({ cloud, onEdit, onDelete }: CentroD
       filtered.sort((a, b) => {
         const aVal = a[sortField];
         const bVal = b[sortField];
-        
+
         if (aVal === null || aVal === undefined) return 1;
         if (bVal === null || bVal === undefined) return -1;
-        
+
         if (typeof aVal === "number" && typeof bVal === "number") {
           return sortOrder === "asc" ? aVal - bVal : bVal - aVal;
         }
-        
+
         const aStr = String(aVal).toLowerCase();
         const bStr = String(bVal).toLowerCase();
-        
+
         if (sortOrder === "asc") {
           return aStr.localeCompare(bStr);
         } else {
@@ -130,7 +127,7 @@ export const CentroDeCostoTableComponent = ({ cloud, onEdit, onDelete }: CentroD
   const getPageNumbers = () => {
     const pages = [];
     const maxVisible = 5;
-    
+
     if (totalPages <= maxVisible) {
       for (let i = 1; i <= totalPages; i++) {
         pages.push(i);
@@ -152,7 +149,7 @@ export const CentroDeCostoTableComponent = ({ cloud, onEdit, onDelete }: CentroD
         pages.push(totalPages);
       }
     }
-    
+
     return pages;
   };
 
@@ -199,7 +196,7 @@ export const CentroDeCostoTableComponent = ({ cloud, onEdit, onDelete }: CentroD
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 w-5 h-5" />
             <input
               type="text"
-              placeholder="Buscar por ID, nombre, responsable, localización o tags..."
+              placeholder="Buscar por ID, nombre, responsable o localización..."
               value={searchTerm}
               onChange={(e) => {
                 setSearchTerm(e.target.value);
@@ -234,7 +231,7 @@ export const CentroDeCostoTableComponent = ({ cloud, onEdit, onDelete }: CentroD
         <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
           <thead className="bg-gray-50 dark:bg-gray-900/50 sticky top-0 z-10">
             <tr>
-              <th 
+              <th
                 className="px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors select-none"
                 onClick={() => handleSort("id_centro_costo")}
               >
@@ -243,7 +240,7 @@ export const CentroDeCostoTableComponent = ({ cloud, onEdit, onDelete }: CentroD
                   {getSortIcon("id_centro_costo")}
                 </div>
               </th>
-              <th 
+              <th
                 className="px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors select-none"
                 onClick={() => handleSort("nombre_centro")}
               >
@@ -252,7 +249,7 @@ export const CentroDeCostoTableComponent = ({ cloud, onEdit, onDelete }: CentroD
                   {getSortIcon("nombre_centro")}
                 </div>
               </th>
-              <th 
+              <th
                 className="px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors select-none"
                 onClick={() => handleSort("responsable_centro")}
               >
@@ -261,19 +258,13 @@ export const CentroDeCostoTableComponent = ({ cloud, onEdit, onDelete }: CentroD
                   {getSortIcon("responsable_centro")}
                 </div>
               </th>
-              <th 
+              <th
                 className="px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors select-none"
                 onClick={() => handleSort("localizacion")}
               >
                 <div className="flex items-center gap-2">
                   Localización
                   {getSortIcon("localizacion")}
-                </div>
-              </th>
-              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
-                <div className="flex items-center gap-2">
-                  <Tag className="w-4 h-4" />
-                  Tags
                 </div>
               </th>
               <th className="px-6 py-4 text-center text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
@@ -284,7 +275,7 @@ export const CentroDeCostoTableComponent = ({ cloud, onEdit, onDelete }: CentroD
           <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
             {paginatedData.length === 0 ? (
               <tr>
-                <td colSpan={6} className="px-6 py-12 text-center">
+                <td colSpan={5} className="px-6 py-12 text-center">
                   <Search className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-3" />
                   <p className="text-gray-500 dark:text-gray-400 font-medium">No se encontraron resultados</p>
                   <p className="text-gray-400 dark:text-gray-500 text-sm mt-1">Intenta con otros términos de búsqueda</p>
@@ -313,41 +304,6 @@ export const CentroDeCostoTableComponent = ({ cloud, onEdit, onDelete }: CentroD
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-gray-600 dark:text-gray-400">{centro.localizacion || "-"}</div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex flex-wrap gap-1.5 max-w-xs">
-                      {centro.tags && centro.tags.length > 0 ? (
-                        centro.tags.slice(0, 3).map((tag, index) => {
-                          const [key, value] = tag.includes(':') ? tag.split(':') : [tag, null];
-                          return (
-                            <span
-                              key={index}
-                              className="inline-flex items-center px-2 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300 rounded-md text-xs font-medium"
-                              title={tag}
-                            >
-                              {value ? (
-                                <>
-                                  <span className="font-semibold">{key}:</span>
-                                  <span className="ml-1">{value.length > 10 ? value.substring(0, 10) + '...' : value}</span>
-                                </>
-                              ) : (
-                                <span>{key.length > 15 ? key.substring(0, 15) + '...' : key}</span>
-                              )}
-                            </span>
-                          );
-                        })
-                      ) : (
-                        <span className="text-xs text-gray-400 dark:text-gray-500 italic">Sin tags</span>
-                      )}
-                      {centro.tags && centro.tags.length > 3 && (
-                        <span 
-                          className="inline-flex items-center px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded-md text-xs font-medium"
-                          title={centro.tags.slice(3).join(', ')}
-                        >
-                          +{centro.tags.length - 3}
-                        </span>
-                      )}
-                    </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-center">
                     <div className="flex items-center justify-center gap-2">
@@ -403,11 +359,10 @@ export const CentroDeCostoTableComponent = ({ cloud, onEdit, onDelete }: CentroD
                   <button
                     key={page}
                     onClick={() => handlePageChange(page as number)}
-                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                      currentPage === page
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${currentPage === page
                         ? 'bg-blue-600 text-white'
                         : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'
-                    }`}
+                      }`}
                   >
                     {page}
                   </button>
