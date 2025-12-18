@@ -147,7 +147,7 @@ export const SidebarProfileComponent = ({
                                     <span className="text-sm font-medium">Nubes</span>
                                 </Link>
                             </SidebarMenuButton>
-                            <SidebarMenuButton asChild>
+                            {/* <SidebarMenuButton asChild>
                                 <Link
                                     href='/presupuesto'
                                     className={cn(
@@ -158,7 +158,7 @@ export const SidebarProfileComponent = ({
                                     <CircleDollarSign className="h-5 w-5 text-blue-500" />
                                     <span className="text-sm font-medium">Presupuesto</span>
                                 </Link>
-                            </SidebarMenuButton>
+                            </SidebarMenuButton> */}
                             {
                                 hasMultitenant && (
                                     <SidebarMenuButton asChild>

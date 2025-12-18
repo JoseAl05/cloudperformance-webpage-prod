@@ -47,7 +47,8 @@ import {
     Table,
     Diff,
     Scale,
-    Workflow
+    Workflow,
+    CircleDollarSign
 } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { usePathname } from 'next/navigation'
@@ -206,6 +207,7 @@ export const SidebarComponent = ({
             { label: 'Items Azure', icon: Table, href: '/azure/tables-azure/tablas-item-azure' },
             { label: 'Vista Advisor', icon: Pyramid, href: '/azure/advisor' },
             { label: 'Vista Saving Plans', icon: HandCoins, href: '/azure/saving-plan' },
+            { label: 'Presupuestos', icon: CircleDollarSign, href: '/azure/presupuesto' },
         ],
         recursos: [
             { label: 'Maquinas Virtuales', icon: Computer, href: '/azure/recursos-vm' },
