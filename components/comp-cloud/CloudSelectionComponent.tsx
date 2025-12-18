@@ -138,18 +138,37 @@ export const CloudSelectionComponent = () => {
 
     if (isLoading) return <LoaderComponent size='small' />
 
+    // if (reqPayload) {
+    //     return (
+    //         <div className="animate-in fade-in zoom-in-95 duration-500">
+    //             <Button
+    //                 variant="outline"
+    //                 size="sm"
+    //                 onClick={handleBackToConfig}
+    //                 className="mb-6 gap-2 text-gray-600"
+    //             >
+    //                 <RotateCcw size={14} />
+    //                 Volver a la configuración
+    //             </Button>
+    //             <MainViewIntraCloudBillingComponent payload={reqPayload} />
+    //         </div>
+    //     );
+    // }
     if (reqPayload) {
         return (
             <div className="animate-in fade-in zoom-in-95 duration-500">
-                <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleBackToConfig}
-                    className="mb-6 gap-2 text-gray-600"
-                >
-                    <RotateCcw size={14} />
-                    Volver a la configuración
-                </Button>
+                <div className="sticky top-0 z-70 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 py-4 mb-6 border-b border-border">
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleBackToConfig}
+                        className="gap-2 text-gray-600 dark:text-gray-300"
+                    >
+                        <RotateCcw size={14} />
+                        Volver a la configuración
+                    </Button>
+                </div>
+
                 <MainViewIntraCloudBillingComponent payload={reqPayload} />
             </div>
         );

@@ -162,13 +162,13 @@ export const getIntraCloudBillingColumns = (
     allData: IntraCloudBillingByDimension[]
 ): DynamicColumn<AggregatedBillingRow>[] => {
     const tenantIds = Array.from(new Set(allData.map(t => t.tenant_id))).sort();
-    console.log(allData);
     const columns: DynamicColumn<AggregatedBillingRow>[] = [
         {
             header: "Dimensión",
             accessorKey: "dimension_value",
             cell: (info) => {
                 const val = info.getValue() as string;
+                console.log(val);
                 return (
                     <div className="flex flex-col">
                         <div className="font-medium text-foreground max-w-[250px] truncate" title={val}>
@@ -189,7 +189,9 @@ export const getIntraCloudBillingColumns = (
                 const cost = row.original[tenantId] as number | undefined;
                 return <CostCell cost={cost} />;
             },
-            size: 140
+            size: 140,
+            desc: true,
+            isDefaultSort: index === 0
         });
     });
 

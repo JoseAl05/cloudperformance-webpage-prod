@@ -1,7 +1,7 @@
 // 'use client'
 
 // import { MessageCard } from '@/components/azure/cards/MessageCards';
-// import { IntraCloudBillingChartComponent } from '@/components/comp-cloud/intracloud/billing/grafico/IntraCloudBillingChartComponent';
+// import { IntraCloudBillingCostUsdChartComponent } from '@/components/comp-cloud/intracloud/billing/grafico/IntraCloudBillingCostUsdChartComponent';
 // import { ReqPayload } from '@/components/comp-cloud/intracloud/IntraCloudConfigComponent';
 // import { LoaderComponent } from '@/components/general_aws/LoaderComponent';
 // import { IntraCloudBilling } from '@/interfaces/vista-intracloud/billing/intraCloudBillingInterfaces';
@@ -67,7 +67,7 @@
 //             )}
 //             {
 //                 data && (
-//                     <IntraCloudBillingChartComponent
+//                     <IntraCloudBillingCostUsdChartComponent
 //                         data={data}
 //                     />
 //                 )
@@ -85,7 +85,7 @@
 // }
 'use client'
 
-import { IntraCloudBillingChartComponent } from '@/components/comp-cloud/intracloud/billing/grafico/IntraCloudBillingChartComponent';
+import { IntraCloudBillingCostUsdChartComponent } from '@/components/comp-cloud/intracloud/billing/grafico/IntraCloudBillingCostUsdChartComponent';
 import { IntraCloudBillingCardsComponent } from '@/components/comp-cloud/intracloud/billing/info/IntraCloudBillingCardsComponent';
 import { IntraCloudBillingTable } from '@/components/comp-cloud/intracloud/billing/table/IntraCloudBillingTable';
 import { ReqPayload } from '@/components/comp-cloud/intracloud/IntraCloudConfigComponent';
@@ -130,10 +130,13 @@ export const IntraCloudBillingComponent = ({
     resourceGroups,
     subscriptions,
     tagKeys,
-    tagValues
+    tagValues,
+    region
 }: IntraCloudBillingComponentProps) => {
 
-    const [dimension, setDimension] = useState<string>('');
+    const dimensionDefaultValue = payload.cloud_provider === 'Azure' ? 'service_family' : 'SERVICE';
+
+    const [dimension, setDimension] = useState<string>(dimensionDefaultValue);
 
     const startDateFormatted = startDate.toISOString().replace('Z', '').slice(0, -4);
     const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : '';
@@ -142,12 +145,18 @@ export const IntraCloudBillingComponent = ({
 
     if (payload.tenants) {
         payload.tenants.forEach(tenantId => {
-            filtersPayload[tenantId] = {
-                resource_group: resourceGroups[tenantId] || 'all',
-                subscription: subscriptions[tenantId] || 'all',
-                tagKey: tagKeys[tenantId] || 'allKeys',
-                tagValue: tagValues[tenantId] || 'allValues'
-            };
+            if (payload.cloud_provider === 'Azure') {
+                filtersPayload[tenantId] = {
+                    resource_group: resourceGroups[tenantId] || 'all',
+                    subscription: subscriptions[tenantId] || 'all',
+                    tagKey: tagKeys[tenantId] || 'allKeys',
+                    tagValue: tagValues[tenantId] || 'allValues'
+                };
+            } else if (payload.cloud_provider === 'AWS') {
+                filtersPayload[tenantId] = {
+                    region: region[tenantId] || 'all_regions'
+                };
+            }
         });
     }
 
@@ -156,7 +165,10 @@ export const IntraCloudBillingComponent = ({
         filters: filtersPayload
     };
 
-    const urlAcumulatedBilling = `/api/comparison-cloud/bridge/intracloud/billing/get_tenants_billing?date_from=${startDateFormatted}&date_to=${endDateFormatted}`;
+    const urlAcumulatedBilling =
+        payload.cloud_provider === 'Azure'
+        ? `/api/comparison-cloud/bridge/intracloud/azure/billing/get_tenants_billing?date_from=${startDateFormatted}&date_to=${endDateFormatted}`
+        : `/api/comparison-cloud/bridge/intracloud/aws/billing/get_tenants_billing?date_from=${startDateFormatted}&date_to=${endDateFormatted}`
 
     const acumulatedBilling = useSWR(
         [urlAcumulatedBilling, fullPayload],
@@ -167,10 +179,14 @@ export const IntraCloudBillingComponent = ({
         }
     );
 
-    const urlBillingByDimension = dimension ? `/api/comparison-cloud/bridge/intracloud/billing/get_tenants_billing_by_dimension?date_from=${startDateFormatted}&date_to=${endDateFormatted}&dimension=${dimension}` : null;
+    const urlBillingByDimension = payload.cloud_provider === 'Azure'
+    ? `/api/comparison-cloud/bridge/intracloud/azure/billing/get_tenants_billing_by_dimension?date_from=${startDateFormatted}&date_to=${endDateFormatted}&dimension=${dimension}`
+    : `/api/comparison-cloud/bridge/intracloud/aws/billing/get_tenants_billing_by_dimension?date_from=${startDateFormatted}&date_to=${endDateFormatted}&dimension=${dimension}`;
+
+    const shouldFetchUrlBillingByDimension = dimension ? true : false;
 
     const billingByDimension = useSWR(
-        [urlBillingByDimension, fullPayload],
+        [shouldFetchUrlBillingByDimension ? urlBillingByDimension : null, fullPayload],
         fetcherPost,
         {
             revalidateOnFocus: false,
@@ -202,13 +218,14 @@ export const IntraCloudBillingComponent = ({
                     <IntraCloudBillingCardsComponent
                         data={acumulatedBilling.data}
                     />
-                    <IntraCloudBillingChartComponent
+                    <IntraCloudBillingCostUsdChartComponent
                         data={acumulatedBilling.data}
                     />
                     <IntraCloudBillingTable
                         dimension={dimension}
                         setDimension={setDimension}
                         data={billingByDimension.data ? billingByDimension.data : []}
+                        payload={payload}
                     />
                     <div className="mt-4 p-2 bg-slate-100 rounded text-[10px] font-mono">
                         Payload enviado: {JSON.stringify(filtersPayload, null, 2)}

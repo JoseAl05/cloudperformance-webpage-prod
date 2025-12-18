@@ -8,11 +8,11 @@
 // import { IntraCloudBilling, IntraCloudBillingTenant } from '@/interfaces/vista-intracloud/billing/intraCloudBillingInterfaces';
 // import { formatMetric } from '@/lib/metricUtils';
 
-// interface IntraCloudBillingChartComponentProps {
+// interface IntraCloudBillingCostUsdChartComponentProps {
 //   data: IntraCloudBilling;
 // }
 
-// export const IntraCloudBillingChartComponent = ({ data }: IntraCloudBillingChartComponentProps) => {
+// export const IntraCloudBillingCostUsdChartComponent = ({ data }: IntraCloudBillingCostUsdChartComponentProps) => {
 //   const { theme, resolvedTheme } = useTheme();
 //   const currentTheme = resolvedTheme || theme;
 //   const isDark = currentTheme === 'dark';
@@ -110,13 +110,13 @@ import { formatMetric } from '@/lib/metricUtils';
 import { ReqPayload } from '@/components/comp-cloud/intracloud/IntraCloudConfigComponent';
 import { IntraCloudBilling } from '@/interfaces/vista-intracloud/billing/intraCloudBillingInterfaces';
 
-interface IntraCloudBillingChartComponentProps {
+interface IntraCloudBillingCostUsdChartComponentProps {
   data: IntraCloudBilling[];
   payload: ReqPayload;
 }
 
 
-export const IntraCloudBillingChartComponent = ({ data, payload }: IntraCloudBillingChartComponentProps) => {
+export const IntraCloudBillingCostUsdChartComponent = ({ data, payload }: IntraCloudBillingCostUsdChartComponentProps) => {
   const { theme, resolvedTheme } = useTheme();
   const currentTheme = resolvedTheme || theme;
   const isDark = currentTheme === 'dark';
@@ -171,8 +171,35 @@ export const IntraCloudBillingChartComponent = ({ data, payload }: IntraCloudBil
       series: seriesConfig as unknown,
       extraOption: {
         xAxis: { axisLabel: { rotate: 30 } },
-        yAxis: { min: 0 },
+        yAxis: {
+          type: 'value',
+          name: 'Costo (USD)',
+          nameTextStyle: { color: '#666', fontSize: 10 },
+          // nameGap: 25,
+          min: 0,
+          axisLine: { show: false },
+          axisTick: { show: false },
+          axisLabel: {
+            formatter: (value: number) => {
+              if (value === 0) return '$0';
+              if (value >= 1_000_000) return '$' + (value / 1_000_000).toFixed(1) + 'M';
+              if (value >= 1_000) return '$' + (value / 1_000).toFixed(0) + 'K';
+              return '$' + value.toLocaleString();
+            },
+            color: '#666',
+            fontSize: 10,
+          },
+        },
         grid: { left: 44, right: 12, top: 56, bottom: 64, containLabel: true },
+        tooltip: {
+          trigger: 'axis',
+          valueFormatter: (v) => {
+            if (v == null) return '-';
+            const n = Number(v);
+            if (Number.isNaN(n)) return String(v);
+            return `$${n.toFixed(2)}`;
+          },
+        }
       },
     });
 
@@ -186,7 +213,7 @@ export const IntraCloudBillingChartComponent = ({ data, payload }: IntraCloudBil
   return (
     <Card className="w-full">
       <CardHeader>
-        <CardTitle>Tendencia Facturación Comparativa</CardTitle>
+        <CardTitle>Tendencia Facturación Comparativa Costo Real</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="flex items-center justify-start gap-2 mb-4">

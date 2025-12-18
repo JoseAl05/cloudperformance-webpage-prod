@@ -314,7 +314,7 @@ export const MultiTenantSubscriptionsFilterComponent = ({
 
     const startDateFormatted = startDate ? startDate.toISOString().replace('Z', '').slice(0, -4) : '';
     const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : '';
-    const url = `/api/comparison-cloud/bridge/intracloud/subs/all-subscriptions-ids?date_from=${startDateFormatted}&date_to=${endDateFormatted}`;
+    const url = `/api/comparison-cloud/bridge/intracloud/azure/subs/all-subscriptions-ids?date_from=${startDateFormatted}&date_to=${endDateFormatted}`;
 
     const { data, error, isLoading } = useSWR(
         payload ? [url, payload] : null,

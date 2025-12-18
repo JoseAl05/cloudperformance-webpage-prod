@@ -87,15 +87,26 @@ export const MainViewIntraCloudBillingComponent = ({ payload }: MainViewIntraClo
                 </div>
             </div>
             <div className='w-full min-w-0 space-y-6'>
-                <FiltersComponent
-                    Component={IntraCloudBillingComponent}
-                    regionFilter
-                    isRegionMultiSelect
-                    subscriptionIdFilter
-                    tagsFilter
-                    resourceGroupFilter
-                    payload={payload}
-                />
+                {
+                    payload.cloud_provider === 'Azure' ? (
+                        <FiltersComponent
+                            Component={IntraCloudBillingComponent}
+                            regionFilter
+                            isRegionMultiSelect
+                            subscriptionIdFilter
+                            tagsFilter
+                            resourceGroupFilter
+                            payload={payload}
+                        />
+                    ) : (
+                        <FiltersComponent
+                            Component={IntraCloudBillingComponent}
+                            regionFilter
+                            isRegionMultiSelect
+                            payload={payload}
+                        />
+                    )
+                }
             </div>
         </div>
     )

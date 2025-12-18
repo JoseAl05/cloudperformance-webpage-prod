@@ -392,7 +392,7 @@ export const MultiTenantTagsFilterComponent = ({
         filters: filtersPayload
     };
 
-    const url = `/api/comparison-cloud/bridge/intracloud/tags/get-all-tags?date_from=${startDateFormatted}&date_to=${endDateFormatted}&location=${region}`;
+    const url = `/api/comparison-cloud/bridge/intracloud/azure/tags/get-all-tags?date_from=${startDateFormatted}&date_to=${endDateFormatted}&location=${region}`;
 
     const { data, error, isLoading } = useSWR(
         payload ? [url, fullPayload] : null,

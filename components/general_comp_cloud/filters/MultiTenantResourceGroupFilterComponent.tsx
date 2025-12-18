@@ -358,7 +358,7 @@ export const MultiTenantResourceGroupFilterComponent = ({
         filters: filtersPayload
     };
 
-    const url = `/api/comparison-cloud/bridge/intracloud/resource_groups/get-all-resource_groups?date_from=${startDateFormatted}&date_to=${endDateFormatted}`;
+    const url = `/api/comparison-cloud/bridge/intracloud/azure/resource_groups/get-all-resource_groups?date_from=${startDateFormatted}&date_to=${endDateFormatted}`;
 
     const { data, error, isLoading } = useSWR(
         payload ? [url, fullPayload] : null,

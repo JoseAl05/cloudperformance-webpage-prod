@@ -7,6 +7,8 @@ export type DynamicColumn<T> = {
   accessorKey?: keyof T | string;
   accessorFn?: (row: T) => unknown;
   cell?: (info: unknown) => React.ReactNode;
+  desc?: boolean;
+  isDefaultSort?: boolean;
 };
 
 export const createColumns = <T extends object>(cols: DynamicColumn<T>[]): ColumnDef<T>[] => {
@@ -21,5 +23,10 @@ export const createColumns = <T extends object>(cols: DynamicColumn<T>[]): Colum
       const value = info.getValue();
       return String(value ?? '');
     },
+    sortDescFirst: col.desc,
+    meta: {
+      isDefaultSort: col.isDefaultSort,
+      defaultSortDesc: col.desc
+    }
   }));
 };

@@ -345,6 +345,7 @@ import { useEffect, useState, useMemo } from 'react';
 import { DatePicker } from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { RegionFilterComponent } from '@/components/general_azure/filters/RegionFilterComponent';
+import { RegionFilterComponent as AwsRegionFilterComponent } from '@/components/general_aws/filters/RegionFilterComponent';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
     Calendar,
@@ -562,6 +563,8 @@ export const FiltersComponent = ({
         router.push(window.location.pathname);
     };
 
+    console.log(payload)
+
     return (
         <div className='space-y-8'>
             <Card className="w-full min-w-0 overflow-visible shadow-sm border-gray-200">
@@ -596,10 +599,20 @@ export const FiltersComponent = ({
                                         />
                                     </div>
                                 )}
-                                {regionFilter && (
+                                {regionFilter && payload.cloud_provider === 'Azure' && (
                                     <div className='space-y-1.5'>
                                         <label className='text-sm font-medium text-gray-600'>Región de Nube</label>
                                         <RegionFilterComponent
+                                            selectedRegion={tempRegion}
+                                            setSelectedRegion={setTempRegion}
+                                            isRegionMultiSelect={isRegionMultiSelect}
+                                        />
+                                    </div>
+                                )}
+                                {regionFilter && payload.cloud_provider === 'AWS' && (
+                                    <div className='space-y-1.5'>
+                                        <label className='text-sm font-medium text-gray-600'>Región de Nube</label>
+                                        <AwsRegionFilterComponent
                                             selectedRegion={tempRegion}
                                             setSelectedRegion={setTempRegion}
                                             isRegionMultiSelect={isRegionMultiSelect}
@@ -615,7 +628,7 @@ export const FiltersComponent = ({
                             </div>
                         )}
 
-                        {(subscriptionIdFilter || tagsFilter) && (
+                        {(subscriptionIdFilter || tagsFilter) && payload.cloud_provider === 'Azure' && (
                             <>
                                 <div className="relative z-40">
                                     <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white p-1 rounded-full border border-gray-200 text-gray-400">
@@ -639,7 +652,7 @@ export const FiltersComponent = ({
                                                 </div>
                                             )}
 
-                                            {tagsFilter && (
+                                            {tagsFilter && payload.cloud_provider === 'Azure' && (
                                                 <div className='space-y-2'>
                                                     <label className='text-xs font-medium text-gray-600 flex items-center gap-2'>
                                                         Tags
@@ -669,7 +682,7 @@ export const FiltersComponent = ({
                             </div>
                         )}
 
-                        {resourceGroupFilter && (
+                        {resourceGroupFilter && payload.cloud_provider === 'Azure' && (
                             <div className="relative z-30">
                                 <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white p-1 rounded-full border border-gray-200 text-gray-400">
                                     <ArrowDown className="h-4 w-4" />

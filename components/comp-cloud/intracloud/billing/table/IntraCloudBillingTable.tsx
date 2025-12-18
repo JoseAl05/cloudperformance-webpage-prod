@@ -6,14 +6,16 @@ import { getIntraCloudBillingColumns } from '@/components/comp-cloud/intracloud/
 import { BarChart3 } from 'lucide-react';
 import { Dispatch, SetStateAction, useMemo } from 'react';
 import { IntraCloudBillingDimSelectionComponent } from '@/components/comp-cloud/intracloud/billing/table/IntraCloudBillingDimSelectionComponent';
+import { ReqPayload } from '@/components/comp-cloud/intracloud/IntraCloudConfigComponent';
 
 interface IntraCloudBillingTableProps {
     data: IntraCloudBillingByDimension[];
     dimension: string;
     setDimension: Dispatch<SetStateAction<string>>;
+    payload: ReqPayload;
 }
 
-export const IntraCloudBillingTable = ({ data, dimension, setDimension }: IntraCloudBillingTableProps) => {
+export const IntraCloudBillingTable = ({ data, dimension, setDimension, payload }: IntraCloudBillingTableProps) => {
 
     const aggregatedData = useMemo(() => {
         if (!dimension || !data.length) return [];
@@ -22,8 +24,7 @@ export const IntraCloudBillingTable = ({ data, dimension, setDimension }: IntraC
 
         data.forEach(tenant => {
             tenant.billing_data.forEach(item => {
-                const dimensionValue = (item[dimension as keyof typeof item] as string) || '-';
-
+                const dimensionValue = (item[dimension.toLowerCase() as keyof typeof item] as string) || '-';
                 if (!dimensionMap.has(dimensionValue)) {
                     dimensionMap.set(dimensionValue, {});
                 }
@@ -36,7 +37,7 @@ export const IntraCloudBillingTable = ({ data, dimension, setDimension }: IntraC
         return Array.from(dimensionMap.entries()).map(([dimensionValue, costs]) => ({
             dimension_value: dimensionValue,
             ...costs
-        }));
+        }))
     }, [data, dimension]);
 
     const columns = createColumns(getIntraCloudBillingColumns(data));
@@ -57,6 +58,7 @@ export const IntraCloudBillingTable = ({ data, dimension, setDimension }: IntraC
                     <IntraCloudBillingDimSelectionComponent
                         dimension={dimension}
                         setDimension={setDimension}
+                        payload={payload}
                     />
                 </div>
             </CardHeader>

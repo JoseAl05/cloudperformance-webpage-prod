@@ -148,7 +148,7 @@ export const IntraCloudConfigComponent = ({ cloudType, accounts, onReqReady }: I
         onReqReady(finalPayload);
     };
 
-    console.log(selectedIds);
+    console.log(cloudType);
 
     return (
         <div className="space-y-6">

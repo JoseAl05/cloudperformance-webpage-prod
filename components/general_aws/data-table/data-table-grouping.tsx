@@ -8,6 +8,7 @@ import {
     getFilteredRowModel,
     useReactTable,
     type SortingState,
+    Column
 } from '@tanstack/react-table'
 import { useState, useMemo, useCallback, useEffect } from 'react'
 import { ChevronDown, ChevronRight, MoreHorizontal, ArrowUpDown } from 'lucide-react'
@@ -23,14 +24,15 @@ import {
 } from '@/components/ui/select'
 
 interface DataTableGroupingProps<TData, TValue> {
-    columns: ColumnDef<TData, TValue>[]
-    data?: TData[]
-    filterColumn?: string
-    filterPlaceholder?: string
-    enableGrouping?: boolean
-    groupByColumn?: string
-    pageSizeGroups?: number
-    pageSizeItems?: number
+    columns: ColumnDef<TData, TValue>[];
+    data?: TData[];
+    filterColumn?: string;
+    filterPlaceholder?: string;
+    enableGrouping?: boolean;
+    groupByColumn?: string;
+    pageSizeGroups?: number;
+    pageSizeItems?: number;
+    initialSorting?: SortingState;
 }
 
 type AnyRow = Record<string, unknown>
@@ -48,6 +50,11 @@ interface ProcessedRow extends AnyRow {
     __itemCount?: number
     __isChildRow?: boolean
     __parentGroup?: string
+}
+
+type ColumnMeta = {
+    isDefaultSort?: boolean
+    defaultSortDesc?: boolean
 }
 
 const comparator = (a: unknown, b: unknown): number => {
@@ -399,9 +406,10 @@ export function DataTableGrouping<TData, TValue>({
     groupByColumn,
     pageSizeGroups = 10,
     pageSizeItems = 10,
+    initialSorting = []
 }: DataTableGroupingProps<TData, TValue>) {
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
-    const [sorting, setSorting] = useState<SortingState>([])
+    // const [sorting, setSorting] = useState<SortingState>(initialSorting)
     const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set())
     const [groupPages, setGroupPages] = useState<Map<string, number>>(new Map())
     const [groupPageSize, setGroupPageSize] = useState(pageSizeGroups)
@@ -420,6 +428,18 @@ export function DataTableGrouping<TData, TValue>({
     const totalGroupsForPagination = enableGrouping
         ? new Set(filteredData.map((r: unknown) => String(r[groupByColumn] ?? '—'))).size
         : filteredData.length
+
+    const [sorting, setSorting] = useState<SortingState>(() => {
+        const defaultCol = columns.find(col => (col.meta as ColumnMeta)?.isDefaultSort);
+
+        if (defaultCol) {
+            return [{
+                id: (defaultCol.id ?? (defaultCol as unknown).accessorKey) as string,
+                desc: (defaultCol.meta as ColumnMeta)?.defaultSortDesc ?? false
+            }];
+        }
+        return [];
+    })
 
     const { currentPage, totalPages, canPrevious, canNext, goToPrevious, goToNext, resetPage } =
         usePagination(totalGroupsForPagination, groupPageSize)
