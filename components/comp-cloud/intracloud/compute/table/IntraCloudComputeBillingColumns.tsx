@@ -478,7 +478,6 @@ const ComparisonCell = ({ row, tenantIds, cloudProvider }: { row: AggregatedComp
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-4">
                     {tenantIds.map((tid, idx) => {
                         const tenantCost = Number(row[tid]) || 0;
-                        // Seguridad: Si el costo es 0 y no hay nombre de recurso máximo, probablemente no hay datos relevantes
                         if (tenantCost === 0 && (!row.max_resource_name || !row.max_resource_name[tid])) return null;
 
                         const maxResName = row.max_resource_name?.[tid] || 'N/A';
@@ -579,7 +578,6 @@ export const getIntraCloudComputeBillingColumns = (
             cell: ({ row }) => {
                 const cost = row.original[tenantId] as number | undefined;
 
-                // Si es AWS, recuperamos el Resource ID
                 let resourceIdLabel = undefined;
                 if (cloudProvider === 'AWS') {
                     resourceIdLabel = row.original[`${tenantId}_meta_resource`] as string;

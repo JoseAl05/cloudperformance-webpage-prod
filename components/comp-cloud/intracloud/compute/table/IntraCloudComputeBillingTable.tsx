@@ -132,8 +132,7 @@ import { Dispatch, SetStateAction, useMemo } from 'react';
 import { ReqPayload } from '@/components/comp-cloud/intracloud/IntraCloudConfigComponent';
 import { AggregatedComputeRow, getIntraCloudComputeBillingColumns } from '@/components/comp-cloud/intracloud/compute/table/IntraCloudComputeBillingColumns';
 import { formatMetric } from '@/lib/metricUtils';
-import { ScrollArea } from "@/components/ui/scroll-area" // Opcional: para si hay muchos tenants
-import { Separator } from "@/components/ui/separator"
+import { IntraCloudBillingDimSelectionComponent } from '@/components/comp-cloud/intracloud/billing/table/IntraCloudBillingDimSelectionComponent';
 
 interface IntraCloudComputeBillingTableProps {
     data: IntraCloudComputeBilling[];
@@ -144,26 +143,24 @@ interface IntraCloudComputeBillingTableProps {
 
 export const IntraCloudComputeBillingTable = ({ data, dimension, setDimension, payload }: IntraCloudComputeBillingTableProps) => {
 
-    const cloudProvider = payload.cloud_provider; // "AWS" | "Azure"
+    const cloudProvider = payload.cloud_provider;
 
-    // 1. Calcular estadísticas por tenant para AWS
     const awsStats = useMemo(() => {
         if (cloudProvider !== 'AWS' || !data.length) return null;
 
-        // Mapeamos los datos de cada tenant
         const mostExpensiveList = data.map((tenant, idx) => ({
             id: tenant.tenant_id,
             name: `Tenant ${idx + 1}`,
             cost: tenant.most_expensive?.total_cost || 0,
             resourceId: tenant.most_expensive?.RESOURCE_ID || tenant.most_expensive?.resource || 'N/A'
-        })).sort((a, b) => b.cost - a.cost); // Ordenamos de mayor a menor costo
+        })).sort((a, b) => b.cost - a.cost);
 
         const leastExpensiveList = data.map((tenant, idx) => ({
             id: tenant.tenant_id,
             name: `Tenant ${idx + 1}`,
             cost: tenant.least_expensive?.total_cost || 0,
             resourceId: tenant.least_expensive?.RESOURCE_ID || tenant.least_expensive?.resource || 'N/A'
-        })).sort((a, b) => a.cost - b.cost); // Ordenamos de menor a mayor costo
+        })).sort((a, b) => a.cost - b.cost);
 
         return {
             most: mostExpensiveList,
@@ -171,12 +168,9 @@ export const IntraCloudComputeBillingTable = ({ data, dimension, setDimension, p
         };
     }, [data, cloudProvider]);
 
-
-    // 2. Procesar datos para la tabla
     const aggregatedData = useMemo(() => {
         if (!dimension || !data.length) return [];
 
-        // --- LÓGICA AWS: COMPARACIÓN POR RANKING ---
         if (cloudProvider === 'AWS') {
             const tenantSortedData = data.map(tenant => {
                 return {
@@ -216,8 +210,6 @@ export const IntraCloudComputeBillingTable = ({ data, dimension, setDimension, p
             }
             return rows;
         }
-
-        // --- LÓGICA AZURE: AGRUPACIÓN POR DIMENSIÓN ---
         const dimensionMap = new Map<string, AggregatedComputeRow>();
 
         data.forEach(tenant => {
@@ -263,10 +255,8 @@ export const IntraCloudComputeBillingTable = ({ data, dimension, setDimension, p
 
     return (
         <div className="flex flex-col gap-4 w-full">
-            {/* AWS CARDS - LISTADO POR TENANT */}
             {cloudProvider === 'AWS' && awsStats && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {/* CARD: MOST EXPENSIVE */}
                     <Card className="bg-white border-l-4 border-l-orange-500 shadow-sm flex flex-col">
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 border-b">
                             <CardTitle className="text-sm font-medium text-muted-foreground">
@@ -298,8 +288,6 @@ export const IntraCloudComputeBillingTable = ({ data, dimension, setDimension, p
                             </div>
                         </CardContent>
                     </Card>
-
-                    {/* CARD: LEAST EXPENSIVE */}
                     <Card className="bg-white border-l-4 border-l-emerald-500 shadow-sm flex flex-col">
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 border-b">
                             <CardTitle className="text-sm font-medium text-muted-foreground">
@@ -333,8 +321,6 @@ export const IntraCloudComputeBillingTable = ({ data, dimension, setDimension, p
                     </Card>
                 </div>
             )}
-
-            {/* TABLA PRINCIPAL */}
             <Card className="w-full overflow-hidden">
                 <CardHeader className="border-b bg-muted/10">
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -352,6 +338,17 @@ export const IntraCloudComputeBillingTable = ({ data, dimension, setDimension, p
                     </div>
                 </CardHeader>
                 <CardContent className="p-0">
+                    {
+                        cloudProvider === 'Azure' && (
+                            <div className="p-2 flex justify-end">
+                                <IntraCloudBillingDimSelectionComponent
+                                    dimension={dimension}
+                                    setDimension={setDimension}
+                                    payload={payload}
+                                />
+                            </div>
+                        )
+                    }
                     {dimension && aggregatedData.length > 0 ? (
                         <div className="p-4">
                             <DataTableGrouping
