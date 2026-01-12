@@ -14,7 +14,7 @@ const ACTIONS = [
         href: '/comparacion-nubes/intranube',
         bgColor: 'bg-blue-500/10',
         textColor: 'text-blue-600',
-        role: ['usuario', 'admin_empresa'],
+        role: ['usuario', 'admin_empresa','admin_global'],
     },
     {
         name: 'Comparacion Internube',
@@ -31,8 +31,7 @@ export default function ComparissionIndexPage() {
     const { user, isLoading } = useSession();
 
     if (isLoading) return <div className="mx-auto max-w-5xl px-4 py-8 text-center text-gray-500">Cargando módulo...</div>;
-
-    if (!user || (user.role !== 'usuario' && user.role !== 'admin_empresa')) {
+    if (!user || (user.role !== 'usuario' && user.role !== 'admin_global' && user.role !== 'admin_empresa')) {
         return (
             <div className="mx-auto max-w-5xl px-4 py-8 text-center">
                 <div className="p-10 bg-red-100 border border-red-400 text-red-700 rounded-lg shadow-lg">
