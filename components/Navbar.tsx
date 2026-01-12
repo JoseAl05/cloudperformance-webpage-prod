@@ -68,7 +68,7 @@ export const Navbar = ({ payload }: NavbarProps) => {
 
                                 <DropdownMenuContent
                                     align="end"
-                                    className="w-56 shadow-lg"
+                                    className="w-56 shadow-lg z-70"
                                 >
                                     <DropdownMenuItem asChild>
                                         <Link href="/perfil" className="cursor-pointer">
