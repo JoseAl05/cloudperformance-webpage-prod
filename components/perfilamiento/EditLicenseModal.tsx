@@ -11,13 +11,17 @@ const generateAccountId = () => 'clp-' + Date.now().toString(36);
 
 interface AccountRowProps {
     account: CloudAccount;
-    cloud: 'azure' | 'aws';
-    onUpdate: (cloud: 'azure' | 'aws', id: string, field: keyof CloudAccount, value: string) => void;
-    onRemove: (cloud: 'azure' | 'aws', id: string) => void;
+    cloud: 'azure' | 'aws' | 'gcp';
+    onUpdate: (cloud: 'azure' | 'aws' | 'gcp', id: string, field: keyof CloudAccount, value: string) => void;
+    onRemove: (cloud: 'azure' | 'aws' | 'gcp', id: string) => void;
 }
 
 const AccountRow = memo(({ account, cloud, onUpdate, onRemove }: AccountRowProps) => {
-    const themeColor = cloud === 'azure' ? 'text-blue-700 border-blue-300' : 'text-amber-700 border-amber-300';
+    // Lógica de colores actualizada para incluir GCP
+    let themeColor = '';
+    if (cloud === 'azure') themeColor = 'text-blue-700 border-blue-300';
+    else if (cloud === 'aws') themeColor = 'text-amber-700 border-amber-300';
+    else themeColor = 'text-emerald-700 border-emerald-300'; // GCP style
     
     return (
         <div className="grid grid-cols-6 gap-2 items-center py-2 border-b border-gray-200">
@@ -58,15 +62,19 @@ const AccountRow = memo(({ account, cloud, onUpdate, onRemove }: AccountRowProps
 AccountRow.displayName = 'AccountRow';
 
 interface AccountListEditorProps {
-    cloud: 'azure' | 'aws';
+    cloud: 'azure' | 'aws' | 'gcp';
     accounts: CloudAccount[];
-    onUpdate: (cloud: 'azure' | 'aws', id: string, field: keyof CloudAccount, value: string) => void;
-    onRemove: (cloud: 'azure' | 'aws', id: string) => void;
-    onAdd: (cloud: 'azure' | 'aws') => void;
+    onUpdate: (cloud: 'azure' | 'aws' | 'gcp', id: string, field: keyof CloudAccount, value: string) => void;
+    onRemove: (cloud: 'azure' | 'aws' | 'gcp', id: string) => void;
+    onAdd: (cloud: 'azure' | 'aws' | 'gcp') => void;
 }
 
 const AccountListEditor = memo(({ cloud, accounts, onUpdate, onRemove, onAdd }: AccountListEditorProps) => {
-    const accentColor = cloud === 'azure' ? 'text-blue-600 hover:text-blue-800' : 'text-amber-600 hover:text-amber-800';
+    // Color del botón añadir
+    let accentColor = '';
+    if (cloud === 'azure') accentColor = 'text-blue-600 hover:text-blue-800';
+    else if (cloud === 'aws') accentColor = 'text-amber-600 hover:text-amber-800';
+    else accentColor = 'text-emerald-600 hover:text-emerald-800';
 
     return (
         <div className="space-y-2 pt-1 border-t mt-2">
@@ -101,17 +109,25 @@ interface EditLicenseModalProps {
 export default function EditLicenseModal({ empresa, onClose, refreshList }: EditLicenseModalProps) {
     const [azureAccountsData, setAzureAccountsData] = useState<CloudAccount[]>([]);
     const [awsAccountsData, setAwsAccountsData] = useState<CloudAccount[]>([]);
+    const [gcpAccountsData, setGcpAccountsData] = useState<CloudAccount[]>([]); // Nuevo estado GCP
+
     const [formData, setFormData] = useState({
         name: empresa.name,
         planName: empresa.planName,
         userLimit: empresa.userLimit,
         currentUsers: empresa.currentUsers,
+        // AWS
         is_aws: empresa.is_aws || false,
         user_db_aws: empresa.user_db_aws || '',
+        is_aws_multi_tenant: empresa.is_aws_multi_tenant || false,
+        // Azure
         is_azure: empresa.is_azure || false,
         user_db_azure: empresa.user_db_azure || '',
-        is_aws_multi_tenant: empresa.is_aws_multi_tenant || false,
         is_azure_multi_tenant: empresa.is_azure_multi_tenant || false,
+        // GCP (Nuevos campos)
+        is_gcp: empresa.is_gcp || false,
+        user_db_gcp: empresa.user_db_gcp || '',
+        is_gcp_multi_tenant: empresa.is_gcp_multi_tenant || false,
     });
 
     const [loading, setLoading] = useState(false);
@@ -126,17 +142,25 @@ export default function EditLicenseModal({ empresa, onClose, refreshList }: Edit
                 planName: empresa.planName,
                 userLimit: empresa.userLimit,
                 currentUsers: empresa.currentUsers,
+                
                 is_aws: empresa.is_aws || false,
                 user_db_aws: empresa.user_db_aws || '',
+                is_aws_multi_tenant: empresa.is_aws_multi_tenant || false,
+
                 is_azure: empresa.is_azure || false,
                 user_db_azure: empresa.user_db_azure || '',
-                is_aws_multi_tenant: empresa.is_aws_multi_tenant || false,
                 is_azure_multi_tenant: empresa.is_azure_multi_tenant || false,
+
+                // Carga inicial GCP
+                is_gcp: empresa.is_gcp || false,
+                user_db_gcp: empresa.user_db_gcp || '',
+                is_gcp_multi_tenant: empresa.is_gcp_multi_tenant || false,
             });
             
             // Cargar las cuentas existentes
             setAzureAccountsData(empresa.azure_accounts || []);
             setAwsAccountsData(empresa.aws_accounts || []);
+            setGcpAccountsData(empresa.gcp_accounts || []); // Cargar cuentas GCP
             
             setMessage('');
         }
@@ -170,37 +194,51 @@ export default function EditLicenseModal({ empresa, onClose, refreshList }: Edit
                 setAzureAccountsData([]);
             }
 
+            // Limpiar datos cuando se desactiva GCP
+            if (name === 'is_gcp' && !checked) {
+                newState.user_db_gcp = '';
+                newState.is_gcp_multi_tenant = false;
+                setGcpAccountsData([]);
+            }
+
             // Limpiar arrays cuando se desactiva multi-tenant
-            if (name === 'is_azure_multi_tenant' && !checked) {
-                setAzureAccountsData([]);
-            }
-            if (name === 'is_aws_multi_tenant' && !checked) {
-                setAwsAccountsData([]);
-            }
+            if (name === 'is_azure_multi_tenant' && !checked) setAzureAccountsData([]);
+            if (name === 'is_aws_multi_tenant' && !checked) setAwsAccountsData([]);
+            if (name === 'is_gcp_multi_tenant' && !checked) setGcpAccountsData([]);
 
             return newState;
         });
     };
 
-    const handleAddAccount = useCallback((cloud: 'azure' | 'aws') => {
+    const handleAddAccount = useCallback((cloud: 'azure' | 'aws' | 'gcp') => {
         const newAccount: CloudAccount = {
             id: generateAccountId(),
             alias: `Nueva Cuenta ${cloud.toUpperCase()}`,
             db: '',
         };
-        const setter = cloud === 'azure' ? setAzureAccountsData : setAwsAccountsData;
-        setter(prev => [...prev, newAccount]);
+        // Lógica de selección de setter
+        if (cloud === 'azure') setAzureAccountsData(prev => [...prev, newAccount]);
+        else if (cloud === 'aws') setAwsAccountsData(prev => [...prev, newAccount]);
+        else setGcpAccountsData(prev => [...prev, newAccount]);
     }, []);
 
-    const handleUpdateAccount = useCallback((cloud: 'azure' | 'aws', id: string, field: keyof CloudAccount, value: string) => {
-        const setter = cloud === 'azure' ? setAzureAccountsData : setAwsAccountsData;
+    const handleUpdateAccount = useCallback((cloud: 'azure' | 'aws' | 'gcp', id: string, field: keyof CloudAccount, value: string) => {
+        let setter;
+        if (cloud === 'azure') setter = setAzureAccountsData;
+        else if (cloud === 'aws') setter = setAwsAccountsData;
+        else setter = setGcpAccountsData;
+
         setter(prev => prev.map(acc => 
             acc.id === id ? { ...acc, [field]: value } : acc
         ));
     }, []);
-    
-    const handleRemoveAccount = useCallback((cloud: 'azure' | 'aws', id: string) => {
-        const setter = cloud === 'azure' ? setAzureAccountsData : setAwsAccountsData;
+
+    const handleRemoveAccount = useCallback((cloud: 'azure' | 'aws' | 'gcp', id: string) => {
+        let setter;
+        if (cloud === 'azure') setter = setAzureAccountsData;
+        else if (cloud === 'aws') setter = setAwsAccountsData;
+        else setter = setGcpAccountsData;
+
         setter(prev => prev.filter(acc => acc.id !== id));
     }, []);
 
@@ -209,41 +247,45 @@ export default function EditLicenseModal({ empresa, onClose, refreshList }: Edit
         setLoading(true);
         setMessage('');
 
-        // Validaciones
+        // Validaciones Básicas
         if (!formData.name || !formData.planName) {
             setMessage('Error: Faltan campos esenciales (Nombre o Plan).');
-            setLoading(false);
-            return;
+            setLoading(false); return;
         }
 
+        // Validaciones AWS
         if (!formData.is_aws_multi_tenant && formData.is_aws && !formData.user_db_aws) {
             setMessage('Error: El Nombre DB AWS es requerido si el acceso AWS está activado.');
-            setLoading(false);
-            return;
+            setLoading(false); return;
         }
-
-        if (!formData.is_azure_multi_tenant && formData.is_azure && !formData.user_db_azure) {
-            setMessage('Error: El Nombre DB Azure es requerido si el acceso Azure está activado.');
-            setLoading(false);
-            return;
-        }
-
-        if (formData.is_azure_multi_tenant && azureAccountsData.length === 0) {
-            setMessage('Error: Si marca Multi-Tenant Azure, debe agregar al menos una cuenta.');
-            setLoading(false);
-            return;
-        }
-
         if (formData.is_aws_multi_tenant && awsAccountsData.length === 0) {
             setMessage('Error: Si marca Multi-Tenant AWS, debe agregar al menos una cuenta.');
-            setLoading(false);
-            return;
+            setLoading(false); return;
+        }
+
+        // Validaciones Azure
+        if (!formData.is_azure_multi_tenant && formData.is_azure && !formData.user_db_azure) {
+            setMessage('Error: El Nombre DB Azure es requerido si el acceso Azure está activado.');
+            setLoading(false); return;
+        }
+        if (formData.is_azure_multi_tenant && azureAccountsData.length === 0) {
+            setMessage('Error: Si marca Multi-Tenant Azure, debe agregar al menos una cuenta.');
+            setLoading(false); return;
+        }
+
+        // Validaciones GCP
+        if (!formData.is_gcp_multi_tenant && formData.is_gcp && !formData.user_db_gcp) {
+            setMessage('Error: El Nombre DB GCP es requerido si el acceso GCP está activado.');
+            setLoading(false); return;
+        }
+        if (formData.is_gcp_multi_tenant && gcpAccountsData.length === 0) {
+            setMessage('Error: Si marca Multi-Tenant GCP, debe agregar al menos una cuenta.');
+            setLoading(false); return;
         }
 
         if (formData.userLimit !== undefined && formData.userLimit < currentUsers) {
             setMessage(`Error: El nuevo límite (${formData.userLimit}) no puede ser menor a los usuarios activos (${currentUsers}).`);
-            setLoading(false);
-            return;
+            setLoading(false); return;
         }
 
         // Preparar cuentas finales
@@ -255,17 +297,31 @@ export default function EditLicenseModal({ empresa, onClose, refreshList }: Edit
             ? awsAccountsData
             : formData.is_aws ? [{ id: 'aws01', alias: formData.name + ' - Principal', db: formData.user_db_aws }] : undefined;
 
+        const finalGcpAccounts = formData.is_gcp_multi_tenant 
+            ? gcpAccountsData
+            : formData.is_gcp ? [{ id: 'gcp01', alias: formData.name + ' - Principal', db: formData.user_db_gcp }] : undefined;
+
         const updatePayload = {
             planName: formData.planName,
             userLimit: formData.userLimit,
+            
+            // AWS
             is_aws: formData.is_aws,
             user_db_aws: formData.is_aws && !formData.is_aws_multi_tenant ? formData.user_db_aws : null,
+            is_aws_multi_tenant: formData.is_aws_multi_tenant,
+            aws_accounts: finalAwsAccounts,
+
+            // Azure
             is_azure: formData.is_azure,
             user_db_azure: formData.is_azure && !formData.is_azure_multi_tenant ? formData.user_db_azure : null,
-            is_aws_multi_tenant: formData.is_aws_multi_tenant,
             is_azure_multi_tenant: formData.is_azure_multi_tenant,
             azure_accounts: finalAzureAccounts,
-            aws_accounts: finalAwsAccounts,
+
+            // GCP
+            is_gcp: formData.is_gcp,
+            user_db_gcp: formData.is_gcp && !formData.is_gcp_multi_tenant ? formData.user_db_gcp : null,
+            is_gcp_multi_tenant: formData.is_gcp_multi_tenant,
+            gcp_accounts: finalGcpAccounts,
         };
 
         try {
@@ -276,7 +332,6 @@ export default function EditLicenseModal({ empresa, onClose, refreshList }: Edit
                 credentials: 'include',
             });
 
-            // --- CORRECCIÓN: Definir tipo en lugar de any ---
             let data: { message?: string } = {}; 
 
             try {
@@ -312,7 +367,7 @@ export default function EditLicenseModal({ empresa, onClose, refreshList }: Edit
             className="fixed inset-0 z-[1050] flex justify-center items-center transition-opacity duration-300"
             style={{ backgroundColor: 'rgba(0, 0, 0, 0.75)' }}
         >
-            <div className="relative w-full max-w-3xl mx-4 max-h-[90vh] overflow-y-auto transform transition-all duration-300 scale-100">
+            <div className="relative w-full max-w-4xl mx-4 max-h-[90vh] overflow-y-auto transform transition-all duration-300 scale-100">
                 <div className="bg-white rounded-xl shadow-2xl border">
                     <header className="flex items-center justify-between p-5 border-b bg-blue-600 rounded-t-xl text-white sticky top-0 z-10">
                         <div className="flex items-center space-x-3">
@@ -379,9 +434,11 @@ export default function EditLicenseModal({ empresa, onClose, refreshList }: Edit
                                 <Cloud className="h-4 w-4" /> <span>Configuración de Conexiones Maestras</span>
                             </h6>
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {/* Grilla de Nubes: AWS - Azure - GCP */}
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                
                                 {/* AWS CONFIGURATION */}
-                                <div className="space-y-2 border p-3 rounded-lg">
+                                <div className="space-y-2 border p-3 rounded-lg bg-amber-50/20 border-amber-100">
                                     <div className="flex items-center space-x-4 mb-2">
                                         <input 
                                             type="checkbox" 
@@ -440,7 +497,7 @@ export default function EditLicenseModal({ empresa, onClose, refreshList }: Edit
                                 </div>
 
                                 {/* AZURE CONFIGURATION */}
-                                <div className="space-y-2 border p-3 rounded-lg">
+                                <div className="space-y-2 border p-3 rounded-lg bg-blue-50/20 border-blue-100">
                                     <div className="flex items-center space-x-4 mb-2">
                                         <input 
                                             type="checkbox" 
@@ -491,6 +548,65 @@ export default function EditLicenseModal({ empresa, onClose, refreshList }: Edit
                                         <AccountListEditor 
                                             cloud="azure" 
                                             accounts={azureAccountsData} 
+                                            onAdd={handleAddAccount} 
+                                            onUpdate={handleUpdateAccount} 
+                                            onRemove={handleRemoveAccount} 
+                                        />
+                                    )}
+                                </div>
+
+                                {/* GCP CONFIGURATION (NUEVO) */}
+                                <div className="space-y-2 border p-3 rounded-lg bg-emerald-50/20 border-emerald-100">
+                                    <div className="flex items-center space-x-4 mb-2">
+                                        <input 
+                                            type="checkbox" 
+                                            name="is_gcp" 
+                                            id="is_gcp" 
+                                            checked={formData.is_gcp} 
+                                            onChange={handleChange} 
+                                            className="h-4 w-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500" 
+                                        />
+                                        <label htmlFor="is_gcp" className="text-sm font-medium">Acceso GCP</label>
+
+                                        {formData.is_gcp && (
+                                            <div className="flex items-center space-x-2">
+                                                <input 
+                                                    type="checkbox" 
+                                                    name="is_gcp_multi_tenant" 
+                                                    id="is_gcp_multi_tenant" 
+                                                    checked={formData.is_gcp_multi_tenant} 
+                                                    onChange={handleChange} 
+                                                    className="h-4 w-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500" 
+                                                />
+                                                <label htmlFor="is_gcp_multi_tenant" className="text-sm font-medium text-emerald-700">
+                                                    Multi-Tenant
+                                                </label>
+                                            </div>
+                                        )}
+                                    </div>
+                                    
+                                    {formData.is_gcp && !formData.is_gcp_multi_tenant && (
+                                        <div className="space-y-2 pt-2">
+                                            <label htmlFor="user_db_gcp" className="text-xs font-medium text-emerald-700">
+                                                Nombre DB GCP (Maestra/Principal)
+                                            </label>
+                                            <input 
+                                                type="text" 
+                                                name="user_db_gcp" 
+                                                id="user_db_gcp" 
+                                                value={formData.user_db_gcp} 
+                                                onChange={handleChange} 
+                                                required={formData.is_gcp} 
+                                                className="flex h-10 w-full rounded-md border border-emerald-300 bg-white px-3 py-2 text-sm" 
+                                                placeholder="Ej: Cloud_Performance_GCP" 
+                                            />
+                                        </div>
+                                    )}
+
+                                    {formData.is_gcp && formData.is_gcp_multi_tenant && (
+                                        <AccountListEditor 
+                                            cloud="gcp" 
+                                            accounts={gcpAccountsData} 
                                             onAdd={handleAddAccount} 
                                             onUpdate={handleUpdateAccount} 
                                             onRemove={handleRemoveAccount} 

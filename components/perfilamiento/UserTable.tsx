@@ -12,11 +12,20 @@ interface UserData {
     username: string;
     client: string;
     role: UserRole;
+
+    // AWS
     is_aws: boolean;
-    is_azure: boolean;
-    is_active: boolean;
     user_db_aws?: string;
+
+    // Azure
+    is_azure: boolean;
     user_db_azure?: string;
+
+    // GCP
+    is_gcp: boolean;
+    user_db_gcp?: string;
+
+    is_active: boolean;
 }
 
 const fetcher = async (url: string) => {
@@ -217,7 +226,8 @@ export default function UserTable() {
                                     <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-700">
                                         {user.is_aws && <span className="text-xs text-amber-600 mr-1">AWS</span>}
                                         {user.is_azure && <span className="text-xs text-blue-600">Azure</span>}
-                                        {(!user.is_aws && !user.is_azure) && <span className="text-xs text-gray-400">Ninguno</span>}
+                                        {user.is_gcp && <span className="text-xs text-green-600 mr-2">GCP</span>}
+                                        {(!user.is_aws && !user.is_azure && !user.is_gcp) && <span className="text-xs text-gray-400">Ninguno</span>}
                                     </td>
                                     <td className="px-4 py-3 whitespace-nowrap text-right text-sm font-medium">
                                         {canEdit && (

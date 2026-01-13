@@ -78,7 +78,12 @@ export async function PUT(req: NextRequest, { params }: Params) {
             is_aws_multi_tenant,
             is_azure_multi_tenant,
             aws_accounts,
-            azure_accounts
+            azure_accounts,
+
+            is_gcp,                 
+            user_db_gcp,
+            is_gcp_multi_tenant,
+            gcp_accounts,
         } = body; 
         
         const _id = new ObjectId(id);
@@ -208,6 +213,48 @@ export async function PUT(req: NextRequest, { params }: Params) {
                 updateFields.azure_accounts = undefined;
             }
         }
+
+        // 5. LÓGICA AMPLIADA: CONFIGURACIÓN GCP
+        if (typeof is_gcp === 'boolean') {
+            updateFields.is_gcp = is_gcp;
+
+            if (is_gcp) {
+                if (is_gcp_multi_tenant === true) {
+                    updateFields.is_gcp_multi_tenant = true;
+                    updateFields.user_db_gcp = null;
+
+                    if (!gcp_accounts || !Array.isArray(gcp_accounts) || gcp_accounts.length === 0) {
+                        return NextResponse.json({
+                            message: 'Debe proporcionar al menos un proyecto GCP en modo multi-tenant.'
+                        }, { status: 400 });
+                    }
+
+                    for (const acc of gcp_accounts) {
+                        if (!acc.id || !acc.alias || !acc.db) {
+                            return NextResponse.json({
+                                message: 'Todos los proyectos GCP deben tener id, alias y db.'
+                            }, { status: 400 });
+                        }
+                    }
+
+                    updateFields.gcp_accounts = gcp_accounts;
+                } else {
+                    updateFields.is_gcp_multi_tenant = false;
+                    updateFields.gcp_accounts = undefined;
+                    updateFields.user_db_gcp = user_db_gcp;
+
+                    if (!user_db_gcp || user_db_gcp.trim() === '') {
+                        return NextResponse.json({
+                            message: 'La cadena de conexión GCP es requerida si el acceso está habilitado.'
+                        }, { status: 400 });
+                    }
+                }
+            } else {
+                updateFields.user_db_gcp = null;
+                updateFields.is_gcp_multi_tenant = false;
+                updateFields.gcp_accounts = undefined;
+            }
+        }
         
         // Agregar la fecha de actualización de la licencia
         updateFields.updatedAt = new Date();
@@ -230,8 +277,10 @@ export async function PUT(req: NextRequest, { params }: Params) {
         const fieldsToPropagate: Partial<User> = {
             is_aws: updateFields.is_aws,
             is_azure: updateFields.is_azure,
+            is_gcp: updateFields.is_gcp, 
             is_aws_multi_tenant: updateFields.is_aws_multi_tenant,
-            is_azure_multi_tenant: updateFields.is_azure_multi_tenant
+            is_azure_multi_tenant: updateFields.is_azure_multi_tenant,
+            is_gcp_multi_tenant: updateFields.is_gcp_multi_tenant
         };
 
         if (updateFields.planName !== undefined) {
@@ -252,6 +301,13 @@ export async function PUT(req: NextRequest, { params }: Params) {
         } else if (updateFields.is_azure) {
             fieldsToPropagate.user_db_azure = updateFields.user_db_azure;
             fieldsToPropagate.azure_accounts = undefined;
+        }
+        if (updateFields.is_gcp_multi_tenant) {
+            fieldsToPropagate.user_db_gcp = null;
+            fieldsToPropagate.gcp_accounts = updateFields.gcp_accounts;
+        } else if (updateFields.is_gcp) {
+            fieldsToPropagate.user_db_gcp = updateFields.user_db_gcp;
+            fieldsToPropagate.gcp_accounts = undefined;
         }
 
         const updateUsersResult = await usersCollection.updateMany(

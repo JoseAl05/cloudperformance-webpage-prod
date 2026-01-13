@@ -10,6 +10,7 @@ interface EmpresaData {
     currentUsers: number;
     is_aws: boolean;
     is_azure: boolean;
+    is_gcp: boolean; 
     planName: string;
 }
 
@@ -116,7 +117,12 @@ export default function LicenseTable() {
                                 const activeUsers = empresa.currentUsers ?? 0;
                                 const isOverLimit = activeUsers > empresa.userLimit;
                                 const limitColor = isOverLimit ? 'text-red-600 font-bold' : 'text-green-600';
-                                const cloudStatus = (empresa.is_aws ? 'AWS' : '') + (empresa.is_aws && empresa.is_azure ? ' | ' : '') + (empresa.is_azure ? 'Azure' : '');
+                                const cloudStatus = [
+                                    empresa.is_aws && 'AWS',
+                                    empresa.is_azure && 'Azure',
+                                    empresa.is_gcp && 'GCP',
+                                ].filter(Boolean).join(' | ');
+
 
                                 return (
                                     <tr key={empresa._id} className="hover:bg-gray-50 transition duration-150">

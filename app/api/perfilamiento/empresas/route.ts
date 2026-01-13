@@ -37,6 +37,11 @@ export async function GET(req: NextRequest) {
         azure_accounts: 1,
         aws_accounts: 1,
 
+        is_gcp: 1,                 
+        user_db_gcp: 1,            
+        is_gcp_multi_tenant: 1,   
+        gcp_accounts: 1,
+
         _id: 1,
       })
       .toArray();
@@ -78,6 +83,11 @@ export async function POST(req: NextRequest) {
     is_azure_multi_tenant = false,
     azure_accounts,
     aws_accounts,
+
+    is_gcp = false,            
+    user_db_gcp,
+    is_gcp_multi_tenant = false,
+    gcp_accounts,
   } = body;
 
   if (!name || !planName) {
@@ -146,6 +156,11 @@ export async function POST(req: NextRequest) {
 
       azure_accounts: azure_accounts,
       aws_accounts: aws_accounts,
+
+      is_gcp,                                      
+      user_db_gcp: is_gcp ? user_db_gcp : null,   
+      is_gcp_multi_tenant,                         
+      gcp_accounts, 
 
       createdAt: new Date(),
     };
