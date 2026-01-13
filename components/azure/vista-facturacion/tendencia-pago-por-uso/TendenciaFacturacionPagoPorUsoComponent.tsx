@@ -108,7 +108,6 @@ export const TendenciaFacturacionPagoPorUsoComponent = ({
         );
 
     const metrics = calculateMetrics(data);
-    console.log(metrics);
 
     return (
         <div className="w-full min-w-0 px-4 py-2">

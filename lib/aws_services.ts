@@ -6,3 +6,7 @@ export const aws_compute_services = [
   { label: 'RDS Mariadb', value: 'mariadb' },
   { label: 'RDS Sql Server', value: 'sqlserver' },
 ];
+
+export const aws_storage_services = [
+  { label: 'S3 Buckets', value: 's3' },
+]

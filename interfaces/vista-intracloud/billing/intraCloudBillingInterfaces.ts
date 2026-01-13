@@ -4,7 +4,8 @@ export interface IntraCloudBilling {
 }
 
 export interface IntraCloudBillingData {
-  _id: string;
+  start_date: string;
+  service: string;
   cost_in_usd_sum: number;
   payg_cost_in_usd_sum: number;
 }

@@ -16,19 +16,21 @@ import {
     PopoverContent,
     PopoverTrigger
 } from '@/components/ui/popover';
-import { azure_compute_services } from '@/lib/azure_services';
+import { azure_compute_services, azure_storage_services } from '@/lib/azure_services';
 import { ReqPayload } from '@/components/comp-cloud/intracloud/IntraCloudConfigComponent';
-import { aws_compute_services } from '@/lib/aws_services';
+import { aws_compute_services, aws_storage_services } from '@/lib/aws_services';
 
 interface MultiTenantServiceFilterComponentProps {
     service: string;
     setService: Dispatch<SetStateAction<string>>;
+    serviceType?: string;
     payload: ReqPayload;
 }
 
 export const MultiTenantServiceFilterComponent = ({
     service,
     setService,
+    serviceType,
     payload
 }: MultiTenantServiceFilterComponentProps) => {
     const [open, setOpen] = useState(false);
@@ -36,9 +38,17 @@ export const MultiTenantServiceFilterComponent = ({
     let servicesList = [];
 
     if (payload.cloud_provider === 'Azure') {
-        servicesList = azure_compute_services;
+        if (serviceType === 'compute'){
+            servicesList = azure_compute_services;
+        } else if (serviceType === 'storage'){
+            servicesList = azure_storage_services;
+        }
     } else if (payload.cloud_provider === 'AWS') {
-        servicesList = aws_compute_services;
+        if (serviceType === 'compute'){
+            servicesList = aws_compute_services;
+        } else if (serviceType === 'storage'){
+            servicesList = aws_storage_services;
+        }
     }
 
 
@@ -46,9 +56,6 @@ export const MultiTenantServiceFilterComponent = ({
         if (!service || service.trim() === '') return 'Selecciona servicio';
 
         const selectedService = servicesList.find((s) => s.value === service);
-
-        // Si encuentra el servicio, muestra el label. 
-        // Si no (ej. error de datos), muestra el valor crudo o un fallback, pero no "undefined"
         return selectedService ? selectedService.label : service;
     };
 

@@ -123,16 +123,18 @@ export const IntraCloudBillingCostUsdChartComponent = ({ data, payload }: IntraC
 
   const chartRef = useRef<HTMLDivElement>(null);
 
+  console.log(data);
+
   const chartSeriesData = useMemo(() => {
     if (!data || !Array.isArray(data)) return [];
 
     return data.map((tenant, index) => {
       const sortedData = [...tenant.billing_data].sort((a, b) =>
-        new Date(a._id).getTime() - new Date(b._id).getTime()
+        new Date(a.start_date).getTime() - new Date(b.start_date).getTime()
       );
 
       const chartData: [string, string][] = sortedData.map(item => [
-        item._id,
+        item.start_date,
         formatMetric(item.cost_in_usd_sum)
       ]);
 

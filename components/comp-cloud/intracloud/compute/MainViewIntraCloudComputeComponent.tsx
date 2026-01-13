@@ -111,6 +111,7 @@ export const MainViewIntraCloudComputeComponent = ({ payload }: MainViewIntraClo
                             tagsFilter
                             resourceGroupFilter
                             serviceFilter
+                            serviceType='compute'
                             resourceFilter
                             payload={payload}
                         />
@@ -120,6 +121,7 @@ export const MainViewIntraCloudComputeComponent = ({ payload }: MainViewIntraClo
                             regionFilter
                             isRegionMultiSelect
                             serviceFilter
+                            serviceType='compute'
                             resourceFilter
                             payload={payload}
                         />
