@@ -1,9 +1,9 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { IntraCloudBilling } from '@/interfaces/vista-intracloud/billing/intraCloudBillingInterfaces'
+import { IntraCloudBilling } from '@/interfaces/vista-intracloud/billing/intraCloudBillingInterfaces';
 import { formatMetric } from '@/lib/metricUtils';
 import { cn } from '@/lib/utils';
-import { Badge, Clock, DollarSign, Eye } from 'lucide-react';
+import { Badge, Clock, DollarSign, LucideIcon } from 'lucide-react'; // Agregué LucideIcon al import
 import { useMemo } from 'react';
 
 interface IntraCloudBillingCardsComponentProps {
@@ -29,7 +29,6 @@ const gridColsMap: Record<number, string> = {
 };
 
 const StatCard = ({ title, value, description, subDescription, icon: Icon, actionLabel, dateLabel }: StatCardProps) => {
-
     return (
         <Card className='border-l-4 shadow-sm hover:shadow-md transition-all duration-200 border-l-blue-500 flex flex-col justify-between group relative'>
             <CardContent className="p-6">
@@ -67,79 +66,76 @@ const StatCard = ({ title, value, description, subDescription, icon: Icon, actio
     );
 };
 
-
-
 export const IntraCloudBillingCardsComponent = ({ data }: IntraCloudBillingCardsComponentProps) => {
 
     const acumulatedCostByTenant = useMemo(() => {
         if (!data || !Array.isArray(data)) return [];
 
         return data.map((tenant, index) => {
-            if (!tenant.billing_data || tenant.billing_data.length === 0) {
+            const billingData = tenant.billing_data || [];
+
+            if (billingData.length === 0) {
                 return {
                     cardTitle: `Costo real acumulado Tenant ${index + 1}`,
                     acc_cost: 0,
-                    first_date: null,
-                    last_date: null,
+                    dateLabel: "Sin datos registrados",
                     tenant_id: tenant.tenant_id,
-                    description: '',
+                    description: 'Costo Retail: $0',
                     subDescription: ''
                 };
             }
 
-            const sortedData = [...tenant.billing_data].sort((a, b) =>
-                new Date(a._id).getTime() - new Date(b._id).getTime()
-            );
+            let totalCost = 0;
+            let totalRetailCost = 0;
+            let minTime = Infinity;
+            let maxTime = -Infinity;
 
-            const firstDate = new Date(sortedData[0]._id);
-            const lastDate = new Date(sortedData[sortedData.length - 1]._id);
+            // Iteración única para sumar costos y encontrar rango de fechas
+            billingData.forEach((item) => {
+                const cost = Number(item.cost_in_usd_sum) || 0;
+                const retail = Number(item.payg_cost_in_usd_sum) || 0;
+                // Asumimos que start_date viene en formato ISO string compatible
+                const time = new Date(item.start_date).getTime();
+
+                totalCost += cost;
+                totalRetailCost += retail;
+
+                if (time < minTime) minTime = time;
+                if (time > maxTime) maxTime = time;
+            });
+
+            const firstDate = minTime !== Infinity ? new Date(minTime) : null;
+            const lastDate = maxTime !== -Infinity ? new Date(maxTime) : null;
+
             const dateRangeText = firstDate && lastDate
-                ? `${firstDate.toLocaleDateString()} - ${lastDate.toLocaleDateString()}`
-                : "Sin datos registrados";
-
-            const totalCost = sortedData.reduce((sum, item) => {
-                return sum + (item.cost_in_usd_sum || 0);
-            }, 0);
-            const totalRetailCost = sortedData.reduce((sum, item) => {
-                return sum + (item.payg_cost_in_usd_sum || 0);
-            }, 0)
+                ? `${firstDate.toISOString().split('T')[0]} - ${lastDate.toISOString().split('T')[0]}`
+                : "Sin rango de fechas";
 
             return {
                 cardTitle: `Costo real acumulado Tenant ${index + 1}`,
                 acc_cost: totalCost,
-                first_date: firstDate,
-                last_date: lastDate,
                 tenant_id: tenant.tenant_id,
                 description: `Costo Retail: $${formatMetric(totalRetailCost)}`,
-                subDescription: `Costo acumulado calculado en el rango ${dateRangeText}`
+                subDescription: `Costo acumulado calculado en el rango ${dateRangeText}`,
+                dateLabel: dateRangeText
             };
         });
     }, [data]);
 
-
     const colsClass = gridColsMap[data.length] ?? "grid-cols-4";
-    return (
-        <>
-            <div className={cn(
-                "grid gap-4",
-                colsClass,
-            )}>
-                {
-                    acumulatedCostByTenant.map((tenant) => {
 
-                        return (
-                            <StatCard
-                                key={tenant.tenant_id}
-                                title={tenant.cardTitle}
-                                value={formatMetric(tenant.acc_cost)}
-                                description={tenant.description}
-                                subDescription={tenant.subDescription}
-                                icon={DollarSign}
-                            />
-                        );
-                    })
-                }
-            </div>
-        </>
-    )
+    return (
+        <div className={cn("grid gap-4", colsClass)}>
+            {acumulatedCostByTenant.map((tenant) => (
+                <StatCard
+                    key={tenant.tenant_id}
+                    title={tenant.cardTitle}
+                    value={formatMetric(tenant.acc_cost)}
+                    description={tenant.description}
+                    subDescription={tenant.subDescription}
+                    icon={DollarSign}
+                />
+            ))}
+        </div>
+    );
 }

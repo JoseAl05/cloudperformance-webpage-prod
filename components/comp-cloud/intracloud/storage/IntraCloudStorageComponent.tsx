@@ -1,15 +1,17 @@
 'use client'
 
-import { IntraCloudComputeChartComponent } from '@/components/comp-cloud/intracloud/compute/grafico/IntraCloudComputeChartComponent';
-import { IntraCloudComputeCardsByTenantComponent } from '@/components/comp-cloud/intracloud/compute/info/IntraCloudComputeCardsByTenantComponent';
 import { ReqPayload } from '@/components/comp-cloud/intracloud/IntraCloudConfigComponent';
 import { IntraCloudServicesBillingTable } from '@/components/comp-cloud/intracloud/services_billing/table/IntraCloudServicesBillingTable';
+import { IntraCloudAwsStorageChartComponent } from '@/components/comp-cloud/intracloud/storage/aws/grafico/IntraCloudAwsStorageChartComponent';
+import { IntraCloudAwsStorageCardsByTenantComponent } from '@/components/comp-cloud/intracloud/storage/aws/info/IntraCloudAwsStorageCardsByTenantComponent';
+import { IntraCloudAzureStorageChartComponent } from '@/components/comp-cloud/intracloud/storage/azure/grafico/IntraCloudAzureStorageChartComponent';
+import { IntraCloudAzureStorageCardsByTenantComponent } from '@/components/comp-cloud/intracloud/storage/azure/info/IntraCloudAzureStorageCardsByTenantComponent';
 import { DynamicFilterProps } from '@/components/general_comp_cloud/filters/FilterComponent';
 import { AlertCircle, Loader2 } from 'lucide-react';
 import { useState } from 'react';
 import useSWR from 'swr';
 
-type IntraCloudComputeComponentProps = DynamicFilterProps;
+type IntraCloudStorageComponentProps = DynamicFilterProps;
 
 interface BackendPayload extends ReqPayload {
     filters: Record<string, {
@@ -35,7 +37,7 @@ const fetcherPost = async ([url, payload]: [string, BackendPayload]) => {
 const isNonEmptyArray = <T,>(v: unknown): v is T[] => Array.isArray(v) && v.length > 0
 const isNullish = (v: unknown) => v === null || v === undefined
 
-export const IntraCloudComputeComponent = ({
+export const IntraCloudStorageComponent = ({
     payload,
     startDate,
     endDate,
@@ -43,7 +45,7 @@ export const IntraCloudComputeComponent = ({
     resources,
     service,
     region
-}: IntraCloudComputeComponentProps) => {
+}: IntraCloudStorageComponentProps) => {
 
     const startDateFormatted = startDate.toISOString().replace('Z', '').slice(0, -4);
     const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : '';
@@ -73,18 +75,18 @@ export const IntraCloudComputeComponent = ({
         filters: filtersPayload
     };
 
-    const urlComputeMetrics =
+    const urlStorageMetrics =
         payload.cloud_provider === 'Azure'
-            ? `/api/comparison-cloud/bridge/intracloud/azure/compute/get_compute_usage?date_from=${startDateFormatted}&date_to=${endDateFormatted}&service=${service}`
-            : `/api/comparison-cloud/bridge/intracloud/aws/compute/get_compute_usage?date_from=${startDateFormatted}&date_to=${endDateFormatted}&service=${service}`
+            ? `/api/comparison-cloud/bridge/intracloud/azure/storage/get_storage_usage?date_from=${startDateFormatted}&date_to=${endDateFormatted}&service=${service}`
+            : `/api/comparison-cloud/bridge/intracloud/aws/storage/get_storage_usage?date_from=${startDateFormatted}&date_to=${endDateFormatted}&service=${service}`
 
-    const urlBillingCompute = payload.cloud_provider === 'Azure'
-        ? `/api/comparison-cloud/bridge/intracloud/azure/compute/get_compute_billing_data?date_from=${startDateFormatted}&date_to=${endDateFormatted}&service=${service}&dimension=${dimension}`
-        : `/api/comparison-cloud/bridge/intracloud/aws/compute/get_compute_billing_data?date_from=${startDateFormatted}&date_to=${endDateFormatted}&dimension=${dimension}&service=${service}`;
+    const urlBillingStorage = payload.cloud_provider === 'Azure'
+        ? `/api/comparison-cloud/bridge/intracloud/azure/storage/get_storage_billing_data?date_from=${startDateFormatted}&date_to=${endDateFormatted}&service=${service}&dimension=${dimension}`
+        : `/api/comparison-cloud/bridge/intracloud/aws/storage/get_storage_billing_data?date_from=${startDateFormatted}&date_to=${endDateFormatted}&dimension=${dimension}&service=${service}`;
 
 
-    const computeMetrics = useSWR(
-        [urlComputeMetrics, fullPayload],
+    const storageMetrics = useSWR(
+        [urlStorageMetrics, fullPayload],
         fetcherPost,
         {
             revalidateOnFocus: false,
@@ -92,8 +94,8 @@ export const IntraCloudComputeComponent = ({
         }
     );
 
-    const computeBilling = useSWR(
-        [urlBillingCompute, fullPayload],
+    const storageBilling = useSWR(
+        [urlBillingStorage, fullPayload],
         fetcherPost,
         {
             revalidateOnFocus: false,
@@ -103,54 +105,70 @@ export const IntraCloudComputeComponent = ({
 
     return (
         <div className="p-4 space-y-6">
-            {computeMetrics.isLoading && (
+            {storageMetrics.isLoading && (
                 <div className="flex flex-col items-center justify-center h-64 border-2 border-dashed border-gray-200 bg-gray-50/50">
                     <Loader2 className="h-10 w-10 text-emerald-500 animate-spin mb-4" />
                     <p className="text-gray-500 font-medium">Analizando datos de {payload.cloud_provider}...</p>
                 </div>
             )}
-            {computeMetrics.error && (
+            {storageMetrics.error && (
                 <div className="flex items-center gap-3 p-4 bg-red-50 text-red-700 border border-red-200">
                     <AlertCircle size={20} />
                     <div className="flex flex-col">
                         <p>Ocurrió un error al cargar el reporte.</p>
-                        <span className="text-xs font-mono mt-1 opacity-90">{computeMetrics.error.message}</span>
+                        <span className="text-xs font-mono mt-1 opacity-90">{storageMetrics.error.message}</span>
                     </div>
                 </div>
             )}
             {
-                computeMetrics.data && (
+                storageMetrics.data && (
                     <>
-                        <IntraCloudComputeCardsByTenantComponent
-                            data={computeMetrics.data}
-                        />
-                        <IntraCloudComputeChartComponent
-                            data={computeMetrics.data}
-                        />
+                        {
+                            payload.cloud_provider === 'AWS' ? (
+                                <>
+                                    <IntraCloudAwsStorageCardsByTenantComponent
+                                        data={storageMetrics.data}
+                                    />
+                                    <IntraCloudAwsStorageChartComponent
+                                        data={storageMetrics.data}
+                                    />
+                                </>
+                            ) : (
+                                <>
+                                    <IntraCloudAzureStorageCardsByTenantComponent
+                                        data={storageMetrics.data}
+                                    />
+                                    <IntraCloudAzureStorageChartComponent
+                                        data={storageMetrics.data}
+                                    />
+                                </>
+                            )
+                        }
+
                     </>
                 )
             }
-            {computeBilling.isLoading && (
+            {storageBilling.isLoading && (
                 <div className="flex flex-col items-center justify-center h-64 border-2 border-dashed border-gray-200 bg-gray-50/50">
                     <Loader2 className="h-10 w-10 text-emerald-500 animate-spin mb-4" />
                     <p className="text-gray-500 font-medium">Analizando datos de {payload.cloud_provider}...</p>
                 </div>
             )}
-            {computeBilling.error && (
+            {storageBilling.error && (
                 <div className="flex items-center gap-3 p-4 bg-red-50 text-red-700 border border-red-200">
                     <AlertCircle size={20} />
                     <div className="flex flex-col">
                         <p>Ocurrió un error al cargar el reporte.</p>
-                        <span className="text-xs font-mono mt-1 opacity-90">{computeBilling.error.message}</span>
+                        <span className="text-xs font-mono mt-1 opacity-90">{storageBilling.error.message}</span>
                     </div>
                 </div>
             )}
             {
-                computeBilling.data && (
+                storageBilling.data && (
                     <IntraCloudServicesBillingTable
                         dimension={dimension}
                         setDimension={setDimension}
-                        data={computeBilling.data}
+                        data={storageBilling.data}
                         payload={payload}
                     />
                 )

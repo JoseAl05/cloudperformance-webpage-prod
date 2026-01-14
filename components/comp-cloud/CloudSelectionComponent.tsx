@@ -117,6 +117,7 @@ import { RotateCcw } from 'lucide-react';
 import { useSession } from '@/hooks/useSession';
 import { CloudAccount } from '@/types/db';
 import { MainViewIntraCloudComputeComponent } from '@/components/comp-cloud/intracloud/compute/MainViewIntraCloudComputeComponent';
+import { MainViewIntraCloudStorageComponent } from '@/components/comp-cloud/intracloud/storage/MainViewIntraCloudStorageComponent';
 
 export const CloudSelectionComponent = () => {
     const { user, isLoading } = useSession();
@@ -178,6 +179,11 @@ export const CloudSelectionComponent = () => {
                 {
                     reqPayload.service_type === 'compute' && (
                         <MainViewIntraCloudComputeComponent payload={reqPayload} />
+                    )
+                }
+                {
+                    reqPayload.service_type === 'storage' && (
+                        <MainViewIntraCloudStorageComponent payload={reqPayload} />
                     )
                 }
             </div>

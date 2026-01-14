@@ -43,6 +43,7 @@ interface FiltersComponentProps {
     tagsFilter?: boolean;
     resourceGroupFilter?: boolean;
     serviceFilter?: boolean;
+    serviceType?: string;
     resourceFilter?: boolean;
     payload: ReqPayload;
 }
@@ -107,6 +108,7 @@ export const FiltersComponent = ({
     tagsFilter = false,
     resourceGroupFilter = false,
     serviceFilter = false,
+    serviceType = '',
     resourceFilter = false,
     payload
 }: FiltersComponentProps) => {
@@ -116,11 +118,29 @@ export const FiltersComponent = ({
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
 
+    const getDefaultService = () => {
+        const isAzure = payload.cloud_provider === 'Azure';
+        const isAws = payload.cloud_provider === 'AWS';
+        if (isAzure) {
+            if (serviceType === 'storage') return 'storage-accounts';
+            if (serviceType === 'compute') return 'vm';
+            return 'billing';
+        }
+
+        if (isAws) {
+            if (serviceType === 'storage') return 's3';
+            if (serviceType === 'compute') return 'ec2';
+            return 'billing';
+        }
+
+        return '';
+    };
+
     const getInitialFilters = () => {
         const startDateParam = searchParams.get('startDate');
         const endDateParam = searchParams.get('endDate');
         const regionParam = searchParams.get('region');
-        const serviceParam = searchParams.get('service');
+        const serviceParam = searchParams.get('service') || getDefaultService();
 
         const tenants = payload.tenants || [];
 
@@ -136,6 +156,7 @@ export const FiltersComponent = ({
             initialTagKeys[id] = searchParams.get(`tagKey_${index}`) || TAG_CONSTANTS.DEFAULT_KEY;
             initialTagValues[id] = searchParams.get(`tagValue_${index}`) || TAG_CONSTANTS.DEFAULT_VALUE;
             initialResources[id] = searchParams.get(`resource_${index}`) || '';
+
         });
 
         const startDate = startDateParam ? new Date(startDateParam) : yesterday;
@@ -149,7 +170,7 @@ export const FiltersComponent = ({
             resourceGroups: initialRGs,
             tagKeys: initialTagKeys,
             tagValues: initialTagValues,
-            service: serviceParam || (payload.cloud_provider === 'Azure' ? 'vm' : 'ec2'),
+            service: serviceParam,
             resources: initialResources
         };
     };
@@ -233,7 +254,7 @@ export const FiltersComponent = ({
         setTempTagKeys(defaultTagsK);
         setTempTagValues(defaultTagsV);
         setTempResources(emptyMapString);
-        setTempService(payload.cloud_provider === 'Azure' ? 'vm' : 'ec2');
+        setTempService(getDefaultService());
 
         router.push(window.location.pathname);
     };
@@ -287,6 +308,7 @@ export const FiltersComponent = ({
                                             <MultiTenantServiceFilterComponent
                                                 service={tempService}
                                                 setService={setTempService}
+                                                serviceType={serviceType}
                                                 payload={payload}
                                             />
                                         </div>
@@ -322,17 +344,17 @@ export const FiltersComponent = ({
                             <>
                                 <FilterSeparator />
                                 <div className="border rounded-lg p-5 shadow-sm ">
-                                        <div className='space-y-2'>
-                                            <label className='text-xs font-medium text-gray-600 flex items-center gap-2'>
-                                                Región
-                                            </label>
-                                            <RegionFilterComponent
-                                                selectedRegion={tempRegion}
-                                                setSelectedRegion={setTempRegion}
-                                                isRegionMultiSelect={isRegionMultiSelect}
-                                            />
-                                        </div>
+                                    <div className='space-y-2'>
+                                        <label className='text-xs font-medium text-gray-600 flex items-center gap-2'>
+                                            Región
+                                        </label>
+                                        <RegionFilterComponent
+                                            selectedRegion={tempRegion}
+                                            setSelectedRegion={setTempRegion}
+                                            isRegionMultiSelect={isRegionMultiSelect}
+                                        />
                                     </div>
+                                </div>
                             </>
                         )}
                         {

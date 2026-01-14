@@ -16,4 +16,8 @@ export const azure_compute_services = [
   { label: 'Nodos K8S', value: 'vmssk8s' },
   { label: 'PostgreSQL Flexible', value: 'dbpg' },
   { label: 'Mysql Flexible', value: 'dbmysql' },
+  { label: 'Storage Account', value: 'strg_account' }
+];
+export const azure_storage_services = [
+  { label: 'Storage Account', value: 'strg_account' }
 ];

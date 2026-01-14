@@ -341,6 +341,7 @@ interface MultiTenantTagsFilterComponentProps {
     startDate: Date;
     endDate: Date;
     region: string;
+    service: string;
     payload: ReqPayload;
 }
 

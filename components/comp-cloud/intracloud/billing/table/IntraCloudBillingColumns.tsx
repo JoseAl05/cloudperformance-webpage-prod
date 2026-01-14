@@ -168,7 +168,6 @@ export const getIntraCloudBillingColumns = (
             accessorKey: "dimension_value",
             cell: (info) => {
                 const val = info.getValue() as string;
-                console.log(val);
                 return (
                     <div className="flex flex-col">
                         <div className="font-medium text-foreground max-w-[250px] truncate" title={val}>

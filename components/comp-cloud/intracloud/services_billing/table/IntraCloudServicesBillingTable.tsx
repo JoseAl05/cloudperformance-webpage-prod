@@ -1,123 +1,3 @@
-// 'use client'
-
-// import { createColumns } from '@/components/general_aws/data-table/columns';
-// import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-// import { DataTableGrouping } from '@/components/general_aws/data-table/data-table-grouping';
-// import { IntraCloudComputeBilling, IntraCloudComputeBillingData } from '@/interfaces/vista-intracloud/compute/intraCloudComputeInterfaces';
-// import { BarChart3 } from 'lucide-react';
-// import { Dispatch, SetStateAction, useMemo } from 'react';
-// import { ReqPayload } from '@/components/comp-cloud/intracloud/IntraCloudConfigComponent';
-// import { IntraCloudBillingDimSelectionComponent } from '@/components/comp-cloud/intracloud/billing/table/IntraCloudBillingDimSelectionComponent';
-// import { AggregatedComputeRow, getIntraCloudComputeBillingColumns } from '@/components/comp-cloud/intracloud/compute/table/IntraCloudComputeBillingColumns';
-
-// interface IntraCloudComputeBillingTableProps {
-//     data: IntraCloudComputeBilling[];
-//     dimension: string;
-//     setDimension: Dispatch<SetStateAction<string>>;
-//     payload: ReqPayload;
-// }
-
-// export const IntraCloudComputeBillingTable = ({ data, dimension, setDimension, payload }: IntraCloudComputeBillingTableProps) => {
-
-//     const cloudProvider = payload.cloud_provider;
-//     const aggregatedData = useMemo(() => {
-//         if (!dimension || !data.length) return [];
-
-//         const dimensionMap = new Map<string, AggregatedComputeRow>();
-
-//         data.forEach(tenant => {
-//             const tenantId = tenant.tenant_id;
-
-//             tenant.billing_data.forEach((item: IntraCloudComputeBillingData) => {
-//                 const dimensionValue = (item[dimension as keyof typeof item] as string) || 'N/A';
-
-//                 if (!dimensionMap.has(dimensionValue)) {
-//                     dimensionMap.set(dimensionValue, {
-//                         dimension_value: dimensionValue,
-//                         max_resource_name: {},
-//                         max_resource_cost: {},
-//                         min_resource_name: {},
-//                         min_resource_cost: {}
-//                     });
-//                 }
-
-//                 const current = dimensionMap.get(dimensionValue)!;
-//                 const itemCost = item.cost_in_usd_sum || item.cost_in_usd || 0;
-
-//                 current[tenantId] = (Number(current[tenantId]) || 0) + itemCost;
-
-//                 const resourceName = (item as unknown).resource || (item as unknown).instance_name || 'Unknown';
-
-//                 const currentMaxCost = current.max_resource_cost[tenantId] ?? -1;
-//                 if (itemCost > currentMaxCost) {
-//                     current.max_resource_cost[tenantId] = itemCost;
-//                     current.max_resource_name[tenantId] = resourceName;
-//                 }
-
-//                 const currentMinCost = current.min_resource_cost[tenantId];
-//                 if (currentMinCost === undefined || itemCost < currentMinCost) {
-//                     current.min_resource_cost[tenantId] = itemCost;
-//                     current.min_resource_name[tenantId] = resourceName;
-//                 }
-//             });
-//         });
-
-//         return Array.from(dimensionMap.values());
-//     }, [data, dimension]);
-
-//     const columns = createColumns(getIntraCloudComputeBillingColumns(data));
-
-//     return (
-//         <Card className="w-full overflow-hidden">
-//             <CardHeader className="border-b bg-muted/10">
-//                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-//                     <div>
-//                         <CardTitle className="flex items-center gap-2 text-lg">
-//                             <BarChart3 className="h-5 w-5 text-emerald-500" />
-//                             Costos de Cómputo
-//                         </CardTitle>
-//                         <p className="text-sm text-muted-foreground mt-1">
-//                             Análisis detallado por {dimension}.
-//                         </p>
-//                     </div>
-//                     <IntraCloudBillingDimSelectionComponent
-//                         dimension={dimension}
-//                         setDimension={setDimension}
-//                         payload={payload}
-//                     />
-//                 </div>
-//             </CardHeader>
-//             <CardContent className="p-0">
-//                 {dimension && aggregatedData.length > 0 ? (
-//                     <div className="p-4">
-//                         <DataTableGrouping
-//                             columns={columns}
-//                             data={aggregatedData}
-//                             filterColumn="dimension_value"
-//                             filterPlaceholder={`Filtrar por ${dimension}...`}
-//                             enableGrouping={false}
-//                             pageSizeGroups={10}
-//                             pageSizeItems={10}
-//                         />
-//                     </div>
-//                 ) : (
-//                     <div className="text-center text-gray-500 py-16">
-//                         {!dimension ? 'Selecciona una dimensión.' : 'No hay datos para esta selección.'}
-//                     </div>
-//                 )}
-//                 {aggregatedData.length > 0 && (
-//                     <div className="border-t bg-muted/50 px-6 py-3">
-//                         <div className="flex items-center justify-between">
-//                             <div className="text-xs text-muted-foreground">
-//                                 {aggregatedData.length} registros encontrados
-//                             </div>
-//                         </div>
-//                     </div>
-//                 )}
-//             </CardContent>
-//         </Card>
-//     );
-// };
 'use client'
 
 import { createColumns } from '@/components/general_aws/data-table/columns';
@@ -130,18 +10,20 @@ import {
 import { BarChart3, TrendingUp, TrendingDown } from 'lucide-react';
 import { Dispatch, SetStateAction, useMemo } from 'react';
 import { ReqPayload } from '@/components/comp-cloud/intracloud/IntraCloudConfigComponent';
-import { AggregatedComputeRow, getIntraCloudComputeBillingColumns } from '@/components/comp-cloud/intracloud/compute/table/IntraCloudComputeBillingColumns';
+import { AggregatedComputeRow } from '@/components/comp-cloud/intracloud/compute/table/IntraCloudComputeBillingColumns';
 import { formatMetric } from '@/lib/metricUtils';
 import { IntraCloudBillingDimSelectionComponent } from '@/components/comp-cloud/intracloud/billing/table/IntraCloudBillingDimSelectionComponent';
+import { IntraCloudStorageBilling } from '@/interfaces/vista-intracloud/storage/intraCloudStorageInterfaces';
+import { getIntraCloudServicesBillingColumns } from '@/components/comp-cloud/intracloud/services_billing/table/IntraCloudServicesBillingColumns';
 
-interface IntraCloudComputeBillingTableProps {
-    data: IntraCloudComputeBilling[];
+interface IntraCloudServicesBillingTableProps {
+    data: IntraCloudComputeBilling[] | IntraCloudStorageBilling[];
     dimension: string;
     setDimension: Dispatch<SetStateAction<string>>;
     payload: ReqPayload;
 }
 
-export const IntraCloudComputeBillingTable = ({ data, dimension, setDimension, payload }: IntraCloudComputeBillingTableProps) => {
+export const IntraCloudServicesBillingTable = ({ data, dimension, setDimension, payload }: IntraCloudServicesBillingTableProps) => {
 
     const cloudProvider = payload.cloud_provider;
 
@@ -192,8 +74,11 @@ export const IntraCloudComputeBillingTable = ({ data, dimension, setDimension, p
                     max_resource_name: {},
                     max_resource_cost: {},
                     min_resource_name: {},
-                    min_resource_cost: {}
+                    min_resource_cost: {},
+                    resource_search_term: ""
                 };
+
+                const searchTerms: string[] = [];
 
                 tenantSortedData.forEach(tData => {
                     const item = tData.items[i];
@@ -202,10 +87,15 @@ export const IntraCloudComputeBillingTable = ({ data, dimension, setDimension, p
                         const resourceId = item.RESOURCE_ID || (item as unknown).resource || 'Unknown';
                         row[tData.tenantId] = cost;
                         row[`${tData.tenantId}_meta_resource`] = resourceId;
+
+                        searchTerms.push(resourceId);
                     } else {
                         row[tData.tenantId] = 0;
                     }
                 });
+
+                row.resource_search_term = searchTerms.join(' ');
+
                 rows.push(row);
             }
             return rows;
@@ -251,7 +141,7 @@ export const IntraCloudComputeBillingTable = ({ data, dimension, setDimension, p
         return Array.from(dimensionMap.values());
     }, [data, dimension, cloudProvider]);
 
-    const columns = createColumns(getIntraCloudComputeBillingColumns(data, cloudProvider));
+    const columns = createColumns(getIntraCloudServicesBillingColumns(data, cloudProvider));
 
     return (
         <div className="flex flex-col gap-4 w-full">
@@ -354,7 +244,7 @@ export const IntraCloudComputeBillingTable = ({ data, dimension, setDimension, p
                             <DataTableGrouping
                                 columns={columns}
                                 data={aggregatedData}
-                                filterColumn="dimension_value"
+                                filterColumn={cloudProvider === 'AWS' ? "resource_search_term" : "dimension_value"}
                                 filterPlaceholder={cloudProvider === 'AWS' ? "Filtrar por ranking..." : `Filtrar por ${dimension}...`}
                                 enableGrouping={false}
                                 pageSizeGroups={10}

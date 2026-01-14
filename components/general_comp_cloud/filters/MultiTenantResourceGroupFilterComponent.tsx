@@ -357,8 +357,6 @@ export const MultiTenantResourceGroupFilterComponent = ({
             const rawKey = tagKeysMap[tenantId];
             const rawValue = tagValuesMap[tenantId];
 
-            console.log(rawKey, rawValue);
-
             filtersPayload[tenantId] = {
                 tagKey: rawKey || "",
                 tagValue: rawValue || ""

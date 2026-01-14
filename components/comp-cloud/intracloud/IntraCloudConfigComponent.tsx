@@ -148,8 +148,6 @@ export const IntraCloudConfigComponent = ({ cloudType, accounts, onReqReady }: I
         onReqReady(finalPayload);
     };
 
-    console.log(cloudType);
-
     return (
         <div className="space-y-6">
             <Card className="border-l-4 border-l-blue-500 shadow-sm animate-in slide-in-from-top-4 fade-in duration-700">
