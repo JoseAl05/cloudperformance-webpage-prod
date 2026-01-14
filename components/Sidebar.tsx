@@ -248,7 +248,7 @@ export const SidebarComponent = ({
     const GCPRoutes = {
         routes: [
             { label: 'Inicio', icon: LayoutDashboard, href: '/gcp' },
-            { label: 'Tendencia Facturación', icon: Grid2X2, href: '/gcp/facturacion/tendencia-pago-por-uso' },
+            { label: 'Tendencia Facturación', icon: Grid2X2, href: '/gcp/facturacion/tendencia-facturacion' },
             { label: 'Quotas', icon: PieChart, href: '/gcp/quotas' },
             //{ label: 'Deployments', icon: Zap, href: '/gcp/deployments' },
             //{ label: 'Items GCP', icon: Table, href: '/gcp/tables-gcp/tablas-item-gcp' },
