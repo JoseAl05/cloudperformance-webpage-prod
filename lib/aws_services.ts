@@ -9,4 +9,5 @@ export const aws_compute_services = [
 
 export const aws_storage_services = [
   { label: 'S3 Buckets', value: 's3' },
-]
+  { label: 'Discos', value: 'disks' },
+];

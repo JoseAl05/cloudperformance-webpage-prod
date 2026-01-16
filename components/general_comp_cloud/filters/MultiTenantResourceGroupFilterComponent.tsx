@@ -307,6 +307,7 @@ interface MultiTenantResourceGroupFilterComponentProps {
     tagValuesMap: Record<string, string | null>;
     startDate: Date;
     endDate: Date;
+    service: string;
     payload: ReqPayload;
 }
 
@@ -402,9 +403,21 @@ export const MultiTenantResourceGroupFilterComponent = ({
         });
     }, [data, isLoading, payload.tenants, setResourceGroupsMap]);
 
+    if (!service) {
+        return (
+            <div className="space-y-1">
+                <label className='text-[10px] font-bold text-gray-500 uppercase tracking-wider ml-1 truncate block'>
+                    Selecciona un Servicio
+                </label>
+            </div>
+        )
+    }
+
     if (isLoading) return <FilterSkeleton />
     if (error) return <div className="text-red-500 text-xs">Error cargando grupos de recursos</div>
     // if (!data) return null;
+
+
 
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 p-2  rounded-md border border-dashed">

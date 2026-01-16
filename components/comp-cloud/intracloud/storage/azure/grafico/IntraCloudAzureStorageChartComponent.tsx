@@ -2,17 +2,20 @@
 
 import { useMemo, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Info, Database, HardDrive, FileText, MessageSquare, Table as TableIcon, Server } from 'lucide-react';
+import { Info, Database, HardDrive, FileText, MessageSquare, Table as TableIcon, Server, Disc } from 'lucide-react';
 import { createChartOption, deepMerge, makeBaseOptions, useECharts } from '@/lib/echartsGlobalConfig';
 import { useTheme } from 'next-themes';
-import { bytesToGB } from '@/lib/bytesToMbs';
-import { IntraCloudStorage, IntraCloudStorageData, IntraCloudStorageMetrics } from '@/interfaces/vista-intracloud/storage/intraCloudStorageInterfaces';
+import { bytesToGB, bytesToMB } from '@/lib/bytesToMbs';
+import { IntraCloudStorage, IntraCloudStorageData } from '@/interfaces/vista-intracloud/storage/intraCloudStorageInterfaces';
+import { IntraCloudDisks } from '@/interfaces/vista-intracloud/storage/intraCloudDisksInterfaces';
 
 interface IntraCloudAzureStorageChartComponentProps {
-    data?: IntraCloudStorage[];
+    data?: IntraCloudStorage[] | IntraCloudDisks[];
+    service: string;
 }
 
 const formatServiceTitle = (serviceType: string) => {
+    if (serviceType === 'General_Disks') return 'Métricas Discos';
     return serviceType.replace(/_/g, ' ').replace('Service', '').trim();
 };
 
@@ -23,48 +26,84 @@ const getServiceIcon = (serviceType: string) => {
     if (type.includes('queue')) return <MessageSquare className="w-5 h-5 text-orange-500" />;
     if (type.includes('table')) return <TableIcon className="w-5 h-5 text-purple-500" />;
     if (type.includes('account')) return <HardDrive className="w-5 h-5 text-indigo-500" />;
+    if (type.includes('disk')) return <Disc className="w-5 h-5 text-slate-500" />;
     return <Server className="w-5 h-5 text-slate-500" />;
 };
 
-const SingleMetricChart = ({ serviceType, metricName, data }: { serviceType: string; metricName: string; data: IntraCloudStorage[] }) => {
+const SingleMetricChart = ({ serviceType, metricName, data, service }: { serviceType: string; metricName: string; data: IntraCloudStorage[] | IntraCloudDisks[], service: string; }) => {
     const { theme, resolvedTheme } = useTheme();
     const currentTheme = resolvedTheme || theme;
     const isDark = currentTheme === 'dark';
     const chartRef = useRef<HTMLDivElement>(null);
 
     const seriesData = useMemo(() => {
-        return data.map((tenant, index) => {
-            const serviceMetrics: IntraCloudStorageMetrics[] = tenant.storage_data[serviceType as keyof IntraCloudStorageData] || [];
+        if (service === 'strg_account') {
+            const storageData = data as IntraCloudStorage[];
+            return storageData.map((tenant, index) => {
+                const serviceMetrics = tenant.storage_data[serviceType as keyof IntraCloudStorageData] || [];
 
-            const metricData = serviceMetrics
-                .filter((m) => m.metric_name === metricName)
-                .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime())
-                .map((m) => {
-                    let metricValue = m.value;
-                    const nameLower = m.metric_name.toLowerCase();
+                const metricData = serviceMetrics
+                    .filter((m) => m.metric_name === metricName)
+                    .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime())
+                    .map((m) => {
+                        let metricValue = m.value;
+                        const nameLower = m.metric_name.toLowerCase();
 
-                    if (
-                        nameLower.includes("bytes") ||
-                        nameLower.includes("capacity") ||
-                        nameLower.includes("usage") ||
-                        nameLower.includes("ingress") ||
-                        nameLower.includes("egress")
-                    ) {
-                        metricValue = bytesToGB(m.value);
-                    }
+                        if (
+                            nameLower.includes("bytessize") ||
+                            nameLower.includes("capacity") ||
+                            nameLower.includes("usage") ||
+                            nameLower.includes("ingress") ||
+                            nameLower.includes("egress")
+                        ) {
+                            metricValue = bytesToGB(m.value);
+                        } else if (nameLower.includes('bytes/sec')) {
+                            metricValue = bytesToMB(m.value)
+                        }
 
-                    return [m.timestamp, metricValue];
-                });
+                        return [m.timestamp, metricValue];
+                    });
 
-            return {
-                name: `Tenant ${index + 1}`,
-                type: 'line',
-                smooth: true,
-                showSymbol: false,
-                data: metricData,
-            };
-        });
-    }, [data, serviceType, metricName]);
+                return {
+                    name: `Tenant ${index + 1}`,
+                    type: 'line',
+                    smooth: true,
+                    showSymbol: false,
+                    data: metricData,
+                };
+            });
+        } else if (service === 'disks') {
+            const disksData = data as IntraCloudDisks[];
+            return disksData.map((tenant, index) => {
+                const serviceMetrics = tenant.disks_data || [];
+
+                const metricData = serviceMetrics
+                    .filter((m) => m.metric_name === metricName)
+                    .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime())
+                    .map((m) => {
+                        let metricValue = m.value;
+                        const nameLower = m.metric_name.toLowerCase();
+
+                        if (
+                            nameLower.includes("bytes/sec")
+                        ) {
+                            metricValue = bytesToMB(m.value);
+                        }
+
+                        return [m.timestamp, metricValue];
+                    });
+
+                return {
+                    name: `Tenant ${index + 1}`,
+                    type: 'line',
+                    smooth: true,
+                    showSymbol: false,
+                    data: metricData,
+                };
+            });
+        }
+        return [];
+    }, [data, serviceType, metricName, service]);
 
     const option = useMemo(() => {
         const base = makeBaseOptions({
@@ -99,7 +138,7 @@ const SingleMetricChart = ({ serviceType, metricName, data }: { serviceType: str
                 return `${Number(v).toFixed(2)}%`;
             };
         } else if (
-            nameLower.includes("bytes") ||
+            nameLower.includes("bytessize") ||
             nameLower.includes("capacity") ||
             nameLower.includes("usage") ||
             nameLower.includes("ingress") ||
@@ -117,6 +156,13 @@ const SingleMetricChart = ({ serviceType, metricName, data }: { serviceType: str
             tooltipFormatter = (v: number | null) => {
                 if (v == null) return '-';
                 return `${Number(v).toFixed(2)} ms`;
+            };
+        } else if (nameLower.includes('bytes/sec')) {
+            yAxisName = `${metricName} (MB/s)`;
+            axisLabelFormatter = (value: number) => `${value.toFixed(1)} MB/s`;
+            tooltipFormatter = (v: number | null) => {
+                if (v == null) return '-';
+                return `${Number(v).toFixed(2)} MB/s`;
             };
         }
 
@@ -182,27 +228,44 @@ const SingleMetricChart = ({ serviceType, metricName, data }: { serviceType: str
     );
 };
 
-export const IntraCloudAzureStorageChartComponent = ({ data }: IntraCloudAzureStorageChartComponentProps) => {
+export const IntraCloudAzureStorageChartComponent = ({ data, service }: IntraCloudAzureStorageChartComponentProps) => {
     const groupedCharts = useMemo(() => {
         if (!data) return {};
 
         const groups: Record<string, Set<string>> = {};
 
-        data.forEach(tenant => {
-            if (!tenant.storage_data) return;
+        if (service === 'strg_account') {
+            const storageData = data as IntraCloudStorage[];
+            storageData.forEach((tenant) => {
+                if (!tenant.storage_data) return;
 
-            Object.entries(tenant.storage_data).forEach(([serviceType, metrics]) => {
-                if (!groups[serviceType]) {
-                    groups[serviceType] = new Set();
-                }
-                metrics.forEach(metric => {
-                    groups[serviceType].add(metric.metric_name);
+                Object.entries(tenant.storage_data).forEach(([serviceType, metrics]) => {
+                    if (!groups[serviceType]) {
+                        groups[serviceType] = new Set();
+                    }
+                    metrics.forEach(metric => {
+                        groups[serviceType].add(metric.metric_name);
+                    });
                 });
             });
-        });
+        } else if (service === 'disks') {
+            const disksData = data as IntraCloudDisks[];
+            const disksKey = 'General_Disks';
+            if (!groups[disksKey]) {
+                groups[disksKey] = new Set();
+            }
+
+            disksData.forEach((tenant) => {
+                if (!tenant.disks_data) return;
+
+                tenant.disks_data.forEach(metric => {
+                    groups[disksKey].add(metric.metric_name);
+                });
+            });
+        }
 
         return groups;
-    }, [data]);
+    }, [data, service]);
 
     const sortedServiceTypes = useMemo(() => {
         return Object.keys(groupedCharts).sort((a, b) => {
@@ -213,7 +276,7 @@ export const IntraCloudAzureStorageChartComponent = ({ data }: IntraCloudAzureSt
     }, [groupedCharts]);
 
     if (!data || data.length === 0) {
-        return <div className="text-muted-foreground text-sm">No hay datos de almacenamiento para graficar.</div>;
+        return <div className="text-muted-foreground text-sm">No hay datos para graficar.</div>;
     }
 
     return (
@@ -244,6 +307,7 @@ export const IntraCloudAzureStorageChartComponent = ({ data }: IntraCloudAzureSt
                                     serviceType={serviceType}
                                     metricName={metricName}
                                     data={data}
+                                    service={service}
                                 />
                             ))}
                         </div>

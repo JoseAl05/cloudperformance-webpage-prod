@@ -402,6 +402,16 @@ export const MultiTenantTagsFilterComponent = ({
         { revalidateOnFocus: false, shouldRetryOnError: false }
     );
 
+    if (!service) {
+        return (
+            <div className="space-y-1">
+                <label className='text-[10px] font-bold text-gray-500 uppercase tracking-wider ml-1 truncate block'>
+                    Selecciona un Servicio
+                </label>
+            </div>
+        )
+    }
+
     if (isLoading) return <FilterSkeleton />
     if (error) return <div className="text-red-500 text-xs">Error cargando tags</div>
     if (!data) return null;

@@ -13,6 +13,7 @@ import { bytesToGB } from '@/lib/bytesToMbs';
 
 interface IntraCloudAwsStorageCardsByTenantComponentProps {
     data?: IntraCloudStorage[];
+    service: string;
 }
 
 const gridColsMap: Record<number, string> = {
@@ -24,8 +25,12 @@ const gridColsMap: Record<number, string> = {
 
 const getMetricUnit = (metricName: string): string => {
     const name = metricName.toLowerCase();
+    if (name.includes('burstbalance')) return '%';
+    if (name.includes('queuelength')) return 'Solicitudes';
     if (name.includes('bytes')) return 'GB';
     if (name.includes('numberofobjects')) return 'Objetos';
+    if (name.includes('iops') || name.includes('ops')) return 'IOPS';
+    if (name.includes('idletime')) return 'Segundos';
     return '';
 };
 
@@ -59,7 +64,7 @@ const MetricItem = ({ metric }: { metric: IntraCloudStorageMetricsSummary }) => 
     );
 };
 
-export const IntraCloudAwsStorageCardsByTenantComponent = ({ data }: IntraCloudAwsStorageCardsByTenantComponentProps) => {
+export const IntraCloudAwsStorageCardsByTenantComponent = ({ data, service }: IntraCloudAwsStorageCardsByTenantComponentProps) => {
     if (!data || data.length === 0) {
         return <div className="text-muted-foreground text-sm">No hay datos de almacenamiento para mostrar.</div>;
     }
@@ -98,12 +103,26 @@ export const IntraCloudAwsStorageCardsByTenantComponent = ({ data }: IntraCloudA
 
                             <CardContent className="pt-6 flex-1 space-y-6">
                                 <div className="space-y-3">
-                                    <div className="flex items-center gap-2 mb-2">
-                                        <Activity className="w-4 h-4 text-slate-500" />
-                                        <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-                                            Métricas Servicio S3 Bucket
-                                        </h3>
-                                    </div>
+                                    {
+                                        service === 's3' && (
+                                            <div className="flex items-center gap-2 mb-2">
+                                                <Activity className="w-4 h-4 text-slate-500" />
+                                                <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                                                    Métricas Servicio S3 Bucket
+                                                </h3>
+                                            </div>
+                                        )
+                                    }
+                                    {
+                                        service === 'disks' && (
+                                            <div className="flex items-center gap-2 mb-2">
+                                                <Activity className="w-4 h-4 text-slate-500" />
+                                                <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                                                    Métricas Servicio EBS
+                                                </h3>
+                                            </div>
+                                        )
+                                    }
                                     {sortedSummary.length > 0 ? (
                                         <div className="grid grid-cols-2 gap-3">
                                             {sortedSummary.map((metric, mIndex) => {

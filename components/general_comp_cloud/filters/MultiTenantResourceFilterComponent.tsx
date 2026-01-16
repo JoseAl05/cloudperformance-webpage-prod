@@ -56,9 +56,9 @@ export const MultiTenantResourceFilterComponent = ({
     }, [service, setResourcesMap]);
 
     let url = null;
-    if(payload.cloud_provider === 'Azure'){
+    if (payload.cloud_provider === 'Azure') {
         url = service ? `/api/comparison-cloud/bridge/intracloud/azure/resources/get_all_resources?date_from=${startDateFormatted}&date_to=${endDateFormatted}&service=${service}` : null;
-    } else if (payload.cloud_provider === 'AWS'){
+    } else if (payload.cloud_provider === 'AWS') {
         url = service ? `/api/comparison-cloud/bridge/intracloud/aws/resources/get_all_resources?date_from=${startDateFormatted}&date_to=${endDateFormatted}&service=${service}` : null;
     }
 
@@ -81,6 +81,16 @@ export const MultiTenantResourceFilterComponent = ({
     const handleUpdate = (tenantId: string, val: string) => {
         setResourcesMap(prev => ({ ...prev, [tenantId]: val }));
     };
+
+    if (!service) {
+        return (
+            <div className="space-y-1">
+                <label className='text-[10px] font-bold text-gray-500 uppercase tracking-wider ml-1 truncate block'>
+                    Selecciona un Servicio
+                </label>
+            </div>
+        )
+    }
 
     if (isLoading) return <FilterSkeleton />
     if (error) return <div className="text-red-500 text-xs">Error</div>

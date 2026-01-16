@@ -7,48 +7,80 @@ import { createChartOption, deepMerge, makeBaseOptions, useECharts } from '@/lib
 import { useTheme } from 'next-themes';
 import { bytesToGB } from '@/lib/bytesToMbs';
 import { IntraCloudStorage, IntraCloudStorageMetrics } from '@/interfaces/vista-intracloud/storage/intraCloudStorageInterfaces';
+import { IntraCloudDisks, IntraCloudDisksMetrics } from '@/interfaces/vista-intracloud/storage/intraCloudDisksInterfaces';
 
 
 interface IntraCloudAwsStorageChartComponentProps {
     data: IntraCloudStorage[];
+    service: string;
 }
 
-const SingleMetricChart = ({ metricName, data }: { metricName: string; data: IntraCloudStorage[] }) => {
+const SingleMetricChart = ({ metricName, data, service }: { metricName: string; data: IntraCloudStorage[] | IntraCloudDisks[], service: string }) => {
     const { theme, resolvedTheme } = useTheme();
     const currentTheme = resolvedTheme || theme;
     const isDark = currentTheme === 'dark';
     const chartRef = useRef<HTMLDivElement>(null);
 
     const seriesData = useMemo(() => {
-        return data.map((tenant, index) => {
-            const storageMetrics: IntraCloudStorageMetrics[] = tenant.storage_data;
-            const metricData = storageMetrics
-                .filter((m) => m.metric_name === metricName)
-                .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime())
-                .map((m) => {
-                    let metricValue = 0;
-                    if (m.metric_name.includes("Bytes") || m.metric_name.includes("Size")) {
-                        metricValue = bytesToGB(m.value);
-                    } else {
-                        metricValue = m.value;
-                    }
+        if (service === 's3') {
+            const storageData = data as IntraCloudStorage[];
+            return storageData.map((tenant, index) => {
+                const storageMetrics: IntraCloudStorageMetrics[] = tenant.storage_data;
+                const metricData = storageMetrics
+                    .filter((m) => m.metric_name === metricName)
+                    .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime())
+                    .map((m) => {
+                        let metricValue = 0;
+                        if (m.metric_name.includes("Bytes") || m.metric_name.includes("Size")) {
+                            metricValue = bytesToGB(m.value);
+                        } else {
+                            metricValue = m.value;
+                        }
 
-                    return [m.timestamp, metricValue];
-                });
+                        return [m.timestamp, metricValue];
+                    });
 
-            return {
-                name: `Tenant ${index + 1}`,
-                type: 'line',
-                smooth: true,
-                showSymbol: false,
-                data: metricData,
-            };
-        });
-    }, [data, metricName]);
+                return {
+                    name: `Tenant ${index + 1}`,
+                    type: 'line',
+                    smooth: true,
+                    showSymbol: false,
+                    data: metricData,
+                };
+            });
+        } else if (service === 'disks') {
+            const disksData = data as IntraCloudDisks[];
+            return disksData.map((tenant, index) => {
+                const disksMetrics: IntraCloudDisksMetrics[] = tenant.disks_data;
+                const metricData = disksMetrics
+                    .filter((m) => m.metric_name === metricName)
+                    .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime())
+                    .map((m) => {
+                        let metricValue = 0;
+                        if (m.metric_name.includes("Bytes") || m.metric_name.includes("Size")) {
+                            metricValue = bytesToGB(m.value);
+                        } else {
+                            metricValue = m.value;
+                        }
+
+                        return [m.timestamp, metricValue];
+                    });
+
+                return {
+                    name: `Tenant ${index + 1}`,
+                    type: 'line',
+                    smooth: true,
+                    showSymbol: false,
+                    data: metricData,
+                };
+            });
+        }
+        return [];
+    }, [data, metricName, service]);
 
     const option = useMemo(() => {
         const base = makeBaseOptions({
-            legend: data.map((t,index) => `Tenant ${index + 1}`),
+            legend: data.map((t, index) => `Tenant ${index + 1}`),
             useUTC: true,
             showToolbox: true,
             metricType: 'default',
@@ -81,6 +113,27 @@ const SingleMetricChart = ({ metricName, data }: { metricName: string; data: Int
             tooltipFormatter = (v: number | null) => {
                 if (v == null) return '-';
                 return `${Number(v).toFixed(2)} Objetos`;
+            };
+        } else if (metricName.includes('VolumeQueue')) {
+            yAxisName = `${metricName} (Solicitudes)`;
+            axisLabelFormatter = (value: number) => `${value.toFixed(1)} Solicitudes`;
+            tooltipFormatter = (v: number | null) => {
+                if (v == null) return '-';
+                return `${Number(v).toFixed(2)} Solicitudes`;
+            };
+        } else if (metricName.includes('BurstBalance')) {
+            yAxisName = `${metricName} (%)`;
+            axisLabelFormatter = (value: number) => `${value.toFixed(1)} %`;
+            tooltipFormatter = (v: number | null) => {
+                if (v == null) return '-';
+                return `${Number(v).toFixed(2)} %`;
+            };
+        } else if (metricName.includes('OPS')) {
+            yAxisName = `${metricName} (IOPS)`;
+            axisLabelFormatter = (value: number) => `${value.toFixed(1)} IOPS`;
+            tooltipFormatter = (v: number | null) => {
+                if (v == null) return '-';
+                return `${Number(v).toFixed(2)} IOPS`;
             };
         }
 
@@ -144,16 +197,27 @@ const SingleMetricChart = ({ metricName, data }: { metricName: string; data: Int
     );
 };
 
-export const IntraCloudAwsStorageChartComponent = ({ data }: IntraCloudAwsStorageChartComponentProps) => {
+export const IntraCloudAwsStorageChartComponent = ({ data, service }: IntraCloudAwsStorageChartComponentProps) => {
     const uniqueMetrics = useMemo(() => {
         const metrics = new Set<string>();
-        data.forEach(tenant => {
-            tenant.storage_data.forEach(metric => {
-                metrics.add(metric.metric_name);
+        if (service === 's3') {
+            const storageData = data as IntraCloudStorage[];
+            storageData.forEach(tenant => {
+                const storageMetrics = tenant.storage_data as IntraCloudStorageMetrics[];
+                storageMetrics.forEach(metric => {
+                    metrics.add(metric.metric_name);
+                });
             });
-        });
+        } else if (service === 'disks') {
+            const disksData = data as IntraCloudDisks[];
+            disksData.forEach(tenant => {
+                tenant.disks_data.forEach(metric => {
+                    metrics.add(metric.metric_name);
+                });
+            });
+        }
         return Array.from(metrics).sort();
-    }, [data]);
+    }, [data, service]);
 
     if (!data || data.length === 0) {
         return null;
@@ -166,6 +230,7 @@ export const IntraCloudAwsStorageChartComponent = ({ data }: IntraCloudAwsStorag
                     key={metricName}
                     metricName={metricName}
                     data={data}
+                    service={service}
                 />
             ))}
         </div>

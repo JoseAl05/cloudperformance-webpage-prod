@@ -346,7 +346,7 @@ export const MultiTenantSubscriptionsFilterComponent = ({
         });
     }, [data, isLoading, payload.tenants, setSubscriptionsMap]);
 
-    if (isLoading) return <FilterSkeleton/>
+    if (isLoading) return <FilterSkeleton />
     if (error) return <div className="text-red-500 text-xs">Error</div>
     if (!data) return null;
 

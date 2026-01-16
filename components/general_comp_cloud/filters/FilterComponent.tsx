@@ -31,6 +31,8 @@ export interface DynamicFilterProps {
     resourceGroups: Record<string, string>;
     tagKeys: Record<string, string | null>;
     tagValues: Record<string, string | null>;
+    resources: Record<string, string>;
+    service: string;
     payload: ReqPayload;
 }
 
@@ -122,13 +124,13 @@ export const FiltersComponent = ({
         const isAzure = payload.cloud_provider === 'Azure';
         const isAws = payload.cloud_provider === 'AWS';
         if (isAzure) {
-            if (serviceType === 'storage') return 'storage-accounts';
+            if (serviceType === 'storage') return '';
             if (serviceType === 'compute') return 'vm';
             return 'billing';
         }
 
         if (isAws) {
-            if (serviceType === 'storage') return 's3';
+            if (serviceType === 'storage') return '';
             if (serviceType === 'compute') return 'ec2';
             return 'billing';
         }
@@ -238,7 +240,7 @@ export const FiltersComponent = ({
             if (resourceFilter && tempResources[id]) query.set(`resource_${index}`, tempResources[id]);
         });
 
-        router.push(`${window.location.pathname}?${query.toString()}`);
+        router.push(`${window.location.pathname}?${query.toString()}`,{ scroll: false });
     };
 
     const clearFilters = () => {
@@ -256,7 +258,7 @@ export const FiltersComponent = ({
         setTempResources(emptyMapString);
         setTempService(getDefaultService());
 
-        router.push(window.location.pathname);
+        router.push(window.location.pathname,{ scroll: false });
     };
 
     return (
