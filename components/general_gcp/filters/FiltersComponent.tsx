@@ -205,23 +205,7 @@ export const FiltersComponent = ({
                             </div>
                         )}
 
-                         {/* 4. RECURSOS (Discos, etc) */}
-                         {resourceFilter && (
-                            <div className='space-y-2'>
-                                <label className='text-sm font-medium text-foreground flex items-center gap-2'>
-                                    <HardDrive className='h-4 w-4' /> Recurso
-                                </label>
-                                <ResourcesFilterComponent 
-                                    resourceId={tempResource}
-                                    setResourceId={setTempResource}
-                                    service={resourceService}
-                                    projects={tempProjects} 
-                                    regions={tempRegions}   
-                                />
-                            </div>
-                        )}
-
-                        {/* 5. TAGS (NUEVO) */}
+                        {/* 4. TAGS (NUEVO) */}
                         {tagsFilter && (
                             <div className='space-y-2'>
                                 <label className='text-sm font-medium text-foreground flex items-center gap-2'>
@@ -238,6 +222,22 @@ export const FiltersComponent = ({
                                     setSelectedKey={setTempTagKey}
                                     selectedValue={tempTagValue}
                                     setSelectedValue={setTempTagValue}
+                                />
+                            </div>
+                        )}
+
+                         {/* 5. RECURSOS (Discos, etc) */}
+                         {resourceFilter && (
+                            <div className='space-y-2'>
+                                <label className='text-sm font-medium text-foreground flex items-center gap-2'>
+                                    <HardDrive className='h-4 w-4' /> Recurso
+                                </label>
+                                <ResourcesFilterComponent 
+                                    resourceId={tempResource}
+                                    setResourceId={setTempResource}
+                                    service={resourceService}
+                                    projects={tempProjects} 
+                                    regions={tempRegions}   
                                 />
                             </div>
                         )}
