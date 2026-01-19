@@ -124,7 +124,7 @@ export const TendenciaFacturacionChartComponent = ({ startDate, endDate, project
 
     const metrics = calculateMetrics(filteredData);
 
-    const DetailPopover = ({ title, items, icon: Icon }: { title: string, items: string[], icon: any }) => (
+    const DetailPopover = ({ title, items, icon: Icon }: { title: string, items: string[], icon: unknown }) => (
         <Popover>
             <PopoverTrigger asChild>
                 <Button variant='ghost' className="ml-2 p-1 rounded-full cursor-pointer hover:bg-muted transition-colors text-muted-foreground hover:text-foreground focus:outline-none">

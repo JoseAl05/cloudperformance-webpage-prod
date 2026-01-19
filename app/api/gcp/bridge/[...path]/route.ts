@@ -30,9 +30,6 @@ async function proxy(
   const incomingUrl = new URL(req.url);
   const targetUrl = `${BASE}/${subpath}${incomingUrl.search}`;
 
-
-  console.log('GCP TARGET URL:', targetUrl);
-
   const headers = new Headers();
   headers.set('Authorization', `Bearer ${token}`);
   for (const [k, v] of req.headers) {
