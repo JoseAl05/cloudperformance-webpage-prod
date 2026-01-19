@@ -92,7 +92,7 @@ export const useFeatureAccess = () => {
 
     //  LÓGICA MULTI-TENANT 
     
-    const normalizeAccounts = (rawAccounts: any[] | undefined, legacyDb: string | null | undefined) => {
+    const normalizeAccounts = (rawAccounts: unknown[] | undefined, legacyDb: string | null | undefined) => {
         let list = rawAccounts || [];
         if (list.length === 0 && legacyDb) {
             list = [{ id: 'default-legacy', alias: 'Cuenta Principal', db: legacyDb }];
