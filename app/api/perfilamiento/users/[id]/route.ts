@@ -69,7 +69,7 @@ export async function PUT(req: NextRequest, { params }: Params) {
       updateFields.passwordHash = await bcrypt.hash(body.password, 12);
     }
 
-    // CORRECCIÓN CLAVE: Añadir 'is_active' como campo permitido para la actualización
+    // Campos permitidos para actualizar
     const allowedFields = [
       'email',
       'username',
@@ -78,7 +78,9 @@ export async function PUT(req: NextRequest, { params }: Params) {
       'is_azure',
       'user_db_aws',
       'user_db_azure',
-      'is_active', // <-- AÑADIDO
+      'is_gcp',
+      'user_db_gcp',
+      'is_active', 
       'passwordHash', // Para que el campo de la contraseña hasheada sea incluido
     ];
 

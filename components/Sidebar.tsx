@@ -88,11 +88,13 @@ export const SidebarComponent = ({
     const [isMounted, setIsMounted] = useState(false);
     const [isAzure, setIsAzure] = useState(false);
     const [isAws, setIsAws] = useState(false);
+    const [isGPC, setIsGPC] = useState(false);
 
     const provider = useMemo(() => {
         if (!pathname) return null
         if (pathname.startsWith('/aws')) return 'aws'
         if (pathname.startsWith('/azure')) return 'azure'
+        if (pathname.startsWith('/gpc')) return 'gpc'
         return null
     }, [pathname])
 
@@ -226,11 +228,58 @@ export const SidebarComponent = ({
         ],
     }
 
+// CORREGIDO: Rutas apuntando a /gcp en lugar de /gpc
+    const infrausedGCP = [
+        { label: 'Compute Engine', icon: Computer, href: '/gcp/funciones/unused-resources/vm' },
+        { label: 'Instance Groups', icon: Boxes, href: '/gcp/funciones/unused-resources/instance-groups' },
+        { label: 'Discos Persistentes', icon: HardDrive, href: '/gcp/funciones/unused-resources/persistent-disks' },
+        { label: 'Load Balancers', icon: Scale, href: '/gcp/funciones/loadbalancers-infrautilizados' },
+        { label: 'HTTP(S) LB (Ingress)', icon: Workflow, href: '/gcp/funciones/https-lb-infrautilizados' },
+        { label: 'Cloud DNS', icon: Globe2, href: '/gcp/funciones/cloud-dns-infrautilizados' }
+    ]
+
+    const consumeSubItemsGCP = [
+        { label: 'Compute Engine', icon: Computer, href: '/gcp/consumo-ce' },
+        { label: 'Cloud SQL / Spanner', icon: Database, href: '/gcp/consumo-sql' },
+        { label: 'GKE Nodes', icon: Server, href: '/gcp/consumo-gke' },
+        { label: 'Cloud Load Balancing', icon: Workflow, href: '/gcp/consumo-clb' }
+    ]
+
+    const GCPRoutes = {
+        routes: [
+            { label: 'Inicio', icon: LayoutDashboard, href: '/gcp' },
+            { label: 'Tendencia Facturación', icon: Grid2X2, href: '/gcp/facturacion/tendencia-facturacion' },
+            { label: 'Quotas', icon: PieChart, href: '/gcp/quotas' },
+            //{ label: 'Deployments', icon: Zap, href: '/gcp/deployments' },
+            //{ label: 'Items GCP', icon: Table, href: '/gcp/tables-gcp/tablas-item-gcp' },
+            { label: 'Vista Advisor', icon: Pyramid, href: '/gcp/advisor' },
+            { label: 'Vista Saving Plans', icon: HandCoins, href: '/gcp/saving-plan' },
+            { label: 'Presupuestos', icon: CircleDollarSign, href: '/gcp/presupuesto' },
+        ],
+        recursos: [
+            { label: 'Compute Engine', icon: Computer, href: '/gcp/recursos-vm' },
+            { label: 'Cloud DNS / GLB', icon: Workflow, href: '/gcp/recursos-traffic-manager' }
+        ],
+        consumes: [{ label: 'Consumos', subItems: consumeSubItemsGCP, icon: Zap }],
+        funciones: [
+            { label: 'Storage Class Analysis', icon: Cylinder, href: '/gcp/funciones/storage-classes-analysis' },
+            { label: 'Variación Storage', icon: Cylinder, href: '/gcp/funciones/variacion-storage' },
+            { label: 'Top 10 uso de recursos', icon: LineChart, href: '/gcp/funciones/top-10-recursos-uso' },
+            { label: 'Incremento Uso de Recursos', icon: LineChart, href: '/gcp/funciones/incremento-top-recursos-uso' },
+            { label: 'Spot vs Standard VMs', icon: Computer, href: '/gcp/funciones/spot-vs-standard-vm' },
+            { label: 'Promedio de uso por región', icon: MapPin, href: '/gcp/funciones/promedio-por-localizacion' },
+            { label: 'Consumo horario hábil vs no hábil', icon: Clock, href: '/gcp/funciones/analisis-vms-horario' },
+            { label: 'Recursos no utilizados', subItems: infrausedGCP, icon: TrendingDown }
+        ],
+    }
+
+
     const { routes, recursos, consumes, funciones } = useMemo(() => {
         if (isAws) return AwsRoutes
         if (isAzure) return AzureRoutes
+        if (isGPC) return GCPRoutes
         return { routes: [], recursos: [], consumes: [], funciones: [] }
-    }, [isAws, isAzure]);
+    }, [isAws, isAzure, isGPC]);
 
     const defaultOpenRecursos = useMemo(
         () => recursos.some((r) => r.href === pathname),
@@ -277,6 +326,7 @@ export const SidebarComponent = ({
     useEffect(() => {
         setIsAws(pathname.startsWith('/aws'))
         setIsAzure(pathname.startsWith('/azure'))
+        setIsGPC(pathname.startsWith('/gcp'))
     }, [pathname])
 
     useEffect(() => {

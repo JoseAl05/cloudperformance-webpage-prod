@@ -107,6 +107,7 @@ function bindFullscreenLifecycle(chart: echarts.ECharts, el: HTMLElement) {
     width: el.style.width,
     height: el.style.height,
     backgroundColor: el.style.backgroundColor,
+    padding: el.style.padding
   };
 
   const applyBG = () => {
@@ -129,6 +130,7 @@ function bindFullscreenLifecycle(chart: echarts.ECharts, el: HTMLElement) {
       el.style.width = prev.width;
       el.style.height = prev.height;
       el.style.backgroundColor = prev.backgroundColor;
+      el.style.padding = prev.padding;
     }
     requestAnimationFrame(() => chart.resize());
   };

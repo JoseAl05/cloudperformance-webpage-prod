@@ -65,12 +65,16 @@ export async function POST(req: Request) {
     role: user.role,
     user_db_aws: user.user_db_aws,
     user_db_azure: user.user_db_azure,
+    user_db_gcp: user.user_db_gcp,
     is_aws: user.is_aws,
     is_azure: user.is_azure,
+    is_gcp: user.is_gcp,
     is_aws_multi_tenant: clientData.is_aws_multi_tenant,
     is_azure_multi_tenant: clientData.is_azure_multi_tenant,
+    is_gcp_multi_tenant: clientData.is_gcp_multi_tenant,
     azure_accounts: clientData.azure_accounts || [],
     aws_accounts: clientData.aws_accounts || [],
+    gcp_accounts: clientData.gcp_accounts || [],
     planName: user.planName,
   });
 

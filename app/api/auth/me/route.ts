@@ -10,8 +10,10 @@ type SessionUser = Omit<User, 'passwordHash'> & {
   planName?: string;
   is_aws_multi_tenant?: boolean;
   is_azure_multi_tenant?: boolean;
+  is_gcp_multi_tenant?: boolean;
   azure_accounts?: CloudAccount[];
   aws_accounts?: CloudAccount[];
+  gcp_accounts?: CloudAccount[];
 };
 
 export async function GET() {
@@ -39,11 +41,11 @@ export async function GET() {
     type UserWithTenancy = User & {
       is_aws_multi_tenant?: boolean;
       is_azure_multi_tenant?: boolean;
+      is_gcp_multi_tenant?: boolean;
     };
 
     const userTyped = user as UserWithTenancy;
 
-    // 3. Construir la respuesta usando SOLO los datos del usuario
     const sessionUser: SessionUser = {
       _id: user._id,
       email: user.email,
@@ -54,14 +56,22 @@ export async function GET() {
       is_active: user.is_active,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
+
       is_aws: user.is_aws,
       is_azure: user.is_azure,
+      is_gcp: user.is_gcp,
+
       user_db_aws: user.user_db_aws,
       user_db_azure: user.user_db_azure,
+      user_db_gcp: user.user_db_gcp,
+
       is_aws_multi_tenant: userTyped.is_aws_multi_tenant || false,
       is_azure_multi_tenant: userTyped.is_azure_multi_tenant || false,
+      is_gcp_multi_tenant: userTyped.is_gcp_multi_tenant || false,
+
       azure_accounts: user.azure_accounts || [],
       aws_accounts: user.aws_accounts || [],
+      gcp_accounts: user.gcp_accounts || [],
     };
 
     return NextResponse.json({ user: sessionUser });

@@ -6,7 +6,7 @@ import bcrypt from 'bcryptjs';
 import { Filter } from 'mongodb';
 
 // =========================================================================
-// RUTA: GET /api/perfilamiento/users (Listado de Usuarios) - FUNCIONANDO
+// RUTA: GET /api/perfilamiento/users (Listado de Usuarios) 
 // =========================================================================
 
 export async function GET(req: NextRequest) {
@@ -105,23 +105,29 @@ export async function POST(req: NextRequest) {
     type EmpresaWithTenancy = Empresa & {
       is_aws_multi_tenant?: boolean;
       is_azure_multi_tenant?: boolean;
+      is_gcp_multi_tenant?: boolean;
     };
     const empresaTyped = empresa as EmpresaWithTenancy;
 
     // 3. HERENCIA DE CONEXIONES Y PERMISOS MULTI-TENANT
     const inherited_aws_db = empresa.user_db_aws || null;
     const inherited_azure_db = empresa.user_db_azure || null;
+    const inherited_gcp_db = empresa.user_db_gcp || null;
 
     const inherited_is_aws = empresa.is_aws || inherited_aws_db !== null;
     const inherited_is_azure = empresa.is_azure || inherited_azure_db !== null;
+    const inherited_is_gcp = empresa.is_gcp || inherited_gcp_db !== null;
 
     // 💡 NUEVA HERENCIA MULTI-TENANT (Ahora sin 'any')
     const inherited_is_aws_multi_tenant =
       empresaTyped.is_aws_multi_tenant || false;
     const inherited_is_azure_multi_tenant =
       empresaTyped.is_azure_multi_tenant || false;
+    const inherited_is_gcp_multi_tenant =
+      empresaTyped.is_gcp_multi_tenant || false;
     const inherited_aws_accounts = empresa.aws_accounts || [];
     const inherited_azure_accounts = empresa.azure_accounts || [];
+    const inherited_gcp_accounts = empresa.gcp_accounts || [];
 
     const inherited_planName = empresa.planName || null;
 
@@ -152,14 +158,20 @@ export async function POST(req: NextRequest) {
       // ASIGNACIÓN DE VALORES HEREDADOS
       is_aws: inherited_is_aws,
       user_db_aws: inherited_aws_db,
+      is_aws_multi_tenant: inherited_is_aws_multi_tenant,
+      aws_accounts: inherited_aws_accounts,
 
+      // Azure
       is_azure: inherited_is_azure,
       user_db_azure: inherited_azure_db,
-
-      is_aws_multi_tenant: inherited_is_aws_multi_tenant,
       is_azure_multi_tenant: inherited_is_azure_multi_tenant,
-      aws_accounts: inherited_aws_accounts,
       azure_accounts: inherited_azure_accounts,
+
+      // ✅ GCP
+      is_gcp: inherited_is_gcp,
+      user_db_gcp: inherited_gcp_db,
+      is_gcp_multi_tenant: inherited_is_gcp_multi_tenant,
+      gcp_accounts: inherited_gcp_accounts,
 
       planName: inherited_planName,
     };

@@ -298,6 +298,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import useSWR from 'swr'
 import { ReqPayload } from '@/components/comp-cloud/intracloud/IntraCloudConfigComponent'
 import { FilterSkeleton } from '@/components/general_comp_cloud/FilterSkeletonComponent'
+import { TAG_CONSTANTS } from '@/components/general_comp_cloud/filters/MultiTenantTagsFilterComponent'
 
 interface MultiTenantResourceGroupFilterComponentProps {
     resourceGroupsMap: Record<string, string>;
@@ -306,6 +307,7 @@ interface MultiTenantResourceGroupFilterComponentProps {
     tagValuesMap: Record<string, string | null>;
     startDate: Date;
     endDate: Date;
+    service: string;
     payload: ReqPayload;
 }
 
@@ -337,18 +339,28 @@ export const MultiTenantResourceGroupFilterComponent = ({
     tagValuesMap,
     startDate,
     endDate,
+    service,
     payload
 }: MultiTenantResourceGroupFilterComponentProps) => {
 
     const startDateFormatted = startDate ? startDate.toISOString().replace('Z', '').slice(0, -4) : '';
     const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : '';
 
+
+    const hasValidTags = payload.tenants.some(tenantId => {
+        const key = tagKeysMap[tenantId];
+        return key && key !== "";
+    });
+
     const filtersPayload: Record<string, unknown> = {};
     if (payload.tenants) {
         payload.tenants.forEach(tenantId => {
+            const rawKey = tagKeysMap[tenantId];
+            const rawValue = tagValuesMap[tenantId];
+
             filtersPayload[tenantId] = {
-                tagKey: tagKeysMap[tenantId] || 'allKeys',
-                tagValue: tagValuesMap[tenantId] || 'allValues'
+                tagKey: rawKey || "",
+                tagValue: rawValue || ""
             };
         });
     }
@@ -358,10 +370,11 @@ export const MultiTenantResourceGroupFilterComponent = ({
         filters: filtersPayload
     };
 
-    const url = `/api/comparison-cloud/bridge/intracloud/azure/resource_groups/get-all-resource_groups?date_from=${startDateFormatted}&date_to=${endDateFormatted}`;
+    const url = `/api/comparison-cloud/bridge/intracloud/azure/resource_groups/get-all-resource_groups?date_from=${startDateFormatted}&date_to=${endDateFormatted}&service=${service}`;
+    const shouldFetch = payload && hasValidTags;
 
     const { data, error, isLoading } = useSWR(
-        payload ? [url, fullPayload] : null,
+        shouldFetch ? [url, fullPayload] : null,
         fetcherPost,
         { revalidateOnFocus: false, shouldRetryOnError: false }
     );
@@ -390,12 +403,24 @@ export const MultiTenantResourceGroupFilterComponent = ({
         });
     }, [data, isLoading, payload.tenants, setResourceGroupsMap]);
 
+    if (!service) {
+        return (
+            <div className="space-y-1">
+                <label className='text-[10px] font-bold text-gray-500 uppercase tracking-wider ml-1 truncate block'>
+                    Selecciona un Servicio
+                </label>
+            </div>
+        )
+    }
+
     if (isLoading) return <FilterSkeleton />
     if (error) return <div className="text-red-500 text-xs">Error cargando grupos de recursos</div>
-    if (!data) return null;
+    // if (!data) return null;
+
+
 
     return (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 p-2 bg-slate-50 rounded-md border border-dashed">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 p-2  rounded-md border border-dashed">
             {payload.tenants.map((tenantId, index) => {
                 const rgs = tenantDataMap[tenantId] || [];
                 const currentValue = resourceGroupsMap[tenantId] || 'all';

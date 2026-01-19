@@ -196,7 +196,7 @@
 
 
 //     return (
-//         <div className="space-y-2 border border-dashed border-gray-200 p-3 rounded-md bg-slate-50/50">
+//         <div className="space-y-2 border border-dashed  p-3 rounded-md bg-slate-50/50">
 //             <span className='text-[10px] font-bold text-gray-500 uppercase tracking-wider block mb-1'>
 //                 {label}
 //             </span>
@@ -205,7 +205,7 @@
 //                     <Button
 //                         variant="outline"
 //                         role="combobox"
-//                         className="w-full justify-between bg-white text-xs h-8"
+//                         className="w-full justify-between  text-xs h-8"
 //                         disabled={isDisabled || noTags}
 //                     >
 //                         <span className="truncate max-w-[90%]">
@@ -251,7 +251,7 @@
 //                                     variant="outline"
 //                                     role="combobox"
 //                                     disabled={selectedKey === defaultKeyToken}
-//                                     className="w-full justify-between bg-white text-xs h-8 disabled:opacity-70 disabled:bg-gray-100"
+//                                     className="w-full justify-between  text-xs h-8 disabled:opacity-70 disabled:bg-gray-100"
 //                                 >
 //                                     <span className="truncate max-w-[90%]">
 //                                         {getDisplayLabel(selectedValue, false)}
@@ -341,6 +341,7 @@ interface MultiTenantTagsFilterComponentProps {
     startDate: Date;
     endDate: Date;
     region: string;
+    service: string;
     payload: ReqPayload;
 }
 
@@ -372,6 +373,7 @@ export const MultiTenantTagsFilterComponent = ({
     startDate,
     endDate,
     region,
+    service,
     payload
 }: MultiTenantTagsFilterComponentProps) => {
 
@@ -392,13 +394,23 @@ export const MultiTenantTagsFilterComponent = ({
         filters: filtersPayload
     };
 
-    const url = `/api/comparison-cloud/bridge/intracloud/azure/tags/get-all-tags?date_from=${startDateFormatted}&date_to=${endDateFormatted}&location=${region}`;
+    const url = service ? `/api/comparison-cloud/bridge/intracloud/azure/tags/get-all-tags?date_from=${startDateFormatted}&date_to=${endDateFormatted}&location=${region}&service=${service}` : `/api/comparison-cloud/bridge/intracloud/azure/tags/get-all-tags?date_from=${startDateFormatted}&date_to=${endDateFormatted}&location=${region}`;
 
     const { data, error, isLoading } = useSWR(
         payload ? [url, fullPayload] : null,
         fetcherPost,
         { revalidateOnFocus: false, shouldRetryOnError: false }
     );
+
+    if (!service) {
+        return (
+            <div className="space-y-1">
+                <label className='text-[10px] font-bold text-gray-500 uppercase tracking-wider ml-1 truncate block'>
+                    Selecciona un Servicio
+                </label>
+            </div>
+        )
+    }
 
     if (isLoading) return <FilterSkeleton />
     if (error) return <div className="text-red-500 text-xs">Error cargando tags</div>
@@ -408,11 +420,11 @@ export const MultiTenantTagsFilterComponent = ({
     const updateValue = (id: string, v: string | null) => setValuesMap(prev => ({ ...prev, [id]: v }));
 
     return (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-2 bg-slate-50 rounded-md border border-dashed">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-2  rounded-md border border-dashed">
             {payload.tenants.map((tenantId, index) => {
                 const tags = data[tenantId] || [];
-                const currentKey = keysMap[tenantId] || TAG_CONSTANTS.DEFAULT_KEY;
-                const currentValue = valuesMap[tenantId] || TAG_CONSTANTS.DEFAULT_VALUE;
+                const currentKey = keysMap[tenantId];
+                const currentValue = valuesMap[tenantId];
 
                 return (
                     <SingleTenantTagSelector
@@ -479,8 +491,29 @@ const SingleTenantTagSelector = ({
         return [defaultValueToken, ...realValues];
     }, [selectedKey, tagMap, defaultKeyToken, defaultValueToken]);
 
+    useEffect(() => {
+        if (noTags) {
+            if (selectedKey !== "" || selectedValue !== "") {
+                setSelectedKey("");
+                setSelectedValue("");
+            }
+            return;
+        }
+
+        if (selectedKey && selectedKey !== defaultKeyToken && selectedKey !== "" && !realKeys.includes(selectedKey)) {
+            setSelectedKey(defaultKeyToken);
+            setSelectedValue(defaultValueToken);
+            return;
+        }
+
+        if (!selectedKey || selectedKey === "") {
+            setSelectedKey(defaultKeyToken);
+            setSelectedValue(defaultValueToken);
+        }
+    }, [tags, noTags, realKeys, selectedKey, selectedValue, defaultKeyToken, defaultValueToken, setSelectedKey, setSelectedValue]);
+
     const getDisplayLabel = (val: string | null, isKey: boolean) => {
-        if (noTags) return "Sin datos"; // Muestra esto si no hay tags
+        if (noTags) return "Sin datos";
         if (!val || val === defaultKeyToken || val === defaultValueToken) {
             return isKey ? "Todas las Claves" : "Todos los Valores";
         }
@@ -488,7 +521,7 @@ const SingleTenantTagSelector = ({
     };
 
     return (
-        <div className="space-y-2 border border-gray-200 p-3 rounded-md bg-white shadow-sm h-full">
+        <div className="space-y-2 border  p-3 rounded-md  shadow-sm h-full">
             <span className='text-[10px] font-bold text-gray-500 uppercase tracking-wider block mb-1'>
                 {label}
             </span>
@@ -529,8 +562,7 @@ const SingleTenantTagSelector = ({
                     </Command>
                 </PopoverContent>
             </Popover>
-
-            {!noTags && selectedKey && selectedKey !== defaultKeyToken && (
+            {!noTags && selectedKey && selectedKey !== defaultKeyToken && selectedKey !== "" && (
                 <div className="relative animate-in fade-in slide-in-from-top-1">
                     <Popover open={openValue} onOpenChange={setOpenValue}>
                         <PopoverTrigger asChild>

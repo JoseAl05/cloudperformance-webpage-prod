@@ -8,26 +8,63 @@ const fetcher = (url: string) => fetch(url, { credentials: 'include' }).then(res
 const PLAN_ACCESS_CONFIG: Record<string, { 
     aws: 'full_dashboard' | 'pdf_report' | 'none'; 
     azure: 'full_dashboard' | 'pdf_report' | 'none';
+    gcp: 'full_dashboard' | 'pdf_report' | 'none'
     presupuesto: boolean;
     vistaAdvisor: boolean; 
 }> = {
-    'starter (freemium)': { aws: 'pdf_report', azure: 'pdf_report', presupuesto: false, vistaAdvisor: false }, 
-    'starter': { aws: 'pdf_report', azure: 'pdf_report', presupuesto: false, vistaAdvisor: false }, 
-    'pro': { aws: 'full_dashboard', azure: 'full_dashboard', presupuesto: false, vistaAdvisor: false },
-    'business': { aws: 'full_dashboard', azure: 'full_dashboard', presupuesto: true, vistaAdvisor: true },
-    'global access': { aws: 'full_dashboard', azure: 'full_dashboard', presupuesto: true, vistaAdvisor: true },
-};
+    'starter (freemium)': {
+        aws: 'pdf_report',
+        azure: 'pdf_report',
+        gcp: 'none',
+        presupuesto: false,
+        vistaAdvisor: false,
+    },
+    'starter': {
+        aws: 'pdf_report',
+        azure: 'pdf_report',
+        gcp: 'none',
+        presupuesto: false,
+        vistaAdvisor: false,
+    },
+    'pro': {
+        aws: 'full_dashboard',
+        azure: 'full_dashboard',
+        gcp: 'pdf_report',
+        presupuesto: false,
+        vistaAdvisor: false,
+    },
+    'business': {
+        aws: 'full_dashboard',
+        azure: 'full_dashboard',
+        gcp: 'full_dashboard',
+        presupuesto: true,
+        vistaAdvisor: true,
+    },
+    'global access': {
+        aws: 'full_dashboard',
+        azure: 'full_dashboard',
+        gcp: 'full_dashboard',
+        presupuesto: true,
+        vistaAdvisor: true,
+    },
+}
+
 
 
 export const useFeatureAccess = () => {
     const { user: userLoggedIn, isLoading: loadingSession, refresh: refreshSession } = useSession();
     const { 
-        selectedCompany, 
+        selectedCompany,
         setSelectedCompany,
-        activeAzureAccountId, 
+
+        activeAzureAccountId,
         setActiveAzureAccountId,
-        activeAwsAccountId, 
-        setActiveAwsAccountId 
+
+        activeAwsAccountId,
+        setActiveAwsAccountId,
+
+        activeGcpAccountId,
+        setActiveGcpAccountId,
     } = useClientContext(); 
 
     const isGlobalAdmin = userLoggedIn?.role === 'admin_global';
@@ -63,9 +100,10 @@ export const useFeatureAccess = () => {
         return list;
     };
     
-    // Normalizar ambas nubes
+    // Normalizar nubes
     const azureAccountsList = normalizeAccounts(activeCredentials?.azure_accounts, activeCredentials?.user_db_azure);
     const awsAccountsList = normalizeAccounts(activeCredentials?.aws_accounts, activeCredentials?.user_db_aws);
+    const gcpAccountsList = normalizeAccounts(activeCredentials?.gcp_accounts, activeCredentials?.user_db_gcp);
 
     let currentDbAzure = null;
     if (azureAccountsList.length > 0) {
@@ -77,6 +115,12 @@ export const useFeatureAccess = () => {
     if (awsAccountsList.length > 0) {
         const selectedAccount = awsAccountsList.find(acc => acc.id === activeAwsAccountId);
         currentDbAws = selectedAccount ? selectedAccount.db : awsAccountsList[0].db;
+    }
+
+    let currentDbGcp = null;
+    if (gcpAccountsList.length > 0) {
+        const selectedAccount = gcpAccountsList.find(acc => acc.id === activeGcpAccountId);
+        currentDbGcp = selectedAccount ? selectedAccount.db : gcpAccountsList[0].db;
     }
 
     const sourcePlanName = activeCredentials?.planName || (isGlobalAdmin ? 'Global Access' : undefined);
@@ -95,18 +139,23 @@ export const useFeatureAccess = () => {
         
         isAzureActive: activeCredentials?.is_azure || false,
         dbAzureName: currentDbAzure, 
-        azureAccountsList, 
+        azureAccountsList,
+
+        isGcpActive: activeCredentials?.is_gcp || false,
+        dbGcpName: currentDbGcp,
+        gcpAccountsList,
     };
 
 
-    const swapContextToken = async (targetClientName: string, explicitAzureDb: string | null = null, explicitAwsDb: string | null = null) => {
+    const swapContextToken = async (targetClientName: string, explicitAzureDb: string | null = null, explicitAwsDb: string | null = null, explicitGcpDb: string | null = null) => {
         if (!targetClientName) return;
    
         try {
             const payload = { 
                 clientName: targetClientName,
                 user_db_azure: explicitAzureDb, 
-                user_db_aws: explicitAwsDb,      
+                user_db_aws: explicitAwsDb,
+                user_db_gcp: explicitGcpDb,      
             };
 
             const response = await fetch('/api/auth/swap-client-context', { 
@@ -135,12 +184,15 @@ export const useFeatureAccess = () => {
         swapContextToken,
         setSelectedCompany,
         activeAzureAccountId, setActiveAzureAccountId, 
-        activeAwsAccountId, setActiveAwsAccountId,  
+        activeAwsAccountId, setActiveAwsAccountId,
+        activeGcpAccountId, setActiveGcpAccountId,
 
         canAccessFullDashboardAws: isGlobalAdmin || (planRestrictions.aws === 'full_dashboard'),
         canAccessFullDashboardAzure: isGlobalAdmin || (planRestrictions.azure === 'full_dashboard'),
+        canAccessFullDashboardGcp:isGlobalAdmin || planRestrictions.gcp === 'full_dashboard',
         canAccessPdfReportAzure: isGlobalAdmin || (planRestrictions.azure !== 'none'),
         canAccessPdfReportAws: isGlobalAdmin || (planRestrictions.aws !== 'none'),
+        canAccessPdfReportGcp: isGlobalAdmin || planRestrictions.gcp !== 'none',
         canAccessPresupuesto: isGlobalAdmin || planRestrictions.presupuesto,
         canAccessVistaAdvisor: isGlobalAdmin || planRestrictions.vistaAdvisor,
         

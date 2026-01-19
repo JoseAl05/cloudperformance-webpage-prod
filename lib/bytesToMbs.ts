@@ -1,4 +1,4 @@
-export const bytesToMB = (bytes) => {
+export const bytesToMB = (bytes:number) => {
   if (typeof bytes !== 'number' || bytes < 0) {
     throw new Error('El valor debe ser un número mayor o igual a 0');
   }

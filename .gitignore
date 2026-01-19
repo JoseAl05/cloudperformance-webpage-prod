@@ -45,3 +45,8 @@ convert-imports.mjs
 fix-import-leading.mjs
 remove-unused-imports.mjs
 *.log
+
+# Ignorar archivos comprimidos
+*.zip
+*.rar
+*.7z

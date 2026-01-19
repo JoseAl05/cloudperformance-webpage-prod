@@ -35,8 +35,20 @@ export interface JWTPayload {
   username: string;
   client: string;
   role: UserRole;
-  user_db_aws: string;
-  user_db_azure: string;
-  is_azure: boolean;
+
+  // AWS
   is_aws: boolean;
+  user_db_aws: string | null;
+
+  // Azure
+  is_azure: boolean;
+  user_db_azure: string | null;
+
+  // GCP 
+  is_gcp: boolean;
+  user_db_gcp: string | null;
+
+  is_aws_multi_tenant?: boolean;
+  is_azure_multi_tenant?: boolean;
+  is_gcp_multi_tenant?: boolean;
 }

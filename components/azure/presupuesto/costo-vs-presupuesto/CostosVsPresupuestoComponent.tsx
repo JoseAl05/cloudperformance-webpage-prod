@@ -88,9 +88,7 @@ export const CostosVsPresupuestoComponent = ({ cloud, anio }: CentroDeCostoCompo
     : Array.isArray(dataFacturacion?.data)
     ? dataFacturacion.data
     : [];
-  
-  console.log("RAW FACTURACION", dataFacturacion);
-  console.log("NORMALIZADO", facturacionArray);
+
 
 
   // Loader

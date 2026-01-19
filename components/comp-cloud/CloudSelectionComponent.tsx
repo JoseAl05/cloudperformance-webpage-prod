@@ -116,6 +116,8 @@ import { Button } from '@/components/ui/button';
 import { RotateCcw } from 'lucide-react';
 import { useSession } from '@/hooks/useSession';
 import { CloudAccount } from '@/types/db';
+import { MainViewIntraCloudComputeComponent } from '@/components/comp-cloud/intracloud/compute/MainViewIntraCloudComputeComponent';
+import { MainViewIntraCloudStorageComponent } from '@/components/comp-cloud/intracloud/storage/MainViewIntraCloudStorageComponent';
 
 export const CloudSelectionComponent = () => {
     const { user, isLoading } = useSession();
@@ -157,7 +159,7 @@ export const CloudSelectionComponent = () => {
     if (reqPayload) {
         return (
             <div className="animate-in fade-in zoom-in-95 duration-500">
-                <div className="sticky top-0 z-70 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 py-4 mb-6 border-b border-border">
+                <div className="sticky top-0 z-10 bg-background py-4 px-4 mb-6 border-b border-border shadow-sm">
                     <Button
                         variant="outline"
                         size="sm"
@@ -169,7 +171,21 @@ export const CloudSelectionComponent = () => {
                     </Button>
                 </div>
 
-                <MainViewIntraCloudBillingComponent payload={reqPayload} />
+                {
+                    reqPayload.service_type === 'billing' && (
+                        <MainViewIntraCloudBillingComponent payload={reqPayload} />
+                    )
+                }
+                {
+                    reqPayload.service_type === 'compute' && (
+                        <MainViewIntraCloudComputeComponent payload={reqPayload} />
+                    )
+                }
+                {
+                    reqPayload.service_type === 'storage' && (
+                        <MainViewIntraCloudStorageComponent payload={reqPayload} />
+                    )
+                }
             </div>
         );
     }

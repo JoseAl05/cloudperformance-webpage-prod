@@ -346,12 +346,12 @@ export const MultiTenantSubscriptionsFilterComponent = ({
         });
     }, [data, isLoading, payload.tenants, setSubscriptionsMap]);
 
-    if (isLoading) return <FilterSkeleton/>
+    if (isLoading) return <FilterSkeleton />
     if (error) return <div className="text-red-500 text-xs">Error</div>
     if (!data) return null;
 
     return (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 p-2 bg-slate-50 rounded-md border border-dashed">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 p-2  rounded-md border border-dashed">
             {payload.tenants.map((tenantId, index) => {
                 const subs = tenantDataMap[tenantId] || [];
                 const currentValue = subscriptionsMap[tenantId] || 'all';

@@ -12,6 +12,7 @@ interface UserToEdit {
     role: UserRole;
     is_aws: boolean;
     is_azure: boolean;
+    is_gcp: boolean;
 }
 
 interface EditUserModalProps {
@@ -40,6 +41,7 @@ export default function EditUserModal({ user, onClose, refreshUserList }: EditUs
                 role: user.role,
                 is_aws: user.is_aws,
                 is_azure: user.is_azure,
+                is_gcp: user.is_gcp,
             });
             setMessage('');
         }
@@ -167,19 +169,6 @@ export default function EditUserModal({ user, onClose, refreshUserList }: EditUs
                                     {!canEditRole && <p className="text-xs text-red-600 mt-1">No tienes permiso para cambiar el rol de este usuario.</p>}
                                 </div>
                             </div>
-                            
-                            {/* PERMISOS AWS/AZURE - UNIFICADO con color azul */}
-                            {/* <div className="flex items-center space-x-4 pt-2 border-b pb-4">
-                                <p className="text-sm font-medium text-gray-700">Accesos:</p>
-                                <div className="flex items-center space-x-2">
-                                    <input type="checkbox" name="is_aws" id="is_aws_edit" checked={formData.is_aws || false} onChange={handleChange} className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
-                                    <label htmlFor="is_aws_edit" className="text-sm font-medium">AWS</label>
-                                </div>
-                                <div className="flex items-center space-x-2">
-                                    <input type="checkbox" name="is_azure" id="is_azure_edit" checked={formData.is_azure || false} onChange={handleChange} className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
-                                    <label htmlFor="is_azure_edit" className="text-sm font-medium">Azure</label>
-                                </div>
-                            </div> */}
 
                             <div className="space-y-2">
                                 <label htmlFor="password" className="text-sm font-medium">Nueva Contraseña</label>
