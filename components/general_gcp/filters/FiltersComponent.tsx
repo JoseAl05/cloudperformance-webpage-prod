@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { DatePicker } from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 
@@ -9,7 +9,7 @@ import { Calendar, Filter, XCircle, LayoutGrid, Globe, HardDrive, Tag } from 'lu
 import { Button } from '@/components/ui/button';
 import { useRouter, useSearchParams } from 'next/navigation';
 
-import { ProjectsFilterComponent } from './ProjectsFilterComponent'; 
+import { ProjectsFilterComponent } from './ProjectsFilterComponent';
 import { RegionsFilterComponent } from './RegionsFilterComponent';
 import { ResourcesFilterComponent } from './ResourcesFilterComponent';
 import { TagsFilterComponent } from './TagsFilterComponent'; // Importamos el nuevo componente
@@ -25,16 +25,17 @@ interface FiltersComponentProps {
         tagKey?: string | null;
         tagValue?: string | null;
     }) => React.JSX.Element;
-    
+
     // Flags de activación
     dateFilter?: boolean;
-    projectsFilter?: boolean; 
+    projectsFilter?: boolean;
     regionFilter?: boolean;
     resourceFilter?: boolean;
+    isResourceMultiSelect?: boolean;
     tagsFilter?: boolean; // NUEVO FLAG
 
     // Config extra
-    resourceService?: 'disks' | 'instances' | 'addresses';
+    resourceService?: string;
     tagCollection?: string; // NUEVO: Colección de Mongo para buscar tags (ej: gcp_compute_disks)
     tagColumn?: string;     // NUEVO: Nombre columna (default: labels)
 }
@@ -46,7 +47,8 @@ export const FiltersComponent = ({
     regionFilter = false,
     resourceFilter = false,
     tagsFilter = false, // Por defecto apagado
-    resourceService = 'disks',
+    resourceService = '',
+    isResourceMultiSelect = false,
     tagCollection = '',  // Obligatorio si tagsFilter es true
     tagColumn = 'labels'
 }: FiltersComponentProps) => {
@@ -62,14 +64,17 @@ export const FiltersComponent = ({
         const projectsParam = searchParams.get('projects');
         const regionsParam = searchParams.get('regions');
         const resourceParam = searchParams.get('resourceId');
-        
+
         // Nuevos params de URL
         const tagKeyParam = searchParams.get('tagKey');
         const tagValueParam = searchParams.get('tagValue');
 
+        const startDate = startDateParam ? new Date(startDateParam) : yesterday;
+        const endDate = endDateParam ? new Date(endDateParam) : new Date();
+
         return {
-            startDate: startDateParam ? new Date(startDateParam) : yesterday,
-            endDate: endDateParam ? new Date(endDateParam) : new Date(),
+            startDate: startDate,
+            endDate: endDate,
             projects: projectsParam || '',
             regions: regionsParam || '',
             resourceId: resourceParam || '',
@@ -79,16 +84,19 @@ export const FiltersComponent = ({
     };
 
     const [filters, setFilters] = useState(getInitialFilters);
-    
+
     // Estados temporales
+
     const [tempRange, setTempRange] = useState<[Date | null, Date | null]>([filters.startDate, filters.endDate]);
     const [tempProjects, setTempProjects] = useState<string>(filters.projects);
     const [tempRegions, setTempRegions] = useState<string>(filters.regions);
     const [tempResource, setTempResource] = useState<string>(filters.resourceId);
-    
+
     // Estados temporales para Tags
     const [tempTagKey, setTempTagKey] = useState<string | null>(filters.tagKey);
     const [tempTagValue, setTempTagValue] = useState<string | null>(filters.tagValue);
+
+
 
     useEffect(() => {
         const newFilters = getInitialFilters();
@@ -101,11 +109,15 @@ export const FiltersComponent = ({
         setTempTagValue(newFilters.tagValue);
     }, [searchParams]);
 
+
     const onChangeDate = (dates: [Date | null, Date | null]) => setTempRange(dates);
+
+    const tempStartDate = useMemo(() => (tempRange[0] ?? filters.startDate), [tempRange, filters.startDate]);
+    const tempEndDate = useMemo(() => (tempRange[1] ?? filters.endDate), [tempRange, filters.endDate]);
 
     const applyFilters = () => {
         const [start, end] = tempRange;
-        if (!start || !end) return; 
+        if (!start || !end) return;
 
         const newFilters = {
             startDate: start,
@@ -122,11 +134,11 @@ export const FiltersComponent = ({
         const query = new URLSearchParams();
         query.set('startDate', newFilters.startDate.toISOString());
         query.set('endDate', newFilters.endDate.toISOString());
-        
+
         if (newFilters.projects) query.set('projects', newFilters.projects);
         if (newFilters.regions) query.set('regions', newFilters.regions);
         if (newFilters.resourceId) query.set('resourceId', newFilters.resourceId);
-        
+
         // Guardar tags en URL si existen
         if (newFilters.tagKey) query.set('tagKey', newFilters.tagKey);
         if (newFilters.tagValue) query.set('tagValue', newFilters.tagValue);
@@ -161,7 +173,7 @@ export const FiltersComponent = ({
             <Card className="w-full min-w-0 overflow-hidden">
                 <CardContent className='space-y-6 pt-6'>
                     <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6'>
-                        
+
                         {/* 1. FECHA */}
                         {dateFilter && (
                             <div className='space-y-2'>
@@ -174,7 +186,7 @@ export const FiltersComponent = ({
                                     startDate={tempRange[0]}
                                     endDate={tempRange[1]}
                                     selectsRange
-                                    className='w-full px-3 py-2 border border-input bg-background text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent'
+                                    className='w-full px-3 py-2 border border-input bg-background text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent text-sm'
                                 />
                             </div>
                         )}
@@ -185,7 +197,7 @@ export const FiltersComponent = ({
                                 <label className='text-sm font-medium text-foreground flex items-center gap-2'>
                                     <LayoutGrid className='h-4 w-4' /> Proyectos
                                 </label>
-                                <ProjectsFilterComponent 
+                                <ProjectsFilterComponent
                                     projects={tempProjects}
                                     setProjects={setTempProjects}
                                 />
@@ -198,38 +210,21 @@ export const FiltersComponent = ({
                                 <label className='text-sm font-medium text-foreground flex items-center gap-2'>
                                     <Globe className='h-4 w-4' /> Regiones
                                 </label>
-                                <RegionsFilterComponent 
+                                <RegionsFilterComponent
                                     regions={tempRegions}
                                     setRegions={setTempRegions}
                                 />
                             </div>
                         )}
-
-                         {/* 4. RECURSOS (Discos, etc) */}
-                         {resourceFilter && (
-                            <div className='space-y-2'>
-                                <label className='text-sm font-medium text-foreground flex items-center gap-2'>
-                                    <HardDrive className='h-4 w-4' /> Recurso
-                                </label>
-                                <ResourcesFilterComponent 
-                                    resourceId={tempResource}
-                                    setResourceId={setTempResource}
-                                    service={resourceService}
-                                    projects={tempProjects} 
-                                    regions={tempRegions}   
-                                />
-                            </div>
-                        )}
-
                         {/* 5. TAGS (NUEVO) */}
                         {tagsFilter && (
                             <div className='space-y-2'>
                                 <label className='text-sm font-medium text-foreground flex items-center gap-2'>
                                     <Tag className='h-4 w-4' /> Tags
                                 </label>
-                                <TagsFilterComponent 
-                                    startDate={tempRange[0]!}
-                                    endDate={tempRange[1]!}
+                                <TagsFilterComponent
+                                    startDate={tempStartDate}
+                                    endDate={tempEndDate}
                                     projects={tempProjects}
                                     regions={tempRegions}
                                     collection={tagCollection}
@@ -238,6 +233,24 @@ export const FiltersComponent = ({
                                     setSelectedKey={setTempTagKey}
                                     selectedValue={tempTagValue}
                                     setSelectedValue={setTempTagValue}
+                                />
+                            </div>
+                        )}
+                        {/* 4. RECURSOS (Discos, etc) */}
+                        {resourceFilter && (
+                            <div className='space-y-2'>
+                                <label className='text-sm font-medium text-foreground flex items-center gap-2'>
+                                    <HardDrive className='h-4 w-4' /> Recurso
+                                </label>
+                                <ResourcesFilterComponent
+                                    resourceId={tempResource}
+                                    setResourceId={setTempResource}
+                                    service={resourceService}
+                                    startDate={tempStartDate}
+                                    endDate={tempEndDate}
+                                    isResourceMultiSelect={isResourceMultiSelect}
+                                    projects={tempProjects}
+                                    regions={tempRegions}
                                 />
                             </div>
                         )}
@@ -256,7 +269,7 @@ export const FiltersComponent = ({
                 {/* Renderizamos el componente hijo pasando TODOS los filtros */}
                 <Component
                     startDate={filters.startDate}
-                    endDate={filters.endDate!}
+                    endDate={filters.endDate}
                     projects={filters.projects}
                     regions={filters.regions}
                     resourceId={filters.resourceId}

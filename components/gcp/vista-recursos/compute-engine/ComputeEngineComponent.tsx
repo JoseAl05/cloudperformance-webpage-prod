@@ -133,6 +133,21 @@
 // }
 'use client'
 
-export const ComputeEngineComponente = () => {
+interface ComputeEngineComponentProps {
+    startDate: Date
+    endDate: Date
+    projects: string
+    regions: string
+    resourceId: string
+}
+
+export const ComputeEngineComponente = ({
+    startDate,
+    endDate,
+    projects,
+    regions,
+    resourceId
+
+}) => {
     return (<></>)
 }

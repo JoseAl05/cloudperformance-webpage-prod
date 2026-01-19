@@ -19,7 +19,7 @@ export const LoaderComponent = ({ size = 'large' }: LoaderComponentProps) => {
                                 height={80}
                             />
                             <Loader2 className="h-5 w-5 animate-spin" />
-                            <span className="text-xs text-muted-foreground pt-2">Cargando datos de la instancia…</span>
+                            <span className="text-xs text-muted-foreground pt-2">Cargando...</span>
                         </div>
                     </div>
                 ) : (

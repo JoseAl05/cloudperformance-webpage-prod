@@ -142,7 +142,7 @@ export const TagsFilterComponent = ({
 
 
     return (
-        <div className="flex gap-2 w-full"> 
+        <div className="space-y-2"> 
             {/* Combo 1: KEY */}
             <Popover open={openKey} onOpenChange={setOpenKey}>
                 <PopoverTrigger asChild>

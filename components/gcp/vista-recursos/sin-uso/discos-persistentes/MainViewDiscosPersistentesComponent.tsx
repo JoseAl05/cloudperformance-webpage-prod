@@ -25,12 +25,12 @@ export const MainViewDiscosPersistentesComponent = () => {
       <div className="w-full min-w-0">
         <FiltersComponent
           Component={DiscosPersistentesComponent}
-          dateFilter={true}
-          projectFilter={true}    // Singular, como acordamos
-          regionFilter={true}     // Activamos el nuevo filtro
-          resourceFilter={true}   // Activamos el combobox de recursos
-          resourceService="disks" // Le decimos que busque discos
-          // --- TAGS ---
+          dateFilter
+          projectFilter
+          regionFilter
+          resourceFilter
+          isResourceMultiSelect
+          resourceService="disks"
           tagsFilter={true}
           tagCollection="gcp_compute_disks"
           tagColumn="labels"

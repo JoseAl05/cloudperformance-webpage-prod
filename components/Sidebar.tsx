@@ -257,7 +257,7 @@ export const SidebarComponent = ({
             { label: 'Presupuestos', icon: CircleDollarSign, href: '/gcp/presupuesto' },
         ],
         recursos: [
-            { label: 'Compute Engine', icon: Computer, href: '/gcp/recursos-vm' },
+            { label: 'Compute Engine', icon: Computer, href: '/gcp/recursos/compute-engine' },
             { label: 'Cloud DNS / GLB', icon: Workflow, href: '/gcp/recursos-traffic-manager' }
         ],
         consumes: [{ label: 'Consumos', subItems: consumeSubItemsGCP, icon: Zap }],

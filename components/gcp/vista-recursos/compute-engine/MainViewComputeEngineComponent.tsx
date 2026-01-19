@@ -27,6 +27,9 @@ export const MainViewComputeEngineComponent = () => {
                     dateFilter
                     projectsFilter
                     regionFilter
+                    resourceFilter
+                    isResourceMultiSelect={false}
+                    resourceService='instances'
                 />
             </div>
         </div>
