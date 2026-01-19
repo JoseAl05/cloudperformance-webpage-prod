@@ -46,7 +46,7 @@ export const ResourcesFilterComponent = ({
     }
 
     const url = getEndpoint()
-    const { data, isLoading } = useSWR<any[]>(url, fetcher)
+    const { data, isLoading } = useSWR<unknown[]>(url, fetcher)
 
     const resourceList = useMemo(() => {
         if (!Array.isArray(data)) return []
