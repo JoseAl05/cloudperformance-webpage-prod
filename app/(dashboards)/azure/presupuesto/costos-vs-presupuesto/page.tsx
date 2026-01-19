@@ -1,4 +1,4 @@
-import { MainViewCostoVsPresupuestoComponent } from '@/components/presupuesto/costo-vs-presupuesto/MainViewCostoVsPresupuestoComponent';
+import { MainViewCostoVsPresupuestoComponent } from '@/components/azure/presupuesto/costo-vs-presupuesto/MainViewCostoVsPresupuestoComponent';
 import { Suspense } from 'react';
 
 export default function DashboardPresupuestoPage() {

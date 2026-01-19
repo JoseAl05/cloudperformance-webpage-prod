@@ -1,4 +1,4 @@
-import { MainViewPresupuestoAnualComponent } from '@/components/presupuesto/presupuesto-anual/MainViewPresupuestoAnualComponent';
+import { MainViewPresupuestoAnualComponent } from '@/components/azure/presupuesto/presupuesto-anual/MainViewPresupuestoAnualComponent';
 import { Suspense } from 'react';
 
 export default function DashboardPresupuestoPage() {

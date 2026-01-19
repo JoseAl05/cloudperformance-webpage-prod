@@ -3,7 +3,9 @@
 import { CircleDollarSign } from "lucide-react";
 import { SessionGate } from "@/components/general_presupuesto/session/SesionGate";
 import { FiltersComponent } from "@/components/general_presupuesto/filters/FiltersComponent";
+import { Card, CardContent } from '@/components/ui/card';
 import { PresupuestoMensualComponent } from "@/components/azure/presupuesto/presupuesto-mensual/PresupuestoMensualComponent";
+import { PresupuestoMensualComponentV2 } from "@/components/azure/presupuesto/presupuesto-mensual/PresupuestoMensualComponentV2";
 
 export const MainViewPresupuestoMensualComponent = () => {
   return (
@@ -28,11 +30,18 @@ export const MainViewPresupuestoMensualComponent = () => {
         </div>
 
         <div className="w-full min-w-0">
-          <FiltersComponent
-            Component={PresupuestoMensualComponent}
+          {/* <FiltersComponent
+            Component={PresupuestoMensualComponentV2}
             cloudFilter
             dateFilter={false}
-          />
+          /> */}
+          <div className='space-y-6'>
+            <Card className="w-full min-w-0 overflow-hidden">
+              <CardContent className='space-y-6'>
+                <PresupuestoMensualComponentV2 />
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
     </SessionGate>
