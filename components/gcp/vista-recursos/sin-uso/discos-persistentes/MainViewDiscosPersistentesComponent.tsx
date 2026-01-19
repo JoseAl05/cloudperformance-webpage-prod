@@ -1,0 +1,37 @@
+import { FiltersComponent } from "@/components/general_gcp/filters/FiltersComponent";
+import { HardDrive } from "lucide-react";
+import { DiscosPersistentesComponent } from "./DiscosPersistentesComponent";
+
+export const MainViewDiscosPersistentesComponent = () => {
+  return (
+    <div className="w-full min-w-0 space-y-4">
+      <div className="mb-8">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-3 mb-2">
+              <div className="h-12 w-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                <HardDrive className="h-6 w-6 text-blue-600" />
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+                  Discos Persistentes Sin Uso
+                </h1>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div className="w-full min-w-0">
+        <FiltersComponent
+          Component={DiscosPersistentesComponent}
+          dateFilter={true}
+          projectFilter={true}    // Singular, como acordamos
+          regionFilter={true}     // Activamos el nuevo filtro
+          resourceFilter={true}   // Activamos el combobox de recursos
+          resourceService="disks" // Le decimos que busque discos
+        />
+      </div>
+    </div>
+  );
+};
