@@ -5,13 +5,14 @@ import { DatePicker } from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 
 import { Card, CardContent } from '@/components/ui/card';
-import { Calendar, Filter, XCircle, LayoutGrid, Globe, HardDrive } from 'lucide-react'; 
+import { Calendar, Filter, XCircle, LayoutGrid, Globe, HardDrive, Tag } from 'lucide-react'; // Agregamos Tag icon
 import { Button } from '@/components/ui/button';
 import { useRouter, useSearchParams } from 'next/navigation';
 
 import { ProjectsFilterComponent } from './ProjectsFilterComponent'; 
 import { RegionsFilterComponent } from './RegionsFilterComponent';
 import { ResourcesFilterComponent } from './ResourcesFilterComponent';
+import { TagsFilterComponent } from './TagsFilterComponent'; // Importamos el nuevo componente
 
 interface FiltersComponentProps {
     Component: (params: {
@@ -20,16 +21,22 @@ interface FiltersComponentProps {
         projects: string;
         regions: string;
         resourceId?: string;
+        // Nuevos params para el hijo
+        tagKey?: string | null;
+        tagValue?: string | null;
     }) => React.JSX.Element;
     
     // Flags de activación
     dateFilter?: boolean;
-    projectsFilter?: boolean; // Nota: cambié projectFilter a projectsFilter para consistencia plural
+    projectsFilter?: boolean; 
     regionFilter?: boolean;
     resourceFilter?: boolean;
-    
+    tagsFilter?: boolean; // NUEVO FLAG
+
     // Config extra
     resourceService?: 'disks' | 'instances' | 'addresses';
+    tagCollection?: string; // NUEVO: Colección de Mongo para buscar tags (ej: gcp_compute_disks)
+    tagColumn?: string;     // NUEVO: Nombre columna (default: labels)
 }
 
 export const FiltersComponent = ({
@@ -38,7 +45,10 @@ export const FiltersComponent = ({
     projectsFilter = true,
     regionFilter = false,
     resourceFilter = false,
-    resourceService = 'disks'
+    tagsFilter = false, // Por defecto apagado
+    resourceService = 'disks',
+    tagCollection = '',  // Obligatorio si tagsFilter es true
+    tagColumn = 'labels'
 }: FiltersComponentProps) => {
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -52,23 +62,33 @@ export const FiltersComponent = ({
         const projectsParam = searchParams.get('projects');
         const regionsParam = searchParams.get('regions');
         const resourceParam = searchParams.get('resourceId');
+        
+        // Nuevos params de URL
+        const tagKeyParam = searchParams.get('tagKey');
+        const tagValueParam = searchParams.get('tagValue');
 
         return {
             startDate: startDateParam ? new Date(startDateParam) : yesterday,
             endDate: endDateParam ? new Date(endDateParam) : new Date(),
             projects: projectsParam || '',
             regions: regionsParam || '',
-            resourceId: resourceParam || ''
+            resourceId: resourceParam || '',
+            tagKey: tagKeyParam || null,
+            tagValue: tagValueParam || null
         };
     };
 
     const [filters, setFilters] = useState(getInitialFilters);
     
-    // Estados temporales (lo que selecciona el usuario antes de dar click a "Aplicar")
+    // Estados temporales
     const [tempRange, setTempRange] = useState<[Date | null, Date | null]>([filters.startDate, filters.endDate]);
     const [tempProjects, setTempProjects] = useState<string>(filters.projects);
     const [tempRegions, setTempRegions] = useState<string>(filters.regions);
     const [tempResource, setTempResource] = useState<string>(filters.resourceId);
+    
+    // Estados temporales para Tags
+    const [tempTagKey, setTempTagKey] = useState<string | null>(filters.tagKey);
+    const [tempTagValue, setTempTagValue] = useState<string | null>(filters.tagValue);
 
     useEffect(() => {
         const newFilters = getInitialFilters();
@@ -77,6 +97,8 @@ export const FiltersComponent = ({
         setTempProjects(newFilters.projects);
         setTempRegions(newFilters.regions);
         setTempResource(newFilters.resourceId);
+        setTempTagKey(newFilters.tagKey);
+        setTempTagValue(newFilters.tagValue);
     }, [searchParams]);
 
     const onChangeDate = (dates: [Date | null, Date | null]) => setTempRange(dates);
@@ -90,7 +112,9 @@ export const FiltersComponent = ({
             endDate: end,
             projects: tempProjects,
             regions: tempRegions,
-            resourceId: tempResource
+            resourceId: tempResource,
+            tagKey: tempTagKey,
+            tagValue: tempTagValue
         };
 
         setFilters(newFilters);
@@ -102,6 +126,10 @@ export const FiltersComponent = ({
         if (newFilters.projects) query.set('projects', newFilters.projects);
         if (newFilters.regions) query.set('regions', newFilters.regions);
         if (newFilters.resourceId) query.set('resourceId', newFilters.resourceId);
+        
+        // Guardar tags en URL si existen
+        if (newFilters.tagKey) query.set('tagKey', newFilters.tagKey);
+        if (newFilters.tagValue) query.set('tagValue', newFilters.tagValue);
 
         router.push(`${window.location.pathname}?${query.toString()}`);
     };
@@ -112,7 +140,9 @@ export const FiltersComponent = ({
             endDate: new Date(),
             projects: '',
             regions: '',
-            resourceId: ''
+            resourceId: '',
+            tagKey: null,
+            tagValue: null
         };
 
         setFilters(defaultFilters);
@@ -120,6 +150,8 @@ export const FiltersComponent = ({
         setTempProjects('');
         setTempRegions('');
         setTempResource('');
+        setTempTagKey(null);
+        setTempTagValue(null);
 
         router.push(window.location.pathname);
     };
@@ -183,8 +215,29 @@ export const FiltersComponent = ({
                                     resourceId={tempResource}
                                     setResourceId={setTempResource}
                                     service={resourceService}
-                                    projects={tempProjects} // Cascada
-                                    regions={tempRegions}   // Cascada
+                                    projects={tempProjects} 
+                                    regions={tempRegions}   
+                                />
+                            </div>
+                        )}
+
+                        {/* 5. TAGS (NUEVO) */}
+                        {tagsFilter && (
+                            <div className='space-y-2'>
+                                <label className='text-sm font-medium text-foreground flex items-center gap-2'>
+                                    <Tag className='h-4 w-4' /> Tags
+                                </label>
+                                <TagsFilterComponent 
+                                    startDate={tempRange[0]!}
+                                    endDate={tempRange[1]!}
+                                    projects={tempProjects}
+                                    regions={tempRegions}
+                                    collection={tagCollection}
+                                    tagColumnName={tagColumn}
+                                    selectedKey={tempTagKey}
+                                    setSelectedKey={setTempTagKey}
+                                    selectedValue={tempTagValue}
+                                    setSelectedValue={setTempTagValue}
                                 />
                             </div>
                         )}
@@ -200,13 +253,15 @@ export const FiltersComponent = ({
                     </div>
                 </CardContent>
 
-                {/* Renderizamos el componente hijo con los props filtrados */}
+                {/* Renderizamos el componente hijo pasando TODOS los filtros */}
                 <Component
                     startDate={filters.startDate}
                     endDate={filters.endDate!}
                     projects={filters.projects}
                     regions={filters.regions}
                     resourceId={filters.resourceId}
+                    tagKey={filters.tagKey}
+                    tagValue={filters.tagValue}
                 />
             </Card>
         </div>

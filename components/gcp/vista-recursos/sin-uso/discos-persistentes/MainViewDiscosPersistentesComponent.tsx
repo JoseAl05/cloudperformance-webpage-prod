@@ -30,6 +30,10 @@ export const MainViewDiscosPersistentesComponent = () => {
           regionFilter={true}     // Activamos el nuevo filtro
           resourceFilter={true}   // Activamos el combobox de recursos
           resourceService="disks" // Le decimos que busque discos
+          // --- TAGS ---
+          tagsFilter={true}
+          tagCollection="gcp_compute_disks"
+          tagColumn="labels"
         />
       </div>
     </div>
