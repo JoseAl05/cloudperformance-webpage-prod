@@ -87,13 +87,13 @@ export const CentroDeCostoComponentV2 = () => {
       });
 
       if (!res.ok) throw new Error(await res.text());
-      
+
       mutate(`/api/presupuesto/bridge/${cloudType}/centro-costo`);
       handleFormClose();
-      
+
       // Mostrar mensaje de éxito
-      setSuccessMessage(isEditing 
-        ? "Centro de costo actualizado exitosamente" 
+      setSuccessMessage(isEditing
+        ? "Centro de costo actualizado exitosamente"
         : "Centro de costo creado exitosamente"
       );
       setSuccessDialogOpen(true);
@@ -111,19 +111,19 @@ export const CentroDeCostoComponentV2 = () => {
 
   const handleDeleteConfirm = async () => {
     if (!centroToDelete) return;
-    
+
     try {
       const res = await fetch(
         `/api/presupuesto/bridge/${cloudType}/centro-costo/${centroToDelete}`,
         { method: "DELETE" }
       );
-      
+
       if (!res.ok) throw new Error("Error al eliminar el centro de costo");
-      
+
       mutate(`/api/presupuesto/bridge/${cloudType}/centro-costo`);
       setDeleteDialogOpen(false);
       setCentroToDelete(null);
-      
+
       // Mostrar mensaje de éxito
       setSuccessMessage("Centro de costo eliminado exitosamente");
       setSuccessDialogOpen(true);
@@ -217,7 +217,7 @@ export const CentroDeCostoComponentV2 = () => {
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel 
+              <AlertDialogCancel
                 onClick={handleDeleteCancel}
                 className="bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-900 dark:text-gray-100"
               >
@@ -252,7 +252,7 @@ export const CentroDeCostoComponentV2 = () => {
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogAction 
+              <AlertDialogAction
                 onClick={() => setErrorDialogOpen(false)}
                 className="bg-red-600 hover:bg-red-700 text-white"
               >
@@ -281,7 +281,7 @@ export const CentroDeCostoComponentV2 = () => {
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogAction 
+              <AlertDialogAction
                 onClick={() => setSuccessDialogOpen(false)}
                 className="bg-green-600 hover:bg-green-700 text-white"
               >
