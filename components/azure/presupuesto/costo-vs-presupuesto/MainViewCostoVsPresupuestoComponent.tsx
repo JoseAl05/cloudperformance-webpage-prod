@@ -3,6 +3,7 @@ import { CircleDollarSign } from "lucide-react";
 import { SessionGate } from "@/components/general_presupuesto/session/SesionGate";
 import { FiltersComponent } from "@/components/general_presupuesto/filters/FiltersComponent";
 import { CostosVsPresupuestoComponent } from "@/components/azure/presupuesto/costo-vs-presupuesto/CostosVsPresupuestoComponent";
+import { CostosVsPresupuestoComponentV2 } from "@/components/azure/presupuesto/costo-vs-presupuesto/CostosVsPresupuestoComponentV2";
 
 export const MainViewCostoVsPresupuestoComponent = () => {
   return (
@@ -28,12 +29,16 @@ export const MainViewCostoVsPresupuestoComponent = () => {
 
         <div className="w-full min-w-0">
           <FiltersComponent
-            Component={CostosVsPresupuestoComponent}
-            cloudFilter
+            Component={CostosVsPresupuestoComponentV2}
+            // cloudFilter
             dateFilter={false}
             anioFilter 
+            // centroDeCostoFilter
+            // isCentroDeCostoMultiselect
+            cloudFilterType={"azure"}
           />
         </div>
+
       </div>
     </SessionGate>
   );

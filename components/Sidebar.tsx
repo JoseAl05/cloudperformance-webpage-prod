@@ -88,13 +88,13 @@ export const SidebarComponent = ({
     const [isMounted, setIsMounted] = useState(false);
     const [isAzure, setIsAzure] = useState(false);
     const [isAws, setIsAws] = useState(false);
-    const [isGPC, setIsGPC] = useState(false);
+    const [isGcp, setIsGcp] = useState(false);
 
     const provider = useMemo(() => {
         if (!pathname) return null
         if (pathname.startsWith('/aws')) return 'aws'
         if (pathname.startsWith('/azure')) return 'azure'
-        if (pathname.startsWith('/gpc')) return 'gpc'
+        if (pathname.startsWith('/gcp')) return 'gcp'
         return null
     }, [pathname])
 
@@ -277,9 +277,9 @@ export const SidebarComponent = ({
     const { routes, recursos, consumes, funciones } = useMemo(() => {
         if (isAws) return AwsRoutes
         if (isAzure) return AzureRoutes
-        if (isGPC) return GCPRoutes
+        if (isGcp) return GCPRoutes
         return { routes: [], recursos: [], consumes: [], funciones: [] }
-    }, [isAws, isAzure, isGPC]);
+    }, [isAws, isAzure, isGcp]);
 
     const defaultOpenRecursos = useMemo(
         () => recursos.some((r) => r.href === pathname),
@@ -326,7 +326,7 @@ export const SidebarComponent = ({
     useEffect(() => {
         setIsAws(pathname.startsWith('/aws'))
         setIsAzure(pathname.startsWith('/azure'))
-        setIsGPC(pathname.startsWith('/gcp'))
+        setIsGcp(pathname.startsWith('/gcp'))
     }, [pathname])
 
     useEffect(() => {

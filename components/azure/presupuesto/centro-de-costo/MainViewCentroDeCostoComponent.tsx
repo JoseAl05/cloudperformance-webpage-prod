@@ -1,8 +1,10 @@
 "use client";
 import { CircleDollarSign } from "lucide-react";
 import { SessionGate } from "@/components/general_presupuesto/session/SesionGate";
+import { Card, CardContent } from '@/components/ui/card';
 import { FiltersComponent } from "@/components/general_presupuesto/filters/FiltersComponent";
 import { CentroDeCostoComponent } from "@/components/azure/presupuesto/centro-de-costo/CentroDeCostoComponent";
+import { CentroDeCostoComponentV2 } from "@/components/azure/presupuesto/centro-de-costo/CentroDeCostoComponentV2";
 
 export const MainViewCentroDeCostoComponent = () => {
   return (
@@ -26,13 +28,21 @@ export const MainViewCentroDeCostoComponent = () => {
           </div>
         </div>
 
-        <div className="w-full min-w-0">
+        {/* <div className="w-full min-w-0">
           <FiltersComponent
             Component={CentroDeCostoComponent}
             cloudFilter
             dateFilter={false}
           />
+        </div> */}
+        <div className='space-y-6'>
+          <Card className="w-full min-w-0 overflow-hidden">
+            <CardContent className='space-y-6'>
+              <CentroDeCostoComponentV2 />
+            </CardContent>
+          </Card>
         </div>
+
       </div>
     </SessionGate>
   );

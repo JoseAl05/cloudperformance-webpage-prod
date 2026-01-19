@@ -104,7 +104,7 @@ export const FiltersComponent = ({
     const onChangeDate = (dates: [Date | null, Date | null]) => setTempRange(dates);
 
     const applyFilters = () => {
-        let [start, end] = tempRange;
+        const [start, end] = tempRange;
         if (!start || !end) return; 
 
         const newFilters = {

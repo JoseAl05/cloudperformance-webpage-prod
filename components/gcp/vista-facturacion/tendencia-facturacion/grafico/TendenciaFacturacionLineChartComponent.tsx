@@ -9,11 +9,11 @@ import { useEffect, useMemo, useRef } from 'react';
 
 
 interface FacturacionData {
-    service: string;                
-    usage_start_time: { $date: string } | string; 
-    cost_in_usd: number;            
-    region?: string;                
-    resource_name?: string;         
+    service: string;
+    usage_start_time: { $date: string } | string;
+    cost_in_usd: number;
+    region?: string;
+    resource_name?: string;
 }
 
 interface TendenciaFacturacionLineChartComponentProps {
@@ -84,15 +84,15 @@ export const TendenciaFacturacionLineChartComponent = ({ data }: TendenciaFactur
 
 
         rawData.forEach((item) => {
-            
+
             const service = item.service;
-            
+
             // 2. Extraer fecha correctamente del objeto MongoDB o string
             let dateStr = '';
             if (typeof item.usage_start_time === 'object' && item.usage_start_time !== null && '$date' in item.usage_start_time) {
-                 dateStr = item.usage_start_time.$date;
+                dateStr = item.usage_start_time.$date;
             } else if (typeof item.usage_start_time === 'string') {
-                 dateStr = item.usage_start_time;
+                dateStr = item.usage_start_time;
             }
 
             // Validar que tengamos una fecha válida antes de procesar

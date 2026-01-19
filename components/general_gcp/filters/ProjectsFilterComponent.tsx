@@ -30,13 +30,13 @@ export const ProjectsFilterComponent = ({
     const [open, setOpen] = useState(false)
 
     const url = `/api/gcp/bridge/gcp/general/all-gcp-projects-ids`
-    
+
     const { data, error, isLoading } = useSWR<ApiGcpProject[]>(url, fetcher)
 
     const projectList = useMemo(() => {
         if (!Array.isArray(data)) return [] as { id: string; name: string }[]
         if (data.length === 0) return []
-        
+
         return data.map((p) => ({
             id: p.project_id,
             name: p.project_name || p.project_id,
@@ -83,12 +83,12 @@ export const ProjectsFilterComponent = ({
 
     const handleProjectToggle = (projectIdOrAll: string) => {
         let currentProjects = [...selectedIds]
-        
+
         if (projectIdOrAll === 'all_projects') {
             currentProjects = ['all_projects']
         } else {
             currentProjects = currentProjects.filter((s) => s !== 'all_projects')
-            
+
             if (currentProjects.includes(projectIdOrAll)) {
                 currentProjects = currentProjects.filter((s) => s !== projectIdOrAll)
             } else {

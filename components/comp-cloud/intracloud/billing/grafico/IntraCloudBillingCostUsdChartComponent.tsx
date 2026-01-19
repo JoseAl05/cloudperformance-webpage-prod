@@ -123,8 +123,6 @@ export const IntraCloudBillingCostUsdChartComponent = ({ data, payload }: IntraC
 
   const chartRef = useRef<HTMLDivElement>(null);
 
-  console.log(data);
-
   const chartSeriesData = useMemo(() => {
     if (!data || !Array.isArray(data)) return [];
 

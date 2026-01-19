@@ -29,6 +29,7 @@ import { AutoScalingGroupFilterComponent } from '@/components/general_aws/filter
 import { MetricsFilterComponent } from '@/components/general_aws/filters/MetricsFilterComponent';
 import { MetricsRDSFilterComponent } from '@/components/general_aws/filters/MetricsRDSFilterComponent';
 import { AnioFilterComponent } from '@/components/general_presupuesto/filters/AnioFilterComponent';
+import { string } from 'zod';
 interface FiltersComponentProps {
     Component: (params: {
         startDate: Date;
@@ -75,6 +76,7 @@ interface FiltersComponentProps {
     variationServiceFilter?: boolean;
     variationMetricFilter?: boolean;
     cloudFilter?: boolean;
+    cloudFilterType?: string | null; 
     centroDeCostoFilter?: boolean;
     isCentroDeCostoMultiselect?: boolean;
     anioFilter?: boolean;
@@ -118,6 +120,7 @@ export const FiltersComponent = ({
     variationServiceFilter = false,
     variationMetricFilter = false,
     cloudFilter = false,
+    cloudFilterType = null,
     centroDeCostoFilter = false,
     isCentroDeCostoMultiselect= false,
     anioFilter = false,
@@ -635,21 +638,6 @@ export const FiltersComponent = ({
                             </div>
                         )}
 
-                        {centroDeCostoFilter && (
-                            <div className='space-y-2'>
-                                <label className='text-sm font-medium text-foreground flex items-center gap-2'>
-                                    <Cloud className='h-4 w-4' />
-                                    Centro de Costo
-                                </label>
-                                <CentroDeCostoFilterComponent 
-                                  cloudType={tempCloud} 
-                                  CentroDeCosto={tempCentroDeCosto}
-                                  setCentroDeCosto={setTempCentroDeCosto}  
-                                  isCentroDeCostoMultiselect={isCentroDeCostoMultiselect} 
-                                />
-                            </div>
-                        )}
-
                         {anioFilter && (
                             <div className='space-y-2'>
                                 <label className='text-sm font-medium text-foreground flex items-center gap-2'>
@@ -659,6 +647,21 @@ export const FiltersComponent = ({
                                 <AnioFilterComponent 
                                     selectedAnio={tempAnio} 
                                     setSelectedAnio={setTempAnio}
+                                />
+                            </div>
+                        )}
+
+                        {centroDeCostoFilter && (
+                            <div className='space-y-2'>
+                                <label className='text-sm font-medium text-foreground flex items-center gap-2'>
+                                    <Cloud className='h-4 w-4' />
+                                    Centro de Costo
+                                </label>
+                                <CentroDeCostoFilterComponent 
+                                  cloudType={cloudFilterType} 
+                                  CentroDeCosto={tempCentroDeCosto}
+                                  setCentroDeCosto={setTempCentroDeCosto}  
+                                  isCentroDeCostoMultiselect={isCentroDeCostoMultiselect} 
                                 />
                             </div>
                         )}
@@ -968,9 +971,11 @@ export const FiltersComponent = ({
                     variationService={filters.variationService}
                     metric={filters.metric}
                     metrics={metricsRDSFilter ? filters.metricsRDS : filters.metrics}
-                    cloud={filters.cloud}
-                    centroDeCosto={filters.centroDeCosto}
+                    // cloud={filters.cloud}
                     anio={filters.anio}
+                    cloud= {cloudFilterType}
+                    centroDeCosto={filters.centroDeCosto}
+                    
                 />
             </Card>
         </div>

@@ -2,8 +2,10 @@
 
 import { CircleDollarSign } from "lucide-react";
 import { SessionGate } from "@/components/general_presupuesto/session/SesionGate";
+import { Card, CardContent } from '@/components/ui/card';
 import { FiltersComponent } from "@/components/general_presupuesto/filters/FiltersComponent";
 import { PresupuestoAnualComponent } from "@/components/azure/presupuesto/presupuesto-anual/PresupuestoAnualComponent";
+import { PresupuestoAnualComponentV2 } from "@/components/azure/presupuesto/presupuesto-anual/PresupuestoAnualComponentV2";
 
 export const MainViewPresupuestoAnualComponent = () => {
   return (
@@ -28,11 +30,20 @@ export const MainViewPresupuestoAnualComponent = () => {
         </div>
 
         <div className="w-full min-w-0">
-          <FiltersComponent
+          {/* <FiltersComponent
             Component={PresupuestoAnualComponent}
             cloudFilter
             dateFilter={false}
-          />
+          /> */}
+
+          <div className='space-y-6'>
+            <Card className="w-full min-w-0 overflow-hidden">
+              <CardContent className='space-y-6'>
+                <PresupuestoAnualComponentV2 />
+              </CardContent>
+            </Card>
+          </div>
+
         </div>
       </div>
     </SessionGate>
