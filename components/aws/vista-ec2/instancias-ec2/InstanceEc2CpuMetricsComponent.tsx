@@ -108,6 +108,7 @@ export const InstanceEc2CpuMetricsComponent = ({ startDate, endDate, instance }:
             </div>
         )
     }
+
     return (
         <>
             <div className='w-full min-w-0 px-4 py-6'>
