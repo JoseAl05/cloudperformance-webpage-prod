@@ -1,7 +1,7 @@
 'use client'
 import useSWR from 'swr';
 import { useState, useMemo } from 'react';
-import { TrendingUp, DollarSign, Calendar, Info } from 'lucide-react';
+import { TrendingUp, DollarSign, Info, TrendingDown } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { LoaderComponent } from '@/components/general_gcp/LoaderComponent';
 import { TendenciaFacturacionLineChartComponent } from '@/components/gcp/vista-facturacion/tendencia-facturacion/grafico/TendenciaFacturacionLineChartComponent';
@@ -18,57 +18,75 @@ import {
     PopoverTrigger,
 } from "@/components/ui/popover";
 import { Button } from '@/components/ui/button';
+import { SelectCurrencyComponent } from '@/components/gcp/vista-facturacion/tendencia-facturacion/SelectCurrencyComponent';
 
-interface TendenciaFacturacionProps {
+interface TendenciaFacturacionComponentProps {
     startDate: Date;
     endDate: Date;
+    regions: string;
     projects?: string[];
-
+    tagKey?: string;
+    tagValue?: string;
 }
 
-interface MongoDate {
-    $date: string;
+export interface FacturacionData {
+    service: string;
+    usage_start_time: string;
+    sync_time: string;
+    cost_gross_clp: number;
+    cost_gross_usd: number;
+    cost_net_clp: number;
+    cost_net_usd: number;
 }
-
-interface FacturacionData {
-    service: string;           
-    usage_start_time: MongoDate; 
-    usage_end_time: MongoDate;
-    project: {
-        labels: { key: string; value: string }[];
-    };
-    location: {
-        region: string;
-    };
-    resource: {
-        name: string;
-    };
-    cost: number;
-    currency: string;
-    currency_conversion_rate: number;
-    project_id: string;
-    region: string;            
-    resource_name: string;     
-    labels: { key: string; value: string }[];
-    cost_in_usd: number;       
-}
-// ------------------------------------------------------------------
 
 const fetcher = (url: string) =>
-  fetch(url, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json'
+    fetch(url, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    }).then(res => res.json())
+
+export function parseScientific(num: string): string {
+    // If the number is not in scientific notation return it as it is.
+    if (!/\d+\.?\d*e[+-]*\d+/i.test(num)) {
+        return num;
     }
-  }).then(res => res.json())
 
-export const TendenciaFacturacionChartComponent = ({ startDate, endDate, projects }: TendenciaFacturacionProps) => {
+    // Remove the sign.
+    const numberSign = Math.sign(Number(num));
+    num = Math.abs(Number(num)).toString();
+
+    // Parse into coefficient and exponent.
+    const [coefficient, exponent] = num.toLowerCase().split("e");
+    let zeros = Math.abs(Number(exponent));
+    const exponentSign = Math.sign(Number(exponent));
+    const [integer, decimals] = (coefficient.indexOf(".") != -1 ? coefficient : `${coefficient}.`).split(".");
+
+    if (exponentSign === -1) {
+        zeros -= integer.length;
+        num =
+            zeros < 0
+                ? integer.slice(0, zeros) + "." + integer.slice(zeros) + decimals
+                : "0." + "0".repeat(zeros) + integer + decimals;
+    } else {
+        if (decimals) zeros -= decimals.length;
+        num =
+            zeros < 0
+                ? integer + decimals.slice(0, zeros) + "." + decimals.slice(zeros)
+                : integer + decimals + "0".repeat(zeros);
+    }
+
+    return numberSign < 0 ? "-" + num : num;
+}
+
+export const TendenciaFacturacionComponent = ({ startDate, endDate, projects, regions }: TendenciaFacturacionComponentProps) => {
     const [topN, setTopN] = useState<string>("all");
-
+    const [currency, setCurrency] = useState<string>("original");
     const startDateFormatted = startDate.toISOString().split('.')[0];
     const endDateFormatted = endDate.toISOString().split('.')[0];
 
-    const apiUrl = `/api/gcp/bridge/gcp/facturacion/tendencia_facturacion?date_from=${startDateFormatted}&date_to=${endDateFormatted}&project_id=${projects || ''}`;
+    const apiUrl = `/api/gcp/bridge/gcp/facturacion/tendencia_facturacion?date_from=${startDateFormatted}&date_to=${endDateFormatted}&project_id=${projects || ''}&region=${regions}`;
 
     const { data, error, isLoading } = useSWR<FacturacionData[]>(apiUrl, fetcher);
 
@@ -77,11 +95,14 @@ export const TendenciaFacturacionChartComponent = ({ startDate, endDate, project
         if (topN === 'all') return data;
 
         const serviceTotals = new Map<string, number>();
-        
 
         data.forEach(item => {
             const current = serviceTotals.get(item.service) || 0;
-            serviceTotals.set(item.service, current + item.cost_in_usd);
+            if (currency === "original") {
+                serviceTotals.set(item.service, current + item.cost_net_clp);
+            } else if (currency === "usd") {
+                serviceTotals.set(item.service, current + item.cost_net_usd);
+            }
         });
 
         const topServicesNames = Array.from(serviceTotals.entries())
@@ -90,17 +111,21 @@ export const TendenciaFacturacionChartComponent = ({ startDate, endDate, project
             .map(entry => entry[0]);
 
         return data.filter(item => topServicesNames.includes(item.service));
-    }, [data, topN]);
+    }, [data, topN, currency]);
 
     const calculateMetrics = (processedData: FacturacionData[]) => {
-        if (!processedData?.length) return { total: 0, servicesList: [], regionsList: [] };
+        if (!processedData?.length) return { total: 0, servicesList: [] };
 
+        let total = 0;
+        if (currency === "original") {
+            total = processedData.reduce((sum, item) => sum + item.cost_net_clp, 0);
+        } else if (currency === "usd") {
+            total = processedData.reduce((sum, item) => sum + item.cost_net_usd, 0);
+        }
 
-        const total = processedData.reduce((sum, item) => sum + item.cost_in_usd, 0); // cost_in_usd
-        const servicesList = Array.from(new Set(processedData.map((i) => i.service))).sort(); // service
-        const regionsList = Array.from(new Set(processedData.map((i) => i.region))).sort();   // region
+        const servicesList = Array.from(new Set(processedData.map((i) => i.service))).sort();
 
-        return { total, servicesList, regionsList };
+        return { total, servicesList };
     };
 
     if (isLoading) return <LoaderComponent />;
@@ -142,8 +167,8 @@ export const TendenciaFacturacionChartComponent = ({ startDate, endDate, project
                 <div className="max-h-[250px] overflow-y-auto p-2">
                     {items.length > 0 ? (
                         <ul className="text-sm space-y-1">
-                            {items.map((item) => (
-                                <li key={item} className="px-2 py-1 rounded hover:bg-muted/50 truncate" title={item}>
+                            {items.map((item, index) => (
+                                <li key={index} className="px-2 py-1 rounded hover:bg-muted/50 truncate" title={item}>
                                     {item}
                                 </li>
                             ))}
@@ -155,6 +180,35 @@ export const TendenciaFacturacionChartComponent = ({ startDate, endDate, project
             </PopoverContent>
         </Popover>
     );
+
+    const billingValue = (value: number) => {
+        let finalValue = '';
+        const absValue = Math.abs(value);
+
+        if (absValue < 0.01 && absValue > 0) {
+            finalValue = value.toPrecision(2);
+        } else {
+            if (currency === "original") {
+                finalValue = value.toPrecision(2)
+            } else if (currency === "usd") {
+                finalValue = value.toPrecision(2)
+            }
+        }
+        return parseScientific(finalValue)
+    }
+
+    const isNegative = metrics.total < 0;
+
+    const finOpsTitle = isNegative ? "Costo Neto (Saldo a Favor)" : "Costo Neto (Cargo)";
+
+    const finOpsSnippet = isNegative
+        ? "Suma acumulada de los costos netos. El valor es negativo porque los créditos superan al uso."
+        : "Suma acumulada de los costos netos. Representa el consumo efectivo tras aplicar descuentos.";
+
+    const cardBorderColor = isNegative ? "border-l-blue-500" : "border-l-green-500";
+    const amountColor = isNegative ? "text-blue-600" : "text-green-600";
+    const IconComponent = isNegative ? TrendingDown : DollarSign;
+    const iconColor = isNegative ? "text-blue-500" : "text-green-500";
 
     return (
         <div className="w-full min-w-0 px-4 py-6">
@@ -188,21 +242,39 @@ export const TendenciaFacturacionChartComponent = ({ startDate, endDate, project
                             <SelectItem value="all">Todos</SelectItem>
                         </SelectContent>
                     </Select>
+                    <span className="text-sm font-medium text-muted-foreground whitespace-nowrap">
+                        Divisa
+                    </span>
+                    <SelectCurrencyComponent
+                        currency={currency}
+                        setCurrency={setCurrency}
+                        payload={{}}
+                    />
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 py-5">
-                <Card className="border-l-4 border-l-green-500 shadow-sm hover:shadow-md transition-shadow">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 py-5">
+                <Card className={`border-l-4 ${cardBorderColor} shadow-sm hover:shadow-md transition-shadow`}>
                     <CardContent className="p-6">
-                        <div className="flex items-center justify-between">
-                            <div>
+                        <div className="flex items-start justify-between">
+                            <div className="flex flex-col gap-1">
                                 <p className="text-sm font-medium text-muted-foreground">Costo Acumulado</p>
-                                <p className="text-2xl font-bold text-green-600">
-                                    $ {metrics.total < 0.01 ? metrics.total.toPrecision(2) : metrics.total.toLocaleString('en-US', { minimumFractionDigits: 2, style: 'currency', currency: 'USD' }).replace('$', '')}
+                                <p className={`text-2xl font-bold ${amountColor}`}>
+                                    $ {billingValue(metrics.total)}
                                 </p>
-                                <p className="text-xs text-muted-foreground">En los servicios visibles (USD)</p>
+
+                                <div className="mt-2 p-2 bg-muted/40 rounded text-xs text-muted-foreground border border-muted">
+                                    <span className="font-semibold block mb-0.5">
+                                        {finOpsTitle}
+                                    </span>
+                                    {finOpsSnippet}
+                                </div>
+
+                                <p className="text-[10px] text-muted-foreground mt-1">
+                                    En los servicios visibles ({currency})
+                                </p>
                             </div>
-                            <DollarSign className="h-8 w-8 text-green-500 opacity-80" />
+                            <IconComponent className={`h-8 w-8 ${iconColor} opacity-80`} />
                         </div>
                     </CardContent>
                 </Card>
@@ -213,7 +285,10 @@ export const TendenciaFacturacionChartComponent = ({ startDate, endDate, project
                             <div>
                                 <p className="text-sm font-medium text-muted-foreground">Servicios</p>
                                 <div className="flex items-center">
-                                    <p className="text-2xl font-bold text-blue-600">{metrics.servicesList.length}</p>
+                                    {/* Aquí se agrega el conteo de servicios */}
+                                    <p className="text-2xl font-bold text-blue-600">
+                                        {metrics.servicesList.length}
+                                    </p>
                                     <DetailPopover
                                         title="Servicios Mostrados"
                                         items={metrics.servicesList}
@@ -223,26 +298,6 @@ export const TendenciaFacturacionChartComponent = ({ startDate, endDate, project
                                 <p className="text-xs text-muted-foreground">Servicios mostrados</p>
                             </div>
                             <TrendingUp className="h-8 w-8 text-blue-500 opacity-80" />
-                        </div>
-                    </CardContent>
-                </Card>
-
-                <Card className="border-l-4 border-l-purple-500 shadow-sm hover:shadow-md transition-shadow">
-                    <CardContent className="p-6">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="text-sm font-medium text-muted-foreground">Regiones</p>
-                                <div className="flex items-center">
-                                    <p className="text-2xl font-bold text-purple-600">{metrics.regionsList.length}</p>
-                                    <DetailPopover
-                                        title="Regiones Involucradas"
-                                        items={metrics.regionsList}
-                                        icon={Calendar}
-                                    />
-                                </div>
-                                <p className="text-xs text-muted-foreground">Regiones involucradas</p>
-                            </div>
-                            <Calendar className="h-8 w-8 text-purple-500 opacity-80" />
                         </div>
                     </CardContent>
                 </Card>
@@ -265,6 +320,7 @@ export const TendenciaFacturacionChartComponent = ({ startDate, endDate, project
                 <CardContent>
                     <TendenciaFacturacionLineChartComponent
                         data={filteredData}
+                        currency={currency}
                     />
                 </CardContent>
             </Card>
@@ -282,10 +338,6 @@ export const TendenciaFacturacionChartComponent = ({ startDate, endDate, project
                         <div>
                             <span className="text-muted-foreground">Hasta:</span>
                             <p className="font-medium">{endDate.toLocaleDateString('es-ES')}</p>
-                        </div>
-                        <div>
-                            <span className="text-muted-foreground">Región:</span>
-                            <p className="font-medium">{metrics.regionsList.length}</p>
                         </div>
                         <div>
                             <span className="text-muted-foreground">Servicios:</span>

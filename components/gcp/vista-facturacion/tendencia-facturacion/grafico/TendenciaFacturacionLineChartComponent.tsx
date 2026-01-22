@@ -6,18 +6,13 @@ import { createChartOption, deepMerge, makeBaseOptions, useECharts } from '@/lib
 import { Download } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { useEffect, useMemo, useRef } from 'react';
+import { FacturacionData } from '@/components/gcp/vista-facturacion/tendencia-facturacion/TendenciaFacturacionComponent';
 
 
-interface FacturacionData {
-    service: string;
-    usage_start_time: { $date: string } | string;
-    cost_in_usd: number;
-    region?: string;
-    resource_name?: string;
-}
 
 interface TendenciaFacturacionLineChartComponentProps {
-    data: FacturacionData[]
+    data: FacturacionData[];
+    currency: string;
 }
 
 const generateUniqueColors = (count: number) => {
@@ -68,7 +63,7 @@ const toUTCDate = (s: string) => {
 
 const fmt = new Intl.DateTimeFormat('es-CL', { day: 'numeric', month: 'short', timeZone: 'UTC' });
 
-export const TendenciaFacturacionLineChartComponent = ({ data }: TendenciaFacturacionLineChartComponentProps) => {
+export const TendenciaFacturacionLineChartComponent = ({ data, currency }: TendenciaFacturacionLineChartComponentProps) => {
 
     const { theme, resolvedTheme } = useTheme();
     const currentTheme = resolvedTheme || theme;
@@ -84,36 +79,31 @@ export const TendenciaFacturacionLineChartComponent = ({ data }: TendenciaFactur
 
 
         rawData.forEach((item) => {
-
             const service = item.service;
 
-            // 2. Extraer fecha correctamente del objeto MongoDB o string
-            let dateStr = '';
-            if (typeof item.usage_start_time === 'object' && item.usage_start_time !== null && '$date' in item.usage_start_time) {
-                dateStr = item.usage_start_time.$date;
-            } else if (typeof item.usage_start_time === 'string') {
-                dateStr = item.usage_start_time;
+            const [day, month, year] = item.usage_start_time.split('/').map(Number);
+            const isoDate = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+
+            let cost = 0;
+            if (currency === "original") {
+                cost = item.cost_net_clp;
+            } else if (currency === "usd") {
+                cost = item.cost_net_usd;
             }
 
-            // Validar que tengamos una fecha válida antes de procesar
-            if (!dateStr) return;
-
-            const date = new Date(dateStr).toISOString().slice(0, 10);
-
-            // 3. Usar 'cost_in_usd'
-            const cost = item.cost_in_usd;
-
-            allDates.add(date);
+            allDates.add(isoDate);
             if (!serviceMap.has(service)) serviceMap.set(service, new Map());
-            const currentCost = serviceMap.get(service)!.get(date) || 0;
-            serviceMap.get(service)!.set(date, currentCost + cost);
+            const currentCost = serviceMap.get(service)!.get(isoDate) || 0;
+            serviceMap.get(service)!.set(isoDate, currentCost + cost);
         });
-        // ---------------------------------------------
 
         const sortedDates = Array.from(allDates).sort();
 
         const significantServices = Array.from(serviceMap.entries())
-            .filter(([_, dateMap]) => Array.from(dateMap.values()).reduce((sum, v) => sum + v, 0))
+            .filter(([_, dateMap]) => {
+                const values = Array.from(dateMap.values());
+                return values.length > 0;
+            })
             .sort((a, b) => {
                 const totalA = Array.from(a[1].values()).reduce((sum, v) => sum + v, 0);
                 const totalB = Array.from(b[1].values()).reduce((sum, v) => sum + v, 0);
@@ -198,11 +188,16 @@ export const TendenciaFacturacionLineChartComponent = ({ data }: TendenciaFactur
                 const originalDate = toUTCDate(dates[(params[0] as { dataIndex: number }).dataIndex]);
                 const dateStr = fmt.format(originalDate);
 
+                // const items = (params as unknown[]).map((p) => ({
+                //     name: (p as { seriesName: string }).seriesName,
+                //     value: Number((p as { value: unknown }).value || 0),
+                //     marker: (p as { marker: string }).marker,
+                // })).filter((i) => (i as { value: number }).value > 0) as { name: string; value: number; marker: string }[];
                 const items = (params as unknown[]).map((p) => ({
                     name: (p as { seriesName: string }).seriesName,
                     value: Number((p as { value: unknown }).value || 0),
                     marker: (p as { marker: string }).marker,
-                })).filter((i) => (i as { value: number }).value > 0) as { name: string; value: number; marker: string }[];
+                })) as { name: string; value: number; marker: string }[];
 
                 if (!items.length) {
                     return `<div style="font-weight:600;margin-bottom:6px">${dateStr}</div>
@@ -219,7 +214,7 @@ export const TendenciaFacturacionLineChartComponent = ({ data }: TendenciaFactur
                 const money = (n: number) =>
                     n >= 1_000_000 ? '$' + (n / 1_000_000).toFixed(2) + 'M'
                         : n >= 1_000 ? '$' + (n / 1_000).toFixed(0) + 'K'
-                            : '$' + n.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                            : '$' + n.toLocaleString(currency === "original" ? 'es-ES' : 'en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
                 let html = `<div style="font-weight:600;margin-bottom:8px">${dateStr}</div>`;
 
@@ -294,7 +289,7 @@ export const TendenciaFacturacionLineChartComponent = ({ data }: TendenciaFactur
                 },
                 yAxis: {
                     type: 'value',
-                    name: 'Facturación (USD)',
+                    name: `Facturación (${currency === 'usd' ? 'USD' : 'CLP'})`,
                     nameTextStyle: { color: '#666', fontSize: 12, padding: [0, 0, 10, 0] },
                     nameGap: 25,
                     axisLine: { show: false },
@@ -320,7 +315,7 @@ export const TendenciaFacturacionLineChartComponent = ({ data }: TendenciaFactur
         });
 
         return deepMerge(base, lines);
-    }, [data]);
+    }, [data, currency]);
 
     useECharts(chartRef, option, [option], isDark ? 'cp-dark' : 'cp-light');
 
