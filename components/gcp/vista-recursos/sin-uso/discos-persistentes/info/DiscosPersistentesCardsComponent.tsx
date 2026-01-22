@@ -22,7 +22,7 @@ interface DiscosPersistentesCardsProps {
 }
 
 // Reutilizamos estilo AWS
-const StatCard = ({ title, value, unit, icon: Icon, description, colorClass = "blue" }: any) => {
+const StatCard = ({ title, value, unit, icon: Icon, description, colorClass = "blue" }: unknown) => {
     
     const colorStyles = {
         blue:  { border: "border-l-blue-500",   bgIcon: "bg-blue-100 text-blue-600" },
