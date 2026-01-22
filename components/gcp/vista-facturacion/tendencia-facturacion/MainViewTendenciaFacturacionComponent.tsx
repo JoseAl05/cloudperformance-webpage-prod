@@ -1,6 +1,6 @@
 // components/gcp/vista-facturacion/tendencia-facturacion/MainViewTendenciaFacturacionComponent.tsx
 import { FiltersComponent } from '@/components/general_gcp/filters/FiltersComponent'
-import { TendenciaFacturacionChartComponent } from '@/components/gcp/vista-facturacion/tendencia-facturacion/TendenciaFacturacionChartComponent'
+import { TendenciaFacturacionComponent } from '@/components/gcp/vista-facturacion/tendencia-facturacion/TendenciaFacturacionComponent'
 import { TrendingUp } from 'lucide-react'
 export const MainViewTendenciaFacturacionComponent = () => {
     return (
@@ -26,7 +26,7 @@ export const MainViewTendenciaFacturacionComponent = () => {
             </div>
             <div className='w-full min-w-0'>
                 <FiltersComponent
-                    Component={TendenciaFacturacionChartComponent}
+                    Component={TendenciaFacturacionComponent}
                     dateFilter
                     projectFilter
                 />
