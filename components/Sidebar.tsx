@@ -258,7 +258,7 @@ export const SidebarComponent = ({
         ],
         recursos: [
             { label: 'Compute Engine', icon: Computer, href: '/gcp/recursos/compute-engine' },
-            { label: 'Cloud DNS / GLB', icon: Workflow, href: '/gcp/recursos-traffic-manager' }
+            { label: 'Instance Groups', icon: Workflow, href: '/gcp/recursos/instance-groups' }
         ],
         consumes: [{ label: 'Consumos', subItems: consumeSubItemsGCP, icon: Zap }],
         funciones: [

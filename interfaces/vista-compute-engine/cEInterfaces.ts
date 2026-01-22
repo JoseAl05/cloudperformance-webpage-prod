@@ -1,12 +1,12 @@
 export interface ComputeEngineMetrics {
-    avg_value: number;
-    metric_name: string;
-    metric_data: ComputeEngineMetricData[];
+  avg_value: number;
+  metric_name: string;
+  metric_data: ComputeEngineMetricData[];
 }
 
-export interface ComputeEngineMetricData{
-    timestamp:string;
-    metric_value:number;
+export interface ComputeEngineMetricData {
+  timestamp: string;
+  metric_value: number;
 }
 
 export interface ComputeEngineInfoServiceAccount {
@@ -139,3 +139,15 @@ export interface ComputeEngineInfo {
 }
 
 export type ComputeEngineInfoResponse = ComputeEngineInfo[];
+
+export interface ComputeEngineBilling {
+  cost_gross_clp: number;
+  cost_gross_usd: number;
+  cost_net_clp: number;
+  cost_net_usd: number;
+  discount_clp: number;
+  discount_usd: number;
+  sync_time: string;
+  usage_start_time: string;
+  sku: string;
+}
