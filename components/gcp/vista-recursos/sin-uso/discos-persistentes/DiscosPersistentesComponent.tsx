@@ -1,94 +1,87 @@
 'use client'
 
-import { LoaderComponent } from '@/components/general_gcp/LoaderComponent'
-import { MessageCard } from '@/components/aws/cards/MessageCards' // Reutilizamos las cards de AWS por ahora o las de general_gcp si existen
-import { AlertCircle, Info } from 'lucide-react'
-import useSWR from 'swr'
+import React from 'react';
+import useSWR from 'swr';
+import { DiscosPersistentesCardsComponent } from './info/DiscosPersistentesCardsComponent'; 
+// import { DiscosPersistentesTableComponent } from './info/DiscosPersistentesTableComponent'; // (Aún no existe, lo haremos después)
 
-// Interfaces temporales (las moveremos a un archivo de interfaces luego)
-interface DiscosPersistentesProps {
+interface DiscosComponentProps {
     startDate: Date;
-    endDate?: Date;
+    endDate: Date;
     projects: string;
     regions: string;
     resourceId?: string;
+    // Nuevos props de Tags
+    tagKey?: string | null;
+    tagValue?: string | null;
 }
 
-const fetcher = (url: string) =>
-    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
-        .then(r => r.json());
+const fetcher = (url: string) => fetch(url).then(res => res.json());
 
-export const DiscosPersistentesComponent = ({ startDate, endDate, projects, regions, resourceId }: DiscosPersistentesProps) => {
+export const DiscosPersistentesComponent = ({ 
+    startDate, 
+    endDate, 
+    projects, 
+    regions, 
+    resourceId,
+    tagKey,
+    tagValue 
+}: DiscosComponentProps) => {
 
-    // 1. Formateo de fechas para API
-    const startDateFormatted = startDate.toISOString().replace('Z', '').slice(0, -4);
-    const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : '';
+    // 1. Construcción de URL Dinámica
+    // Base URL apuntando al bridge
+    //let url = `/api/gcp/bridge/gcp/recursos-sin-uso/discos-persistentes-sin-uso?simple_list=true`;
+    let url = `/api/gcp/bridge/gcp/recursos_sin_uso/discos_persistentes?simple_list=true`;
 
-    // 2. Construcción de URL con todos los filtros
-    // Nota: El endpoint debe coincidir con tu backend.
-    const url = projects 
-        ? `/api/gcp/bridge/gcp/recursos_sin_uso/discos_persistentes_sin_uso?date_from=${startDateFormatted}&date_to=${endDateFormatted}&projects=${projects}&regions=${regions}&resource_id=${resourceId || ''}`
-        : null;
+    // Fechas
+    if (startDate) url += `&date_from=${startDate.toISOString().slice(0, 19)}`; // Quitamos milisegundos para evitar problemas
+    if (endDate) url += `&date_to=${endDate.toISOString().slice(0, 19)}`;
 
-    const { data, error, isLoading } = useSWR(url, fetcher)
-
-    // 3. Manejo de Estados
-    if (!projects) {
-        return (
-            <div className="max-w-7xl mx-auto px-6 py-8">
-                <div className="text-center text-gray-500 text-lg font-medium">
-                    Selecciona un proyecto para comenzar.
-                </div>
-            </div>
-        )
+    // Filtros obligatorios y opcionales
+    if (projects) url += `&project_id=${projects}`;
+    if (regions && regions !== 'all_regions') url += `&location=${regions}`;
+    
+    // Filtros de Tags (Si existen)
+    if (tagKey && tagKey !== 'allKeys') {
+        url += `&tag_key=${encodeURIComponent(tagKey)}`;
+        if (tagValue && tagValue !== 'allValues') {
+            url += `&tag_value=${encodeURIComponent(tagValue)}`;
+        }
     }
 
-    if (isLoading) return <LoaderComponent size='large' />
+    // 2. Fetch de datos
+    // Solo hacemos fetch si tenemos al menos un proyecto seleccionado para no saturar
+    const shouldFetch = !!projects; 
 
-    if (error) {
-        return (
-            <div className="w-full min-w-0 px-4 py-10 flex flex-col items-center gap-4">
-                <MessageCard
-                    icon={AlertCircle}
-                    title="Error al cargar datos"
-                    description="Ocurrió un problema al conectar con el servidor."
-                    tone="error"
-                />
-            </div>
-        )
-    }
-
-    const hasData = data && (data.length > 0 || data.resumen);
-
-    if (!hasData) {
-        return (
-            <div className="w-full min-w-0 px-4 py-6">
-                <MessageCard
-                    icon={Info}
-                    title="Sin discos sin uso"
-                    description="No se encontraron discos persistentes sin uso con los filtros seleccionados."
-                    tone="warn"
-                />
-            </div>
-        )
-    }
+    const { data, error, isLoading } = useSWR(shouldFetch ? url : null, fetcher, {
+        revalidateOnFocus: false, // Evita recargas innecesarias
+    });
 
     return (
-        <div className='w-full min-w-0 px-4 py-6 space-y-6'>
-            {/* AQUÍ IRÁN LOS COMPONENTES VISUALES */}
-            
-            <div className="p-4 border border-dashed border-gray-300 rounded bg-gray-50">
-                <p className="text-sm text-gray-600 font-mono">
-                    ✅ Conexión Exitosa. Datos recibidos: {Array.isArray(data) ? data.length : 'Objeto'} registros.
-                    <br/>
-                    (En el siguiente paso renderizaremos las Cards, Gráficos y Tabla aquí)
-                </p>
+        <div className="space-y-6 mt-6">
+            <DiscosPersistentesCardsComponent 
+                // Usamos los nombres exactos de tu respuesta de Postman
+                summary={{
+                    discos_sin_uso: data?.resumen?.discos_sin_uso || 0,
+                    tamano_sin_uso_gb: data?.resumen?.tamano_sin_uso_gb || 0,
+                    costo_total_usd: data?.resumen?.costo_total_usd || 0
+                }} 
+                isLoading={isLoading}
+            />
+
+            {/* SECCIÓN 2: TABLA DE DETALLE (Placeholder por ahora) */}
+            <div className="rounded-md border p-4 bg-white dark:bg-slate-950">
+                <h3 className="text-sm font-medium mb-4">Detalle de Discos ({data?.discos?.length || 0})</h3>
+                {error && <div className="text-red-500 text-sm">Error al cargar los datos.</div>}
+                
+                {!isLoading && data?.discos && (
+                    <div className="text-sm text-gray-500">
+                        Aquí irá la tabla con los {data.discos.length} discos encontrados. 
+                        (Ej: {data.discos[0]?.name})
+                    </div>
+                )}
             </div>
 
-            {/* <DiscosPersistentesCardsComponent data={data} />
-            <DiscosPersistentesTrendChart data={data} />
-            <DiscosPersistentesTable data={data} /> 
-            */}
         </div>
-    )
-}
+    );
+};
