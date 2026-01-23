@@ -1,10 +1,9 @@
 'use client'
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { HardDrive, Database, CircleDollarSign } from 'lucide-react';
+import { HardDrive, Database, CircleDollarSign, AlertTriangle } from 'lucide-react';
 
-// Interfaz exacta basada en tu JSON ("resumen")
 interface DiscosResumen {
     total_discos: number;
     discos_en_uso: number;
@@ -16,13 +15,18 @@ interface DiscosResumen {
     currency: string;
 }
 
+interface Disco {
+    tiene_billing: boolean;
+    cost_in_usd: number;
+}
+
 interface DiscosPersistentesCardsProps {
-    summary?: DiscosResumen; // Puede ser undefined mientras carga
+    summary?: DiscosResumen;
+    discos?: Disco[];
     isLoading: boolean;
 }
 
-// Reutilizamos estilo AWS
-const StatCard = ({ title, value, unit, icon: Icon, description, colorClass = "blue" }: any) => {
+const StatCard = ({ title, value, unit, icon: Icon, description, colorClass = "blue", warning = false }: any) => {
     
     const colorStyles = {
         blue:  { border: "border-l-blue-500",   bgIcon: "bg-blue-100 text-blue-600" },
@@ -39,7 +43,7 @@ const StatCard = ({ title, value, unit, icon: Icon, description, colorClass = "b
                     <div>
                         <p className="text-sm font-medium text-muted-foreground">{title}</p>
                         <h4 className="text-3xl font-bold tracking-tight">
-                            {value} <span className="text-sm font-normal text-slate-400">{unit}</span>
+                            {value} {unit && <span className="text-sm font-normal text-slate-400">{unit}</span>}
                         </h4>
                     </div>
                     <div className={`p-3 rounded-xl ${style.bgIcon}`}>
@@ -47,16 +51,38 @@ const StatCard = ({ title, value, unit, icon: Icon, description, colorClass = "b
                     </div>
                 </div>
                 <div className="space-y-2">
-                    <p className="text-xs text-muted-foreground">{description}</p>
+                    {warning ? (
+                        <div className="flex items-start gap-2 text-xs text-amber-600 bg-amber-50 dark:bg-amber-900/20 p-2 rounded">
+                            <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
+                            <div>
+                                <p className="font-semibold">Sin detalle de facturación</p>
+                                <p className="text-[10px] mt-0.5">Active export billing en GCP para ver costos</p>
+                            </div>
+                        </div>
+                    ) : (
+                        <p className="text-xs text-muted-foreground">{description}</p>
+                    )}
                 </div>
             </CardContent>
         </Card>
     )
 }
 
-export const DiscosPersistentesCardsComponent = ({ summary, isLoading }: DiscosPersistentesCardsProps) => {
+export const DiscosPersistentesCardsComponent = ({ summary, discos = [], isLoading }: DiscosPersistentesCardsProps) => {
 
-    if (isLoading || !summary) {
+    // Detectar si hay discos sin billing
+    const sinBilling = useMemo(() => {
+        return discos.some(d => d.tiene_billing === false);
+    }, [discos]);
+
+    // Determinar descripción del costo
+    const costoDescripcion = useMemo(() => {
+        if (sinBilling) return null; // Mostrará warning
+        if (summary?.costo_total_usd === 0) return "Discos en Free Tier de GCP.";
+        return "Costo mensual estimado eliminando estos discos.";
+    }, [sinBilling, summary?.costo_total_usd]);
+
+    if (isLoading) {
         return (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 animate-pulse">
                 {[1, 2, 3].map((i) => (
@@ -65,6 +91,8 @@ export const DiscosPersistentesCardsComponent = ({ summary, isLoading }: DiscosP
             </div>
         );
     }
+
+    if (!summary) return null;
 
     return (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -88,9 +116,10 @@ export const DiscosPersistentesCardsComponent = ({ summary, isLoading }: DiscosP
                 title="Ahorro Estimado"
                 value={`$${summary.costo_total_usd.toFixed(2)}`}
                 unit="USD/mes"
-                description="Costo mensual estimado (Snapshot + Provisioning)."
+                description={costoDescripcion}
                 icon={CircleDollarSign}
                 colorClass="green"
+                warning={sinBilling}
             />
         </div>
     );

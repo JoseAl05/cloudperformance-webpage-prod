@@ -152,7 +152,7 @@ export const TagsFilterComponent = ({
                                 ? 'Sin tags'
                                 : (isValidKey
                                     ? (selectedKey === 'allKeys' ? 'Todas las claves' : selectedKey)
-                                    : 'Tag Key')}
+                                    : 'Selecciona una key...')}
                         </span>
                         <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                     </Button>
@@ -203,10 +203,10 @@ export const TagsFilterComponent = ({
                 <Popover open={openValue} onOpenChange={setOpenValue}>
                     <PopoverTrigger asChild>
                         <Button variant="outline" className="w-full justify-between bg-transparent">
-                             <span className="truncate">
+                            <span className="truncate">
                                 {isValidValue
                                     ? (selectedValue === 'allValues' ? 'Todos los valores' : selectedValue)
-                                    : "Tag Value"}
+                                    : "Selecciona un valor..."}
                             </span>
                             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                         </Button>

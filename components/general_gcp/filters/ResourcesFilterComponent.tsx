@@ -100,7 +100,8 @@ export const ResourcesFilterComponent = ({
 
     const getDisplayText = () => {
         if (!hasData) return 'Sin recursos disponibles'
-        if (selectedIds.includes('all') || (!resourceId && hasData)) return 'Todos los Recursos'
+        if (selectedIds.includes('all')) return 'Todos los Recursos'
+        if (!resourceId && hasData) return 'Selecciona un recurso...'
         if (selectedIds.length === 1) return idToName.get(selectedIds[0]) ?? selectedIds[0]
         return `${selectedIds.length} recursos seleccionados`
     }
