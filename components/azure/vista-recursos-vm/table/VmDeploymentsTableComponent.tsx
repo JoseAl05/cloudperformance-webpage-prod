@@ -2,7 +2,7 @@
 
 import useSWR from "swr"
 import { ColumnDef } from "@tanstack/react-table"
-import { DataTableGrouping } from "@/components/general_aws/data-table/data-table-grouping"
+import { DataTableGrouping } from "@/components/data-table/data-table-grouping"
 import { Card, CardContent } from '@/components/ui/card'
 import {
     CheckCircle2,
