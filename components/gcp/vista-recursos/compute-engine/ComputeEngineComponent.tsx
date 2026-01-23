@@ -134,11 +134,14 @@
 'use client'
 
 import { MessageCard } from '@/components/aws/cards/MessageCards';
+import { ComputeEngineChartComponent } from '@/components/gcp/vista-recursos/compute-engine/grafico/ComputeEngineChartComponent';
 import { ComputeEngineInfoComponent } from '@/components/gcp/vista-recursos/compute-engine/info/ComputeEngineInfoComponent';
 import { ComputeEngineMetricsCardsComponent } from '@/components/gcp/vista-recursos/compute-engine/info/ComputeEngineMetricsCardsComponent';
+import { ComputeEngineBillingTable } from '@/components/gcp/vista-recursos/compute-engine/table/ComputeEngineBillingTable';
 import { LoaderComponent } from '@/components/general_gcp/LoaderComponent';
-import { ComputeEngineInfoResponse, ComputeEngineMetrics } from '@/interfaces/vista-compute-engine/cEInterfaces';
-import { AlertCircle, ChartBar, Clock, Info } from 'lucide-react';
+import { ComputeEngineBilling, ComputeEngineInfoResponse, ComputeEngineMetrics } from '@/interfaces/vista-compute-engine/cEInterfaces';
+import { AlertCircle, ChartBar, DollarSign, Info } from 'lucide-react';
+import { useState } from 'react';
 import useSWR from 'swr';
 
 interface ComputeEngineComponentProps {
@@ -160,6 +163,8 @@ export const ComputeEngineComponente = ({
 
 }: ComputeEngineComponentProps) => {
 
+    const [currency, setCurrency] = useState<string>("original");
+
     const startDateFormatted = startDate.toISOString().replace('Z', '').slice(0, -4);
     const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : '';
 
@@ -173,13 +178,22 @@ export const ComputeEngineComponente = ({
         fetcher
     )
 
+    const cEBilling = useSWR(
+        resourceId ? `/api/gcp/bridge/gcp/instancias_compute_engine/gcp-compute-instances_billing?date_from=${startDateFormatted}&date_to=${endDateFormatted}&instance=${resourceId}` : null,
+        fetcher
+    )
+
     const anyLoading =
         cEMetrics.isLoading ||
-        cEInfo.isLoading
+        cEInfo.isLoading ||
+        cEBilling.isLoading
+
 
     const anyError =
         !!cEMetrics.error ||
-        !!cEInfo.error
+        !!cEInfo.error ||
+        !!cEBilling.error
+
 
     const metricsData: ComputeEngineMetrics[] | null =
         isNonEmptyArray<ComputeEngineMetrics>(cEMetrics.data) ? cEMetrics.data : null;
@@ -187,8 +201,13 @@ export const ComputeEngineComponente = ({
     const infoData: ComputeEngineInfoResponse[] | null =
         isNonEmptyArray<ComputeEngineInfoResponse>(cEInfo.data) ? cEInfo.data : null;
 
+    const billingData: ComputeEngineBilling[] | null =
+        isNonEmptyArray<ComputeEngineBilling>(cEBilling.data) ? cEBilling.data : null;
+
     const hasMetricsData = !!metricsData && metricsData.length > 0
     const hasInfoData = !!infoData && infoData.length > 0
+    const hasBillingData = !!billingData && billingData.length > 0
+
 
     if (anyLoading) {
         return <LoaderComponent />
@@ -215,7 +234,7 @@ export const ComputeEngineComponente = ({
         )
     }
 
-    const noneHasData = !hasMetricsData && !hasInfoData
+    const noneHasData = !hasMetricsData && !hasInfoData && !hasBillingData;
     if (noneHasData) {
         return (
             <div className="w-full min-w-0 px-4 py-6">
@@ -229,8 +248,6 @@ export const ComputeEngineComponente = ({
         )
     }
 
-    console.log(metricsData);
-
     return (
         <>
             <div className='w-full min-w-0 px-4 py-6'>
@@ -239,7 +256,7 @@ export const ComputeEngineComponente = ({
                         <ComputeEngineInfoComponent data={infoData} />
                     </div>
                     <div className='flex-1 space-y-6 min-w-0 overflow-hidden'>
-                        <ComputeEngineMetricsCardsComponent data={metricsData}/>
+                        <ComputeEngineMetricsCardsComponent data={metricsData} />
                     </div>
                 </div>
                 <div className='flex flex-col gap-5 mt-10'>
@@ -247,10 +264,18 @@ export const ComputeEngineComponente = ({
                         <ChartBar className="h-8 w-8 text-blue-500" />
                         <h1 className="text-3xl font-bold text-foreground">Métricas de la Instancia</h1>
                     </div>
+                    <ComputeEngineChartComponent
+                        data={metricsData}
+                    />
                 </div>
-                <div className="flex items-center gap-3 my-10">
-                    <Clock className="h-8 w-8 text-blue-500" />
-                    <h1 className="text-3xl font-bold text-foreground">Eventos de la Instancia</h1>
+                <div className='flex flex-col gap-5 mt-10'>
+                    <div className="flex items-center gap-3 my-10">
+                        <DollarSign className="h-8 w-8 text-blue-500" />
+                        <h1 className="text-3xl font-bold text-foreground">Facturación de la Instancia</h1>
+                    </div>
+                    <ComputeEngineBillingTable
+                        data={billingData}
+                    />
                 </div>
             </div>
         </>

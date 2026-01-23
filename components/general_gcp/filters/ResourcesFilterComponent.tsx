@@ -47,12 +47,15 @@ export const ResourcesFilterComponent = ({
         case 'instances':
             url = regions ? `/api/gcp/bridge/gcp/instancias_compute_engine/all_compute_engine_instances?date_from=${startDateFormatted}&date_to=${endDateFormatted}&project_id=${projects}&location=${regions}` : '';
             break;
+        case 'instance_groups':
+            url = regions ? `/api/gcp/bridge/gcp/instance_groups/all_instance_groups?date_from=${startDateFormatted}&date_to=${endDateFormatted}&project_id=${projects}&location=${regions}` : '';
+            break;
         default:
             url = '';
     }
 
     const { data, error, isLoading } = useSWR(
-        url,
+        regions ? url : null,
         fetcherGet,
         { revalidateOnFocus: false, shouldRetryOnError: false }
     );

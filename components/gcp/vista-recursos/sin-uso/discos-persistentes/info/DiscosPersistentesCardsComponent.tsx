@@ -26,7 +26,7 @@ interface DiscosPersistentesCardsProps {
     isLoading: boolean;
 }
 
-const StatCard = ({ title, value, unit, icon: Icon, description, colorClass = "blue", warning = false }: any) => {
+const StatCard = ({ title, value, unit, icon: Icon, description, colorClass = "blue", warning = false }: unknown) => {
     
     const colorStyles = {
         blue:  { border: "border-l-blue-500",   bgIcon: "bg-blue-100 text-blue-600" },

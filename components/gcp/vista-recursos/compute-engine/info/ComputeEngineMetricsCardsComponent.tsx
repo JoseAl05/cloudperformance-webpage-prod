@@ -1,9 +1,11 @@
 'use client'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useSidebar } from '@/components/ui/sidebar';
 import { ComputeEngineMetrics } from '@/interfaces/vista-compute-engine/cEInterfaces';
 import { bytesToMB } from '@/lib/bytesToMbs';
 import { formatMetric } from '@/lib/metricUtils';
+import { cn } from '@/lib/utils';
 import { Activity, HardDrive, Network, Clock, Cpu } from 'lucide-react';
 import { useMemo } from 'react';
 
@@ -41,6 +43,8 @@ const formatMetricName = (name: string) => {
 
 export const ComputeEngineMetricsCardsComponent = ({ data }: ComputeEngineMetricsCardsComponentProps) => {
 
+    const { state } = useSidebar()
+
     const metrics = useMemo(() => {
         if (!data || !Array.isArray(data) || data.length === 0) return [];
         return data;
@@ -50,9 +54,15 @@ export const ComputeEngineMetricsCardsComponent = ({ data }: ComputeEngineMetric
         return <div className="text-muted-foreground text-sm">No hay métricas de Compute Engine para mostrar.</div>;
     }
 
+    const sortedMetrics = metrics.sort((a,b) => a.metric_name.localeCompare(b.metric_name));
+
     return (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {metrics.map((metric) => {
+        <div className={cn(
+            "grid gap-6",
+            state !== "collapsed" ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-2" : "grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
+        )
+        }>
+            {sortedMetrics.map((metric) => {
                 const Icon = getMetricIcon(metric.metric_name);
                 const unit = metricUnits[metric.metric_name] || '';
                 const peakValue = metric.metric_data
