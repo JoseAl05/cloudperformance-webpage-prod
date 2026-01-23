@@ -1,7 +1,7 @@
 'use client'
 
 import { ResourceBillingActionCell } from '@/components/aws/facturacion-recurso/table/ResourceBillingActionCell';
-import { DynamicColumn } from '@/components/general_aws/data-table/columns';
+import { DynamicColumn } from '@/components/data-table/columns';
 import { NatGatewaysMetricsSummary, NatGatewaysMetricsSummaryMetrics } from '@/interfaces/vista-consumos/natGwConsumeViewInterfaces';
 import { bytesToMB } from '@/lib/bytesToMbs';
 import { formatMetric } from '@/lib/metricUtils'; // Asegúrate de tener esto importado

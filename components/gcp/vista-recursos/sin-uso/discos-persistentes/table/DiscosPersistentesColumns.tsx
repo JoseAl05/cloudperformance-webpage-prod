@@ -1,6 +1,6 @@
 'use client'
 
-import { DynamicColumn } from '@/components/general_gcp/data-table/columns';
+import { DynamicColumn } from '@/components/data-table/columns';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Eye, HardDrive } from 'lucide-react';

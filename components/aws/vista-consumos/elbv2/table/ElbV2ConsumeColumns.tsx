@@ -1,7 +1,7 @@
 'use client'
 
 import { ResourceBillingActionCell } from '@/components/aws/facturacion-recurso/table/ResourceBillingActionCell';
-import { DynamicColumn } from '@/components/general_aws/data-table/columns';
+import { DynamicColumn } from '@/components/data-table/columns';
 import { LoadbalancerV2MetricsSummary, LoadbalancerV2MetricsSummaryMetrics } from '@/interfaces/vista-consumos/elbV2ConsumeViewInterfaces';
 import { bytesToMB } from '@/lib/bytesToMbs';
 import { formatMetric } from '@/lib/metricUtils';

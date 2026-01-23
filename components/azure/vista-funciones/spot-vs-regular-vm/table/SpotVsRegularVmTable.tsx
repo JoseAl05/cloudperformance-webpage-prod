@@ -1,8 +1,8 @@
-import { createColumns } from '@/components/general_aws/data-table/columns';
+import { createColumns } from '@/components/data-table/columns';
 import { SpotVsRegularVm } from '@/interfaces/vista-spot-vs-regular-vm/spotVsRegularVmInterfaces'
 import { SpotVsRegularVmColumns } from '@/components/azure/vista-funciones/spot-vs-regular-vm/table/SpotVsRegularVmColumns';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { DataTableGrouping } from '@/components/general_aws/data-table/data-table-grouping';
+import { DataTableGrouping } from '@/components/data-table/data-table-grouping';
 
 interface SpotVsRegularVmTableProps {
     data: SpotVsRegularVm[];

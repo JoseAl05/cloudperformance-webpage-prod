@@ -1,8 +1,8 @@
 // 'use client'
 
-// import { createColumns } from '@/components/general_aws/data-table/columns';
+// import { createColumns } from '@/components/data-table/columns';
 // import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-// import { DataTableGrouping } from '@/components/general_aws/data-table/data-table-grouping';
+// import { DataTableGrouping } from '@/components/data-table/data-table-grouping';
 // import { Server } from 'lucide-react';
 // import { LoadbalancerV2MetricsSummary } from '@/interfaces/vista-consumos/elbV2ConsumeViewInterfaces';
 // import { getElbV2ConsumeColumns } from '@/components/aws/vista-consumos/elbv2/table/ElbV2ConsumeColumns';
@@ -115,9 +115,9 @@
 
 'use client'
 
-import { createColumns } from '@/components/general_aws/data-table/columns';
+import { createColumns } from '@/components/data-table/columns';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { DataTableGrouping } from '@/components/general_aws/data-table/data-table-grouping';
+import { DataTableGrouping } from '@/components/data-table/data-table-grouping';
 import { Server } from 'lucide-react';
 import { LoadbalancerV2MetricsSummary } from '@/interfaces/vista-consumos/elbV2ConsumeViewInterfaces';
 import { getElbV2ConsumeColumns } from '@/components/aws/vista-consumos/elbv2/table/ElbV2ConsumeColumns';

@@ -1,6 +1,6 @@
-import { createColumns } from '@/components/general_aws/data-table/columns';
+import { createColumns } from '@/components/data-table/columns';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { DataTableGrouping } from '@/components/general_aws/data-table/data-table-grouping';
+import { DataTableGrouping } from '@/components/data-table/data-table-grouping';
 import { UnusedVmss } from '@/interfaces/vista-unused-resources/unusedVmssInterface';
 import { UnusedVmssColumns } from '@/components/azure/vista-funciones/unused-resources/vmss/table/UnusedVmssColumns';
 

@@ -1,6 +1,6 @@
-import { createColumns } from '@/components/general_aws/data-table/columns';
+import { createColumns } from '@/components/data-table/columns';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { DataTableGrouping } from '@/components/general_aws/data-table/data-table-grouping';
+import { DataTableGrouping } from '@/components/data-table/data-table-grouping';
 import { getUnusedEc2Columns } from './UnusedEc2Columns'; // Ajustar ruta
 import { BarChart3, Info } from 'lucide-react';
 import { Ec2TableRow } from '@/interfaces/general-interfaces/ec2MetricsTableData';

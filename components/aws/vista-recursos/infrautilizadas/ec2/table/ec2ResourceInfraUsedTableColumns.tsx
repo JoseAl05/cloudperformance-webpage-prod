@@ -1,7 +1,7 @@
 'use client'
 
 import { Badge } from '@/components/ui/badge';
-import { DynamicColumn } from '@/components/general_aws/data-table/columns';
+import { DynamicColumn } from '@/components/data-table/columns';
 import { Ec2Instance } from '@/interfaces/vista-infrautilizadas/ec2ResourceInfraUsedViewInterface';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';

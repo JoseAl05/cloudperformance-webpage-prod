@@ -1,7 +1,7 @@
 'use client'
 
 import { Badge } from '@/components/ui/badge';
-import { DynamicColumn } from '@/components/general_aws/data-table/columns';
+import { DynamicColumn } from '@/components/data-table/columns';
 import { Button } from '@/components/ui/button';
 import { Eye, Copy } from 'lucide-react';
 import { useState } from 'react';

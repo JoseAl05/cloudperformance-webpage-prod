@@ -1,6 +1,6 @@
 'use client'
 
-import { DynamicColumn } from '@/components/general_aws/data-table/columns';
+import { DynamicColumn } from '@/components/data-table/columns';
 import { Button } from '@/components/ui/button';
 import { Eye } from 'lucide-react';
 import { useState } from 'react';

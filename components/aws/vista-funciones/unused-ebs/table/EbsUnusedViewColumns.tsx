@@ -1,6 +1,6 @@
 'use client'
 import { Badge } from '@/components/ui/badge';
-import { DynamicColumn } from '@/components/general_aws/data-table/columns';
+import { DynamicColumn } from '@/components/data-table/columns';
 import { useSearchParams } from 'next/navigation';
 import { UnusedEbsVolumeInfo } from '@/interfaces/vista-ebs-no-utilizados/ebsUnusedInterfaces';
 

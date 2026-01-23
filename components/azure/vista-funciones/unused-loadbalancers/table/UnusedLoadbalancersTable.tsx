@@ -1,6 +1,6 @@
-import { createColumns } from '@/components/general_aws/data-table/columns';
+import { createColumns } from '@/components/data-table/columns';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { DataTableGrouping } from '@/components/general_aws/data-table/data-table-grouping';
+import { DataTableGrouping } from '@/components/data-table/data-table-grouping';
 import { UnusedLb } from '@/interfaces/vista-unused-resources/unusedLbInterfaces';
 import { UnusedLoadbalancersColumns } from '@/components/azure/vista-funciones/unused-loadbalancers/table/UnusedLoadbalancersColumns';
 

@@ -1,6 +1,6 @@
 'use client'
 import { Badge } from '@/components/ui/badge';
-import { DynamicColumn } from '@/components/general_aws/data-table/columns';
+import { DynamicColumn } from '@/components/data-table/columns';
 import { RdsConsumeViewInstance } from '@/interfaces/vista-consumos/rdsPgConsumeViewInterfaces';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';

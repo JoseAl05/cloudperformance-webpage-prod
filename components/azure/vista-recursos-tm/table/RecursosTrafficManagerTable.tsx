@@ -2,7 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { History } from 'lucide-react';
-import { DataTableGrouping } from '@/components/general_aws/data-table/data-table-grouping'; // Asumiendo que existe
+import { DataTableGrouping } from '@/components/data-table/data-table-grouping'; // Asumiendo que existe
 import { TrafficManagerDataHistory } from '@/interfaces/vista-traffic-manager/trafficManagerInterfaces';
 import { RecursosTrafficManagerColumns } from '@/components/azure/vista-recursos-tm/table/RecursosTrafficManagerColumns';
 
