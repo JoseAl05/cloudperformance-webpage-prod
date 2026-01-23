@@ -4,6 +4,7 @@ import React from 'react';
 import useSWR from 'swr';
 import { DiscosPersistentesCardsComponent } from './info/DiscosPersistentesCardsComponent'; 
 // import { DiscosPersistentesTableComponent } from './info/DiscosPersistentesTableComponent'; // (Aún no existe, lo haremos después)
+import { DiscosPersistentesTable } from './table/DiscosPersistentesTable';
 
 interface DiscosComponentProps {
     startDate: Date;
@@ -31,7 +32,8 @@ export const DiscosPersistentesComponent = ({
     // 1. Construcción de URL Dinámica
     // Base URL apuntando al bridge
     //let url = `/api/gcp/bridge/gcp/recursos-sin-uso/discos-persistentes-sin-uso?simple_list=true`;
-    let url = `/api/gcp/bridge/gcp/recursos_sin_uso/discos_persistentes?simple_list=true`;
+    //let url = `/api/gcp/bridge/gcp/recursos_sin_uso/discos_persistentes?simple_list=true`;
+    let url = `/api/gcp/bridge/gcp/recursos_sin_uso/discos_persistentes?simple_list=true&discos_en_uso=false`;
 
     // Fechas
     if (startDate) url += `&date_from=${startDate.toISOString().slice(0, 19)}`; // Quitamos milisegundos para evitar problemas
@@ -59,29 +61,41 @@ export const DiscosPersistentesComponent = ({
 
     return (
         <div className="space-y-6 mt-6">
-            <DiscosPersistentesCardsComponent 
-                // Usamos los nombres exactos de tu respuesta de Postman
-                summary={{
-                    discos_sin_uso: data?.resumen?.discos_sin_uso || 0,
-                    tamano_sin_uso_gb: data?.resumen?.tamano_sin_uso_gb || 0,
-                    costo_total_usd: data?.resumen?.costo_total_usd || 0
-                }} 
-                isLoading={isLoading}
-            />
+            {/* Mensaje si no hay proyecto seleccionado */}
+            {!projects && (
+                <div className="text-center text-gray-500 text-lg font-medium py-4">
+                    No se ha seleccionado ningún proyecto.
+                </div>
+            )}
 
-            {/* SECCIÓN 2: TABLA DE DETALLE (Placeholder por ahora) */}
-            <div className="rounded-md border p-4 bg-white dark:bg-slate-950">
-                <h3 className="text-sm font-medium mb-4">Detalle de Discos ({data?.discos?.length || 0})</h3>
-                {error && <div className="text-red-500 text-sm">Error al cargar los datos.</div>}
-                
-                {!isLoading && data?.discos && (
-                    <div className="text-sm text-gray-500">
-                        Aquí irá la tabla con los {data.discos.length} discos encontrados. 
-                        (Ej: {data.discos[0]?.name})
+            {/* Contenido cuando hay proyecto */}
+            {projects && (
+                <>
+                    <DiscosPersistentesCardsComponent 
+                        summary={data?.resumen}
+                        discos={data?.discos || []}
+                        isLoading={isLoading}
+                    />
+
+                    <div className="rounded-md border bg-white dark:bg-slate-950">
+                        <div className="p-4 border-b">
+                            <h3 className="text-sm font-medium">
+                                Detalle de Discos ({data?.discos?.length || 0})
+                            </h3>
+                        </div>
+                        {error && (
+                            <div className="text-red-500 text-sm p-4">
+                                Error al cargar los datos.
+                            </div>
+                        )}
+                        {!isLoading && data?.discos && (
+                            <DiscosPersistentesTable 
+                                data={data.discos} 
+                            />
+                        )}
                     </div>
-                )}
-            </div>
-
+                </>
+            )}
         </div>
     );
 };
