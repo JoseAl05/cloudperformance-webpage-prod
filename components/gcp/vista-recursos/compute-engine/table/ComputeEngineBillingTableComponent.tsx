@@ -9,11 +9,11 @@ import { getComputeEngineBillingColumns } from './ComputeEngineBillingColumns';
 const formatUSD = (value: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value);
 const formatCLP = (value: number) => new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(value);
 
-interface ComputeEngineBillingTableProps {
+interface ComputeEngineBillingTableComponentProps {
     data: ComputeEngineBilling[];
 }
 
-export const ComputeEngineBillingTable = ({ data }: ComputeEngineBillingTableProps) => {
+export const ComputeEngineBillingTableComponent = ({ data }: ComputeEngineBillingTableComponentProps) => {
     const aggregatedData = useMemo(() => {
         if (!data || data.length === 0) return [];
 
