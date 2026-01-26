@@ -15,6 +15,6 @@ export const formatMetric = (value: number) => {
   }
 
   return new Intl.NumberFormat('en-US', {
-    maximumSignificantDigits: 4,
+    maximumSignificantDigits: 2,
   }).format(value);
 };

@@ -48,7 +48,8 @@ import {
     Diff,
     Scale,
     Workflow,
-    CircleDollarSign
+    CircleDollarSign,
+    ShipWheel
 } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { usePathname } from 'next/navigation'
@@ -136,7 +137,7 @@ export const SidebarComponent = ({
         { label: 'Instancias EC2 AutoscalingGroups', icon: Computer, href: '/aws/recursos/infrautilizadas/autoscaling' },
         { label: 'Instancias EC2 Nodos EKS', icon: Computer, href: '/aws/recursos/infrautilizadas/eks' },
         { label: 'Vólumenes EBS', icon: HardDrive, href: '/aws/funciones/ebs-no-utilizados' },
-        { label: 'Nat Gateways', icon: Workflow, href: '/aws/funciones/nat-gateways-no-utilizados'},
+        { label: 'Nat Gateways', icon: Workflow, href: '/aws/funciones/nat-gateways-no-utilizados' },
         { label: 'Loadbalancers V2', icon: Workflow, href: '/aws/funciones/elbv2-no-utilizados' },
         { label: 'Route 53', icon: Workflow, href: '/aws/funciones/routes53-no-utilizados' }
     ]
@@ -228,7 +229,7 @@ export const SidebarComponent = ({
         ],
     }
 
-// CORREGIDO: Rutas apuntando a /gcp en lugar de /gpc
+    // CORREGIDO: Rutas apuntando a /gcp en lugar de /gpc
     const infrausedGCP = [
         { label: 'Compute Engine', icon: Computer, href: '/gcp/funciones/unused-resources/vm' },
         { label: 'Instance Groups', icon: Boxes, href: '/gcp/funciones/unused-resources/instance-groups' },
@@ -259,7 +260,10 @@ export const SidebarComponent = ({
         recursos: [
             { label: 'Compute Engine', icon: Computer, href: '/gcp/recursos/compute-engine' },
             { label: 'Instance Groups', icon: Workflow, href: '/gcp/recursos/instance-groups' },
-            { label: 'Clusters GKE', icon: Workflow, href: '/gcp/recursos/clusters-gke' }
+            { label: 'Clusters GKE', icon: ShipWheel, href: '/gcp/recursos/clusters-gke' },
+            { label: 'Cloud SQL Postgres', icon: Database, href: '/gcp/recursos/cloudsql/postgresql' },
+            { label: 'Cloud SQL Mysql', icon: Database, href: '/gcp/recursos/cloudsql/mysql' },
+            { label: 'Cloud SQL Sql Server', icon: Database, href: '/gcp/recursos/cloudsql/sqlserver' },
         ],
         consumes: [{ label: 'Consumos', subItems: consumeSubItemsGCP, icon: Zap }],
         funciones: [

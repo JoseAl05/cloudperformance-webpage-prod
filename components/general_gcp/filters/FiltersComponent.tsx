@@ -38,6 +38,7 @@ interface FiltersComponentProps {
     resourceService?: string;
     tagCollection?: string; // NUEVO: Colección de Mongo para buscar tags (ej: gcp_compute_disks)
     tagColumn?: string;     // NUEVO: Nombre columna (default: labels)
+    dbEngine?: string;
 }
 
 export const FiltersComponent = ({
@@ -50,7 +51,8 @@ export const FiltersComponent = ({
     resourceService = '',
     isResourceMultiSelect = false,
     tagCollection = '',  // Obligatorio si tagsFilter es true
-    tagColumn = 'labels'
+    tagColumn = 'labels',
+    dbEngine = ''
 }: FiltersComponentProps) => {
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -275,6 +277,7 @@ export const FiltersComponent = ({
                     resourceId={filters.resourceId}
                     tagKey={filters.tagKey}
                     tagValue={filters.tagValue}
+                    dbEngine={dbEngine}
                 />
             </Card>
         </div>
