@@ -43,8 +43,6 @@ export const GkeInfoComponent = ({ data }: GkeInfoComponentProps) => {
         <div className='w-full xl:w-[25rem]'>
             <div className='space-y-8'>
                 {data && data.map((group, index) => {
-                    // Accedemos al snapshot más reciente (asumiendo orden descendente o posición 0)
-                    // Si el array está vacío, manejamos null de forma segura.
                     const latestSnapshot = group.history_data && group.history_data.length > 0
                         ? group.history_data[0]
                         : null;
@@ -93,7 +91,7 @@ export const GkeInfoComponent = ({ data }: GkeInfoComponentProps) => {
                                     <CardContent className='space-y-4'>
                                         <div>
                                             <div className='flex items-center justify-between gap-5'>
-                                                <span className='font-semibold text-sm truncate max-w-[150px]' title={clusterName}>{clusterName}</span>
+                                                <span className='font-semibold text-sm max-w-[150px]' title={clusterName}>{clusterName}</span>
                                                 <Badge variant='default' className={getStatusColor(status)}>
                                                     {status}
                                                 </Badge>

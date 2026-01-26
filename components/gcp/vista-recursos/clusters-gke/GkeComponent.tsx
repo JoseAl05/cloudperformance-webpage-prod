@@ -4,9 +4,11 @@ import { MessageCard } from '@/components/aws/cards/MessageCards';
 import { GkeChartComponent } from '@/components/gcp/vista-recursos/clusters-gke/grafico/GkeChartComponent';
 import { GkeInfoComponent } from '@/components/gcp/vista-recursos/clusters-gke/info/GkeInfoComponent';
 import { GkeMetricsCardComponent } from '@/components/gcp/vista-recursos/clusters-gke/info/GkeMetricsCardComponent';
+import { GkeBillingComponent } from '@/components/gcp/vista-recursos/clusters-gke/table/GkeBillingComponent';
+import { GkeNodesTableComponent } from '@/components/gcp/vista-recursos/clusters-gke/table/GkeNodesTableComponent';
 import { LoaderComponent } from '@/components/general_gcp/LoaderComponent';
 import { ClusterGkeInfo, ClusterGkeInstances, ClusterGkeMetrics } from '@/interfaces/vista-gke/gkeInterfaces';
-import { AlertCircle, ChartBar, DollarSign, Info } from 'lucide-react';
+import { AlertCircle, ChartBar, Computer, DollarSign, Info } from 'lucide-react';
 import useSWR from 'swr';
 
 interface GkeComponentProps {
@@ -29,8 +31,6 @@ export const GkeComponent = ({
     const startDateFormatted = startDate.toISOString().replace('Z', '').slice(0, -4);
     const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : '';
 
-
-
     const gkeInfo = useSWR(
         resourceId ? `/api/gcp/bridge/gcp/gke_clusters/gcp_gke_cluster?date_from=${startDateFormatted}&date_to=${endDateFormatted}&cluster_gke=${resourceId}` : null,
         fetcher
@@ -41,18 +41,13 @@ export const GkeComponent = ({
         fetcher
     )
 
-
     const anyLoading =
         gkeInfo.isLoading ||
         gkeInstances.isLoading
 
-
-
     const anyError =
         !!gkeInfo.error ||
         !!gkeInstances.error
-
-
 
 
     const infoData: ClusterGkeInfo[] | null =
@@ -61,24 +56,8 @@ export const GkeComponent = ({
     const instancesData: ClusterGkeInstances[] | null =
         isNonEmptyArray<ClusterGkeInstances>(gkeInstances.data) ? gkeInstances.data : null;
 
-
-
     const hasInfoData = !!infoData && infoData.length > 0;
     const hasInstancesData = !!instancesData && instancesData.length > 0;
-
-    const instancesList = hasInstancesData && instancesData.map(instance => instance.resource_id);
-
-    const gkeMetrics = useSWR(
-        instancesList ? `/api/gcp/bridge/gcp/gke_clusters/gcp_gke_cluster_metrics?date_from=${startDateFormatted}&date_to=${endDateFormatted}&nodes=${instancesList.join(',')}` : null,
-        fetcher
-    )
-
-    const metricsData: ClusterGkeMetrics[] | null =
-        isNonEmptyArray<ClusterGkeMetrics>(gkeMetrics.data) ? gkeMetrics.data : null;
-
-    const hasMetricsData = !!metricsData && metricsData.length > 0;
-
-    console.log(metricsData);
 
     if (anyLoading) {
         return <LoaderComponent />
@@ -120,7 +99,8 @@ export const GkeComponent = ({
         )
     }
 
-
+    const instancesNamesList = instancesData.map(instance => instance.resource_name);
+    const instancesIdsList = instancesData.map(instance => instance.resource_id);
 
     return (
         <>
@@ -133,32 +113,42 @@ export const GkeComponent = ({
                     </div>
                     <div className='flex-1 space-y-6 min-w-0 overflow-hidden'>
                         <GkeMetricsCardComponent
-                            data={metricsData}
+                            instances={instancesNamesList}
+                            startDate={startDateFormatted}
+                            endDate={endDateFormatted}
                         />
                     </div>
                 </div>
                 <div className='flex flex-col gap-5 mt-10'>
-                    <div className="flex items-center gap-3 my-5">
-                        <ChartBar className="h-8 w-8 text-blue-500" />
-                        <h1 className="text-3xl font-bold text-foreground">Métricas del Cluster</h1>
+                    <div className="flex items-center gap-3 my-0">
+                        <Computer className="h-8 w-8 text-blue-500" />
+                        <h1 className="text-3xl font-bold text-foreground">Nodos</h1>
                     </div>
-                    <GkeChartComponent
-                        data={metricsData}
+                    <GkeNodesTableComponent
+                        data={instancesData}
                     />
                 </div>
                 <div className='flex flex-col gap-5 mt-10'>
-                    <div className="flex items-center gap-3 my-0">
-                        <DollarSign className="h-8 w-8 text-blue-500" />
-                        <h1 className="text-3xl font-bold text-foreground">Nodos</h1>
+                    <div className="flex items-center gap-3 my-5">
+                        <ChartBar className="h-8 w-8 text-blue-500" />
+                        <h1 className="text-3xl font-bold text-foreground">Métricas nodos del Cluster</h1>
                     </div>
-
+                    <GkeChartComponent
+                        instances={instancesNamesList}
+                        startDate={startDateFormatted}
+                        endDate={endDateFormatted}
+                    />
                 </div>
                 <div className='flex flex-col gap-5 mt-10'>
                     <div className="flex items-center gap-3 my-10">
                         <DollarSign className="h-8 w-8 text-blue-500" />
                         <h1 className="text-3xl font-bold text-foreground">Facturación Nodos</h1>
                     </div>
-
+                    <GkeBillingComponent
+                        instances={instancesIdsList}
+                        startDate={startDateFormatted}
+                        endDate={endDateFormatted}
+                    />
                 </div>
             </div>
         </>
