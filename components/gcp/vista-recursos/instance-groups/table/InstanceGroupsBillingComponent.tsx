@@ -29,18 +29,17 @@ export const InstanceGroupsBillingComponent = ({ instances, startDate, endDate }
         fetcher
     )
 
+    const anyLoading =
+        iGBilling.isLoading
+
+    const anyError =
+        !!iGBilling.error
+
     const billingData: InstanceGroupsBilling[] | null =
         isNonEmptyArray<InstanceGroupsBilling>(iGBilling.data) ? iGBilling.data : null;
 
     const hasBillingData = !!billingData && billingData.length > 0;
 
-    const anyLoading =
-        iGBilling.isLoading
-
-
-
-    const anyError =
-        !!iGBilling.error
 
     if (anyLoading) {
         return <LoaderComponent />

@@ -2,15 +2,25 @@
 
 import { useMemo, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Info } from 'lucide-react';
+import { AlertCircle, Info } from 'lucide-react';
 import { createChartOption, deepMerge, makeBaseOptions, useECharts } from '@/lib/echartsGlobalConfig';
 import { useTheme } from 'next-themes';
+import useSWR from 'swr';
+import { LoaderComponent } from '@/components/general_gcp/LoaderComponent';
+import { MessageCard } from '@/components/aws/cards/MessageCards';
 import { InstanceGroupsMetrics } from '@/interfaces/vista-instance-group/iGInterfaces';
 
-
 interface InstanceGroupChartComponentProps {
-    data: InstanceGroupsMetrics[];
+    instances: string[];
+    startDate: string;
+    endDate: string;
 }
+
+const fetcher = (url: string) =>
+    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
+        .then(r => r.json());
+
+const isNonEmptyArray = <T,>(v: unknown): v is T[] => Array.isArray(v) && v.length > 0
 
 const SingleMetricChart = ({ metric }: { metric: InstanceGroupsMetrics }) => {
     const { theme, resolvedTheme } = useTheme();
@@ -19,36 +29,35 @@ const SingleMetricChart = ({ metric }: { metric: InstanceGroupsMetrics }) => {
     const chartRef = useRef<HTMLDivElement>(null);
 
     const seriesData = useMemo(() => {
-        const metricName = metric.metric_name;
+        const groups: Record<string, [string, number][]> = {};
 
-        const processedData = metric.metric_data
-            .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime())
-            .map((m) => {
-                return [m.timestamp, m.metric_value];
-            });
+        metric.metric_data.forEach((item) => {
+            if (!groups[item.resource_name]) {
+                groups[item.resource_name] = [];
+            }
+            groups[item.resource_name].push([item.timestamp, item.metric_value]);
+        });
 
-        return [{
-            name: metricName,
+        return Object.entries(groups).map(([resourceName, dataPoints]) => ({
+            name: resourceName,
             type: 'line',
             smooth: true,
             showSymbol: false,
-            data: processedData,
-        }];
+            data: dataPoints.sort((a, b) => new Date(a[0]).getTime() - new Date(b[0]).getTime()),
+        }));
     }, [metric]);
 
     const option = useMemo(() => {
         const metricName = metric.metric_name;
+        const resourceNames = seriesData.map(s => s.name);
 
         const base = makeBaseOptions({
-            legend: [metricName],
+            legend: resourceNames,
             useUTC: true,
             showToolbox: true,
-            metricType: 'default',
+            metricType: 'default'
         });
 
-        let yAxisName = metricName;
-
-        // Base formatter for generic large numbers (K, M, B for Billion)
         const formatGeneric = (value: number) => {
             if (value >= 1000000000) return `${(value / 1000000000).toFixed(1)}B`;
             if (value >= 1000000) return `${(value / 1000000).toFixed(1)}M`;
@@ -56,7 +65,6 @@ const SingleMetricChart = ({ metric }: { metric: InstanceGroupsMetrics }) => {
             return value.toFixed(1);
         };
 
-        // Formatter for Bytes (KB, MB, GB)
         const formatBytes = (value: number) => {
             if (value === 0) return '0 B/s';
             const k = 1024;
@@ -66,36 +74,14 @@ const SingleMetricChart = ({ metric }: { metric: InstanceGroupsMetrics }) => {
         };
 
         let axisLabelFormatter = formatGeneric;
-        let tooltipFormatter = (v: number | null) => {
-            if (v == null) return '-';
-            return Number(v).toLocaleString('en-US', { maximumFractionDigits: 2 });
-        };
+        let tooltipFormatter = (v: unknown) => v != null ? Number(v).toLocaleString() : '-';
 
-        // Logic based on metric name patterns from JSON
         if (metricName.includes('cpu_utilization') || metricName.includes('percent')) {
-            yAxisName = `${metricName} (%)`;
             axisLabelFormatter = (value: number) => `${value.toFixed(1)}%`;
-            tooltipFormatter = (v: number | null) => v != null ? `${Number(v).toFixed(2)}%` : '-';
-        }
-        else if (metricName.includes('throughput')) {
-            yAxisName = `${metricName}`; // Unit is dynamic in label
+            tooltipFormatter = (v: unknown) => v != null ? `${Number(v).toFixed(2)}%` : '-';
+        } else if (metricName.includes('throughput')) {
             axisLabelFormatter = formatBytes;
-            tooltipFormatter = (v: number | null) => v != null ? formatBytes(Number(v)) : '-';
-        }
-        else if (metricName.includes('iops')) {
-            yAxisName = `${metricName} (IOPS)`;
-            axisLabelFormatter = (value: number) => `${formatGeneric(value)} IOPS`;
-            tooltipFormatter = (v: number | null) => v != null ? `${Number(v).toFixed(2)} IOPS` : '-';
-        }
-        else if (metricName.includes('pps')) {
-            yAxisName = `${metricName} (PPS)`;
-            axisLabelFormatter = (value: number) => `${formatGeneric(value)} PPS`;
-            tooltipFormatter = (v: number | null) => v != null ? `${Number(v).toFixed(2)} PPS` : '-';
-        }
-        else if (metricName.includes('uptime')) {
-            yAxisName = `${metricName} (s)`;
-            axisLabelFormatter = (value: number) => `${value}s`;
-            tooltipFormatter = (v: number | null) => v != null ? `${Number(v).toFixed(0)}s` : '-';
+            tooltipFormatter = (v: unknown) => v != null ? formatBytes(Number(v)) : '-';
         }
 
         const chartOptions = createChartOption({
@@ -105,7 +91,11 @@ const SingleMetricChart = ({ metric }: { metric: InstanceGroupsMetrics }) => {
             tooltip: true,
             series: [],
             extraOption: {
-                grid: { left: 30, right: 30, top: 50, bottom: 60, containLabel: true },
+                grid: { left: 20, right: 30, top: 70, bottom: 50, containLabel: true },
+                legend: {
+                    type: 'scroll',
+                    top: 0
+                }
             },
         });
 
@@ -115,74 +105,102 @@ const SingleMetricChart = ({ metric }: { metric: InstanceGroupsMetrics }) => {
                 valueFormatter: tooltipFormatter,
             },
             yAxis: {
-                name: yAxisName,
-                nameTextStyle: {
-                    align: 'left',
-                    padding: [0, 0, 0, 0]
-                },
-                axisLabel: {
-                    formatter: axisLabelFormatter
-                }
+                name: metricName,
+                axisLabel: { formatter: axisLabelFormatter }
             },
             series: seriesData
         };
 
         return deepMerge(base, deepMerge(chartOptions, specificOptions));
-    }, [isDark, seriesData, metric]);
+    }, [seriesData, metric]);
 
     useECharts(chartRef, option, [option], isDark ? 'cp-dark' : 'cp-light');
 
-    const isEmpty = seriesData.every(s => s.data.length === 0);
-
     return (
         <Card className="w-full h-full">
-            <CardHeader>
-                <CardTitle>{metric.metric_name.toUpperCase()}</CardTitle>
+            <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-bold">{metric.metric_name.toUpperCase()}</CardTitle>
             </CardHeader>
             <CardContent>
-                <div className="flex items-center justify-start gap-2 mb-4">
-                    <Info className="w-4 h-4 text-blue-500 flex-shrink-0" />
+                <div className="flex items-center gap-2 mb-2">
+                    <Info className="w-3 h-3 text-blue-500" />
                     <p className="text-[10px] text-muted-foreground">
-                        Mostrando datos para la métrica <strong>{metric.metric_name}</strong>.
-                        {/* Promedio: <strong>{metric.avg_value.toFixed(2)}</strong> */}
+                        {seriesData.length} recursos reportando datos.
                     </p>
                 </div>
-                {isEmpty ? (
-                    <div className="w-full h-[300px] flex items-center justify-center bg-gray-50 rounded-lg">
-                        <span className="text-gray-400">No hay datos disponibles para esta métrica</span>
-                    </div>
-                ) : (
-                    <div ref={chartRef} className="w-full h-[300px]" />
-                )}
+                <div ref={chartRef} className="w-full h-[350px]" />
             </CardContent>
         </Card>
     );
 };
 
-export const InstanceGroupChartComponent = ({ data }: InstanceGroupChartComponentProps) => {
+export const InstanceGroupChartComponent = ({ instances, startDate, endDate }: InstanceGroupChartComponentProps) => {
+
+    const iGMetrics = useSWR(
+        instances ? `/api/gcp/bridge/gcp/instance_groups/gcp_instance_group_metrics?date_from=${startDate}&date_to=${endDate}&instances=${instances.join(',')}` : null,
+        fetcher
+    )
+
+    const anyLoading =
+        iGMetrics.isLoading
+
+    const anyError =
+        !!iGMetrics.error
+
+    const metricsData: InstanceGroupsMetrics[] | null =
+        isNonEmptyArray<InstanceGroupsMetrics>(iGMetrics.data) ? iGMetrics.data : null;
+
+    const hasMetricsData = !!metricsData && metricsData.length > 0;
 
     const sortedMetrics = useMemo(() => {
-        if (!data) return [];
-        return [...data].sort((a, b) => {
-            const nameA = a.metric_name.toLowerCase();
-            const nameB = b.metric_name.toLowerCase();
+        if (!metricsData) return [];
+        return [...metricsData].sort((a, b) => a.metric_name.localeCompare(b.metric_name));
+    }, [metricsData]);
 
-            const isCpuA = nameA.includes('cpu');
-            const isCpuB = nameB.includes('cpu');
-
-            if (isCpuA && !isCpuB) return -1;
-            if (!isCpuA && isCpuB) return 1;
-
-            return nameA.localeCompare(nameB);
-        });
-    }, [data]);
-
-    if (!data || data.length === 0) {
-        return null;
+    if (anyLoading) {
+        return <LoaderComponent />
     }
 
+    if (!sortedMetrics) {
+        return (
+            <div className="max-w-7xl mx-auto px-6 py-8">
+                <div className="text-center text-gray-500 text-lg font-medium">No se obtuvieron datos.</div>
+            </div>
+        )
+    }
+
+    if (anyError) {
+        return (
+            <div className="w-full min-w-0 px-4 py-10 flex flex-col items-center gap-4">
+                <MessageCard
+                    icon={AlertCircle}
+                    title="Error al cargar datos"
+                    description="Ocurrió un problema al obtener la información desde la API. Intenta nuevamente o ajusta el rango de fechas."
+                    tone="error"
+                />
+            </div>
+        )
+    }
+
+    const noneHasData = !hasMetricsData
+
+    if (noneHasData) {
+        return (
+            <div className="w-full min-w-0 px-4 py-6">
+                <MessageCard
+                    icon={Info}
+                    title="Sin datos para mostrar"
+                    description="No encontramos métricas ni información de la instancia en el rango seleccionado."
+                    tone="warn"
+                />
+            </div>
+        )
+    }
+
+
+
     return (
-        <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-2 gap-4 w-full">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 w-full">
             {sortedMetrics.map((metricItem) => (
                 <SingleMetricChart
                     key={metricItem.metric_name}

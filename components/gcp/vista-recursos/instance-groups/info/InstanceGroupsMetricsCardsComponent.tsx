@@ -1,17 +1,28 @@
 'use client'
 
+import { MessageCard } from '@/components/aws/cards/MessageCards';
+import { LoaderComponent } from '@/components/general_gcp/LoaderComponent';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useSidebar } from '@/components/ui/sidebar';
 import { InstanceGroupsMetrics } from '@/interfaces/vista-instance-group/iGInterfaces';
 import { bytesToMB } from '@/lib/bytesToMbs';
 import { formatMetric } from '@/lib/metricUtils';
 import { cn } from '@/lib/utils';
-import { Activity, HardDrive, Network, Clock, Cpu } from 'lucide-react';
+import { Activity, HardDrive, Network, Clock, Cpu, Info, AlertCircle } from 'lucide-react';
 import { useMemo } from 'react';
+import useSWR from 'swr';
 
 interface InstanceGroupsMetricsCardsComponentProps {
-    data?: InstanceGroupsMetrics[];
+    instances: string[];
+    startDate: string;
+    endDate: string;
 }
+
+const fetcher = (url: string) =>
+    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
+        .then(r => r.json());
+
+const isNonEmptyArray = <T,>(v: unknown): v is T[] => Array.isArray(v) && v.length > 0
 
 const metricUnits: Record<string, string> = {
     network_ingress_throughput: "MB/s",
@@ -41,20 +52,74 @@ const formatMetricName = (name: string) => {
         .join(' ');
 };
 
-export const InstanceGroupsMetricsCardsComponent = ({ data }: InstanceGroupsMetricsCardsComponentProps) => {
+export const InstanceGroupsMetricsCardsComponent = ({ instances, startDate, endDate }: InstanceGroupsMetricsCardsComponentProps) => {
 
     const { state } = useSidebar()
+    const iGMetrics = useSWR(
+        instances ? `/api/gcp/bridge/gcp/instance_groups/gcp_instance_group_metrics?date_from=${startDate}&date_to=${endDate}&instances=${instances.join(',')}` : null,
+        fetcher
+    )
+
+    const anyLoading =
+        iGMetrics.isLoading
+
+    const anyError =
+        !!iGMetrics.error
+
+    const metricsData: InstanceGroupsMetrics[] | null =
+        isNonEmptyArray<InstanceGroupsMetrics>(iGMetrics.data) ? iGMetrics.data : null;
+
+    const hasMetricsData = !!metricsData && metricsData.length > 0;
 
     const metrics = useMemo(() => {
-        if (!data || !Array.isArray(data) || data.length === 0) return [];
-        return data;
-    }, [data]);
+        if (!metricsData || !Array.isArray(metricsData) || metricsData.length === 0) return [];
+        return metricsData;
+    }, [metricsData]);
 
-    if (!data || data.length === 0) {
-        return <div className="text-muted-foreground text-sm">No hay métricas de Compute Engine para mostrar.</div>;
+
+    const sortedMetrics = metrics.sort((a, b) => a.metric_name.localeCompare(b.metric_name));
+
+    if (anyLoading) {
+        return <LoaderComponent />
     }
 
-    const sortedMetrics = metrics.sort((a,b) => a.metric_name.localeCompare(b.metric_name));
+    if (!sortedMetrics) {
+        return (
+            <div className="max-w-7xl mx-auto px-6 py-8">
+                <div className="text-center text-gray-500 text-lg font-medium">No se obtuvieron datos.</div>
+            </div>
+        )
+    }
+
+    if (anyError) {
+        return (
+            <div className="w-full min-w-0 px-4 py-10 flex flex-col items-center gap-4">
+                <MessageCard
+                    icon={AlertCircle}
+                    title="Error al cargar datos"
+                    description="Ocurrió un problema al obtener la información desde la API. Intenta nuevamente o ajusta el rango de fechas."
+                    tone="error"
+                />
+            </div>
+        )
+    }
+
+    const noneHasData = !hasMetricsData
+
+    if (noneHasData) {
+        return (
+            <div className="w-full min-w-0 px-4 py-6">
+                <MessageCard
+                    icon={Info}
+                    title="Sin datos para mostrar"
+                    description="No encontramos métricas ni información de la instancia en el rango seleccionado."
+                    tone="warn"
+                />
+            </div>
+        )
+    }
+
+
 
     return (
         <div className={cn(
@@ -73,7 +138,7 @@ export const InstanceGroupsMetricsCardsComponent = ({ data }: InstanceGroupsMetr
 
                 let finalMetricValue = 0;
                 let finalPeakValue = 0;
-                if(unit === "MB/s"){
+                if (unit === "MB/s") {
                     finalMetricValue = bytesToMB(metricValue);
                     finalPeakValue = bytesToMB(peakValue);
                 } else {
@@ -96,7 +161,7 @@ export const InstanceGroupsMetricsCardsComponent = ({ data }: InstanceGroupsMetr
                             </div>
                         </CardHeader>
                         <CardContent>
-                             <div className="flex justify-between items-end px-2 pb-2">
+                            <div className="flex justify-between items-end px-2 pb-2">
                                 <div>
                                     <p className="text-xs font-semibold text-green-400 uppercase tracking-wider mb-1">Promedio</p>
                                     <div className="flex items-baseline gap-1">

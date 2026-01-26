@@ -8,7 +8,7 @@ import { InstanceGroupsBillingComponent } from '@/components/gcp/vista-recursos/
 import { InstanceGroupsInstancesTableComponent } from '@/components/gcp/vista-recursos/instance-groups/table/InstanceGroupsInstancesTableComponent';
 import { LoaderComponent } from '@/components/general_gcp/LoaderComponent';
 import { InstanceGroupInfo, InstanceGroupsInstances, InstanceGroupsMetrics } from '@/interfaces/vista-instance-group/iGInterfaces';
-import { AlertCircle, ChartBar, DollarSign, Info } from 'lucide-react';
+import { AlertCircle, ChartBar, Computer, DollarSign, Info } from 'lucide-react';
 import useSWR from 'swr';
 
 interface InstanceGroupsComponentProps {
@@ -121,7 +121,9 @@ export const InstanceGroupsComponent = ({
         )
     }
 
-    const instancesList = instancesData.map(instance => instance.resource_id);
+    const instancesNamesList = instancesData.map(instance => instance.resource_name);
+    const instancesIdsList = instancesData.map(instance => instance.resource_id);
+
 
     return (
         <>
@@ -134,26 +136,30 @@ export const InstanceGroupsComponent = ({
                     </div>
                     <div className='flex-1 space-y-6 min-w-0 overflow-hidden'>
                         <InstanceGroupsMetricsCardsComponent
-                            data={metricsData}
+                            instances={instancesNamesList}
+                            startDate={startDateFormatted}
+                            endDate={endDateFormatted}
                         />
                     </div>
                 </div>
                 <div className='flex flex-col gap-5 mt-10'>
-                    <div className="flex items-center gap-3 my-5">
-                        <ChartBar className="h-8 w-8 text-blue-500" />
-                        <h1 className="text-3xl font-bold text-foreground">Métricas de la Instancia</h1>
-                    </div>
-                    <InstanceGroupChartComponent
-                        data={metricsData}
-                    />
-                </div>
-                <div className='flex flex-col gap-5 mt-10'>
                     <div className="flex items-center gap-3 my-0">
-                        <DollarSign className="h-8 w-8 text-blue-500" />
+                        <Computer className="h-8 w-8 text-blue-500" />
                         <h1 className="text-3xl font-bold text-foreground">Instancias del Instance Group</h1>
                     </div>
                     <InstanceGroupsInstancesTableComponent
                         data={instancesData}
+                    />
+                </div>
+                <div className='flex flex-col gap-5 mt-10'>
+                    <div className="flex items-center gap-3 my-5">
+                        <ChartBar className="h-8 w-8 text-blue-500" />
+                        <h1 className="text-3xl font-bold text-foreground">Métricas Instancias</h1>
+                    </div>
+                    <InstanceGroupChartComponent
+                        instances={instancesNamesList}
+                        startDate={startDateFormatted}
+                        endDate={endDateFormatted}
                     />
                 </div>
                 <div className='flex flex-col gap-5 mt-10'>
@@ -162,7 +168,7 @@ export const InstanceGroupsComponent = ({
                         <h1 className="text-3xl font-bold text-foreground">Facturación del Instance Group</h1>
                     </div>
                     <InstanceGroupsBillingComponent
-                        instances={instancesList}
+                        instances={instancesIdsList}
                         startDate={startDateFormatted}
                         endDate={endDateFormatted}
                     />

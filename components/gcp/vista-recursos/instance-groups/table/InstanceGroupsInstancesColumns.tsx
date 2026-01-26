@@ -4,6 +4,8 @@ import { DynamicColumn } from '@/components/general/data-table/columns';
 import { InstanceGroupsInstances, InstanceGroupsInstancesData } from '@/interfaces/vista-compute-engine/cEInterfaces';
 import { Button } from '@/components/ui/button';
 import { History, Monitor, Globe, MapPin, CalendarClock, Calendar } from 'lucide-react';
+import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 
 export type ProcessedInstanceRow = InstanceGroupsInstances & {
     latestSnapshot: InstanceGroupsInstancesData | undefined;
@@ -33,6 +35,21 @@ const extractNameFromUrl = (url: string) => {
     return parts[parts.length - 1];
 };
 
+const GetParameters = () => {
+    const searchParams = useSearchParams();
+    const startDateParam = searchParams.get('startDate');
+    const endDateParam = searchParams.get('endDate');
+    const projectParam = searchParams.get('projects');
+    const regionParam = searchParams.get('regions');
+
+    return {
+        startDateParam,
+        endDateParam,
+        projectParam,
+        regionParam
+    }
+}
+
 export const getInstanceGroupsInstancesColumns = (
     onHistoryClick?: (instance: ProcessedInstanceRow) => void
 ): DynamicColumn<ProcessedInstanceRow>[] => {
@@ -40,14 +57,23 @@ export const getInstanceGroupsInstancesColumns = (
         {
             header: "Nombre de Instancia",
             accessorKey: "resource_name",
-            cell: (info) => (
-                <div className="flex flex-col">
-                    <span className="font-medium text-foreground flex items-center gap-2">
-                        <Monitor className="h-4 w-4 text-muted-foreground" />
-                        {String(info.getValue() || '-')}
-                    </span>
-                </div>
-            ),
+            cell: ({ row }) => {
+                const { startDateParam, endDateParam, projectParam, regionParam } = GetParameters();
+                return (
+                    <div className="flex flex-col">
+                        <Link
+                            href={{ pathname: '/gcp/recursos/compute-engine', query: { startDate: startDateParam, endDate: endDateParam, resourceId: row.original.resource_id, projects: projectParam, regions: regionParam } }}
+                            rel="noopener noreferrer"
+                            target="_blank"
+                        >
+                            <span className="font-medium text-blue-500 flex items-center gap-2 transition-all hover:text-blue-300">
+                                <Monitor className="h-4 w-4" />
+                                {String(row.original.resource_name || '-')}
+                            </span>
+                        </Link>
+                    </div>
+                )
+            },
             size: 220,
             enableSorting: true
         },

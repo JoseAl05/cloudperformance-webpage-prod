@@ -7,6 +7,7 @@ export interface ClusterGkeMetrics {
 export interface ClusterGkeMetricData {
   timestamp: string;
   metric_value: number;
+  resource_name: string;
 }
 
 export interface ClusterGkeInstances {
