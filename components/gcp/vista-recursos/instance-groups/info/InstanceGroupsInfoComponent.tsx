@@ -44,7 +44,7 @@ export const InstanceGroupsInfoComponent = ({ data }: InstanceGroupsInfoComponen
             <div className='space-y-8'>
                 {data && data.map((group) => {
                     const history = group.history_data;
-                    const groupId = group.nistance_group_id;
+                    const groupId = group.instance_group_id;
                     const groupName = group.instance_group_name;
                     const latestSnapshot = history[0];
 

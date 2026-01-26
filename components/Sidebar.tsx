@@ -258,7 +258,8 @@ export const SidebarComponent = ({
         ],
         recursos: [
             { label: 'Compute Engine', icon: Computer, href: '/gcp/recursos/compute-engine' },
-            { label: 'Instance Groups', icon: Workflow, href: '/gcp/recursos/instance-groups' }
+            { label: 'Instance Groups', icon: Workflow, href: '/gcp/recursos/instance-groups' },
+            { label: 'Clusters GKE', icon: Workflow, href: '/gcp/recursos/clusters-gke' }
         ],
         consumes: [{ label: 'Consumos', subItems: consumeSubItemsGCP, icon: Zap }],
         funciones: [

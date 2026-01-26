@@ -50,6 +50,9 @@ export const ResourcesFilterComponent = ({
         case 'instance_groups':
             url = regions ? `/api/gcp/bridge/gcp/instance_groups/all_instance_groups?date_from=${startDateFormatted}&date_to=${endDateFormatted}&project_id=${projects}&location=${regions}` : '';
             break;
+        case 'clusters-gke':
+            url = regions ? `/api/gcp/bridge/gcp/gke_clusters/all_gke_clusters?date_from=${startDateFormatted}&date_to=${endDateFormatted}&project_id=${projects}&location=${regions}` : '';
+            break;
         default:
             url = '';
     }

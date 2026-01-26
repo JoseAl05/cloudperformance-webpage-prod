@@ -69,7 +69,7 @@ export interface InstanceGroupsInstancesDataNetworkInterfaces {
 export interface InstanceGroupInfo {
     history_data: HistoryData[];
     instance_group_name: string;
-    nistance_group_id: string;
+    instance_group_id: string;
 }
 
 export interface HistoryData {
