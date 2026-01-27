@@ -48,7 +48,6 @@ const SingleMetricChart = ({ metric }: { metric: ComputeEngineMetrics }) => {
 
         let yAxisName = metricName;
 
-        // Base formatter for generic large numbers (K, M, B for Billion)
         const formatGeneric = (value: number) => {
             if (value >= 1000000000) return `${(value / 1000000000).toFixed(1)}B`;
             if (value >= 1000000) return `${(value / 1000000).toFixed(1)}M`;
@@ -56,7 +55,6 @@ const SingleMetricChart = ({ metric }: { metric: ComputeEngineMetrics }) => {
             return value.toFixed(1);
         };
 
-        // Formatter for Bytes (KB, MB, GB)
         const formatBytes = (value: number) => {
             if (value === 0) return '0 B/s';
             const k = 1024;
@@ -71,14 +69,13 @@ const SingleMetricChart = ({ metric }: { metric: ComputeEngineMetrics }) => {
             return Number(v).toLocaleString('en-US', { maximumFractionDigits: 2 });
         };
 
-        // Logic based on metric name patterns from JSON
         if (metricName.includes('cpu_utilization') || metricName.includes('percent')) {
             yAxisName = `${metricName} (%)`;
             axisLabelFormatter = (value: number) => `${value.toFixed(1)}%`;
             tooltipFormatter = (v: number | null) => v != null ? `${Number(v).toFixed(2)}%` : '-';
         }
         else if (metricName.includes('throughput')) {
-            yAxisName = `${metricName}`; // Unit is dynamic in label
+            yAxisName = `${metricName}`;
             axisLabelFormatter = formatBytes;
             tooltipFormatter = (v: number | null) => v != null ? formatBytes(Number(v)) : '-';
         }

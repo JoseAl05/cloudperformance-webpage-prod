@@ -1,4 +1,4 @@
-import { ComputeEngineComponente } from '@/components/gcp/vista-recursos/compute-engine/ComputeEngineComponent'
+import { ComputeEngineComponent } from '@/components/gcp/vista-recursos/compute-engine/ComputeEngineComponent'
 import { FiltersComponent } from '@/components/general_gcp/filters/FiltersComponent'
 import { PieChart} from 'lucide-react'
 
@@ -23,7 +23,7 @@ export const MainViewComputeEngineComponent = () => {
             </div>
             <div className='w-full min-w-0'>
                 <FiltersComponent
-                    Component={ComputeEngineComponente}
+                    Component={ComputeEngineComponent}
                     dateFilter
                     projectsFilter
                     regionFilter

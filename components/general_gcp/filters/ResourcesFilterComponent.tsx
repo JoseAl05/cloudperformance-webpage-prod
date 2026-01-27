@@ -50,6 +50,18 @@ export const ResourcesFilterComponent = ({
         case 'instance_groups':
             url = regions ? `/api/gcp/bridge/gcp/instance_groups/all_instance_groups?date_from=${startDateFormatted}&date_to=${endDateFormatted}&project_id=${projects}&location=${regions}` : '';
             break;
+        case 'clusters-gke':
+            url = regions ? `/api/gcp/bridge/gcp/gke_clusters/all_gke_clusters?date_from=${startDateFormatted}&date_to=${endDateFormatted}&project_id=${projects}&location=${regions}` : '';
+            break;
+        case 'postgres':
+            url = regions ? `/api/gcp/bridge/gcp/instancias_cloud_sql/all_cloudsql_instances?date_from=${startDateFormatted}&date_to=${endDateFormatted}&project_id=${projects}&location=${regions}&db_engine=postgres` : '';
+            break;
+        case 'mysql':
+            url = regions ? `/api/gcp/bridge/gcp/instancias_cloud_sql/all_cloudsql_instances?date_from=${startDateFormatted}&date_to=${endDateFormatted}&project_id=${projects}&location=${regions}&db_engine=mysql` : '';
+            break;
+        case 'sqlserver':
+            url = regions ? `/api/gcp/bridge/gcp/instancias_cloud_sql/all_cloudsql_instances?date_from=${startDateFormatted}&date_to=${endDateFormatted}&project_id=${projects}&location=${regions}&db_engine=sqlserver` : '';
+            break
         default:
             url = '';
     }
@@ -105,7 +117,7 @@ export const ResourcesFilterComponent = ({
         if (!hasData) return 'Sin recursos disponibles'
         if (selectedIds.includes('all')) return 'Todos los Recursos'
         if (!resourceId && hasData) return 'Selecciona un recurso...'
-        if (selectedIds.length === 1) return idToName.get(selectedIds[0]) ?? selectedIds[0]
+        if (selectedIds.length === 1) return idToName.get(selectedIds[0]) ?? idToName.get(selectedIds[0])
         return `${selectedIds.length} recursos seleccionados`
     }
 

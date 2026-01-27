@@ -2,7 +2,7 @@
 
 import useSWR from "swr"
 import { ColumnDef } from "@tanstack/react-table"
-import { DataTableSingle } from "@/components/general_aws/data-table/data-table-single"
+import { DataTableSingle } from "@/components/data-table/data-table-single"
 import { ArrowUpDown } from "lucide-react"
 import { LoaderComponent } from '@/components/general_aws/LoaderComponent'
 

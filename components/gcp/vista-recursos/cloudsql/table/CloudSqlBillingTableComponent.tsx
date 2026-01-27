@@ -3,21 +3,21 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { DataTableGrouping } from '@/components/data-table/data-table-grouping';
 import { BarChart3 } from 'lucide-react';
 import { useMemo } from 'react';
-import { ComputeEngineBilling } from '@/interfaces/vista-compute-engine/cEInterfaces';
-import { getComputeEngineBillingColumns } from './ComputeEngineBillingColumns';
+import { CloudSqlBilling } from '@/interfaces/vista-cloudsql/cSqlInterfaces';
+import { getCloudSqlBillingColumns } from '@/components/gcp/vista-recursos/cloudsql/table/CloudSqlBillingColumns';
 
 const formatUSD = (value: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value);
 const formatCLP = (value: number) => new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(value);
 
-interface ComputeEngineBillingTableProps {
-    data: ComputeEngineBilling[];
+interface CloudSqlBillingTableComponentProps {
+    data: CloudSqlBilling[];
 }
 
-export const ComputeEngineBillingTable = ({ data }: ComputeEngineBillingTableProps) => {
+export const CloudSqlBillingTableComponent = ({ data }: CloudSqlBillingTableComponentProps) => {
     const aggregatedData = useMemo(() => {
         if (!data || data.length === 0) return [];
 
-        const skuMap = new Map<string, ComputeEngineBilling>();
+        const skuMap = new Map<string, CloudSqlBilling>();
 
         data.forEach((item) => {
             const current = skuMap.get(item.sku);
@@ -44,7 +44,7 @@ export const ComputeEngineBillingTable = ({ data }: ComputeEngineBillingTablePro
         }), { usd: 0, clp: 0 });
     }, [aggregatedData]);
 
-    const columns = createColumns(getComputeEngineBillingColumns());
+    const columns = createColumns(getCloudSqlBillingColumns());
 
     return (
         <Card className="w-full overflow-hidden">
@@ -53,7 +53,7 @@ export const ComputeEngineBillingTable = ({ data }: ComputeEngineBillingTablePro
                     <div>
                         <CardTitle className="flex items-center gap-2 text-lg">
                             <BarChart3 className="h-5 w-5 text-emerald-500" />
-                            Facturación de Compute Engine
+                            Facturación de instancia Cloud SQL
                         </CardTitle>
                         <p className="text-sm text-muted-foreground mt-1">
                             Desglose de costos por SKU (USD y CLP).
