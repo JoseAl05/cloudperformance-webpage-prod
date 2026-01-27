@@ -5,14 +5,16 @@ import { DatePicker } from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 
 import { Card, CardContent } from '@/components/ui/card';
-import { Calendar, Filter, XCircle, LayoutGrid, Globe, HardDrive, Tag } from 'lucide-react'; // Agregamos Tag icon
+import { Calendar, Filter, XCircle, LayoutGrid, Globe, HardDrive, Tag, Database } from 'lucide-react'; // Agregamos Tag icon
 import { Button } from '@/components/ui/button';
 import { useRouter, useSearchParams } from 'next/navigation';
 
 import { ProjectsFilterComponent } from './ProjectsFilterComponent';
 import { RegionsFilterComponent } from './RegionsFilterComponent';
 import { ResourcesFilterComponent } from './ResourcesFilterComponent';
-import { TagsFilterComponent } from './TagsFilterComponent'; // Importamos el nuevo componente
+import { TagsFilterComponent } from './TagsFilterComponent'; 
+import { DatabaseTypeFilterComponent } from './DatabaseTypeFilterComponent';
+
 
 interface FiltersComponentProps {
     Component: (params: {
@@ -24,6 +26,7 @@ interface FiltersComponentProps {
         // Nuevos params para el hijo
         tagKey?: string | null;
         tagValue?: string | null;
+        databaseType?: string;
     }) => React.JSX.Element;
 
     // Flags de activación
@@ -32,7 +35,8 @@ interface FiltersComponentProps {
     regionFilter?: boolean;
     resourceFilter?: boolean;
     isResourceMultiSelect?: boolean;
-    tagsFilter?: boolean; // NUEVO FLAG
+    tagsFilter?: boolean;
+    databaseTypeFilter?: boolean; 
 
     // Config extra
     resourceService?: string;
@@ -50,7 +54,8 @@ export const FiltersComponent = ({
     resourceService = '',
     isResourceMultiSelect = false,
     tagCollection = '',  // Obligatorio si tagsFilter es true
-    tagColumn = 'labels'
+    tagColumn = 'labels',
+    databaseTypeFilter = false 
 }: FiltersComponentProps) => {
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -68,6 +73,7 @@ export const FiltersComponent = ({
         // Nuevos params de URL
         const tagKeyParam = searchParams.get('tagKey');
         const tagValueParam = searchParams.get('tagValue');
+        const dbTypeParam = searchParams.get('databaseType');
 
         const startDate = startDateParam ? new Date(startDateParam) : yesterday;
         const endDate = endDateParam ? new Date(endDateParam) : new Date();
@@ -79,7 +85,8 @@ export const FiltersComponent = ({
             regions: regionsParam || '',
             resourceId: resourceParam || '',
             tagKey: tagKeyParam || null,
-            tagValue: tagValueParam || null
+            tagValue: tagValueParam || null,
+            databaseType: dbTypeParam || 'all'
         };
     };
 
@@ -95,7 +102,7 @@ export const FiltersComponent = ({
     // Estados temporales para Tags
     const [tempTagKey, setTempTagKey] = useState<string | null>(filters.tagKey);
     const [tempTagValue, setTempTagValue] = useState<string | null>(filters.tagValue);
-
+    const [tempDatabaseType, setTempDatabaseType] = useState<string>(filters.databaseType || 'all');
 
 
     useEffect(() => {
@@ -107,6 +114,7 @@ export const FiltersComponent = ({
         setTempResource(newFilters.resourceId);
         setTempTagKey(newFilters.tagKey);
         setTempTagValue(newFilters.tagValue);
+        setTempDatabaseType(newFilters.databaseType || 'all');
     }, [searchParams]);
 
 
@@ -126,7 +134,8 @@ export const FiltersComponent = ({
             regions: tempRegions,
             resourceId: tempResource,
             tagKey: tempTagKey,
-            tagValue: tempTagValue
+            tagValue: tempTagValue,
+            databaseType: tempDatabaseType
         };
 
         setFilters(newFilters);
@@ -142,6 +151,9 @@ export const FiltersComponent = ({
         // Guardar tags en URL si existen
         if (newFilters.tagKey) query.set('tagKey', newFilters.tagKey);
         if (newFilters.tagValue) query.set('tagValue', newFilters.tagValue);
+        if (newFilters.databaseType && newFilters.databaseType !== 'all') {
+            query.set('databaseType', newFilters.databaseType);
+        }        
 
         router.push(`${window.location.pathname}?${query.toString()}`);
     };
@@ -154,7 +166,8 @@ export const FiltersComponent = ({
             regions: '',
             resourceId: '',
             tagKey: null,
-            tagValue: null
+            tagValue: null,
+            databaseType: 'all'
         };
 
         setFilters(defaultFilters);
@@ -164,6 +177,7 @@ export const FiltersComponent = ({
         setTempResource('');
         setTempTagKey(null);
         setTempTagValue(null);
+        setTempDatabaseType('all');
 
         router.push(window.location.pathname);
     };
@@ -216,7 +230,7 @@ export const FiltersComponent = ({
                                 />
                             </div>
                         )}
-                        {/* 5. TAGS (NUEVO) */}
+                        {/* 4. TAGS (NUEVO) */}
                         {tagsFilter && (
                             <div className='space-y-2'>
                                 <label className='text-sm font-medium text-foreground flex items-center gap-2'>
@@ -236,7 +250,7 @@ export const FiltersComponent = ({
                                 />
                             </div>
                         )}
-                        {/* 4. RECURSOS (Discos, etc) */}
+                        {/* 5. RECURSOS (Discos, etc) */}
                         {resourceFilter && (
                             <div className='space-y-2'>
                                 <label className='text-sm font-medium text-foreground flex items-center gap-2'>
@@ -251,6 +265,18 @@ export const FiltersComponent = ({
                                     isResourceMultiSelect={isResourceMultiSelect}
                                     projects={tempProjects}
                                     regions={tempRegions}
+                                />
+                            </div>
+                        )}    
+                        {/* 6. TIPO BD */}
+                        {databaseTypeFilter && (
+                            <div className='space-y-2'>
+                                <label className='text-sm font-medium text-foreground flex items-center gap-2'>
+                                    <Database className='h-4 w-4' /> Tipo BD
+                                </label>
+                                <DatabaseTypeFilterComponent
+                                    databaseType={tempDatabaseType}
+                                    setDatabaseType={setTempDatabaseType}
                                 />
                             </div>
                         )}
@@ -275,6 +301,7 @@ export const FiltersComponent = ({
                     resourceId={filters.resourceId}
                     tagKey={filters.tagKey}
                     tagValue={filters.tagValue}
+                    databaseType={filters.databaseType}
                 />
             </Card>
         </div>

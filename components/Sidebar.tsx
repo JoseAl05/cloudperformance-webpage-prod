@@ -240,7 +240,7 @@ export const SidebarComponent = ({
 
     const consumeSubItemsGCP = [
         { label: 'Compute Engine', icon: Computer, href: '/gcp/consumo-ce' },
-        { label: 'Cloud SQL / Spanner', icon: Database, href: '/gcp/consumo-sql' },
+        { label: 'Cloud SQL / Spanner', icon: Database, href: '/gcp/consumos/cloud-sql' },
         { label: 'GKE Nodes', icon: Server, href: '/gcp/consumo-gke' },
         { label: 'Cloud Load Balancing', icon: Workflow, href: '/gcp/consumo-clb' }
     ]
