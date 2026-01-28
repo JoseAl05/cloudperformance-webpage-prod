@@ -231,7 +231,7 @@ export const SidebarComponent = ({
 
     // CORREGIDO: Rutas apuntando a /gcp en lugar de /gpc
     const infrausedGCP = [
-        { label: 'Compute Engine', icon: Computer, href: '/gcp/funciones/unused-resources/vm' },
+        { label: 'Compute Engine', icon: Computer, href: '/gcp/funciones/unused-resources/compute-engine' },
         { label: 'Instance Groups', icon: Boxes, href: '/gcp/funciones/unused-resources/instance-groups' },
         { label: 'Discos Persistentes', icon: HardDrive, href: '/gcp/funciones/unused-resources/persistent-disks' },
         { label: 'Load Balancers', icon: Scale, href: '/gcp/funciones/loadbalancers-infrautilizados' },
