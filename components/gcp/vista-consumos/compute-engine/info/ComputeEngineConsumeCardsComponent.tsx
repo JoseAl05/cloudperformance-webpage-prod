@@ -165,8 +165,6 @@ export const ComputeEngineConsumeCardsComponent = ({
     efficiency,
     isLoading
 }: CloudSQLCardsProps) => {
-    console.log(instancias);
-
     const sinBilling = useMemo(() => {
         return instancias.filter(i => i.tiene_billing === false);
     }, [instancias]);

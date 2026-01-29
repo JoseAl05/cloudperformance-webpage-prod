@@ -15,7 +15,7 @@ export const MainViewUnusedCeComponent = () => {
                             </div>
                             <div>
                                 <h1 className='text-3xl font-bold text-gray-900 dark:text-gray-100'>
-                                    Compute Engines
+                                    Compute Engines Infrautilizados
                                 </h1>
                             </div>
                         </div>
