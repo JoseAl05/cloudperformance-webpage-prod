@@ -231,7 +231,7 @@ export const SidebarComponent = ({
 
     // CORREGIDO: Rutas apuntando a /gcp en lugar de /gpc
     const infrausedGCP = [
-        { label: 'Compute Engine', icon: Computer, href: '/gcp/funciones/unused-resources/vm' },
+        { label: 'Compute Engine', icon: Computer, href: '/gcp/funciones/unused-resources/compute-engine' },
         { label: 'Instance Groups', icon: Boxes, href: '/gcp/funciones/unused-resources/instance-groups' },
         { label: 'Discos Persistentes', icon: HardDrive, href: '/gcp/funciones/unused-resources/persistent-disks' },
         { label: 'Load Balancers', icon: Scale, href: '/gcp/funciones/loadbalancers-infrautilizados' },
@@ -240,7 +240,7 @@ export const SidebarComponent = ({
     ]
 
     const consumeSubItemsGCP = [
-        { label: 'Compute Engine', icon: Computer, href: '/gcp/consumo-ce' },
+        { label: 'Compute Engine', icon: Computer, href: '/gcp/consumos/compute-engine' },
         { label: 'Cloud SQL / Spanner', icon: Database, href: '/gcp/consumos/cloud-sql' },
         { label: 'GKE Nodes', icon: Server, href: '/gcp/consumo-gke' },
         { label: 'Cloud Load Balancing', icon: Workflow, href: '/gcp/consumo-clb' }

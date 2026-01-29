@@ -56,7 +56,11 @@ export const FiltersComponent = ({
     isResourceMultiSelect = false,
     tagCollection = '',  // Obligatorio si tagsFilter es true
     tagColumn = 'labels',
+<<<<<<< HEAD
     databaseTypeFilter = false, 
+=======
+    databaseTypeFilter = false,
+>>>>>>> d26a8d5400ce8a9761be226232dfbe2243760aa1
     dbEngine = ''
 }: FiltersComponentProps) => {
     const router = useRouter();

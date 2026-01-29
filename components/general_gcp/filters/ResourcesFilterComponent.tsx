@@ -41,11 +41,11 @@ export const ResourcesFilterComponent = ({
         case 'disks':
             url = regions ? `/api/gcp/bridge/gcp/recursos_sin_uso/all_persistent_disks?date_from=${startDateFormatted}&date_to=${endDateFormatted}&project_id=${projects}&location=${regions}` : '';
             break;
-        case 'instances_unused':
-            url = regions ? `/api/gcp/bridge/gcp/recursos-sin-uso/compute-engine-sin-uso?projects=${projects}&regions=${regions}&simple_list=true` : '';
-            break;
         case 'instances':
             url = regions ? `/api/gcp/bridge/gcp/instancias_compute_engine/all_compute_engine_instances?date_from=${startDateFormatted}&date_to=${endDateFormatted}&project_id=${projects}&location=${regions}` : '';
+            break;
+        case 'unused-instances':
+            url = regions ? `/api/gcp/bridge/gcp/recursos_sin_uso/all_unused_compute_engines?date_from=${startDateFormatted}&date_to=${endDateFormatted}&project_id=${projects}&location=${regions}` : '';
             break;
         case 'instance_groups':
             url = regions ? `/api/gcp/bridge/gcp/instance_groups/all_instance_groups?date_from=${startDateFormatted}&date_to=${endDateFormatted}&project_id=${projects}&location=${regions}` : '';
@@ -82,7 +82,13 @@ export const ResourcesFilterComponent = ({
             resource_id: r.resource_id,
             resource_name: r.resource_name || r.resource_id,
         }))
-    }, [data])
+    }, [data]);
+
+    const allIdsString = useMemo(() => {
+        return allResources.map(r => r.resource_id).join(',');
+    }, [allResources]);
+
+    console.log(allIdsString);
 
     const hasData = allResources.length > 0;
 
@@ -95,9 +101,10 @@ export const ResourcesFilterComponent = ({
         }
 
         if (hasData && !resourceId) {
-            setResourceId('all')
+            // setResourceId('all')
+            setResourceId(allIdsString);
         }
-    }, [data, isLoading, hasData, resourceId, setResourceId]);
+    }, [data, isLoading, hasData, resourceId, setResourceId, allIdsString]);
 
     const selectedIds = useMemo(
         () => (resourceId ? resourceId.split(',').filter(Boolean) : []),
@@ -115,26 +122,45 @@ export const ResourcesFilterComponent = ({
 
     const getDisplayText = () => {
         if (!hasData) return 'Sin recursos disponibles'
-        if (selectedIds.includes('all')) return 'Todos los Recursos'
+        // if (selectedIds.includes('all')) return 'Todos los Recursos'
+        if (selectedIds.length === allResources.length && allResources.length > 0) return 'Todos los Recursos'
         if (!resourceId && hasData) return 'Selecciona un recurso...'
-        if (selectedIds.length === 1) return idToName.get(selectedIds[0]) ?? idToName.get(selectedIds[0])
+        if (selectedIds.length === 1) return idToName.get(selectedIds[0]) ?? `${selectedIds[0]} - ${idToName.get(selectedIds[0])}`
         return `${selectedIds.length} recursos seleccionados`
     }
 
     const handleResourceToggle = (resourceValue: string) => {
-        let selectedResources = [...selectedIds]
         if (resourceValue === 'all') {
-            selectedResources = ['all']
-        } else {
-            selectedResources = selectedResources.filter((s) => s !== 'all')
-            if (selectedResources.includes(resourceValue)) {
-                selectedResources = selectedResources.filter((s) => s !== resourceValue)
-            } else {
-                selectedResources.push(resourceValue)
-            }
+            const areAllSelected = selectedIds.length === allResources.length;
+            setResourceId(areAllSelected ? '' : allIdsString);
+            return;
         }
-        setResourceId(selectedResources.length ? selectedResources.join(',') : '')
+
+        let newSelected = [...selectedIds];
+
+        if (newSelected.includes(resourceValue)) {
+            newSelected = newSelected.filter((s) => s !== resourceValue);
+        } else {
+            newSelected.push(resourceValue);
+        }
+
+        setResourceId(newSelected.join(','));
     };
+
+    // const handleResourceToggle = (resourceValue: string) => {
+    //     let selectedResources = [...selectedIds]
+    //     if (resourceValue === 'all') {
+    //         selectedResources = ['all']
+    //     } else {
+    //         selectedResources = selectedResources.filter((s) => s !== 'all')
+    //         if (selectedResources.includes(resourceValue)) {
+    //             selectedResources = selectedResources.filter((s) => s !== resourceValue)
+    //         } else {
+    //             selectedResources.push(resourceValue)
+    //         }
+    //     }
+    //     setResourceId(selectedResources.length ? selectedResources.join(',') : '')
+    // };
 
     return !isResourceMultiSelect ? (
         <Popover open={open} onOpenChange={setOpen}>
@@ -202,7 +228,7 @@ export const ResourcesFilterComponent = ({
                         {hasData && (
                             <CommandGroup className='max-h-[200px] overflow-y-auto'>
                                 <CommandItem value='all' onSelect={() => handleResourceToggle('all')}>
-                                    <Check className={cn('mr-2 h-4 w-4', selectedIds.includes('all') ? 'opacity-100' : 'opacity-0')} />
+                                    <Check className={cn('mr-2 h-4 w-4', selectedIds.length === allResources.length ? 'opacity-100' : 'opacity-0')} />
                                     Todos los Recursos
                                 </CommandItem>
                                 {allResources.map((i) => (
@@ -212,7 +238,7 @@ export const ResourcesFilterComponent = ({
                                         onSelect={() => handleResourceToggle(i.resource_id)}
                                     >
                                         <Check className={cn('mr-2 h-4 w-4', selectedIds.includes(i.resource_id) ? 'opacity-100' : 'opacity-0')} />
-                                        {i.resource_name}
+                                        {i.resource_id} - {i.resource_name}
                                     </CommandItem>
                                 ))}
                             </CommandGroup>
