@@ -47,6 +47,9 @@ export const ResourcesFilterComponent = ({
         case 'unused-instances':
             url = regions ? `/api/gcp/bridge/gcp/recursos_sin_uso/all_unused_compute_engines?date_from=${startDateFormatted}&date_to=${endDateFormatted}&project_id=${projects}&location=${regions}` : '';
             break;
+        // case 'unused-instance_groups':
+        //     url = regions ? `/api/gcp/bridge/gcp/recursos_sin_uso/all_unused_instances_instance_groups?date_from=${startDateFormatted}&date_to=${endDateFormatted}&project_id=${projects}&location=${regions}` : '';
+        //     break;
         case 'instance_groups':
             url = regions ? `/api/gcp/bridge/gcp/instance_groups/all_instance_groups?date_from=${startDateFormatted}&date_to=${endDateFormatted}&project_id=${projects}&location=${regions}` : '';
             break;
@@ -87,8 +90,6 @@ export const ResourcesFilterComponent = ({
     const allIdsString = useMemo(() => {
         return allResources.map(r => r.resource_id).join(',');
     }, [allResources]);
-
-    console.log(allIdsString);
 
     const hasData = allResources.length > 0;
 
