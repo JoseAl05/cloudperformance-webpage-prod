@@ -14,6 +14,7 @@ import { RegionsFilterComponent } from './RegionsFilterComponent';
 import { ResourcesFilterComponent } from './ResourcesFilterComponent';
 import { TagsFilterComponent } from './TagsFilterComponent'; 
 import { DatabaseTypeFilterComponent } from './DatabaseTypeFilterComponent';
+import { StorageClassFilterComponent } from './StorageClassFilterComponent';
 
 
 interface FiltersComponentProps {
@@ -43,6 +44,7 @@ interface FiltersComponentProps {
     tagCollection?: string; // NUEVO: Colección de Mongo para buscar tags (ej: gcp_compute_disks)
     tagColumn?: string;     // NUEVO: Nombre columna (default: labels)
     dbEngine?: string;
+    storageClassFilter?: boolean; 
 }
 
 export const FiltersComponent = ({
@@ -57,7 +59,8 @@ export const FiltersComponent = ({
     tagCollection = '',  // Obligatorio si tagsFilter es true
     tagColumn = 'labels',
     databaseTypeFilter = false, 
-    dbEngine = ''
+    dbEngine = '',
+    storageClassFilter = false
 }: FiltersComponentProps) => {
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -76,6 +79,7 @@ export const FiltersComponent = ({
         const tagKeyParam = searchParams.get('tagKey');
         const tagValueParam = searchParams.get('tagValue');
         const dbTypeParam = searchParams.get('databaseType');
+        const storageClassParam = searchParams.get('storageClass');
 
         const startDate = startDateParam ? new Date(startDateParam) : yesterday;
         const endDate = endDateParam ? new Date(endDateParam) : new Date();
@@ -88,7 +92,8 @@ export const FiltersComponent = ({
             resourceId: resourceParam || '',
             tagKey: tagKeyParam || null,
             tagValue: tagValueParam || null,
-            databaseType: dbTypeParam || 'all'
+            databaseType: dbTypeParam || 'all',
+            storageClass: storageClassParam || 'all'
         };
     };
 
@@ -105,6 +110,8 @@ export const FiltersComponent = ({
     const [tempTagKey, setTempTagKey] = useState<string | null>(filters.tagKey);
     const [tempTagValue, setTempTagValue] = useState<string | null>(filters.tagValue);
     const [tempDatabaseType, setTempDatabaseType] = useState<string>(filters.databaseType || 'all');
+
+    const [tempStorageClass, setTempStorageClass] = useState('all');
 
 
     useEffect(() => {
@@ -156,6 +163,9 @@ export const FiltersComponent = ({
         if (newFilters.databaseType && newFilters.databaseType !== 'all') {
             query.set('databaseType', newFilters.databaseType);
         }        
+        if (storageClassFilter && tempStorageClass !== 'all') {
+            query.set('storageClass', tempStorageClass); 
+        }
 
         router.push(`${window.location.pathname}?${query.toString()}`);
     };
@@ -169,7 +179,8 @@ export const FiltersComponent = ({
             resourceId: '',
             tagKey: null,
             tagValue: null,
-            databaseType: 'all'
+            databaseType: 'all',
+            storageClass: 'all'
         };
 
         setFilters(defaultFilters);
@@ -180,6 +191,7 @@ export const FiltersComponent = ({
         setTempTagKey(null);
         setTempTagValue(null);
         setTempDatabaseType('all');
+        setTempStorageClass('all');
 
         router.push(window.location.pathname);
     };
@@ -282,6 +294,14 @@ export const FiltersComponent = ({
                                 />
                             </div>
                         )}
+                        {/* 7. CLASE STORAGE */}
+                        {storageClassFilter && (
+                            <StorageClassFilterComponent
+                                value={tempStorageClass}
+                                onChange={setTempStorageClass}
+                            />
+                        )}
+
                     </div>
 
                     <div className='flex items-center gap-4'>

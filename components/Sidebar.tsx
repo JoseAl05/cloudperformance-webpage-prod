@@ -270,6 +270,7 @@ export const SidebarComponent = ({
             { label: 'Storage Class Analysis', icon: Cylinder, href: '/gcp/funciones/storage-classes-analysis' },
             { label: 'Variación Storage', icon: Cylinder, href: '/gcp/funciones/variacion-storage' },
             { label: 'Top 10 uso de recursos', icon: LineChart, href: '/gcp/funciones/top-10-recursos-uso' },
+            { label: 'Top Cloud Storage Buckets', icon: LineChart, href: '/gcp/funciones/top-cloud-storage-buckets' },
             { label: 'Incremento Uso de Recursos', icon: LineChart, href: '/gcp/funciones/incremento-top-recursos-uso' },
             { label: 'Spot vs Standard VMs', icon: Computer, href: '/gcp/funciones/spot-vs-standard-vm' },
             { label: 'Promedio de uso por región', icon: MapPin, href: '/gcp/funciones/promedio-por-localizacion' },
