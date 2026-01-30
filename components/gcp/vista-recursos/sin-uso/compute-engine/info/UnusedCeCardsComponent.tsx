@@ -2,7 +2,7 @@
 
 import React, { useMemo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Server, TrendingUp, Cpu, Network, DollarSign } from 'lucide-react';
+import { Server, TrendingUp, Cpu, Network, DollarSign, Computer, HardDrive } from 'lucide-react';
 import { bytesToMB } from '@/lib/bytesToMbs';
 import { UnusedCeCardsMetricSummary } from '@/interfaces/vista-unused-resources/unusedComputeEngineInterfaces';
 
@@ -101,7 +101,7 @@ export const UnusedCeCardsComponent = ({ data, instanceCount, totalUsdUnusedInst
                     value={instanceCount}
                     unit="Recursos"
                     description="Total de instancias detectadas con uso de CPU < 10%."
-                    icon={Server}
+                    icon={Computer}
                 />
                 <StatCard
                     title="CPU Promedio Global"
@@ -113,8 +113,8 @@ export const UnusedCeCardsComponent = ({ data, instanceCount, totalUsdUnusedInst
                 />
                 <StatCard
                     title="I/O Promedio de paquetes de red"
-                    value={metrics.netPps.avg}
-                    peakValue={metrics.netPps.peak}
+                    value={metrics.netPps.avg.toFixed(2)}
+                    peakValue={metrics.netPps.peak.toFixed(2)}
                     unit="Paquetes"
                     description="Tráfico de paquetes promedio (In + Out) procesado."
                     icon={Network}
@@ -133,7 +133,7 @@ export const UnusedCeCardsComponent = ({ data, instanceCount, totalUsdUnusedInst
                     peakValue={metrics.diskIops.peak.toFixed(2)}
                     unit="IOPS"
                     description="Tráfico de IOPS promedio (In + Out) procesado."
-                    icon={Network}
+                    icon={HardDrive}
                 />
                 <StatCard
                     title="I/O Promedio de MB/s de disco"
@@ -141,7 +141,7 @@ export const UnusedCeCardsComponent = ({ data, instanceCount, totalUsdUnusedInst
                     peakValue={bytesToMB(metrics.diskThroughput.peak)}
                     unit="MB/s"
                     description="Rendimiento de disco promedio (In + Out) procesado."
-                    icon={Network}
+                    icon={HardDrive}
                 />
             </div>
         </div>

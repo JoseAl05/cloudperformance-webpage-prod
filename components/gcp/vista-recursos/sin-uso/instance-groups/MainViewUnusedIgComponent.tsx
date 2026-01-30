@@ -1,9 +1,8 @@
-import { ComputeEngineComponent } from '@/components/gcp/vista-recursos/compute-engine/ComputeEngineComponent'
-import { UnusedCeComponent } from '@/components/gcp/vista-recursos/sin-uso/compute-engine/UnusedCeComponent'
+import { UnusedIgComponent } from '@/components/gcp/vista-recursos/sin-uso/instance-groups/UnusedIgComponent'
 import { FiltersComponent } from '@/components/general_gcp/filters/FiltersComponent'
 import { PieChart} from 'lucide-react'
 
-export const MainViewUnusedCeComponent = () => {
+export const MainViewUnusedIgComponent = () => {
     return (
         <div className='w-full min-w-0 space-y-4'>
             <div className='mb-8'>
@@ -15,7 +14,7 @@ export const MainViewUnusedCeComponent = () => {
                             </div>
                             <div>
                                 <h1 className='text-3xl font-bold text-gray-900 dark:text-gray-100'>
-                                    Compute Engines Infrautilizados
+                                    Compute Engines de Instance Groups Infrautilizados
                                 </h1>
                             </div>
                         </div>
@@ -24,13 +23,13 @@ export const MainViewUnusedCeComponent = () => {
             </div>
             <div className='w-full min-w-0'>
                 <FiltersComponent
-                    Component={UnusedCeComponent}
+                    Component={UnusedIgComponent}
                     dateFilter
                     projectsFilter
                     regionFilter
                     resourceFilter
                     isResourceMultiSelect
-                    resourceService='unused-instances'
+                    resourceService='instance_groups'
                 />
             </div>
         </div>

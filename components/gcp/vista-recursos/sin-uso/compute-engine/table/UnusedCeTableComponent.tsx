@@ -26,6 +26,14 @@ const TableLegend = () => (
 );
 
 export const UnusedCeTableComponent = ({ data }: UnusedCeTableComponentProps) => {
+
+    const totalGlobalCost = useMemo(() => {
+        if (!data) return 0;
+        return data.reduce((acc, row) => acc + (row.billing?.total_cost_usd || 0), 0);
+    }, [data]);
+
+    console.log(totalGlobalCost);
+
     const processedData = useMemo(() => {
         if (!data) return [];
         return data.map(row => {
@@ -37,12 +45,13 @@ export const UnusedCeTableComponent = ({ data }: UnusedCeTableComponentProps) =>
                 sort_net_inout_pps: findVal("network_egress_pps") + findVal("network_ingress_pps"),
                 sort_net_inout_throughput: findVal("network_egress_throughput") + findVal("network_ingress_throughput"),
                 sort_disk_inout_iops: findVal("disk_read_iops") + findVal("disk_write_iops"),
-                sort_disk_inout_throughput: findVal("disk_read_throughput") + findVal("disk_write_throughput")
+                sort_disk_inout_throughput: findVal("disk_read_throughput") + findVal("disk_write_throughput"),
+                sort_billing: row.billing?.total_cost_usd || 0
             };
         });
     }, [data]);
 
-    const columns = createColumns(getUnusedCeColumns());
+    const columns = createColumns(getUnusedCeColumns(totalGlobalCost));
 
     return (
         <Card className="shadow-sm border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950">
@@ -57,14 +66,14 @@ export const UnusedCeTableComponent = ({ data }: UnusedCeTableComponentProps) =>
                                 Métricas Comparativas
                             </CardTitle>
                             <CardDescription className="dark:text-slate-400">
-                                Análisis de saturación y volumen de tráfico por instancia.
+                                Análisis de saturación, volumen de tráfico y facturación por instancia.
                             </CardDescription>
                         </div>
                     </div>
                 </div>
                 <TableLegend />
             </CardHeader>
-            <CardContent className="p-0">
+            <CardContent className="p-5">
                 <DataTableGrouping
                     columns={columns}
                     data={processedData}
