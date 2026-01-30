@@ -233,10 +233,11 @@ export const SidebarComponent = ({
     const infrausedGCP = [
         { label: 'Compute Engine', icon: Computer, href: '/gcp/funciones/unused-resources/compute-engine' },
         { label: 'Instance Groups', icon: Boxes, href: '/gcp/funciones/unused-resources/instance-groups' },
+        { label: 'Clusters GKE', icon: Boxes, href: '/gcp/funciones/unused-resources/clusters-gke' },
         { label: 'Discos Persistentes', icon: HardDrive, href: '/gcp/funciones/unused-resources/persistent-disks' },
-        { label: 'Load Balancers', icon: Scale, href: '/gcp/funciones/loadbalancers-infrautilizados' },
-        { label: 'HTTP(S) LB (Ingress)', icon: Workflow, href: '/gcp/funciones/https-lb-infrautilizados' },
-        { label: 'Cloud DNS', icon: Globe2, href: '/gcp/funciones/cloud-dns-infrautilizados' }
+        // { label: 'Load Balancers', icon: Scale, href: '/gcp/funciones/loadbalancers-infrautilizados' },
+        // { label: 'HTTP(S) LB (Ingress)', icon: Workflow, href: '/gcp/funciones/https-lb-infrautilizados' },
+        // { label: 'Cloud DNS', icon: Globe2, href: '/gcp/funciones/cloud-dns-infrautilizados' }
     ]
 
     const consumeSubItemsGCP = [

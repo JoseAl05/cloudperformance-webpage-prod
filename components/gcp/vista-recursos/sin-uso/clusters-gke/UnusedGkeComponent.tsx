@@ -8,7 +8,7 @@ import { UnusedCeCardsMetricSummary, UnusedCeTableData } from '@/interfaces/vist
 import { AlertCircle, Clock, Info } from 'lucide-react';
 import useSWR from 'swr';
 
-interface UnusedCeComponentProps {
+interface UnusedGkeComponentProps {
     startDate: Date;
     endDate: Date;
     resourceId: string;
@@ -22,36 +22,36 @@ const fetcher = (url: string) =>
 
 const isNonEmptyArray = <T,>(v: unknown): v is T[] => Array.isArray(v) && v.length > 0
 
-export const UnusedCeComponent = ({ startDate, endDate, regions, projects, resourceId }: UnusedCeComponentProps) => {
+export const UnusedGkeComponent = ({ startDate, endDate, regions, projects, resourceId }: UnusedGkeComponentProps) => {
 
     const startDateFormatted = startDate.toISOString().replace('Z', '').slice(0, -4);
     const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : '';
 
-    const allUnusedCeTable = useSWR(
-        resourceId ? `/api/gcp/bridge/gcp/recursos_sin_uso/get_ce_table_data?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${regions}&resource=${resourceId}&project_id=${projects}` : null,
+    const allUnusedGkeCeTable = useSWR(
+        resourceId ? `/api/gcp/bridge/gcp/recursos_sin_uso/get_gke_ce_table_data?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${regions}&resource=${resourceId}&project_id=${projects}` : null,
         fetcher
     )
-    const allUnusedCeCards = useSWR(
-        resourceId ? `/api/gcp/bridge/gcp/recursos_sin_uso/cards_metrics_summary?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${regions}&resource=${resourceId}&project_id=${projects}` : null,
+    const allUnusedGkeCeCards = useSWR(
+        resourceId ? `/api/gcp/bridge/gcp/recursos_sin_uso/cards_gke_nodes_metrics_summary?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${regions}&resource=${resourceId}&project_id=${projects}` : null,
         fetcher
     )
 
     const unusedCeTableData: UnusedCeTableData[] | null =
-        isNonEmptyArray<UnusedCeTableData>(allUnusedCeTable.data) ? allUnusedCeTable.data : null;
+        isNonEmptyArray<UnusedCeTableData>(allUnusedGkeCeTable.data) ? allUnusedGkeCeTable.data : null;
 
     const unusedCeCardsData: UnusedCeCardsMetricSummary[] | null =
-        isNonEmptyArray<UnusedCeCardsMetricSummary>(allUnusedCeCards.data) ? allUnusedCeCards.data : null;
+        isNonEmptyArray<UnusedCeCardsMetricSummary>(allUnusedGkeCeCards.data) ? allUnusedGkeCeCards.data : null;
 
     const hasUnusedData = !!unusedCeTableData || !!unusedCeCardsData;
 
     const anyLoading =
-        allUnusedCeTable.isLoading ||
-        allUnusedCeCards.isLoading
+        allUnusedGkeCeCards.isLoading ||
+        allUnusedGkeCeTable.isLoading
 
 
     const anyError =
-        !!allUnusedCeTable.error ||
-        !!allUnusedCeCards.error
+        !!allUnusedGkeCeCards.error ||
+        !!allUnusedGkeCeTable.error
 
     if (!resourceId) {
         return (
@@ -106,7 +106,7 @@ export const UnusedCeComponent = ({ startDate, endDate, regions, projects, resou
 
                 <div className="flex items-center gap-3 my-10">
                     <Clock className="h-8 w-8 text-blue-500" />
-                    <h1 className="text-3xl font-bold text-foreground">Detalle Compute Engine Infrautilizadas</h1>
+                    <h1 className="text-3xl font-bold text-foreground">Detalle instancias de Instance Groups infrautilizadas</h1>
                 </div>
                 <UnusedCeTableComponent
                     data={unusedCeTableData}

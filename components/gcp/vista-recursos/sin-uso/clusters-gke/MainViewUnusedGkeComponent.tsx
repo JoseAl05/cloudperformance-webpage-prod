@@ -1,8 +1,8 @@
-import { UnusedIgComponent } from '@/components/gcp/vista-recursos/sin-uso/instance-groups/UnusedIgComponent'
+import { UnusedGkeComponent } from '@/components/gcp/vista-recursos/sin-uso/clusters-gke/UnusedGkeComponent'
 import { FiltersComponent } from '@/components/general_gcp/filters/FiltersComponent'
 import { PieChart} from 'lucide-react'
 
-export const MainViewUnusedIgComponent = () => {
+export const MainViewUnusedGkeComponent = () => {
     return (
         <div className='w-full min-w-0 space-y-4'>
             <div className='mb-8'>
@@ -14,7 +14,7 @@ export const MainViewUnusedIgComponent = () => {
                             </div>
                             <div>
                                 <h1 className='text-3xl font-bold text-gray-900 dark:text-gray-100'>
-                                    Compute Engines de Instance Groups Infrautilizados
+                                    Nodos de Clusters GKE Infrautilizados
                                 </h1>
                             </div>
                         </div>
@@ -23,13 +23,13 @@ export const MainViewUnusedIgComponent = () => {
             </div>
             <div className='w-full min-w-0'>
                 <FiltersComponent
-                    Component={UnusedIgComponent}
+                    Component={UnusedGkeComponent}
                     dateFilter
                     projectsFilter
                     regionFilter
                     resourceFilter
                     isResourceMultiSelect
-                    resourceService='instance_groups'
+                    resourceService='clusters-gke'
                 />
             </div>
         </div>
