@@ -28,7 +28,7 @@ interface SpotVsStandardTableProps {
 }
 
 export const SpotVsStandardTable = ({ data, startDate, endDate }: SpotVsStandardTableProps) => {
-    
+
     // Flatten data: cada fila es una VM con su fecha
     const flattenedData = useMemo(() => {
         return data.map(vm => ({
@@ -48,7 +48,7 @@ export const SpotVsStandardTable = ({ data, startDate, endDate }: SpotVsStandard
             es_candidata_spot: vm.es_candidata_spot,
             costo_por_hora: vm.costo_por_hora,
             tiene_billing: vm.tiene_billing,
-            ahorro_potencial_spot: vm.ahorro_potencial_spot || 0 
+            ahorro_potencial_spot: vm.ahorro_potencial_spot || 0
         }));
     }, [data]);
 
@@ -81,7 +81,7 @@ export const SpotVsStandardTable = ({ data, startDate, endDate }: SpotVsStandard
         {
             accessorKey: "es_candidata_spot",
             header: "Oportunidad",
-            cell: (info) => 
+            cell: (info) =>
                 info.getValue() ? (
                     <Badge className="bg-amber-100 text-amber-700 text-xs">
                         Candidata Spot
@@ -91,7 +91,7 @@ export const SpotVsStandardTable = ({ data, startDate, endDate }: SpotVsStandard
         {
             accessorKey: "costo_por_hora",
             header: "Costo/Hora",
-            cell: ({ row }) => 
+            cell: ({ row }) =>
                 row.original.tiene_billing ? (
                     <span className="text-sm font-semibold">
                         ${row.original.costo_por_hora.toFixed(4)}/h
@@ -99,11 +99,11 @@ export const SpotVsStandardTable = ({ data, startDate, endDate }: SpotVsStandard
                 ) : (
                     <span className="text-xs text-amber-600">Sin billing</span>
                 )
-        }, 
+        },
         {
             accessorKey: "ahorro_potencial_spot",
             header: "Ahorro Potencial",
-            cell: ({ row }) => 
+            cell: ({ row }) =>
                 row.original.es_candidata_spot && row.original.ahorro_potencial_spot > 0 ? (
                     <span className="text-sm font-semibold text-green-600">
                         ${row.original.ahorro_potencial_spot.toFixed(2)}/mes
@@ -111,14 +111,14 @@ export const SpotVsStandardTable = ({ data, startDate, endDate }: SpotVsStandard
                 ) : (
                     <span className="text-xs text-muted-foreground">-</span>
                 )
-        },                
+        },
         {
             accessorKey: "machine_type_simple",
             header: "Machine Type",
             cell: (info) => (
                 <span className="text-sm">{info.getValue() as string}</span>
             )
-        },       
+        },
         {
             accessorKey: "zona",
             header: "Zona",

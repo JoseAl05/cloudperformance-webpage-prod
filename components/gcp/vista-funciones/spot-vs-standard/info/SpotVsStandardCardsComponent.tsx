@@ -29,21 +29,21 @@ interface SpotVsStandardCardsProps {
     isLoading: boolean;
 }
 
-const StatCard = ({ 
-    title, 
-    value, 
-    unit, 
-    icon: Icon, 
-    description, 
-    colorClass = "blue", 
+const StatCard = ({
+    title,
+    value,
+    unit,
+    icon: Icon,
+    description,
+    colorClass = "blue",
     warning = false,
     subtitle
-}: any) => {
-    
+}: unknown) => {
+
     const colorStyles = {
-        blue:   { border: "border-l-blue-500",   bgIcon: "bg-blue-100 text-blue-600" },
+        blue: { border: "border-l-blue-500", bgIcon: "bg-blue-100 text-blue-600" },
         purple: { border: "border-l-purple-500", bgIcon: "bg-purple-100 text-purple-600" },
-        green:  { border: "border-l-green-500",  bgIcon: "bg-green-100 text-green-600" },
+        green: { border: "border-l-green-500", bgIcon: "bg-green-100 text-green-600" },
     };
 
     const style = colorStyles[colorClass as keyof typeof colorStyles] || colorStyles.blue;
@@ -81,10 +81,10 @@ const StatCard = ({
     )
 }
 
-export const SpotVsStandardCardsComponent = ({ 
-    summary, 
-    vms = [], 
-    isLoading 
+export const SpotVsStandardCardsComponent = ({
+    summary,
+    vms = [],
+    isLoading
 }: SpotVsStandardCardsProps) => {
 
     const porcentajeSpot = useMemo(() => {
@@ -137,7 +137,7 @@ export const SpotVsStandardCardsComponent = ({
                 description="Costo mensual estimado con configuración actual (Standard + Spot)."
                 icon={Server}
                 colorClass="blue"
-            />            
+            />
             <StatCard
                 title="Ahorro Potencial"
                 value={`$${(summary.ahorro_potencial_total || 0).toFixed(2)}`}

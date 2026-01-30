@@ -32,25 +32,25 @@ export const SpotVsStandardChart = ({ data }: SpotVsStandardChartProps) => {
         // Agrupar por fecha
         const groupedByDate = safeData.reduce((acc, vm) => {
             const date = new Date(vm.sync_time.$date).toISOString().split('T')[0];
-            
+
             if (!acc[date]) {
                 acc[date] = { total: 0, standard: 0, spot: 0 };
             }
-            
+
             acc[date].total++;
-            
+
             if (vm.tipo_vm === 'STANDARD') {
                 acc[date].standard++;
             } else if (vm.tipo_vm === 'SPOT' || vm.tipo_vm === 'PREEMPTIBLE') {
                 acc[date].spot++;
             }
-            
+
             return acc;
         }, {} as Record<string, { total: number; standard: number; spot: number }>);
 
         // Convertir a arrays ordenados
         const dates = Object.keys(groupedByDate).sort();
-        
+
         const totalSeries: [string, number][] = dates.map(date => [
             new Date(date).toISOString(),
             groupedByDate[date].total
