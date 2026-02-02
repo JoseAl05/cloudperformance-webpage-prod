@@ -254,9 +254,9 @@ export const SidebarComponent = ({
             { label: 'Quotas', icon: PieChart, href: '/gcp/quotas' },
             //{ label: 'Deployments', icon: Zap, href: '/gcp/deployments' },
             //{ label: 'Items GCP', icon: Table, href: '/gcp/tables-gcp/tablas-item-gcp' },
-            { label: 'Vista Advisor', icon: Pyramid, href: '/gcp/advisor' },
-            { label: 'Vista Saving Plans', icon: HandCoins, href: '/gcp/saving-plan' },
-            { label: 'Presupuestos', icon: CircleDollarSign, href: '/gcp/presupuesto' },
+            { label: 'Recommender', icon: Pyramid, href: '/gcp/recommender' },
+            // { label: 'Vista Saving Plans', icon: HandCoins, href: '/gcp/saving-plan' },
+            // { label: 'Presupuestos', icon: CircleDollarSign, href: '/gcp/presupuesto' },
         ],
         recursos: [
             { label: 'Compute Engine', icon: Computer, href: '/gcp/recursos/compute-engine' },
@@ -268,14 +268,14 @@ export const SidebarComponent = ({
         ],
         consumes: [{ label: 'Consumos', subItems: consumeSubItemsGCP, icon: Zap }],
         funciones: [
-            { label: 'Storage Class Analysis', icon: Cylinder, href: '/gcp/funciones/storage-classes-analysis' },
-            { label: 'Variación Storage', icon: Cylinder, href: '/gcp/funciones/variacion-storage' },
-            { label: 'Top 10 uso de recursos', icon: LineChart, href: '/gcp/funciones/top-10-recursos-uso' },
+            // { label: 'Storage Class Analysis', icon: Cylinder, href: '/gcp/funciones/storage-classes-analysis' },
+            // { label: 'Variación Storage', icon: Cylinder, href: '/gcp/funciones/variacion-storage' },
+            // { label: 'Top 10 uso de recursos', icon: LineChart, href: '/gcp/funciones/top-10-recursos-uso' },
             { label: 'Top Cloud Storage Buckets', icon: LineChart, href: '/gcp/funciones/top-cloud-storage-buckets' },
-            { label: 'Incremento Uso de Recursos', icon: LineChart, href: '/gcp/funciones/incremento-top-recursos-uso' },
+            // { label: 'Incremento Uso de Recursos', icon: LineChart, href: '/gcp/funciones/incremento-top-recursos-uso' },
             { label: 'Spot vs Standard VMs', icon: Computer, href: '/gcp/funciones/spot-vs-standard-vm' },
-            { label: 'Promedio de uso por región', icon: MapPin, href: '/gcp/funciones/promedio-por-localizacion' },
-            { label: 'Consumo horario hábil vs no hábil', icon: Clock, href: '/gcp/funciones/analisis-vms-horario' },
+            // { label: 'Promedio de uso por región', icon: MapPin, href: '/gcp/funciones/promedio-por-localizacion' },
+            // { label: 'Consumo horario hábil vs no hábil', icon: Clock, href: '/gcp/funciones/analisis-vms-horario' },
             { label: 'Recursos no utilizados', subItems: infrausedGCP, icon: TrendingDown }
         ],
     }
