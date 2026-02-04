@@ -242,9 +242,10 @@ export const SidebarComponent = ({
 
     const consumeSubItemsGCP = [
         { label: 'Compute Engine', icon: Computer, href: '/gcp/consumos/compute-engine' },
+        { label: 'Instances Group', icon: Boxes, href: '/gcp/consumos/instances-group' },
+        { label: 'Clusters GKE', icon: Server, href: '/gcp/consumos/clusters-gke' },
         { label: 'Cloud SQL / Spanner', icon: Database, href: '/gcp/consumos/cloud-sql' },
-        { label: 'GKE Nodes', icon: Server, href: '/gcp/consumo-gke' },
-        { label: 'Cloud Load Balancing', icon: Workflow, href: '/gcp/consumo-clb' }
+        // { label: 'Cloud Load Balancing', icon: Workflow, href: '/gcp/consumo-clb' }
     ]
 
     const GCPRoutes = {

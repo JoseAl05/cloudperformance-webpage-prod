@@ -332,7 +332,7 @@ export const RecommenderInfoComponent = ({ data }: RecommenderInfoComponentProps
                                         <div className={`rounded-lg border p-3 flex flex-col justify-between bg-emerald-50/50 dark:bg-emerald-950/10 border-emerald-200 dark:border-emerald-800`}>
                                             <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground mb-1">
                                                 <DollarSign className="h-3.5 w-3.5" />
-                                                Ahorro Estimado Total
+                                                Ahorro mensual estimado
                                             </div>
                                             <div className="text-xl font-bold text-emerald-600 dark:text-emerald-400">
                                                 {formatCurrency(selectedRec.total_savings, selectedRec.currency)}
@@ -374,7 +374,7 @@ export const RecommenderInfoComponent = ({ data }: RecommenderInfoComponentProps
                             <div className="flex-1 overflow-y-auto p-0 bg-muted/5">
                                 <div className="p-4 sm:p-5">
                                     <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
-                                        Detalle de Recursos ({selectedRec.count})
+                                        Detalle de la recomendación ({selectedRec.count})
                                     </h3>
                                     <div className="rounded-lg border bg-card overflow-hidden">
                                         <table className="w-full text-sm text-left">
@@ -382,15 +382,13 @@ export const RecommenderInfoComponent = ({ data }: RecommenderInfoComponentProps
                                                 <tr>
                                                     <th className="px-4 py-3 font-medium">Proyecto</th>
                                                     <th className="px-4 py-3 font-medium">Ubicación</th>
-                                                    {/* CAMBIO 4: Ocultar columna de ahorro si no es COST */}
                                                     {selectedRec.category === 'COST' && (
-                                                        <th className="px-4 py-3 font-medium text-right">Ahorro Ind.</th>
+                                                        <th className="px-4 py-3 font-medium text-right">Ahorro mensual</th>
                                                     )}
                                                 </tr>
                                             </thead>
                                             <tbody className="divide-y">
                                                 {selectedRec.items.map((item, idx) => {
-                                                    // Usar Math.abs para filas individuales
                                                     const saving = item.savings_estimate?.amount ? Math.abs(item.savings_estimate.amount) : 0;
                                                     return (
                                                         <tr key={idx} className="hover:bg-muted/30">

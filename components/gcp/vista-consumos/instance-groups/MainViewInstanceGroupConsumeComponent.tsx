@@ -1,9 +1,9 @@
 import { FiltersComponent } from "@/components/general_gcp/filters/FiltersComponent";
 import { Database } from "lucide-react";
-import { CloudSQLComponent } from "./CloudSQLComponent";
 import { ComputeEngineConsumeComponent } from '@/components/gcp/vista-consumos/compute-engine/ComputeEngineConsumeComponent';
+import { InstanceGroupConsumeComponent } from '@/components/gcp/vista-consumos/instance-groups/InstanceGroupConsumeComponent';
 
-export const MainViewComputeEngineConsumeComponent = () => {
+export const MainViewInstanceGroupConsumeComponent = () => {
     return (
         <div className="w-full min-w-0 space-y-4">
             <div className="mb-8">
@@ -15,10 +15,10 @@ export const MainViewComputeEngineConsumeComponent = () => {
                             </div>
                             <div>
                                 <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
-                                    Compute Engine - Consumo y Eficiencia
+                                    Instancias Instances Group - Consumo y Eficiencia
                                 </h1>
                                 <p className="text-gray-500 dark:text-gray-400">
-                                    Análisis de rendimiento y costos de instancias Compute Engine
+                                    Análisis de rendimiento y costos de instancias de Instances Group
                                 </p>
                             </div>
                         </div>
@@ -28,14 +28,14 @@ export const MainViewComputeEngineConsumeComponent = () => {
 
             <div className="w-full min-w-0">
                 <FiltersComponent
-                    Component={ComputeEngineConsumeComponent}
+                    Component={InstanceGroupConsumeComponent}
                     dateFilter
                     projectFilter
                     regionFilter
                     // tagsFilter
                     resourceFilter
                     isResourceMultiSelect
-                    resourceService='instances'
+                    resourceService='instance_groups'
                     // tagCollection="gcp_compute_instances"
                     // tagColumn="labels"
                 />

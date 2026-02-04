@@ -6,19 +6,19 @@ import { ComputeEngineConsumeCardsComponent } from '@/components/gcp/vista-consu
 import { ComputeEngineConsumeChartComponent } from '@/components/gcp/vista-consumos/compute-engine/grafico/ComputeEngineConsumeChartComponent';
 import { ComputeEngineConsumeTableComponent } from '@/components/gcp/vista-consumos/compute-engine/table/ComputeEngineConsumeTableComponent';
 
-interface ComputeEngineConsumeComponentProps {
+interface InstanceGroupConsumeComponentProps {
     startDate: Date;
     endDate: Date;
     projects: string;
     regions: string;
+    resourceId: string;
     // tagKey?: string | null;
     // tagValue?: string | null;
-    resourceId: string;
 }
 
 const fetcher = (url: string) => fetch(url).then(res => res.json());
 
-export const ComputeEngineConsumeComponent = ({
+export const InstanceGroupConsumeComponent = ({
     startDate,
     endDate,
     projects,
@@ -26,10 +26,10 @@ export const ComputeEngineConsumeComponent = ({
     resourceId
     // tagKey,
     // tagValue
-}: ComputeEngineConsumeComponentProps) => {
+}: InstanceGroupConsumeComponentProps) => {
 
-    // Construcción de URL    
-    let infoUrl = `/api/gcp/bridge/gcp/consumo/compute_engine/info?`;
+    // Construcción de URL
+    let infoUrl = `/api/gcp/bridge/gcp/consumo/instance_group/info?`;
 
     if (startDate) infoUrl += `date_from=${startDate.toISOString().slice(0, 19)}&`;
     if (endDate) infoUrl += `date_to=${endDate.toISOString().slice(0, 19)}&`;
@@ -50,7 +50,7 @@ export const ComputeEngineConsumeComponent = ({
     });
 
     // Fetch eficiencia global
-    let efficiencyUrl = `/api/gcp/bridge/gcp/consumo/compute_engine/global_efficiency?`;
+    let efficiencyUrl = `/api/gcp/bridge/gcp/consumo/instance_group/global_efficiency?`;
 
     if (startDate) efficiencyUrl += `date_from=${startDate.toISOString().slice(0, 19)}&`;
     if (endDate) efficiencyUrl += `date_to=${endDate.toISOString().slice(0, 19)}&`;
@@ -65,7 +65,7 @@ export const ComputeEngineConsumeComponent = ({
     );
 
     // Fetch gráficos
-    let metricsUrl = `/api/gcp/bridge/gcp/consumo/consumo_compute_engine?`;
+    let metricsUrl = `/api/gcp/bridge/gcp/consumo/consumo_instance_group?`;
     if (startDate) metricsUrl += `date_from=${startDate.toISOString().slice(0, 19)}&`;
     if (endDate) metricsUrl += `date_to=${endDate.toISOString().slice(0, 19)}&`;
     if (projects) metricsUrl += `project_id=${projects}&`;
@@ -129,7 +129,8 @@ export const ComputeEngineConsumeComponent = ({
             </div>
         );
     }
-    console.log(infoData.data)
+
+    console.log(metricsData.data);
 
     return (
         <div className="space-y-6 mt-6 px-4">
