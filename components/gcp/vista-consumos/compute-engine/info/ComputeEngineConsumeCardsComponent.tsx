@@ -12,7 +12,7 @@ interface CloudSQLResumen {
     costo_total_clp: number;
     costo_total_usd: number;
     currency: string;
-    tiene_billing: boolean;
+    // tiene_billing: boolean;
 }
 
 interface Instancia {
@@ -37,7 +37,7 @@ interface Instancia {
     costo_total_clp: number;
     costo_total_usd: number;
     currency: string;
-    tiene_billing: boolean;
+    // tiene_billing: boolean;
     creationTimestamp: string;
     sync_time: string;
     labels: {
@@ -165,15 +165,15 @@ export const ComputeEngineConsumeCardsComponent = ({
     efficiency,
     isLoading
 }: CloudSQLCardsProps) => {
-    const sinBilling = useMemo(() => {
-        return instancias.filter(i => i.tiene_billing === false);
-    }, [instancias]);
+    // const sinBilling = useMemo(() => {
+    //     return instancias.filter(i => i.tiene_billing === false);
+    // }, [instancias]);
 
     const costoDescripcion = useMemo(() => {
-        if (sinBilling.length === 0) return null;
+        // if (sinBilling.length > 0) return null;
         if (summary?.costo_total_usd === 0) return "Instancias en Free Tier de GCP.";
         return "Costo mensual total de todas las instancias.";
-    }, [sinBilling, summary?.costo_total_usd]);
+    }, [summary?.costo_total_usd]);
 
     // Loading State
     if (isLoading) {
@@ -244,7 +244,7 @@ export const ComputeEngineConsumeCardsComponent = ({
                     description={costoDescripcion ?? ''}
                     icon={DollarSign}
                     colorClass="green"
-                    warning={sinBilling.length === 0}
+                    // warning={sinBilling.length > 0}
                 />
             </div>
 

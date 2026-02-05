@@ -5,17 +5,19 @@ import { DatePicker } from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 
 import { Card, CardContent } from '@/components/ui/card';
-import { Calendar, Filter, XCircle, LayoutGrid, Globe, HardDrive, Tag, Database } from 'lucide-react'; // Agregamos Tag icon
+import { Calendar, Filter, XCircle, LayoutGrid, Globe, HardDrive, Tag, Database, Grid, ArrowUpDown } from 'lucide-react'; // Agregamos Tag icon
 import { Button } from '@/components/ui/button';
 import { useRouter, useSearchParams } from 'next/navigation';
 
 import { ProjectsFilterComponent } from './ProjectsFilterComponent';
 import { RegionsFilterComponent } from './RegionsFilterComponent';
 import { ResourcesFilterComponent } from './ResourcesFilterComponent';
-import { TagsFilterComponent } from './TagsFilterComponent'; 
+import { TagsFilterComponent } from './TagsFilterComponent';
 import { DatabaseTypeFilterComponent } from './DatabaseTypeFilterComponent';
 import { StorageClassFilterComponent } from './StorageClassFilterComponent';
 import { ServiceFilterComponent } from './ServiceFilterComponent';
+import { RecommenderCategoriesFilterComponent } from '@/components/general_gcp/filters/RecommenderCategoriesFilterComponent';
+import { RecommenderPriorityFilterComponent } from '@/components/general_gcp/filters/RecommenderPriorityFilterComponent';
 
 
 interface FiltersComponentProps {
@@ -48,7 +50,13 @@ interface FiltersComponentProps {
     tagCollection?: string; // NUEVO: Colección de Mongo para buscar tags (ej: gcp_compute_disks)
     tagColumn?: string;     // NUEVO: Nombre columna (default: labels)
     dbEngine?: string;
-    storageClassFilter?: boolean; 
+    storageClassFilter?: boolean;
+    categoryFilter?: boolean;
+    priorityFilter?: boolean;
+    category?: string;
+    priority?: string;
+    isRecommenderCategoryMultiSelect?: boolean;
+    isRecommenderPriorityMultiSelect?: boolean;
 }
 
 export const FiltersComponent = ({
@@ -62,11 +70,17 @@ export const FiltersComponent = ({
     isResourceMultiSelect = false,
     tagCollection = '',  // Obligatorio si tagsFilter es true
     tagColumn = 'labels',
-    databaseTypeFilter = false, 
+    databaseTypeFilter = false,
     dbEngine = '',
     storageClassFilter = false,
     serviceFilter = false,
     isServiceMultiSelect = false,
+    categoryFilter = false,
+    priorityFilter = false,
+    category = '',
+    priority = '',
+    isRecommenderCategoryMultiSelect = false,
+    isRecommenderPriorityMultiSelect = false
 }: FiltersComponentProps) => {
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -87,6 +101,9 @@ export const FiltersComponent = ({
         const tagValueParam = searchParams.get('tagValue');
         const dbTypeParam = searchParams.get('databaseType');
         const storageClassParam = searchParams.get('storageClass');
+        const categoryParam = searchParams.get('category');
+        const priorityParam = searchParams.get('priority');
+
 
         const startDate = startDateParam ? new Date(startDateParam) : yesterday;
         const endDate = endDateParam ? new Date(endDateParam) : new Date();
@@ -101,7 +118,9 @@ export const FiltersComponent = ({
             tagValue: tagValueParam || null,
             databaseType: dbTypeParam || 'all',
             storageClass: storageClassParam || 'all',
-            service: serviceParam || 'all'
+            service: serviceParam || 'all',
+            category: categoryParam || '',
+            priority: priorityParam || ''
         };
     };
 
@@ -122,6 +141,10 @@ export const FiltersComponent = ({
     const [tempStorageClass, setTempStorageClass] = useState('all');
     const [tempService, setTempService] = useState<string>(filters.service || 'all');
 
+    const [tempCategory, setTempCategory] = useState(filters.category);
+    const [tempPriority, setTempPriority] = useState(filters.priority);
+
+
 
     useEffect(() => {
         const newFilters = getInitialFilters();
@@ -134,6 +157,9 @@ export const FiltersComponent = ({
         setTempTagValue(newFilters.tagValue);
         setTempDatabaseType(newFilters.databaseType || 'all');
         setTempService(newFilters.service || 'all');
+        setTempStorageClass(newFilters.storageClass || 'all');
+        setTempCategory(newFilters.category);
+        setTempPriority(newFilters.priority);
     }, [searchParams]);
 
 
@@ -156,6 +182,9 @@ export const FiltersComponent = ({
             tagValue: tempTagValue,
             databaseType: tempDatabaseType,
             service: tempService,
+            storageClass: tempStorageClass,
+            category: tempCategory,
+            priority: tempPriority
         };
 
         setFilters(newFilters);
@@ -174,10 +203,13 @@ export const FiltersComponent = ({
         if (newFilters.tagValue) query.set('tagValue', newFilters.tagValue);
         if (newFilters.databaseType && newFilters.databaseType !== 'all') {
             query.set('databaseType', newFilters.databaseType);
-        }        
-        if (storageClassFilter && tempStorageClass !== 'all') {
-            query.set('storageClass', tempStorageClass); 
         }
+        if (storageClassFilter && tempStorageClass !== 'all') {
+            query.set('storageClass', tempStorageClass);
+        }
+
+        if (newFilters.category) query.set('category', newFilters.category);
+        if (newFilters.priority) query.set('priority', newFilters.priority);
 
         if (newFilters.service && newFilters.service !== 'all') {
             query.set('service', newFilters.service);
@@ -198,6 +230,8 @@ export const FiltersComponent = ({
             databaseType: 'all',
             storageClass: 'all',
             service: 'all',
+            category: '',
+            priority: ''
         };
 
         setFilters(defaultFilters);
@@ -210,6 +244,9 @@ export const FiltersComponent = ({
         setTempDatabaseType('all');
         setTempStorageClass('all');
         setTempService('all');
+        setTempCategory('');
+        setTempPriority('');
+
 
         router.push(window.location.pathname);
     };
@@ -262,6 +299,35 @@ export const FiltersComponent = ({
                                 />
                             </div>
                         )}
+                        {
+                            categoryFilter && (
+                                <div className='space-y-2'>
+                                    <label className='text-sm font-medium text-foreground flex items-center gap-2'>
+                                        <Grid className='h-4 w-4' /> Categorías
+                                    </label>
+                                    <RecommenderCategoriesFilterComponent
+                                        category={tempCategory}
+                                        setCategory={setTempCategory}
+                                        isRecommenderCategoryMultiSelect={isRecommenderCategoryMultiSelect}
+                                    />
+                                </div>
+                            )
+
+                        }
+                        {
+                            priorityFilter && (
+                                <div className='space-y-2'>
+                                    <label className='text-sm font-medium text-foreground flex items-center gap-2'>
+                                        <ArrowUpDown className='h-4 w-4' /> Prioridades
+                                    </label>
+                                    <RecommenderPriorityFilterComponent
+                                        priority={tempPriority}
+                                        setPriority={setTempPriority}
+                                        isRecommenderPriorityMultiSelect={isRecommenderPriorityMultiSelect}
+                                    />
+                                </div>
+                            )
+                        }
                         {/* 4. TAGS (NUEVO) */}
                         {tagsFilter && (
                             <div className='space-y-2'>
@@ -299,7 +365,7 @@ export const FiltersComponent = ({
                                     regions={tempRegions}
                                 />
                             </div>
-                        )}    
+                        )}
                         {/* 6. TIPO BD */}
                         {databaseTypeFilter && (
                             <div className='space-y-2'>
@@ -358,6 +424,8 @@ export const FiltersComponent = ({
                     databaseType={filters.databaseType}
                     dbEngine={dbEngine}
                     service={filters.service}
+                    category={filters.category}
+                    priority={filters.priority}
                 />
             </Card>
         </div>
