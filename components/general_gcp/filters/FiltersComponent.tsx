@@ -15,6 +15,7 @@ import { ResourcesFilterComponent } from './ResourcesFilterComponent';
 import { TagsFilterComponent } from './TagsFilterComponent'; 
 import { DatabaseTypeFilterComponent } from './DatabaseTypeFilterComponent';
 import { StorageClassFilterComponent } from './StorageClassFilterComponent';
+import { ServiceFilterComponent } from './ServiceFilterComponent';
 
 
 interface FiltersComponentProps {
@@ -28,6 +29,7 @@ interface FiltersComponentProps {
         tagKey?: string | null;
         tagValue?: string | null;
         databaseType?: string;
+        service?: string;
     }) => React.JSX.Element;
 
     // Flags de activación
@@ -37,7 +39,9 @@ interface FiltersComponentProps {
     resourceFilter?: boolean;
     isResourceMultiSelect?: boolean;
     tagsFilter?: boolean;
-    databaseTypeFilter?: boolean; 
+    databaseTypeFilter?: boolean;
+    serviceFilter?: boolean;
+    isServiceMultiSelect?: boolean;
 
     // Config extra
     resourceService?: string;
@@ -60,7 +64,9 @@ export const FiltersComponent = ({
     tagColumn = 'labels',
     databaseTypeFilter = false, 
     dbEngine = '',
-    storageClassFilter = false
+    storageClassFilter = false,
+    serviceFilter = false,
+    isServiceMultiSelect = false,
 }: FiltersComponentProps) => {
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -74,6 +80,7 @@ export const FiltersComponent = ({
         const projectsParam = searchParams.get('projects');
         const regionsParam = searchParams.get('regions');
         const resourceParam = searchParams.get('resourceId');
+        const serviceParam = searchParams.get('service');
 
         // Nuevos params de URL
         const tagKeyParam = searchParams.get('tagKey');
@@ -93,7 +100,8 @@ export const FiltersComponent = ({
             tagKey: tagKeyParam || null,
             tagValue: tagValueParam || null,
             databaseType: dbTypeParam || 'all',
-            storageClass: storageClassParam || 'all'
+            storageClass: storageClassParam || 'all',
+            service: serviceParam || 'all'
         };
     };
 
@@ -112,6 +120,7 @@ export const FiltersComponent = ({
     const [tempDatabaseType, setTempDatabaseType] = useState<string>(filters.databaseType || 'all');
 
     const [tempStorageClass, setTempStorageClass] = useState('all');
+    const [tempService, setTempService] = useState<string>(filters.service || 'all');
 
 
     useEffect(() => {
@@ -124,6 +133,7 @@ export const FiltersComponent = ({
         setTempTagKey(newFilters.tagKey);
         setTempTagValue(newFilters.tagValue);
         setTempDatabaseType(newFilters.databaseType || 'all');
+        setTempService(newFilters.service || 'all');
     }, [searchParams]);
 
 
@@ -144,7 +154,8 @@ export const FiltersComponent = ({
             resourceId: tempResource,
             tagKey: tempTagKey,
             tagValue: tempTagValue,
-            databaseType: tempDatabaseType
+            databaseType: tempDatabaseType,
+            service: tempService,
         };
 
         setFilters(newFilters);
@@ -156,6 +167,7 @@ export const FiltersComponent = ({
         if (newFilters.projects) query.set('projects', newFilters.projects);
         if (newFilters.regions) query.set('regions', newFilters.regions);
         if (newFilters.resourceId) query.set('resourceId', newFilters.resourceId);
+        
 
         // Guardar tags en URL si existen
         if (newFilters.tagKey) query.set('tagKey', newFilters.tagKey);
@@ -165,6 +177,10 @@ export const FiltersComponent = ({
         }        
         if (storageClassFilter && tempStorageClass !== 'all') {
             query.set('storageClass', tempStorageClass); 
+        }
+
+        if (newFilters.service && newFilters.service !== 'all') {
+            query.set('service', newFilters.service);
         }
 
         router.push(`${window.location.pathname}?${query.toString()}`);
@@ -180,7 +196,8 @@ export const FiltersComponent = ({
             tagKey: null,
             tagValue: null,
             databaseType: 'all',
-            storageClass: 'all'
+            storageClass: 'all',
+            service: 'all',
         };
 
         setFilters(defaultFilters);
@@ -192,6 +209,7 @@ export const FiltersComponent = ({
         setTempTagValue(null);
         setTempDatabaseType('all');
         setTempStorageClass('all');
+        setTempService('all');
 
         router.push(window.location.pathname);
     };
@@ -302,6 +320,20 @@ export const FiltersComponent = ({
                             />
                         )}
 
+                        {/* SERVICIOS GCP */}
+                        {serviceFilter && (
+                            <div className='space-y-2'>
+                                <label className='text-sm font-medium text-foreground flex items-center gap-2'>
+                                    <HardDrive className='h-4 w-4' /> Servicio
+                                </label>
+                                <ServiceFilterComponent
+                                    selectedService={tempService}
+                                    setSelectedService={setTempService}
+                                    isServiceMultiselect={isServiceMultiSelect}
+                                />
+                            </div>
+                        )}
+
                     </div>
 
                     <div className='flex items-center gap-4'>
@@ -325,6 +357,7 @@ export const FiltersComponent = ({
                     tagValue={filters.tagValue}
                     databaseType={filters.databaseType}
                     dbEngine={dbEngine}
+                    service={filters.service}
                 />
             </Card>
         </div>
