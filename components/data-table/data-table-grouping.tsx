@@ -222,23 +222,40 @@ const usePagination = (totalItems: number, pageSize: number) => {
     }
 }
 
+const ResizeHandle = ({ header }: { header: Header<unknown, unknown> }) => {
+    return (
+        <div
+            onMouseDown={header.getResizeHandler()}
+            onTouchStart={header.getResizeHandler()}
+            className={`absolute right-0 top-0 h-full w-1 cursor-col-resize select-none touch-none hover:bg-blue-500 opacity-0 hover:opacity-100 transition-opacity
+                ${header.column.getIsResizing() ? 'bg-blue-500 opacity-100' : 'bg-border'}
+            `}
+            onClick={(e) => e.stopPropagation()}
+        />
+    )
+}
+
 const SortableHeader = ({ header }: { header: unknown }) => {
     const canSort = header.column.getCanSort?.() ?? true
     const sorted = header.column.getIsSorted?.() as false | 'asc' | 'desc'
     const label = flexRender(header.column.columnDef.header, header.getContext())
-    if (!canSort) return label
+    // if (!canSort) return label
     return (
-        <Button
-            variant="ghost"
-            className="h-8 -ml-2 px-2 flex items-center gap-1"
-            onClick={header.column.getToggleSortingHandler()}
-            aria-sort={sorted ? (sorted === 'asc' ? 'ascending' : 'descending') : 'none'}
-            aria-label="Ordenar columna"
-        >
-            <span className="truncate">{label}</span>
-            <ArrowUpDown className={`h-4 w-4 transition-opacity ${sorted ? 'opacity-100' : 'opacity-50'}`} />
-            {sorted && <span className="sr-only">{sorted === 'asc' ? 'Ascendente' : 'Descendente'}</span>}
-        </Button>
+        <div className="flex items-center justify-between w-full h-full">
+            {!canSort ? (
+                <span className="truncate">{label}</span>
+            ) : (
+                <Button
+                    variant="ghost"
+                    className="h-8 -ml-2 px-2 flex items-center gap-1 w-full justify-start hover:bg-transparent"
+                    onClick={header.column.getToggleSortingHandler()}
+                    aria-sort={sorted ? (sorted === 'asc' ? 'ascending' : 'descending') : 'none'}
+                >
+                    <span className="truncate">{label}</span>
+                    <ArrowUpDown className={`h-4 w-4 shrink-0 transition-opacity ${sorted ? 'opacity-100' : 'opacity-50'}`} />
+                </Button>
+            )}
+        </div>
     )
 }
 
@@ -518,6 +535,7 @@ export function DataTableGrouping<TData, TValue>({
         onColumnFiltersChange: setColumnFilters,
         getFilteredRowModel: getFilteredRowModel(),
         onSortingChange: setSorting,
+        columnResizeMode: 'onChange',
         state: { columnFilters, sorting },
         getRowId: (row: ProcessedRow) => row.__rowId,
         manualPagination: true,
@@ -540,13 +558,26 @@ export function DataTableGrouping<TData, TValue>({
                     />
                 </div>
             )}
-            <div className="overflow-hidden rounded-md border">
-                <Table>
+            <div className="rounded-md border overflow-auto relative w-full">
+                <Table className="table-fixed w-full caption-bottom text-sm" style={{ width: table.getTotalSize() }}>
                     <TableHeader>
                         {table.getHeaderGroups().map((headerGroup) => (
                             <TableRow key={headerGroup.id}>
                                 {headerGroup.headers.map((header) => (
-                                    <TableHead key={header.id}>{header.isPlaceholder ? null : <SortableHeader header={header} />}</TableHead>
+                                    <TableHead
+                                        key={header.id}
+                                        className="relative group bg-background"
+                                        style={{ width: header.getSize() }}
+                                    >
+                                        {
+                                            header.isPlaceholder ? null : (
+                                                <>
+                                                    <SortableHeader header={header} />
+                                                    <ResizeHandle header={header} />
+                                                </>
+                                            )
+                                        }
+                                    </TableHead>
                                 ))}
                             </TableRow>
                         ))}
@@ -577,7 +608,11 @@ export function DataTableGrouping<TData, TValue>({
                                 return (
                                     <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'} className={isChild ? 'border-l-4 border-l-blue-200' : ''}>
                                         {row.getVisibleCells().map((cell) => (
-                                            <TableCell key={cell.id} className={isChild ? 'pl-8' : ''}>
+                                            <TableCell
+                                                key={cell.id}
+                                                className={`truncate ${isChild ? 'pl-8' : ''}`}
+                                                style={{ width: cell.column.getSize() }}
+                                            >
                                                 {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                             </TableCell>
                                         ))}
