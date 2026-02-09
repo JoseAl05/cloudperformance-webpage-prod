@@ -249,7 +249,9 @@ export const SidebarComponent = ({
     ]
 
     const workingNonWorkingItemsGCP = [
-        { label: 'Compute Engine', icon: Computer, href: '/gcp/funciones/uso-horario-habil-no-habil/compute-engines' }
+        { label: 'Compute Engine', icon: Computer, href: '/gcp/funciones/uso-horario-habil-no-habil/compute-engines' },
+        { label: 'Instance Groups', icon: Boxes, href: '/gcp/funciones/uso-horario-habil-no-habil/instance-group' },
+        { label: 'Clusters GKE', icon: Server, href: '/gcp/funciones/uso-horario-habil-no-habil/cluster-gke' }
     ]
 
     const GCPRoutes = {

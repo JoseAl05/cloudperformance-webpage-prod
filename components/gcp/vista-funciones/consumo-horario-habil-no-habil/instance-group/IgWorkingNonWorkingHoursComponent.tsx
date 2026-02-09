@@ -9,7 +9,7 @@ import { WorkingNonWorkingHoursUsage, WorkingNonWorkingHoursUsageSummary, Workin
 import { AlertCircle, Clock, Info } from 'lucide-react';
 import useSWR from 'swr';
 
-interface UnusedCeComponentProps {
+interface IgWorkingNonWorkingHoursComponentProps {
     startDate: Date;
     endDate: Date;
     resourceId: string;
@@ -23,23 +23,23 @@ const fetcher = (url: string) =>
 
 const isNonEmptyArray = <T,>(v: unknown): v is T[] => Array.isArray(v) && v.length > 0
 
-export const WorkingNonWorkingHoursComponent = ({ startDate, endDate, regions, projects, resourceId }: UnusedCeComponentProps) => {
+export const IgWorkingNonWorkingHoursComponent = ({ startDate, endDate, regions, projects, resourceId }: IgWorkingNonWorkingHoursComponentProps) => {
 
     const startDateFormatted = startDate.toISOString().replace('Z', '').slice(0, -4);
     const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : '';
 
     const workingNonWorkingUsage = useSWR(
-        resourceId ? `/api/gcp/bridge/gcp/compute_engine/working_hours_non_working_hours_usage?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${regions}&instances=${resourceId}` : null,
+        resourceId ? `/api/gcp/bridge/gcp/instance_group/working_hours_non_working_hours_usage?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${regions}&instances=${resourceId}` : null,
         fetcher
     )
 
     const workingNonWorkingUsageSummary = useSWR(
-        resourceId ? `/api/gcp/bridge/gcp/compute_engine/working_hours_non_working_hours_usage_summary?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${regions}&instances=${resourceId}` : null,
+        resourceId ? `/api/gcp/bridge/gcp/instance_group/working_hours_non_working_hours_usage_summary?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${regions}&instances=${resourceId}` : null,
         fetcher
     )
 
     const workingNonWorkingUsageSummaryByResource = useSWR(
-        resourceId ? `/api/gcp/bridge/gcp/compute_engine/working_hours_non_working_hours_usage_summary_by_resource?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${regions}&instances=${resourceId}` : null,
+        resourceId ? `/api/gcp/bridge/gcp/instance_group/working_hours_non_working_hours_usage_summary_by_resource?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${regions}&instances=${resourceId}` : null,
         fetcher
     )
 
@@ -97,7 +97,7 @@ export const WorkingNonWorkingHoursComponent = ({ startDate, endDate, regions, p
                 <MessageCard
                     icon={Info}
                     title="Sin datos para mostrar"
-                    description="No encontramos instancias EC2 infrautilizadas en el rango seleccionado."
+                    description="No encontramos instancias en el rango seleccionado."
                     tone="warn"
                 />
             </div>

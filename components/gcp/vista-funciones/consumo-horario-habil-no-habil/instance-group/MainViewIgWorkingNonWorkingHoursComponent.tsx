@@ -1,8 +1,8 @@
-import { WorkingNonWorkingHoursComponent } from '@/components/gcp/vista-funciones/consumo-horario-habil-no-habil/WorkingNonWorkingHoursComponent'
+import { IgWorkingNonWorkingHoursComponent } from '@/components/gcp/vista-funciones/consumo-horario-habil-no-habil/instance-group/IgWorkingNonWorkingHoursComponent'
 import { FiltersComponent } from '@/components/general_gcp/filters/FiltersComponent'
 import { PieChart} from 'lucide-react'
 
-export const MainViewWorkingNonWorkingHoursComponent = () => {
+export const MainViewIgWorkingNonWorkingHoursComponent = () => {
     return (
         <div className='w-full min-w-0 space-y-4'>
             <div className='mb-8'>
@@ -14,7 +14,7 @@ export const MainViewWorkingNonWorkingHoursComponent = () => {
                             </div>
                             <div>
                                 <h1 className='text-3xl font-bold text-gray-900 dark:text-gray-100'>
-                                    Análisis uso de Compute Engines en horario hábil y no hábil
+                                    Análisis uso de Compute Engines de Instances Group en horario hábil y no hábil
                                 </h1>
                             </div>
                         </div>
@@ -23,13 +23,13 @@ export const MainViewWorkingNonWorkingHoursComponent = () => {
             </div>
             <div className='w-full min-w-0'>
                 <FiltersComponent
-                    Component={WorkingNonWorkingHoursComponent}
+                    Component={IgWorkingNonWorkingHoursComponent}
                     dateFilter
                     projectsFilter
                     regionFilter
                     resourceFilter
                     isResourceMultiSelect
-                    resourceService='instances'
+                    resourceService='instance_groups'
                 />
             </div>
         </div>
