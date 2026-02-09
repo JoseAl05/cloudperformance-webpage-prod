@@ -8,14 +8,32 @@ import {
     Server,
     Moon,
     Sun,
-    Scale
+    Scale,
+    Calendar,
+    ExternalLink
 } from 'lucide-react';
 import { useState } from 'react';
 import { HistoryModal, HistoryModalTab } from '@/components/general_gcp/modal/HistoryModal';
 import { WorkingNonWorkingHoursUsageSummaryByResource, WorkingNonWorkingHoursUsageSummaryByResourceMetrics } from '@/interfaces/vista-consumo-horario-habil-no-habil/workingNonWorkingHoursInterfaces';
 
 import { formatGeneric, formatBytes } from '@/lib/bytesToMbs';
-import { WorkingNonWorkingAnalysisView, WorkingNonWorkingInfoView, WorkingNonWorkingMetricsView } from '@/components/gcp/vista-funciones/consumo-horario-habil-no-habil/info/WorkingNonWorkingInsightModalComponent';
+import { WorkingNonWorkingInfoView, WorkingNonWorkingMetricsView } from '@/components/gcp/vista-funciones/consumo-horario-habil-no-habil/info/WorkingNonWorkingInsightModalComponent';
+import { usePathname, useSearchParams } from 'next/navigation';
+import Link from 'next/link';
+
+export const getMetricFormat = (metricName: string): 'percent' | 'bytes' | 'number' => {
+    const lower = metricName.toLowerCase();
+    if (lower.includes('utilization') || lower.includes('percentage') || lower.includes('percent')) return 'percent';
+    if (lower.includes('throughput') || lower.includes('bytes')) return 'bytes';
+    return 'number';
+};
+
+export const formatMetricName = (name: string): string => {
+    return name
+        .split('_')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
+};
 
 const findMetric = (metrics: WorkingNonWorkingHoursUsageSummaryByResourceMetrics[], metricName: string, schedule: string) => {
     return metrics.find(m =>
@@ -117,9 +135,9 @@ const GeneralTrendCell = ({ row }: { row: WorkingNonWorkingHoursUsageSummaryByRe
     });
 
     if (workingCount > nonWorkingCount) {
-        return <Badge variant="outline" className="text-[10px] bg-amber-50 text-amber-700 border-amber-200 flex w-fit items-center gap-1"><Sun className="w-3 h-3" /> Mayor uso general en horario hábil</Badge>;
+        return <Badge variant="outline" className="text-[10px] text-amber-700 border-amber-200 flex w-fit items-center gap-1"><Sun className="w-3 h-3" /> Mayor uso general en horario hábil</Badge>;
     } else if (nonWorkingCount > workingCount) {
-        return <Badge variant="outline" className="text-[10px] bg-purple-50 text-purple-700 border-purple-200 flex w-fit items-center gap-1"><Moon className="w-3 h-3" /> Mayor uso general en horario no hábil</Badge>;
+        return <Badge variant="outline" className="text-[10px] text-purple-700 border-purple-200 flex w-fit items-center gap-1"><Moon className="w-3 h-3" /> Mayor uso general en horario no hábil</Badge>;
     }
     return <Badge variant="secondary" className="text-[10px] flex w-fit items-center gap-1"><Scale className="w-3 h-3" /> Balanceado</Badge>;
 };
@@ -130,7 +148,6 @@ const DetailsCell = ({ row }: { row: WorkingNonWorkingHoursUsageSummaryByResourc
     const tabs: HistoryModalTab[] = [
         { value: "info", label: "Resumen", content: <WorkingNonWorkingInfoView data={row} /> },
         { value: "metricas", label: "Detalle Métricas", content: <WorkingNonWorkingMetricsView data={row} /> },
-        // { value: "analisis", label: "Análisis & Ahorro", content: <WorkingNonWorkingAnalysisView data={row} /> }
     ];
 
     return (
@@ -143,102 +160,143 @@ const DetailsCell = ({ row }: { row: WorkingNonWorkingHoursUsageSummaryByResourc
     );
 };
 
-export interface MaxValues {
-    maxDiskReadIOPS: number;
-    maxDiskWriteIOPS: number;
-    maxDiskReadThroughput: number;
-    maxDiskWriteThroughput: number;
-    maxNetIngressPPS: number;
-    maxNetEgressPPS: number;
-    maxNetIngressThroughput: number;
-    maxNetEgressThroughput: number;
+const GetParameters = () => {
+    const searchParams = useSearchParams();
+    const pathname = usePathname();
+    const startDateParam = searchParams.get('startDate');
+    const endDateParam = searchParams.get('endDate');
+    const projectParam = searchParams.get('projects');
+    const regionParam = searchParams.get('regions');
+
+    return {
+        startDateParam,
+        endDateParam,
+        projectParam,
+        regionParam,
+        pathname
+    }
 }
 
-export const getWorkingNonWorkingColumns = (maxValues: MaxValues): DynamicColumn<WorkingNonWorkingHoursUsageSummaryByResource>[] => [
-    {
-        header: "Recurso",
-        accessorKey: "resource_name",
-        cell: (info) => (
-            <div className="flex flex-col justify-center">
-                <div className="flex items-center gap-2 mb-1">
-                    <div className="p-1.5 bg-slate-50 dark:bg-slate-900 rounded border border-slate-100 dark:border-slate-800">
-                        <Server className="h-3.5 w-3.5 text-slate-500 dark:text-slate-400" />
+export const getWorkingNonWorkingColumns = (
+    uniqueMetrics: string[],
+    maxValues: Record<string, number>
+): DynamicColumn<WorkingNonWorkingHoursUsageSummaryByResource>[] => {
+
+    const metricColumns: DynamicColumn<WorkingNonWorkingHoursUsageSummaryByResource>[] = uniqueMetrics.map(metric => {
+        const format = getMetricFormat(metric);
+        return {
+            header: formatMetricName(metric),
+            id: metric,
+            cell: ({ row }) => (
+                <DualMetricCell
+                    row={row.original}
+                    metricName={metric}
+                    maxVal={maxValues[metric] || 100}
+                    format={format}
+                />
+            ),
+            size: 220,
+            enableSorting: true,
+        };
+    });
+
+    return [
+        {
+            header: "Recurso",
+            accessorKey: "resource_name",
+            cell: (info) => {
+                const { startDateParam, endDateParam, projectParam, regionParam, pathname } = GetParameters();
+
+                const isCloudSql = pathname.includes('cloud-sql');
+                const redirectBaseUrl = isCloudSql ? '/gcp/recursos/cloudsql' : '/gcp/recursos';
+                const resourcePath = isCloudSql ? info.getValue() : info.row.original.resource_id;
+
+                let redirectUrl = '';
+                if (pathname.includes('mysql')) {
+                    redirectUrl = `${redirectBaseUrl}/mysql`;
+                } else if (pathname.includes('postgres')) {
+                    redirectUrl = `${redirectBaseUrl}/postgresql`;
+                } else if (pathname.includes('sqlserver')) {
+                    redirectUrl = `${redirectBaseUrl}/sqlserver`;
+                } else {
+                    redirectUrl = `${redirectBaseUrl}/compute-engine`;
+                }
+
+                const hrefObject = {
+                    pathname: redirectUrl,
+                    query: {
+                        startDate: startDateParam,
+                        endDate: endDateParam,
+                        resourceId: resourcePath,
+                        projects: projectParam,
+                        regions: regionParam
+                    }
+                };
+
+                return (
+                    <div className="flex flex-col justify-center">
+                        <Link
+                            href={hrefObject}
+                            className="group flex items-start gap-3 p-2 -ml-2 rounded-md transition-all duration-200 hover:bg-slate-100 dark:hover:bg-slate-800/50"
+                            rel="noopener noreferrer"
+                            target="_blank"
+                        >
+                            <div className="mt-0.5 p-1.5 bg-slate-50 dark:bg-slate-900 rounded border border-slate-200 dark:border-slate-700 group-hover:border-blue-200 dark:group-hover:border-blue-800 transition-colors">
+                                <Server className="h-4 w-4 text-slate-500 dark:text-slate-400 group-hover:text-blue-500 transition-colors" />
+                            </div>
+
+                            <div className="flex flex-col min-w-0 flex-1">
+                                <div className="flex items-center justify-between gap-2">
+                                    <span
+                                        className="font-semibold text-sm text-slate-700 dark:text-slate-200 truncate group-hover:text-blue-600 dark:group-hover:text-blue-400 group-hover:underline decoration-blue-300 underline-offset-2 transition-colors"
+                                        title={info.getValue() as string}
+                                    >
+                                        {info.getValue() as string}
+                                    </span>
+                                    <ExternalLink className="h-3.5 w-3.5 text-slate-300 dark:text-slate-600 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 group-hover:text-blue-500 transition-all duration-300 ease-out" />
+                                </div>
+
+                                <span className="text-[10px] text-slate-400 dark:text-slate-500 font-mono truncate group-hover:text-slate-500 dark:group-hover:text-slate-400 transition-colors">
+                                    {info.row.original.resource_id}
+                                </span>
+                            </div>
+                        </Link>
                     </div>
-                    <span className="font-semibold text-sm text-slate-700 dark:text-slate-200 max-w-[180px]" title={info.getValue() as string}>
-                        {info.getValue() as string}
-                    </span>
+                )
+            },
+            size: 300,
+            enableSorting: true
+        },
+        {
+            header: "Fecha Observación",
+            accessorKey: "sync_time",
+            cell: (info) => (
+                <div className="flex flex-col justify-center">
+                    <div className="flex items-center gap-2 mb-1">
+                        <div className="p-1.5 bg-slate-50 dark:bg-slate-900 rounded border border-slate-100 dark:border-slate-800">
+                            <Calendar className="h-3.5 w-3.5 text-slate-500 dark:text-slate-400" />
+                        </div>
+                        <span className="font-semibold text-sm text-slate-700 dark:text-slate-200 max-w-[180px]" title={info.getValue() as string}>
+                            {new Date(info.getValue()).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) as string}
+                        </span>
+                    </div>
                 </div>
-                <div className="text-[10px] text-muted-foreground pl-1 max-w-[180px] opacity-70">
-                    {info.row.original.resource_id}
-                </div>
-            </div>
-        ),
-        size: 200
-    },
-    {
-        header: "CPU",
-        id: "cpu_col",
-        cell: ({ row }) => <DualMetricCell row={row.original} metricName="cpu_utilization" maxVal={100} format="percent" />,
-        size: 130
-    },
-    {
-        header: "Disk Read (IOPS)",
-        id: "disk_read_iops_col",
-        cell: ({ row }) => <DualMetricCell row={row.original} metricName="disk_read_iops" maxVal={maxValues.maxDiskReadIOPS} format="number" />,
-        size: 140
-    },
-    {
-        header: "Disk Write (IOPS)",
-        id: "disk_write_iops_col",
-        cell: ({ row }) => <DualMetricCell row={row.original} metricName="disk_write_iops" maxVal={maxValues.maxDiskWriteIOPS} format="number" />,
-        size: 140
-    },
-    {
-        header: "Disk Read (Bytes)",
-        id: "disk_read_bytes_col",
-        cell: ({ row }) => <DualMetricCell row={row.original} metricName="disk_read_throughput" maxVal={maxValues.maxDiskReadThroughput} format="bytes" />,
-        size: 140
-    },
-    {
-        header: "Disk Write (Bytes)",
-        id: "disk_write_bytes_col",
-        cell: ({ row }) => <DualMetricCell row={row.original} metricName="disk_write_throughput" maxVal={maxValues.maxDiskWriteThroughput} format="bytes" />,
-        size: 140
-    },
-    {
-        header: "Net In (Bytes)",
-        id: "net_in_bytes_col",
-        cell: ({ row }) => <DualMetricCell row={row.original} metricName="network_ingress_throughput" maxVal={maxValues.maxNetIngressThroughput} format="bytes" />,
-        size: 140
-    },
-    {
-        header: "Net Out (Bytes)",
-        id: "net_out_bytes_col",
-        cell: ({ row }) => <DualMetricCell row={row.original} metricName="network_egress_throughput" maxVal={maxValues.maxNetEgressThroughput} format="bytes" />,
-        size: 140
-    },
-    {
-        header: "Net In (PPS)",
-        id: "net_in_pps_col",
-        cell: ({ row }) => <DualMetricCell row={row.original} metricName="network_ingress_pps" maxVal={maxValues.maxNetIngressPPS} format="number" />,
-        size: 130
-    },
-    {
-        header: "Net Out (PPS)",
-        id: "net_out_pps_col",
-        cell: ({ row }) => <DualMetricCell row={row.original} metricName="network_egress_pps" maxVal={maxValues.maxNetEgressPPS} format="number" />,
-        size: 130
-    },
-    {
-        header: "Tendencia Global",
-        accessorKey: "metric_activity_summary",
-        cell: ({ row }) => <GeneralTrendCell row={row.original} />,
-        size: 140
-    },
-    {
-        id: "actions",
-        header: " ",
-        cell: ({ row }) => <DetailsCell row={row.original} />,
-        size: 50
-    }
-];
+            ),
+            size: 300,
+            enableSorting: true
+        },
+        ...metricColumns,
+        {
+            header: "Tendencia Global",
+            accessorKey: "metric_activity_summary",
+            cell: ({ row }) => <GeneralTrendCell row={row.original} />,
+            size: 250
+        },
+        {
+            id: "actions",
+            header: " ",
+            cell: ({ row }) => <DetailsCell row={row.original} />,
+            size: 150
+        }
+    ];
+};

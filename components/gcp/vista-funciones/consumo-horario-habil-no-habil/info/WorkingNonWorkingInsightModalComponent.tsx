@@ -2,9 +2,11 @@
 
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Calendar, Clock, AlertTriangle, CheckCircle2,DollarSign, Activity, HardDrive, Network } from 'lucide-react';
+import { Calendar, Clock, AlertTriangle, CheckCircle2, DollarSign, Activity } from 'lucide-react';
 import { WorkingNonWorkingHoursUsageSummaryByResource, WorkingNonWorkingHoursUsageSummaryByResourceMetrics } from '@/interfaces/vista-consumo-horario-habil-no-habil/workingNonWorkingHoursInterfaces';
 import { formatGeneric, formatBytes } from '@/lib/bytesToMbs';
+import { formatMetricName, getMetricFormat } from '@/components/gcp/vista-funciones/consumo-horario-habil-no-habil/table/WorkingNonWorkingHoursColumns';
+
 
 const getVal = (metrics: WorkingNonWorkingHoursUsageSummaryByResourceMetrics[], name: string, schedule: string) => {
     return metrics.find(m => m.metric_name === name && m.schedule_type === schedule)?.avg_value || 0;
@@ -18,14 +20,14 @@ export const WorkingNonWorkingInfoView = ({ data }: { data: WorkingNonWorkingHou
     return (
         <ScrollArea className="flex-1">
             <div className="p-6 space-y-6">
-                <div className="rounded-lg border-l-4 p-4 shadow-sm flex items-start gap-3 border-indigo-500 bg-indigo-50 text-indigo-700">
+                <div className="rounded-lg border-l-4 p-4 shadow-sm flex items-start gap-3 border-indigo-500 text-indigo-700">
                     <div className="p-2 bg-white/60 dark:bg-black/20 rounded-full">
                         <Clock className="h-5 w-5" />
                     </div>
                     <div>
                         <h4 className="text-sm font-bold">Recurso Analizado</h4>
                         <p className="text-xs opacity-90 mt-1">
-                            Análisis integral de patrones de uso temporal (9 métricas) para detección de anomalías.
+                            Análisis integral de patrones de uso temporal para detección de anomalías.
                         </p>
                     </div>
                 </div>
@@ -56,6 +58,15 @@ export const WorkingNonWorkingInfoView = ({ data }: { data: WorkingNonWorkingHou
 
 export const WorkingNonWorkingMetricsView = ({ data }: { data: WorkingNonWorkingHoursUsageSummaryByResource }) => {
 
+    const uniqueMetricNames = Array.from(new Set(data.metric_data.map(m => m.metric_name)));
+
+    const groupedMetrics = uniqueMetricNames.reduce((acc, metricName) => {
+        const prefix = metricName.split('_')[0].toUpperCase();
+        if (!acc[prefix]) acc[prefix] = [];
+        acc[prefix].push(metricName);
+        return acc;
+    }, {} as Record<string, string[]>);
+
     const RenderRow = ({ label, metricKey, type }: { label: string, metricKey: string, type: 'percent' | 'bytes' | 'number' }) => {
         const wAvg = getVal(data.metric_data, metricKey, 'business_hours');
         const nwAvg = getVal(data.metric_data, metricKey, 'non_business_hours');
@@ -71,8 +82,8 @@ export const WorkingNonWorkingMetricsView = ({ data }: { data: WorkingNonWorking
         return (
             <TableRow>
                 <TableCell className="font-medium text-xs">{label}</TableCell>
-                <TableCell className="text-center font-mono text-xs bg-blue-50/30 text-blue-700">{fmt(wAvg)}</TableCell>
-                <TableCell className="text-center font-mono text-xs bg-purple-50/30 text-purple-700">{fmt(nwAvg)}</TableCell>
+                <TableCell className="text-center font-mono text-xs text-blue-700">{fmt(wAvg)}</TableCell>
+                <TableCell className="text-center font-mono text-xs text-purple-700">{fmt(nwAvg)}</TableCell>
                 <TableCell className="text-center text-xs text-muted-foreground">{fmt(wMax)} / {fmt(nwMax)}</TableCell>
             </TableRow>
         );
@@ -81,46 +92,35 @@ export const WorkingNonWorkingMetricsView = ({ data }: { data: WorkingNonWorking
     return (
         <ScrollArea className="flex-1">
             <div className="p-6 space-y-6">
-                <div>
-                    <h4 className="text-sm font-semibold mb-3 flex items-center gap-2"><Activity className="h-4 w-4" /> Cómputo (CPU)</h4>
-                    <div className="border rounded-lg overflow-hidden dark:border-slate-800">
-                        <Table>
-                            <TableHeader className="bg-slate-50 dark:bg-slate-900"><TableRow><TableHead>Métrica</TableHead><TableHead className="text-center">Hábil</TableHead><TableHead className="text-center">No Hábil</TableHead><TableHead className="text-center">Max (H/NH)</TableHead></TableRow></TableHeader>
-                            <TableBody>
-                                <RenderRow label="CPU Utilization" metricKey="cpu_utilization" type="percent" />
-                            </TableBody>
-                        </Table>
+                {Object.entries(groupedMetrics).map(([group, metrics]) => (
+                    <div key={group}>
+                        <h4 className="text-sm font-semibold mb-3 flex items-center gap-2">
+                            <Activity className="h-4 w-4" /> {group} Metrics
+                        </h4>
+                        <div className="border rounded-lg overflow-hidden dark:border-slate-800">
+                            <Table>
+                                <TableHeader className="bg-slate-50 dark:bg-slate-900">
+                                    <TableRow>
+                                        <TableHead>Métrica</TableHead>
+                                        <TableHead className="text-center">Hábil</TableHead>
+                                        <TableHead className="text-center">No Hábil</TableHead>
+                                        <TableHead className="text-center">Max (H/NH)</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {metrics.map(metric => (
+                                        <RenderRow
+                                            key={metric}
+                                            label={formatMetricName(metric)}
+                                            metricKey={metric}
+                                            type={getMetricFormat(metric)}
+                                        />
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </div>
                     </div>
-                </div>
-                <div>
-                    <h4 className="text-sm font-semibold mb-3 flex items-center gap-2"><HardDrive className="h-4 w-4" /> Almacenamiento</h4>
-                    <div className="border rounded-lg overflow-hidden dark:border-slate-800">
-                        <Table>
-                            <TableHeader className="bg-slate-50 dark:bg-slate-900"><TableRow><TableHead>Métrica</TableHead><TableHead className="text-center">Hábil</TableHead><TableHead className="text-center">No Hábil</TableHead><TableHead className="text-center">Max (H/NH)</TableHead></TableRow></TableHeader>
-                            <TableBody>
-                                <RenderRow label="Read IOPS" metricKey="disk_read_iops" type="number" />
-                                <RenderRow label="Write IOPS" metricKey="disk_write_iops" type="number" />
-                                <RenderRow label="Read Throughput" metricKey="disk_read_throughput" type="bytes" />
-                                <RenderRow label="Write Throughput" metricKey="disk_write_throughput" type="bytes" />
-                            </TableBody>
-                        </Table>
-                    </div>
-                </div>
-                <div>
-                    <h4 className="text-sm font-semibold mb-3 flex items-center gap-2"><Network className="h-4 w-4" /> Red</h4>
-                    <div className="border rounded-lg overflow-hidden dark:border-slate-800">
-                        <Table>
-                            <TableHeader className="bg-slate-50 dark:bg-slate-900"><TableRow><TableHead>Métrica</TableHead><TableHead className="text-center">Hábil</TableHead><TableHead className="text-center">No Hábil</TableHead><TableHead className="text-center">Max (H/NH)</TableHead></TableRow></TableHeader>
-                            <TableBody>
-                                <RenderRow label="Ingress (Bytes)" metricKey="network_ingress_throughput" type="bytes" />
-                                <RenderRow label="Egress (Bytes)" metricKey="network_egress_throughput" type="bytes" />
-                                <RenderRow label="Ingress (PPS)" metricKey="network_ingress_pps" type="number" />
-                                <RenderRow label="Egress (PPS)" metricKey="network_egress_pps" type="number" />
-                            </TableBody>
-                        </Table>
-                    </div>
-                </div>
-
+                ))}
             </div>
         </ScrollArea>
     );
@@ -131,9 +131,8 @@ export const WorkingNonWorkingAnalysisView = ({ data }: { data: WorkingNonWorkin
     const analyzeResource = () => {
         const cpuW = getVal(data.metric_data, 'cpu_utilization', 'business_hours');
         const cpuNW = getVal(data.metric_data, 'cpu_utilization', 'non_business_hours');
-        const netInNW = getVal(data.metric_data, 'network_ingress_throughput', 'non_business_hours');
 
-        const isZombie = cpuW < 5 && cpuNW < 5 && netInNW < 1000;
+        const isZombie = cpuW < 5 && cpuNW < 5;
         const isSaverCandidate = cpuW > 10 && cpuNW < 2;
 
         if (isZombie) return { title: "Posible Zombie", desc: "Recurso sin uso significativo.", icon: AlertTriangle, color: "text-red-600 bg-red-50 border-red-200" };

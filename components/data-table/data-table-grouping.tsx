@@ -8,7 +8,7 @@ import {
     getFilteredRowModel,
     useReactTable,
     type SortingState,
-    Column
+    type Header
 } from '@tanstack/react-table'
 import { useState, useMemo, useCallback, useEffect } from 'react'
 import { ChevronDown, ChevronRight, MoreHorizontal, ArrowUpDown } from 'lucide-react'
@@ -223,15 +223,25 @@ const usePagination = (totalItems: number, pageSize: number) => {
 }
 
 const ResizeHandle = ({ header }: { header: Header<unknown, unknown> }) => {
+    const isResizing = header.column.getIsResizing()
     return (
         <div
             onMouseDown={header.getResizeHandler()}
             onTouchStart={header.getResizeHandler()}
-            className={`absolute right-0 top-0 h-full w-1 cursor-col-resize select-none touch-none hover:bg-blue-500 opacity-0 hover:opacity-100 transition-opacity
-                ${header.column.getIsResizing() ? 'bg-blue-500 opacity-100' : 'bg-border'}
-            `}
+            onDoubleClick={() => header.column.resetSize()}
+            className="absolute right-0 top-0 h-full w-4 -right-2 z-20 cursor-col-resize select-none touch-none flex justify-center items-center group/resizer outline-none"
             onClick={(e) => e.stopPropagation()}
-        />
+        >
+            <div
+                className={`
+                    w-px transition-all duration-200 rounded-full
+                    ${isResizing
+                        ? 'bg-blue-600 h-full w-[2px] opacity-100'
+                        : 'h-6 bg-slate-300 dark:bg-slate-700 opacity-60 group-hover/resizer:bg-blue-400 group-hover/resizer:opacity-100 group-hover/resizer:h-8'
+                    }
+                `}
+            />
+        </div>
     )
 }
 
@@ -239,9 +249,9 @@ const SortableHeader = ({ header }: { header: unknown }) => {
     const canSort = header.column.getCanSort?.() ?? true
     const sorted = header.column.getIsSorted?.() as false | 'asc' | 'desc'
     const label = flexRender(header.column.columnDef.header, header.getContext())
-    // if (!canSort) return label
+
     return (
-        <div className="flex items-center justify-between w-full h-full">
+        <div className="flex items-center justify-between w-full h-full group/sortable">
             {!canSort ? (
                 <span className="truncate">{label}</span>
             ) : (
@@ -252,7 +262,7 @@ const SortableHeader = ({ header }: { header: unknown }) => {
                     aria-sort={sorted ? (sorted === 'asc' ? 'ascending' : 'descending') : 'none'}
                 >
                     <span className="truncate">{label}</span>
-                    <ArrowUpDown className={`h-4 w-4 shrink-0 transition-opacity ${sorted ? 'opacity-100' : 'opacity-50'}`} />
+                    <ArrowUpDown className={`h-4 w-4 shrink-0 transition-opacity ${sorted ? 'opacity-100' : 'opacity-30 group-hover/sortable:opacity-70'}`} />
                 </Button>
             )}
         </div>
@@ -426,7 +436,6 @@ export function DataTableGrouping<TData, TValue>({
     initialSorting = []
 }: DataTableGroupingProps<TData, TValue>) {
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
-    // const [sorting, setSorting] = useState<SortingState>(initialSorting)
     const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set())
     const [groupPages, setGroupPages] = useState<Map<string, number>>(new Map())
     const [groupPageSize, setGroupPageSize] = useState(pageSizeGroups)
@@ -460,11 +469,6 @@ export function DataTableGrouping<TData, TValue>({
 
     const { currentPage, totalPages, canPrevious, canNext, goToPrevious, goToNext, resetPage } =
         usePagination(totalGroupsForPagination, groupPageSize)
-
-    // const { currentPage, totalPages, canPrevious, canNext, goToPrevious, goToNext, resetPage } = usePagination(
-    //     enableGrouping ? 0 : safeData.length,
-    //     groupPageSize
-    // )
 
     useEffect(() => {
         resetPage()
@@ -559,7 +563,7 @@ export function DataTableGrouping<TData, TValue>({
                 </div>
             )}
             <div className="rounded-md border overflow-auto relative w-full">
-                <Table className="table-fixed w-full caption-bottom text-sm" style={{ width: table.getTotalSize() }}>
+                <Table className="table-fixed caption-bottom text-sm" style={{ width: table.getTotalSize() }}>
                     <TableHeader>
                         {table.getHeaderGroups().map((headerGroup) => (
                             <TableRow key={headerGroup.id}>

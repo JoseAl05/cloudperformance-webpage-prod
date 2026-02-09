@@ -60,6 +60,7 @@ const getMetricConfig = (metricName: string) => {
         if (lowerName.includes('ingress')) return { icon: ArrowDownLeft, unit: 'pps' };
         return { icon: Network, unit: 'pps' };
     }
+    if (lowerName.includes('gb')) return { icon: HardDrive, unit: 'GB' };
 
     if (lowerName.includes('memory') || lowerName.includes('ram')) return { icon: Server, unit: '%' };
 
@@ -78,7 +79,7 @@ const MetricColumn = ({
     const isWorking = type === 'working';
 
     const styles = isWorking ? {
-        bg: "bg-blue-50/40",
+        bg: "",
         border: "border-blue-100",
         text: "text-blue-900",
         subtext: "text-blue-600",
@@ -86,7 +87,7 @@ const MetricColumn = ({
         iconColor: "text-blue-500",
         badge: "bg-blue-100 text-blue-700 border-blue-200"
     } : {
-        bg: "bg-amber-50/40",
+        bg: "",
         border: "border-amber-100",
         text: "text-amber-900",
         subtext: "text-amber-600",
@@ -185,11 +186,11 @@ export const WorkingNonWorkingHoursCardsComponent = ({ data }: WorkingNonWorking
 
                 return (
                     <Card key={group.metricName} className="border shadow-sm hover:shadow-md transition-shadow">
-                        <div className="bg-white border-b px-4 py-3 flex items-center gap-2">
-                            <div className="p-1.5 bg-slate-100 rounded text-slate-600">
+                        <div className="border-b px-4 py-3 flex items-center gap-2">
+                            <div className="p-1.5 rounded">
                                 <MetricIcon className="w-4 h-4" />
                             </div>
-                            <h3 className="font-semibold text-sm text-slate-800 capitalize truncate" title={humanName}>
+                            <h3 className="font-semibold text-sm capitalize truncate" title={humanName}>
                                 {humanName}
                             </h3>
                         </div>
