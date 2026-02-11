@@ -90,7 +90,7 @@ export const TrendStorageLineChart = ({
         tooltip: {
           trigger: 'axis',
           formatter: (params: unknown): string => {
-            const list = (Array.isArray(params) ? params : [params]).filter(Boolean) as any[]
+            const list = (Array.isArray(params) ? params : [params]).filter(Boolean) as unknown[]
             const rawAxis = list[0]?.axisValue || list[0]?.name || ''
 
             let header = rawAxis

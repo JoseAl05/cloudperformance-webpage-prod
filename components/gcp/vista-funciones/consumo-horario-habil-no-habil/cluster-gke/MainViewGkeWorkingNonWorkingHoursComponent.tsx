@@ -1,8 +1,8 @@
-import { UnusedCeComponent } from '@/components/gcp/vista-recursos/sin-uso/compute-engine/UnusedCeComponent'
+import { GkeWorkingNonWorkingHoursComponent } from '@/components/gcp/vista-funciones/consumo-horario-habil-no-habil/cluster-gke/GkeWorkingNonWorkingHoursComponent'
 import { FiltersComponent } from '@/components/general_gcp/filters/FiltersComponent'
 import { PieChart} from 'lucide-react'
 
-export const MainViewUnusedCeComponent = () => {
+export const MainViewGkeWorkingNonWorkingHoursComponent = () => {
     return (
         <div className='w-full min-w-0 space-y-4'>
             <div className='mb-8'>
@@ -14,7 +14,7 @@ export const MainViewUnusedCeComponent = () => {
                             </div>
                             <div>
                                 <h1 className='text-3xl font-bold text-gray-900 dark:text-gray-100'>
-                                    Compute Engines Infrautilizados
+                                    Análisis uso de Nodos de Clusters GKE en horario hábil y no hábil
                                 </h1>
                             </div>
                         </div>
@@ -23,15 +23,15 @@ export const MainViewUnusedCeComponent = () => {
             </div>
             <div className='w-full min-w-0'>
                 <FiltersComponent
-                    Component={UnusedCeComponent}
+                    Component={GkeWorkingNonWorkingHoursComponent}
                     dateFilter
                     projectsFilter
                     regionFilter
                     resourceFilter
                     isResourceMultiSelect
-                    resourceService='unused-instances'
-                    tagCollection='gcp_compute_instances'
-                    tagColumn='labels'
+                    resourceService='clusters-gke'
+                    tagCollection='gcp_container_clusters'
+                    tagColumn='resourceLabels'
                     tagsFilter
                 />
             </div>

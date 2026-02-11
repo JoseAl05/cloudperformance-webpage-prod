@@ -260,10 +260,10 @@ export const getComputeEngineConsumeColumns = (maxCpu: number, maxCost: number):
             return (
                 <div className="flex flex-col text-xs">
                     <span className="font-semibold text-slate-700 dark:text-slate-300">
-                        {dateObj.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' })}
+                        {dateObj.toLocaleDateString('es-CL', { day: '2-digit', month: 'short' })}
                     </span>
                     <span className="text-[10px] text-muted-foreground font-mono">
-                        {dateObj.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}
+                        {dateObj.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' })}
                     </span>
                 </div>
             );

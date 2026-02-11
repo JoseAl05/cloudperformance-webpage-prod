@@ -70,7 +70,7 @@ export const HistoryModal = ({
                                 <TabsTrigger
                                     key={tab.value}
                                     value={tab.value}
-                                    className="data-[state=active]:border-b-2 data-[state=active]:border-blue-500 rounded-none px-0 pb-3 bg-transparent shadow-none data-[state=active]:text-blue-600 dark:data-[state=active]:text-blue-400"
+                                    className="data-[state=active]:border-b-2 data-[state=active]:border-blue-500 rounded-none px-0 pb-3 bg-transparent shadow-none cursor-pointer data-[state=active]:text-blue-600 dark:data-[state=active]:text-blue-400"
                                 >
                                     {tab.label}
                                 </TabsTrigger>

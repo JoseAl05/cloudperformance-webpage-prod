@@ -249,6 +249,16 @@ export const SidebarComponent = ({
         // { label: 'Cloud Load Balancing', icon: Workflow, href: '/gcp/consumo-clb' }
     ]
 
+    const workingNonWorkingItemsGCP = [
+        { label: 'Compute Engine', icon: Computer, href: '/gcp/funciones/uso-horario-habil-no-habil/compute-engines' },
+        { label: 'Instance Groups', icon: Boxes, href: '/gcp/funciones/uso-horario-habil-no-habil/instance-group' },
+        { label: 'Clusters GKE', icon: Server, href: '/gcp/funciones/uso-horario-habil-no-habil/cluster-gke' },
+        { label: 'Cloud SQL Postgres', icon: Database, href: '/gcp/funciones/uso-horario-habil-no-habil/cloud-sql/postgresql' },
+        { label: 'Cloud SQL Mysql', icon: Database, href: '/gcp/funciones/uso-horario-habil-no-habil/cloud-sql/mysql' },
+        { label: 'Cloud SQL Sql Server', icon: Database, href: '/gcp/funciones/uso-horario-habil-no-habil/cloud-sql/sqlserver' },
+
+    ]
+
     const GCPRoutes = {
         routes: [
             { label: 'Inicio', icon: LayoutDashboard, href: '/gcp' },
@@ -277,8 +287,12 @@ export const SidebarComponent = ({
             // { label: 'Incremento Uso de Recursos', icon: LineChart, href: '/gcp/funciones/incremento-top-recursos-uso' },
             { label: 'Spot vs Standard VMs', icon: Computer, href: '/gcp/funciones/spot-vs-standard-vm' },
             { label: 'Promedio de uso por región', icon: MapPin, href: '/gcp/funciones/uso-costo-por-localizacion' },
+<<<<<<< HEAD
             { label: 'Top Facturación por Región', icon: DollarSign, href: '/gcp/funciones/top-facturacion-region' },
             { label: 'Consumo horario hábil vs no hábil', icon: Clock, href: '/gcp/funciones/analisis-vms-horario' },
+=======
+            { label: 'Consumo horario hábil vs no hábil', subItems: workingNonWorkingItemsGCP, icon: Clock },
+>>>>>>> 9aabf45929508d01b11e37ad91287b54ca62f4eb
             // { label: 'Promedio de uso por región', icon: MapPin, href: '/gcp/funciones/promedio-por-localizacion' },
             // { label: 'Consumo horario hábil vs no hábil', icon: Clock, href: '/gcp/funciones/analisis-vms-horario' },
             { label: 'Recursos no utilizados', subItems: infrausedGCP, icon: TrendingDown }

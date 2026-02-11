@@ -30,6 +30,9 @@ export const MainViewComputeEngineComponent = () => {
                     resourceFilter
                     isResourceMultiSelect={false}
                     resourceService='instances'
+                    tagCollection='gcp_compute_instances'
+                    tagColumn='labels'
+                    tagsFilter
                 />
             </div>
         </div>

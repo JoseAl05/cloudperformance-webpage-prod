@@ -9,6 +9,7 @@ export type DynamicColumn<T> = {
   cell?: (info: unknown) => React.ReactNode;
   desc?: boolean;
   isDefaultSort?: boolean;
+  size?: number;
 };
 
 export const createColumns = <T extends object>(cols: DynamicColumn<T>[]): ColumnDef<T>[] => {
@@ -27,6 +28,7 @@ export const createColumns = <T extends object>(cols: DynamicColumn<T>[]): Colum
     meta: {
       isDefaultSort: col.isDefaultSort,
       defaultSortDesc: col.desc
-    }
+    },
+    size: col.size
   }));
 };

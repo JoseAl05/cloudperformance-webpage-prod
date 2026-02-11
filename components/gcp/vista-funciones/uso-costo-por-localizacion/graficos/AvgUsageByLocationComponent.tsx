@@ -36,7 +36,7 @@ interface RegionMetricas {
 interface Props {
   data: RegionMetricas[]
   isLoading: boolean
-  error: any
+  error: unknown
 }
 
 /* ================= HELPERS ================= */

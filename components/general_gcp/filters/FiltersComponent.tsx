@@ -111,11 +111,11 @@ export const FiltersComponent = ({
         return {
             startDate: startDate,
             endDate: endDate,
-            projects: projectsParam || '',
-            regions: regionsParam || '',
+            projects: projectsParam || 'all_projects',
+            regions: regionsParam || 'all_regions',
             resourceId: resourceParam || '',
-            tagKey: tagKeyParam || null,
-            tagValue: tagValueParam || null,
+            tagKey: tagKeyParam || 'allKeys',
+            tagValue: tagValueParam || 'allValues',
             databaseType: dbTypeParam || 'all',
             storageClass: storageClassParam || 'all',
             service: serviceParam || 'all',
@@ -363,6 +363,8 @@ export const FiltersComponent = ({
                                     isResourceMultiSelect={isResourceMultiSelect}
                                     projects={tempProjects}
                                     regions={tempRegions}
+                                    tagKey={tempTagKey}
+                                    tagValue={tempTagValue}
                                 />
                             </div>
                         )}

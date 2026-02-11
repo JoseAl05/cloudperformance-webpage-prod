@@ -18,14 +18,8 @@ import {
     LineChart,
     Gauge,
     CalendarClock,
-    Monitor,
-    Layers,
-    ShoppingCart,
-    Receipt,
     Stars,
     TrendingUp,
-    Boxes,
-    MapPin,
     HardDrive,
     Container, // Nuevo icono para GKE/contenedores
 } from "lucide-react"
@@ -36,7 +30,6 @@ export default function DashboardGCPPage() {
             <section className="rounded-2xl border p-6 bg-gradient-to-br from-slate-50 to-white md:p-8 dark:from-slate-900 dark:to-slate-950">
                 <div className="flex items-start justify-between gap-4">
                     <div className="flex items-start gap-3">
-                        {/* Asegúrate de tener un icono gcp.svg en tu carpeta public o cambia el src */}
                         <div className="relative h-18 w-18 md:h-20 md:w-20">
                             <Image src="/gcp.svg" alt="GCP" fill className="object-contain" priority />
                         </div>
@@ -61,7 +54,6 @@ export default function DashboardGCPPage() {
                         </p>
 
                         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 w-full mt-4">
-                            {/* Card 1: Billing */}
                             <Card className="border-2 border-primary/50 shadow-lg hover:shadow-xl transition-shadow duration-300 bg-gradient-to-br from-white to-primary/5 dark:from-slate-900 dark:to-primary/10">
                                 <CardHeader className="pb-3">
                                     <div className="flex flex-wrap items-start justify-between gap-4">
@@ -96,8 +88,6 @@ export default function DashboardGCPPage() {
                                     </div>
                                 </CardContent>
                             </Card>
-
-                            {/* Card 2: Advisor / Recommender */}
                             <Card className="border-2 border-primary/50 shadow-lg hover:shadow-xl transition-shadow duration-300 bg-gradient-to-br from-white to-primary/5 dark:from-slate-900 dark:to-primary/10">
                                 <CardHeader className="pb-3">
                                     <div className="flex flex-wrap items-start justify-between gap-4">
@@ -135,8 +125,6 @@ export default function DashboardGCPPage() {
                                     </div>
                                 </CardContent>
                             </Card>
-
-                            {/* Card 3: Savings / CUDs */}
                             <Card className="lg:col-span-2 border-2 border-primary/50 shadow-lg hover:shadow-xl transition-shadow duration-300 bg-gradient-to-br from-white to-primary/5 dark:from-slate-900 dark:to-primary/10">
                                 <CardHeader className="pb-3">
                                     <div className="flex flex-wrap items-start justify-between gap-4">
@@ -186,8 +174,6 @@ export default function DashboardGCPPage() {
                                     </div>
                                 </CardContent>
                             </Card>
-
-                            {/* Card 4: Storage */}
                             <Card className="lg:col-span-2 border-2 border-primary/50 shadow-lg hover:shadow-xl transition-shadow duration-300 bg-gradient-to-br from-white to-primary/5 dark:from-slate-900 dark:to-primary/10">
                                 <CardHeader className="pb-3">
                                     <div className="flex flex-wrap items-start justify-between gap-4">
