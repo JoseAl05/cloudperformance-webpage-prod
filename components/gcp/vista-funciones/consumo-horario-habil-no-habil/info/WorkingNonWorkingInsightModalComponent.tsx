@@ -135,7 +135,7 @@ export const WorkingNonWorkingAnalysisView = ({ data }: { data: WorkingNonWorkin
         const isZombie = cpuW < 5 && cpuNW < 5;
         const isSaverCandidate = cpuW > 10 && cpuNW < 2;
 
-        if (isZombie) return { title: "Posible Zombie", desc: "Recurso sin uso significativo.", icon: AlertTriangle, color: "text-red-600 bg-red-50 border-red-200" };
+        if (isZombie) return { title: "Posible Infrautilizado", desc: "Recurso sin uso significativo.", icon: AlertTriangle, color: "text-red-600 bg-red-50 border-red-200" };
         if (isSaverCandidate) return { title: "Candidato Ahorro", desc: "Inactivo fuera de horario.", icon: DollarSign, color: "text-green-600 bg-green-50 border-green-200" };
 
         return { title: "Estándar", desc: "Comportamiento normal.", icon: CheckCircle2, color: "text-slate-600 bg-slate-50 border-slate-200" };

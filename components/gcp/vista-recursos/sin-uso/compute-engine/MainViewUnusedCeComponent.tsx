@@ -30,6 +30,9 @@ export const MainViewUnusedCeComponent = () => {
                     resourceFilter
                     isResourceMultiSelect
                     resourceService='unused-instances'
+                    tagCollection='gcp_compute_instances'
+                    tagColumn='labels'
+                    tagsFilter
                 />
             </div>
         </div>

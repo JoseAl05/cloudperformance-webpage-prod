@@ -22,13 +22,13 @@ const StatCard = ({
   icon: Icon,
   description,
   colorClass = 'blue'
-}: any) => {
+}: unknown) => {
 
   const colorStyles = {
-    blue:   { border: "border-l-blue-500",   bgIcon: "bg-blue-100 text-blue-600" },
-    green:  { border: "border-l-green-500",  bgIcon: "bg-green-100 text-green-600" },
+    blue: { border: "border-l-blue-500", bgIcon: "bg-blue-100 text-blue-600" },
+    green: { border: "border-l-green-500", bgIcon: "bg-green-100 text-green-600" },
     purple: { border: "border-l-purple-500", bgIcon: "bg-purple-100 text-purple-600" },
-    amber:  { border: "border-l-amber-500",  bgIcon: "bg-amber-100 text-amber-600" },
+    amber: { border: "border-l-amber-500", bgIcon: "bg-amber-100 text-amber-600" },
   }
 
   const style = colorStyles[colorClass as keyof typeof colorStyles] || colorStyles.blue
@@ -58,7 +58,7 @@ export const UsageCostLocationSummaryCards = ({ resumen, isLoading }: Props) => 
   if (isLoading) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 animate-pulse">
-        {[1,2,3,4].map(i => (
+        {[1, 2, 3, 4].map(i => (
           <div key={i} className="h-40 bg-slate-100 dark:bg-slate-800 rounded-lg border-l-4 border-slate-200" />
         ))}
       </div>

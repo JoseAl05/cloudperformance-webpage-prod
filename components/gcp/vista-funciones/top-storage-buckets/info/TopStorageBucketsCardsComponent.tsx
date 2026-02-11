@@ -15,24 +15,24 @@ interface StorageResumen {
 
 interface TopStorageBucketsCardsProps {
     summary?: StorageResumen;
-    buckets?: any[];
+    buckets?: unknown[];
     isLoading: boolean;
 }
 
-const StatCard = ({ 
-    title, 
-    value, 
-    unit, 
-    icon: Icon, 
-    description, 
+const StatCard = ({
+    title,
+    value,
+    unit,
+    icon: Icon,
+    description,
     colorClass = "blue"
-}: any) => {
-    
+}: unknown) => {
+
     const colorStyles = {
-        blue:   { border: "border-l-blue-500",   bgIcon: "bg-blue-100 text-blue-600" },
-        green:  { border: "border-l-green-500",  bgIcon: "bg-green-100 text-green-600" },
+        blue: { border: "border-l-blue-500", bgIcon: "bg-blue-100 text-blue-600" },
+        green: { border: "border-l-green-500", bgIcon: "bg-green-100 text-green-600" },
         purple: { border: "border-l-purple-500", bgIcon: "bg-purple-100 text-purple-600" },
-        amber:  { border: "border-l-amber-500",  bgIcon: "bg-amber-100 text-amber-600" },
+        amber: { border: "border-l-amber-500", bgIcon: "bg-amber-100 text-amber-600" },
     };
 
     const style = colorStyles[colorClass as keyof typeof colorStyles] || colorStyles.blue;
@@ -57,10 +57,10 @@ const StatCard = ({
     )
 }
 
-export const TopStorageBucketsCardsComponent = ({ 
-    summary, 
-    buckets = [], 
-    isLoading 
+export const TopStorageBucketsCardsComponent = ({
+    summary,
+    buckets = [],
+    isLoading
 }: TopStorageBucketsCardsProps) => {
 
     if (isLoading) {
@@ -90,7 +90,7 @@ export const TopStorageBucketsCardsComponent = ({
             {/* 2. TOTAL BUCKETS - Quitamos cualquier espacio extra */}
             <StatCard
                 title="Total Buckets"
-                value={Number(summary.total_buckets)} 
+                value={Number(summary.total_buckets)}
                 unit="" // Forzamos unit vacío para evitar el "22"
                 description="Buckets únicos monitoreados."
                 icon={Database}

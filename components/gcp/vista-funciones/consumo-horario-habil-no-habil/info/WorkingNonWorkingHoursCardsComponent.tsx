@@ -63,6 +63,7 @@ const getMetricConfig = (metricName: string) => {
     if (lowerName.includes('gb')) return { icon: HardDrive, unit: 'GB' };
 
     if (lowerName.includes('memory') || lowerName.includes('ram')) return { icon: Server, unit: '%' };
+    if (lowerName.includes('transactions')) return { icon: Activity, unit: 'Transacciones' };
 
     return { icon: Activity, unit: '' };
 };

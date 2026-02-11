@@ -31,6 +31,9 @@ export const MainViewGkeComponent = () => {
                     resourceFilter
                     isResourceMultiSelect={false}
                     resourceService='clusters-gke'
+                    tagCollection='gcp_container_clusters'
+                    tagColumn='resourceLabels'
+                    tagsFilter
                 />
             </div>
         </div>

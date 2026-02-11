@@ -12,7 +12,6 @@ interface WorkingNonWorkingHoursChartComponentProps {
     data: WorkingNonWorkingHoursUsage[];
 }
 
-
 const SingleMetricChart = ({ metricName, data }: { metricName: string, data: WorkingNonWorkingHoursUsage[] }) => {
     const { theme, resolvedTheme } = useTheme();
     const currentTheme = resolvedTheme || theme;
@@ -20,150 +19,189 @@ const SingleMetricChart = ({ metricName, data }: { metricName: string, data: Wor
     const chartRef = useRef<HTMLDivElement>(null);
 
     const seriesData = useMemo(() => {
-        const businessData: [string, number][] = [];
-        const nonBusinessData: [string, number][] = [];
-
+        // 1. Ordenar por fecha estricta
         const sortedData = [...data].sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
 
+        const businessDataPoints: [string, number | null][] = [];
+        const nonBusinessDataPoints: [string, number | null][] = [];
+        
+        const businessValues: number[] = [];
+        const nonBusinessValues: number[] = [];
+
+        // 2. Mapeo "Espejo"
+        // En lugar de inventar fechas, iteramos la data real.
+        // Para cada punto, asignamos valor a su serie correspondiente y NULL a la contraria.
+        // Esto garantiza que los puntos del mismo tipo se unan, pero se corten al cambiar de tipo.
         sortedData.forEach(item => {
             const isNonWorking = item.schedule_type.toLowerCase().includes('non') || item.schedule_type.toLowerCase().includes('no');
-            const point: [string, number] = [item.timestamp, item.metric_value];
-
+            
             if (isNonWorking) {
-                nonBusinessData.push(point);
+                // Es No Hábil: Dato al rojo, Null al azul
+                nonBusinessDataPoints.push([item.timestamp, item.metric_value]);
+                businessDataPoints.push([item.timestamp, null]);
+                nonBusinessValues.push(item.metric_value);
             } else {
-                businessData.push(point);
+                // Es Hábil: Dato al azul, Null al rojo
+                businessDataPoints.push([item.timestamp, item.metric_value]);
+                nonBusinessDataPoints.push([item.timestamp, null]);
+                businessValues.push(item.metric_value);
             }
         });
 
-        return [
-            {
-                name: 'Horario Hábil',
-                type: 'line',
-                smooth: true,
-                showSymbol: false,
-                lineStyle: {
-                    width: 3,
-                    color: '#3b82f6'
+        // 3. Cálculos estadísticos (solo con valores reales)
+        const businessAvg = businessValues.length > 0 
+            ? businessValues.reduce((sum, val) => sum + val, 0) / businessValues.length 
+            : 0;
+        const nonBusinessAvg = nonBusinessValues.length > 0 
+            ? nonBusinessValues.reduce((sum, val) => sum + val, 0) / nonBusinessValues.length 
+            : 0;
+
+        const businessMax = businessValues.length > 0 ? Math.max(...businessValues) : 0;
+        const nonBusinessMax = nonBusinessValues.length > 0 ? Math.max(...nonBusinessValues) : 0;
+
+        return {
+            series: [
+                {
+                    name: 'Horario Hábil',
+                    type: 'line',
+                    smooth: false, 
+                    showSymbol: true,
+                    symbol: 'circle',
+                    symbolSize: 6,
+                    // connectNulls: false es vital para dejar el espacio en blanco en el cambio de turno
+                    connectNulls: false, 
+                    lineStyle: { width: 2.5, color: '#2563eb' },
+                    itemStyle: { color: '#2563eb', borderColor: '#fff', borderWidth: 1 },
+                    areaStyle: {
+                        opacity: 0.15,
+                        color: {
+                            type: 'linear',
+                            x: 0, y: 0, x2: 0, y2: 1,
+                            colorStops: [
+                                { offset: 0, color: 'rgba(37, 99, 235, 0.3)' },
+                                { offset: 1, color: 'rgba(37, 99, 235, 0.05)' }
+                            ]
+                        }
+                    },
+                    data: businessDataPoints,
                 },
-                itemStyle: {
-                    color: '#3b82f6'
-                },
-                areaStyle: {
-                    opacity: 0.3,
-                    color: {
-                        type: 'linear',
-                        x: 0, y: 0, x2: 0, y2: 1,
-                        colorStops: [
-                            { offset: 0, color: 'rgba(59, 130, 246, 0.6)' },
-                            { offset: 1, color: 'rgba(59, 130, 246, 0.05)' }
-                        ]
-                    }
-                },
-                emphasis: {
-                    focus: 'series'
-                },
-                data: businessData,
-            },
-            {
-                name: 'Horario No Hábil',
-                type: 'line',
-                smooth: true,
-                showSymbol: false,
-                lineStyle: {
-                    width: 2,
-                    type: 'dashed',
-                    color: '#f59e0b'
-                },
-                itemStyle: {
-                    color: '#f59e0b'
-                },
-                areaStyle: {
-                    opacity: 0.2,
-                    color: {
-                        type: 'linear',
-                        x: 0, y: 0, x2: 0, y2: 1,
-                        colorStops: [
-                            { offset: 0, color: 'rgba(245, 158, 11, 0.5)' },
-                            { offset: 1, color: 'rgba(245, 158, 11, 0.05)' }
-                        ]
-                    }
-                },
-                emphasis: {
-                    focus: 'series'
-                },
-                data: nonBusinessData,
+                {
+                    name: 'Horario No Hábil',
+                    type: 'line',
+                    smooth: false,
+                    showSymbol: true,
+                    symbol: 'diamond',
+                    symbolSize: 7,
+                    connectNulls: false,
+                    lineStyle: { width: 2.5, color: '#dc2626' },
+                    itemStyle: { color: '#dc2626', borderColor: '#fff', borderWidth: 1 },
+                    areaStyle: {
+                        opacity: 0.12,
+                        color: {
+                            type: 'linear',
+                            x: 0, y: 0, x2: 0, y2: 1,
+                            colorStops: [
+                                { offset: 0, color: 'rgba(220, 38, 38, 0.25)' },
+                                { offset: 1, color: 'rgba(220, 38, 38, 0.05)' }
+                            ]
+                        }
+                    },
+                    data: nonBusinessDataPoints,
+                }
+            ],
+            stats: {
+                businessAvg, nonBusinessAvg, businessMax, nonBusinessMax
             }
-        ];
+        };
     }, [data]);
 
     const option = useMemo(() => {
-        const base = makeBaseOptions({
-            legend: ['Horario Hábil', 'Horario No Hábil'],
-            useUTC: true,
-            showToolbox: true,
-            metricType: 'default',
-        });
-
+        // Configuramos formato de ejes y tooltip
         let yAxisName = metricName;
         let axisLabelFormatter = formatGeneric;
-        let tooltipFormatter = (v: number | null) => v != null ? formatGeneric(Number(v)) : '-';
-
-        const lowerName = metricName.toLowerCase();
-
-        if (lowerName.includes('cpu') || lowerName.includes('percent') || lowerName.includes('utilization')) {
-            yAxisName = `${metricName} (%)`;
-            axisLabelFormatter = (value: number) => `${value.toFixed(1)}%`;
-            tooltipFormatter = (v: number | null) => v != null ? `${Number(v).toFixed(2)}%` : '-';
-        }
-        else if (lowerName.includes('throughput')) {
-            yAxisName = `${metricName}`;
-            axisLabelFormatter = formatBytes;
-            tooltipFormatter = (v: number | null) => v != null ? formatBytes(Number(v)) : '-';
-        }
-        else if (lowerName.includes('iops')) {
-            yAxisName = `${metricName} (IOPS)`;
-            axisLabelFormatter = (value: number) => `${formatGeneric(value)} IOPS`;
-            tooltipFormatter = (v: number | null) => v != null ? `${Number(v).toFixed(2)} IOPS` : '-';
-        }
-        else if (lowerName.includes('pps')) {
-            yAxisName = `${metricName} (PPS)`;
-            axisLabelFormatter = (value: number) => `${formatGeneric(value)} PPS`;
-            tooltipFormatter = (v: number | null) => v != null ? `${Number(v).toFixed(2)} PPS` : '-';
-        }
-
-        const chartOptions = createChartOption({
-            kind: 'line',
-            xAxisType: 'time',
-            legend: true,
-            tooltip: true,
-            series: [],
-            extraOption: {
-                grid: { left: 50, right: 30, top: 50, bottom: 60, containLabel: true },
-                legend: { top: 0 }
-            },
-        });
-
-        const specificOptions = {
-            tooltip: {
-                trigger: 'axis',
-                valueFormatter: tooltipFormatter,
-            },
-            yAxis: {
-                name: yAxisName,
-                nameTextStyle: { align: 'left', padding: [0, 0, 0, 0] },
-                axisLabel: { formatter: axisLabelFormatter },
-                splitArea: { show: false }
-            },
-            series: seriesData
+        
+        // Formatter para el tooltip: Solo muestra el valor si existe (ignora los nulls)
+        const tooltipValueFormatter = (value: number | string) => {
+             // Si viene null o undefined, retornamos string vacío para que ECharts lo oculte o maneje
+            if (value === null || value === undefined) return '';
+            const num = Number(value);
+            if (metricName.toLowerCase().includes('throughput')) return formatBytes(num);
+            if (metricName.toLowerCase().includes('cpu') || metricName.toLowerCase().includes('percent')) return `${num.toFixed(2)}%`;
+            return formatGeneric(num);
         };
 
-        return deepMerge(base, deepMerge(chartOptions, specificOptions));
+        const lowerName = metricName.toLowerCase();
+        if (lowerName.includes('cpu') || lowerName.includes('percent')) {
+            yAxisName = `${metricName} (%)`;
+            axisLabelFormatter = (val) => `${val.toFixed(1)}%`;
+        } else if (lowerName.includes('throughput')) {
+            yAxisName = metricName;
+            axisLabelFormatter = formatBytes;
+        }
+
+        const baseOption = {
+            grid: { left: 50, right: 30, top: 60, bottom: 60, containLabel: true },
+            legend: { show: true, top: 0 },
+            tooltip: {
+                trigger: 'axis',
+                // Custom tooltip formatter para limpiar los repetidos o nulos
+                formatter: function (params: unknown) {
+                    let result = `<div class="text-xs font-semibold mb-1 text-slate-700 dark:text-slate-200">${params[0].axisValueLabel}</div>`;
+                    let hasValues = false;
+                    
+                    params.forEach((item: unknown) => {
+                        // Solo agregamos la línea al tooltip si el valor NO es null
+                        if (item.value[1] !== null && item.value[1] !== undefined) {
+                            hasValues = true;
+                            const formattedVal = tooltipValueFormatter(item.value[1]);
+                            result += `
+                                <div class="flex items-center gap-2 text-xs">
+                                    <span style="display:inline-block;margin-right:4px;border-radius:10px;width:10px;height:10px;background-color:${item.color};"></span>
+                                    <span class="text-slate-500 dark:text-slate-400">${item.seriesName}:</span>
+                                    <span class="font-medium text-slate-900 dark:text-slate-100">${formattedVal}</span>
+                                </div>
+                            `;
+                        }
+                    });
+                    return hasValues ? result : '';
+                }
+            },
+            xAxis: {
+                type: 'time',
+                boundaryGap: false,
+                // Quitamos el min/max hardcodeado para que se ajuste a la data existente y evite espacios blancos
+                axisLabel: {
+                    formatter: '{dd}-{MM} {HH}:{mm}',
+                    hideOverlap: true
+                }
+            },
+            yAxis: {
+                type: 'value',
+                name: yAxisName,
+                axisLabel: { formatter: axisLabelFormatter },
+                splitLine: { show: true, lineStyle: { type: 'dashed', opacity: 0.5 } }
+            },
+            dataZoom: [
+                {
+                    type: 'inside',
+                    start: 0,
+                    end: 100
+                },
+                {
+                    type: 'slider',
+                    bottom: 0,
+                    height: 20
+                }
+            ],
+            series: seriesData.series
+        };
+
+        return baseOption;
     }, [isDark, seriesData, metricName]);
 
     useECharts(chartRef, option, [option], isDark ? 'cp-dark' : 'cp-light');
 
-    const isEmpty = seriesData.every(s => s.data.length === 0);
+    const hasData = data && data.length > 0;
 
     return (
         <Card className="w-full h-full shadow-sm">
@@ -173,13 +211,41 @@ const SingleMetricChart = ({ metricName, data }: { metricName: string, data: Wor
                 </CardTitle>
             </CardHeader>
             <CardContent>
-                <div className="flex items-center justify-start gap-2 mb-4">
-                    <Info className="w-4 h-4 text-blue-500 flex-shrink-0" />
-                    <p className="text-[10px] text-muted-foreground">
-                        Comparativa temporal entre horario hábil y no hábil para <strong>{metricName}</strong>.
-                    </p>
-                </div>
-                {isEmpty ? (
+                {/* Resumen Estadístico (Se mantiene igual, solo lógica visual) */}
+                {hasData && (
+                    <div className="mb-4 p-3 bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 rounded-lg border border-slate-200 dark:border-slate-700">
+                        <div className="grid grid-cols-2 gap-4 mb-3">
+                            {/* Bloque Hábil */}
+                            <div className="flex flex-col">
+                                <div className="flex items-center gap-2 mb-1">
+                                    <div className="w-3 h-3 rounded-full bg-blue-600"></div>
+                                    <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">Horario Hábil</span>
+                                </div>
+                                <div className="text-sm font-bold text-blue-600 dark:text-blue-400">
+                                    {metricName.toLowerCase().includes('percent') || metricName.toLowerCase().includes('cpu') 
+                                        ? `${seriesData.stats.businessAvg.toFixed(2)}%`
+                                        : formatGeneric(seriesData.stats.businessAvg)}
+                                </div>
+                                <span className="text-[10px] text-muted-foreground">Promedio</span>
+                            </div>
+                            {/* Bloque No Hábil */}
+                            <div className="flex flex-col">
+                                <div className="flex items-center gap-2 mb-1">
+                                    <div className="w-3 h-3 rotate-45 bg-red-600"></div>
+                                    <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">Horario No Hábil</span>
+                                </div>
+                                <div className="text-sm font-bold text-red-600 dark:text-red-400">
+                                    {metricName.toLowerCase().includes('percent') || metricName.toLowerCase().includes('cpu') 
+                                        ? `${seriesData.stats.nonBusinessAvg.toFixed(2)}%`
+                                        : formatGeneric(seriesData.stats.nonBusinessAvg)}
+                                </div>
+                                <span className="text-[10px] text-muted-foreground">Promedio</span>
+                            </div>
+                        </div>
+                    </div>
+                )}
+                
+                {!hasData ? (
                     <div className="w-full h-[300px] flex items-center justify-center bg-slate-50 rounded-lg border border-dashed">
                         <span className="text-muted-foreground text-sm">No hay datos disponibles</span>
                     </div>
@@ -192,25 +258,19 @@ const SingleMetricChart = ({ metricName, data }: { metricName: string, data: Wor
 };
 
 export const WorkingNonWorkingHoursChartComponent = ({ data }: WorkingNonWorkingHoursChartComponentProps) => {
-
+    // Agrupación de métricas
     const groupedMetrics = useMemo(() => {
         if (!data || data.length === 0) return [];
-
         const groups: Record<string, WorkingNonWorkingHoursUsage[]> = {};
-
         data.forEach(item => {
-            if (!groups[item.metric]) {
-                groups[item.metric] = [];
-            }
+            if (!groups[item.metric]) groups[item.metric] = [];
             groups[item.metric].push(item);
         });
-
+        
+        // Ordenar: CPU primero
         return Object.entries(groups).sort(([nameA], [nameB]) => {
-            const lowerA = nameA.toLowerCase();
-            const lowerB = nameB.toLowerCase();
-            const isCpuA = lowerA.includes('cpu');
-            const isCpuB = lowerB.includes('cpu');
-
+            const isCpuA = nameA.toLowerCase().includes('cpu');
+            const isCpuB = nameB.toLowerCase().includes('cpu');
             if (isCpuA && !isCpuB) return -1;
             if (!isCpuA && isCpuB) return 1;
             return nameA.localeCompare(nameB);
@@ -228,11 +288,7 @@ export const WorkingNonWorkingHoursChartComponent = ({ data }: WorkingNonWorking
     return (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 w-full">
             {groupedMetrics.map(([metricName, metricData]) => (
-                <SingleMetricChart
-                    key={metricName}
-                    metricName={metricName}
-                    data={metricData}
-                />
+                <SingleMetricChart key={metricName} metricName={metricName} data={metricData} />
             ))}
         </div>
     );

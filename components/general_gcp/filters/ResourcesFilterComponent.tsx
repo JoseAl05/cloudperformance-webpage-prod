@@ -271,14 +271,16 @@ import { LoaderComponent } from '@/components/general_aws/LoaderComponent'
 
 // --- Tipos ---
 interface ResourcesFilterComponentProps {
-    service: string,
-    resourceId: string,
-    setResourceId: Dispatch<SetStateAction<string>>,
-    startDate: Date,
-    endDate: Date,
-    projects: string,
+    service: string;
+    resourceId: string;
+    setResourceId: Dispatch<SetStateAction<string>>;
+    startDate: Date;
+    endDate: Date;
+    projects: string;
     regions: string;
-    isResourceMultiSelect: boolean
+    tagKey: string;
+    tagValue: string;
+    isResourceMultiSelect: boolean;
 }
 
 interface ResourceItem {
@@ -292,7 +294,7 @@ const fetcherGet = (url: string) =>
         .then(r => r.json());
 
 // Función auxiliar para limpiar el switch gigante del componente principal
-const getUrlForService = (service: string, params: { startDate: string, endDate: string, projects: string, regions: string }) => {
+const getUrlForService = (service: string, params: { startDate: string, endDate: string, projects: string, regions: string, tagKey: string, tagValue: string }) => {
     const { startDate, endDate, projects, regions } = params;
     if (!regions) return null; // Si no hay región, no hacemos fetch (comportamiento original)
 
@@ -301,19 +303,19 @@ const getUrlForService = (service: string, params: { startDate: string, endDate:
 
     switch (service) {
         case 'disks': return `${baseUrl}/recursos_sin_uso/all_persistent_disks?${baseParams}`;
-        case 'instances': return `${baseUrl}/instancias_compute_engine/all_compute_engine_instances?${baseParams}`;
-        case 'unused-instances': return `${baseUrl}/recursos_sin_uso/all_unused_compute_engines?${baseParams}`;
+        case 'instances': return `${baseUrl}/instancias_compute_engine/all_compute_engine_instances?${baseParams}&tagKey=${params.tagKey}&tagValue=${params.tagValue}`;
+        case 'unused-instances': return `${baseUrl}/recursos_sin_uso/all_unused_compute_engines?${baseParams}&tagKey=${params.tagKey}&tagValue=${params.tagValue}`;
         case 'instance_groups': return `${baseUrl}/instance_groups/all_instance_groups?${baseParams}`;
-        case 'clusters-gke': return `${baseUrl}/gke_clusters/all_gke_clusters?${baseParams}`;
-        case 'postgres': return `${baseUrl}/instancias_cloud_sql/all_cloudsql_instances?${baseParams}&db_engine=postgres`;
-        case 'mysql': return `${baseUrl}/instancias_cloud_sql/all_cloudsql_instances?${baseParams}&db_engine=mysql`;
-        case 'sqlserver': return `${baseUrl}/instancias_cloud_sql/all_cloudsql_instances?${baseParams}&db_engine=sqlserver`;
+        case 'clusters-gke': return `${baseUrl}/gke_clusters/all_gke_clusters?${baseParams}&tagKey=${params.tagKey}&tagValue=${params.tagValue}`;
+        case 'postgres': return `${baseUrl}/instancias_cloud_sql/all_cloudsql_instances?${baseParams}&tagKey=${params.tagKey}&tagValue=${params.tagValue}&db_engine=postgres`;
+        case 'mysql': return `${baseUrl}/instancias_cloud_sql/all_cloudsql_instances?${baseParams}&tagKey=${params.tagKey}&tagValue=${params.tagValue}&db_engine=mysql`;
+        case 'sqlserver': return `${baseUrl}/instancias_cloud_sql/all_cloudsql_instances?${baseParams}&tagKey=${params.tagKey}&tagValue=${params.tagValue}&db_engine=sqlserver`;
         default: return null;
     }
 }
 
 export const ResourcesFilterComponent = ({
-    service, resourceId, setResourceId, startDate, endDate, projects, regions, isResourceMultiSelect
+    service, resourceId, setResourceId, startDate, endDate, projects, regions,tagKey, tagValue, isResourceMultiSelect
 }: ResourcesFilterComponentProps) => {
     const [open, setOpen] = useState(false);
 
@@ -322,8 +324,10 @@ export const ResourcesFilterComponent = ({
         startDate: startDate ? startDate.toISOString().replace('Z', '').slice(0, -4) : '',
         endDate: endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : '',
         projects,
-        regions
-    }), [startDate, endDate, projects, regions]);
+        regions,
+        tagKey,
+        tagValue
+    }), [startDate, endDate, projects, regions, tagKey, tagValue]);
 
     const url = useMemo(() => getUrlForService(service, dateParams), [service, dateParams]);
 

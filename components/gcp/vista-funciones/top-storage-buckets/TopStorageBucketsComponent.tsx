@@ -19,14 +19,14 @@ interface TopStorageBucketsComponentProps {
 
 const fetcher = (url: string) => fetch(url).then(res => res.json());
 
-export const TopStorageBucketsComponent = ({ 
-    startDate, 
-    endDate, 
-    projects, 
+export const TopStorageBucketsComponent = ({
+    startDate,
+    endDate,
+    projects,
     regions,
     storageClass,
     tagKey,
-    tagValue 
+    tagValue
 }: TopStorageBucketsComponentProps) => {
 
     // Construcción de URL
@@ -56,7 +56,7 @@ export const TopStorageBucketsComponent = ({
 
         const grouped: Record<string, { date: string; object_count: number; total_size_gb: number }> = {};
 
-        data.buckets.forEach((bucket: any) => {
+        data.buckets.forEach((bucket: unknown) => {
             const date = bucket.sync_time?.$date || bucket.sync_time;
             if (!date) return;
 
@@ -76,7 +76,7 @@ export const TopStorageBucketsComponent = ({
             (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
         );
     }, [data]);
-    
+
     //DATOS PARA LOS TOP
     const bucketsForTop = useMemo(() => {
         if (!data?.buckets || data.buckets.length === 0) return [];
@@ -84,14 +84,14 @@ export const TopStorageBucketsComponent = ({
         // Obtener timestamp más reciente real
         const latestTimestamp = Math.max(
             ...data.buckets
-                .map((b: any) => new Date(b.sync_time?.$date || b.sync_time).getTime())
+                .map((b: unknown) => new Date(b.sync_time?.$date || b.sync_time).getTime())
                 .filter((t: number) => !isNaN(t))
         );
 
         if (!latestTimestamp) return [];
 
         // Nos quedamos SOLO con buckets de ese último snapshot exacto
-        return data.buckets.filter((b: any) => {
+        return data.buckets.filter((b: unknown) => {
             const t = new Date(b.sync_time?.$date || b.sync_time).getTime();
             return t === latestTimestamp;
         });
@@ -140,7 +140,7 @@ export const TopStorageBucketsComponent = ({
     return (
         <div className="space-y-6 mt-6 px-4">
             {/* Cards */}
-            <TopStorageBucketsCardsComponent 
+            <TopStorageBucketsCardsComponent
                 summary={data?.resumen}
                 buckets={data?.buckets || []}
                 isLoading={isLoading}
@@ -148,13 +148,13 @@ export const TopStorageBucketsComponent = ({
 
             {/* 2 Gráficos TOP */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <TopStorageBucketsChart 
-                    data={bucketsForTop} 
-                    type="objects" 
+                <TopStorageBucketsChart
+                    data={bucketsForTop}
+                    type="objects"
                 />
-                <TopStorageBucketsChart 
-                    data={bucketsForTop} 
-                    type="size" 
+                <TopStorageBucketsChart
+                    data={bucketsForTop}
+                    type="size"
                 />
             </div>
 
@@ -176,11 +176,11 @@ export const TopStorageBucketsComponent = ({
             </div>
 
             {/* TODO: Tabla */}
-                <BucketsHistoricalTable
-                    data={data.buckets}
-                    startDate={startDate.toISOString().split('T')[0]}
-                    endDate={endDate.toISOString().split('T')[0]}
-                />
+            <BucketsHistoricalTable
+                data={data.buckets}
+                startDate={startDate.toISOString().split('T')[0]}
+                endDate={endDate.toISOString().split('T')[0]}
+            />
         </div>
     );
 };
