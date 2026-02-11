@@ -49,7 +49,8 @@ import {
     Scale,
     Workflow,
     CircleDollarSign,
-    ShipWheel
+    ShipWheel,
+    DollarSign
 } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { usePathname } from 'next/navigation'
@@ -256,7 +257,7 @@ export const SidebarComponent = ({
             //{ label: 'Deployments', icon: Zap, href: '/gcp/deployments' },
             //{ label: 'Items GCP', icon: Table, href: '/gcp/tables-gcp/tablas-item-gcp' },
             { label: 'Recommender', icon: Pyramid, href: '/gcp/recommender' },
-            // { label: 'Vista Saving Plans', icon: HandCoins, href: '/gcp/saving-plan' },
+            { label: 'Vista Saving Plans', icon: HandCoins, href: '/gcp/saving-plan' },
             // { label: 'Presupuestos', icon: CircleDollarSign, href: '/gcp/presupuesto' },
         ],
         recursos: [
@@ -276,6 +277,7 @@ export const SidebarComponent = ({
             // { label: 'Incremento Uso de Recursos', icon: LineChart, href: '/gcp/funciones/incremento-top-recursos-uso' },
             { label: 'Spot vs Standard VMs', icon: Computer, href: '/gcp/funciones/spot-vs-standard-vm' },
             { label: 'Promedio de uso por región', icon: MapPin, href: '/gcp/funciones/uso-costo-por-localizacion' },
+            { label: 'Top Facturación por Región', icon: DollarSign, href: '/gcp/funciones/top-facturacion-region' },
             { label: 'Consumo horario hábil vs no hábil', icon: Clock, href: '/gcp/funciones/analisis-vms-horario' },
             // { label: 'Promedio de uso por región', icon: MapPin, href: '/gcp/funciones/promedio-por-localizacion' },
             // { label: 'Consumo horario hábil vs no hábil', icon: Clock, href: '/gcp/funciones/analisis-vms-horario' },
