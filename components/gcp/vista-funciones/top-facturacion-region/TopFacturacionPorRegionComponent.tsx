@@ -30,6 +30,10 @@ export const TopFacturacionPorRegionComponent = () => {
       <FiltersComponent
         Component={MainViewTopFacturacionPorLocalizacionGCP} 
         dateFilter
+        projectsFilter
+        tagsFilter
+        tagCollection='gcp_billing_export_detailed'
+        tagColumn='labels'
       />
     </div>
   )
