@@ -15,7 +15,7 @@ import {
 } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { ArrowUpRight, ArrowDownRight, Minus } from 'lucide-react'
-import { bytesToGB } from '@/lib/bytesToMbs'
+import { bytesToGB, formatBytes } from '@/lib/bytesToMbs'
 
 interface StorageVariationCardsComponentProps {
     strgVariationData: StorageVariation[]
@@ -102,7 +102,7 @@ const RangeExtras = ({ label, range }: { label: string; range?: StorageVariation
                 {typeof average === "number" && (
                     <div className="flex items-center justify-between gap-4 rounded-lg border border-blue-200 bg-blue-50/80 px-4 py-2.5 dark:border-blue-900 dark:bg-blue-950/40">
                         <span className="text-sm font-medium text-blue-900 dark:text-blue-200">Promedio</span>
-                        <span className="text-sm font-bold tabular-nums text-blue-700 dark:text-blue-300">{fmtGB(average)}</span>
+                        <span className="text-sm font-bold tabular-nums text-blue-700 dark:text-blue-300">{formatBytes(average)}</span>
                     </div>
                 )}
                 {entries.map(([k, v]) => (
@@ -133,6 +133,7 @@ const accentByService: Record<string, string> = {
 export const StorageVariationCardsComponent = ({
     strgVariationData,
 }: StorageVariationCardsComponentProps) => {
+    console.log(strgVariationData);
     const item = React.useMemo(
         () => (strgVariationData?.[0] as unknown as Record<string, unknown>) || undefined,
         [strgVariationData]
@@ -174,6 +175,8 @@ export const StorageVariationCardsComponent = ({
         const actualAvgBytes = sv?.actual_range?.average
         const prevAvgBytes = sv?.prev_range?.average
         const varAbsBytes = sv?.variation
+        console.log(varAbsBytes);
+        console.log(formatBytes(varAbsBytes));
         const varPct = sv?.variation_percent
 
         const monthA = sv?.actual_range?.month;
@@ -211,13 +214,13 @@ export const StorageVariationCardsComponent = ({
                                 <div className="text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">
                                     {monthB ?? 'Periodo previo'}
                                 </div>
-                                <div className="text-3xl font-bold tabular-nums text-slate-900 dark:text-slate-100">{fmtGB(prevAvgBytes ?? null)}</div>
+                                <div className="text-3xl font-bold tabular-nums text-slate-900 dark:text-slate-100">{formatBytes(prevAvgBytes)}</div>
                             </div>
                             <div className="space-y-2 text-right">
                                 <div className="text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">
                                     {monthA ?? 'Periodo actual'}
                                 </div>
-                                <div className="text-3xl font-bold tabular-nums text-slate-900 dark:text-slate-100">{fmtGB(actualAvgBytes ?? null)}</div>
+                                <div className="text-3xl font-bold tabular-nums text-slate-900 dark:text-slate-100">{formatBytes(actualAvgBytes)}</div>
                             </div>
                         </div>
 
@@ -231,7 +234,7 @@ export const StorageVariationCardsComponent = ({
                                 <Trend value={varAbsGB ?? undefined} />
                                 <div className="flex items-baseline gap-2.5">
                                     {/* <span className="text-2xl font-bold tabular-nums text-slate-900 dark:text-slate-100">{fmtGB(varAbsBytes ?? null)}</span> */}
-                                    <span className="text-2xl font-bold tabular-nums text-slate-900 dark:text-slate-100">{fmtGB(varAbsBytes)}</span>
+                                    <span className="text-2xl font-bold tabular-nums text-slate-900 dark:text-slate-100">{formatBytes(varAbsBytes)}</span>
                                     <span className="text-lg font-semibold text-slate-600 dark:text-slate-400">
                                         ({fmtPercent(varPct)})
                                     </span>
