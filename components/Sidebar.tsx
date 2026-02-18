@@ -50,7 +50,12 @@ import {
     Workflow,
     CircleDollarSign,
     ShipWheel,
-    DollarSign
+    DollarSign,
+    Network,
+    ChartNetwork,
+    LucideNetwork,
+    LucideChartNetwork,
+    Split
 } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { usePathname } from 'next/navigation'
@@ -230,6 +235,11 @@ export const SidebarComponent = ({
         ],
     }
 
+        const NetworkingGCP = [
+            { label: 'IPs Externas sin Uso', icon: Globe2, href: '/gcp/funciones/networking/ips-sin-uso' },
+            { label: 'Subnets sin Recursos Asociados', icon: Split, href: '/gcp/funciones/networking/subnets-sin-recursos' },
+        ]
+
     // CORREGIDO: Rutas apuntando a /gcp en lugar de /gpc
     const infrausedGCP = [
         { label: 'Compute Engine', icon: Computer, href: '/gcp/funciones/unused-resources/compute-engine' },
@@ -289,10 +299,11 @@ export const SidebarComponent = ({
             { label: 'Promedio de uso por región', icon: MapPin, href: '/gcp/funciones/uso-costo-por-localizacion' },
             { label: 'Top Facturación por Región', icon: DollarSign, href: '/gcp/funciones/top-facturacion-region' },
             { label: 'Consumo horario hábil vs no hábil', icon: Clock, href: '/gcp/funciones/analisis-vms-horario' },
-            { label: 'Consumo horario hábil vs no hábil', subItems: workingNonWorkingItemsGCP, icon: Clock },
+            { label: 'Consumo horario hábil vs no hábil', subItems: workingNonWorkingItemsGCP, icon: Clock },           
             // { label: 'Promedio de uso por región', icon: MapPin, href: '/gcp/funciones/promedio-por-localizacion' },
-            // { label: 'Consumo horario hábil vs no hábil', icon: Clock, href: '/gcp/funciones/analisis-vms-horario' },
-            { label: 'Recursos no utilizados', subItems: infrausedGCP, icon: TrendingDown }
+            // { label: 'Consumo horario hábil vs no hábil', icon: Clock, href: '/gcp/funciones/analisis-vms-horario' },                       
+            { label: 'Recursos no utilizados', subItems: infrausedGCP, icon: TrendingDown },
+            { label: 'Networking', subItems: NetworkingGCP, icon: Network },
         ],
     }
 
