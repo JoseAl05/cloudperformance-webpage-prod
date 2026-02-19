@@ -37,6 +37,7 @@ import {
     Puzzle,
     MapPin,
     LayoutDashboard,
+    Globe,
     Globe2,
     Monitor,
     ShoppingCart,
@@ -256,7 +257,7 @@ export const SidebarComponent = ({
         { label: 'Instances Group', icon: Boxes, href: '/gcp/consumos/instances-group' },
         { label: 'Clusters GKE', icon: Server, href: '/gcp/consumos/clusters-gke' },
         { label: 'Cloud SQL / Spanner', icon: Database, href: '/gcp/consumos/cloud-sql' },
-        // { label: 'Cloud Load Balancing', icon: Workflow, href: '/gcp/consumo-clb' }
+        { label: 'Zonas DNS: Consumo y Estado', icon: Globe, href: '/gcp/consumos/dns/zonas-consumo-estado' }
     ]
 
     const workingNonWorkingItemsGCP = [

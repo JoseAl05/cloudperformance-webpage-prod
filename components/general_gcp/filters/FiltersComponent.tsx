@@ -5,7 +5,7 @@ import { DatePicker } from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 
 import { Card, CardContent } from '@/components/ui/card';
-import { Calendar, Filter, XCircle, LayoutGrid, Globe, HardDrive, Tag, Database, Grid, ArrowUpDown } from 'lucide-react'; // Agregamos Tag icon
+import { Calendar, Filter, XCircle, LayoutGrid, Globe, HardDrive, Tag, Database, Grid, ArrowUpDown, Activity } from 'lucide-react'; // Agregamos Tag icon
 import { Button } from '@/components/ui/button';
 import { useRouter, useSearchParams } from 'next/navigation';
 
@@ -14,6 +14,7 @@ import { RegionsFilterComponent } from './RegionsFilterComponent';
 import { ResourcesFilterComponent } from './ResourcesFilterComponent';
 import { TagsFilterComponent } from './TagsFilterComponent';
 import { DatabaseTypeFilterComponent } from './DatabaseTypeFilterComponent';
+import { EstadoUsoFilterComponent } from './EstadoUsoFilterComponent';
 import { StorageClassFilterComponent } from './StorageClassFilterComponent';
 import { ServiceFilterComponent } from './ServiceFilterComponent';
 import { RecommenderCategoriesFilterComponent } from '@/components/general_gcp/filters/RecommenderCategoriesFilterComponent';
@@ -32,6 +33,7 @@ interface FiltersComponentProps {
         tagValue?: string | null;
         databaseType?: string;
         service?: string;
+        estadoUso?: string;
     }) => React.JSX.Element;
 
     // Flags de activación
@@ -42,6 +44,7 @@ interface FiltersComponentProps {
     isResourceMultiSelect?: boolean;
     tagsFilter?: boolean;
     databaseTypeFilter?: boolean;
+    estadoUsoFilter?: boolean;
     serviceFilter?: boolean;
     isServiceMultiSelect?: boolean;
 
@@ -71,6 +74,7 @@ export const FiltersComponent = ({
     tagCollection = '',  // Obligatorio si tagsFilter es true
     tagColumn = 'labels',
     databaseTypeFilter = false,
+    estadoUsoFilter = false,
     dbEngine = '',
     storageClassFilter = false,
     serviceFilter = false,
@@ -100,6 +104,7 @@ export const FiltersComponent = ({
         const tagKeyParam = searchParams.get('tagKey');
         const tagValueParam = searchParams.get('tagValue');
         const dbTypeParam = searchParams.get('databaseType');
+        const estadoUsoParam = searchParams.get('estado_uso');
         const storageClassParam = searchParams.get('storageClass');
         const categoryParam = searchParams.get('category');
         const priorityParam = searchParams.get('priority');
@@ -117,6 +122,7 @@ export const FiltersComponent = ({
             tagKey: tagKeyParam || 'allKeys',
             tagValue: tagValueParam || 'allValues',
             databaseType: dbTypeParam || 'all',
+            estadoUso: estadoUsoParam || 'all',
             storageClass: storageClassParam || 'all',
             service: serviceParam || 'all',
             category: categoryParam || '',
@@ -137,6 +143,7 @@ export const FiltersComponent = ({
     const [tempTagKey, setTempTagKey] = useState<string | null>(filters.tagKey);
     const [tempTagValue, setTempTagValue] = useState<string | null>(filters.tagValue);
     const [tempDatabaseType, setTempDatabaseType] = useState<string>(filters.databaseType || 'all');
+    const [tempEstadoUso, setTempEstadoUso] = useState<string>(filters.estadoUso || 'all');
 
     const [tempStorageClass, setTempStorageClass] = useState('all');
     const [tempService, setTempService] = useState<string>(filters.service || 'all');
@@ -156,6 +163,7 @@ export const FiltersComponent = ({
         setTempTagKey(newFilters.tagKey);
         setTempTagValue(newFilters.tagValue);
         setTempDatabaseType(newFilters.databaseType || 'all');
+        setTempEstadoUso(newFilters.estadoUso || 'all');
         setTempService(newFilters.service || 'all');
         setTempStorageClass(newFilters.storageClass || 'all');
         setTempCategory(newFilters.category);
@@ -181,6 +189,7 @@ export const FiltersComponent = ({
             tagKey: tempTagKey,
             tagValue: tempTagValue,
             databaseType: tempDatabaseType,
+            estadoUso: tempEstadoUso,
             service: tempService,
             storageClass: tempStorageClass,
             category: tempCategory,
@@ -204,6 +213,9 @@ export const FiltersComponent = ({
         if (newFilters.databaseType && newFilters.databaseType !== 'all') {
             query.set('databaseType', newFilters.databaseType);
         }
+        if (newFilters.estadoUso && newFilters.estadoUso !== 'all') {
+            query.set('estado_uso', newFilters.estadoUso);
+        }        
         if (storageClassFilter && tempStorageClass !== 'all') {
             query.set('storageClass', tempStorageClass);
         }
@@ -228,6 +240,7 @@ export const FiltersComponent = ({
             tagKey: null,
             tagValue: null,
             databaseType: 'all',
+            estadoUso: 'all',
             storageClass: 'all',
             service: 'all',
             category: '',
@@ -242,6 +255,7 @@ export const FiltersComponent = ({
         setTempTagKey(null);
         setTempTagValue(null);
         setTempDatabaseType('all');
+        setTempEstadoUso('all');
         setTempStorageClass('all');
         setTempService('all');
         setTempCategory('');
@@ -380,7 +394,19 @@ export const FiltersComponent = ({
                                 />
                             </div>
                         )}
-                        {/* 7. CLASE STORAGE */}
+                        {/* 7. ESTADO DE USO (DNS) */}
+                        {estadoUsoFilter && (
+                            <div className='space-y-2'>
+                                <label className='text-sm font-medium text-foreground flex items-center gap-2'>
+                                    <Activity className='h-4 w-4' /> Estado de Uso
+                                </label>
+                                <EstadoUsoFilterComponent
+                                    estadoUso={tempEstadoUso}
+                                    setEstadoUso={setTempEstadoUso}
+                                />
+                            </div>
+                        )}                        
+                        {/* 8. CLASE STORAGE */}
                         {storageClassFilter && (
                             <StorageClassFilterComponent
                                 value={tempStorageClass}
@@ -388,7 +414,7 @@ export const FiltersComponent = ({
                             />
                         )}
 
-                        {/* SERVICIOS GCP */}
+                        {/* 9. SERVICIOS GCP */}
                         {serviceFilter && (
                             <div className='space-y-2'>
                                 <label className='text-sm font-medium text-foreground flex items-center gap-2'>
@@ -424,6 +450,7 @@ export const FiltersComponent = ({
                     tagKey={filters.tagKey}
                     tagValue={filters.tagValue}
                     databaseType={filters.databaseType}
+                    estadoUso={filters.estadoUso}
                     dbEngine={dbEngine}
                     service={filters.service}
                     category={filters.category}
