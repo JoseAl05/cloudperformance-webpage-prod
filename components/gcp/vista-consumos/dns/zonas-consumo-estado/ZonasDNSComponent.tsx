@@ -22,11 +22,29 @@ export const ZonasDNSComponent = ({
     estadoUso
 }: ZonasDNSComponentProps) => {
 
-    let url = `/api/gcp/bridge/gcp/consumo/zonas_dns?`;
-    if (startDate) url += `date_from=${startDate.toISOString().slice(0, 19)}&`;
-    if (endDate)   url += `date_to=${endDate.toISOString().slice(0, 19)}&`;
-    if (projects)  url += `project_id=${projects}&`;
-    if (estadoUso && estadoUso !== 'all') url += `estado_uso=${estadoUso}&`;
+    // let url = `/api/gcp/bridge/gcp/consumo/zonas_dns?`;
+    // if (startDate) url += `date_from=${startDate.toISOString().slice(0, 19)}&`;
+    // if (endDate)   url += `date_to=${endDate.toISOString().slice(0, 19)}&`;
+    // if (projects)  url += `project_id=${projects}&`;
+    // if (estadoUso && estadoUso !== 'all') url += `estado_uso=${estadoUso}&`;
+
+    // inicio correccion mmontt ... Construimos la URL de forma segura
+    const params = new URLSearchParams();
+    
+    if (startDate) params.append('date_from', startDate.toISOString().slice(0, 19));
+    if (endDate) params.append('date_to', endDate.toISOString().slice(0, 19));
+    if (projects) params.append('project_id', projects);
+    
+    // TRADUCTOR CLAVE: Mapeamos el string del frontend al booleano que espera Python
+    if (estadoUso === 'sin_uso') {
+        params.append('sin_uso', 'true');
+    } else if (estadoUso === 'con_consumo') {
+        params.append('sin_uso', 'false');
+    }
+    // Si estadoUso es 'all' (o vacío), no agregamos el parámetro y la API nos devuelve todo
+
+    const url = `/api/gcp/bridge/gcp/consumo/zonas_dns?${params.toString()}`;
+    //fin correccion mmontt
 
     const shouldFetch = !!projects;
 

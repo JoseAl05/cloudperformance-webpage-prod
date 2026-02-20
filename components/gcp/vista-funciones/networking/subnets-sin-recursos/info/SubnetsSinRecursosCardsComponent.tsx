@@ -60,22 +60,28 @@ const StatCard = ({ title, value, unit, icon: Icon, description, subtitle, color
     );
 };
 
+// Función para calcular IPs desde CIDR
+const calcularIPsDesdeSubnets = (subnets: any[]): number => {
+    return subnets.reduce((total, subnet) => {
+        const cidrSuffix = parseInt(subnet.ip_cidr_range.split('/')[1]);
+        const ipsDisponibles = Math.pow(2, 32 - cidrSuffix);
+        return total + ipsDisponibles;
+    }, 0);
+};
+
 export const SubnetsSinRecursosCardsComponent = ({ summary, subnets = [], isLoading }: SubnetsSinRecursosCardsProps) => {
 
     const calculatedData = useMemo(() => {
-        if (!summary) return { ipsPrivadasBloqueadas: 0, regionesExpuestas: 0, esRedDefault: false };
+        if (!summary || !subnets) return { ipsPrivadasBloqueadas: 0, regionesExpuestas: 0, esRedDefault: false };
 
-        // Calcular IPs privadas bloqueadas (cada /20 tiene 4,096 IPs)
-        const ipsPrivadasBloqueadas = summary.total_subnets_sin_recursos * 4096;
+        // 🟢 CÁLCULO CORRECTO usando los datos reales
+        const ipsPrivadasBloqueadas = calcularIPsDesdeSubnets(subnets);
         
-        // Contar regiones expuestas
         const regionesExpuestas = Object.keys(summary.por_region).length;
-        
-        // Detectar si usa red default
         const esRedDefault = summary.por_network.default > 0;
 
         return { ipsPrivadasBloqueadas, regionesExpuestas, esRedDefault };
-    }, [summary]);
+    }, [summary, subnets]);  // ← Agregar 'subnets' a las dependencias
 
     if (isLoading) {
         return (
@@ -102,7 +108,7 @@ export const SubnetsSinRecursosCardsComponent = ({ summary, subnets = [], isLoad
             <StatCard
                 title="IPs Privadas Bloqueadas"
                 value={calculatedData.ipsPrivadasBloqueadas.toLocaleString('es-ES')}
-                subtitle="Capacidad bloqueada en /20 CIDRs"
+                subtitle="Capacidad total bloqueada"
                 description="Direccionamiento IP reservado sin uso. Alto impacto en planificación de red."
                 icon={AlertTriangle}
                 colorClass="red"
