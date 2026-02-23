@@ -17,6 +17,7 @@ import {
 } from '@/components/ui/collapsible'
 import { cn } from '@/lib/utils'
 import {
+    Activity,
     Grid2X2,
     PieChart,
     Zap,
@@ -257,7 +258,8 @@ export const SidebarComponent = ({
         { label: 'Instances Group', icon: Boxes, href: '/gcp/consumos/instances-group' },
         { label: 'Clusters GKE', icon: Server, href: '/gcp/consumos/clusters-gke' },
         { label: 'Cloud SQL / Spanner', icon: Database, href: '/gcp/consumos/cloud-sql' },
-        { label: 'Zonas DNS: Consumo y Estado', icon: Globe, href: '/gcp/consumos/dns/zonas-consumo-estado' }
+        { label: 'Zonas DNS: Consumo y Estado', icon: Globe, href: '/gcp/consumos/dns/zonas-consumo-estado' },
+        { label: 'Load Balancers: Consumo y Uso', icon: Activity, href: '/gcp/consumos/load-balancers/consumo-uso' }
     ]
 
     const workingNonWorkingItemsGCP = [

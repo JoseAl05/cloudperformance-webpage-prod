@@ -15,7 +15,7 @@ interface EstadoUsoFilterProps {
 }
 
 const ESTADO_USO_OPTIONS = [
-    { value: 'all', label: 'Todas las Zonas' },
+    { value: 'all', label: 'Todos' },
     { value: 'sin_uso', label: 'Solo Sin Uso' },
     { value: 'con_consumo', label: 'Solo Con Consumo' },
 ];

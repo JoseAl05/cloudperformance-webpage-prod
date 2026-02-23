@@ -5,7 +5,7 @@ import { DatePicker } from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 
 import { Card, CardContent } from '@/components/ui/card';
-import { Calendar, Filter, XCircle, LayoutGrid, Globe, HardDrive, Tag, Database, Grid, ArrowUpDown, Activity } from 'lucide-react'; // Agregamos Tag icon
+import { Calendar, Filter, XCircle, LayoutGrid, Globe, HardDrive, Tag, Database, Grid, ArrowUpDown, Activity, Network } from 'lucide-react'; // Agregamos Tag icon
 import { Button } from '@/components/ui/button';
 import { useRouter, useSearchParams } from 'next/navigation';
 
@@ -15,6 +15,7 @@ import { ResourcesFilterComponent } from './ResourcesFilterComponent';
 import { TagsFilterComponent } from './TagsFilterComponent';
 import { DatabaseTypeFilterComponent } from './DatabaseTypeFilterComponent';
 import { EstadoUsoFilterComponent } from './EstadoUsoFilterComponent';
+import { EsquemaFilterComponent } from './EsquemaFilterComponent';
 import { StorageClassFilterComponent } from './StorageClassFilterComponent';
 import { ServiceFilterComponent } from './ServiceFilterComponent';
 import { RecommenderCategoriesFilterComponent } from '@/components/general_gcp/filters/RecommenderCategoriesFilterComponent';
@@ -34,6 +35,7 @@ interface FiltersComponentProps {
         databaseType?: string;
         service?: string;
         estadoUso?: string;
+        esquema?: string;
     }) => React.JSX.Element;
 
     // Flags de activación
@@ -45,6 +47,7 @@ interface FiltersComponentProps {
     tagsFilter?: boolean;
     databaseTypeFilter?: boolean;
     estadoUsoFilter?: boolean;
+    showEsquemaFilter?: boolean;
     serviceFilter?: boolean;
     isServiceMultiSelect?: boolean;
 
@@ -75,6 +78,7 @@ export const FiltersComponent = ({
     tagColumn = 'labels',
     databaseTypeFilter = false,
     estadoUsoFilter = false,
+    esquemaFilter = false,
     dbEngine = '',
     storageClassFilter = false,
     serviceFilter = false,
@@ -105,6 +109,7 @@ export const FiltersComponent = ({
         const tagValueParam = searchParams.get('tagValue');
         const dbTypeParam = searchParams.get('databaseType');
         const estadoUsoParam = searchParams.get('estado_uso');
+        const esquemaParam = searchParams.get('esquema');
         const storageClassParam = searchParams.get('storageClass');
         const categoryParam = searchParams.get('category');
         const priorityParam = searchParams.get('priority');
@@ -123,6 +128,7 @@ export const FiltersComponent = ({
             tagValue: tagValueParam || 'allValues',
             databaseType: dbTypeParam || 'all',
             estadoUso: estadoUsoParam || 'all',
+            esquema: esquemaParam || 'all',
             storageClass: storageClassParam || 'all',
             service: serviceParam || 'all',
             category: categoryParam || '',
@@ -144,6 +150,7 @@ export const FiltersComponent = ({
     const [tempTagValue, setTempTagValue] = useState<string | null>(filters.tagValue);
     const [tempDatabaseType, setTempDatabaseType] = useState<string>(filters.databaseType || 'all');
     const [tempEstadoUso, setTempEstadoUso] = useState<string>(filters.estadoUso || 'all');
+    const [tempEsquema, setTempEsquema] = useState<string>(filters.esquema || 'all');
 
     const [tempStorageClass, setTempStorageClass] = useState('all');
     const [tempService, setTempService] = useState<string>(filters.service || 'all');
@@ -164,6 +171,7 @@ export const FiltersComponent = ({
         setTempTagValue(newFilters.tagValue);
         setTempDatabaseType(newFilters.databaseType || 'all');
         setTempEstadoUso(newFilters.estadoUso || 'all');
+        setTempEsquema(filters.esquema || 'all');
         setTempService(newFilters.service || 'all');
         setTempStorageClass(newFilters.storageClass || 'all');
         setTempCategory(newFilters.category);
@@ -215,7 +223,10 @@ export const FiltersComponent = ({
         }
         if (newFilters.estadoUso && newFilters.estadoUso !== 'all') {
             query.set('estado_uso', newFilters.estadoUso);
-        }        
+        }
+        if (newFilters.esquema && newFilters.esquema !== 'all') {
+        query.set('esquema', newFilters.esquema);
+        }                
         if (storageClassFilter && tempStorageClass !== 'all') {
             query.set('storageClass', tempStorageClass);
         }
@@ -241,6 +252,7 @@ export const FiltersComponent = ({
             tagValue: null,
             databaseType: 'all',
             estadoUso: 'all',
+            esquema: 'all',
             storageClass: 'all',
             service: 'all',
             category: '',
@@ -256,6 +268,7 @@ export const FiltersComponent = ({
         setTempTagValue(null);
         setTempDatabaseType('all');
         setTempEstadoUso('all');
+        setTempEsquema('all');
         setTempStorageClass('all');
         setTempService('all');
         setTempCategory('');
@@ -405,8 +418,21 @@ export const FiltersComponent = ({
                                     setEstadoUso={setTempEstadoUso}
                                 />
                             </div>
-                        )}                        
-                        {/* 8. CLASE STORAGE */}
+                        )}
+                        {/* 8. ESQUEMA DE BALANCEO */}
+                        {esquemaFilter && (
+                            <div className='space-y-2'>
+                                <label className='text-sm font-medium text-foreground flex items-center gap-2'>
+                                    {/* Usa un ícono de Lucide como Network, GitMerge o Server */}
+                                    <Network className='h-4 w-4' /> Esquema
+                                </label>
+                                <EsquemaFilterComponent
+                                    value={tempEsquema}
+                                    onChange={(e) => setTempEsquema(e.target.value)}
+                                />
+                            </div>
+                        )}                                                
+                        {/* 9. CLASE STORAGE */}
                         {storageClassFilter && (
                             <StorageClassFilterComponent
                                 value={tempStorageClass}
@@ -414,7 +440,7 @@ export const FiltersComponent = ({
                             />
                         )}
 
-                        {/* 9. SERVICIOS GCP */}
+                        {/* 10. SERVICIOS GCP */}
                         {serviceFilter && (
                             <div className='space-y-2'>
                                 <label className='text-sm font-medium text-foreground flex items-center gap-2'>
