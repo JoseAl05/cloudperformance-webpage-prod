@@ -1,4 +1,4 @@
-import { MainViewSavingPlansComponent }  from '@/components/gcp/vista-saving-plan/MainViewSavingPlansComponent';
+import { MainViewSavingPlansComponent }  from '@/components/gcp/vista-cuds/spend-based-cuds/MainViewSpendBasedCudsComponent';
 import { Suspense } from 'react';
 
 export default function DashboardGcpSavingPlan() {
