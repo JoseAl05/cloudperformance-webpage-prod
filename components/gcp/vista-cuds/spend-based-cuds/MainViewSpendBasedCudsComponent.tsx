@@ -1,5 +1,5 @@
 import { FiltersComponent } from '@/components/general_gcp/filters/FiltersComponent'
-import { GcpCommitmentsViewComponent } from '@/components/gcp/vista-saving-plan/SavingPlansComponent'
+import { SpendBasedCudsComponent } from '@/components/gcp/vista-cuds/spend-based-cuds/SpendBasedCudsComponent'
 import { HandCoins } from 'lucide-react'
 
 export const MainViewSavingPlansComponent = () => {
@@ -17,7 +17,7 @@ export const MainViewSavingPlansComponent = () => {
                                     Ahorros y Compromisos de Uso
                                 </h1>
                                 <p className='text-gray-500 dark:text-gray-400'>
-                                    Análisis de Saving Plans y ahorro estimado en Google Cloud
+                                    Análisis de CUDs y ahorro estimado en Google Cloud
                                 </p>
                             </div>
                         </div>
@@ -25,11 +25,14 @@ export const MainViewSavingPlansComponent = () => {
                 </div>
             </div>
 
-            <FiltersComponent
-                Component={GcpCommitmentsViewComponent}
-                dateFilter
-                projectsFilter
-            />
+            <div className='w-full min-w-0'>
+                <FiltersComponent
+                    Component={SpendBasedCudsComponent}
+                    dateFilter={true}
+                    //monthYearFilter
+                    projectsFilter={false}
+                />
+            </div>
         </div>
     )
 }
