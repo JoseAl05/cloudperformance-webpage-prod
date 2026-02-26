@@ -281,6 +281,7 @@ export const SidebarComponent = ({
             //{ label: 'Items GCP', icon: Table, href: '/gcp/tables-gcp/tablas-item-gcp' },
             { label: 'Recommender', icon: Pyramid, href: '/gcp/recommender' },
             { label: 'Vista Saving Plans', icon: HandCoins, href: '/gcp/saving-plan' },
+            { label: 'Métricas Finops', icon: ChartNetwork, href: '/gcp/finops-metrics-ai' }
             // { label: 'Presupuestos', icon: CircleDollarSign, href: '/gcp/presupuesto' },
         ],
         recursos: [

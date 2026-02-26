@@ -36,6 +36,7 @@ interface FiltersComponentProps {
         service?: string;
         estadoUso?: string;
         esquema?: string;
+        cloud?: string;
     }) => React.JSX.Element;
 
     // Flags de activación
@@ -63,12 +64,13 @@ interface FiltersComponentProps {
     priority?: string;
     isRecommenderCategoryMultiSelect?: boolean;
     isRecommenderPriorityMultiSelect?: boolean;
+    cloud: string;
 }
 
 export const FiltersComponent = ({
     Component,
     dateFilter = true,
-    projectsFilter = true,
+    projectsFilter = false,
     regionFilter = false,
     resourceFilter = false,
     tagsFilter = false, // Por defecto apagado
@@ -88,7 +90,8 @@ export const FiltersComponent = ({
     category = '',
     priority = '',
     isRecommenderCategoryMultiSelect = false,
-    isRecommenderPriorityMultiSelect = false
+    isRecommenderPriorityMultiSelect = false,
+    cloud
 }: FiltersComponentProps) => {
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -481,6 +484,7 @@ export const FiltersComponent = ({
                     service={filters.service}
                     category={filters.category}
                     priority={filters.priority}
+                    cloud={cloud}
                 />
             </Card>
         </div>
