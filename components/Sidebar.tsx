@@ -17,7 +17,7 @@ import {
 } from '@/components/ui/collapsible'
 import { cn } from '@/lib/utils'
 import {
-    Activity,
+    Share2,
     Grid2X2,
     PieChart,
     Zap,
@@ -259,7 +259,7 @@ export const SidebarComponent = ({
         { label: 'Clusters GKE', icon: Server, href: '/gcp/consumos/clusters-gke' },
         { label: 'Cloud SQL / Spanner', icon: Database, href: '/gcp/consumos/cloud-sql' },
         { label: 'Zonas DNS: Consumo y Estado', icon: Globe, href: '/gcp/consumos/dns/zonas-consumo-estado' },
-        { label: 'Load Balancers: Consumo y Uso', icon: Activity, href: '/gcp/consumos/load-balancers/consumo-uso' }
+        { label: 'Load Balancers: Consumo y Uso', icon: Share2, href: '/gcp/consumos/load-balancers/consumo-uso' }
     ]
 
     const workingNonWorkingItemsGCP = [
@@ -297,6 +297,7 @@ export const SidebarComponent = ({
             // { label: 'Variación Storage', icon: Cylinder, href: '/gcp/funciones/variacion-storage' },
             // { label: 'Top 10 uso de recursos', icon: LineChart, href: '/gcp/funciones/top-10-recursos-uso' },
             { label: 'Top Cloud Storage Buckets', icon: LineChart, href: '/gcp/funciones/top-cloud-storage-buckets' },
+            { label: 'Top Filestore Sub-Utilizados', icon: LineChart, href: '/gcp/funciones/top-filestore-sub-utilizado' },
             // { label: 'Incremento Uso de Recursos', icon: LineChart, href: '/gcp/funciones/incremento-top-recursos-uso' },
             { label: 'Spot vs Standard VMs', icon: Computer, href: '/gcp/funciones/spot-vs-standard-vm' },
             { label: 'Promedio de uso por región', icon: MapPin, href: '/gcp/funciones/uso-costo-por-localizacion' },
