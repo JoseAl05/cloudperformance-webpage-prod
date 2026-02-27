@@ -281,6 +281,8 @@ export const SidebarComponent = ({
             //{ label: 'Deployments', icon: Zap, href: '/gcp/deployments' },
             //{ label: 'Items GCP', icon: Table, href: '/gcp/tables-gcp/tablas-item-gcp' },
             { label: 'Recommender', icon: Pyramid, href: '/gcp/recommender' },
+            { label: 'Vista Saving Plans', icon: HandCoins, href: '/gcp/saving-plan' },
+            { label: 'Métricas Finops', icon: ChartNetwork, href: '/gcp/finops-metrics-ai' }
             { label: 'Reservations', icon: Server, href: '/gcp/reservas' },
             { label: 'Committed Use Discounts', icon: HandCoins, href: '/gcp/cuds/spend-based-cuds' },
             // { label: 'Presupuestos', icon: CircleDollarSign, href: '/gcp/presupuesto' },

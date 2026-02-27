@@ -1,11 +1,13 @@
 'use client'
 
+import { AiRecommendationsComponent } from '@/components/AiRecommendationsComponent';
 import { MessageCard } from '@/components/aws/cards/MessageCards';
 import { RecommenderPieChartComponent } from '@/components/gcp/vista-recommender/grafico/RecommenderPieChartComponent';
 import { RecommenderInfoComponent } from '@/components/gcp/vista-recommender/info/RecommenderInfoComponent';
 import { LoaderComponent } from '@/components/general_gcp/LoaderComponent';
+import { AiRecommendationReport } from '@/interfaces/ai-recommendations/aiRecommendations';
 import { RecommenderGcp } from '@/interfaces/vista-recommender/gcpRecommenderInterfaces';
-import { AlertCircle, ChartBar, Info } from 'lucide-react';
+import { AlertCircle, AtomIcon, ChartBar, Info } from 'lucide-react';
 import useSWR from 'swr';
 
 interface RecommenderComponentProps {
@@ -41,17 +43,28 @@ export const RecommenderComponent = ({
         fetcher
     )
 
+    const allAiRecommendations = useSWR(
+        (category && priority) ? `/api/gcp/bridge/gcp/ai_recommendations/get_recommendations?date_from=${startDateFormatted}&date_to=${endDateFormatted}` : null,
+        fetcher
+    )
+
     const recommenderData: RecommenderGcp[] | null =
         isNonEmptyArray<RecommenderGcp>(allRecommendations.data) ? allRecommendations.data : null;
 
+    const aiRecommendationsData: AiRecommendationReport[] | null =
+        isNonEmptyArray<AiRecommendationReport>(allAiRecommendations.data) ? allAiRecommendations.data : null;
+
+
     const hasRecommenderData = !!recommenderData;
+    const hasAiRecommendationsData = !!aiRecommendationsData;
 
     const anyLoading =
-        allRecommendations.isLoading
+        allRecommendations.isLoading || allAiRecommendations.isLoading;
 
 
     const anyError =
-        !!allRecommendations.error
+        !!allRecommendations.error || !!allAiRecommendations.error;
+
 
     if (!category) {
         return (
@@ -99,8 +112,6 @@ export const RecommenderComponent = ({
         )
     }
 
-    console.log(recommenderData);
-
     return (
         <div className="w-full min-w-0 px-4 py-6">
             <div className="flex items-center gap-3 mb-6">
@@ -114,6 +125,13 @@ export const RecommenderComponent = ({
             </div>
             <RecommenderInfoComponent
                 data={recommenderData}
+            />
+            <div className="flex items-center gap-3 my-10">
+                <AtomIcon className="h-7 w-7 text-blue-500" />
+                <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Recomendaciones IA</h1>
+            </div>
+            <AiRecommendationsComponent
+                data={aiRecommendationsData}
             />
         </div>
     )
