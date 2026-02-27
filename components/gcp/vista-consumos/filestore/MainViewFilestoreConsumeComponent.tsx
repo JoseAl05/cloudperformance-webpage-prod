@@ -7,7 +7,6 @@ import { FilestoreConsumeComponent } from '@/components/gcp/vista-consumos/files
 export const MainViewFilestoreConsumeComponent = () => {
     return (
         <div className="w-full min-w-0 space-y-4">
-            {/* Header de la Vista */}
             <div className="mb-8">
                 <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                     <div>
@@ -28,12 +27,16 @@ export const MainViewFilestoreConsumeComponent = () => {
                 </div>
             </div>
 
-            {/* Barra de Filtros Globales */}
             <div className="w-full min-w-0">
                 <FiltersComponent
                     Component={FilestoreConsumeComponent}
                     dateFilter
-                    projectFilter={false}
+                    projectsFilter
+                    regionFilter
+
+                    resourceFilter
+                    isResourceMultiSelect
+                    resourceService='filestore'
                 />
             </div>
         </div>

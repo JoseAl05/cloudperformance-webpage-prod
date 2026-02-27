@@ -101,7 +101,6 @@ export const FilestoreConsumeCardsComponent = ({ summary, instancias = [], isLoa
                 large
             />
 
-            {/* Grid de 5 columnas para incluir la nueva tarjeta */}
             <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
                 <StatCard
                     title="Total Filestores"
