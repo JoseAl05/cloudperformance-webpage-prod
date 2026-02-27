@@ -259,7 +259,8 @@ export const SidebarComponent = ({
         { label: 'Clusters GKE', icon: Server, href: '/gcp/consumos/clusters-gke' },
         { label: 'Cloud SQL / Spanner', icon: Database, href: '/gcp/consumos/cloud-sql' },
         { label: 'Zonas DNS: Consumo y Estado', icon: Globe, href: '/gcp/consumos/dns/zonas-consumo-estado' },
-        { label: 'Load Balancers: Consumo y Uso', icon: Activity, href: '/gcp/consumos/load-balancers/consumo-uso' }
+        { label: 'Load Balancers: Consumo y Uso', icon: Share2, href: '/gcp/consumos/load-balancers/consumo-uso' },
+        { label: 'Cloud Filestore', icon: Box, href: '/gcp/consumos/filestore' },
     ]
 
     const workingNonWorkingItemsGCP = [
