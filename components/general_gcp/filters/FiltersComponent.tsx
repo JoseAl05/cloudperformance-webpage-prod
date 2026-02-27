@@ -38,6 +38,7 @@ interface FiltersComponentProps {
         estadoUso?: string;
         esquema?: string;
         filestoreTier?: string;
+        cloud?: string;
     }) => React.JSX.Element;
 
     // Flags de activación
@@ -66,12 +67,13 @@ interface FiltersComponentProps {
     priority?: string;
     isRecommenderCategoryMultiSelect?: boolean;
     isRecommenderPriorityMultiSelect?: boolean;
+    cloud: string;
 }
 
 export const FiltersComponent = ({
     Component,
     dateFilter = true,
-    projectsFilter = true,
+    projectsFilter = false,
     regionFilter = false,
     resourceFilter = false,
     tagsFilter = false, // Por defecto apagado
@@ -92,7 +94,8 @@ export const FiltersComponent = ({
     priority = '',
     isRecommenderCategoryMultiSelect = false,
     isRecommenderPriorityMultiSelect = false,
-    filestoreTierFilter = false
+    filestoreTierFilter = false,
+    cloud
 }: FiltersComponentProps) => {
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -508,6 +511,7 @@ export const FiltersComponent = ({
                     category={filters.category}
                     priority={filters.priority}
                     filestoreTier={filters.filestoreTier}
+                    cloud={cloud}
                 />
             </Card>
         </div>

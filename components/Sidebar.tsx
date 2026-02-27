@@ -259,7 +259,7 @@ export const SidebarComponent = ({
         { label: 'Clusters GKE', icon: Server, href: '/gcp/consumos/clusters-gke' },
         { label: 'Cloud SQL / Spanner', icon: Database, href: '/gcp/consumos/cloud-sql' },
         { label: 'Zonas DNS: Consumo y Estado', icon: Globe, href: '/gcp/consumos/dns/zonas-consumo-estado' },
-        { label: 'Load Balancers: Consumo y Uso', icon: Share2, href: '/gcp/consumos/load-balancers/consumo-uso' }
+        { label: 'Load Balancers: Consumo y Uso', icon: Activity, href: '/gcp/consumos/load-balancers/consumo-uso' }
     ]
 
     const workingNonWorkingItemsGCP = [
@@ -281,6 +281,9 @@ export const SidebarComponent = ({
             //{ label: 'Items GCP', icon: Table, href: '/gcp/tables-gcp/tablas-item-gcp' },
             { label: 'Recommender', icon: Pyramid, href: '/gcp/recommender' },
             { label: 'Vista Saving Plans', icon: HandCoins, href: '/gcp/saving-plan' },
+            { label: 'Métricas Finops', icon: ChartNetwork, href: '/gcp/finops-metrics-ai'},
+            { label: 'Reservations', icon: Server, href: '/gcp/reservas' },
+            { label: 'Committed Use Discounts', icon: HandCoins, href: '/gcp/cuds/spend-based-cuds' },
             // { label: 'Presupuestos', icon: CircleDollarSign, href: '/gcp/presupuesto' },
         ],
         recursos: [

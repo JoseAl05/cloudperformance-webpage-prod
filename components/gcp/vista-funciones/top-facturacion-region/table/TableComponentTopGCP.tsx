@@ -90,14 +90,10 @@ export const TableComponentTopGCP = ({
     (item) => !(item.cost_net_usd === 0 && item.cost_gross_usd === 0)
   )
 
-  /* =============================================
-     COLUMNAS AJUSTADAS PARA ANCHO TOTAL
-  ============================================= */
   const columns: ColumnDef<TableDataTopGCP>[] = [
     {
       accessorKey: "location_region",
       header: "Región",
-      // Ajuste: Ancho mínimo fijo para que no se apriete
       cell: ({ getValue }) => (
         <div className="flex items-center gap-2 min-w-[150px]">
           <MapPin className="h-4 w-4 text-slate-400 shrink-0" />
@@ -108,8 +104,6 @@ export const TableComponentTopGCP = ({
     {
       accessorKey: "service_description",
       header: "Servicio",
-      // Ajuste CRÍTICO: Eliminamos el max-w y truncate, ponemos min-w grande
-      // para que esta columna ocupe el espacio sobrante.
       cell: ({ getValue }) => (
         <div className="flex items-center gap-2 min-w-[300px] w-full">
           <Cloud className="h-4 w-4 text-indigo-400 shrink-0" />
@@ -122,13 +116,26 @@ export const TableComponentTopGCP = ({
     {
       accessorKey: "usage_date",
       header: "Fecha de Uso",
-      cell: ({ getValue }) => {
-        const value = getValue() as string 
-        const [year, month, day] = value.split("-").map(Number)
-        const date = new Date(year, month - 1, day)
+      cell: ({ getValue, row }) => {
+
+        if (row.getIsGrouped()) {
+          return null
+        }
+        const value = getValue()
+        if (!value || typeof value !== "string") {
+          return "-"
+        }
+        const date = new Date(value)
+        if (isNaN(date.getTime())) {
+          return value
+        }
+
         const formattedDate = date.toLocaleDateString("es-CL", {
-            day: "numeric", month: "short", year: "numeric"
+          day: "numeric",
+          month: "short",
+          year: "numeric"
         })
+
 
         return (
           <div className="flex items-center gap-2 text-slate-500 min-w-[120px]">
@@ -140,7 +147,6 @@ export const TableComponentTopGCP = ({
     },
     {
       accessorKey: "cost_gross_usd",
-      // header alineado a la derecha explícitamente con clase
       header: () => <div className="text-right w-full block">Costo Bruto</div>,
       cell: ({ getValue }) => {
         const num = getValue() as number
@@ -206,7 +212,7 @@ export const TableComponentTopGCP = ({
       </CardHeader>
 
       <CardContent className="p-0">
-        <div className="p-2 w-full"> {/* Aseguramos contenedor full width */}
+        <div className="p-2 w-full"> 
             <DataTableGrouping
                 columns={columns}
                 data={filteredData}

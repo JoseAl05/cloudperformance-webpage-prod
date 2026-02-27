@@ -2,10 +2,12 @@
 import useSWR from 'swr'
 import { LoaderComponent } from '@/components/general_aws/LoaderComponent'
 import { MessageCard } from '@/components/azure/cards/MessageCards'
-import { AlertCircle, ChartBar, Info } from 'lucide-react'
+import { AlertCircle, AtomIcon, ChartBar, Info } from 'lucide-react'
 import { AdvisorViewPieChartComponent } from '@/components/azure/vista-advisor/grafico/AdvisorViewPieChartComponent'
 import { AdvisorViewInfoComponent } from '@/components/azure/vista-advisor/info/AdvisorViewInfoComponent'
 import { AIComponentAzure } from '@/components/azure/vista-advisor/ia-recommedations/AIComponentAzure'
+import { AiRecommendationReport } from '@/interfaces/ai-recommendations/aiRecommendations'
+import { AiRecommendationsComponent } from '@/components/AiRecommendationsComponent'
 
 interface AdvisorViewComponentProps {
     impact: string | null
@@ -35,6 +37,8 @@ type AzureAdvisorApiResponse = AzureAdvisorRecommendation[]
 const fetcher = (url: string) =>
     fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
         .then(r => r.json());
+
+const isNonEmptyArray = <T,>(v: unknown): v is T[] => Array.isArray(v) && v.length > 0
 
 export const AdvisorViewComponent = ({
     impact,
@@ -69,7 +73,15 @@ export const AdvisorViewComponent = ({
         fetcher,
     )
 
-    if (isLoading) return <LoaderComponent />
+    const aiRecommendations = useSWR(
+        (hasImpactSelected && hasCategorySelected) ? `/api/azure/bridge/azure/get_ai_recommendations?date_from=${startDateFormatted}&date_to=${endDateFormatted}` : null,
+        fetcher,
+    )
+
+    const aiRecommendationsData: AiRecommendationReport[] | null =
+        isNonEmptyArray<AiRecommendationReport>(aiRecommendations.data) ? aiRecommendations.data : null;
+
+    if (isLoading || aiRecommendations.isLoading) return <LoaderComponent />
 
     // Mostrar mensaje si no se han seleccionado los filtros obligatorios
     if (!shouldFetch) {
@@ -82,7 +94,7 @@ export const AdvisorViewComponent = ({
         )
     }
 
-    if (error) {
+    if (error || aiRecommendations.error) {
         return (
             <div className="w-full min-w-0 px-4 py-10 flex flex-col items-center gap-4">
                 <MessageCard
@@ -125,9 +137,13 @@ export const AdvisorViewComponent = ({
                 endDate={endDate}
             />
 
-            <div className="mt-12">
-                <AIComponentAzure />
+            <div className="flex items-center gap-3 my-10">
+                <AtomIcon className="h-7 w-7 text-blue-500" />
+                <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Recomendaciones IA</h1>
             </div>
+            <AiRecommendationsComponent
+                data={aiRecommendationsData}
+            />
         </div>
     )
 }

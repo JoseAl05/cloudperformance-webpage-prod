@@ -2,7 +2,7 @@
 import useSWR from 'swr'
 import { LoaderComponent } from '@/components/general_aws/LoaderComponent';
 import { MessageCard } from '@/components/aws/cards/MessageCards'
-import { AlertCircle, ChartBar, Info } from 'lucide-react'
+import { AlertCircle, AtomIcon, ChartBar, Info } from 'lucide-react'
 import type {
     AdvisorApiResponse,
     AdvisorRecommendation,
@@ -11,6 +11,8 @@ import type {
 import { AdvisorViewPieChartComponent } from '@/components/aws/vista-advisor/grafico/AdvisorViewPieChartComponent'
 import { AdvisorViewInfoComponent } from '@/components/aws/vista-advisor/info/AdvisorViewInfoComponent'
 import { AIComponentAws } from '@/components/aws/vista-advisor/ia-recommendations/AIComponentAws'
+import { AiRecommendationReport } from '@/interfaces/ai-recommendations/aiRecommendations';
+import { AiRecommendationsComponent } from '@/components/AiRecommendationsComponent';
 
 interface AdvisorViewComponentProps {
     advisorCategory: string
@@ -70,6 +72,8 @@ const fmtPct = (n?: number) =>
 const shortId = (id?: string, left = 6, right = 6) =>
     id && id.length > left + right + 3 ? `${id.slice(0, left)}...${id.slice(-right)}` : id ?? ''
 
+const isNonEmptyArray = <T,>(v: unknown): v is T[] => Array.isArray(v) && v.length > 0
+
 export const AdvisorViewComponent = ({
     advisorCategory,
     advisorStatus,
@@ -82,14 +86,39 @@ export const AdvisorViewComponent = ({
     const advisorCategoryFormatted = advisorCategory?.toLowerCase() ?? '';
     const advisorStatusFormatted = advisorStatus?.toLowerCase() ?? '';
 
-    const { data, error, isLoading } = useSWR<AdvisorApiResponse | unknown>(
+    const advisor = useSWR<AdvisorApiResponse | unknown>(
         advisorCategory || advisorStatus
             ? `/api/aws/bridge/advisor/get_advisor_data?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&category=${advisorCategoryFormatted}&status=${advisorStatusFormatted}`
             : null,
         fetcher,
     )
 
-    if (isLoading) return <LoaderComponent />
+    const advisorAiData = useSWR<AiRecommendationReport>(
+        advisorCategory || advisorStatus
+            ? `/api/aws/bridge/advisor/get_ai_recommendations?date_from=${startDateFormatted}&date_to=${endDateFormatted}`
+            : null,
+        fetcher,
+    )
+
+    const advisorData: AdvisorApiResponse | null =
+        isNonEmptyArray<AdvisorApiResponse>(advisor.data) ? advisor.data : null;
+
+    const aiRecommendationsData: AiRecommendationReport[] | null =
+        isNonEmptyArray<AiRecommendationReport>(advisorAiData.data) ? advisorAiData.data : null;
+
+    const hasAdvisorData = !!advisorData
+    const hasAiRecommendationsData = !!aiRecommendationsData;
+
+    const anyLoading =
+        advisor.isLoading || advisorAiData.isLoading;
+
+
+    const anyError =
+        !!advisor.error || !!advisorAiData.error;
+
+    if (anyLoading) {
+        return <LoaderComponent />
+    }
 
     if (!advisorCategory || !advisorStatus) {
         return (
@@ -101,7 +130,7 @@ export const AdvisorViewComponent = ({
         )
     }
 
-    if (error) {
+    if (anyError) {
         return (
             <div className="w-full min-w-0 px-4 py-10 flex flex-col items-center gap-4">
                 <MessageCard
@@ -114,7 +143,7 @@ export const AdvisorViewComponent = ({
         )
     }
 
-    if (!data || data.length === 0) {
+    if (!hasAdvisorData) {
         return (
             <div className="w-full min-w-0 px-4 py-6">
                 <MessageCard
@@ -135,16 +164,20 @@ export const AdvisorViewComponent = ({
             </div>
             <div className='my-5'>
                 <AdvisorViewPieChartComponent
-                    data={data as AdvisorApiResponse}
+                    data={advisorData}
                 />
             </div>
             <AdvisorViewInfoComponent
-                data={data as AllAdvisorRecommendations[] | null}
+                data={advisorData}
             />
 
-            <div className="mt-12">
-                <AIComponentAws />
+            <div className="flex items-center gap-3 my-10">
+                <AtomIcon className="h-7 w-7 text-blue-500" />
+                <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Recomendaciones IA</h1>
             </div>
+            <AiRecommendationsComponent
+                data={aiRecommendationsData}
+            />
         </div>
     )
 }
