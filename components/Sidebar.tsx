@@ -270,6 +270,7 @@ export const SidebarComponent = ({
         { label: 'Cloud SQL Postgres', icon: Database, href: '/gcp/funciones/uso-horario-habil-no-habil/cloud-sql/postgresql' },
         { label: 'Cloud SQL Mysql', icon: Database, href: '/gcp/funciones/uso-horario-habil-no-habil/cloud-sql/mysql' },
         { label: 'Cloud SQL Sql Server', icon: Database, href: '/gcp/funciones/uso-horario-habil-no-habil/cloud-sql/sqlserver' },
+        { label: 'Cloud Filestore', icon: Box, href: '/gcp/funciones/uso-horario-habil-no-habil/filestore' },
 
     ]
 
