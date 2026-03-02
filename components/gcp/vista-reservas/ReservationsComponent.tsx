@@ -68,7 +68,7 @@ export const ReservationsAnalysisComponent = ({ startDate, endDate }: Reservatio
   const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : ''
 
   // Llamada al endpoint
-  const { data, isLoading, error } = useSWR<any>(
+  const { data, isLoading, error } = useSWR<unknown>(
     `/api/gcp/bridge/gcp/vista/reservas?date_from=${startDateFormatted}&date_to=${endDateFormatted}`,
     fetcher
   )

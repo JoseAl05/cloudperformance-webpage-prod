@@ -88,7 +88,7 @@ export const ReservationsBarChartComponent = ({ data }: ReservationsBarChartProp
             tooltipFormatter(params) {
                 if (!params || !(Array.isArray(params)) || !params.length) return '';
 
-                const p = params[0] as any;
+                const p = params[0] as unknown;
                 const rawValue = Number(p.value || 0);
                 const money = '$' + rawValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 

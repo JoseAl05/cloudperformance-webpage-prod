@@ -29,7 +29,8 @@ import {
     Server,
     Hammer,
     ChevronLeft,
-    ChevronRight
+    ChevronRight,
+    FilterX
 } from 'lucide-react';
 import {
     AiFinopsMetrics,
@@ -183,8 +184,7 @@ const StandardMetricDetail = ({ metricData, type }: StandardMetricDetailProps) =
         const d = metricData as CostVolatilityAnalysis;
         kpiLabel = "Volatilidad";
         kpiValue = `${d.volatility_percentage}%`;
-        // @ts-ignore
-        const anomalousCount = d.anomalous_resources?.services_flagged_count || (d as any).anomalous_services?.services_flagged_count || 0;
+        const anomalousCount = d.anomalous_resources?.services_flagged_count || (d as unknown).anomalous_services?.services_flagged_count || 0;
         extraInfo = (
             <div className="mt-2 text-xs text-muted-foreground">
                 <span className="font-semibold">{anomalousCount}</span> servicios anómalos detectados

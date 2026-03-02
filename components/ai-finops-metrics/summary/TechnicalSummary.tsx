@@ -19,7 +19,7 @@ export const TechnicalSummary = ({ data }: TechnicalSummaryProps) => {
       <Card className="bg-gradient-to-r from-orange-50 to-transparent dark:from-orange-950/30 border-l-4 border-l-orange-500 shadow-md">
         <CardContent className='p-4'>
           <p className="md:text-xl font-normal leading-tight text-foreground">
-            "{executive_summary.cto_summary}"
+            {executive_summary.cto_summary}
           </p>
         </CardContent>
       </Card>
