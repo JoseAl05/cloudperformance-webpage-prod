@@ -381,7 +381,6 @@ export const ResourcesFilterComponent = ({
         if (resourceId === '') {
             setResourceId(allIdsString);
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [allIdsString, hasData, isLoading, setResourceId]);
     // NOTA: Quitamos 'resourceId' de dependencias para evitar loop infinito al deseleccionar manual.
 
