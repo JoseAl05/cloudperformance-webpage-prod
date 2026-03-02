@@ -92,6 +92,14 @@ export const LoadBalancersCardsComponent = ({ summary, loadBalancers = [], isLoa
                 icon={AlertTriangle}
                 colorClass={summary.sin_trafico > 0 ? "orange" : "green"}
             />
+             <StatCard
+                 title="Costo Total"
+                 value={`$${summary.costo_total_usd.toFixed(2)}`}
+                 unit="USD/mes"
+                 description="Gasto de los balanceadores listados"
+                 icon={DollarSign}
+                 colorClass="blue"
+             />            
             <StatCard
                 title="Ahorro Potencial"
                 value={`$${summary.ahorro_potencial_total_usd.toFixed(2)}`}

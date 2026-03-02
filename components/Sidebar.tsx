@@ -17,7 +17,7 @@ import {
 } from '@/components/ui/collapsible'
 import { cn } from '@/lib/utils'
 import {
-    Activity,
+    Share2,
     Grid2X2,
     PieChart,
     Zap,
@@ -259,7 +259,8 @@ export const SidebarComponent = ({
         { label: 'Clusters GKE', icon: Server, href: '/gcp/consumos/clusters-gke' },
         { label: 'Cloud SQL / Spanner', icon: Database, href: '/gcp/consumos/cloud-sql' },
         { label: 'Zonas DNS: Consumo y Estado', icon: Globe, href: '/gcp/consumos/dns/zonas-consumo-estado' },
-        { label: 'Load Balancers: Consumo y Uso', icon: Activity, href: '/gcp/consumos/load-balancers/consumo-uso' }
+        { label: 'Load Balancers: Consumo y Uso', icon: Share2, href: '/gcp/consumos/load-balancers/consumo-uso' },
+        { label: 'Cloud Filestore', icon: Box, href: '/gcp/consumos/filestore' },
     ]
 
     const workingNonWorkingItemsGCP = [
@@ -269,6 +270,7 @@ export const SidebarComponent = ({
         { label: 'Cloud SQL Postgres', icon: Database, href: '/gcp/funciones/uso-horario-habil-no-habil/cloud-sql/postgresql' },
         { label: 'Cloud SQL Mysql', icon: Database, href: '/gcp/funciones/uso-horario-habil-no-habil/cloud-sql/mysql' },
         { label: 'Cloud SQL Sql Server', icon: Database, href: '/gcp/funciones/uso-horario-habil-no-habil/cloud-sql/sqlserver' },
+        { label: 'Cloud Filestore', icon: Box, href: '/gcp/funciones/uso-horario-habil-no-habil/filestore' },
 
     ]
 
@@ -297,6 +299,8 @@ export const SidebarComponent = ({
         consumes: [{ label: 'Consumos', subItems: consumeSubItemsGCP, icon: Zap }],
         funciones: [
             { label: 'Top Cloud Storage Buckets', icon: LineChart, href: '/gcp/funciones/top-cloud-storage-buckets' },
+            { label: 'Top Filestore Sub-Utilizados', icon: LineChart, href: '/gcp/funciones/top-filestore-sub-utilizado' },
+            // { label: 'Incremento Uso de Recursos', icon: LineChart, href: '/gcp/funciones/incremento-top-recursos-uso' },
             { label: 'Spot vs Standard VMs', icon: Computer, href: '/gcp/funciones/spot-vs-standard-vm' },
             { label: 'Promedio de uso por región', icon: MapPin, href: '/gcp/funciones/uso-costo-por-localizacion' },
             { label: 'Top Facturación por Región', icon: DollarSign, href: '/gcp/funciones/top-facturacion-region' },

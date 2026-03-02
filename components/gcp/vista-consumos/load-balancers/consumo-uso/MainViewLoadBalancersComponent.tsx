@@ -1,5 +1,5 @@
 import { FiltersComponent } from "@/components/general_gcp/filters/FiltersComponent";
-import { Activity } from "lucide-react";
+import { Share2 } from "lucide-react";
 import { LoadBalancersComponent } from "./LoadBalancersComponent";
 
 export const MainViewLoadBalancersComponent = () => {
@@ -10,7 +10,7 @@ export const MainViewLoadBalancersComponent = () => {
           <div>
             <div className="flex items-center gap-3 mb-2">
               <div className="h-12 w-12 bg-gradient-to-br from-green-500 to-teal-500 rounded-lg flex items-center justify-center">
-                <Activity className="h-6 w-6 text-white" />
+                <Share2 className="h-6 w-6 text-white" />
               </div>
               <div>
                 <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">

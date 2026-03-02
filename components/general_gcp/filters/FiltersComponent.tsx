@@ -5,7 +5,7 @@ import { DatePicker } from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 
 import { Card, CardContent } from '@/components/ui/card';
-import { Calendar, Filter, XCircle, LayoutGrid, Globe, HardDrive, Tag, Database, Grid, ArrowUpDown, Activity, Network } from 'lucide-react'; // Agregamos Tag icon
+import { Calendar, Filter, XCircle, LayoutGrid, Globe, HardDrive, Tag, Database, Grid, ArrowUpDown, Activity, Network, Layers } from 'lucide-react'; // Agregamos Tag icon
 import { Button } from '@/components/ui/button';
 import { useRouter, useSearchParams } from 'next/navigation';
 
@@ -15,6 +15,7 @@ import { ResourcesFilterComponent } from './ResourcesFilterComponent';
 import { TagsFilterComponent } from './TagsFilterComponent';
 import { DatabaseTypeFilterComponent } from './DatabaseTypeFilterComponent';
 import { EstadoUsoFilterComponent } from './EstadoUsoFilterComponent';
+import { FilestoreTierFilterComponent } from './FilestoreTierFilterComponent';
 import { EsquemaFilterComponent } from './EsquemaFilterComponent';
 import { StorageClassFilterComponent } from './StorageClassFilterComponent';
 import { ServiceFilterComponent } from './ServiceFilterComponent';
@@ -36,6 +37,7 @@ interface FiltersComponentProps {
         service?: string;
         estadoUso?: string;
         esquema?: string;
+        filestoreTier?: string;
         cloud?: string;
     }) => React.JSX.Element;
 
@@ -48,6 +50,7 @@ interface FiltersComponentProps {
     tagsFilter?: boolean;
     databaseTypeFilter?: boolean;
     estadoUsoFilter?: boolean;
+    filestoreTierFilter?: boolean;
     showEsquemaFilter?: boolean;
     serviceFilter?: boolean;
     isServiceMultiSelect?: boolean;
@@ -91,6 +94,7 @@ export const FiltersComponent = ({
     priority = '',
     isRecommenderCategoryMultiSelect = false,
     isRecommenderPriorityMultiSelect = false,
+    filestoreTierFilter = false,
     cloud
 }: FiltersComponentProps) => {
     const router = useRouter();
@@ -113,6 +117,7 @@ export const FiltersComponent = ({
         const dbTypeParam = searchParams.get('databaseType');
         const estadoUsoParam = searchParams.get('estado_uso');
         const esquemaParam = searchParams.get('esquema');
+        const filestoreTierParam = searchParams.get('filestoreTier');
         const storageClassParam = searchParams.get('storageClass');
         const categoryParam = searchParams.get('category');
         const priorityParam = searchParams.get('priority');
@@ -132,6 +137,7 @@ export const FiltersComponent = ({
             databaseType: dbTypeParam || 'all',
             estadoUso: estadoUsoParam || 'all',
             esquema: esquemaParam || 'all',
+            filestoreTier: filestoreTierParam || 'all',
             storageClass: storageClassParam || 'all',
             service: serviceParam || 'all',
             category: categoryParam || '',
@@ -154,6 +160,7 @@ export const FiltersComponent = ({
     const [tempDatabaseType, setTempDatabaseType] = useState<string>(filters.databaseType || 'all');
     const [tempEstadoUso, setTempEstadoUso] = useState<string>(filters.estadoUso || 'all');
     const [tempEsquema, setTempEsquema] = useState<string>(filters.esquema || 'all');
+    const [tempFilestoreTier, setTempFilestoreTier] = useState<string>(filters.filestoreTier || 'all');
 
     const [tempStorageClass, setTempStorageClass] = useState('all');
     const [tempService, setTempService] = useState<string>(filters.service || 'all');
@@ -175,6 +182,7 @@ export const FiltersComponent = ({
         setTempDatabaseType(newFilters.databaseType || 'all');
         setTempEstadoUso(newFilters.estadoUso || 'all');
         setTempEsquema(filters.esquema || 'all');
+        setTempFilestoreTier(newFilters.filestoreTier || 'all');
         setTempService(newFilters.service || 'all');
         setTempStorageClass(newFilters.storageClass || 'all');
         setTempCategory(newFilters.category);
@@ -201,6 +209,7 @@ export const FiltersComponent = ({
             tagValue: tempTagValue,
             databaseType: tempDatabaseType,
             estadoUso: tempEstadoUso,
+            filestoreTier: tempFilestoreTier,
             service: tempService,
             storageClass: tempStorageClass,
             category: tempCategory,
@@ -228,8 +237,11 @@ export const FiltersComponent = ({
             query.set('estado_uso', newFilters.estadoUso);
         }
         if (newFilters.esquema && newFilters.esquema !== 'all') {
-        query.set('esquema', newFilters.esquema);
-        }                
+            query.set('esquema', newFilters.esquema);
+        }   
+        if (newFilters.filestoreTier && newFilters.filestoreTier !== 'all') {
+            query.set('filestoreTier', newFilters.filestoreTier);
+        }             
         if (storageClassFilter && tempStorageClass !== 'all') {
             query.set('storageClass', tempStorageClass);
         }
@@ -256,6 +268,7 @@ export const FiltersComponent = ({
             databaseType: 'all',
             estadoUso: 'all',
             esquema: 'all',
+            filestoreTier: 'all',
             storageClass: 'all',
             service: 'all',
             category: '',
@@ -272,6 +285,7 @@ export const FiltersComponent = ({
         setTempDatabaseType('all');
         setTempEstadoUso('all');
         setTempEsquema('all');
+        setTempFilestoreTier('all');
         setTempStorageClass('all');
         setTempService('all');
         setTempCategory('');
@@ -422,7 +436,19 @@ export const FiltersComponent = ({
                                 />
                             </div>
                         )}
-                        {/* 8. ESQUEMA DE BALANCEO */}
+                        {/* 8. FILESTORE TIER */}
+                        {filestoreTierFilter && (
+                            <div className='space-y-2'>
+                                <label className='text-sm font-medium text-foreground flex items-center gap-2'>
+                                    <Layers className='h-4 w-4' /> Tier Filestore
+                                </label>
+                                <FilestoreTierFilterComponent
+                                    tier={tempFilestoreTier}
+                                    setTier={setTempFilestoreTier}
+                                />
+                            </div>
+                        )}                        
+                        {/* 9. ESQUEMA DE BALANCEO */}
                         {esquemaFilter && (
                             <div className='space-y-2'>
                                 <label className='text-sm font-medium text-foreground flex items-center gap-2'>
@@ -435,7 +461,7 @@ export const FiltersComponent = ({
                                 />
                             </div>
                         )}                                                
-                        {/* 9. CLASE STORAGE */}
+                        {/* 10. CLASE STORAGE */}
                         {storageClassFilter && (
                             <StorageClassFilterComponent
                                 value={tempStorageClass}
@@ -443,7 +469,7 @@ export const FiltersComponent = ({
                             />
                         )}
 
-                        {/* 10. SERVICIOS GCP */}
+                        {/* 11. SERVICIOS GCP */}
                         {serviceFilter && (
                             <div className='space-y-2'>
                                 <label className='text-sm font-medium text-foreground flex items-center gap-2'>
@@ -484,6 +510,7 @@ export const FiltersComponent = ({
                     service={filters.service}
                     category={filters.category}
                     priority={filters.priority}
+                    filestoreTier={filters.filestoreTier}
                     cloud={cloud}
                 />
             </Card>
