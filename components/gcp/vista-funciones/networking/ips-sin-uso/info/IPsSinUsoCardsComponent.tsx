@@ -15,11 +15,11 @@ interface IPsResumen {
 
 interface IPsSinUsoCardsProps {
     summary?: IPsResumen;
-    ips?: any[];
+    ips?: unknown[];
     isLoading: boolean;
 }
 
-const StatCard = ({ title, value, unit, icon: Icon, description, subtitle, colorClass = "blue" }: any) => {
+const StatCard = ({ title, value, unit, icon: Icon, description, subtitle, colorClass = "blue" }: unknown) => {
     const colorStyles: Record<string, { border: string; bgIcon: string }> = {
         blue:   { border: "border-l-blue-500",   bgIcon: "bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400" },
         green:  { border: "border-l-green-500",  bgIcon: "bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400" },

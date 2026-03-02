@@ -65,11 +65,18 @@ export interface ResourceAnalysisReport {
   details: ResourceDetail[];
 }
 
+export interface ForecastPeriodKeyDrivers {
+  value_detected: number;
+  service_name: string;
+  key_reason: string;
+  anomaly_detected: string;
+}
+
 export interface ForecastPeriod {
   period: string;
   predicted_spend_usd: number;
   confidence_level: string;
-  key_drivers: string[];
+  key_drivers: ForecastPeriodKeyDrivers[];
 }
 
 export interface AiFinopsMetrics {
@@ -123,13 +130,15 @@ export interface AiFinopsMetricsAnalysis {
 export interface OpportunityCostAnalysis extends BaseMetricAnalysis {
   total_potential_savings_usd: number;
   savings_threshold_rule: string;
-  resources_analysis: ResourceAnalysisReport;
 }
 
 export interface CostVolatilityAnalysis extends BaseMetricAnalysis {
   volatility_percentage: number;
   volatility_threshold: string;
-  anomalous_resources: ResourceAnalysisReport;
+  anomalous_resources: {
+    services_flagged_count: number;
+    services_analyzed_count: number;
+  };
 }
 
 export interface CpuEfficiencyAnalysis extends BaseMetricAnalysis {
@@ -144,9 +153,23 @@ export interface ElasticityAnalysis extends BaseMetricAnalysis {
   scaling_groups_analysis: ResourceAnalysisReport;
 }
 
+export interface MaturityAssessmentAnalysisCriteriaDetails {
+  name?: string;
+  detail_description?: string;
+}
+
+export interface MaturityAssessmentAnalysisCriteria {
+  value: string;
+  service_analyzed: string;
+  expected_value: string;
+  criteria: string;
+  details: MaturityAssessmentAnalysisCriteriaDetails[];
+}
+
 export interface MaturityAssessmentAnalysis extends BaseMetricAnalysis {
   finops_maturity_level: string;
   maturity_level_description: string;
+  criteria_analyzed: MaturityAssessmentAnalysisCriteria[];
 }
 
 export interface AiFinopsMetricsForecast {

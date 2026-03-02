@@ -131,8 +131,8 @@ const RiskBadge = ({ level }: { level: RiskLevel }) => {
     let color = "bg-gray-100 text-gray-800 border-gray-200"; // Default
 
     if (level.includes('LOW')) color = "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-800";
-    else if (level.includes('MEDIUM')) color = "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-800";
-    else if (level.includes('HIGH')) color = "bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/30 dark:text-rose-400 dark:border-rose-800";
+    else if (level.includes('MEDIUM')) color = "bg-yellow-50 text-yellow-700 border-yellow-200 dark:bg-yellow-950/30 dark:text-yellow-400 dark:border-yellow-800";
+    else if (level.includes('HIGH')) color = "bg-red-50 text-red-700 border-red-200 dark:bg-red-950/30 dark:text-red-400 dark:border-red-800";
 
     return (
         <AttributeBadge
@@ -147,8 +147,8 @@ const RiskBadge = ({ level }: { level: RiskLevel }) => {
 const ImpactBadge = ({ impact }: { impact: OperationalImpact }) => {
     let color = "bg-gray-100 text-gray-800 border-gray-200";
 
-    if (impact.includes('NONE') || impact.includes('LOW')) color = "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/30 dark:text-blue-400 dark:border-blue-800";
-    else if (impact.includes('MEDIUM')) color = "bg-orange-50 text-orange-700 border-orange-200 dark:bg-orange-950/30 dark:text-orange-400 dark:border-orange-800";
+    if (impact.includes('NONE') || impact.includes('LOW')) color = "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-800";
+    else if (impact.includes('MEDIUM')) color = "bg-yellow-50 text-yellow-700 border-yellow-200 dark:bg-yellow-950/30 dark:text-yellow-400 dark:border-yellow-800";
     else if (impact.includes('HIGH')) color = "bg-red-50 text-red-700 border-red-200 dark:bg-red-950/30 dark:text-red-400 dark:border-red-800";
 
     return (
@@ -164,9 +164,9 @@ const ImpactBadge = ({ impact }: { impact: OperationalImpact }) => {
 const ReversibilityBadge = ({ reversibility }: { reversibility: Reversibility }) => {
     let color = "bg-gray-100 text-gray-800 border-gray-200";
 
-    if (reversibility.includes('EASY')) color = "bg-teal-50 text-teal-700 border-teal-200 dark:bg-teal-950/30 dark:text-teal-400 dark:border-teal-800";
+    if (reversibility.includes('EASY')) color = "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-800";
     else if (reversibility.includes('MEDIUM')) color = "bg-yellow-50 text-yellow-700 border-yellow-200 dark:bg-yellow-950/30 dark:text-yellow-400 dark:border-yellow-800";
-    else color = "bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950/30 dark:text-purple-400 dark:border-purple-800";
+    else color = "bg-red-50 text-red-700 border-red-200 dark:bg-red-950/30 dark:text-red-400 dark:border-red-800";
 
     return (
         <AttributeBadge

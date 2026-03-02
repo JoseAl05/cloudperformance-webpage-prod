@@ -164,13 +164,13 @@ export const SubnetsSinRecursosCharts = ({ data, porRegion, porPurpose }: Subnet
                         borderRadius: 4,
                         borderColor: seriesBorderColor,
                         borderWidth: 1,
-                        color: function(params: any) {
+                        color: function(params: unknown) {
                             return params.data.name.includes('VMs y Recursos') ? '#36A2EB' : '#FF6384';
                         }
                     },
                     label: {
                         show: true,
-                        formatter: (p: any) => `${p.data.name}\n${p.value}`,
+                        formatter: (p: unknown) => `${p.data.name}\n${p.value}`,
                         fontSize: 11,
                         color: textColor,
                         fontWeight: 'bold'
