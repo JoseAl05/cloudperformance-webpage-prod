@@ -48,7 +48,7 @@ export const FilestoreWorkingNonWorkingHoursComponent = ({ startDate, endDate, r
         const rawData = workingSummaryByResource.data;
         if (!Array.isArray(rawData)) return [];
 
-        const grouped: Record<string, any> = {};
+        const grouped: Record<string, unknown> = {};
 
         rawData.forEach(item => {
             const key = `${item.resource_id}-${item.sync_time}`;
@@ -68,7 +68,7 @@ export const FilestoreWorkingNonWorkingHoursComponent = ({ startDate, endDate, r
 
             // Insertamos las métricas en el array del recurso correspondiente
             if (Array.isArray(item.metric_data)) {
-                item.metric_data.forEach((m: any) => {
+                item.metric_data.forEach((m: unknown) => {
                     grouped[key].metric_data.push({
                         ...m,
                         metric_name: normalizedMetricName // Inyectamos el nombre en cada entrada

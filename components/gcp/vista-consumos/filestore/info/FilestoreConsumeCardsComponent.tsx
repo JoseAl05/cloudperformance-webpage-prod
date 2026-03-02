@@ -15,12 +15,12 @@ interface FilestoreResumen {
 
 interface FilestoreCardsProps {
     summary?: FilestoreResumen;
-    instancias?: any[];
+    instancias?: unknown[];
     isLoading: boolean;
 }
 
-const StatCard = ({ title, value, unit, icon: Icon, description, colorClass = "blue", subtitle, large = false }: any) => {
-    const colorStyles: any = {
+const StatCard = ({ title, value, unit, icon: Icon, description, colorClass = "blue", subtitle, large = false }: unknown) => {
+    const colorStyles: unknown = {
         blue: { border: "border-l-blue-500", bgIcon: "bg-blue-100 text-blue-600" },
         amber: { border: "border-l-amber-500", bgIcon: "bg-amber-100 text-amber-600" },
         green: { border: "border-l-green-500", bgIcon: "bg-green-100 text-green-600" },

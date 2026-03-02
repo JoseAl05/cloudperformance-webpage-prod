@@ -8,7 +8,7 @@ import { getFilestoreConsumeColumns } from './FilestoreConsumeColumns';
 import { Database, HardDrive } from 'lucide-react';
 
 interface FilestoreConsumeTableComponentProps {
-    data: any[]; // Array de instancias del JSON
+    data: unknown[]; // Array de instancias del JSON
 }
 
 const TableLegend = () => (
