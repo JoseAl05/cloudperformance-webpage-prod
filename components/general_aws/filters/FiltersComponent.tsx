@@ -55,6 +55,7 @@ interface FiltersComponentProps {
         month?: number | null;
         year?: number | null;
         eksAsgInstance?: string;
+        cloud?: string;
     }) => React.JSX.Element;
     dateFilter?: boolean;
     regionFilter?: boolean;
@@ -154,7 +155,8 @@ export const FiltersComponent = ({
     elbV2Filter = false,
     isElbV2Multiselect = false,
     unusedR53Filter = false,
-    isUnusedR53Multiselect = false
+    isUnusedR53Multiselect = false,
+    cloud
 }: FiltersComponentProps) => {
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -1051,6 +1053,7 @@ export const FiltersComponent = ({
                     unusedElbV2={filters.unusedElbV2}
                     elbV2={filters.elbV2}
                     unusedR53={filters.unusedR53}
+                    cloud={cloud}
                 />
             </Card>
         </div>

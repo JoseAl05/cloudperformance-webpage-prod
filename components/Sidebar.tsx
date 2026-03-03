@@ -171,6 +171,7 @@ export const SidebarComponent = ({
             { label: 'Eventos', icon: Zap, href: '/aws/eventos' },
             { label: 'Vista Advisor', icon: Pyramid, href: '/aws/advisor' },
             { label: 'Vista Saving Plans', icon: HandCoins, href: '/aws/saving-plan' },
+            { label: 'Métricas Finops', icon: ChartNetwork, href: '/aws/finops-metrics-ai' },
         ],
         recursos: [
             { label: 'Instancias EC2', icon: Computer, href: '/aws/recursos/instancias-ec2', color: 'text-orange-500' },

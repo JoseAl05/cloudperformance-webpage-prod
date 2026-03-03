@@ -34,6 +34,7 @@ export const MainViewAiFinopsMetricsComponent = ({cloud}: MainViewAiFinopsMetric
                         <AwsFiltersComponent
                             Component={AiFinopsMetricsComponent}
                             dateFilter
+                            cloud={cloud}
                         />
                     )
                 }
