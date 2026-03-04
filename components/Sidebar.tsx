@@ -248,6 +248,7 @@ export const SidebarComponent = ({
         { label: 'Instance Groups', icon: Boxes, href: '/gcp/funciones/unused-resources/instance-groups' },
         { label: 'Clusters GKE', icon: Boxes, href: '/gcp/funciones/unused-resources/clusters-gke' },
         { label: 'Discos Persistentes', icon: HardDrive, href: '/gcp/funciones/unused-resources/persistent-disks' },
+        { label: 'Filestore – Sin Uso', icon: HardDrive, href: '/gcp/recursos/filestore-sin-uso' },
         // { label: 'Load Balancers', icon: Scale, href: '/gcp/funciones/loadbalancers-infrautilizados' },
         // { label: 'HTTP(S) LB (Ingress)', icon: Workflow, href: '/gcp/funciones/https-lb-infrautilizados' },
         // { label: 'Cloud DNS', icon: Globe2, href: '/gcp/funciones/cloud-dns-infrautilizados' }
@@ -301,7 +302,7 @@ export const SidebarComponent = ({
             // { label: 'Variación Storage', icon: Cylinder, href: '/gcp/funciones/variacion-storage' },
             // { label: 'Top 10 uso de recursos', icon: LineChart, href: '/gcp/funciones/top-10-recursos-uso' },
             { label: 'Top Cloud Storage Buckets', icon: LineChart, href: '/gcp/funciones/top-cloud-storage-buckets' },
-            { label: 'Top Filestore Sub-Utilizados', icon: LineChart, href: '/gcp/funciones/top-filestore-sub-utilizado' },
+            { label: 'Top Filestore Sub-Utilizados', icon: TrendingDown, href: '/gcp/funciones/top-filestore-sub-utilizado' },
             // { label: 'Incremento Uso de Recursos', icon: LineChart, href: '/gcp/funciones/incremento-top-recursos-uso' },
             { label: 'Spot vs Standard VMs', icon: Computer, href: '/gcp/funciones/spot-vs-standard-vm' },
             { label: 'Promedio de uso por región', icon: MapPin, href: '/gcp/funciones/uso-costo-por-localizacion' },
