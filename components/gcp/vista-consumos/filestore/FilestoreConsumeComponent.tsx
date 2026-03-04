@@ -2,7 +2,6 @@
 
 import React from 'react';
 import useSWR from 'swr';
-// Aquí importaremos los componentes que crearemos a continuación
 import { FilestoreConsumeCardsComponent } from '@/components/gcp/vista-consumos/filestore/info/FilestoreConsumeCardsComponent';
 import { FilestoreConsumeChartComponent } from '@/components/gcp/vista-consumos/filestore/grafico/FilestoreConsumeChartComponent';
 import { FilestoreConsumeTableComponent } from '@/components/gcp/vista-consumos/filestore/table/FilestoreConsumeTableComponent';
@@ -25,14 +24,12 @@ export const FilestoreConsumeComponent = ({
     resourceId
 }: FilestoreConsumeComponentProps) => {
 
-    // 1. Fetch de Información General e Instancias
-    // Nota: Usamos la ruta de filestore que estuvimos probando
     let infoUrl = `/api/gcp/bridge/gcp/consumo/filestore/info?`;
     if (startDate) infoUrl += `date_from=${startDate.toISOString().slice(0, 19)}&`;
     if (endDate) infoUrl += `date_to=${endDate.toISOString().slice(0, 19)}&`;
     if (projects) infoUrl += `project_id=${projects}&`;
     if (regions && regions !== 'all_regions') infoUrl += `location=${regions}&`;
-    if (resourceId) infoUrl += `resource_id=${resourceId}&`;
+    if (resourceId) infoUrl += `resource=${resourceId}&`;
 
     const shouldFetch = !!projects;
 
@@ -42,12 +39,9 @@ export const FilestoreConsumeComponent = ({
         { revalidateOnFocus: false }
     );
 
-    // 2. Fetch de Métricas Temporales (para los gráficos)
-    // En Filestore, la data histórica viene dentro del objeto 'history' de cada instancia,
-    // pero si tu API tiene un endpoint separado de métricas planas, lo apuntamos aquí.
+
     let metricsUrl = `/api/gcp/bridge/gcp/consumo/consumo_filestore?`;
     if (projects) metricsUrl += `project_id=${projects}&`;
-    // ... otros filtros
 
     const { data: metricsData, error: metricsError, isLoading: metricsLoading } = useSWR(
         shouldFetch ? metricsUrl : null, 
@@ -55,11 +49,11 @@ export const FilestoreConsumeComponent = ({
         { revalidateOnFocus: false }
     );
 
-    // Manejo de estados de carga y error
+
     const anyLoading = infoLoading || metricsLoading;
     const anyError = infoError || metricsError;
     
-    // Validación de datos basada en tu JSON: buscamos 'instancias'
+  
     const hasData = infoData?.instancias && infoData.instancias.length > 0;
 
     if (!projects) {

@@ -165,7 +165,7 @@ export const ZonasDNSCharts = ({ data }: ZonasDNSChartsProps) => {
                         borderRadius: 4,
                         borderColor: seriesBorderColor,
                         borderWidth: 1,
-                        color: function(params: any) {
+                        color: function(params: unknown) {
                             const colors = {
                                 'SIN_USO': '#dc2626',
                                 'USO_BAJO': '#f59e0b',
@@ -177,7 +177,7 @@ export const ZonasDNSCharts = ({ data }: ZonasDNSChartsProps) => {
                     },
                     label: {
                         show: true,
-                        formatter: (p: any) => `${p.data.name}\n${p.value}`,
+                        formatter: (p: unknown) => `${p.data.name}\n${p.value}`,
                         fontSize: 11,
                         color: textColor,
                         fontWeight: 'bold'

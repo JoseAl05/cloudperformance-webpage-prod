@@ -33,7 +33,7 @@ export const AiFinopsMetricsComponent = ({ startDate, endDate, cloud }: AiFinops
 
     switch (cloud) {
         case 'aws':
-            url = '';
+            url = '/api/aws/bridge/finops_metrics/get_finops_metrics';
             break;
         case 'azure':
             url = '';

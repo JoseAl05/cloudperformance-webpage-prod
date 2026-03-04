@@ -64,10 +64,10 @@ const SingleFilestoreChart = ({ data, metricKey }: { data: HistoryPoint[], metri
             extraOption: {
                 tooltip: { 
                     trigger: 'axis', 
-                    valueFormatter: (v: any) => config.formatType === 'bytes' ? formatBytes(v) : `${v} ${config.unit}` 
+                    valueFormatter: (v: unknown) => config.formatType === 'bytes' ? formatBytes(v) : `${v} ${config.unit}` 
                 },
                 yAxis: {
-                    axisLabel: { formatter: (v: any) => config.formatType === 'bytes' ? formatBytes(v) : v }
+                    axisLabel: { formatter: (v: unknown) => config.formatType === 'bytes' ? formatBytes(v) : v }
                 },
                 grid: { left: 60, right: 20, bottom: 40, containLabel: true }
             }
@@ -90,7 +90,7 @@ const SingleFilestoreChart = ({ data, metricKey }: { data: HistoryPoint[], metri
     );
 };
 
-export const FilestoreConsumeChartComponent = ({ data }: { data: any[] }) => {
+export const FilestoreConsumeChartComponent = ({ data }: { data: unknown[] }) => {
     // Tomamos la primera instancia para el gráfico general o podrías iterar
     const firstInstance = data?.[0];
     const history = firstInstance?.history || {};

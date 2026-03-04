@@ -113,7 +113,7 @@ export const FilestoreInfoView = ({ data }: { data: FilestoreInstanciaData }) =>
 };
 
 // 2. VISTA DE MÉTRICAS (Basada en la estructura del historial del JSON)
-export const FilestoreMetricasView = ({ data }: { data: any }) => {
+export const FilestoreMetricasView = ({ data }: { data: unknown }) => {
     return (
         <ScrollArea className="flex-1">
             <div className="p-6 space-y-4">

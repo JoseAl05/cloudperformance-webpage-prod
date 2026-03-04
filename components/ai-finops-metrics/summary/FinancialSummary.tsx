@@ -19,7 +19,7 @@ export const FinancialSummary = ({ data }: FinancialSummaryProps) => {
             <Card className="bg-gradient-to-r from-blue-50 to-transparent dark:from-blue-950/30 border-l-4 border-l-blue-500 shadow-md">
                 <CardContent className='p-4'>
                     <p className="md:text-xl font-normal leading-tight text-foreground">
-                        "{executive_summary.cfo_summary}"
+                        {executive_summary.cfo_summary}
                     </p>
                 </CardContent>
             </Card>

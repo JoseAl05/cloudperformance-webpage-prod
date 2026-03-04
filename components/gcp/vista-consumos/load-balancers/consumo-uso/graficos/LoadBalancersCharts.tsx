@@ -167,7 +167,7 @@ export const LoadBalancersCharts = ({ data, porEsquema }: LoadBalancersChartsPro
                         borderRadius: 4,
                         borderColor: seriesBorderColor,
                         borderWidth: 1,
-                        color: function(params: any) {
+                        color: function(params: unknown) {
                             const colors = {
                                 'EXTERNAL': '#3b82f6',
                                 'INTERNAL': '#10b981',
@@ -180,7 +180,7 @@ export const LoadBalancersCharts = ({ data, porEsquema }: LoadBalancersChartsPro
                     },
                     label: {
                         show: true,
-                        formatter: (p: any) => `${p.data.name}\n${p.value}`,
+                        formatter: (p: unknown) => `${p.data.name}\n${p.value}`,
                         fontSize: 11,
                         color: textColor,
                         fontWeight: 'bold'

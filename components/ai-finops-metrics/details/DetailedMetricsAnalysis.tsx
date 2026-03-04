@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import {
     Select,
@@ -9,20 +9,10 @@ import {
 } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow
-} from '@/components/ui/table';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import {
     AlertCircle,
     BarChart3,
-    CalendarClock,
     CheckCircle2,
     Cpu,
     DollarSign,
@@ -34,7 +24,13 @@ import {
     Target,
     TrendingUp,
     Zap,
-    ArrowRight
+    ArrowRight,
+    Activity,
+    Server,
+    Hammer,
+    ChevronLeft,
+    ChevronRight,
+    FilterX
 } from 'lucide-react';
 import {
     AiFinopsMetrics,
@@ -44,14 +40,16 @@ import {
     ForecastPeriod,
     MaturityAssessmentAnalysis,
     OpportunityCostAnalysis,
-    ResourceAnalysisReport
+    ResourceDetail,
+    ForecastPeriodKeyDrivers
 } from '@/interfaces/ai-finops-metrics/aiFinopsMetricsInterfaces';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 
 interface DetailedMetricsAnalysisProps {
     data: AiFinopsMetrics;
 }
 
-// Mapeo de opciones para el Selector
 const METRIC_OPTIONS = [
     { value: 'opportunity_cost', label: 'Costo de Oportunidad', icon: DollarSign },
     { value: 'cost_volatility', label: 'Volatilidad de Costos', icon: TrendingUp },
@@ -65,6 +63,8 @@ export const DetailedMetricsAnalysis = ({ data }: DetailedMetricsAnalysisProps) 
     const [selectedMetric, setSelectedMetric] = useState<string | null>(null);
 
     const renderContent = () => {
+        if (!data || !data.metrics_analysis) return <EmptyState />;
+
         switch (selectedMetric) {
             case 'opportunity_cost':
                 return <StandardMetricDetail metricData={data.metrics_analysis.opportunity_cost} type="opportunity_cost" />;
@@ -85,7 +85,6 @@ export const DetailedMetricsAnalysis = ({ data }: DetailedMetricsAnalysisProps) 
 
     return (
         <div className="space-y-6">
-            {/* Header y Selector */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-muted/30 p-4 rounded-lg border">
                 <div className="space-y-1">
                     <h3 className="font-semibold text-lg flex items-center gap-2">
@@ -115,7 +114,6 @@ export const DetailedMetricsAnalysis = ({ data }: DetailedMetricsAnalysisProps) 
                 </div>
             </div>
 
-            {/* Área de Contenido Dinámico */}
             <div className="min-h-[400px] transition-all duration-300">
                 {renderContent()}
             </div>
@@ -123,6 +121,7 @@ export const DetailedMetricsAnalysis = ({ data }: DetailedMetricsAnalysisProps) 
     );
 };
 
+// --- Utils ---
 const MarkdownText = ({ content }: { content: string }) => {
     return (
         <ReactMarkdown
@@ -140,7 +139,15 @@ const MarkdownText = ({ content }: { content: string }) => {
     );
 };
 
-// --- Sub-componente: Estado Vacío ---
+const getStatusColor = (status: string) => {
+    switch (status) {
+        case 'EXCELLENT': return 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300 border-green-200 dark:border-green-800';
+        case 'WARNING': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300 border-yellow-200 dark:border-yellow-800';
+        case 'CRITICAL': return 'bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300 border-red-200 dark:border-red-800';
+        default: return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300';
+    }
+};
+
 const EmptyState = () => (
     <div className="flex flex-col items-center justify-center h-64 border-2 border-dashed rounded-lg bg-muted/5 text-muted-foreground">
         <MousePointerClick className="h-12 w-12 mb-4 opacity-50" />
@@ -155,174 +162,273 @@ interface StandardMetricDetailProps {
     type: 'opportunity_cost' | 'cost_volatility' | 'cpu_efficiency' | 'elasticity';
 }
 
-const StandardMetricDetail = ({ metricData, type }: StandardMetricDetailProps) => {
+const ITEMS_PER_PAGE = 5;
 
-    // Aseguramos que resources sea siempre un array de ResourceAnalysisReport para poder iterar
-    let resources: ResourceAnalysisReport[] = [];
+const StandardMetricDetail = ({ metricData, type }: StandardMetricDetailProps) => {
+    // Estados para paginación y búsqueda
+    const [searchTerm, setSearchTerm] = useState("");
+    const [currentPage, setCurrentPage] = useState(1);
+
+    let resourceList: ResourceDetail[] = [];
     let kpiValue: React.ReactNode = null;
     let kpiLabel = "";
+    let extraInfo: React.ReactNode = null;
 
+    // Extracción de Datos (Misma lógica anterior)
     if (type === 'opportunity_cost') {
         const d = metricData as OpportunityCostAnalysis;
-        // resources_analysis es un OBJETO único, lo envolvemos en un array
-        resources = d.resources_analysis ? [d.resources_analysis] : [];
-        kpiLabel = "Ahorro Potencial";
-        kpiValue = `$${d.total_potential_savings_usd.toLocaleString()}`;
-    } else if (type === 'cost_volatility') {
+        kpiLabel = "Ahorro Potencial Total";
+        kpiValue = `$${d.total_potential_savings_usd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    }
+    else if (type === 'cost_volatility') {
         const d = metricData as CostVolatilityAnalysis;
-        // anomalous_resources es un OBJETO único, lo envolvemos en un array
-        resources = d.anomalous_resources ? [d.anomalous_resources] : [];
-        kpiLabel = "Volatilidad Detectada";
+        kpiLabel = "Volatilidad";
         kpiValue = `${d.volatility_percentage}%`;
-    } else if (type === 'cpu_efficiency') {
+        const anomalousCount = d.anomalous_resources?.services_flagged_count || (d as unknown).anomalous_services?.services_flagged_count || 0;
+        extraInfo = (
+            <div className="mt-2 text-xs text-muted-foreground">
+                <span className="font-semibold">{anomalousCount}</span> servicios anómalos detectados
+            </div>
+        );
+    }
+    else if (type === 'cpu_efficiency') {
         const d = metricData as CpuEfficiencyAnalysis;
-        // underutilized_instances es un OBJETO único, lo envolvemos en un array
-        resources = d.underutilized_instances ? [d.underutilized_instances] : [];
         kpiLabel = "Utilización Promedio";
-        kpiValue = `${d.average_cpu_utilization}%`;
-    } else if (type === 'elasticity') {
+        kpiValue = `${d.average_cpu_utilization.toFixed(2)}%`;
+        if (d.underutilized_instances && d.underutilized_instances.details) {
+            resourceList = d.underutilized_instances.details;
+        }
+    }
+    else if (type === 'elasticity') {
         const d = metricData as ElasticityAnalysis;
-        // scaling_groups_analysis es un OBJETO único, lo envolvemos en un array
-        resources = d.scaling_groups_analysis ? [d.scaling_groups_analysis] : [];
-        kpiLabel = "Puntaje de Elasticidad";
+        kpiLabel = "Puntaje Elasticidad";
         kpiValue = d.elasticity_score;
+        if (d.scaling_groups_analysis && d.scaling_groups_analysis.details) {
+            resourceList = d.scaling_groups_analysis.details;
+        }
     }
 
-    const getStatusColor = (status: string) => {
-        if (status === 'EXCELLENT') return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300';
-        if (status === 'WARNING') return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300';
-        return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300';
+    // --- Lógica de Filtrado y Paginación ---
+
+    // 1. Filtrar
+    const filteredResources = resourceList.filter(r => {
+        const term = searchTerm.toLowerCase();
+        return (
+            r.resource_name.toLowerCase().includes(term) ||
+            r.resource_id.toLowerCase().includes(term) ||
+            r.resource_type.toLowerCase().includes(term)
+        );
+    });
+
+    // 2. Calcular Páginas
+    const totalPages = Math.ceil(filteredResources.length / ITEMS_PER_PAGE);
+
+    // 3. Obtener items actuales
+    const currentResources = filteredResources.slice(
+        (currentPage - 1) * ITEMS_PER_PAGE,
+        currentPage * ITEMS_PER_PAGE
+    );
+
+    // Resetear a página 1 cuando cambia la búsqueda
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [searchTerm]);
+
+    // Helpers para color de estado (Misma lógica)
+    const getStatusStyle = (status: string) => {
+        switch (status) {
+            case 'EXCELLENT': return 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300 border-green-200 dark:border-green-800';
+            case 'WARNING': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300 border-yellow-200 dark:border-yellow-800';
+            case 'CRITICAL': return 'bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300 border-red-200 dark:border-red-800';
+            default: return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300';
+        }
     };
 
     return (
         <div className="space-y-6 animate-in fade-in zoom-in-95 duration-300">
+            {/* KPI Card Principal (Sin cambios) */}
             <Card>
-                <CardHeader className="pb-2">
+                <CardHeader className="pb-4">
                     <div className="flex justify-between items-start">
                         <div className="space-y-1">
-                            <CardTitle className="text-xl capitalize flex items-center gap-2">
-                                {metricData.metric_name.replace(/_/g, ' ')}
-                                <Badge className={getStatusColor(metricData.status)} variant="secondary">
+                            <CardTitle className="text-xl flex items-center gap-3">
+                                {metricData.metric_name}
+                                <Badge className={`${getStatusStyle(metricData.status)} border`} variant="outline">
                                     {metricData.status}
                                 </Badge>
                             </CardTitle>
-                            <CardDescription>Análisis detallado y hallazgos</CardDescription>
+                            <CardDescription>
+                                <span className="font-medium">Asignado a:</span> {metricData.assigned_to}
+                            </CardDescription>
                         </div>
-                        <div className="text-right">
-                            <p className="text-xs font-medium text-muted-foreground uppercase">{kpiLabel}</p>
-                            <p className="text-2xl font-bold">{kpiValue}</p>
+                        <div className="text-right bg-muted/20 p-3 rounded-lg border">
+                            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{kpiLabel}</p>
+                            <p className="text-2xl font-bold text-foreground">{kpiValue}</p>
+                            {extraInfo}
                         </div>
                     </div>
                 </CardHeader>
-                <CardContent className="mt-4 space-y-6">
-                    <div className="grid gap-6">
-                        <div className="space-y-2">
-                            <h4 className="font-semibold text-xl flex items-center gap-2 text-amber-600 dark:text-amber-500">
-                                <AlertCircle className="h-4 w-4" />
-                                Causa Raíz Detectada
+                <CardContent className="space-y-6">
+                    <div className="grid md:grid-cols-2 gap-6">
+                        <div className="space-y-3">
+                            <h4 className="font-semibold text-sm flex items-center gap-2 text-amber-600 dark:text-amber-500 uppercase tracking-wide">
+                                <AlertCircle className="h-4 w-4" /> Análisis de Causa Raíz
                             </h4>
-                            <div className="bg-amber-50/50 dark:bg-amber-950/10 border border-amber-100 dark:border-amber-900 rounded-md">
-                                <ScrollArea className="w-full rounded-md">
-                                    <div className="p-4">
-                                        <MarkdownText content={metricData.root_cause_analysis} />
-                                    </div>
-                                </ScrollArea>
+                            <div className="text-sm text-muted-foreground bg-amber-50/50 dark:bg-amber-950/10 p-4 rounded-md border border-amber-100 dark:border-amber-900">
+                                <MarkdownText content={metricData.root_cause_analysis} />
                             </div>
                         </div>
-
-                        <div className="space-y-2">
-                            <h4 className="font-semibold text-xl flex items-center gap-2 text-blue-600 dark:text-blue-500">
-                                <Lightbulb className="h-4 w-4" />
-                                Recomendación Principal
+                        <div className="space-y-3">
+                            <h4 className="font-semibold text-sm flex items-center gap-2 text-blue-600 dark:text-blue-500 uppercase tracking-wide">
+                                <Lightbulb className="h-4 w-4" /> Recomendación
                             </h4>
-                            <div className="bg-blue-50/50 dark:bg-blue-950/10 border border-blue-100 dark:border-blue-900 rounded-md">
-                                <ScrollArea className="w-full rounded-md">
-                                    <div className="p-4">
-                                        <MarkdownText content={metricData.recommendation} />
-                                    </div>
-                                </ScrollArea>
+                            <div className="text-sm text-muted-foreground bg-blue-50/50 dark:bg-blue-950/10 p-4 rounded-md border border-blue-100 dark:border-blue-900">
+                                <MarkdownText content={metricData.recommendation} />
                             </div>
                         </div>
                     </div>
-
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-4 border-t">
+                    <Separator />
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                         <div>
                             <span className="text-xs text-muted-foreground uppercase font-bold">Prioridad</span>
-                            <p className="text-sm font-medium">{metricData.priority}</p>
+                            <div className="flex items-center gap-2 mt-1">
+                                <div className={`h-2 w-2 rounded-full ${metricData.priority === 'Critical' ? 'bg-red-500' : metricData.priority === 'Warning' ? 'bg-yellow-500' : 'bg-green-500'}`} />
+                                <p className="text-sm font-medium">{metricData.priority}</p>
+                            </div>
                         </div>
                         <div>
                             <span className="text-xs text-muted-foreground uppercase font-bold">Esfuerzo</span>
-                            <p className="text-sm font-medium truncate" title={metricData.effort}>{metricData.effort.split('(')[0]}</p>
+                            <p className="text-sm font-medium mt-1 truncate" title={metricData.effort}>{metricData.effort.split('(')[0].trim()}</p>
                         </div>
                         <div>
                             <span className="text-xs text-muted-foreground uppercase font-bold">Riesgo</span>
-                            <p className="text-sm font-medium truncate" title={metricData.risk}>{metricData.risk.split('(')[0]}</p>
-                        </div>
-                        <div>
-                            <span className="text-xs text-muted-foreground uppercase font-bold">Asignado a</span>
-                            <p className="text-sm font-medium">{metricData.assigned_to}</p>
+                            <p className="text-sm font-medium mt-1 truncate" title={metricData.risk}>{metricData.risk.split('(')[0].trim()}</p>
                         </div>
                     </div>
                 </CardContent>
             </Card>
 
-            {resources && resources.length > 0 ? (
-                resources.map((report, idx) => (
-                    <Card key={idx}>
-                        <CardHeader>
-                            <CardTitle className="text-base font-semibold">
-                                Recursos Analizados ({report.resources_flagged_count} de {report.resources_analyzed_count} afectados)
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <ScrollArea className="h-[300px] w-full rounded-md border">
-                                <Table>
-                                    <TableHeader>
-                                        <TableRow>
-                                            <TableHead>Recurso</TableHead>
-                                            <TableHead>Tipo</TableHead>
-                                            <TableHead>Evidencia</TableHead>
-                                            <TableHead>Acción Sugerida</TableHead>
-                                            <TableHead className="text-right">Ahorro Est.</TableHead>
-                                        </TableRow>
-                                    </TableHeader>
-                                    <TableBody>
-                                        {/* Aquí accedemos correctamente al array 'details' dentro del objeto ResourceAnalysisReport */}
-                                        {report.details && report.details.length > 0 ? (
-                                            report.details.map((resource, rIdx) => (
-                                                <TableRow key={rIdx}>
-                                                    <TableCell className="font-medium text-xs">
-                                                        {resource.resource_name}
-                                                        <div className="text-[10px] text-muted-foreground">{resource.resource_id}</div>
-                                                    </TableCell>
-                                                    <TableCell className="text-xs">{resource.resource_type}</TableCell>
-                                                    <TableCell className="text-xs text-muted-foreground max-w-[200px] truncate" title={resource.specific_evidence}>
-                                                        {resource.specific_evidence}
-                                                    </TableCell>
-                                                    <TableCell className="text-xs text-muted-foreground max-w-[200px] truncate" title={resource.suggested_action}>
-                                                        {resource.suggested_action}
-                                                    </TableCell>
-                                                    <TableCell className="text-right text-xs font-mono">
+            {/* SECCIÓN DE RECURSOS CON FILTRO Y PAGINACIÓN */}
+            {resourceList && resourceList.length > 0 && (
+                <div className="space-y-4">
+                    <div className="flex flex-col sm:flex-row justify-between items-end sm:items-center gap-4">
+                        <h4 className="font-semibold flex items-center gap-2 text-lg">
+                            <Activity className="h-5 w-5 text-gray-500" />
+                            Recursos Identificados
+                            <Badge variant="secondary" className="ml-1">{resourceList.length}</Badge>
+                        </h4>
+
+                        {/* Buscador */}
+                        <div className="relative w-full sm:w-72">
+                            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                            <Input
+                                type="text"
+                                placeholder="Filtrar por nombre, ID o tipo..."
+                                className="pl-9"
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                            />
+                            {searchTerm && (
+                                <button
+                                    onClick={() => setSearchTerm("")}
+                                    className="absolute right-2.5 top-2.5 text-muted-foreground hover:text-foreground"
+                                >
+                                    <FilterX className="h-4 w-4" />
+                                </button>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Lista de Tarjetas Paginada */}
+                    <div className="grid gap-4 min-h-[200px]">
+                        {currentResources.length > 0 ? (
+                            currentResources.map((resource, idx) => (
+                                <Card key={idx} className="overflow-hidden border-l-4 border-l-blue-500 dark:border-l-blue-700">
+                                    <CardContent className="p-4 sm:p-5 space-y-4">
+                                        <div className="flex flex-col sm:flex-row justify-between gap-3">
+                                            <div className="space-y-1">
+                                                <div className="flex items-center gap-2 flex-wrap">
+                                                    <span className="font-semibold text-base">{resource.resource_name}</span>
+                                                    <Badge variant="outline" className="text-xs font-normal bg-muted/50">
+                                                        {resource.resource_type}
+                                                    </Badge>
+                                                </div>
+                                                <div className="text-xs font-mono text-muted-foreground break-all flex items-center gap-1">
+                                                    <Server className="h-3 w-3 inline" />
+                                                    {resource.resource_id}
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center gap-2 bg-green-50 dark:bg-green-950/20 px-3 py-1.5 rounded border border-green-100 dark:border-green-900 self-start shrink-0">
+                                                <DollarSign className="h-4 w-4 text-green-600 dark:text-green-400" />
+                                                <div className="text-right">
+                                                    <div className="text-[10px] text-muted-foreground uppercase leading-none mb-0.5">Ahorro Est.</div>
+                                                    <div className="font-bold text-sm text-green-700 dark:text-green-300 leading-none">
                                                         {resource.potential_savings_usd ? `$${resource.potential_savings_usd}` : '-'}
-                                                    </TableCell>
-                                                </TableRow>
-                                            ))
-                                        ) : (
-                                            <TableRow>
-                                                <TableCell colSpan={5} className="text-center text-xs text-muted-foreground py-4">
-                                                    No hay detalles de recursos disponibles.
-                                                </TableCell>
-                                            </TableRow>
-                                        )}
-                                    </TableBody>
-                                </Table>
-                            </ScrollArea>
-                        </CardContent>
-                    </Card>
-                ))
-            ) : (
-                <div className="text-center p-8 text-muted-foreground bg-muted/10 rounded-lg border border-dashed">
-                    No se detectaron recursos específicos afectados para este reporte.
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <Separator className="bg-border/60" />
+                                        <div className="grid md:grid-cols-2 gap-6">
+                                            <div className="space-y-2">
+                                                <h5 className="text-xs font-bold text-muted-foreground uppercase flex items-center gap-1.5">
+                                                    <Search className="h-3.5 w-3.5" /> Evidencia Técnica
+                                                </h5>
+                                                <p className="text-sm text-muted-foreground leading-relaxed bg-muted/20 p-3 rounded border border-border/50">
+                                                    {resource.specific_evidence}
+                                                </p>
+                                            </div>
+                                            <div className="space-y-2">
+                                                <h5 className="text-xs font-bold text-muted-foreground uppercase flex items-center gap-1.5">
+                                                    <Hammer className="h-3.5 w-3.5 text-blue-500" /> Acción Sugerida
+                                                </h5>
+                                                <p className="text-sm text-foreground leading-relaxed bg-blue-50/30 dark:bg-blue-950/10 p-3 rounded border border-blue-100/50 dark:border-blue-900/50">
+                                                    {resource.suggested_action}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            ))
+                        ) : (
+                            <div className="flex flex-col items-center justify-center py-10 text-muted-foreground border-2 border-dashed rounded-lg bg-muted/5">
+                                <Search className="h-10 w-10 mb-2 opacity-20" />
+                                <p>No se encontraron recursos que coincidan con tu búsqueda.</p>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Controles de Paginación */}
+                    {totalPages > 1 && (
+                        <div className="flex items-center justify-between border-t pt-4">
+                            <div className="text-xs text-muted-foreground">
+                                Mostrando <span className="font-medium">{(currentPage - 1) * ITEMS_PER_PAGE + 1}</span> - <span className="font-medium">{Math.min(currentPage * ITEMS_PER_PAGE, filteredResources.length)}</span> de <span className="font-medium">{filteredResources.length}</span> recursos
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                                    disabled={currentPage === 1}
+                                >
+                                    <ChevronLeft className="h-4 w-4" />
+                                    <span className="sr-only sm:not-sr-only sm:ml-2">Anterior</span>
+                                </Button>
+                                <div className="text-xs font-medium bg-muted px-3 py-2 rounded">
+                                    Pág {currentPage} de {totalPages}
+                                </div>
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                                    disabled={currentPage === totalPages}
+                                >
+                                    <span className="sr-only sm:not-sr-only sm:mr-2">Siguiente</span>
+                                    <ChevronRight className="h-4 w-4" />
+                                </Button>
+                            </div>
+                        </div>
+                    )}
                 </div>
             )}
         </div>
@@ -332,51 +438,79 @@ const StandardMetricDetail = ({ metricData, type }: StandardMetricDetailProps) =
 // --- Sub-componente: Detalle Madurez ---
 const MaturityDetail = ({ metricData }: { metricData: MaturityAssessmentAnalysis }) => {
     return (
-        <Card className="animate-in fade-in zoom-in-95 duration-300">
-            <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                    <CheckCircle2 className="h-6 w-6 text-purple-500" />
-                    Evaluación de Madurez FinOps
-                </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-                <div className="flex flex-col items-center justify-center p-6 bg-muted/20 rounded-lg border">
-                    <h3 className="text-4xl font-extrabold text-purple-600 dark:text-purple-400 mb-2">
+        <div className="space-y-6 animate-in fade-in zoom-in-95 duration-300">
+            {/* Header Card */}
+            <Card className="overflow-hidden border-purple-200 dark:border-purple-900">
+                <div className="bg-purple-50 dark:bg-purple-950/20 p-6 flex flex-col items-center justify-center border-b border-purple-100 dark:border-purple-900">
+                    <CheckCircle2 className="h-10 w-10 text-purple-600 dark:text-purple-400 mb-3" />
+                    <h3 className="text-3xl font-extrabold text-foreground mb-1">
                         {metricData.finops_maturity_level}
                     </h3>
-                    <p className="text-center max-w-lg text-foreground">
+                    <p className="text-center text-muted-foreground text-sm max-w-2xl">
                         {metricData.maturity_level_description}
                     </p>
                 </div>
+                <CardContent className="pt-6 grid gap-6">
+                    <div className="space-y-2">
+                        <h4 className="font-semibold text-sm flex items-center gap-2 uppercase tracking-wide text-muted-foreground">
+                            Recomendación Estratégica
+                        </h4>
+                        <div className="bg-muted/30 p-4 rounded-lg text-sm">
+                            <MarkdownText content={metricData.recommendation} />
+                        </div>
+                    </div>
+                </CardContent>
+            </Card>
 
-                <div className="grid gap-6">
-                    <div className="space-y-2">
-                        <span className="font-semibold text-sm flex items-center gap-2 text-amber-600 dark:text-amber-500">
-                            <AlertCircle className="h-4 w-4" /> Análisis de Causa Raíz
-                        </span>
-                        <div className="bg-amber-50/50 dark:bg-amber-950/10 border border-amber-100 dark:border-amber-900 rounded-md">
-                            <ScrollArea className="w-full rounded-md">
-                                <div className="p-4">
-                                    <MarkdownText content={metricData.root_cause_analysis} />
+            {/* Listado de Criterios Analizados */}
+            <div className="grid gap-4">
+                <h3 className="font-semibold text-lg">Detalle de Criterios Evaluados</h3>
+                {metricData.criteria_analyzed.map((criteria, idx) => (
+                    <Card key={idx} className="overflow-hidden">
+                        <CardHeader className="bg-muted/20 py-3">
+                            <div className="flex justify-between items-center">
+                                <CardTitle className="text-sm font-semibold">{criteria.criteria}</CardTitle>
+                                <Badge variant="outline" className="text-xs font-normal">
+                                    {criteria.service_analyzed}
+                                </Badge>
+                            </div>
+                        </CardHeader>
+                        <CardContent className="pt-4 grid sm:grid-cols-2 gap-4 text-sm">
+                            <div>
+                                <span className="block text-xs font-bold uppercase text-muted-foreground mb-1">Valor Detectado</span>
+                                <div className="p-2 bg-blue-50 dark:bg-blue-950/10 border border-blue-100 dark:border-blue-900 rounded text-blue-800 dark:text-blue-300">
+                                    {criteria.value}
                                 </div>
-                            </ScrollArea>
-                        </div>
-                    </div>
-                    <div className="space-y-2">
-                        <span className="font-semibold text-sm flex items-center gap-2 text-blue-600 dark:text-blue-500">
-                            <Lightbulb className="h-4 w-4" /> Recomendación Estratégica
-                        </span>
-                        <div className="bg-blue-50/50 dark:bg-blue-950/10 border border-blue-100 dark:border-blue-900 rounded-md">
-                            <ScrollArea className="w-full rounded-md">
-                                <div className="p-4">
-                                    <MarkdownText content={metricData.recommendation} />
+                            </div>
+                            <div>
+                                <span className="block text-xs font-bold uppercase text-muted-foreground mb-1">Valor Esperado</span>
+                                <div className="p-2 bg-green-50 dark:bg-green-950/10 border border-green-100 dark:border-green-900 rounded text-green-800 dark:text-green-300">
+                                    {criteria.expected_value}
                                 </div>
-                            </ScrollArea>
-                        </div>
-                    </div>
-                </div>
-            </CardContent>
-        </Card>
+                            </div>
+
+                            {/* Detalles anidados del criterio si existen */}
+                            {criteria.details && criteria.details.length > 0 && (
+                                <div className="col-span-2 mt-2 pt-2 border-t">
+                                    <span className="block text-xs font-bold uppercase text-muted-foreground mb-2">Análisis Técnico</span>
+                                    <ul className="space-y-2">
+                                        {criteria.details.map((d, dIdx) => (
+                                            <li key={dIdx} className="text-xs text-muted-foreground flex items-start gap-2">
+                                                <ArrowRight className="h-3 w-3 mt-0.5 text-blue-500 shrink-0" />
+                                                <span>
+                                                    {d.name && <span className="font-semibold text-foreground mr-1">{d.name}:</span>}
+                                                    {d.detail_description}
+                                                </span>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            )}
+                        </CardContent>
+                    </Card>
+                ))}
+            </div>
+        </div>
     )
 }
 
@@ -388,39 +522,33 @@ const ForecastDetail = ({ forecastData }: { forecastData: AiFinopsMetrics['spend
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                         <LineChart className="h-6 w-6 text-blue-500" />
-                        Proyección de Gasto
+                        Proyección de Gasto (Forecast)
                     </CardTitle>
                     <CardDescription>
-                        Análisis predictivo basado en {forecastData.data_points_analyzed} puntos de datos históricos.
+                        Basado en {forecastData.data_points_analyzed} puntos de datos históricos.
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <div className="bg-blue-50 dark:bg-blue-950/20 p-4 rounded-lg border border-blue-100 dark:border-blue-900 mb-6">
-                        <h4 className="font-semibold text-blue-700 dark:text-blue-300 text-sm mb-1">Estrategia utilizada</h4>
-                        <MarkdownText content={forecastData.strategy_used} />
-                    </div>
-                    <div className="bg-blue-50 dark:bg-blue-950/20 p-4 rounded-lg border border-blue-100 dark:border-blue-900 mb-6">
-                        <h4 className="font-semibold text-blue-700 dark:text-blue-300 text-sm mb-1">Recomendación del Modelo</h4>
-                        <MarkdownText content={forecastData.recommendation} />
-                    </div>
-
-                    <div className="grid md:grid-cols-2 gap-8">
-                        {/* Tarjeta Corto Plazo */}
-                        <div>
-                            <h4 className="font-semibold mb-3 flex items-center gap-2 text-sm text-muted-foreground uppercase tracking-wide">
-                                <Zap className="h-4 w-4 text-amber-500" />
-                                Corto Plazo
-                            </h4>
-                            <ForecastCard periods={forecastData.short_term_forecast} />
+                    <div className="grid gap-6">
+                        <div className="p-4 rounded-lg border bg-muted/20">
+                            <h4 className="font-semibold text-sm mb-2 text-foreground">Estrategia Utilizada</h4>
+                            <div className="text-sm text-muted-foreground">
+                                <MarkdownText content={forecastData.strategy_used} />
+                            </div>
                         </div>
 
-                        {/* Tarjeta Largo Plazo */}
-                        <div>
-                            <h4 className="font-semibold mb-3 flex items-center gap-2 text-sm text-muted-foreground uppercase tracking-wide">
-                                <BarChart3 className="h-4 w-4 text-indigo-500" />
-                                Largo Plazo
+                        <div className="grid md:grid-cols-2 gap-6">
+                            <ForecastCard periods={forecastData.short_term_forecast} title="Corto Plazo" icon={Zap} iconColor="text-amber-500" />
+                            <ForecastCard periods={forecastData.long_term_forecast} title="Largo Plazo" icon={BarChart3} iconColor="text-indigo-500" />
+                        </div>
+
+                        <div className="p-4 rounded-lg border border-blue-200 bg-blue-50 dark:bg-blue-950/20 dark:border-blue-800">
+                            <h4 className="font-semibold text-sm mb-2 text-blue-800 dark:text-blue-300 flex items-center gap-2">
+                                <Lightbulb className="h-4 w-4" /> Recomendación del Modelo
                             </h4>
-                            <ForecastCard periods={forecastData.long_term_forecast} />
+                            <div className="text-sm text-blue-700 dark:text-blue-400">
+                                <MarkdownText content={forecastData.recommendation} />
+                            </div>
                         </div>
                     </div>
                 </CardContent>
@@ -429,49 +557,64 @@ const ForecastDetail = ({ forecastData }: { forecastData: AiFinopsMetrics['spend
     )
 }
 
-// NUEVO COMPONENTE: ForecastCard (Reemplaza a la tabla)
-const ForecastCard = ({ periods }: { periods: ForecastPeriod }) => {
+// Sub-componente Forecast Card
+interface ForecastCardProps {
+    periods: ForecastPeriod;
+    title: string;
+    icon: React.ElementType;
+    iconColor: string;
+}
 
-    // Helper para el color de confianza
-    const getConfidenceColor = (confidence: string) => {
+const ForecastCard = ({ periods, title, icon: Icon, iconColor }: ForecastCardProps) => {
+    const getConfidenceBadge = (confidence: string) => {
         const c = confidence.toLowerCase();
-        if (c.includes('high')) return 'text-green-600 bg-green-50 border-green-200 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800';
-        if (c.includes('medium')) return 'text-yellow-600 bg-yellow-50 border-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-400 dark:border-yellow-800';
-        return 'text-red-600 bg-red-50 border-red-200 dark:bg-red-900/30 dark:text-red-400 dark:border-red-800';
+        let color = "bg-gray-100 text-gray-800";
+        if (c.includes('high') || c.includes('alta')) color = "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300";
+        else if (c.includes('medium') || c.includes('media')) color = "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300";
+        else color = "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300";
+
+        return <Badge className={`${color} border-0 ml-auto`}>{confidence}</Badge>;
     };
 
     return (
-        <div className="border rounded-xl bg-card shadow-sm overflow-hidden flex flex-col h-full">
-            {/* Cabecera con Datos Clave */}
-            <div className="p-5 bg-muted/20 border-b flex flex-col gap-4">
-                <div className="flex justify-between items-start">
-                    <div className="flex items-center gap-2 text-muted-foreground">
-                        <CalendarClock className="h-4 w-4" />
-                        <span className="text-sm font-medium">{periods.period}</span>
-                    </div>
-                    <Badge variant="outline" className={`capitalize ${getConfidenceColor(periods.confidence_level)}`}>
-                        {periods.confidence_level}
-                    </Badge>
+        <div className="flex flex-col h-full border rounded-xl overflow-hidden shadow-sm bg-card">
+            <div className="p-4 border-b bg-muted/10 flex flex-col gap-3">
+                <div className="flex items-center gap-2">
+                    <Icon className={`h-4 w-4 ${iconColor}`} />
+                    <span className="font-semibold text-sm uppercase tracking-wider">{title}</span>
+                    {getConfidenceBadge(periods.confidence_level)}
                 </div>
                 <div>
-                    <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Gasto Proyectado</span>
-                    <div className="text-3xl font-bold tracking-tight mt-1">
+                    <span className="text-xs text-muted-foreground uppercase">Gasto Estimado ({periods.period})</span>
+                    <div className="text-3xl font-bold mt-1 tracking-tight">
                         ${periods.predicted_spend_usd.toLocaleString()}
                     </div>
                 </div>
             </div>
-
-            {/* Sección de Key Drivers */}
-            <div className="p-5 flex-grow flex flex-col">
-                <h5 className="text-sm font-semibold mb-3 flex items-center gap-2">
-                    <Target className="h-4 w-4 text-blue-500" />
-                    Key Drivers (Factores Clave)
+            <div className="p-4 bg-white dark:bg-transparent flex-grow">
+                <h5 className="text-xs font-bold text-muted-foreground uppercase mb-3 flex items-center gap-2">
+                    <Target className="h-3 w-3" /> Key Drivers Detectados
                 </h5>
-                <div className="text-sm text-muted-foreground space-y-3">
-                    {periods.key_drivers.map((driver, idx) => (
-                        <div key={idx} className="flex items-start gap-2.5">
-                            <ArrowRight className="h-4 w-4 text-blue-400 mt-0.5 shrink-0" />
-                            <span className="leading-snug">{driver}</span>
+                <div className="space-y-4">
+                    {periods.key_drivers.map((driver: ForecastPeriodKeyDrivers, idx) => (
+                        <div key={idx} className="group relative pl-4 border-l-2 border-muted hover:border-blue-400 transition-colors">
+                            <div className="flex justify-between items-start">
+                                <span className="text-sm font-semibold text-foreground">{driver.service_name}</span>
+                                {driver.value_detected > 0 && (
+                                    <span className="text-xs font-mono text-muted-foreground">
+                                        ${driver.value_detected.toFixed(2)}
+                                    </span>
+                                )}
+                            </div>
+                            <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                                {driver.key_reason}
+                            </p>
+                            {driver.anomaly_detected !== "Sin anomalía" && (
+                                <div className="mt-1 inline-flex items-center text-[10px] font-medium text-amber-600 bg-amber-50 px-2 py-0.5 rounded border border-amber-100 dark:bg-amber-950/30 dark:border-amber-900 dark:text-amber-400">
+                                    <AlertCircle className="h-3 w-3 mr-1" />
+                                    {driver.anomaly_detected}
+                                </div>
+                            )}
                         </div>
                     ))}
                 </div>

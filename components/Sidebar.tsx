@@ -171,6 +171,7 @@ export const SidebarComponent = ({
             { label: 'Eventos', icon: Zap, href: '/aws/eventos' },
             { label: 'Vista Advisor', icon: Pyramid, href: '/aws/advisor' },
             { label: 'Vista Saving Plans', icon: HandCoins, href: '/aws/saving-plan' },
+            { label: 'Métricas Finops', icon: ChartNetwork, href: '/aws/finops-metrics-ai' },
         ],
         recursos: [
             { label: 'Instancias EC2', icon: Computer, href: '/aws/recursos/instancias-ec2', color: 'text-orange-500' },
@@ -237,10 +238,10 @@ export const SidebarComponent = ({
         ],
     }
 
-        const NetworkingGCP = [
-            { label: 'IPs Externas sin Uso', icon: Globe2, href: '/gcp/funciones/networking/ips-sin-uso' },
-            { label: 'Subnets sin Recursos Asociados', icon: Split, href: '/gcp/funciones/networking/subnets-sin-recursos' },
-        ]
+    const NetworkingGCP = [
+        { label: 'IPs Externas sin Uso', icon: Globe2, href: '/gcp/funciones/networking/ips-sin-uso' },
+        { label: 'Subnets sin Recursos Asociados', icon: Split, href: '/gcp/funciones/networking/subnets-sin-recursos' },
+    ]
 
     // CORREGIDO: Rutas apuntando a /gcp en lugar de /gpc
     const infrausedGCP = [
@@ -271,6 +272,7 @@ export const SidebarComponent = ({
         { label: 'Cloud SQL Postgres', icon: Database, href: '/gcp/funciones/uso-horario-habil-no-habil/cloud-sql/postgresql' },
         { label: 'Cloud SQL Mysql', icon: Database, href: '/gcp/funciones/uso-horario-habil-no-habil/cloud-sql/mysql' },
         { label: 'Cloud SQL Sql Server', icon: Database, href: '/gcp/funciones/uso-horario-habil-no-habil/cloud-sql/sqlserver' },
+        { label: 'Cloud Filestore', icon: Box, href: '/gcp/funciones/uso-horario-habil-no-habil/filestore' },
 
     ]
 
@@ -282,10 +284,10 @@ export const SidebarComponent = ({
             //{ label: 'Deployments', icon: Zap, href: '/gcp/deployments' },
             //{ label: 'Items GCP', icon: Table, href: '/gcp/tables-gcp/tablas-item-gcp' },
             { label: 'Recommender', icon: Pyramid, href: '/gcp/recommender' },
-            { label: 'Vista Saving Plans', icon: HandCoins, href: '/gcp/saving-plan' },
-            { label: 'Métricas Finops', icon: ChartNetwork, href: '/gcp/finops-metrics-ai'},
+            //{ label: 'Vista Saving Plans', icon: HandCoins, href: '/gcp/saving-plan' },
+            { label: 'Métricas Finops', icon: ChartNetwork, href: '/gcp/finops-metrics-ai' },
             { label: 'Reservations', icon: Server, href: '/gcp/reservas' },
-            { label: 'Committed Use Discounts', icon: HandCoins, href: '/gcp/cuds/spend-based-cuds' },
+            { label: 'Committed Use Discounts', icon: HandCoins, href: '/gcp/cuds/spend-based-cuds'},
             // { label: 'Presupuestos', icon: CircleDollarSign, href: '/gcp/presupuesto' },
         ],
         recursos: [
@@ -298,9 +300,6 @@ export const SidebarComponent = ({
         ],
         consumes: [{ label: 'Consumos', subItems: consumeSubItemsGCP, icon: Zap }],
         funciones: [
-            // { label: 'Storage Class Analysis', icon: Cylinder, href: '/gcp/funciones/storage-classes-analysis' },
-            // { label: 'Variación Storage', icon: Cylinder, href: '/gcp/funciones/variacion-storage' },
-            // { label: 'Top 10 uso de recursos', icon: LineChart, href: '/gcp/funciones/top-10-recursos-uso' },
             { label: 'Top Cloud Storage Buckets', icon: LineChart, href: '/gcp/funciones/top-cloud-storage-buckets' },
             { label: 'Top Filestore Sub-Utilizados', icon: TrendingDown, href: '/gcp/funciones/top-filestore-sub-utilizado' },
             // { label: 'Incremento Uso de Recursos', icon: LineChart, href: '/gcp/funciones/incremento-top-recursos-uso' },
@@ -308,9 +307,7 @@ export const SidebarComponent = ({
             { label: 'Promedio de uso por región', icon: MapPin, href: '/gcp/funciones/uso-costo-por-localizacion' },
             { label: 'Top Facturación por Región', icon: DollarSign, href: '/gcp/funciones/top-facturacion-region' },
             { label: 'Consumo horario hábil vs no hábil', icon: Clock, href: '/gcp/funciones/analisis-vms-horario' },
-            { label: 'Consumo horario hábil vs no hábil', subItems: workingNonWorkingItemsGCP, icon: Clock },           
-            // { label: 'Promedio de uso por región', icon: MapPin, href: '/gcp/funciones/promedio-por-localizacion' },
-            // { label: 'Consumo horario hábil vs no hábil', icon: Clock, href: '/gcp/funciones/analisis-vms-horario' },                       
+            { label: 'Consumo horario hábil vs no hábil', subItems: workingNonWorkingItemsGCP, icon: Clock },
             { label: 'Recursos no utilizados', subItems: infrausedGCP, icon: TrendingDown },
             { label: 'Networking', subItems: NetworkingGCP, icon: Network },
         ],

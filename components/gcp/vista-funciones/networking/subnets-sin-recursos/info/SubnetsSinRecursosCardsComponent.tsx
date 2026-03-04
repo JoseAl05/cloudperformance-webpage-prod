@@ -15,11 +15,11 @@ interface SubnetsResumen {
 
 interface SubnetsSinRecursosCardsProps {
     summary?: SubnetsResumen;
-    subnets?: any[];
+    subnets?: unknown[];
     isLoading: boolean;
 }
 
-const StatCard = ({ title, value, unit, icon: Icon, description, subtitle, colorClass = "blue", warning = false }: any) => {
+const StatCard = ({ title, value, unit, icon: Icon, description, subtitle, colorClass = "blue", warning = false }: unknown) => {
     const colorStyles: Record<string, { border: string; bgIcon: string }> = {
         blue:   { border: "border-l-blue-500",   bgIcon: "bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400" },
         amber:  { border: "border-l-amber-500",  bgIcon: "bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400" },
@@ -61,7 +61,7 @@ const StatCard = ({ title, value, unit, icon: Icon, description, subtitle, color
 };
 
 // Función para calcular IPs desde CIDR
-const calcularIPsDesdeSubnets = (subnets: any[]): number => {
+const calcularIPsDesdeSubnets = (subnets: unknown[]): number => {
     return subnets.reduce((total, subnet) => {
         const cidrSuffix = parseInt(subnet.ip_cidr_range.split('/')[1]);
         const ipsDisponibles = Math.pow(2, 32 - cidrSuffix);

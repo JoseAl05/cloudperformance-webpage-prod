@@ -19,6 +19,7 @@ type DeploymentDetail = {
     subscription_id: string
     event_timestamp: { $date: string }
     deployment_status: string
+    user_caller: string
     date?: string
 }
 
@@ -30,7 +31,7 @@ type DeploymentGroup = {
 }
 
 interface DeploymentsDetailsTableComponentProps {
-    data:DeploymentGroup[];
+    data: DeploymentGroup[];
 }
 
 const StatusBadge = ({ status }: { status: string }) => {
@@ -52,7 +53,7 @@ const StatusBadge = ({ status }: { status: string }) => {
     )
 }
 
-export const DeploymentsDetailsTableComponent = ({data}:DeploymentsDetailsTableComponentProps) => {
+export const DeploymentsDetailsTableComponent = ({ data }: DeploymentsDetailsTableComponentProps) => {
     const columns: ColumnDef<DeploymentDetail>[] = [
         {
             accessorKey: "date",
@@ -114,6 +115,13 @@ export const DeploymentsDetailsTableComponent = ({data}:DeploymentsDetailsTableC
                     </div>
                 )
             },
+        },
+        {
+            accessorKey: "user_caller",
+            header: "Usuario",
+            cell: (info) => (
+                <span className="text-sm text-gray-700">{info.getValue() as string}</span>
+            ),
         },
     ]
     const flattenedDetails = data.flatMap(group =>

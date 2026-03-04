@@ -13,9 +13,6 @@ import {
     FilestoreRecomendacionView 
 } from './FilestoreConsumeInsightModalComponent';
 
-/**
- * Interface basada en el JSON del endpoint de Filestore
- */
 interface InstanciaFilestore {
     name: string;
     project_id: string;
@@ -33,9 +30,7 @@ interface InstanciaFilestore {
     labels: Record<string, string>;
 }
 
-/**
- * Visualización de la capacidad de almacenamiento (Usado vs Total)
- */
+
 const CapacityCell = ({ used, total, percentage }: { used: number; total: number; percentage: number }) => {
     // Lógica FinOps: Rojo si está casi vacío (<10%) o Naranja si está casi lleno (>90%)
     const barColor = percentage < 10 ? "bg-red-500" : percentage > 90 ? "bg-orange-500" : "bg-green-500";
