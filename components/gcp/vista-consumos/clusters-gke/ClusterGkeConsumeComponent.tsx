@@ -34,7 +34,7 @@ export const ClusterGkeConsumeComponent = ({
     if (startDate) infoUrl += `date_from=${startDate.toISOString().slice(0, 19)}&`;
     if (endDate) infoUrl += `date_to=${endDate.toISOString().slice(0, 19)}&`;
     if (projects) infoUrl += `project_id=${projects}&`;
-    if (regions && regions !== 'all_regions') infoUrl += `location=${regions}&`;
+    if (regions && regions !== 'all_regions') infoUrl += `region=${regions}&`;
     if (resourceId) infoUrl += `resources_id=${resourceId}&`;
     // if (tagKey && tagKey !== 'allKeys') {
     //     infoUrl += `tag_key=${encodeURIComponent(tagKey)}&`;
@@ -84,8 +84,8 @@ export const ClusterGkeConsumeComponent = ({
         efficiencyData.error ||
         metricsData.error;
 
-    const hasInfoData = !!infoData.data && infoData.data.instancias.length > 0;
-    const hasEfficiencyData = !!efficiencyData.data && efficiencyData.data.metrics_detail.length > 0;
+    const hasInfoData = !!infoData.data && infoData.data.length > 0;
+    const hasEfficiencyData = !!efficiencyData.data && efficiencyData.data.length > 0;
     const hasMetricsData = !!metricsData.data && metricsData.data.length > 0;
 
     const noneHasData = !hasInfoData && !hasEfficiencyData && !hasMetricsData;
