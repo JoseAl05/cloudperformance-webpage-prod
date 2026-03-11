@@ -229,6 +229,8 @@ const StandardMetricDetail = ({ metricData, type }: StandardMetricDetailProps) =
         currentPage * ITEMS_PER_PAGE
     );
 
+    console.log(currentResources)
+
     // Resetear a página 1 cuando cambia la búsqueda
     useEffect(() => {
         setCurrentPage(1);

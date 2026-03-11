@@ -220,6 +220,7 @@ export const SidebarComponent = ({
             { label: 'Vista Advisor', icon: Pyramid, href: '/azure/advisor' },
             { label: 'Vista Saving Plans', icon: HandCoins, href: '/azure/saving-plan' },
             { label: 'Presupuestos', icon: CircleDollarSign, href: '/azure/presupuesto' },
+            { label: 'Métricas Finops', icon: ChartNetwork, href: '/azure/finops-metrics-ai' },
         ],
         recursos: [
             { label: 'Maquinas Virtuales', icon: Computer, href: '/azure/recursos-vm' },
