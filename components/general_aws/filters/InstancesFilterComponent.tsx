@@ -39,30 +39,36 @@ export const InstancesFilterComponent = ({
 }: InstancesFilterComponentProps) => {
     const [open, setOpen] = useState(false);
 
+    console.log(selectedKey, selectedValue)
+
     let url = ''
     const startDateFormatted = startDate.toISOString().replace('Z', '').slice(0, -4);
     const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : '';
+
     switch (service) {
         case 'ec2':
-            url = region ? `/api/aws/bridge/vm/all-instances-ec2?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}` : null;
+            url = (selectedKey && selectedValue) ? `/api/aws/bridge/vm/all-instances-ec2?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}` : null;
+            break;
+        case 'eks':
+            url = (selectedKey && selectedValue) ? `/api/aws/bridge/eks/all-eks-clusters?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}` : null;
             break;
         case 'rds-pg':
-            url = region ? `/api/aws/bridge/db/all-instances-rds-pg?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}` : null;
+            url = (selectedKey && selectedValue) ? `/api/aws/bridge/db/all-instances-rds-pg?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}` : null;
             break;
         case 'rds-mysql':
-            url = region ? `/api/aws/bridge/db/all-instances-rds-mysql?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}` : null;
+            url = (selectedKey && selectedValue) ? `/api/aws/bridge/db/all-instances-rds-mysql?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}` : null;
             break;
         case 'rds-oracle':
-            url = region ? `/api/aws/bridge/db/all-instances-rds-oracle?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}` : null;
+            url = (selectedKey && selectedValue) ? `/api/aws/bridge/db/all-instances-rds-oracle?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}` : null;
             break;
         case 'rds-sqlserver':
-            url = region ? `/api/aws/bridge/db/all-instances-rds-sqlserver?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}` : null;
+            url = (selectedKey && selectedValue) ? `/api/aws/bridge/db/all-instances-rds-sqlserver?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}` : null;
             break;
         case 'rds-mariadb':
-            url = region ? `/api/aws/bridge/db/all-instances-rds-mariadb?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}` : null;
+            url = (selectedKey && selectedValue) ? `/api/aws/bridge/db/all-instances-rds-mariadb?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}` : null;
             break;
         case 'asg':
-            url = region ? `/api/aws/bridge/autoscaling/all-autoscaling-groups?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}` : null;
+            url = (selectedKey && selectedValue) ? `/api/aws/bridge/autoscaling/all-autoscaling-groups?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}` : null;
             break;
         case "infraUsed":
             url = region ? `/api/aws/bridge/ec2/all_unused_ec2_instances?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}` : null;
@@ -71,10 +77,10 @@ export const InstancesFilterComponent = ({
             url = '';
     }
 
-    const tagsBody = selectedKey !== 'allKeys' && selectedValue ? { Key: selectedKey, Value: selectedValue } : null;
+    const tagsBody = selectedKey !== 'allKeys' && selectedValue && selectedValue !== 'allValues' ? { Key: selectedKey, Value: selectedValue } : null;
 
     const apiMethod = service === "infraUsed" ? fetcherGet : fetcherPost;
-    const { data, error, isLoading } = useSWR<unknown[]>([url, tagsBody], ([u, t]) => fetcherPost(u, t));
+    const { data, error, isLoading } = useSWR<unknown[]>(url ? [url, tagsBody] : null, ([u, t]) => fetcherPost(u, t));
 
     useEffect(() => {
         if (!isLoading && !error) {

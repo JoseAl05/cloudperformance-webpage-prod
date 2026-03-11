@@ -6,9 +6,9 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { DataTableGrouping } from '@/components/data-table/data-table-grouping';
 import { Clock, Briefcase, Moon } from 'lucide-react';
 import { WorkingNonWorkingHoursUsageSummaryByResource } from '@/interfaces/vista-consumo-horario-habil-no-habil/workingNonWorkingHoursInterfaces';
-import { getWorkingNonWorkingColumns } from '@/components/gcp/vista-funciones/consumo-horario-habil-no-habil/table/WorkingNonWorkingHoursColumns';
+import { getConsumoHorarioColumns } from '@/components/aws/vista-funciones/consumo-horario-habil-vs-no-habil/table/ConsumoHorarioColumns';
 
-interface WorkingNonWorkingHoursTableComponentProps {
+interface ConsumoHorarioTableComponentProps {
     data: WorkingNonWorkingHoursUsageSummaryByResource[];
 }
 
@@ -31,7 +31,7 @@ const TableLegend = () => (
     </div>
 );
 
-export const WorkingNonWorkingHoursTableComponent = ({ data }: WorkingNonWorkingHoursTableComponentProps) => {
+export const ConsumoHorarioTableComponent = ({ data }: ConsumoHorarioTableComponentProps) => {
 
     const { maxValues, uniqueMetrics } = useMemo(() => {
         const computedMaxValues: Record<string, number> = {};
@@ -51,8 +51,8 @@ export const WorkingNonWorkingHoursTableComponent = ({ data }: WorkingNonWorking
         });
 
         const sortedMetrics = Array.from(metricSet).sort((a, b) => {
-            if (a.includes('cpu')) return -1;
-            if (b.includes('cpu')) return 1;
+            if (a.includes('cpuutilization')) return -1;
+            if (b.includes('cpuutilization')) return 1;
             return a.localeCompare(b);
         });
 
@@ -62,7 +62,7 @@ export const WorkingNonWorkingHoursTableComponent = ({ data }: WorkingNonWorking
         };
     }, [data]);
 
-    const columns = createColumns(getWorkingNonWorkingColumns(uniqueMetrics, maxValues));
+    const columns = createColumns(getConsumoHorarioColumns(uniqueMetrics, maxValues));
 
     if (!data || data.length === 0) {
         return (

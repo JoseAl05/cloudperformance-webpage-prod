@@ -40,7 +40,7 @@ export const HistoryModal = ({
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="max-w-[95vw] md:max-w-6xl h-[90vh] flex flex-col p-0 gap-0 overflow-hidden bg-white dark:bg-slate-950 dark:border-slate-800">
+            <DialogContent className="max-w-[95vw] md:max-w-6xl h-[90vh] flex flex-col p-0 gap-0 overflow-y-auto bg-white dark:bg-slate-950 dark:border-slate-800">
 
                 <div className="px-6 py-4 border-b shrink-0 bg-white dark:bg-slate-950 z-10">
                     <DialogHeader>
@@ -63,14 +63,14 @@ export const HistoryModal = ({
                     </DialogHeader>
                 </div>
 
-                <Tabs defaultValue={tabs[0]?.value} className="flex-1 flex flex-col min-h-0 overflow-hidden">
+                <Tabs defaultValue={tabs[0]?.value} className="flex-1 flex flex-col min-h-0 overflow-y-auto">
                     <div className="px-6 pt-2 pb-0 shrink-0 border-b dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/20">
                         <TabsList className="bg-transparent p-0 gap-6 w-full justify-start h-auto">
                             {tabs.map(tab => (
                                 <TabsTrigger
                                     key={tab.value}
                                     value={tab.value}
-                                    className="data-[state=active]:border-b-2 data-[state=active]:border-blue-500 rounded-none px-0 pb-3 bg-transparent shadow-none data-[state=active]:text-blue-600 dark:data-[state=active]:text-blue-400"
+                                    className="data-[state=active]:border-b-2 data-[state=active]:border-blue-500 rounded-none px-0 pb-3 bg-transparent shadow-none cursor-pointer data-[state=active]:text-blue-600 dark:data-[state=active]:text-blue-400"
                                 >
                                     {tab.label}
                                 </TabsTrigger>

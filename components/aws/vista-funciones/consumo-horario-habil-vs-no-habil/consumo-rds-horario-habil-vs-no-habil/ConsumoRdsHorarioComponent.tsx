@@ -1,3 +1,4 @@
+
 'use client'
 
 import { MessageCard } from '@/components/aws/cards/MessageCards';
@@ -9,11 +10,12 @@ import { WorkingNonWorkingHoursUsage, WorkingNonWorkingHoursUsageSummary, Workin
 import { AlertCircle, Clock, Info } from 'lucide-react';
 import useSWR from 'swr';
 
-interface ConsumoEC2AsgHorarioComponentProps {
+interface ConsumoRdsHorarioComponentProps {
   startDate: Date,
   endDate: Date,
   instance: string
   region: string,
+  dbType: string
 }
 
 const fetcher = (url: string) =>
@@ -22,23 +24,23 @@ const fetcher = (url: string) =>
 
 const isNonEmptyArray = <T,>(v: unknown): v is T[] => Array.isArray(v) && v.length > 0
 
-export const ConsumoEC2AsgHorarioComponent = ({ startDate, endDate, region, instance }: ConsumoEC2AsgHorarioComponentProps) => {
+export const ConsumoRdsHorarioComponent = ({ startDate, endDate, region, instance, dbType}: ConsumoRdsHorarioComponentProps) => {
 
   const startDateFormatted = startDate.toISOString().replace('Z', '').slice(0, -4);
   const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : '';
 
   const workingNonWorkingUsage = useSWR(
-    instance ? `/api/aws/bridge/aws/ec2/autoscaling/business-vs-offhours_usage?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&instances=${instance}` : null,
+    instance ? `/api/aws/bridge/aws/rds/business-vs-offhours_usage?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&instances=${instance}&db_type=${dbType}` : null,
     fetcher
   )
 
   const workingNonWorkingUsageSummary = useSWR(
-    instance ? `/api/aws/bridge/aws/ec2/autoscaling/business-vs-offhours_summary?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&instances=${instance}` : null,
+    instance ? `/api/aws/bridge/aws/rds/business-vs-offhours_summary?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&instances=${instance}&db_type=${dbType}` : null,
     fetcher
   )
 
   const workingNonWorkingUsageSummaryByResource = useSWR(
-    instance ? `/api/aws/bridge/aws/ec2/autoscaling/business-vs-offhours_summary_by_resource?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&instances=${instance}` : null,
+    instance ? `/api/aws/bridge/aws/rds/business-vs-offhours_summary_by_resource?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&instances=${instance}&db_type=${dbType}` : null,
     fetcher
   )
 
@@ -53,7 +55,6 @@ export const ConsumoEC2AsgHorarioComponent = ({ startDate, endDate, region, inst
 
   const hasUnusedData = !!workingNonWorkingUsageData || !!workingNonWorkingUsageSummaryData || !!workingNonWorkingUsageSummaryByResourceData;
 
-  console.log(workingNonWorkingUsageSummaryData)
   const anyLoading =
     workingNonWorkingUsage.isLoading ||
     workingNonWorkingUsageSummary.isLoading ||
@@ -103,8 +104,6 @@ export const ConsumoEC2AsgHorarioComponent = ({ startDate, endDate, region, inst
       </div>
     )
   }
-
-
 
   return (
     <>

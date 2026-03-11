@@ -1,5 +1,5 @@
 import { FiltersComponent } from '@/components/general_aws/filters/FiltersComponent'
-import { MainViewConsumoEC2Horario } from '@/components/aws/vista-funciones/consumo-horario-habil-vs-no-habil/consumo-ec2-horario-habil-vs-no-habil/ConsumoEC2HorarioComponent'
+import { ConsumoEC2HorarioComponent } from '@/components/aws/vista-funciones/consumo-horario-habil-vs-no-habil/consumo-ec2-horario-habil-vs-no-habil/ConsumoEC2HorarioComponent'
 import { Computer } from 'lucide-react'
 
 export const ViewConsumoEC2Horario = () => {
@@ -25,12 +25,16 @@ export const ViewConsumoEC2Horario = () => {
         </div>
       </div>
       <FiltersComponent
-        Component={MainViewConsumoEC2Horario}
+        Component={ConsumoEC2HorarioComponent}
         dateFilter
-        metricFilter
+        regionFilter
+        isRegionMultiSelect
         instancesFilter
         instancesService='ec2'
         isInstanceMultiSelect
+        tagsFilter
+        tagColumnName='Tags'
+        collection='aws_ec2_instances'
       />
     </div>
   )
