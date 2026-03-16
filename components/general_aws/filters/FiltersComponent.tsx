@@ -56,6 +56,7 @@ interface FiltersComponentProps {
         year?: number | null;
         eksAsgInstance?: string;
         cloud?: string;
+        dbType?: string;
     }) => React.JSX.Element;
     dateFilter?: boolean;
     regionFilter?: boolean;
@@ -156,7 +157,8 @@ export const FiltersComponent = ({
     isElbV2Multiselect = false,
     unusedR53Filter = false,
     isUnusedR53Multiselect = false,
-    cloud
+    cloud,
+    dbType
 }: FiltersComponentProps) => {
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -235,8 +237,8 @@ export const FiltersComponent = ({
             eksAsgInstance: eksAsgInstanceParam || '',
             instanceService: instancesService || null,
             region: regionParam || 'all_regions',
-            selectedKey: selectedKeyParam || null,
-            selectedValue: selectedValueParam || null,
+            selectedKey: selectedKeyParam || 'allKeys',
+            selectedValue: selectedValueParam || 'allValues',
             service: selectedServiceParam || 'all_services',
             s3Bucket: s3BucketParam || '',
             ebs: ebsParam || '',
@@ -500,8 +502,8 @@ export const FiltersComponent = ({
             asgInstance: '',
             instancesService: null as unknown,
             region: 'all_regions',
-            selectedKey: null as string | null,
-            selectedValue: null as string | null,
+            selectedKey: 'allKeys' as string | null,
+            selectedValue: 'allValues' as string | null,
             service: '',
             s3Bucket: '',
             ebs: '',
@@ -1054,6 +1056,7 @@ export const FiltersComponent = ({
                     elbV2={filters.elbV2}
                     unusedR53={filters.unusedR53}
                     cloud={cloud}
+                    dbType={dbType}
                 />
             </Card>
         </div>

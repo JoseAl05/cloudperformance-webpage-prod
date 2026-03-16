@@ -1,12 +1,12 @@
-import { ViewConsumoRdsMysqlHorario } from '@/components/aws/vista-funciones/consumo-horario-habil-vs-no-habil/consumo-rds-mysql-horario-habil-vs-no-habil/MainViewConsumoRdsMysqlHorarioComponent';
+import { MainViewConsumoRdsHorario } from '@/components/aws/vista-funciones/consumo-horario-habil-vs-no-habil/consumo-rds-horario-habil-vs-no-habil/MainViewConsumoRdsHorarioComponent';
 import { Suspense } from 'react';
 
-export default function DashboardAwsRdsMysqlHorario() {
-  return (
-    <div>
-      <Suspense fallback={<div>Cargando...</div>}>
-        <ViewConsumoRdsMysqlHorario  />
-      </Suspense>
-    </div>
-  )
+export default function ConsumoHorarioInstanciasRdsMysql() {
+    return (
+        <div className=''>
+            <Suspense fallback={<div>Cargando...</div>}>
+                <MainViewConsumoRdsHorario dbType='rds-mysql'/>
+            </Suspense>
+        </div>
+    )
 }

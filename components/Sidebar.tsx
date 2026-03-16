@@ -140,10 +140,10 @@ export const SidebarComponent = ({
     ]
 
     const infrausedAws = [
-        { label: 'Instancias EC2 Antiguo', icon: Computer, href: '/aws/recursos/infrautilizadas/ec2' },
+        //{ label: 'Instancias EC2', icon: Computer, href: '/aws/recursos/infrautilizadas/ec2' },
         { label: 'Instancias EC2', icon: Computer, href: '/aws/funciones/ec2-no-utilizados' },
-        { label: 'Instancias EC2 AutoscalingGroups', icon: Computer, href: '/aws/recursos/infrautilizadas/autoscaling' },
-        { label: 'Instancias EC2 Nodos EKS', icon: Computer, href: '/aws/recursos/infrautilizadas/eks' },
+        { label: 'Instancias EC2 AutoscalingGroups', icon: Computer, href: '/aws/funciones/ec2-no-utilizados/autoscaling' },
+        { label: 'Instancias EC2 Nodos EKS', icon: Computer, href: '/aws/funciones/ec2-no-utilizados/eks' },
         { label: 'Vólumenes EBS', icon: HardDrive, href: '/aws/funciones/ebs-no-utilizados' },
         { label: 'Nat Gateways', icon: Workflow, href: '/aws/funciones/nat-gateways-no-utilizados' },
         { label: 'Loadbalancers V2', icon: Workflow, href: '/aws/funciones/elbv2-no-utilizados' },
@@ -220,6 +220,7 @@ export const SidebarComponent = ({
             { label: 'Vista Advisor', icon: Pyramid, href: '/azure/advisor' },
             { label: 'Vista Saving Plans', icon: HandCoins, href: '/azure/saving-plan' },
             { label: 'Presupuestos', icon: CircleDollarSign, href: '/azure/presupuesto' },
+            { label: 'Métricas Finops', icon: ChartNetwork, href: '/azure/finops-metrics-ai' },
         ],
         recursos: [
             { label: 'Maquinas Virtuales', icon: Computer, href: '/azure/recursos-vm' },

@@ -1,12 +1,12 @@
-import { ViewConsumoRdsPostgresqlHorario } from '@/components/aws/vista-funciones/consumo-horario-habil-vs-no-habil/consumo-rds-postgresql-horario-habil-vs-no-habil/MainViewConsumoRdsPostgresqlHorarioComponent';
+import { MainViewConsumoRdsHorario } from '@/components/aws/vista-funciones/consumo-horario-habil-vs-no-habil/consumo-rds-horario-habil-vs-no-habil/MainViewConsumoRdsHorarioComponent';
 import { Suspense } from 'react';
 
-export default function DashboardAwsRdsPostgresqlHorario() {
-  return (
-    <div>
-      <Suspense fallback={<div>Cargando...</div>}>
-        <ViewConsumoRdsPostgresqlHorario  />
-      </Suspense>
-    </div>
-  )
+export default function ConsumoHorarioInstanciasRdsPostgresql() {
+    return (
+        <div className=''>
+            <Suspense fallback={<div>Cargando...</div>}>
+                <MainViewConsumoRdsHorario dbType='rds-pg'/>
+            </Suspense>
+        </div>
+    )
 }

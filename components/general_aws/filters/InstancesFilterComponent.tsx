@@ -39,30 +39,39 @@ export const InstancesFilterComponent = ({
 }: InstancesFilterComponentProps) => {
     const [open, setOpen] = useState(false);
 
+    console.log(selectedKey, selectedValue)
+
     let url = ''
     const startDateFormatted = startDate.toISOString().replace('Z', '').slice(0, -4);
     const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : '';
+
     switch (service) {
         case 'ec2':
-            url = region ? `/api/aws/bridge/vm/all-instances-ec2?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}` : null;
+            url = (selectedKey && selectedValue) ? `/api/aws/bridge/vm/all-instances-ec2?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}` : null;
+            break;
+        case 'unused-ec2':
+            url = (selectedKey && selectedValue) ? `/api/aws/bridge/unused/ec2/all_unused_ec2_instances?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}` : null;
+            break;
+        case 'eks':
+            url = (selectedKey && selectedValue) ? `/api/aws/bridge/eks/all-eks-clusters?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}` : null;
             break;
         case 'rds-pg':
-            url = region ? `/api/aws/bridge/db/all-instances-rds-pg?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}` : null;
+            url = (selectedKey && selectedValue) ? `/api/aws/bridge/db/all-instances-rds-pg?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}` : null;
             break;
         case 'rds-mysql':
-            url = region ? `/api/aws/bridge/db/all-instances-rds-mysql?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}` : null;
+            url = (selectedKey && selectedValue) ? `/api/aws/bridge/db/all-instances-rds-mysql?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}` : null;
             break;
         case 'rds-oracle':
-            url = region ? `/api/aws/bridge/db/all-instances-rds-oracle?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}` : null;
+            url = (selectedKey && selectedValue) ? `/api/aws/bridge/db/all-instances-rds-oracle?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}` : null;
             break;
         case 'rds-sqlserver':
-            url = region ? `/api/aws/bridge/db/all-instances-rds-sqlserver?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}` : null;
+            url = (selectedKey && selectedValue) ? `/api/aws/bridge/db/all-instances-rds-sqlserver?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}` : null;
             break;
         case 'rds-mariadb':
-            url = region ? `/api/aws/bridge/db/all-instances-rds-mariadb?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}` : null;
+            url = (selectedKey && selectedValue) ? `/api/aws/bridge/db/all-instances-rds-mariadb?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}` : null;
             break;
         case 'asg':
-            url = region ? `/api/aws/bridge/autoscaling/all-autoscaling-groups?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}` : null;
+            url = (selectedKey && selectedValue) ? `/api/aws/bridge/autoscaling/all-autoscaling-groups?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}` : null;
             break;
         case "infraUsed":
             url = region ? `/api/aws/bridge/ec2/all_unused_ec2_instances?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}` : null;
@@ -71,10 +80,13 @@ export const InstancesFilterComponent = ({
             url = '';
     }
 
-    const tagsBody = selectedKey !== 'allKeys' && selectedValue ? { Key: selectedKey, Value: selectedValue } : null;
+    const tagsBody = selectedKey !== 'allKeys' && selectedValue && selectedValue !== 'allValues' ? { Key: selectedKey, Value: selectedValue } : null;
 
     const apiMethod = service === "infraUsed" ? fetcherGet : fetcherPost;
-    const { data, error, isLoading } = useSWR<unknown[]>([url, tagsBody], ([u, t]) => fetcherPost(u, t));
+    const { data, error, isLoading } = useSWR<(string | { resource_id: string; resource_name: string; cpu_avg: number })[]>(
+        url ? [url, tagsBody] : null,
+        ([u, t]) => fetcherPost(u, t)
+    );
 
     useEffect(() => {
         if (!isLoading && !error) {
@@ -85,10 +97,14 @@ export const InstancesFilterComponent = ({
     }, [data, isLoading, error, setInstance]);
 
 
-    if (isLoading) return <LoaderComponent size='small'/>
+    if (isLoading) return <LoaderComponent size='small' />
     if (error) return <div>Error al cargar datos</div>
 
-    const list: string[] = Array.isArray(data) ? data : []
+    const list: string[] = Array.isArray(data)
+        ? data.map((item) =>
+            typeof item === 'string' ? item : item.resource_id
+        )
+        : [];
     const noInstances = list.length === 0
 
     const selectedInstancesArray = instance ? instance.split(',').filter(Boolean) : [];
@@ -96,8 +112,10 @@ export const InstancesFilterComponent = ({
 
     const getDisplayText = () => {
         if (noInstances) return 'Sin instancias en la región/criterios seleccionados';
-        if (!instance || (!isInstanceMultiSelect && instance === 'all')) return 'Seleccione una instancia';
-        if (isInstanceMultiSelect && selectedInstancesArray.includes('all')) return 'Todas las Instancias';
+        if (!instance) return 'Seleccione una instancia';
+        if (!isInstanceMultiSelect && instance === 'all') return 'Seleccione una instancia';
+        const allSelected = list.length > 0 && list.every((i) => selectedInstancesArray.includes(i));
+        if (isInstanceMultiSelect && allSelected) return 'Todas las Instancias';
         if (selectedInstancesArray.length === 1) return selectedInstancesArray[0];
         return `${selectedInstancesArray.length} instancias seleccionadas`;
     };
@@ -105,9 +123,9 @@ export const InstancesFilterComponent = ({
     const handleInstanceToggle = (instanceValue: string) => {
         let instances = selectedInstancesArray.slice();
         if (instanceValue === 'all') {
-            instances = ['all'];
+            const allSelected = list.every((i) => selectedInstancesArray.includes(i));
+            instances = allSelected ? [] : [...list];
         } else {
-            instances = instances.filter((i) => i !== 'all');
             if (instances.includes(instanceValue)) instances = instances.filter((i) => i !== instanceValue);
             else instances.push(instanceValue);
         }
@@ -173,7 +191,7 @@ export const InstancesFilterComponent = ({
                     {!noInstances && (
                         <CommandGroup className='max-h-[200px] overflow-y-auto'>
                             <CommandItem value='all' onSelect={() => handleInstanceToggle('all')}>
-                                <Check className={cn('mr-2 h-4 w-4', selectedInstancesArray.includes('all') ? 'opacity-100' : 'opacity-0')} />
+                                <Check className={cn('mr-2 h-4 w-4', list.every((i) => selectedInstancesArray.includes(i)) ? 'opacity-100' : 'opacity-0')} />
                                 Todas las Instancias
                             </CommandItem>
                             {list.map((i: string) => (

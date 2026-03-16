@@ -56,6 +56,7 @@ interface FiltersComponentProps {
         selectedOperation?: string;
         impact?: string | null;
         category?: string | null;
+        cloud?:string;
     }) => React.JSX.Element;
     dateFilter?: boolean;
     monthYearFilter?: boolean;
@@ -103,6 +104,7 @@ interface FiltersComponentProps {
     isUnusedTmFilterMultiselect?: boolean;
     tmFilter?: boolean;
     isTmFilterMultiselect?: boolean;
+    cloud?:string;
 }
 
 export const FiltersComponent = ({
@@ -152,7 +154,8 @@ export const FiltersComponent = ({
     unusedTmFilter = false,
     isUnusedTmFilterMultiselect = false,
     tmFilter = false,
-    isTmFilterMultiselect = false
+    isTmFilterMultiselect = false,
+    cloud
 }: FiltersComponentProps) => {
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -976,6 +979,7 @@ export const FiltersComponent = ({
                     selectedAppg={filters.selectedAppGParam}
                     selectedUnusedTm={filters.selectedUnusedTmParam}
                     selectedTm={filters.selectedTmParam}
+                    cloud={cloud}
                 />
             </Card>
         </div>

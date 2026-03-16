@@ -1,5 +1,5 @@
 import { FiltersComponent } from '@/components/general_aws/filters/FiltersComponent'
-import { MainViewConsumoEC2AutoscalingGroupsHorario }  from '@/components/aws/vista-funciones/consumo-horario-habil-vs-no-habil/consumo-ec2-autoscaling-groups-horario-habil-vs-no-habil/ConsumoEC2AsgHorarioComponent'
+import { ConsumoEC2AsgHorarioComponent, MainViewConsumoEC2AutoscalingGroupsHorario } from '@/components/aws/vista-funciones/consumo-horario-habil-vs-no-habil/consumo-ec2-autoscaling-groups-horario-habil-vs-no-habil/ConsumoEC2AsgHorarioComponent'
 import { Computer } from 'lucide-react'
 
 export const ViewConsumoEC2AutoscalingGroupsHorario = () => {
@@ -28,10 +28,16 @@ export const ViewConsumoEC2AutoscalingGroupsHorario = () => {
 
       {/* Filtros + gráfico */}
       <FiltersComponent
-        Component={MainViewConsumoEC2AutoscalingGroupsHorario}
+        Component={ConsumoEC2AsgHorarioComponent}
         dateFilter
-        metricFilter
-        autoScalingGroupFilter
+        regionFilter
+        isRegionMultiSelect
+        instancesFilter
+        isInstanceMultiSelect
+        instancesService='asg'
+        tagsFilter
+        tagColumnName='Tags'
+        collection='aws_auto_scaling_groups'
       />
     </div>
   )

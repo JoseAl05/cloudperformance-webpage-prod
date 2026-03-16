@@ -8,7 +8,7 @@ import { UnusedEc2CardsMetricSummary, UnusedEc2TableData } from '@/interfaces/vi
 import { AlertCircle, Clock, Info } from 'lucide-react';
 import useSWR from 'swr';
 
-interface UnusedEc2ComponentProps {
+interface UnusedEksComponentProps {
     startDate: Date;
     endDate: Date;
     instance: string;
@@ -21,17 +21,17 @@ const fetcher = (url: string) =>
 
 const isNonEmptyArray = <T,>(v: unknown): v is T[] => Array.isArray(v) && v.length > 0
 
-export const UnusedEc2Component = ({ startDate, endDate, region, instance }: UnusedEc2ComponentProps) => {
+export const UnusedEksComponent = ({ startDate, endDate, region, instance }: UnusedEksComponentProps) => {
 
     const startDateFormatted = startDate.toISOString().replace('Z', '').slice(0, -4);
     const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : '';
 
     const allUnusedEc2Table = useSWR(
-        instance ? `/api/aws/bridge/unused/ec2/get_ec2_table_data?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&instance_id=${instance}` : null,
+        instance ? `/api/aws/bridge/unused/ec2/eks/get_ec2_table_data?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&instance_id=${instance}` : null,
         fetcher
     )
     const allUnusedEc2Cards = useSWR(
-        instance ? `/api/aws/bridge/unused/ec2/cards_metrics_summary?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&instance_id=${instance}` : null,
+        instance ? `/api/aws/bridge/unused/ec2/eks/cards_metrics_summary?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&instance_id=${instance}` : null,
         fetcher
     )
 
@@ -105,7 +105,7 @@ export const UnusedEc2Component = ({ startDate, endDate, region, instance }: Unu
 
                 <div className="flex items-center gap-3 my-10">
                     <Clock className="h-8 w-8 text-blue-500" />
-                    <h1 className="text-3xl font-bold text-foreground">Detalle Instancias EC2 Infrautilizadas</h1>
+                    <h1 className="text-3xl font-bold text-foreground">Detalle Instances de EKS Infrautilizadas</h1>
                 </div>
                 <UnusedEc2TableComponent
                     data={unusedEc2TableData}

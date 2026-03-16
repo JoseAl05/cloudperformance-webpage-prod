@@ -2,13 +2,14 @@
 
 import React, { useMemo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Server, TrendingUp, Cpu, Network } from 'lucide-react';
+import { TrendingUp, Cpu, Network, DollarSign, Computer, ShieldAlert, Zap } from 'lucide-react';
 import { bytesToMB } from '@/lib/bytesToMbs';
-import { UnusedEc2CardsData } from '@/interfaces/vista-unused-resources/unusedEc2InstanceInterfaces';
+import { UnusedEc2CardsMetricSummary } from '@/interfaces/vista-unused-resources/unusedEc2InstanceInterfaces';
 
-interface UnusedEc2CardsProps {
-    data: UnusedEc2CardsData[];
+interface UnusedEc2CardsComponentProps {
+    data: UnusedEc2CardsMetricSummary[] | null;
     instanceCount: number;
+    totalUsdUnusedInstances: number;
 }
 
 const StatCard = ({ title, value, unit, peakValue, icon: Icon, description }: unknown) => {
@@ -29,7 +30,7 @@ const StatCard = ({ title, value, unit, peakValue, icon: Icon, description }: un
                 <div className="space-y-2">
                     <p className="text-xs text-muted-foreground">{description}</p>
                     {peakValue !== undefined && (
-                        <div className="pt-3 mt-2 border-t flex items-center gap-2 text-[10px] text-amber-600 font-medium bg-amber-50 p-1 rounded">
+                        <div className="pt-3 mt-2 border-t flex items-center gap-2 text-[10px] text-amber-600 font-medium p-1 rounded">
                             <TrendingUp className="w-3 h-3" />
                             <span>Peak en periodo: {peakValue} {unit}</span>
                         </div>
@@ -40,50 +41,102 @@ const StatCard = ({ title, value, unit, peakValue, icon: Icon, description }: un
     )
 }
 
-export const UnusedEc2CardsComponent = ({ data, instanceCount }: UnusedEc2CardsProps) => {
+export const UnusedEc2CardsComponent = ({ data, instanceCount, totalUsdUnusedInstances }: UnusedEc2CardsComponentProps) => {
 
     const metrics = useMemo(() => {
-        if (!data) return { cpu: { avg: 0, peak: 0 }, net: { avg: 0, peak: 0 } };
+        if (!data) return {
+            cpu: { avg: 0, peak: 0 },
+            statusCheckFailed: { avg: 0, peak: 0 },
+            cpuCreditUsage: { avg: 0, peak: 0 },
+            cpuCreditBalance: { avg: 0, peak: 0 },
+            netIn: { avg: 0, peak: 0 },
+            netOut: { avg: 0, peak: 0 }
+        };
 
         const cpuMetric = data.find((m) => m.metric_name.includes("CPUUtilization"));
+        const statusCheckFailed = data.find((m) => m.metric_name.includes("StatusCheckFailed"));
+        const cpuCreditUsage = data.find((m) => m.metric_name.includes("CPUCreditUsage"));
+        const cpuCreditBalance = data.find((m) => m.metric_name.includes("CPUCreditBalance"));
         const netIn = data.find((m) => m.metric_name.includes("NetworkIn"));
         const netOut = data.find((m) => m.metric_name.includes("NetworkOut"));
 
-        // Sumamos In+Out para una visión simplificada
-        const netAvg = (netIn?.value || 0) + (netOut?.value || 0);
-        const netPeak = (netIn?.peak_value || 0) + (netOut?.peak_value || 0);
-
         return {
             cpu: { avg: cpuMetric?.value || 0, peak: cpuMetric?.peak_value || 0 },
-            net: { avg: netAvg, peak: netPeak }
+            statusCheckFailed: { avg: statusCheckFailed?.value || 0, peak: statusCheckFailed?.peak_value || 0 },
+            cpuCreditUsage: { avg: cpuCreditUsage?.value || 0, peak: cpuCreditUsage?.peak_value || 0 },
+            cpuCreditBalance: { avg: cpuCreditBalance?.value || 0, peak: cpuCreditBalance?.peak_value || 0 },
+            netIn: { avg: netIn?.value || 0, peak: netIn?.peak_value || 0 },
+            netOut: { avg: netOut?.value || 0, peak: netOut?.peak_value || 0 }
         };
     }, [data]);
 
     return (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className='flex flex-col gap-4'>
             <StatCard
-                title="Instancias Infrautilizadas"
-                value={instanceCount}
-                unit="Recursos"
-                description="Total de instancias detectadas como Idle."
-                icon={Server}
+                title="Total costo instancias infrautilizadas"
+                value={`$ ${totalUsdUnusedInstances.toFixed(2)}`}
+                unit=""
+                description="Gasto total generado por instancias infrautilizadas en el periodo seleccionado. (USD)"
+                icon={DollarSign}
             />
-            <StatCard
-                title="CPU Promedio Global"
-                value={metrics.cpu.avg}
-                peakValue={metrics.cpu.peak}
-                unit="%"
-                description="Uso promedio de CPU de todas las instancias en el rango."
-                icon={Cpu}
-            />
-            <StatCard
-                title="I/O Red Promedio"
-                value={bytesToMB(metrics.net.avg)}
-                peakValue={bytesToMB(metrics.net.peak)}
-                unit="MB"
-                description="Tráfico promedio (In + Out) procesado."
-                icon={Network}
-            />
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <StatCard
+                    title="Instancias Infrautilizadas"
+                    value={instanceCount}
+                    unit="Recursos"
+                    description="Total de instancias detectadas con uso de CPU < 10%."
+                    icon={Computer}
+                />
+                <StatCard
+                    title="CPU Promedio Global"
+                    value={metrics.cpu.avg}
+                    peakValue={metrics.cpu.peak}
+                    unit="%"
+                    description="Uso promedio de CPU de todas las instancias en el rango."
+                    icon={Cpu}
+                />
+                <StatCard
+                    title="Status Check Failed"
+                    value={metrics.statusCheckFailed.avg}
+                    peakValue={metrics.statusCheckFailed.peak}
+                    unit=""
+                    description="Promedio de verificaciones de estado fallidas en el periodo."
+                    icon={ShieldAlert}
+                />
+                <StatCard
+                    title="CPU Credit Usage Promedio"
+                    value={metrics.cpuCreditUsage.avg}
+                    peakValue={metrics.cpuCreditUsage.peak}
+                    unit="Créditos"
+                    description="Uso promedio de créditos de CPU en el periodo."
+                    icon={Zap}
+                />
+                <StatCard
+                    title="CPU Credit Balance Promedio"
+                    value={metrics.cpuCreditBalance.avg}
+                    peakValue={metrics.cpuCreditBalance.peak}
+                    unit="Créditos"
+                    description="Balance promedio de créditos de CPU acumulados."
+                    icon={Zap}
+                />
+                <StatCard
+                    title="Network In Promedio"
+                    value={bytesToMB(metrics.netIn.avg)}
+                    peakValue={bytesToMB(metrics.netIn.peak)}
+                    unit="MB/s"
+                    description="Tráfico de red entrante promedio procesado."
+                    icon={Network}
+                />
+                <StatCard
+                    title="Network Out Promedio"
+                    value={bytesToMB(metrics.netOut.avg)}
+                    peakValue={bytesToMB(metrics.netOut.peak)}
+                    unit="MB/s"
+                    description="Tráfico de red saliente promedio procesado."
+                    icon={Network}
+                />
+            </div>
         </div>
     );
 };

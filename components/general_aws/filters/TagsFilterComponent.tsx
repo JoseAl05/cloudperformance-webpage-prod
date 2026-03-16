@@ -80,16 +80,16 @@ export const TagFilterComponent = ({
         [selectedKey, tagMap]
     )
 
-    const isValidKey = !!(selectedKey && keys.includes(selectedKey))
-    const isValidValue = !!(selectedValue && isValidKey && valuesForKey.includes(selectedValue))
+    const isValidKey = !!(selectedKey && selectedKey !== 'allKeys' && keys.includes(selectedKey))
+    const isValidValue = !!(selectedValue && selectedValue !== 'allValues' && isValidKey && valuesForKey.includes(selectedValue))
 
     useEffect(() => {
         if (!data || isLoading) return
-        if (selectedKey && !keys.includes(selectedKey)) {
-            setSelectedKey(null)
-            setSelectedValue(null)
-        } else if (selectedValue && selectedKey && !valuesForKey.includes(selectedValue)) {
-            setSelectedValue(null)
+        if (selectedKey && selectedKey !== 'allKeys' && !keys.includes(selectedKey)) {
+            setSelectedKey('allKeys')
+            setSelectedValue('allValues')
+        } else if (selectedValue && selectedValue !== 'allValues' && selectedKey && selectedKey !== 'allKeys' && !valuesForKey.includes(selectedValue)) {
+            setSelectedValue('allValues')
         }
     }, [data, isLoading, keys, valuesForKey, selectedKey, selectedValue, setSelectedKey, setSelectedValue])
 
@@ -111,7 +111,7 @@ export const TagFilterComponent = ({
             <Popover open={openKey} onOpenChange={setOpenKey}>
                 <PopoverTrigger asChild>
                     <Button variant="outline" role="combobox" aria-expanded={openKey} className="w-full justify-between bg-transparent">
-                        {noTags ? 'Sin tags para la región seleccionada' : (isValidKey ? selectedKey : 'Selecciona una Key')}
+                        {noTags ? 'Sin tags para la región seleccionada' : (selectedKey === 'allKeys' || !selectedKey ? 'Todas las claves' : (isValidKey ? selectedKey : 'Selecciona una Key'))}
                         <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                     </Button>
                 </PopoverTrigger>
@@ -125,13 +125,13 @@ export const TagFilterComponent = ({
                                     <CommandItem
                                         value="allKeys"
                                         onSelect={() => {
-                                            setSelectedKey(null)
-                                            setSelectedValue(null)
+                                            setSelectedKey('allKeys')
+                                            setSelectedValue('allValues')
                                             setOpenKey(false)
-                                            onChange?.({ key: null, value: null })
+                                            onChange?.({ key: 'allKeys', value: 'allValues' })
                                         }}
                                     >
-                                        <Check className={cn("mr-2 h-4 w-4", !selectedKey ? "opacity-100" : "opacity-0")} />
+                                        <Check className={cn("mr-2 h-4 w-4", (selectedKey === 'allKeys' || !selectedKey) ? "opacity-100" : "opacity-0")} />
                                         Todas las claves
                                     </CommandItem>
                                     {keys.map((key, idx) => (
@@ -139,9 +139,9 @@ export const TagFilterComponent = ({
                                             key={`${key}-${idx}`}
                                             onSelect={() => {
                                                 setSelectedKey(key)
-                                                setSelectedValue(null)
+                                                setSelectedValue('allValues')
                                                 setOpenKey(false)
-                                                onChange?.({ key, value: null })
+                                                onChange?.({ key, value: 'allValues' })
                                             }}
                                         >
                                             <Check className={cn("mr-2 h-4 w-4", selectedKey === key ? "opacity-100" : "opacity-0")} />
@@ -159,7 +159,7 @@ export const TagFilterComponent = ({
                 <Popover open={openValue} onOpenChange={setOpenValue}>
                     <PopoverTrigger asChild>
                         <Button variant="outline" className="w-full justify-between">
-                            {isValidValue ? selectedValue : "Selecciona un Value"}
+                            {selectedValue === 'allValues' || !selectedValue ? 'Todos los valores' : (isValidValue ? selectedValue : 'Selecciona un Value')}
                             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                         </Button>
                     </PopoverTrigger>
@@ -171,12 +171,12 @@ export const TagFilterComponent = ({
                                 <CommandGroup>
                                     <CommandItem
                                         onSelect={() => {
-                                            setSelectedValue(null)
+                                            setSelectedValue('allValues')
                                             setOpenValue(false)
-                                            onChange?.({ key: selectedKey ?? null, value: null })
+                                            onChange?.({ key: selectedKey ?? 'allKeys', value: 'allValues' })
                                         }}
                                     >
-                                        <Check className={cn("mr-2 h-4 w-4", !selectedValue ? "opacity-100" : "opacity-0")} />
+                                        <Check className={cn("mr-2 h-4 w-4", (selectedValue === 'allValues' || !selectedValue) ? "opacity-100" : "opacity-0")} />
                                         Todos los valores
                                     </CommandItem>
                                     {valuesForKey.map((value, idx) => (
@@ -185,7 +185,7 @@ export const TagFilterComponent = ({
                                             onSelect={() => {
                                                 setSelectedValue(value)
                                                 setOpenValue(false)
-                                                onChange?.({ key: selectedKey ?? null, value })
+                                                onChange?.({ key: selectedKey ?? 'allKeys', value })
                                             }}
                                         >
                                             <Check className={cn("mr-2 h-4 w-4", selectedValue === value ? "opacity-100" : "opacity-0")} />

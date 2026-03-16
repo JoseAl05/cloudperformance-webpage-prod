@@ -1,5 +1,5 @@
 import { FiltersComponent } from '@/components/general_aws/filters/FiltersComponent'
-import { MainViewConsumoEC2NodosEKSHorario }  from '@/components/aws/vista-funciones/consumo-horario-habil-vs-no-habil/consumo-ec2-nodos-eks-horario-habil-vs-no-habil/ConsumoEC2NodosEKSHorarioComponent'
+import { ConsumoEC2NodosEKSHorarioComponent, MainViewConsumoEC2NodosEKSHorario }  from '@/components/aws/vista-funciones/consumo-horario-habil-vs-no-habil/consumo-ec2-nodos-eks-horario-habil-vs-no-habil/ConsumoEC2NodosEKSHorarioComponent'
 import { Computer } from 'lucide-react'
 
 export const ViewConsumoEC2NodesEKSHorario = () => {
@@ -28,13 +28,16 @@ export const ViewConsumoEC2NodesEKSHorario = () => {
 
       {/* Filtros + gráfico */}
       <FiltersComponent
-        Component={MainViewConsumoEC2NodosEKSHorario}
+        Component={ConsumoEC2NodosEKSHorarioComponent}
         dateFilter
-        metricFilter
-        eksFilter
-        isEksMultiSelect
-        isEksAsgMultiSelect
-        isEksAsgInstanceMultiSelect
+        regionFilter
+        isRegionMultiSelect
+        instancesFilter
+        instancesService='eks'
+        isInstanceMultiSelect
+        tagsFilter
+        tagColumnName='tags'
+        collection='aws_eks_clusters_details'
       />
     </div>
   )
