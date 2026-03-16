@@ -16,6 +16,16 @@ export interface ConsumeViewEc2CreditsMetrics {
     CpuCreditBalanceValue: number;
 }
 
+export interface ConsumeViewEc2NetworkMetrics {
+    timestamp: string;
+    sync_time: string;
+    region: string;
+    avg_network_in: number | null;
+    max_network_in: number | null;
+    avg_network_out: number | null;
+    max_network_out: number | null;
+}
+
 export interface ConsumeViewEc2EbsDevice {
     DeviceName: string;
     Ebs: {
@@ -37,12 +47,12 @@ export interface Ec2ConsumneViewInstance {
     resource: string;
     resource_type: string;
     resource_status: string;
-    ebs_devices: EbsDevice[];
+    ebs_devices: ConsumeViewEc2EbsDevice[];
     devices_attached_count: number;
     devices_not_attached_count: number;
     public_ip: string;
     private_ip: string;
-    network_interfaces: NetworkInterface[];
+    network_interfaces: ConsumeViewEc2NetworkInterface[];
     interfaces_inuse_count: number;
     interfaces_not_inuse_count: number;
     vpc_id: string;
@@ -52,4 +62,14 @@ export interface Ec2ConsumneViewInstance {
     credit_efficiency: string;
     metric_sync_time: string;
     instance_sync_time: string;
+    // ── campos nuevos ──
+    avg_cpu: number | null;
+    max_cpu: number | null;
+    avg_network_in: number | null;
+    max_network_in: number | null;
+    avg_network_out: number | null;
+    max_network_out: number | null;
+    costo_usd: number | null;
+    clasificacion: 'Idle' | 'Infrautilizada' | 'Óptimo' | 'Sin Datos';
 }
+

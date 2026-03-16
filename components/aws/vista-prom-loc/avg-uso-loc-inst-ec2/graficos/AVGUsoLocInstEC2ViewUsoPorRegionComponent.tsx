@@ -20,6 +20,8 @@ import { bytesToGB } from '@/lib/bytesToMbs';
 
 type CellDatum = {
   avg_value: number;
+  min_value?: number;
+  max_value?: number;
   count?: number;
   resources?: string[];
   resource_count?: number;
@@ -27,9 +29,16 @@ type CellDatum = {
   last_ts?: string | null;
 };
 
+type MetricValues = {
+  avg: number;
+  min: number;
+  max: number;
+  count: number;
+};
+
 type ProcessedHeatmapData = {
   region: string;
-  metrics: Record<string, number>;
+  metrics: Record<string, MetricValues>;
 };
 
 type Props = {
@@ -158,6 +167,20 @@ const MetricCellDialog = ({
             <span className="font-medium">{formatMetricValue(metric, datum.avg_value)}</span>
           </div>
 
+          {typeof datum.min_value === 'number' && (
+            <div className="flex items-center justify-between">
+              <span className="text-muted-foreground text-sm">Mínimo</span>
+              <span className="font-medium">{formatMetricValue(metric, datum.min_value)}</span>
+            </div>
+          )}
+
+          {typeof datum.max_value === 'number' && (
+            <div className="flex items-center justify-between">
+              <span className="text-muted-foreground text-sm">Máximo</span>
+              <span className="font-medium">{formatMetricValue(metric, datum.max_value)}</span>
+            </div>
+          )}
+
           <div className="grid grid-cols-2 gap-2 text-sm">
             {typeof datum.count === 'number' && (
               <>
@@ -243,7 +266,10 @@ export const AVGUsoLocInstEC2ViewUsoPorRegionComponent = ({
       for (const metric of Object.keys(row.metrics ?? {})) {
         const val = row.metrics[metric];
         inner.set(metric, {
-          avg_value: typeof val === 'number' ? val : Number.NaN,
+          avg_value: typeof val.avg === 'number' ? val.avg : Number.NaN,
+          min_value: val.min,
+          max_value: val.max,
+          count: val.count,
         });
       }
     }
