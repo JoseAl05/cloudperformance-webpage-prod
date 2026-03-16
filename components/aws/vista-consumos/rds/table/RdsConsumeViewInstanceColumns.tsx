@@ -143,12 +143,58 @@ export const RdsConsumeViewInstanceColumns: DynamicColumn<RdsConsumeViewInstance
             );
         }
     },
+    // {
+    //     header: "Facturación",
+    //     accessorKey: "billing_action",
+    //     cell: ({ row }) => {
+    //         const startDateHistoryFormatted = new Date(row.original.metric_sync_time).toISOString().split('.')[0];
+    //         return <ResourceBillingActionCell resourceId={row.original.resource} startDateHistory={startDateHistoryFormatted} />;
+    //     }
+    // }
+    //mmontt 3 cloumnas nuevas con peaks/avg 202603
     {
-        header: "Facturación",
-        accessorKey: "billing_action",
+        header: "CPU Prom / Máx",
+        accessorKey: "avg_cpu",
         cell: ({ row }) => {
-            const startDateHistoryFormatted = new Date(row.original.metric_sync_time).toISOString().split('.')[0];
-            return <ResourceBillingActionCell resourceId={row.original.resource} startDateHistory={startDateHistoryFormatted} />;
+            const avg = row.original.avg_cpu
+            const max = row.original.max_cpu
+            return (
+                <div className="text-sm text-muted-foreground">
+                    {avg != null ? `${avg.toFixed(2)}%` : '-'}
+                    {max != null ? <span className="text-xs text-muted-foreground ml-1">/ Máx: {max.toFixed(2)}%</span> : ''}
+                </div>
+            )
         }
-    }
+    },
+    {
+        header: "Conexiones Prom / Máx",
+        accessorKey: "avg_connections",
+        cell: ({ row }) => {
+            const avg = row.original.avg_connections
+            const max = row.original.max_connections
+            return (
+                <div className="text-sm text-muted-foreground">
+                    {avg != null ? `${avg.toFixed(1)} conn` : '-'}
+                    {max != null ? <span className="text-xs text-muted-foreground ml-1">/ Máx: {max.toFixed(0)}</span> : ''}
+                </div>
+            )
+        }
+    },
+    {
+        header: "Clasificación",
+        accessorKey: "clasificacion",
+        cell: (info) => {
+            const value = info.getValue() as string
+            const colorMap: Record<string, string> = {
+                'Idle': 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+                'Infrautilizada': 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
+                'Óptimo': 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+            }
+            return (
+                <span className={`px-2 py-1 rounded-full text-xs font-semibold ${colorMap[value] ?? 'bg-gray-100 text-gray-600'}`}>
+                    {value ?? 'Sin Datos'}
+                </span>
+            )
+        }
+    },
 ];

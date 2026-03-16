@@ -54,4 +54,10 @@ export interface RdsConsumeViewInstance {
   credit_efficiency: string;
   metric_sync_time: string;
   db_sync_time: string;
+  //campos nuevos mmontt 202603
+  avg_cpu: number | null;
+  max_cpu: number | null;
+  avg_connections: number | null;
+  max_connections: number | null;
+  clasificacion: 'Idle' | 'Infrautilizada' | 'Óptimo' | 'Sin Datos';  
 }

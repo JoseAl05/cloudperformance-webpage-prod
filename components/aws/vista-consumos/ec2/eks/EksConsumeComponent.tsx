@@ -8,6 +8,8 @@ import { Ec2InfoConsumeViewComponent } from '@/components/aws/vista-consumos/ec2
 import { Ec2ConsumeViewInstanceTable } from '@/components/aws/vista-consumos/ec2/table/Ec2ConsumeViewInstanceTable';
 import { MessageCard } from '@/components/aws/cards/MessageCards';
 import { LoaderComponent } from '@/components/general_aws/LoaderComponent';
+import { Ec2ResourceConsumeViewNetworkComponent } from '@/components/aws/vista-consumos/ec2/graficos/Ec2ResourceConsumeViewNetworkComponent'
+import { ConsumeViewEc2CpuMetrics, ConsumeViewEc2CreditsMetrics, ConsumeViewEc2NetworkMetrics, Ec2ConsumneViewInstance } from '@/interfaces/vista-consumos/ec2ConsumeViewInterfaces'
 
 interface EksConsumeComponentProps {
     startDate: Date,
@@ -46,17 +48,25 @@ export const EksConsumeComponent = ({ startDate, endDate, eksAsgInstance, region
         fetcher
     )
 
+    const ec2NetworkMetrics = useSWR(
+        canFetch ? `/api/aws/bridge/vm/consumo_ec2/network?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&resource=${encodeURIComponent(eksAsgInstance)}` : null,
+        fetcher
+    )    
+
     const anyLoading =
         ec2CpuMetrics.isLoading ||
         ec2CreditsMetrics.isLoading ||
         ec2Info.isLoading ||
-        ec2GlobalCreditsEfficiency.isLoading
+        ec2GlobalCreditsEfficiency.isLoading ||
+        ec2NetworkMetrics.isLoading
+
 
     const anyError =
         !!ec2CpuMetrics.error ||
         !!ec2CreditsMetrics.error ||
         !!ec2Info.error ||
-        !!ec2GlobalCreditsEfficiency.error
+        !!ec2GlobalCreditsEfficiency.error ||
+        !!ec2NetworkMetrics.error
 
     const cpuMetricsData: ConsumeViewEc2CpuMetrics[] | null =
         isNonEmptyArray<ConsumeViewEc2CpuMetrics>(ec2CpuMetrics.data) ? ec2CpuMetrics.data : null
@@ -70,6 +80,9 @@ export const EksConsumeComponent = ({ startDate, endDate, eksAsgInstance, region
     const globalEfficiencyData: unknown = isNullish(ec2GlobalCreditsEfficiency.data)
         ? null
         : ec2GlobalCreditsEfficiency.data
+
+    const networkMetricsData: ConsumeViewEc2NetworkMetrics[] | null =
+        isNonEmptyArray<ConsumeViewEc2NetworkMetrics>(ec2NetworkMetrics.data) ? ec2NetworkMetrics.data : null        
 
     const hasCpuData = !!cpuMetricsData && cpuMetricsData.length > 0
     const hasCreditsData = !!creditsMetricsData && creditsMetricsData.length > 0
@@ -139,6 +152,7 @@ export const EksConsumeComponent = ({ startDate, endDate, eksAsgInstance, region
 
                 <Ec2ResourceConsumeViewUsageCreditsComponent data={creditsMetricsData} />
                 <Ec2ResourceConsumeViewUsageCpuComponent data={cpuMetricsData} />
+                <Ec2ResourceConsumeViewNetworkComponent data={networkMetricsData} />                
             </div>
             <div className="flex flex-col gap-5 mt-10">
                 <div className="flex items-center gap-3 my-5">

@@ -1,7 +1,7 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { ConsumeViewRdsPgCpuMetrics, ConsumeViewRdsPgDbConnectionsMetrics, RdsConsumeViewInstance } from '@/interfaces/vista-consumos/rdsPgConsumeViewInterfaces';
-import { ChevronDown, ChevronUp, Cpu, Database, List, Minus, MonitorX, Zap } from 'lucide-react';
+import { ChevronDown, ChevronUp, Cpu, Database, List, Minus, MonitorX, TrendingUp, Users, Zap } from 'lucide-react';
 import { RdsConsumeViewStoppedInstancesHistoricComponent } from '@/components/aws/vista-consumos/rds/info/RdsConsumeViewStoppedInstancesHistoricComponent';
 
 interface RdsInfoConsumeViewCardsComponentProps {
@@ -132,17 +132,68 @@ export const RdsInfoConsumeViewCardsComponent = ({ infoData, cpuData, dbConnecti
 
     const efficiencyValue = (creditsGlobalEfficiencyData as unknown)?.global_efficiency ?? 'Sin Datos';
 
+    //mmontt nuevos calculos de peaks y conteos 202603
+    const metricsDetail = (creditsGlobalEfficiencyData as unknown)?.metrics_detail ?? []
+    const cpuMetricDetail = metricsDetail.find((m: {metric: string}) => m.metric === 'cpu_utilization')
+    const connMetricDetail = metricsDetail.find((m: {metric: string}) => m.metric === 'db_connections')
+
+    const countIdle = (() => {
+        const latest = new Map<string, RdsConsumeViewInstance>()
+        ;(infoData || []).forEach(inst => {
+            const ex = latest.get(inst.resource)
+            if (!ex || new Date(inst.db_sync_time) > new Date(ex.db_sync_time)) latest.set(inst.resource, inst)
+        })
+        return Array.from(latest.values()).filter(i => i.clasificacion === 'Idle').length
+    })()
+
+    const countInfra = (() => {
+        const latest = new Map<string, RdsConsumeViewInstance>()
+        ;(infoData || []).forEach(inst => {
+            const ex = latest.get(inst.resource)
+            if (!ex || new Date(inst.db_sync_time) > new Date(ex.db_sync_time)) latest.set(inst.resource, inst)
+        })
+        return Array.from(latest.values()).filter(i => i.clasificacion === 'Infrautilizada').length
+    })()
+
+    //mmontt agregamos los peaks 202603
     const instanceData = [
         {
             title: 'Promedio Uso de CPU',
             value: !noCpu ? `${averageCpu.toFixed(2)} %` : 'Sin Datos',
             icon: Cpu,
             borderColor: cpuStatus?.border ?? 'border-l-gray-500',
-            subtitle: (isToday ? 'Actual' : dateLabel),
+            subtitle: isToday ? 'Actual' : dateLabel,
             valueStyle: 'text-xl font-bold text-foreground tracking-tight',
-            usage: !noCpu ? cpuStatus?.message : undefined,
-            usageIcon: !noCpu ? cpuStatus?.icon : undefined,
-            usageStyle: !noCpu ? cpuStatus?.style : undefined,
+            usage: cpuMetricDetail ? `Máx observado: ${cpuMetricDetail.max_utilization?.toFixed(2)}%` : (!noCpu ? cpuStatus?.message : undefined),
+            usageIcon: undefined,
+            usageStyle: 'text-xs text-muted-foreground font-medium pt-2 block',
+        },
+        {
+            title: 'Promedio Conexiones',
+            value: connMetricDetail ? `${connMetricDetail.avg_utilization.toFixed(1)} conn` : 'Sin Datos',
+            icon: Users,
+            borderColor: 'border-l-blue-500',
+            subtitle: isToday ? 'Actual' : dateLabel,
+            valueStyle: 'text-xl font-bold text-foreground tracking-tight',
+            usage: connMetricDetail ? `Máx observado: ${connMetricDetail.max_utilization?.toFixed(0)} conn` : undefined,
+            usageIcon: undefined,
+            usageStyle: 'text-xs text-muted-foreground font-medium pt-2 block',
+        },
+        {
+            title: 'Instancias Idle',
+            value: `${countIdle}`,
+            icon: Minus,
+            borderColor: countIdle > 0 ? 'border-l-red-500' : 'border-l-gray-500',
+            subtitle: isToday ? 'Actual' : dateLabel,
+            valueStyle: 'text-xl font-bold text-foreground tracking-tight',
+        },
+        {
+            title: 'Infrautilizadas',
+            value: `${countInfra}`,
+            icon: TrendingUp,
+            borderColor: countInfra > 0 ? 'border-l-yellow-500' : 'border-l-gray-500',
+            subtitle: isToday ? 'Actual' : dateLabel,
+            valueStyle: 'text-xl font-bold text-foreground tracking-tight',
         },
         {
             title: 'Cantidad de Instancias',
@@ -152,17 +203,8 @@ export const RdsInfoConsumeViewCardsComponent = ({ infoData, cpuData, dbConnecti
             subtitle: isToday ? 'Actual' : dateLabel,
             valueStyle: 'text-xl font-bold text-foreground tracking-tight'
         },
-        // {
-        //     title: 'Cantidad de Instancias Encendidas',
-        //     value: countRunningInstances,
-        //     icon: MonitorCheck,
-        //     borderColor: 'border-l-green-500',
-        //     subtitle: isToday ? 'Actual' : dateLabel,
-        //     valueStyle: 'text-xl font-bold text-foreground tracking-tight'
-        // },
         {
             title: 'Historial de Instancias Apagadas',
-            // value: countStoppedInstances,
             icon: MonitorX,
             borderColor: 'border-l-red-500',
             subtitle: isToday ? 'Actual' : dateLabel,
@@ -173,6 +215,47 @@ export const RdsInfoConsumeViewCardsComponent = ({ infoData, cpuData, dbConnecti
             dialogContentComponent: <RdsConsumeViewStoppedInstancesHistoricComponent instanceInfo={stoppedInstances} />
         }
     ];
+    // const instanceData = [
+    //     {
+    //         title: 'Promedio Uso de CPU',
+    //         value: !noCpu ? `${averageCpu.toFixed(2)} %` : 'Sin Datos',
+    //         icon: Cpu,
+    //         borderColor: cpuStatus?.border ?? 'border-l-gray-500',
+    //         subtitle: (isToday ? 'Actual' : dateLabel),
+    //         valueStyle: 'text-xl font-bold text-foreground tracking-tight',
+    //         usage: !noCpu ? cpuStatus?.message : undefined,
+    //         usageIcon: !noCpu ? cpuStatus?.icon : undefined,
+    //         usageStyle: !noCpu ? cpuStatus?.style : undefined,
+    //     },
+    //     {
+    //         title: 'Cantidad de Instancias',
+    //         value: uniqueInstances,
+    //         icon: Database,
+    //         borderColor: 'border-l-cyan-500',
+    //         subtitle: isToday ? 'Actual' : dateLabel,
+    //         valueStyle: 'text-xl font-bold text-foreground tracking-tight'
+    //     },
+    //     // {
+    //     //     title: 'Cantidad de Instancias Encendidas',
+    //     //     value: countRunningInstances,
+    //     //     icon: MonitorCheck,
+    //     //     borderColor: 'border-l-green-500',
+    //     //     subtitle: isToday ? 'Actual' : dateLabel,
+    //     //     valueStyle: 'text-xl font-bold text-foreground tracking-tight'
+    //     // },
+    //     {
+    //         title: 'Historial de Instancias Apagadas',
+    //         // value: countStoppedInstances,
+    //         icon: MonitorX,
+    //         borderColor: 'border-l-red-500',
+    //         subtitle: isToday ? 'Actual' : dateLabel,
+    //         valueStyle: 'text-xl font-bold text-foreground tracking-tight',
+    //         dialog: !!stoppedInstances.length,
+    //         dialogLabel: 'Ver instancias "stopped"',
+    //         dialogTitle: 'Instancias stopped en periodo seleccionado.',
+    //         dialogContentComponent: <RdsConsumeViewStoppedInstancesHistoricComponent instanceInfo={stoppedInstances} />
+    //     }
+    // ];
 
     const globalCreditsEfficiency = [
         {

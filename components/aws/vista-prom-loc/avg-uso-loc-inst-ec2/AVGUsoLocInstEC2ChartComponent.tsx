@@ -22,6 +22,8 @@ interface MetricAverageGeneral {
   metric_label: string;
   metric_label_original: string;
   average_value: number;
+  min_value: number;
+  max_value: number;
   metric_count: number;
   resource_region: string;
 }
@@ -64,9 +66,16 @@ interface ApiResponseDetail {
 // Union type para ambas respuestas
 type ApiResponse = ApiResponseGeneral | ApiResponseDetail;
 
+interface MetricValues {
+  avg: number;
+  min: number;
+  max: number;
+  count: number;
+}
+
 interface ProcessedHeatmapData {
   region: string;
-  metrics: { [key: string]: number };
+  metrics: { [key: string]: MetricValues };
 }
 
 const fetcher = (url: string) =>
@@ -141,10 +150,15 @@ export const AVGUsoLocInstEC2ChartComponent = ({
 
       const regionKey = detailData.instance_info.resource_region;
 
-      const metrics: { [key: string]: number } = {};
+      const metrics: { [key: string]: MetricValues } = {};
 
       detailData.metric_averages.forEach(metric => {
-        metrics[metric.metric_label] = metric.average_value;
+        metrics[metric.metric_label] = {
+          avg: metric.average_value,
+          min: metric.min_value,
+          max: metric.max_value,
+          count: metric.metric_count,
+        };
       });
 
       return [{
@@ -159,16 +173,21 @@ export const AVGUsoLocInstEC2ChartComponent = ({
       if (!generalData.metric_averages?.length) return [];
 
       // Agrupar métricas por región real (solo regiones con datos)
-      const regionData: { [key: string]: { [key: string]: number } } = {};
+      const regionData: { [key: string]: { [key: string]: MetricValues } } = {};
 
       generalData.metric_averages.forEach(metric => {
-        const regionKey = metric.resource_region; // Usar la región real de cada métrica
+        const regionKey = metric.resource_region;
 
         if (!regionData[regionKey]) {
           regionData[regionKey] = {};
         }
 
-        regionData[regionKey][metric.metric_label] = metric.average_value;
+        regionData[regionKey][metric.metric_label] = {
+          avg: metric.average_value,
+          min: metric.min_value,
+          max: metric.max_value,
+          count: metric.metric_count,
+        };
       });
 
       // Solo devolver regiones que realmente tienen datos

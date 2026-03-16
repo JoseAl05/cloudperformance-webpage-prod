@@ -1,6 +1,6 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { ChevronDown, ChevronUp, Computer, Cpu, HardDrive, List, Minus, MonitorX, Network, Zap } from 'lucide-react';
+import { ChevronDown, ChevronUp, Computer, Cpu, DollarSign, HardDrive, List, Minus, MonitorX, Network, TrendingDown, TrendingUp, Zap } from 'lucide-react';
 import { Ec2ConsumeViewAttachedDiskHistoricComponent } from '@/components/aws/vista-consumos/ec2/info/Ec2ConsumeViewAttachedDiskHistoricComponent';
 import { Ec2ConsumeViewStoppedInstancesHistoricComponent } from '@/components/aws/vista-consumos/ec2/info/Ec2ConsumeViewStoppedInstancesHistoricComponent';
 import { Ec2ConsumeViewInUseInterfacesHistoricComponent } from '@/components/aws/vista-consumos/ec2/info/Ec2ConsumeViewInUseInterfacesHistoricComponent';
@@ -139,17 +139,81 @@ export const Ec2InfoConsumeViewCardsComponent = ({ infoData, cpuData, creditsGlo
 
     const efficiencyValue = (creditsGlobalEfficiencyData as unknown)?.global_efficiency ?? 'Sin Datos';
 
+    // Nuevos cálculos
+    const metricsDetail = (creditsGlobalEfficiencyData as unknown)?.metrics_detail ?? [];
+
+    const cpuMetricDetail = metricsDetail.find((m: unknown) => m?.metric === 'cpu_utilization');
+    const netInMetricDetail = metricsDetail.find((m: unknown) => m?.metric === 'network_in');
+    const netOutMetricDetail = metricsDetail.find((m: unknown) => m?.metric === 'network_out');
+
+    const formatBytes = (bytes: number | null | undefined): string => {
+        if (bytes == null) return 'Sin datos';
+        if (bytes >= 1_000_000) return `${(bytes / 1_000_000).toFixed(2)} MB/s`;
+        if (bytes >= 1_000) return `${(bytes / 1_000).toFixed(2)} KB/s`;
+        return `${bytes.toFixed(2)} B/s`;
+    };
+
+    const costoTotal = Array.from(latestByInstance.values())
+        .reduce((sum, inst) => sum + (inst.costo_usd ?? 0), 0);
+
+    const countIdle = Array.from(latestByInstance.values())
+        .filter(inst => inst.clasificacion === 'Idle').length;
+
+    const countInfra = Array.from(latestByInstance.values())
+        .filter(inst => inst.clasificacion === 'Infrautilizada').length;
+    //fin nuevos cambios    
+
     const instanceData = [
         {
+            title: 'Costo Total',
+            value: `$${costoTotal.toFixed(2)} USD`,
+            icon: DollarSign,
+            borderColor: costoTotal > 50 ? 'border-l-red-500' : costoTotal > 20 ? 'border-l-yellow-500' : 'border-l-green-500',
+            subtitle: isToday ? 'Actual' : dateLabel,
+            valueStyle: 'text-xl font-bold text-foreground tracking-tight',
+        },
+        {
             title: 'Promedio Uso de CPU',
-            value: !noCpu ? `${averageCpu.toFixed(2)} %` : 'Sin Datos',
+            value: cpuMetricDetail ? `${cpuMetricDetail.avg_utilization.toFixed(2)} %` : (!noCpu ? `${averageCpu.toFixed(2)} %` : 'Sin Datos'),
             icon: Cpu,
             borderColor: cpuStatus?.border ?? 'border-l-gray-500',
-            subtitle: (isToday ? 'Actual' : dateLabel),
+            subtitle: cpuMetricDetail ? `Máx observado: ${cpuMetricDetail.max_utilization?.toFixed(1)}%` : (isToday ? 'Actual' : dateLabel),
             valueStyle: 'text-xl font-bold text-foreground tracking-tight',
             usage: !noCpu ? cpuStatus?.message : undefined,
             usageIcon: !noCpu ? cpuStatus?.icon : undefined,
             usageStyle: !noCpu ? cpuStatus?.style : undefined,
+        },
+        {
+            title: 'Red Entrante',
+            value: netInMetricDetail ? formatBytes(netInMetricDetail.avg_utilization) : 'Sin Datos',
+            icon: TrendingDown,
+            borderColor: 'border-l-blue-500',
+            subtitle: netInMetricDetail ? `Máx observado: ${formatBytes(netInMetricDetail.max_utilization)}` : (isToday ? 'Actual' : dateLabel),
+            valueStyle: 'text-xl font-bold text-foreground tracking-tight',
+        },
+        {
+            title: 'Red Saliente',
+            value: netOutMetricDetail ? formatBytes(netOutMetricDetail.avg_utilization) : 'Sin Datos',
+            icon: TrendingUp,
+            borderColor: 'border-l-purple-500',
+            subtitle: netOutMetricDetail ? `Máx observado: ${formatBytes(netOutMetricDetail.max_utilization)}` : (isToday ? 'Actual' : dateLabel),
+            valueStyle: 'text-xl font-bold text-foreground tracking-tight',
+        },
+        {
+            title: 'Instancias Idle',
+            value: `${countIdle}`,
+            icon: MonitorX,
+            borderColor: countIdle > 0 ? 'border-l-red-500' : 'border-l-green-500',
+            subtitle: isToday ? 'Actual' : dateLabel,
+            valueStyle: 'text-xl font-bold text-foreground tracking-tight',
+        },
+        {
+            title: 'Infrautilizadas',
+            value: `${countInfra}`,
+            icon: Computer,
+            borderColor: countInfra > 0 ? 'border-l-yellow-500' : 'border-l-green-500',
+            subtitle: isToday ? 'Actual' : dateLabel,
+            valueStyle: 'text-xl font-bold text-foreground tracking-tight',
         },
         {
             title: 'Cantidad de Instancias',
@@ -159,17 +223,8 @@ export const Ec2InfoConsumeViewCardsComponent = ({ infoData, cpuData, creditsGlo
             subtitle: isToday ? 'Actual' : dateLabel,
             valueStyle: 'text-xl font-bold text-foreground tracking-tight'
         },
-        // {
-        //     title: 'Cantidad de Instancias Encendidas',
-        //     value: countRunningInstances,
-        //     icon: MonitorCheck,
-        //     borderColor: 'border-l-green-500',
-        //     subtitle: isToday ? 'Actual' : dateLabel,
-        //     valueStyle: 'text-xl font-bold text-foreground tracking-tight'
-        // },
         {
             title: 'Historial de Instancias Apagadas',
-            // value: countStoppedInstances,
             icon: MonitorX,
             borderColor: 'border-l-red-500',
             subtitle: isToday ? 'Actual' : dateLabel,
@@ -180,6 +235,7 @@ export const Ec2InfoConsumeViewCardsComponent = ({ infoData, cpuData, creditsGlo
             dialogContentComponent: <Ec2ConsumeViewStoppedInstancesHistoricComponent instanceInfo={stoppedInstances} />
         }
     ];
+
 
     const globalCreditsEfficiency = [
         {
@@ -296,8 +352,8 @@ export const Ec2InfoConsumeViewCardsComponent = ({ infoData, cpuData, creditsGlo
                     );
                 })}
             </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
                 {instanceData.map((instance, index) => {
                     const IconComponent = instance.icon;
                     const UsageIconComponent = instance.usageIcon || null;
