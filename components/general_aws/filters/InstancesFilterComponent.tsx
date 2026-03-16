@@ -55,6 +55,9 @@ export const InstancesFilterComponent = ({
         case 'eks':
             url = (selectedKey && selectedValue) ? `/api/aws/bridge/eks/all-eks-clusters?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}` : null;
             break;
+        case 'ebs':
+            url = (selectedKey && selectedValue) ? `/api/aws/bridge/unused/ebs/all_unused_ebs?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}` : null;
+            break;
         case 'rds-pg':
             url = (selectedKey && selectedValue) ? `/api/aws/bridge/db/all-instances-rds-pg?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}` : null;
             break;
