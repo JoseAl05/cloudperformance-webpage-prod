@@ -1,13 +1,15 @@
+'use client'
+
 import { createColumns } from '@/components/data-table/columns';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { DataTableGrouping } from '@/components/data-table/data-table-grouping';
-import { getUnusedEc2Columns } from './UnusedEc2Columns'; // Ajustar ruta
-import { BarChart3, Info } from 'lucide-react';
-import { Ec2TableRow } from '@/interfaces/general-interfaces/ec2MetricsTableData';
+import { BarChart3 } from 'lucide-react';
 import { useMemo } from 'react';
+import { getUnusedEc2Columns } from './UnusedEc2Columns';
+import { UnusedEc2TableData } from '@/interfaces/vista-unused-resources/unusedEc2InstanceInterfaces';
 
-interface UnusedEc2TableProps {
-    data: Ec2TableRow[];
+interface UnusedEc2TableComponentProps {
+    data: UnusedEc2TableData[];
 }
 
 const TableLegend = () => (
@@ -23,7 +25,13 @@ const TableLegend = () => (
     </div>
 );
 
-export const UnusedEc2Table = ({ data }: UnusedEc2TableProps) => {
+export const UnusedEc2TableComponent = ({ data }: UnusedEc2TableComponentProps) => {
+
+    const totalGlobalCost = useMemo(() => {
+        if (!data) return 0;
+        return data.reduce((acc, row) => acc + (row.billing?.total_cost_usd || 0), 0);
+    }, [data]);
+
     const processedData = useMemo(() => {
         if (!data) return [];
         return data.map(row => {
@@ -32,12 +40,16 @@ export const UnusedEc2Table = ({ data }: UnusedEc2TableProps) => {
             return {
                 ...row,
                 sort_cpu: findVal("CPUUtilization"),
-                sort_net_in: findVal("NetworkIn"),
-                sort_net_out: findVal("NetworkOut")
+                sort_net_inout: findVal("NetworkIn") + findVal("NetworkOut"),
+                sort_cpu_credit_usage: findVal("CPUCreditUsage"),
+                sort_cpu_credit_balance: findVal("CPUCreditBalance"),
+                sort_status_check_failed: findVal("StatusCheckFailed"),
+                sort_billing: row.billing?.total_cost_usd || 0
             };
         });
     }, [data]);
-    const columns = createColumns(getUnusedEc2Columns());
+
+    const columns = createColumns(getUnusedEc2Columns(totalGlobalCost));
 
     return (
         <Card className="shadow-sm border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950">
@@ -52,19 +64,19 @@ export const UnusedEc2Table = ({ data }: UnusedEc2TableProps) => {
                                 Métricas Comparativas
                             </CardTitle>
                             <CardDescription className="dark:text-slate-400">
-                                Análisis de saturación y volumen de tráfico por instancia.
+                                Análisis de saturación, volumen de tráfico y facturación por instancia.
                             </CardDescription>
                         </div>
                     </div>
                 </div>
                 <TableLegend />
             </CardHeader>
-            <CardContent className="p-0">
+            <CardContent className="p-5">
                 <DataTableGrouping
                     columns={columns}
                     data={processedData}
-                    filterColumn="instance_id"
-                    filterPlaceholder="Filtrar por ID..."
+                    filterColumn="instance_name"
+                    filterPlaceholder="Filtrar por Nombre..."
                     pageSizeItems={10}
                 />
             </CardContent>
