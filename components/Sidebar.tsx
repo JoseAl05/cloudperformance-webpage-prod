@@ -57,7 +57,8 @@ import {
     ChartNetwork,
     LucideNetwork,
     LucideChartNetwork,
-    Split
+    Split,
+    Tags
 } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { usePathname } from 'next/navigation'
@@ -172,6 +173,7 @@ export const SidebarComponent = ({
             { label: 'Vista Advisor', icon: Pyramid, href: '/aws/advisor' },
             { label: 'Vista Saving Plans', icon: HandCoins, href: '/aws/saving-plan' },
             { label: 'Métricas Finops', icon: ChartNetwork, href: '/aws/finops-metrics-ai' },
+            { label: 'Mantenedor de Etiquetas (Tags)', icon: Tags, href: '/aws/tags' },
         ],
         recursos: [
             { label: 'Instancias EC2', icon: Computer, href: '/aws/recursos/instancias-ec2', color: 'text-orange-500' },
@@ -221,6 +223,7 @@ export const SidebarComponent = ({
             { label: 'Vista Saving Plans', icon: HandCoins, href: '/azure/saving-plan' },
             { label: 'Presupuestos', icon: CircleDollarSign, href: '/azure/presupuesto' },
             { label: 'Métricas Finops', icon: ChartNetwork, href: '/azure/finops-metrics-ai' },
+            { label: 'Mantenedor de Etiquetas (Tags)', icon: Tags, href: '/azure/tags' },
         ],
         recursos: [
             { label: 'Maquinas Virtuales', icon: Computer, href: '/azure/recursos-vm' },
@@ -290,6 +293,7 @@ export const SidebarComponent = ({
             { label: 'Reservations', icon: Server, href: '/gcp/reservas' },
             { label: 'Committed Use Discounts', icon: HandCoins, href: '/gcp/cuds/spend-based-cuds'},
             // { label: 'Presupuestos', icon: CircleDollarSign, href: '/gcp/presupuesto' },
+            { label: 'Mantenedor de Etiquetas (Tags)', icon: Tags, href: '/gcp/tags' },
         ],
         recursos: [
             { label: 'Compute Engine', icon: Computer, href: '/gcp/recursos/compute-engine' },

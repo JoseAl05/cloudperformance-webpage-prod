@@ -1,6 +1,6 @@
 import { FiltersComponent } from '@/components/general_aws/filters/FiltersComponent'
 import { HardDrive } from 'lucide-react'
-import { EbsUnusedComponent } from '@/components/aws/vista-funciones/unused-ebs/EbsUnusedComponent'
+import { EbsUnusedComponent, UnusedEbsComponent } from '@/components/aws/vista-funciones/unused-ebs/UnusedEbsComponent'
 
 export const MainViewUnusedEbsComponent = () => {
     return (
@@ -23,11 +23,15 @@ export const MainViewUnusedEbsComponent = () => {
             </div>
             <div className='w-full min-w-0'>
                 <FiltersComponent
-                    Component={EbsUnusedComponent}
+                    Component={UnusedEbsComponent}
                     dateFilter
                     regionFilter
-                    ebsFilter
-                    isEbsMultiselect
+                    instancesFilter
+                    instancesService='ebs'
+                    isInstanceMultiSelect
+                    tagsFilter
+                    tagColumnName='Tags'
+                    collection='aws_ec2_ebs_volumes'
                 />
             </div>
         </div>

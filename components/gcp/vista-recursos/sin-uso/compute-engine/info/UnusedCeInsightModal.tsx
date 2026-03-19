@@ -220,7 +220,7 @@ export const UnusedCeHistoryView = ({ data }: { data: UnusedCeTableData }) => {
                                         {new Date(h.sync_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                     </span>
                                 </div>
-                                {i === 0 && <Badge variant="secondary" className="w-fit">Estado Actual</Badge>}
+                                {i === 0 && <Badge variant="secondary" className="w-fit">Último Estado</Badge>}
                             </div>
 
                             <div className="rounded-xl border bg-card p-4 shadow-sm hover:border-slate-300 dark:hover:border-slate-700 transition-colors">
