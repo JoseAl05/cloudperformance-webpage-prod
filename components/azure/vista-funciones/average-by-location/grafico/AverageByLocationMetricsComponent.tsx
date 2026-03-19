@@ -129,6 +129,20 @@ const MetricCellDialog = ({
             <span className="font-medium">{formatMetricValue(metric, datum.avg_value)}</span>
           </div>
 
+          {/* --- NUEVO: max y min observados --- */}
+          {(datum.max_value != null || datum.min_value != null) && (
+            <div className="flex items-center justify-between">
+              <span className="text-muted-foreground text-sm">Máx observado</span>
+              <span className="font-medium text-red-500">{datum.max_value != null ? formatMetricValue(metric, datum.max_value) : '—'}</span>
+            </div>
+          )}
+          {(datum.max_value != null || datum.min_value != null) && (
+            <div className="flex items-center justify-between">
+              <span className="text-muted-foreground text-sm">Mín observado</span>
+              <span className="font-medium text-yellow-500">{datum.min_value != null ? formatMetricValue(metric, datum.min_value) : '—'}</span>
+            </div>
+          )}
+
           <div className="grid grid-cols-2 gap-2 text-sm">
             <span className="text-muted-foreground">Muestras</span>
             <span className="text-right">{datum.count}</span>

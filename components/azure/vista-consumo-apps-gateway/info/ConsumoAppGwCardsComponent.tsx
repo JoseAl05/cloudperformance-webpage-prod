@@ -32,6 +32,7 @@ export const ConsumoAppGwCardsComponent = ({ data }: ConsumoAppGwCardsComponentP
         const usedVals = getValues("Capacity Units");
         const reqsVals = getValues("Total Requests");
         const connVals = getValues("Current Connections");
+
         // Promedio temporal de la capacidad FIJA TOTAL
         const globalAvgFixed = avg(fixedVals);
         // Promedio temporal de la capacidad USADA TOTAL
@@ -44,13 +45,24 @@ export const ConsumoAppGwCardsComponent = ({ data }: ConsumoAppGwCardsComponentP
         const wastedCapacity = Math.max(0, globalAvgFixed - globalAvgUsed);
         const efficiencyPercentage = globalAvgFixed > 0 ? (globalAvgUsed / globalAvgFixed) * 100 : 0;
 
+        // --- NUEVO: max/min de Tráfico y Conexiones ---
+        const maxReqs = reqsVals.length ? Math.max(...reqsVals) : 0;
+        const minReqs = reqsVals.length ? Math.min(...reqsVals) : 0;
+        const maxConns = connVals.length ? Math.max(...connVals) : 0;
+        const minConns = connVals.length ? Math.min(...connVals) : 0;
+
         return {
             avgFixed: globalAvgFixed,
             avgUsed: globalAvgUsed,
             wastedCapacity,
             efficiencyPercentage,
             totalReqs: globalTotalReqs,
-            avgConns: globalAvgConns
+            avgConns: globalAvgConns,
+            // --- NUEVO ---
+            maxReqs,
+            minReqs,
+            maxConns,
+            minConns,
         };
     }, [data]);
 
@@ -105,6 +117,10 @@ export const ConsumoAppGwCardsComponent = ({ data }: ConsumoAppGwCardsComponentP
                             <p className="text-xs text-muted-foreground mt-1">
                                 Suma de peticiones totales en el periodo de recursos seleccionados
                             </p>
+                            {/* --- NUEVO: peaks --- */}
+                            <p className="text-xs text-muted-foreground mt-1">
+                                Máx: {kpis.maxReqs.toFixed(2)} · Mín: {kpis.minReqs.toFixed(2)}
+                            </p>
                         </div>
                         <div className="p-2 bg-blue-100 rounded-full">
                             {kpis.totalReqs < 100
@@ -125,6 +141,10 @@ export const ConsumoAppGwCardsComponent = ({ data }: ConsumoAppGwCardsComponentP
                             </p>
                             <p className="text-xs text-muted-foreground mt-1">
                                 Suma de conexiones de recursos seleccionados
+                            </p>
+                            {/* --- NUEVO: peaks --- */}
+                            <p className="text-xs text-muted-foreground mt-1">
+                                Máx: {kpis.maxConns.toFixed(2)} · Mín: {kpis.minConns.toFixed(2)}
                             </p>
                         </div>
                         <div className="p-2 bg-indigo-100 rounded-full">

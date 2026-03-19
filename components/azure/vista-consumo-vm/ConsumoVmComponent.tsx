@@ -1,7 +1,7 @@
 'use client'
 
 import useSWR from 'swr'
-import { BarChart3, AlertCircle, Info, Cpu, MemoryStick, HardDrive, PowerOff } from 'lucide-react'
+import { BarChart3, AlertCircle, Info, Cpu, MemoryStick, HardDrive, PowerOff, DollarSign } from 'lucide-react'
 import { VmStatusChart } from '@/components/azure/vista-consumo-vm/graficos/VmStatusViewComponent';
 import { LoaderComponent } from '@/components/general_aws/LoaderComponent'
 import { MessageCard } from '@/components/azure/cards/MessageCards'
@@ -27,6 +27,15 @@ interface MetricAverage {
     porcentaje_no_utilizado: number
     unidad: string
     total_registros: number
+    max_used?: number
+    min_used?: number
+}
+
+// --- NUEVO ---
+interface CostosEstimados {
+    total_usd: number
+    moneda: string
+    nota: string
 }
 
 interface AveragesResponse {
@@ -42,6 +51,7 @@ interface AveragesResponse {
         memoria_gb?: MetricAverage
         discos_iops?: MetricAverage
     }
+    costos_estimados?: CostosEstimados  // --- NUEVO ---
 }
 
 const fetcher = (url: string) =>
@@ -197,10 +207,13 @@ export const AzureVmMetricsComponent = ({
         averages.data?.metricas.cpu_cores,
         averages.data?.metricas.memoria_gb,
         averages.data?.metricas.discos_iops,
-        averages.data?.estado_vms
+        averages.data?.estado_vms,
+        averages.data?.costos_estimados,  // --- NUEVO ---
     ].filter(Boolean).length
 
-    const gridCols = metricCount === 4 ? 'md:grid-cols-4' : 'md:grid-cols-3'
+    const gridCols =
+        metricCount === 5 ? 'md:grid-cols-5' :
+        metricCount === 4 ? 'md:grid-cols-4' : 'md:grid-cols-3'
 
     return (
         <div className="w-full min-w-0 px-4 py-6">
@@ -224,6 +237,12 @@ export const AzureVmMetricsComponent = ({
                                                 {averages.data.metricas.cpu_cores.porcentaje_no_utilizado.toFixed(2)} %
                                             </p>
                                             <p className="text-xs text-muted-foreground">No Utilizados</p>
+                                            {/* --- NUEVO: peaks --- */}
+                                            {(averages.data.metricas.cpu_cores.max_used != null || averages.data.metricas.cpu_cores.min_used != null) && (
+                                                <p className="text-xs text-muted-foreground mt-1">
+                                                    Máx: {averages.data.metricas.cpu_cores.max_used?.toFixed(2)} · Mín: {averages.data.metricas.cpu_cores.min_used?.toFixed(2)} {averages.data.metricas.cpu_cores.unidad}
+                                                </p>
+                                            )}
                                         </div>
                                         <Cpu className="h-8 w-8 text-blue-500" />
                                     </div>
@@ -242,6 +261,12 @@ export const AzureVmMetricsComponent = ({
                                                 {averages.data.metricas.memoria_gb.porcentaje_no_utilizado.toFixed(2)} %
                                             </p>
                                             <p className="text-xs text-muted-foreground">No Utilizado</p>
+                                            {/* --- NUEVO: peaks --- */}
+                                            {(averages.data.metricas.memoria_gb.max_used != null || averages.data.metricas.memoria_gb.min_used != null) && (
+                                                <p className="text-xs text-muted-foreground mt-1">
+                                                    Máx: {averages.data.metricas.memoria_gb.max_used?.toFixed(2)} · Mín: {averages.data.metricas.memoria_gb.min_used?.toFixed(2)} {averages.data.metricas.memoria_gb.unidad}
+                                                </p>
+                                            )}
                                         </div>
                                         <MemoryStick className="h-8 w-8 text-purple-500" />
                                     </div>
@@ -260,6 +285,12 @@ export const AzureVmMetricsComponent = ({
                                                 {averages.data.metricas.discos_iops.porcentaje_no_utilizado.toFixed(2)} %
                                             </p>
                                             <p className="text-xs text-muted-foreground">No Utilizado</p>
+                                            {/* --- NUEVO: peaks --- */}
+                                            {(averages.data.metricas.discos_iops.max_used != null || averages.data.metricas.discos_iops.min_used != null) && (
+                                                <p className="text-xs text-muted-foreground mt-1">
+                                                    Máx: {averages.data.metricas.discos_iops.max_used?.toFixed(2)} · Mín: {averages.data.metricas.discos_iops.min_used?.toFixed(2)} {averages.data.metricas.discos_iops.unidad}
+                                                </p>
+                                            )}
                                         </div>
                                         <HardDrive className="h-8 w-8 text-cyan-500" />
                                     </div>
@@ -284,6 +315,26 @@ export const AzureVmMetricsComponent = ({
                                 </CardContent>
                             </Card>
                         )}
+
+                        {/* --- NUEVO: Costo Estimado Card COMENTADO PORQUE
+                         NECESITAMOS UN CUAENTA ACTIVA PARA VALIDAR EL COSTO, TECNICAMENTE ESTA BUENO PERO NO HAY COMO VALIDAR--- */}
+                        {/* {averages.data.costos_estimados && (
+                            <Card className="border-l-4 border-l-green-500">
+                                <CardContent className="p-6">
+                                    <div className="flex items-center justify-between">
+                                        <div>
+                                            <p className="text-sm font-medium text-muted-foreground">Costo Estimado</p>
+                                            <p className="text-2xl font-bold text-green-600">
+                                                $ {averages.data.costos_estimados.total_usd.toFixed(4)}
+                                            </p>
+                                            <p className="text-xs text-muted-foreground">USD · Período seleccionado</p>
+                                            <p className="text-xs text-muted-foreground mt-1">{averages.data.costos_estimados.nota}</p>
+                                        </div>
+                                        <DollarSign className="h-8 w-8 text-green-500" />
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        )} */}
                     </div>
                 )}
 

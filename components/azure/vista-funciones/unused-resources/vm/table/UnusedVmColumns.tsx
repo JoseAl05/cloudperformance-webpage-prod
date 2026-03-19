@@ -434,4 +434,115 @@ export const UnusedVmColumns: DynamicColumn<UnusedVm>[] = [
         ),
         size: 170,
     },
+    // --- NUEVO: columnas de métricas FinOps ---
+    {
+        id: "cpu_promedio",
+        header: "CPU Prom %",
+        cell: ({ row }) => {
+            const series = row.original?.series ?? [];
+            const cpuVals = series.filter(s => s.name === 'Percentage CPU').map(s => s.metric_value);
+            const avg = cpuVals.length ? cpuVals.reduce((a, b) => a + b, 0) / cpuVals.length : null;
+            return (
+                <div className="text-sm text-muted-foreground">
+                    {avg != null ? `${avg.toFixed(2)} %` : '—'}
+                </div>
+            );
+        },
+        size: 110,
+    },
+    {
+        id: "cpu_max",
+        header: "CPU Máx %",
+        cell: ({ row }) => {
+            const series = row.original?.series ?? [];
+            const vals = series.filter(s => s.name === 'Percentage CPU' && s.metric_value_maximum != null).map(s => s.metric_value_maximum as number);
+            const max = vals.length ? Math.max(...vals) : null;
+            return (
+                <div className="text-sm text-red-500">
+                    {max != null ? `${max.toFixed(2)} %` : '—'}
+                </div>
+            );
+        },
+        size: 110,
+    },
+    {
+        id: "cpu_min",
+        header: "CPU Mín %",
+        cell: ({ row }) => {
+            const series = row.original?.series ?? [];
+            const vals = series.filter(s => s.name === 'Percentage CPU' && s.metric_value_minimum != null).map(s => s.metric_value_minimum as number);
+            const min = vals.length ? Math.min(...vals) : null;
+            return (
+                <div className="text-sm text-yellow-500">
+                    {min != null ? `${min.toFixed(2)} %` : '—'}
+                </div>
+            );
+        },
+        size: 110,
+    },
+    {
+        id: "mem_promedio",
+        header: "Mem Prom GB",
+        cell: ({ row }) => {
+            const BYTES_TO_GB = 1_073_741_824;
+            const series = row.original?.series ?? [];
+            const vals = series.filter(s => s.name === 'Available Memory').map(s => s.metric_value / BYTES_TO_GB);
+            const avg = vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : null;
+            return (
+                <div className="text-sm text-muted-foreground">
+                    {avg != null ? `${avg.toFixed(2)} GB` : '—'}
+                </div>
+            );
+        },
+        size: 120,
+    },
+    {
+        id: "mem_max",
+        header: "Mem Máx GB",
+        cell: ({ row }) => {
+            const BYTES_TO_GB = 1_073_741_824;
+            const series = row.original?.series ?? [];
+            const vals = series
+                .filter(s => s.name === 'Available Memory' && s.metric_value_maximum != null)
+                .map(s => (s.metric_value_maximum as number) / BYTES_TO_GB);
+            const max = vals.length ? Math.max(...vals) : null;
+            return (
+                <div className="text-sm text-red-500">
+                    {max != null ? `${max.toFixed(2)} GB` : '—'}
+                </div>
+            );
+        },
+        size: 120,
+    },
+    {
+        id: "mem_min",
+        header: "Mem Mín GB",
+        cell: ({ row }) => {
+            const BYTES_TO_GB = 1_073_741_824;
+            const series = row.original?.series ?? [];
+            const vals = series
+                .filter(s => s.name === 'Available Memory' && s.metric_value_minimum != null)
+                .map(s => (s.metric_value_minimum as number) / BYTES_TO_GB);
+            const min = vals.length ? Math.min(...vals) : null;
+            return (
+                <div className="text-sm text-yellow-500">
+                    {min != null ? `${min.toFixed(2)} GB` : '—'}
+                </div>
+            );
+        },
+        size: 120,
+    },
+    {
+        id: "costo_estimado",
+        header: "Costo Est. USD",
+        cell: ({ row }) => {
+            const costo = row.original?.costo_estimado_usd;
+            return (
+                <div className="text-sm text-green-600 dark:text-green-400 font-medium">
+                    {costo != null ? `$ ${costo.toFixed(6)}` : '—'}
+                </div>
+            );
+        },
+        size: 140,
+    },
 ]

@@ -21,23 +21,56 @@ const ALLOWED_METRICS = new Set([
     'Total Requests'
 ]);
 
+// --- NUEVO: métricas que muestran líneas de max y min en el gráfico ---
+const METRICS_WITH_PEAKS = new Set([
+    'Cpu Utilization',
+]);
+
+// Estructura extendida para incluir max/min por punto
+interface GroupedMetric {
+    dataPoints: [string, string][];
+    dataPointsMax: [string, string][];
+    dataPointsMin: [string, string][];
+}
+
 export const ConsumeAppGwChartsComponent = ({ data }: ConsumeAppGwChartsComponentProps) => {
 
     const groupedMetrics = useMemo(() => {
-        const groups = new Map<string, [string, string][]>();
+        const groups = new Map<string, GroupedMetric>();
         const consolidatedMetrics = data?.[0]?.metrics || [];
 
         consolidatedMetrics.forEach((item: ConsumeViewAppGwMetrics) => {
             if (ALLOWED_METRICS.has(item.metric_name)) {
                 if (!groups.has(item.metric_name)) {
-                    groups.set(item.metric_name, []);
+                    groups.set(item.metric_name, {
+                        dataPoints: [],
+                        dataPointsMax: [],
+                        dataPointsMin: [],
+                    });
                 }
 
-                const value = (item.metric_name === 'Bytes Received' || item.metric_name === 'Bytes Sent')
+                const isBytes = item.metric_name === 'Bytes Received' || item.metric_name === 'Bytes Sent';
+
+                const value = isBytes
                     ? bytesToMB(item.metric_value)
                     : item.metric_value.toFixed(2);
 
-                groups.get(item.metric_name)?.push([item.timestamp, value]);
+                const valueMax = isBytes
+                    ? bytesToMB(item.metric_value_maximum ?? item.metric_value)
+                    : (item.metric_value_maximum ?? item.metric_value).toFixed(2);
+
+                const valueMin = isBytes
+                    ? bytesToMB(item.metric_value_minimum ?? item.metric_value)
+                    : (item.metric_value_minimum ?? item.metric_value).toFixed(2);
+
+                const group = groups.get(item.metric_name)!;
+                group.dataPoints.push([item.timestamp, value]);
+
+                // --- NUEVO: solo agregar max/min para métricas con peaks ---
+                if (METRICS_WITH_PEAKS.has(item.metric_name)) {
+                    group.dataPointsMax.push([item.timestamp, valueMax]);
+                    group.dataPointsMin.push([item.timestamp, valueMin]);
+                }
             }
         });
         return groups;
@@ -57,11 +90,13 @@ export const ConsumeAppGwChartsComponent = ({ data }: ConsumeAppGwChartsComponen
             </div>
 
             <div className="grid grid-cols-1 gap-3 xl:grid-cols-2">
-                {Array.from(groupedMetrics.entries()).map(([metricName, dataPoints]) => (
+                {Array.from(groupedMetrics.entries()).map(([metricName, grouped]) => (
                     <ConsumeAppGwSingleChartComponent
                         key={metricName}
                         metricName={metricName}
-                        dataPoints={dataPoints}
+                        dataPoints={grouped.dataPoints}
+                        dataPointsMax={grouped.dataPointsMax.length > 0 ? grouped.dataPointsMax : undefined}
+                        dataPointsMin={grouped.dataPointsMin.length > 0 ? grouped.dataPointsMin : undefined}
                     />
                 ))}
             </div>

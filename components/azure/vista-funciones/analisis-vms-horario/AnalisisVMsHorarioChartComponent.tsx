@@ -259,14 +259,14 @@ export const AnalisisVMsHorarioChartComponent = ({
           symbolSize: 6,
           lineStyle: {
             width: 2,
-            color: '#1e3a8a'
+            color: '#22C55E'
           },
           itemStyle: {
-            color: '#1e3a8a'
+            color: '#22C55E'
           },
           areaStyle: {
             opacity: 0.2,
-            color: '#1e3a8a'
+            color: '#22C55E'
           },
           data: serieNoHabil
         }

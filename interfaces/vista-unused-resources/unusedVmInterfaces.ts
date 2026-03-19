@@ -11,11 +11,14 @@ export interface UnusedVm {
   mem_under: boolean;
   disk_details: UnusedVmDiskDetails[];
   interface_details: UnusedVmInterfaceDetails[];
+  costo_estimado_usd?: number;  // --- NUEVO ---
 }
 
 export interface UnusedVmSeries {
   name: string;
   metric_value: number;
+  metric_value_maximum?: number;  // --- NUEVO ---
+  metric_value_minimum?: number;  // --- NUEVO ---
   timestamp: string;
 }
 

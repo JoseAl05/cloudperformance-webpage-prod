@@ -1,7 +1,7 @@
 'use client'
 
 import useSWR from 'swr'
-import { Database, AlertCircle, Info, Cpu, MemoryStick, HardDrive, PowerOff } from 'lucide-react'
+import { Database, AlertCircle, Info, Cpu, MemoryStick, HardDrive, PowerOff, DollarSign } from 'lucide-react'
 import { DbStatusChart } from '@/components/azure/vista-consumo-db/graficos/DbStatusViewComponent'
 import { LoaderComponent } from '@/components/general_aws/LoaderComponent'
 import { MessageCard } from '@/components/azure/cards/MessageCards'
@@ -27,6 +27,15 @@ interface MetricAverage {
     porcentaje_no_utilizado: number
     unidad: string
     total_registros: number
+    max_used?: number
+    min_used?: number
+}
+
+// --- NUEVO ---
+interface CostosEstimados {
+    total_usd: number
+    moneda: string
+    nota: string
 }
 
 interface AveragesResponse {
@@ -46,6 +55,7 @@ interface AveragesResponse {
         storage_porcentaje?: MetricAverage
         storage_usado?: MetricAverage
     }
+    costos_estimados?: CostosEstimados  // --- NUEVO ---
 }
 
 const fetcher = (url: string) =>
@@ -216,10 +226,14 @@ export const AzureDbMetricsComponent = ({
         averages.data?.metricas.cpu_porcentaje,
         averages.data?.metricas.memoria_porcentaje,
         averages.data?.metricas.storage_usado,
-        averages.data?.estado_dbs
+        averages.data?.estado_dbs,
+        // averages.data?.costos_estimados,  // --- NUEVO (comentado hasta validar costos) ---
     ].filter(Boolean).length
 
-    const gridCols = metricCount === 4 ? 'md:grid-cols-4' : metricCount === 3 ? 'md:grid-cols-3' : 'md:grid-cols-2'
+    const gridCols =
+        metricCount === 5 ? 'md:grid-cols-5' :
+        metricCount === 4 ? 'md:grid-cols-4' :
+        metricCount === 3 ? 'md:grid-cols-3' : 'md:grid-cols-2'
 
     return (
         <div className="w-full min-w-0 px-4 py-6">
@@ -243,6 +257,12 @@ export const AzureDbMetricsComponent = ({
                                                 {averages.data.metricas.cpu_porcentaje.porcentaje_no_utilizado.toFixed(2)} %
                                             </p>
                                             <p className="text-xs text-muted-foreground">No Utilizado</p>
+                                            {/* --- NUEVO: peaks --- */}
+                                            {(averages.data.metricas.cpu_porcentaje.max_used != null || averages.data.metricas.cpu_porcentaje.min_used != null) && (
+                                                <p className="text-xs text-muted-foreground mt-1">
+                                                    Máx: {averages.data.metricas.cpu_porcentaje.max_used?.toFixed(2)} · Mín: {averages.data.metricas.cpu_porcentaje.min_used?.toFixed(2)} {averages.data.metricas.cpu_porcentaje.unidad}
+                                                </p>
+                                            )}
                                         </div>
                                         <Cpu className="h-8 w-8 text-blue-500" />
                                     </div>
@@ -261,6 +281,12 @@ export const AzureDbMetricsComponent = ({
                                                 {averages.data.metricas.memoria_porcentaje.porcentaje_no_utilizado.toFixed(2)} %
                                             </p>
                                             <p className="text-xs text-muted-foreground">No Utilizado</p>
+                                            {/* --- NUEVO: peaks --- */}
+                                            {(averages.data.metricas.memoria_porcentaje.max_used != null || averages.data.metricas.memoria_porcentaje.min_used != null) && (
+                                                <p className="text-xs text-muted-foreground mt-1">
+                                                    Máx: {averages.data.metricas.memoria_porcentaje.max_used?.toFixed(2)} · Mín: {averages.data.metricas.memoria_porcentaje.min_used?.toFixed(2)} {averages.data.metricas.memoria_porcentaje.unidad}
+                                                </p>
+                                            )}
                                         </div>
                                         <MemoryStick className="h-8 w-8 text-purple-500" />
                                     </div>
@@ -279,6 +305,12 @@ export const AzureDbMetricsComponent = ({
                                                 {averages.data.metricas.storage_usado.porcentaje_no_utilizado.toFixed(2)} %
                                             </p>
                                             <p className="text-xs text-muted-foreground">No Utilizado</p>
+                                            {/* --- NUEVO: peaks --- */}
+                                            {(averages.data.metricas.storage_usado.max_used != null || averages.data.metricas.storage_usado.min_used != null) && (
+                                                <p className="text-xs text-muted-foreground mt-1">
+                                                    Máx: {averages.data.metricas.storage_usado.max_used?.toFixed(2)} · Mín: {averages.data.metricas.storage_usado.min_used?.toFixed(2)} {averages.data.metricas.storage_usado.unidad}
+                                                </p>
+                                            )}
                                         </div>
                                         <HardDrive className="h-8 w-8 text-cyan-500" />
                                     </div>
@@ -303,6 +335,25 @@ export const AzureDbMetricsComponent = ({
                                 </CardContent>
                             </Card>
                         )}
+
+                        {/* --- NUEVO: Costo Estimado Card (comentado hasta validar costos reales) ---
+                        {averages.data.costos_estimados && (
+                            <Card className="border-l-4 border-l-green-500">
+                                <CardContent className="p-6">
+                                    <div className="flex items-center justify-between">
+                                        <div>
+                                            <p className="text-sm font-medium text-muted-foreground">Costo Estimado</p>
+                                            <p className="text-2xl font-bold text-green-600">
+                                                $ {averages.data.costos_estimados.total_usd.toFixed(4)}
+                                            </p>
+                                            <p className="text-xs text-muted-foreground">USD · Período seleccionado</p>
+                                        </div>
+                                        <DollarSign className="h-8 w-8 text-green-500" />
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        )}
+                        */}
                     </div>
                 )}
 
