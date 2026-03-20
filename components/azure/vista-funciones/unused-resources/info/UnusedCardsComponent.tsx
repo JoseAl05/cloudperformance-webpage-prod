@@ -125,12 +125,12 @@ export const UnusedCardsComponent: React.FC<UnusedCardsComponentProps> = ({
 
     // --- NUEVO: métricas FinOps calculadas desde series ---
     const finopsMetrics = useMemo(() => {
-        let cpuValues: number[] = [];
-        let cpuMaxValues: number[] = [];
-        let cpuMinValues: number[] = [];
-        let memValues: number[] = [];
-        let memMaxValues: number[] = [];
-        let memMinValues: number[] = [];
+        const cpuValues: number[] = [];
+        const cpuMaxValues: number[] = [];
+        const cpuMinValues: number[] = [];
+        const memValues: number[] = [];
+        const memMaxValues: number[] = [];
+        const memMinValues: number[] = [];
         let costoTotal = 0;
 
         for (const vm of groupedData.values()) {
