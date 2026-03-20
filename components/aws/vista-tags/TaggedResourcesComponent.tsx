@@ -44,6 +44,7 @@ export interface ApiResponseWrapper {
   results?: ServiceGroupAWS[]
   detail?: string | Record<string, unknown>
   message?: string | Record<string, unknown>
+  success?: boolean
 }
 
 interface TagsAnalysisComponentProps {
@@ -91,6 +92,19 @@ export const TagsAnalysisComponentAWS = ({ startDate, endDate, services }: TagsA
     gruposArray = data;
   } else if (data && typeof data === 'object') {
       const apiResponse = data as ApiResponseWrapper;
+
+      if (apiResponse.success === false && apiResponse.message) {
+        return (
+          <div className="w-full min-w-0 px-4 py-6">
+            <MessageCard 
+              icon={AlertTriangle} 
+              title="Configuración Requerida en AWS" 
+              description={apiResponse.message as string} 
+              tone="warn" 
+            />
+          </div>
+        )
+      }
       
       gruposArray = apiResponse.data || apiResponse.items || apiResponse.results || [];
       
