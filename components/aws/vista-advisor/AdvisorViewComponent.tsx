@@ -5,12 +5,9 @@ import { MessageCard } from '@/components/aws/cards/MessageCards'
 import { AlertCircle, AtomIcon, ChartBar, Info } from 'lucide-react'
 import type {
     AdvisorApiResponse,
-    AdvisorRecommendation,
-    AllAdvisorRecommendations
 } from '@/interfaces/vista-advisor/advisorViewInterfaces'
 import { AdvisorViewPieChartComponent } from '@/components/aws/vista-advisor/grafico/AdvisorViewPieChartComponent'
 import { AdvisorViewInfoComponent } from '@/components/aws/vista-advisor/info/AdvisorViewInfoComponent'
-import { AIComponentAws } from '@/components/aws/vista-advisor/ia-recommendations/AIComponentAws'
 import { AiRecommendationReport } from '@/interfaces/ai-recommendations/aiRecommendations';
 import { AiRecommendationsComponent } from '@/components/AiRecommendationsComponent';
 
@@ -21,56 +18,12 @@ interface AdvisorViewComponentProps {
     endDate: Date
     region: string
 }
-type CheckDetail = {
-    status?: string
-    sync_time?: string
-    categorySpecificSummary?: {
-        costOptimizing?: {
-            estimatedMonthlySavings?: number
-            estimatedPercentMonthlySavings?: number
-        }
-        [k: string]: unknown
-    }
-    resourcesSummary?: {
-        resourcesProcessed?: number
-        resourcesFlagged?: number
-        resourcesIgnored?: number
-        resourcesSuppressed?: number
-    }
-    flaggedResources?: Array<{
-        status?: string
-        region?: string
-        resourceId?: string
-        isSuppressed?: boolean
-        metadata?: unknown[]
-    }>
-}
 
-type AdvisorRecMaybeDetails = AdvisorRecommendation & {
-    check_details?: CheckDetail[]
-}
 
 const fetcher = (url: string) =>
     fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
         .then(r => r.json());
 
-const normalize = (s: string) =>
-    s
-        .toLowerCase()
-        .normalize('NFD')
-        .replace(/\p{Diacritic}/gu, '');
-
-const hasCheckDetails = (rec: unknown): rec is AdvisorRecMaybeDetails =>
-    !!rec && typeof rec === 'object' && Array.isArray((rec as unknown).check_details)
-
-const fmtCurrencyUSD = (n?: number) =>
-    typeof n === 'number' ? new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n) : null
-
-const fmtPct = (n?: number) =>
-    typeof n === 'number' ? `${n}%` : null
-
-const shortId = (id?: string, left = 6, right = 6) =>
-    id && id.length > left + right + 3 ? `${id.slice(0, left)}...${id.slice(-right)}` : id ?? ''
 
 const isNonEmptyArray = <T,>(v: unknown): v is T[] => Array.isArray(v) && v.length > 0
 
