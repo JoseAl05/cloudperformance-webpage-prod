@@ -2,7 +2,7 @@
 
 import { useMemo, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { bytesToMB } from '@/lib/bytesToMbs';
+import { bytesToMB, formatBytes } from '@/lib/bytesToMbs';
 import { Info } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { createChartOption, deepMerge, makeBaseOptions, useECharts } from '@/lib/echartsGlobalConfig';
@@ -52,11 +52,11 @@ export const Ec2ResourceViewUsageNetworkComponent = ({ data }: ResourceViewUsage
     const { networkInMetric, networkOutMetric } = useMemo(() => {
         const networkInData = data?.metrics_data.filter(item => item.MetricLabel === 'Entrada de Red (Promedio)') || [];
         networkInData.sort((a, b) => new Date(a.Timestamp).getTime() - new Date(b.Timestamp).getTime());
-        const networkInMetric: [string, number][] = networkInData.map(item => [item.Timestamp, bytesToMB(item.Value)]);
+        const networkInMetric: [string, number][] = networkInData.map(item => [item.Timestamp, item.Value]);
 
         const networkOutData = data?.metrics_data.filter(item => item.MetricLabel === 'Salida de Red (Promedio)') || [];
         networkOutData.sort((a, b) => new Date(a.Timestamp).getTime() - new Date(b.Timestamp).getTime());
-        const networkOutMetric: [string, number][] = networkOutData.map(item => [item.Timestamp, bytesToMB(item.Value)]);
+        const networkOutMetric: [string, number][] = networkOutData.map(item => [item.Timestamp, item.Value]);
 
         return { networkInMetric, networkOutMetric };
     }, [data]);
@@ -65,11 +65,24 @@ export const Ec2ResourceViewUsageNetworkComponent = ({ data }: ResourceViewUsage
         const colors = getThemeColors();
         const base = makeBaseOptions({
             legend: ['Entrada de Red', 'Salida de Red'],
+            legendPos: 'top',
             unitLabel: 'MBs',
             useUTC: true,
             showToolbox: true,
-            metricType: 'mb',
+            metricType: 'default',
         });
+
+        base.tooltip = {
+            ...(typeof base.tooltip === 'object' && !Array.isArray(base.tooltip) ? base.tooltip : {}),
+            trigger: 'axis',
+            axisPointer: { type: 'line' },
+            valueFormatter: (v: unknown) => {
+                if (v == null) return '-';
+                const n = Number(v);
+                if (Number.isNaN(n)) return String(v);
+                return formatBytes(n);
+            },
+        };
 
         const lines = createChartOption({
             kind: 'line',
@@ -93,13 +106,7 @@ export const Ec2ResourceViewUsageNetworkComponent = ({ data }: ResourceViewUsage
                                 borderWidth: 2
                             },
                             label: {
-                                show: false,
-                                // formatter: '{c}',
-                                // color: '#fff',
-                                // fontSize: 10,
-                                // backgroundColor: colors.netInAreaColor,
-                                // padding: [2, 4],
-                                // borderRadius: 4,
+                                show: false
                             },
                             tooltip: {
                                 trigger: 'item',
@@ -155,13 +162,7 @@ export const Ec2ResourceViewUsageNetworkComponent = ({ data }: ResourceViewUsage
                             symbol: 'pin',
                             symbolSize: networkOutMetric.length > 2000 ? 10 : 30,
                             label: {
-                                show: false,
-                                // formatter: '{c}',
-                                // color: '#fff',
-                                // fontSize: 10,
-                                // backgroundColor: colors.netOutAreaColor,
-                                // padding: [2, 4],
-                                // borderRadius: 4,
+                                show: false
                             },
                             itemStyle: {
                                 color: colors.netOutColor,
@@ -214,7 +215,12 @@ export const Ec2ResourceViewUsageNetworkComponent = ({ data }: ResourceViewUsage
             ],
             extraOption: {
                 xAxis: { axisLabel: { rotate: 30 } },
-                yAxis: { min: 0 },
+                yAxis: {
+                    min: 0,
+                    axisLabel: {
+                        formatter: (v: number) => formatBytes(v),
+                    },
+                },
                 grid: { left: 44, right: 12, top: 56, bottom: 64, containLabel: true },
             },
         });

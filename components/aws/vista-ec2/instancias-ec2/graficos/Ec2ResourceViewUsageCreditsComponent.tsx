@@ -20,6 +20,10 @@ export const Ec2ResourceViewUsageCreditsComponent = ({ data }: ResourceViewUsage
 
     const chartRef = useRef<HTMLDivElement>(null);
 
+    console.log(data?.metrics_data.filter(
+            item => item.MetricLabel === 'Uso de Créditos CPU (Promedio)'
+        ))
+
     const { creditsUsageMetric, creditsBalanceMetric, yMaxRounded } = useMemo(() => {
         const creditsUsageData = data?.metrics_data.filter(
             item => item.MetricLabel === 'Uso de Créditos CPU (Promedio)'

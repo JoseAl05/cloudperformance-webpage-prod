@@ -694,7 +694,7 @@ function buildSeries(def: AnySeriesDef): echarts.SeriesOption {
         lineStyle: { width: 2 },
         areaStyle: def.kind === 'area' ? {} : undefined,
         data: def.data as Array<[unknown, number]> | Array<[number]>,
-        encode: { x: 0, y: 1 },
+        // encode: { x: 0, y: 1 },
         emphasis: { focus: 'series' },
       } as echarts.SeriesOption;
       return applyOverrides(base, def.kind);
