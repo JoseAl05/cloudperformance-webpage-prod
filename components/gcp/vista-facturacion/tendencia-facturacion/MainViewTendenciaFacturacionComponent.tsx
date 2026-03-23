@@ -28,7 +28,11 @@ export const MainViewTendenciaFacturacionComponent = () => {
                 <FiltersComponent
                     Component={TendenciaFacturacionComponent}
                     dateFilter
-                    projectFilter
+                    tagsFilter
+                    tagCollection="gcp_billing_export_detailed"
+                    tagColumn="labels"
+                    projectsFilter
+                    regionFilter
                 />
             </div>
         </div>
