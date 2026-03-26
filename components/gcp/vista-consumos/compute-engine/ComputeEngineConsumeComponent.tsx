@@ -140,26 +140,15 @@ export const ComputeEngineConsumeComponent = ({
                 efficiency={efficiencyData.data}
                 isLoading={infoData.isLoading}
             />
-            {/* <CloudSQLCardsComponent
-                summary={data?.resumen}
-                instancias={data?.instancias || []}
-                efficiency={efficiencyData}
-                isLoading={isLoading}
-            /> */}
 
             {/* Gráficos de métricas */}
             <div className="flex-1 space-y-6 min-w-0 overflow-hidden">
                 <ComputeEngineConsumeChartComponent
                     data={metricsData.data}
                 />
-                {/* <CloudSQLCPUChart data={cpuData} />
-                <CloudSQLConnectionsChart data={connectionsData} />
-                <CloudSQLStorageChart data={storageData} />
-                <CloudSQLMemoryChart data={memoryData} /> */}
             </div>
 
             {/* Tabla */}
-            {/* <CloudSQLTable data={data?.instancias || []} /> */}
             <ComputeEngineConsumeTableComponent
                 data={infoData?.data.instancias || []}
             />

@@ -2,14 +2,12 @@
 
 import useSWR from 'swr'
 import { ChartBar, AlertCircle, Info, Clock } from 'lucide-react'
-import { Ec2ResourceConsumeViewUsageCpuComponent } from '@/components/aws/vista-consumos/ec2/graficos/Ec2ResourceConsumeViewUsageCpuComponent'
-import { Ec2ResourceConsumeViewUsageCreditsComponent } from '@/components/aws/vista-consumos/ec2/graficos/Ec2ResourceConsumeViewUsageCreditsComponent'
-import { Ec2ResourceConsumeViewNetworkComponent } from '@/components/aws/vista-consumos/ec2/graficos/Ec2ResourceConsumeViewNetworkComponent'
-import { Ec2InfoConsumeViewComponent } from '@/components/aws/vista-consumos/ec2/info/Ec2InfoConsumeViewComponent'
-import { Ec2ConsumeViewInstanceTable } from '@/components/aws/vista-consumos/ec2/table/Ec2ConsumeViewInstanceTable'
 import { MessageCard } from '@/components/aws/cards/MessageCards';
 import { LoaderComponent } from '@/components/general_aws/LoaderComponent'
-import { ConsumeViewEc2CpuMetrics, ConsumeViewEc2CreditsMetrics, ConsumeViewEc2NetworkMetrics, Ec2ConsumneViewInstance } from '@/interfaces/vista-consumos/ec2ConsumeViewInterfaces'
+import { ConsumeViewEc2GlobalEfficiency, ConsumeViewEc2Info, ConsumeViewEc2Metrics } from '@/interfaces/vista-consumos/ec2ConsumeViewInterfaces'
+import { Ec2InstancesConsumeChartComponent } from '@/components/aws/vista-consumos/ec2/graficos/Ec2InstancesConsumeChartComponent'
+import { Ec2ConsumeViewCardsComponent } from '@/components/aws/vista-consumos/ec2/info/Ec2ConsumeViewCardsComponent'
+import { Ec2InstancesConsumeTableComponent } from '@/components/aws/vista-consumos/ec2/table/Ec2InstancesConsumeTableComponent'
 
 interface Ec2InstancesConsumeComponentProps {
     startDate: Date
@@ -34,71 +32,59 @@ export const Ec2InstancesConsumeComponent = ({
     const startDateFormatted = startDate.toISOString().replace('Z', '').slice(0, -4)
     const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : ''
 
-    const ec2CpuMetrics = useSWR(
+    const ec2Metrics = useSWR(
         instance
-            ? `/api/aws/bridge/vm/consumo_ec2/cpu_usage?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&resource=${instance}`
-            : null,
-        fetcher
-    )
-    const ec2CreditsMetrics = useSWR(
-        instance
-            ? `/api/aws/bridge/vm/consumo_ec2/credits_usage?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&resource=${instance}`
+            ? `/api/aws/bridge/vm/consumo_ec2?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&resource=${instance}`
             : null,
         fetcher
     )
     const ec2Info = useSWR(
         instance
-            ? `/api/aws/bridge/vm/consumo_ec2/info?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&resource=${instance}`
+            ? `/api/aws/bridge/vm/ec2/info?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&resource=${instance}`
             : null,
         fetcher
     )
-    const ec2GlobalCreditsEfficiency = useSWR(
+    const ec2GlobalEfficiency = useSWR(
         instance
-            ? `/api/aws/bridge/vm/consumo_ec2/global_credits_efficiency?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&resource=${instance}`
+            ? `/api/aws/bridge/vm/ec2/global_efficiency?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&resource=${instance}`
             : null,
         fetcher
     )
 
-    const ec2NetworkMetrics = useSWR(
-        instance
-            ? `/api/aws/bridge/vm/consumo_ec2/network?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&resource=${instance}`
-            : null,
-        fetcher
-    )
+    // const ec2NetworkMetrics = useSWR(
+    //     instance
+    //         ? `/api/aws/bridge/vm/consumo_ec2/network?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&resource=${instance}`
+    //         : null,
+    //     fetcher
+    // )
 
     const anyLoading =
-        ec2CpuMetrics.isLoading ||
-        ec2CreditsMetrics.isLoading ||
+        ec2Metrics.isLoading ||
         ec2Info.isLoading ||
-        ec2GlobalCreditsEfficiency.isLoading ||
-        ec2NetworkMetrics.isLoading
+        ec2GlobalEfficiency.isLoading
 
     const anyError =
-        !!ec2CpuMetrics.error ||
-        !!ec2CreditsMetrics.error ||
+        !!ec2Metrics.error ||
         !!ec2Info.error ||
-        !!ec2GlobalCreditsEfficiency.error ||
-        !!ec2NetworkMetrics.error
+        !!ec2GlobalEfficiency.error
 
-    const cpuMetricsData: ConsumeViewEc2CpuMetrics[] | null =
-        isNonEmptyArray<ConsumeViewEc2CpuMetrics>(ec2CpuMetrics.data) ? ec2CpuMetrics.data : null
+    const metricsData: ConsumeViewEc2Metrics[] | null =
+        isNonEmptyArray<ConsumeViewEc2Metrics>(ec2Metrics.data) ? ec2Metrics.data : null
 
-    const creditsMetricsData: ConsumeViewEc2CreditsMetrics[] | null =
-        isNonEmptyArray<ConsumeViewEc2CreditsMetrics>(ec2CreditsMetrics.data) ? ec2CreditsMetrics.data : null
-
-    const infoData: Ec2ConsumneViewInstance[] | null =
-        isNonEmptyArray<Ec2ConsumneViewInstance>(ec2Info.data) ? ec2Info.data : null
-
-    const globalEfficiencyData: unknown = isNullish(ec2GlobalCreditsEfficiency.data)
+    const infoData: ConsumeViewEc2Info = isNullish(ec2Info.data)
         ? null
-        : ec2GlobalCreditsEfficiency.data
+        : ec2Info.data
 
-    const networkMetricsData: ConsumeViewEc2NetworkMetrics[] | null =
-        isNonEmptyArray<ConsumeViewEc2NetworkMetrics>(ec2NetworkMetrics.data) ? ec2NetworkMetrics.data : null        
+    const globalEfficiencyData: ConsumeViewEc2GlobalEfficiency = isNullish(ec2GlobalEfficiency.data)
+        ? null
+        : ec2GlobalEfficiency.data
 
-    const hasCpuData = !!cpuMetricsData && cpuMetricsData.length > 0
-    const hasCreditsData = !!creditsMetricsData && creditsMetricsData.length > 0
+    // const networkMetricsData: ConsumeViewEc2NetworkMetrics[] | null =
+    //     isNonEmptyArray<ConsumeViewEc2NetworkMetrics>(ec2NetworkMetrics.data) ? ec2NetworkMetrics.data : null
+
+    const hasMetricsData = !!metricsData && metricsData.length > 0
     const hasInfoData = !!infoData && infoData.length > 0
+    const hasEfficiencyData = !!globalEfficiencyData
 
     if (anyLoading) {
         return (
@@ -127,7 +113,7 @@ export const Ec2InstancesConsumeComponent = ({
         )
     }
 
-    const noneHasData = !hasCpuData && !hasCreditsData && !hasInfoData
+    const noneHasData = !hasMetricsData && !hasInfoData && !hasEfficiencyData
     if (noneHasData) {
         return (
             <div className="w-full min-w-0 px-4 py-6">
@@ -142,39 +128,21 @@ export const Ec2InstancesConsumeComponent = ({
     }
 
     return (
-        <div className="w-full min-w-0 px-4 py-6">
+        <div className="space-y-6 mt-6 px-4">
+            <Ec2ConsumeViewCardsComponent
+                summary={infoData?.resumen}
+                instancias={infoData?.instancias}
+                efficiency={globalEfficiencyData}
+                isLoading={ec2Info.isLoading}
+            />
             <div className="flex-1 space-y-6 min-w-0 overflow-hidden">
-                <Ec2InfoConsumeViewComponent
-                    cpuData={cpuMetricsData}
-                    creditsData={creditsMetricsData}
-                    infoData={infoData}
-                    creditsGlobalEfficiency={globalEfficiencyData}
+                <Ec2InstancesConsumeChartComponent
+                    data={metricsData}
                 />
             </div>
-
-            <div className="flex flex-col gap-5 mt-10">
-                <div className="flex items-center gap-3 my-5">
-                    <ChartBar className="h-8 w-8 text-blue-500" />
-                    <h1 className="text-3xl font-bold text-foreground">Métricas de la Instancia</h1>
-                </div>
-
-                <Ec2ResourceConsumeViewUsageCreditsComponent data={creditsMetricsData} />
-                <Ec2ResourceConsumeViewUsageCpuComponent data={cpuMetricsData} />
-                <Ec2ResourceConsumeViewNetworkComponent data={networkMetricsData} />
-            </div>
-            <div className="flex flex-col gap-5 mt-10">
-                <div className="flex items-center gap-3 my-5">
-                    <Clock className="h-8 w-8 text-blue-500" />
-                    <h1 className="text-3xl font-bold text-foreground">Detalle Instancias</h1>
-                </div>
-                <Ec2ConsumeViewInstanceTable
-                    data={infoData}
-                    startDate={startDate}
-                    endDate={endDate}
-                    instance={instance}
-                    enableGrouping
-                />
-            </div>
+            <Ec2InstancesConsumeTableComponent
+                data={infoData?.instancias || []}
+            />
         </div>
     )
 }
