@@ -80,13 +80,22 @@ export function parseScientific(num: string): string {
     return numberSign < 0 ? "-" + num : num;
 }
 
-export const TendenciaFacturacionComponent = ({ startDate, endDate, projects, regions }: TendenciaFacturacionComponentProps) => {
+export const TendenciaFacturacionComponent = ({ startDate, endDate, projects, regions, tagKey, tagValue }: TendenciaFacturacionComponentProps) => {
     const [topN, setTopN] = useState<string>("all");
     const [currency, setCurrency] = useState<string>("original");
     const startDateFormatted = startDate.toISOString().split('.')[0];
     const endDateFormatted = endDate.toISOString().split('.')[0];
 
-    const apiUrl = `/api/gcp/bridge/gcp/facturacion/tendencia_facturacion?date_from=${startDateFormatted}&date_to=${endDateFormatted}&project_id=${projects || ''}&region=${regions}`;
+    const baseUrl = `/api/gcp/bridge/gcp/facturacion/tendencia_facturacion?date_from=${startDateFormatted}&date_to=${endDateFormatted}&project_id=${projects}&region=${regions}`; 
+    let apiUrl = baseUrl;
+
+    if (tagKey && tagKey !== 'allKeys') {
+        apiUrl += `&nombre_tag=${encodeURIComponent(tagKey)}`;
+
+        if (tagValue && tagValue !== 'allValues') {
+            apiUrl += `&valor_tag=${encodeURIComponent(tagValue)}`;
+        }
+    }
 
     const { data, error, isLoading } = useSWR<FacturacionData[]>(apiUrl, fetcher);
 
