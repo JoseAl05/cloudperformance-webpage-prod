@@ -32,12 +32,13 @@ export const MainViewComputeEngineConsumeComponent = () => {
                     dateFilter
                     projectFilter
                     regionFilter
-                    // tagsFilter
                     resourceFilter
                     isResourceMultiSelect
                     resourceService='instances'
-                    // tagCollection="gcp_compute_instances"
-                    // tagColumn="labels"
+                    tagsFilter
+                    tagCollection="gcp_custom_vm_metrics_logs"
+                    tagColumn="labels"
+                    localService="Compute Engine"
                 />
             </div>
         </div>

@@ -43,9 +43,9 @@ export const CloudSQLComponent = ({
     if (regions && regions !== 'all_regions') url += `location=${regions}&`;
     if (databaseType && databaseType !== 'all') url += `database_type=${databaseType}&`;
     if (tagKey && tagKey !== 'allKeys') {
-        url += `tag_key=${encodeURIComponent(tagKey)}&`;
+        url += `tagKey=${encodeURIComponent(tagKey)}&`;
         if (tagValue && tagValue !== 'allValues') {
-            url += `tag_value=${encodeURIComponent(tagValue)}&`;
+            url += `tagValue=${encodeURIComponent(tagValue)}&`;
         }
     }
 

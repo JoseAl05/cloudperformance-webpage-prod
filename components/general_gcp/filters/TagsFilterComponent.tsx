@@ -269,6 +269,7 @@ interface TagFilterComponentProps {
     projects: string,
     collection: string,
     tagColumnName: string,
+    localService: string,
 
     regionField?: string,
     projectField?: string,
@@ -301,6 +302,7 @@ export const TagsFilterComponent = ({
     projects,
     collection,
     tagColumnName,
+    localService,
     regionField = 'location',
     projectField = 'project_id',
     selectedKey,
@@ -319,7 +321,7 @@ export const TagsFilterComponent = ({
 
     const shouldFetch = !!projects
 
-    const url = `/api/gcp/bridge/gcp/general/get_all_tags?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${regions}&region_field=${regionField}&project=${projects}&project_field=${projectField}&collection=${collection}&tag_column_name=${tagColumnName}`;
+    const url = `/api/gcp/bridge/gcp/general/get_all_tags?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${regions}&region_field=${regionField}&project=${projects}&project_field=${projectField}&collection=${collection}&tag_column_name=${tagColumnName}&local_service=${localService}`;
 
     const { data, error, isLoading } = useSWR(
         shouldFetch ? url : null,

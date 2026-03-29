@@ -59,6 +59,7 @@ interface FiltersComponentProps {
     resourceService?: string;
     tagCollection?: string; // NUEVO: Colección de Mongo para buscar tags (ej: gcp_compute_disks)
     tagColumn?: string;     // NUEVO: Nombre columna (default: labels)
+    localService?: string;  // NUEVO: Nombre del servicio para filtrar tags (ej: Compute Engine, Cloud SQL, etc)    
     dbEngine?: string;
     storageClassFilter?: boolean;
     categoryFilter?: boolean;
@@ -81,6 +82,7 @@ export const FiltersComponent = ({
     isResourceMultiSelect = false,
     tagCollection = '',  // Obligatorio si tagsFilter es true
     tagColumn = 'labels',
+    localService = '',
     databaseTypeFilter = false,
     estadoUsoFilter = false,
     esquemaFilter = false,
@@ -385,6 +387,7 @@ export const FiltersComponent = ({
                                     regions={tempRegions}
                                     collection={tagCollection}
                                     tagColumnName={tagColumn}
+                                    localService={localService}
                                     selectedKey={tempTagKey}
                                     setSelectedKey={setTempTagKey}
                                     selectedValue={tempTagValue}

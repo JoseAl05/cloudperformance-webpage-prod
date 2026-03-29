@@ -35,6 +35,7 @@ export const MainViewCloudSQLComponent = () => {
           tagsFilter          
           tagCollection="gcp_sql_instances"
           tagColumn="settings.userLabels"
+          localService="Cloud SQL"
         />
       </div>
     </div>
