@@ -16,10 +16,10 @@ export const MainViewSavingPlansComponent = () => {
                             </div>
                             <div>
                                 <h1 className='text-3xl font-bold text-gray-900 dark:text-gray-100'>
-                                    Saving Plans
+                                    AWS Savings Plans
                                 </h1>
                                 <p className='text-gray-500 dark:text-gray-400'>
-                                    Saving Plans
+                                    Monitorea la eficiencia, el uso real y el desperdicio de tus compromisos de ahorro para optimizar tus costos de cómputo en la nube.
                                 </p>
                             </div>
                         </div>
