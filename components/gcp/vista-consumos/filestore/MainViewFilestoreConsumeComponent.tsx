@@ -37,6 +37,10 @@ export const MainViewFilestoreConsumeComponent = () => {
                     resourceFilter
                     isResourceMultiSelect
                     resourceService='filestore'
+                    tagsFilter
+                    tagCollection="gcp_filestore_instances"
+                    tagColumn="labels"
+                    localService="Cloud Filestore"
                 />
             </div>
         </div>

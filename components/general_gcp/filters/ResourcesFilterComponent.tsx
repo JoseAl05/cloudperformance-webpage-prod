@@ -305,8 +305,8 @@ const getUrlForService = (service: string, params: { startDate: string, endDate:
         case 'disks': return `${baseUrl}/recursos_sin_uso/all_persistent_disks?${baseParams}`;
         case 'instances': return `${baseUrl}/instancias_compute_engine/all_compute_engine_instances?${baseParams}&tagKey=${params.tagKey}&tagValue=${params.tagValue}`;
         case 'unused-instances': return `${baseUrl}/recursos_sin_uso/all_unused_compute_engines?${baseParams}&tagKey=${params.tagKey}&tagValue=${params.tagValue}`;
-        case 'instance_groups': return `${baseUrl}/instance_groups/all_instance_groups?${baseParams}`;
-        case 'filestore': return `${baseUrl}/instancias_filestore/all_filestore?${baseParams}`;
+        case 'instance_groups': return `${baseUrl}/instance_groups/all_instance_groups?${baseParams}&tagKey=${params.tagKey}&tagValue=${params.tagValue}`;
+        case 'filestore': return `${baseUrl}/instancias_filestore/all_filestore?${baseParams}&tagKey=${params.tagKey}&tagValue=${params.tagValue}`;
         case 'clusters-gke': return `${baseUrl}/gke_clusters/all_gke_clusters?${baseParams}&tagKey=${params.tagKey}&tagValue=${params.tagValue}`;
         case 'postgres': return `${baseUrl}/instancias_cloud_sql/all_cloudsql_instances?${baseParams}&tagKey=${params.tagKey}&tagValue=${params.tagValue}&db_engine=postgres`;
         case 'mysql': return `${baseUrl}/instancias_cloud_sql/all_cloudsql_instances?${baseParams}&tagKey=${params.tagKey}&tagValue=${params.tagValue}&db_engine=mysql`;

@@ -12,8 +12,8 @@ interface ClusterGkeConsumeComponentProps {
     projects: string;
     regions: string;
     resourceId: string;
-    // tagKey?: string | null;
-    // tagValue?: string | null;
+    tagKey?: string | null;
+    tagValue?: string | null;
 }
 
 const fetcher = (url: string) => fetch(url).then(res => res.json());
@@ -23,9 +23,9 @@ export const ClusterGkeConsumeComponent = ({
     endDate,
     projects,
     regions,
-    resourceId
-    // tagKey,
-    // tagValue
+    resourceId,
+    tagKey,
+    tagValue
 }: ClusterGkeConsumeComponentProps) => {
 
     // Construcción de URL
@@ -36,12 +36,10 @@ export const ClusterGkeConsumeComponent = ({
     if (projects) infoUrl += `project_id=${projects}&`;
     if (regions && regions !== 'all_regions') infoUrl += `region=${regions}&`;
     if (resourceId) infoUrl += `resources_id=${resourceId}&`;
-    // if (tagKey && tagKey !== 'allKeys') {
-    //     infoUrl += `tag_key=${encodeURIComponent(tagKey)}&`;
-    //     if (tagValue && tagValue !== 'allValues') {
-    //         infoUrl += `tag_value=${encodeURIComponent(tagValue)}&`;
-    //     }
-    // }
+    if (tagKey && tagKey !== 'allKeys') {
+            infoUrl += `tagKey=${encodeURIComponent(tagKey)}&`;
+            if (tagValue) infoUrl += `tagValue=${encodeURIComponent(tagValue)}&`;
+        }
 
     const shouldFetch = !!projects;
 
@@ -57,6 +55,10 @@ export const ClusterGkeConsumeComponent = ({
     if (projects) efficiencyUrl += `project_id=${projects}&`;
     if (regions && regions !== 'all_regions') efficiencyUrl += `location=${regions}&`;
     if (resourceId) efficiencyUrl += `resource=${resourceId}&`;
+    if (tagKey && tagKey !== 'allKeys') {
+            infoUrl += `tagKey=${encodeURIComponent(tagKey)}&`;
+            if (tagValue) infoUrl += `tagValue=${encodeURIComponent(tagValue)}&`;
+        }
 
     const efficiencyData = useSWR(
         shouldFetch ? efficiencyUrl : null,
@@ -71,7 +73,10 @@ export const ClusterGkeConsumeComponent = ({
     if (projects) metricsUrl += `project_id=${projects}&`;
     if (regions && regions !== 'all_regions') metricsUrl += `location=${regions}&`;
     if (resourceId) metricsUrl += `resource=${resourceId}&`;
-
+    if (tagKey && tagKey !== 'allKeys') {
+            infoUrl += `tagKey=${encodeURIComponent(tagKey)}&`;
+            if (tagValue) infoUrl += `tagValue=${encodeURIComponent(tagValue)}&`;
+        }
 
     const metricsData = useSWR(shouldFetch ? metricsUrl : null, fetcher, { revalidateOnFocus: false });
 
