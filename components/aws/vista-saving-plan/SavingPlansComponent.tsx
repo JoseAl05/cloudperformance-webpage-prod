@@ -20,7 +20,8 @@ import {
   Clock,
   Calendar,
   Server,
-  Zap
+  Zap,
+  CheckCircle2
 } from "lucide-react"
 import { SavingPlansBarChartComponent } from '@/components/aws/vista-saving-plan/graficos/SavingPlansBarChartComponent'
 import { SavingPlansLineChartComponent } from '@/components/aws/vista-saving-plan/graficos/SavingPlansLineChartComponent'
@@ -54,16 +55,22 @@ interface SavingPlansComponentProps {
 export const SavingPlansViewComponent = ({ startDate, endDate }: SavingPlansComponentProps) => {
   const startDateFormatted = startDate.toISOString().replace("Z", "").slice(0, -4)
   const endDateFormatted = endDate ? endDate.toISOString().replace("Z", "").slice(0, -4) : ""
-  const selectedArn =
-    "arn:aws:savingsplans::413591708008:savingsplan/e7ebd204-b438-4d74-969a-2a4be4e86a8a"
-  const estadoPlan = "Excesivo"
 
+
+
+  const { data: plansData } = useSWR(
+    `/api/aws/bridge/saving-plans/vista-saving-plans?date_from=${startDateFormatted}&date_to=${endDateFormatted}`,
+    fetcher
+  )
+  const activePlan = plansData?.[0];
+  const selectedArn = activePlan?.savingsPlanArn;
 
   const { data: stats } = useSWR(
     `/api/aws/bridge/saving-plans/vista-saving-plans/dashboard-stats?date_from=${startDateFormatted}&date_to=${endDateFormatted}`,
     fetcher
   )
 
+  
   const { data: costUsage, error, isLoading } = useSWR(
     `/api/aws/bridge/saving-plans/saving-plan-cost-usage?date_from=${startDateFormatted}&date_to=${endDateFormatted}&savings_plan_arn=${selectedArn}`,
     fetcher
@@ -83,6 +90,75 @@ export const SavingPlansViewComponent = ({ startDate, endDate }: SavingPlansComp
     `/api/aws/bridge/saving-plans/lambda-functions-prices/?date_from=${startDateFormatted}&date_to=${endDateFormatted}`,
     fetcher
   )
+
+  const getCoverageStatus = () => {
+    if (!spcost || !costUsage || costUsage.length === 0) {
+      return { 
+        label: "Sin Datos", color: "text-gray-400", bg: "border-l-gray-400", 
+        icon: <Activity className="h-8 w-8 text-gray-400" />, 
+        utilizado: 0, compromiso: 0, desperdicio: 0 
+      };
+    }
+
+    let totalUsoReal = 0;    
+    let totalCompromiso = 0; 
+
+    costUsage.forEach((curr: CostUsage) => {
+      const serviceName = curr.dimensions?.SERVICE || curr.SERVICE || "";
+      if (serviceName.includes("Savings Plans")) {
+        totalUsoReal += Number(curr.amortizedcost) || 0; 
+        totalCompromiso += Number(curr.unblendedcost) || 0;
+      }
+    });
+
+    if (totalCompromiso === 0) {
+      const diffTime = Math.abs(endDate.getTime() - startDate.getTime());
+      const diasDelPeriodo = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) || 1;
+      totalCompromiso = spcost.costo_diario * diasDelPeriodo;
+      totalUsoReal = costUsage.reduce((acc, curr) => acc + (Number(curr.amortizedcost) || 0), 0);
+    }
+
+    const diferencia = totalCompromiso - totalUsoReal;
+
+    if (diferencia > totalCompromiso * 0.15) { 
+      // Sobra más del 15% del dinero del plan -> Excesivo
+      return { 
+        label: "Excesivo / Subutilizado", 
+        color: "text-orange-600", 
+        bg: "border-l-orange-500",
+        icon: <TrendingDown className="h-8 w-8 text-orange-500" />,
+        desc: "Estás pagando por capacidad que no estás usando. La barra verde de compromiso es mayor a la azul de uso.",
+        utilizado: totalUsoReal,
+        compromiso: totalCompromiso,
+        desperdicio: diferencia
+      };
+    } else if (diferencia < -(totalCompromiso * 0.15)) {
+      // Falta más del 15% -> Baja Cobertura
+      return { 
+        label: "Baja Cobertura", 
+        color: "text-blue-600", 
+        bg: "border-l-blue-500",
+        icon: <TrendingUp className="h-8 w-8 text-blue-500" />,
+        desc: "Tu consumo supera el plan. El excedente se está facturando a precio On-Demand normal.",
+        utilizado: totalUsoReal,
+        compromiso: totalCompromiso,
+        desperdicio: Math.abs(diferencia)
+      };
+    }
+    
+    return { 
+      label: "Óptimo", 
+      color: "text-green-600", 
+      bg: "border-l-green-500",
+      icon: <CheckCircle2 className="h-8 w-8 text-green-500" />,
+      desc: "Excelente balance. Estás aprovechando casi todo tu compromiso sin pasarte demasiado.",
+      utilizado: totalUsoReal,
+      compromiso: totalCompromiso,
+      desperdicio: 0
+    };
+  };
+
+  const coverage = getCoverageStatus();
 
   if (isLoading) return <p>Cargando...</p>
   if (error) return <p>Error cargando los datos.</p>
@@ -132,37 +208,69 @@ export const SavingPlansViewComponent = ({ startDate, endDate }: SavingPlansComp
           </CardContent>
         </Card>
       </div>
+
       <div className="col-span-1 md:col-span-6">
         <Dialog>
           <DialogTrigger asChild>
-            <Card className="border-l-4 border-l-yellow-500 cursor-pointer hover:shadow-lg transition w-full h-full rounded-2xl">
+            <Card className={`border-l-4 ${coverage.bg} cursor-pointer hover:shadow-md transition rounded-2xl h-full`}>
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-muted-foreground">Estado Saving Plan</p>
-                    <p className="text-2xl font-bold text-yellow-600">{estadoPlan}</p>
-                    <p className="text-xs text-muted-foreground">Estado actual del plan</p>
+                    <p className="text-sm font-medium text-muted-foreground uppercase text-[10px]">Cobertura del Plan</p>
+                    <p className={`text-2xl font-bold ${coverage.color}`}>{coverage.label}</p>
+                    
+                    {/* Condicional: Si es excesivo mostramos Desperdicio, si no, mostramos el uso */}
+                    {coverage.label === "Excesivo / Subutilizado" ? (
+                       <p className="text-xs font-semibold text-red-500 mt-1">
+                         Desperdicio: {formatUSD(coverage.desperdicio)}
+                       </p>
+                    ) : (
+                       <p className="text-xs text-muted-foreground mt-1">
+                         Utilizado: {formatUSD(coverage.utilizado)}
+                       </p>
+                    )}
                   </div>
-                  <AlertTriangle className="h-8 w-8 text-yellow-500" aria-label="Estado Saving Plan" />
+                  {coverage.icon}
                 </div>
               </CardContent>
             </Card>
           </DialogTrigger>
-          <DialogContent className="max-w-lg">
+          <DialogContent>
             <DialogHeader>
-              <DialogTitle>Detalle del Estado del Saving Plan</DialogTitle>
-              <DialogDescription>
-                Aquí se mostrará la diferencia y recomendaciones de optimización.
-              </DialogDescription>
+              <DialogTitle>Análisis de Eficiencia</DialogTitle>
+              <DialogDescription className="pt-2">{coverage.desc}</DialogDescription>
             </DialogHeader>
-            <div className="space-y-3">
-              <p><strong>Compromiso actual:</strong> {formatUSD(spcost?.commitment_hourly ?? 0)}/hora</p>
-              <p><strong>Costo mensual estimado:</strong> {formatUSD(spcost?.costo_mensual ?? 0)}</p>
-              <p><strong>Costo diario promedio:</strong> {formatUSD(spcost?.costo_diario ?? 0)}</p>
+            <div className="space-y-3 mt-4 border-t pt-4">
+              
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-muted-foreground">Compromiso Total (Verde):</span>
+                <span className="text-sm font-bold text-slate-700">{formatUSD(coverage.compromiso)}</span>
+              </div>
+              
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-muted-foreground">Uso Real Aprovechado (Azul):</span>
+                <span className="text-sm font-bold text-blue-600">{formatUSD(coverage.utilizado)}</span>
+              </div>
+
+              {coverage.label === "Excesivo / Subutilizado" && (
+                <div className="flex justify-between items-center p-2 bg-red-50 rounded-md border border-red-100 mt-2">
+                  <span className="text-sm font-semibold text-red-600">Dinero Desperdiciado:</span>
+                  <span className="text-sm font-bold text-red-600">{formatUSD(coverage.desperdicio)}</span>
+                </div>
+              )}
+
+              {coverage.label === "Baja Cobertura" && (
+                <div className="flex justify-between items-center p-2 bg-orange-50 rounded-md border border-orange-100 mt-2">
+                  <span className="text-sm font-semibold text-orange-600">Gasto fuera del plan:</span>
+                  <span className="text-sm font-bold text-orange-600">{formatUSD(coverage.desperdicio)}</span>
+                </div>
+              )}
+
             </div>
           </DialogContent>
         </Dialog>
       </div>
+
       <SavingPlansBarChartComponent
         costUsage={costUsage ? costUsage : []}
       />
@@ -241,7 +349,7 @@ export const SavingPlansViewComponent = ({ startDate, endDate }: SavingPlansComp
           </CardContent>
         </Card>
       </div>
-      <div className="col-span-1 md:col-span-9">
+      {/* <div className="col-span-1 md:col-span-9">
         <Card className="shadow-lg rounded-2xl h-full">
           <CardHeader>
             <CardTitle>Detalle Lambda</CardTitle>
@@ -266,7 +374,7 @@ export const SavingPlansViewComponent = ({ startDate, endDate }: SavingPlansComp
             <Zap className="h-8 w-8 text-emerald-500" aria-label="Funciones Lambda" />
           </CardContent>
         </Card>
-      </div>
+      </div> */}
     </div>
   )
 }
