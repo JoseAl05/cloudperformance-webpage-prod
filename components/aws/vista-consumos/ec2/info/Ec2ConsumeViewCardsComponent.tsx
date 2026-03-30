@@ -4,7 +4,7 @@ import React, { useMemo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Activity, Database, DollarSign, AlertTriangle, TrendingDown, Zap, Cpu, Network, HardDrive, MemoryStick, LucideIcon, CheckCheck } from 'lucide-react';
 import { ConsumeViewEc2GlobalEfficiency, ConsumeViewEc2InfoInstances } from '@/interfaces/vista-consumos/ec2ConsumeViewInterfaces';
-import { formatBytes } from '@/lib/bytesToMbs';
+import { formatBytes, formatGeneric } from '@/lib/bytesToMbs';
 
 interface Ec2ConsumeViewCardsComponentProps {
     summary: {
@@ -200,7 +200,8 @@ export const Ec2ConsumeViewCardsComponent = ({
                 />
                 <StatCard
                     title="Costo Total"
-                    value={`$${summary.costo_total_usd.toPrecision(2)}`}
+                    value={`$ ${formatGeneric(summary.costo_total_usd)}`}
+                    // value={`$${summary.costo_total_usd.toPrecision(2)}`}
                     unit="USD/mes"
                     description={costoDescripcion ?? ''}
                     icon={DollarSign}
