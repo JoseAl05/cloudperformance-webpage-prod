@@ -42,7 +42,7 @@ export const CloudSqlWorkingNonWorkingHoursComponent = ({
     
     if (startDateFormatted) params.append('date_from', startDateFormatted);
     if (endDateFormatted) params.append('date_to', endDateFormatted);
-    if (regions) params.append('region', regions);
+    if (regions && regions !== 'all_regions') params.append('region', regions);
     if (projects) params.append('project_id', projects);
     
     params.append('instances', resourceId || 'all');
@@ -70,12 +70,11 @@ export const CloudSqlWorkingNonWorkingHoursComponent = ({
     const workingNonWorkingUsageData: WorkingNonWorkingHoursUsage[] | null =
         isNonEmptyArray<WorkingNonWorkingHoursUsage>(workingNonWorkingUsage.data) ? workingNonWorkingUsage.data : null;
 
-
     const workingNonWorkingUsageSummaryData: WorkingNonWorkingHoursUsageSummary[] | null =
-        isNonEmptyArray<any>(workingNonWorkingUsageSummary.data) ? workingNonWorkingUsageSummary.data : null;
+        isNonEmptyArray<WorkingNonWorkingHoursUsageSummary>(workingNonWorkingUsageSummary.data) ? workingNonWorkingUsageSummary.data : null;
 
     const workingNonWorkingUsageSummaryByResourceData: WorkingNonWorkingHoursUsageSummaryByResource[] | null =
-        isNonEmptyArray<any>(workingNonWorkingUsageSummaryByResource.data) ? workingNonWorkingUsageSummaryByResource.data : null;
+        isNonEmptyArray<WorkingNonWorkingHoursUsageSummaryByResource>(workingNonWorkingUsageSummaryByResource.data) ? workingNonWorkingUsageSummaryByResource.data : null;
 
     const hasUnusedData = !!workingNonWorkingUsageData || !!workingNonWorkingUsageSummaryData || !!workingNonWorkingUsageSummaryByResourceData;
 
@@ -88,7 +87,6 @@ export const CloudSqlWorkingNonWorkingHoursComponent = ({
         !!workingNonWorkingUsage.error ||
         !!workingNonWorkingUsageSummary.error ||
         !!workingNonWorkingUsageSummaryByResource.error
-
 
 
     if (!projects && !resourceId) {
