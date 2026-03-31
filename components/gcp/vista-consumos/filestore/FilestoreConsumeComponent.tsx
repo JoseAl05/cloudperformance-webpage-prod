@@ -12,6 +12,8 @@ interface FilestoreConsumeComponentProps {
     projects: string;
     regions: string;
     resourceId: string;
+    tagKey: string;
+    tagValue: string;
 }
 
 const fetcher = (url: string) => fetch(url).then(res => res.json());
@@ -21,7 +23,9 @@ export const FilestoreConsumeComponent = ({
     endDate,
     projects,
     regions,
-    resourceId
+    resourceId,
+    tagKey,    
+    tagValue   
 }: FilestoreConsumeComponentProps) => {
 
     let infoUrl = `/api/gcp/bridge/gcp/consumo/filestore/info?`;
@@ -30,6 +34,8 @@ export const FilestoreConsumeComponent = ({
     if (projects) infoUrl += `project_id=${projects}&`;
     if (regions && regions !== 'all_regions') infoUrl += `location=${regions}&`;
     if (resourceId) infoUrl += `resource=${resourceId}&`;
+    if (tagKey) infoUrl += `tagKey=${tagKey}&`;
+    if (tagValue) infoUrl += `tagValue=${tagValue}&`;
 
     const shouldFetch = !!projects;
 
@@ -40,18 +46,21 @@ export const FilestoreConsumeComponent = ({
     );
 
 
-    let metricsUrl = `/api/gcp/bridge/gcp/consumo/consumo_filestore?`;
-    if (projects) metricsUrl += `project_id=${projects}&`;
+    // let metricsUrl = `/api/gcp/bridge/gcp/consumo/consumo-filestore?`;
+    // if (projects) metricsUrl += `project_id=${projects}&`;
 
-    const { data: metricsData, error: metricsError, isLoading: metricsLoading } = useSWR(
-        shouldFetch ? metricsUrl : null, 
-        fetcher, 
-        { revalidateOnFocus: false }
-    );
+    // if (tagKey) metricsUrl += `tagKey=${tagKey}&`;
+    // if (tagValue) metricsUrl += `tagValue=${tagValue}&`;
+
+    // const { data: metricsData, error: metricsError, isLoading: metricsLoading } = useSWR(
+    //     shouldFetch ? metricsUrl : null, 
+    //     fetcher, 
+    //     { revalidateOnFocus: false }
+    // );
 
 
-    const anyLoading = infoLoading || metricsLoading;
-    const anyError = infoError || metricsError;
+    const anyLoading = infoLoading 
+    const anyError = infoError 
     
   
     const hasData = infoData?.instancias && infoData.instancias.length > 0;

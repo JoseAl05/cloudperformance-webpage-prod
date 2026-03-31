@@ -11,6 +11,8 @@ interface ZonasDNSComponentProps {
     endDate: Date;
     projects: string;
     estadoUso: string;
+    tagKey: string;
+    tagValue: string;
 }
 
 const fetcher = (url: string) => fetch(url).then(res => res.json());
@@ -19,7 +21,9 @@ export const ZonasDNSComponent = ({
     startDate,
     endDate,
     projects,
-    estadoUso
+    estadoUso,
+    tagKey,    
+    tagValue   
 }: ZonasDNSComponentProps) => {
 
     // let url = `/api/gcp/bridge/gcp/consumo/zonas_dns?`;
@@ -42,6 +46,8 @@ export const ZonasDNSComponent = ({
         params.append('sin_uso', 'false');
     }
     // Si estadoUso es 'all' (o vacío), no agregamos el parámetro y la API nos devuelve todo
+    if (tagKey) params.append('tagKey', tagKey);
+    if (tagValue) params.append('tagValue', tagValue);
 
     const url = `/api/gcp/bridge/gcp/consumo/zonas_dns?${params.toString()}`;
     //fin correccion mmontt

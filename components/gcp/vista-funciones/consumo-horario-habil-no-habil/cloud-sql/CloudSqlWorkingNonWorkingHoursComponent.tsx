@@ -15,6 +15,8 @@ interface CloudSqlWorkingNonWorkingHoursComponentProps {
     resourceId: string;
     regions: string;
     projects: string;
+    tagKey: string;
+    tagValue: string;
 }
 
 const fetcher = (url: string) =>
@@ -23,34 +25,57 @@ const fetcher = (url: string) =>
 
 const isNonEmptyArray = <T,>(v: unknown): v is T[] => Array.isArray(v) && v.length > 0
 
-export const CloudSqlWorkingNonWorkingHoursComponent = ({ startDate, endDate, regions, projects, resourceId }: CloudSqlWorkingNonWorkingHoursComponentProps) => {
+export const CloudSqlWorkingNonWorkingHoursComponent = ({ 
+    startDate, 
+    endDate, 
+    regions, 
+    projects, 
+    resourceId,
+    tagKey,    
+    tagValue   
+}: CloudSqlWorkingNonWorkingHoursComponentProps) => {
 
     const startDateFormatted = startDate.toISOString().replace('Z', '').slice(0, -4);
     const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : '';
 
+    const params = new URLSearchParams();
+    
+    if (startDateFormatted) params.append('date_from', startDateFormatted);
+    if (endDateFormatted) params.append('date_to', endDateFormatted);
+    if (regions) params.append('region', regions);
+    if (projects) params.append('project_id', projects);
+    
+    params.append('instances', resourceId || 'all');
+
+    if (tagKey) params.append('tagKey', tagKey);
+    if (tagValue) params.append('tagValue', tagValue);
+
+    const queryString = params.toString();
+
     const workingNonWorkingUsage = useSWR(
-        resourceId ? `/api/gcp/bridge/gcp/cloud_sql/working_hours_non_working_hours_usage?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${regions}&instances=${resourceId}` : null,
+        (projects || resourceId) ? `/api/gcp/bridge/gcp/cloud_sql/working_hours_non_working_hours_usage?${queryString}` : null,
         fetcher
     )
 
     const workingNonWorkingUsageSummary = useSWR(
-        resourceId ? `/api/gcp/bridge/gcp/cloud_sql/working_hours_non_working_hours_usage_summary?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${regions}&instances=${resourceId}` : null,
+        (projects || resourceId) ? `/api/gcp/bridge/gcp/cloud_sql/working_hours_non_working_hours_usage_summary?${queryString}` : null,
         fetcher
     )
 
     const workingNonWorkingUsageSummaryByResource = useSWR(
-        resourceId ? `/api/gcp/bridge/gcp/cloud_sql/working_hours_non_working_hours_usage_summary_by_resource?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${regions}&instances=${resourceId}` : null,
+        (projects || resourceId) ? `/api/gcp/bridge/gcp/cloud_sql/working_hours_non_working_hours_usage_summary_by_resource?${queryString}` : null,
         fetcher
     )
 
     const workingNonWorkingUsageData: WorkingNonWorkingHoursUsage[] | null =
         isNonEmptyArray<WorkingNonWorkingHoursUsage>(workingNonWorkingUsage.data) ? workingNonWorkingUsage.data : null;
 
+
     const workingNonWorkingUsageSummaryData: WorkingNonWorkingHoursUsageSummary[] | null =
-        isNonEmptyArray<UnusedCeCardsMetricSummary>(workingNonWorkingUsageSummary.data) ? workingNonWorkingUsageSummary.data : null;
+        isNonEmptyArray<any>(workingNonWorkingUsageSummary.data) ? workingNonWorkingUsageSummary.data : null;
 
     const workingNonWorkingUsageSummaryByResourceData: WorkingNonWorkingHoursUsageSummaryByResource[] | null =
-        isNonEmptyArray<UnusedCeCardsMetricSummary>(workingNonWorkingUsageSummaryByResource.data) ? workingNonWorkingUsageSummaryByResource.data : null;
+        isNonEmptyArray<any>(workingNonWorkingUsageSummaryByResource.data) ? workingNonWorkingUsageSummaryByResource.data : null;
 
     const hasUnusedData = !!workingNonWorkingUsageData || !!workingNonWorkingUsageSummaryData || !!workingNonWorkingUsageSummaryByResourceData;
 
@@ -59,17 +84,17 @@ export const CloudSqlWorkingNonWorkingHoursComponent = ({ startDate, endDate, re
         workingNonWorkingUsageSummary.isLoading ||
         workingNonWorkingUsageSummaryByResource.isLoading
 
-
     const anyError =
         !!workingNonWorkingUsage.error ||
         !!workingNonWorkingUsageSummary.error ||
         !!workingNonWorkingUsageSummaryByResource.error
 
 
-    if (!resourceId) {
+
+    if (!projects && !resourceId) {
         return (
             <div className="max-w-7xl mx-auto px-6 py-8">
-                <div className="text-center text-gray-500 text-lg font-medium">No se ha seleccionado ningúna instancia.</div>
+                <div className="text-center text-gray-500 text-lg font-medium">No se ha seleccionado ningún proyecto o instancia.</div>
             </div>
         )
     }
@@ -97,14 +122,12 @@ export const CloudSqlWorkingNonWorkingHoursComponent = ({ startDate, endDate, re
                 <MessageCard
                     icon={Info}
                     title="Sin datos para mostrar"
-                    description="No encontramos instancias en el rango seleccionado."
+                    description="No encontramos instancias en el rango o con los filtros seleccionados."
                     tone="warn"
                 />
             </div>
         )
     }
-
-
 
     return (
         <>
