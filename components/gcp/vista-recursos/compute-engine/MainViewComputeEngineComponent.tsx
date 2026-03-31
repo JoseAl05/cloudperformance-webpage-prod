@@ -33,6 +33,7 @@ export const MainViewComputeEngineComponent = () => {
                     tagCollection='gcp_compute_instances'
                     tagColumn='labels'
                     tagsFilter
+                    localService='Compute Engine'
                 />
             </div>
         </div>

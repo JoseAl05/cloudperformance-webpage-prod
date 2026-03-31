@@ -34,6 +34,7 @@ export const MainViewCloudSqlWorkingNonWorkingHoursComponent = ({ db_engine }: {
                     tagCollection='gcp_sql_instances'
                     tagColumn='settings.userLabels'
                     tagsFilter
+                    localService='Cloud SQL'
                 />
             </div>
         </div>

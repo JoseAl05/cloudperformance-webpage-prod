@@ -35,7 +35,11 @@ export const MainViewFilestoreWorkingHoursComponent = () => {
                     regionFilter
                     resourceFilter
                     isResourceMultiSelect
-                    resourceService='filestore' 
+                    resourceService='filestore'
+                    tagsFilter
+                    tagCollection="gcp_filestore_instances"
+                    tagColumn="labels"
+                    localService="Cloud Filestore" 
                 />
             </div>
         </div>

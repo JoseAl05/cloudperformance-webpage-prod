@@ -16,6 +16,7 @@ interface TagFilterComponentProps {
     region: string,
     collection: string,
     tagColumnName: string,
+    localService?:string,
     selectedKey?: string | null,
     selectedValue?: string | null,
     setSelectedKey: Dispatch<SetStateAction<string | null>>,
@@ -34,6 +35,7 @@ export const TagFilterComponent = ({
     region,
     collection,
     tagColumnName,
+    localService,
     selectedKey,
     selectedValue,
     setSelectedKey,
@@ -52,7 +54,7 @@ export const TagFilterComponent = ({
     const shouldFetch = !!region
     const { data, error, isLoading } = useSWR(
         shouldFetch
-            ? `/api/aws/bridge/get-all-tags?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&collection=${collection}&tag_column_name=${tagColumnName}`
+            ? `/api/aws/bridge/get-all-tags?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&collection=${collection}&tag_column_name=${tagColumnName}&local_service=${localService}`
             : null,
         fetcher
     )

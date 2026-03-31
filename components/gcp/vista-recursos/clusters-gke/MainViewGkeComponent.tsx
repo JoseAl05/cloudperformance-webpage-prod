@@ -34,6 +34,7 @@ export const MainViewGkeComponent = () => {
                     tagCollection='gcp_container_clusters'
                     tagColumn='resourceLabels'
                     tagsFilter
+                    localService='Compute Engine'
                 />
             </div>
         </div>

@@ -32,8 +32,8 @@ export const TopFacturacionPorRegionComponent = () => {
         dateFilter
         projectsFilter
         tagsFilter
-        tagCollection='gcp_billing_export_detailed'
-        tagColumn='labels'
+        tagCollection="gcp_billing_export_detailed"
+        tagColumn="labels"
       />
     </div>
   )

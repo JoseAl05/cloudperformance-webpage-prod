@@ -93,6 +93,7 @@ interface FiltersComponentProps {
     serviceFilter?: boolean;
     collection?: string | null;
     tagColumnName?: string | null;
+    localService?: string;
     variationServiceFilter?: boolean;
     variationMetricFilter?: boolean;
     variationResourceFilter?: boolean;
@@ -144,6 +145,7 @@ export const FiltersComponent = ({
     serviceFilter = false,
     collection = null,
     tagColumnName = null,
+    localService,
     variationServiceFilter = false,
     variationMetricFilter = false,
     variationResourceFilter = false,
@@ -688,6 +690,7 @@ export const FiltersComponent = ({
                                     region={tempRegion}
                                     collection={collection as string}
                                     tagColumnName={tagColumnName as string}
+                                    localService={localService}
                                     selectedKey={tempKey}
                                     selectedValue={tempValue}
                                     setSelectedKey={setTempKey}
