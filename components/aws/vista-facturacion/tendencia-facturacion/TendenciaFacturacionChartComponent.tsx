@@ -142,7 +142,7 @@ export const TendenciaFacturacionChartComponent = ({ startDate, endDate, service
                         <p className="text-muted-foreground">Análisis de costos por servicio AWS</p>
                     </div>
                 </div>
-                <div className="flex items-center gap-3 bg-white p-2 rounded-lg border shadow-sm">
+                <div className="flex items-center gap-3 p-2 rounded-lg border shadow-sm">
                     <span className="text-sm font-medium text-muted-foreground whitespace-nowrap">
                         Top Servicios:
                     </span>

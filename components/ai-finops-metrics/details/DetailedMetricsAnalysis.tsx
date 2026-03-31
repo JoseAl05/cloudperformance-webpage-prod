@@ -183,7 +183,7 @@ const StandardMetricDetail = ({ metricData, type }: StandardMetricDetailProps) =
     else if (type === 'cost_volatility') {
         const d = metricData as CostVolatilityAnalysis;
         kpiLabel = "Volatilidad";
-        kpiValue = `${d.volatility_percentage}%`;
+        kpiValue = `${d.volatility_percentage.toFixed(2)}%`;
         const anomalousCount = d.anomalous_resources?.services_flagged_count || (d as unknown).anomalous_services?.services_flagged_count || 0;
         extraInfo = (
             <div className="mt-2 text-xs text-muted-foreground">
