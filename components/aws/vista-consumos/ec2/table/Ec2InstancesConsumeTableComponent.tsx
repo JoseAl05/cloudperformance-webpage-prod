@@ -15,11 +15,11 @@ interface Ec2InstancesConsumeTableComponentProps {
 const TableLegend = () => (
     <div className="flex flex-wrap gap-4 text-xs text-muted-foreground mt-2 bg-slate-50 dark:bg-slate-900/50 p-2 rounded-md border border-slate-100 dark:border-slate-800">
         <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-blue-600"></span>
+            <span className="w-2 h-2 rounded-full"></span>
             <span><strong>Barras:</strong> % relativo al máximo visible.</span>
         </div>
         <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-red-600"></span>
+            <span className="w-2 h-2 rounded-full"></span>
             <span><strong>Costo:</strong> Rojo &gt;$50, Ámbar &gt;$20, Verde ≤$20 USD/mes.</span>
         </div>
     </div>
