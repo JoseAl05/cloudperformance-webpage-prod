@@ -1,407 +1,224 @@
+'use client'
+
+import React, { useMemo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { ConsumeViewRdsPgCpuMetrics, ConsumeViewRdsPgDbConnectionsMetrics, RdsConsumeViewInstance } from '@/interfaces/vista-consumos/rdsPgConsumeViewInterfaces';
-import { ChevronDown, ChevronUp, Cpu, Database, List, Minus, MonitorX, TrendingUp, Users, Zap } from 'lucide-react';
-import { RdsConsumeViewStoppedInstancesHistoricComponent } from '@/components/aws/vista-consumos/rds/info/RdsConsumeViewStoppedInstancesHistoricComponent';
+import { Activity, Database, DollarSign, TrendingDown, Zap, Cpu, Network, HardDrive, MemoryStick } from 'lucide-react';
+import { RdsConsumeViewEfficiencyData, RdsConsumeViewInfoInstances, RdsConsumeViewInfoInstanceHistory } from '@/interfaces/vista-consumos/rdsConsumeViewInterfaces';
+import { formatBytes, formatGeneric } from '@/lib/bytesToMbs';
+
+interface RdsResumen {
+    total_instancias: number;
+    instancias_idle: number;
+    instancias_infrautilizadas: number;
+    instancias_almacenamiento_ineficiente: number;
+}
 
 interface RdsInfoConsumeViewCardsComponentProps {
-    infoData: RdsConsumeViewInstance[] | null;
-    cpuData: ConsumeViewRdsPgCpuMetrics[] | null;
-    dbConnectionsData: ConsumeViewRdsPgDbConnectionsMetrics[] | null;
-    creditsGlobalEfficiencyData: unknown;
+    summary?: RdsResumen;
+    instancias?: RdsConsumeViewInfoInstances[] | null;
+    efficiency?: RdsConsumeViewEfficiencyData | null;
+    isLoading: boolean;
 }
 
-const CPU_LOW_THRESHOLD = 20;
-const CPU_HIGH_THRESHOLD = 80;
+const StatCard = ({
+    title,
+    value,
+    unit,
+    icon: Icon,
+    description,
+    colorClass = "blue",
+    subtitle,
+    large = false
+}: unknown) => {
 
-const getUsageStatus = (type: 'cpu', value: number) => {
-    if (type === 'cpu') {
-        if (value < CPU_LOW_THRESHOLD) {
-            return { message: 'Bajo uso de CPU', icon: ChevronDown, style: 'text-xs text-red-600 font-bold pt-2', border: 'border-l-red-500' };
-        } else if (value > CPU_HIGH_THRESHOLD) {
-            return { message: 'Alto uso de CPU', icon: ChevronUp, style: 'text-xs text-green-600 font-bold pt-2', border: 'border-l-green-500' };
-        }
-        return { message: 'Uso de CPU normal', icon: Minus, style: 'text-xs text-gray-500 font-bold pt-2', border: 'border-l-yellow-500' };
-    }
-    return null;
-};
-
-const getCreditsEfficiencyBorder = (efficiency: string) => {
-    switch (efficiency) {
-        case 'Sin Datos': return 'border-l-gray-500';
-        case 'Infrautilización General': return 'border-l-red-500';
-        case 'Uso Bajo en General': return 'border-l-yellow-500';
-        case 'Uso Razonable': return 'border-l-green-500';
-        case 'Uso Alto': return 'border-l-blue-500';
-        case 'Posible Sobrecarga': return 'border-l-purple-500';
-        default: return 'border-l-gray-500';
-    }
-};
-
-export const RdsInfoConsumeViewCardsComponent = ({ infoData, cpuData, dbConnectionsData, creditsGlobalEfficiencyData }: RdsInfoConsumeViewCardsComponentProps) => {
-    const noInfo = !infoData || infoData.length === 0;
-    const noCpu = !cpuData || cpuData.length === 0;
-
-    if (noInfo) {
-        return <div className="text-center text-gray-500 py-6">No hay información para mostrar.</div>;
-    }
-    const sortedMetrics = (cpuData ? [...cpuData] : [])
-        .sort((a, b) => new Date(b.sync_time).getTime() - new Date(a.sync_time).getTime());
-
-    const latestCpuSync = sortedMetrics[0]?.sync_time;
-    const latestInfoSync = (() => {
-        const latestByInstance = new Map<string, Ec2ConsumneViewInstance>();
-        (infoData || []).forEach(inst => {
-            const existing = latestByInstance.get(inst.resource);
-            const currentTime = new Date(inst.db_sync_time).getTime();
-            if (!existing || currentTime > new Date(existing.db_sync_time).getTime()) {
-                latestByInstance.set(inst.resource, inst);
-            }
-        });
-        const latest = Array.from(latestByInstance.values())
-            .sort((a, b) => new Date(b.db_sync_time).getTime() - new Date(a.db_sync_time).getTime())[0];
-        return latest?.db_sync_time;
-    })();
-
-    const referenceDate = latestCpuSync ? new Date(latestCpuSync) : (latestInfoSync ? new Date(latestInfoSync) : new Date());
-    const today = new Date();
-    const isToday = referenceDate.getDate() === today.getDate()
-        && referenceDate.getMonth() === today.getMonth()
-        && referenceDate.getFullYear() === today.getFullYear();
-    const dateLabel = referenceDate.toLocaleDateString();
-
-    const averageCpu = sortedMetrics.length > 0
-        ? sortedMetrics.reduce((sum, m) => sum + (m.average_cpu_metric_value ?? 0), 0) / sortedMetrics.length
-        : 0;
-
-    const cpuStatus = !noCpu ? getUsageStatus('cpu', averageCpu) : null;
-
-    const averageCredits = (() => {
-        const uniqueInstancesMap = new Map<string, Ec2ConsumneViewInstance>();
-        (infoData || []).forEach(inst => {
-            if (!uniqueInstancesMap.has(inst.resource)) uniqueInstancesMap.set(inst.resource, inst);
-        });
-        const uniqueInstances = Array.from(uniqueInstancesMap.values());
-        const totalBalance = uniqueInstances.reduce((sum, inst) => sum + (inst.last_cpu_credits_balance || 0), 0);
-        const totalUsage = uniqueInstances.reduce((sum, inst) => sum + (inst.last_cpu_credits_usage || 0), 0);
-        return {
-            balance: uniqueInstances.length ? totalBalance / uniqueInstances.length : 0,
-            usage: uniqueInstances.length ? totalUsage / uniqueInstances.length : 0
-        };
-    })();
-
-    const totalCredits = averageCredits.balance + averageCredits.usage;
-    const balancePercent = totalCredits > 0 ? (averageCredits.balance / totalCredits) * 100 : 0;
-    const usagePercent = totalCredits > 0 ? (averageCredits.usage / totalCredits) * 100 : 0;
-
-    const getBalanceStatus = (percent: number) => {
-        if (percent === 0) return { message: 'Sin datos de créditos', icon: Minus, style: 'text-xs text-gray-400 font-bold pt-2', border: 'border-l-gray-500' };
-        if (percent < 50) return { message: 'Créditos disponibles bajos', icon: ChevronDown, style: 'text-xs text-green-600 font-bold pt-2', border: 'border-l-red-500' };
-        if (percent < 80) return { message: 'Créditos disponibles moderados', icon: Minus, style: 'text-xs text-gray-500 font-bold pt-2', border: 'border-l-yellow-500' };
-        return { message: 'Créditos disponibles altos', icon: ChevronUp, style: 'text-xs text-green-600 font-bold pt-2', border: 'border-l-green-500' };
+    const colorStyles = {
+        blue: { border: "border-l-blue-500", bgIcon: "bg-blue-100 text-blue-600" },
+        amber: { border: "border-l-amber-500", bgIcon: "bg-amber-100 text-amber-600" },
+        green: { border: "border-l-green-500", bgIcon: "bg-green-100 text-green-600" },
+        red: { border: "border-l-red-500", bgIcon: "bg-red-100 text-red-600" },
+        purple: { border: "border-l-purple-500", bgIcon: "bg-purple-100 text-purple-600" },
     };
 
-    const getUsageStatusCredits = (percent: number) => {
-        if (percent === 0) return { message: 'Sin créditos disponibles', icon: Minus, style: 'text-xs text-gray-400 font-bold pt-2', border: 'border-l-gray-500' };
-        if (percent > 50) return { message: 'Uso alto de créditos', icon: ChevronUp, style: 'text-xs text-green-600 font-bold pt-2', border: 'border-l-green-500' };
-        if (percent > 20) return { message: 'Uso moderado de créditos', icon: Minus, style: 'text-xs text-gray-500 font-bold pt-2', border: 'border-l-yellow-500' };
-        return { message: 'Uso bajo de créditos', icon: ChevronDown, style: 'text-xs text-red-600 font-bold pt-2', border: 'border-l-red-500' };
-    };
+    const style = colorStyles[colorClass as keyof typeof colorStyles] || colorStyles.blue;
 
-    const balanceStatus = getBalanceStatus(balancePercent);
-    const usageStatus = getUsageStatusCredits(usagePercent);
-
-    const uniqueInstances = new Set((infoData || []).map(inst => inst.resource)).size;
-
-    const instanceStatusMap = new Map<string, string>();
-    (infoData || []).forEach(inst => instanceStatusMap.set(inst.resource, inst.resource_status || ''));
-
-    const countRunningInstances = (infoData || []).filter(inst => (inst.resource_status || '').toLowerCase() === 'available').length;
-    const countStoppedInstances = (infoData || []).filter(inst => (inst.resource_status || '').toLowerCase() === 'stopped').length;
-    const stoppedInstances = (infoData || []).filter(inst => (inst.resource_status || '').toLowerCase() === 'stopped');
-    const hasStopped = stoppedInstances.length > 0;
-
-    const latestByInstance = new Map<string, Ec2ConsumneViewInstance>();
-    (infoData || []).forEach(inst => {
-        const existing = latestByInstance.get(inst.resource);
-        const currentTime = new Date(inst.db_sync_time).getTime();
-        if (!existing || currentTime > new Date(existing.db_sync_time).getTime()) {
-            latestByInstance.set(inst.resource, inst);
-        }
-    });
-
-    const efficiencyValue = (creditsGlobalEfficiencyData as unknown)?.global_efficiency ?? 'Sin Datos';
-
-    //mmontt nuevos calculos de peaks y conteos 202603
-    const metricsDetail = (creditsGlobalEfficiencyData as unknown)?.metrics_detail ?? []
-    const cpuMetricDetail = metricsDetail.find((m: {metric: string}) => m.metric === 'cpu_utilization')
-    const connMetricDetail = metricsDetail.find((m: {metric: string}) => m.metric === 'db_connections')
-
-    const countIdle = (() => {
-        const latest = new Map<string, RdsConsumeViewInstance>()
-        ;(infoData || []).forEach(inst => {
-            const ex = latest.get(inst.resource)
-            if (!ex || new Date(inst.db_sync_time) > new Date(ex.db_sync_time)) latest.set(inst.resource, inst)
-        })
-        return Array.from(latest.values()).filter(i => i.clasificacion === 'Idle').length
-    })()
-
-    const countInfra = (() => {
-        const latest = new Map<string, RdsConsumeViewInstance>()
-        ;(infoData || []).forEach(inst => {
-            const ex = latest.get(inst.resource)
-            if (!ex || new Date(inst.db_sync_time) > new Date(ex.db_sync_time)) latest.set(inst.resource, inst)
-        })
-        return Array.from(latest.values()).filter(i => i.clasificacion === 'Infrautilizada').length
-    })()
-
-    //mmontt agregamos los peaks 202603
-    const instanceData = [
-        {
-            title: 'Promedio Uso de CPU',
-            value: !noCpu ? `${averageCpu.toFixed(2)} %` : 'Sin Datos',
-            icon: Cpu,
-            borderColor: cpuStatus?.border ?? 'border-l-gray-500',
-            subtitle: isToday ? 'Actual' : dateLabel,
-            valueStyle: 'text-xl font-bold text-foreground tracking-tight',
-            usage: cpuMetricDetail ? `Máx observado: ${cpuMetricDetail.max_utilization?.toFixed(2)}%` : (!noCpu ? cpuStatus?.message : undefined),
-            usageIcon: undefined,
-            usageStyle: 'text-xs text-muted-foreground font-medium pt-2 block',
-        },
-        {
-            title: 'Promedio Conexiones',
-            value: connMetricDetail ? `${connMetricDetail.avg_utilization.toFixed(1)} conn` : 'Sin Datos',
-            icon: Users,
-            borderColor: 'border-l-blue-500',
-            subtitle: isToday ? 'Actual' : dateLabel,
-            valueStyle: 'text-xl font-bold text-foreground tracking-tight',
-            usage: connMetricDetail ? `Máx observado: ${connMetricDetail.max_utilization?.toFixed(0)} conn` : undefined,
-            usageIcon: undefined,
-            usageStyle: 'text-xs text-muted-foreground font-medium pt-2 block',
-        },
-        {
-            title: 'Instancias Idle',
-            value: `${countIdle}`,
-            icon: Minus,
-            borderColor: countIdle > 0 ? 'border-l-red-500' : 'border-l-gray-500',
-            subtitle: isToday ? 'Actual' : dateLabel,
-            valueStyle: 'text-xl font-bold text-foreground tracking-tight',
-        },
-        {
-            title: 'Infrautilizadas',
-            value: `${countInfra}`,
-            icon: TrendingUp,
-            borderColor: countInfra > 0 ? 'border-l-yellow-500' : 'border-l-gray-500',
-            subtitle: isToday ? 'Actual' : dateLabel,
-            valueStyle: 'text-xl font-bold text-foreground tracking-tight',
-        },
-        {
-            title: 'Cantidad de Instancias',
-            value: uniqueInstances,
-            icon: Database,
-            borderColor: 'border-l-cyan-500',
-            subtitle: isToday ? 'Actual' : dateLabel,
-            valueStyle: 'text-xl font-bold text-foreground tracking-tight'
-        },
-        {
-            title: 'Historial de Instancias Apagadas',
-            icon: MonitorX,
-            borderColor: 'border-l-red-500',
-            subtitle: isToday ? 'Actual' : dateLabel,
-            valueStyle: 'text-xl font-bold text-foreground tracking-tight',
-            dialog: !!stoppedInstances.length,
-            dialogLabel: 'Ver instancias "stopped"',
-            dialogTitle: 'Instancias stopped en periodo seleccionado.',
-            dialogContentComponent: <RdsConsumeViewStoppedInstancesHistoricComponent instanceInfo={stoppedInstances} />
-        }
-    ];
-    // const instanceData = [
-    //     {
-    //         title: 'Promedio Uso de CPU',
-    //         value: !noCpu ? `${averageCpu.toFixed(2)} %` : 'Sin Datos',
-    //         icon: Cpu,
-    //         borderColor: cpuStatus?.border ?? 'border-l-gray-500',
-    //         subtitle: (isToday ? 'Actual' : dateLabel),
-    //         valueStyle: 'text-xl font-bold text-foreground tracking-tight',
-    //         usage: !noCpu ? cpuStatus?.message : undefined,
-    //         usageIcon: !noCpu ? cpuStatus?.icon : undefined,
-    //         usageStyle: !noCpu ? cpuStatus?.style : undefined,
-    //     },
-    //     {
-    //         title: 'Cantidad de Instancias',
-    //         value: uniqueInstances,
-    //         icon: Database,
-    //         borderColor: 'border-l-cyan-500',
-    //         subtitle: isToday ? 'Actual' : dateLabel,
-    //         valueStyle: 'text-xl font-bold text-foreground tracking-tight'
-    //     },
-    //     // {
-    //     //     title: 'Cantidad de Instancias Encendidas',
-    //     //     value: countRunningInstances,
-    //     //     icon: MonitorCheck,
-    //     //     borderColor: 'border-l-green-500',
-    //     //     subtitle: isToday ? 'Actual' : dateLabel,
-    //     //     valueStyle: 'text-xl font-bold text-foreground tracking-tight'
-    //     // },
-    //     {
-    //         title: 'Historial de Instancias Apagadas',
-    //         // value: countStoppedInstances,
-    //         icon: MonitorX,
-    //         borderColor: 'border-l-red-500',
-    //         subtitle: isToday ? 'Actual' : dateLabel,
-    //         valueStyle: 'text-xl font-bold text-foreground tracking-tight',
-    //         dialog: !!stoppedInstances.length,
-    //         dialogLabel: 'Ver instancias "stopped"',
-    //         dialogTitle: 'Instancias stopped en periodo seleccionado.',
-    //         dialogContentComponent: <RdsConsumeViewStoppedInstancesHistoricComponent instanceInfo={stoppedInstances} />
-    //     }
-    // ];
-
-    const globalCreditsEfficiency = [
-        {
-            title: 'Eficiencia de créditos',
-            value: efficiencyValue,
-            icon: Zap,
-            borderColor: getCreditsEfficiencyBorder(efficiencyValue),
-            subtitle: isToday ? 'Actual' : dateLabel,
-            valueStyle: 'text-4xl text-center font-bold text-foreground tracking-tight'
-        },
-    ];
-
-    const creditsCardsData = [
-        {
-            title: 'Promedio Créditos Disponibles',
-            value: `${averageCredits.balance.toFixed(2)}`,
-            icon: Zap,
-            borderColor: balanceStatus.border,
-            subtitle: isToday ? 'Actual' : dateLabel,
-            valueStyle: 'text-xl font-bold text-foreground tracking-tight',
-            usage: balanceStatus.message,
-            usageIcon: balanceStatus.icon,
-            usageStyle: balanceStatus.style
-        },
-        {
-            title: 'Promedio Créditos Usados',
-            value: `${averageCredits.usage.toFixed(2)}`,
-            icon: Zap,
-            borderColor: usageStatus.border,
-            subtitle: isToday ? 'Actual' : dateLabel,
-            valueStyle: 'text-xl font-bold text-foreground tracking-tight',
-            usage: usageStatus.message,
-            usageIcon: usageStatus.icon,
-            usageStyle: usageStatus.style
-        }
-    ];
     return (
-        <div className="space-y-4">
-            <div className="grid grid-cols-1 gap-4">
-                {globalCreditsEfficiency.map((eff, index) => {
-                    const IconComponent = eff.icon;
-                    return (
-                        <Card key={index} className={`${eff.borderColor} border-l-4 group`}>
-                            <CardContent className="p-4 flex flex-col h-full">
-                                <div className="flex items-center justify-between">
-                                    <div className="p-2 rounded-lg bg-blue-50 dark:bg-blue-950/20 transition-colors duration-200 group-hover:scale-110">
-                                        <IconComponent className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                                    </div>
-                                    <p className="text-xs text-muted-foreground font-medium">{eff.subtitle}</p>
-                                </div>
-                                <h3 className="text-sm font-medium text-muted-foreground mt-2">{eff.title}</h3>
-                                <div className="mt-auto">
-                                    <p className={eff.valueStyle}>{eff.value}</p>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    );
-                })}
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {creditsCardsData.map((credit, index) => {
-                    const IconComponent = credit.icon;
-                    const UsageIconComponent = credit.usageIcon || null;
-                    return (
-                        <Card key={index} className={`${credit.borderColor} border-l-4 group`}>
-                            <CardContent className="p-4 flex flex-col h-full">
-                                <div className="flex items-center justify-between">
-                                    <div className="p-2 rounded-lg bg-blue-50 dark:bg-blue-950/20 transition-colors duration-200 group-hover:scale-110">
-                                        <IconComponent className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                                    </div>
-                                    <p className="text-xs text-muted-foreground font-medium">{credit.subtitle}</p>
-                                </div>
-                                <h3 className="text-sm font-medium text-muted-foreground mt-2">{credit.title}</h3>
-                                <div className="mt-auto">
-                                    <p className={credit.valueStyle}>{credit.value}</p>
-                                    {credit.usage && (
-                                        <span className={credit.usageStyle}>
-                                            {UsageIconComponent && <UsageIconComponent className="h-4 w-4 inline-block mr-1" />}
-                                            {credit.usage}
-                                        </span>
-                                    )}
-                                </div>
-                            </CardContent>
-                        </Card>
-                    );
-                })}
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
-                {instanceData.map((instance, index) => {
-                    const IconComponent = instance.icon;
-                    const UsageIconComponent = instance.usageIcon || null;
-                    return (
-                        <Card key={index} className={`${instance.borderColor} border-l-4 group`}>
-                            <CardContent className="p-4 flex flex-col h-full">
-                                <div className="flex items-center justify-between">
-                                    <div className="p-2 rounded-lg bg-blue-50 dark:bg-blue-950/20 transition-colors duration-200 group-hover:scale-110">
-                                        <IconComponent className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                                    </div>
-                                    <p className="text-xs text-muted-foreground font-medium">{instance.subtitle}</p>
-                                </div>
-                                <h3 className="text-sm font-medium text-muted-foreground mt-2">{instance.title}</h3>
-                                <div className="mt-auto">
-                                    {
-                                        instance.value && (
-                                            <>
-                                                <p className={instance.valueStyle}>
-                                                    {typeof (instance as unknown).format === 'function' ? (instance as unknown).format(instance.value) : instance.value}
-                                                </p>
-                                                {instance.usage && (
-                                                    <span className={instance.usageStyle}>
-                                                        {UsageIconComponent && <UsageIconComponent className="h-4 w-4 inline-block mr-1" />}
-                                                        {instance.usage}
-                                                    </span>
-                                                )}
-                                            </>
-                                        )
-                                    }
-                                    {instance.title === 'Historial de Instancias Apagadas' && (
-                                        hasStopped ? (
-                                            <Dialog className="gap-2 justify-center">
-                                                <DialogTrigger className="flex items-center justify-center gap-2 cursor-pointer transition-all hover:scale-110">
-                                                    <List className="h-4 w-4 text-blue-500" />
-                                                    {instance.dialogLabel ?? 'Ver instancias "stopped"'}
-                                                </DialogTrigger>
-                                                <DialogContent className="max-w-2xl max-h-[80vh] sm:max-w-4xl">
-                                                    <DialogHeader>
-                                                        <DialogTitle>{instance.dialogTitle ?? 'Instancias stopped en periodo seleccionado.'}</DialogTitle>
-                                                        <DialogDescription>Información histórica</DialogDescription>
-                                                    </DialogHeader>
-                                                    <RdsConsumeViewStoppedInstancesHistoricComponent instanceInfo={stoppedInstances} />
-                                                </DialogContent>
-                                            </Dialog>
-                                        ) : (
-                                            <p className="text-xs text-muted-foreground font-medium">
-                                                No se encontraron instancias apagadas en el periodo seleccionado.
-                                            </p>
-                                        )
-                                    )}
-                                </div>
-                            </CardContent>
-                        </Card>
-                    );
-                })}
-            </div>
-        </div>
+        <Card className={`border-l-4 shadow-sm ${style.border}`}>
+            <CardContent className={large ? "p-8" : "p-6"}>
+                <div className="flex justify-between items-start mb-4">
+                    <div className="flex-1">
+                        <p className="text-sm font-medium text-muted-foreground">{title}</p>
+                        <h4 className={`${large ? 'text-5xl' : 'text-3xl'} font-bold tracking-tight`}>
+                            {value} {unit && <span className="text-sm font-normal text-slate-400">{unit}</span>}
+                        </h4>
+                        {subtitle && <p className="text-xs text-muted-foreground mt-1">{subtitle}</p>}
+                    </div>
+                    <div className={`p-3 rounded-xl ${style.bgIcon}`}>
+                        <Icon className={large ? "w-8 h-8" : "w-6 h-6"} />
+                    </div>
+                </div>
+                <p className="text-xs text-muted-foreground">{description}</p>
+            </CardContent>
+        </Card>
     )
 }
+
+const getEfficiencyColor = (score: number): string => {
+    if (score === "Infrautilizado") return "red";
+    if (score === "Uso Bajo") return "amber";
+    return "green";
+};
+
+export const RdsInfoConsumeViewCardsComponent = ({
+    summary,
+    instancias = [],
+    efficiency,
+    isLoading
+}: RdsInfoConsumeViewCardsComponentProps) => {
+
+    const allHistory = useMemo<RdsConsumeViewInfoInstanceHistory[]>(() => {
+        if (!instancias?.length) return [];
+        return instancias.flatMap(inst => inst.history);
+    }, [instancias]);
+
+    const costoTotal = useMemo(() => {
+        return allHistory.reduce((sum, h) => sum + (h.costo_total_usd || 0), 0);
+    }, [allHistory]);
+
+    const metricas = useMemo(() => {
+        if (!allHistory.length) return { cpu: 0, conexiones: 0, storage_free: 0, strg_pct_used: 0, memory_free: 0 };
+
+        const total = allHistory.reduce((acc, h) => ({
+            cpu: acc.cpu + (h.avg_cpu_utilization || 0),
+            conexiones: acc.conexiones + (h.avg_connections || 0),
+            storage_free: acc.storage_free + (h.avg_storage_free || 0),
+            strg_pct_used: acc.strg_pct_used + (h.strg_pct_used || 0),
+            strg_pct_free: acc.strg_pct_free + (h.strg_pct_free || 0),
+            memory_free: acc.memory_free + (h.avg_memory_free || 0),
+        }), { cpu: 0, conexiones: 0, storage_free: 0, strg_pct_used: 0,strg_pct_free:0, memory_free: 0 });
+
+        const count = allHistory.length;
+        const cpuCount = allHistory.filter(h => h.avg_cpu_utilization !== 0).length;
+        return {
+            cpu: total.cpu / count,
+            conexiones: total.conexiones / count,
+            storage_free: total.storage_free / count,
+            strg_pct_used: total.strg_pct_used / count,
+            strg_pct_free: total.strg_pct_free / count,
+            memory_free: total.memory_free / count,
+        };
+    }, [allHistory]);
+
+
+    if (isLoading) {
+        return (
+            <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 animate-pulse">
+                    {[1, 2, 3, 4].map((i) => (
+                        <div key={i} className="h-40 bg-slate-100 dark:bg-slate-800 rounded-lg"></div>
+                    ))}
+                </div>
+                <div className="h-48 bg-slate-100 dark:bg-slate-800 rounded-lg animate-pulse"></div>
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 animate-pulse">
+                    {[1, 2, 3, 4].map((i) => (
+                        <div key={i} className="h-40 bg-slate-100 dark:bg-slate-800 rounded-lg"></div>
+                    ))}
+                </div>
+            </div>
+        );
+    }
+
+    if (!summary) return null;
+
+    return (
+        <div className="space-y-6">
+            {efficiency && (
+                <StatCard
+                    title="Eficiencia Global"
+                    value={`${efficiency.global_efficiency}`}
+                    description={`Promedio ponderado de eficiencia de CPU basado en ${efficiency.metrics_detail[0].samples} muestras.`}
+                    icon={Zap}
+                    colorClass={getEfficiencyColor(efficiency.global_efficiency)}
+                    large
+                />
+            )}
+
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <StatCard
+                    title="Total Instancias"
+                    value={summary.total_instancias}
+                    unit="BD"
+                    description="Total de instancias RDS monitoreadas."
+                    icon={Database}
+                    colorClass="blue"
+                />
+                <StatCard
+                    title="Instancias Idle"
+                    value={summary.instancias_idle}
+                    unit="sin uso"
+                    description="Instancias sin conexiones activas promedio."
+                    icon={Activity}
+                    colorClass="red"
+                />
+                <StatCard
+                    title="Infrautilizadas"
+                    value={summary.instancias_infrautilizadas}
+                    unit="recursos"
+                    description="CPU promedio < 5% y máximo < 15%."
+                    icon={TrendingDown}
+                    colorClass="amber"
+                />
+                <StatCard
+                    title="Costo Total"
+                    value={`$${formatGeneric(costoTotal)}`}
+                    unit="USD"
+                    description="Costo total de todas las instancias en el período."
+                    icon={DollarSign}
+                    colorClass="green"
+                />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <StatCard
+                    title="Promedio CPU"
+                    value={formatGeneric(metricas.cpu)}
+                    unit="%"
+                    description="Uso promedio de CPU en el período."
+                    icon={Cpu}
+                    colorClass="blue"
+                />
+                <StatCard
+                    title="Promedio Conexiones"
+                    value={formatGeneric(metricas.conexiones)}
+                    unit="conn"
+                    description="Conexiones activas promedio."
+                    icon={Network}
+                    colorClass="purple"
+                />
+                <StatCard
+                    title="Storage Libre"
+                    value={formatGeneric(metricas.strg_pct_free)}
+                    unit="%"
+                    description="Porcentaje promedio de almacenamiento usado."
+                    icon={HardDrive}
+                    colorClass="amber"
+                />
+                <StatCard
+                    title="Storage Utilizado"
+                    value={formatGeneric(metricas.strg_pct_used)}
+                    unit="%"
+                    description="Porcentaje promedio de almacenamiento usado."
+                    icon={HardDrive}
+                    colorClass="amber"
+                />
+                <StatCard
+                    title="Promedio Memoria Libre"
+                    value={formatBytes(metricas.memory_free)}
+                    unit=""
+                    description="Memoria libre promedio en el período."
+                    icon={MemoryStick}
+                    colorClass="green"
+                />
+            </div>
+        </div>
+    );
+};

@@ -3,7 +3,7 @@
 import React, { useMemo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Activity, Database, DollarSign, AlertTriangle, TrendingDown, Zap, Cpu, Network, HardDrive, MemoryStick, LucideIcon, CheckCheck } from 'lucide-react';
-import { ConsumeViewEc2GlobalEfficiency, ConsumeViewEc2InfoInstances } from '@/interfaces/vista-consumos/ec2ConsumeViewInterfaces';
+import { ConsumeViewEc2GlobalEfficiency, ConsumeViewEc2InfoInstances, ConsumeViewEc2InfoInstancesHistory } from '@/interfaces/vista-consumos/ec2ConsumeViewInterfaces';
 import { formatBytes, formatGeneric } from '@/lib/bytesToMbs';
 
 interface Ec2ConsumeViewCardsComponentProps {
@@ -11,7 +11,6 @@ interface Ec2ConsumeViewCardsComponentProps {
         total_instancias: number;
         instancias_idle: number;
         instancias_infrautilizadas: number;
-        costo_total_usd: number;
         sync_time: string;
     };
     instancias: ConsumeViewEc2InfoInstances[];
@@ -59,7 +58,7 @@ const StatCard = ({
                 <div className="flex justify-between items-start mb-4">
                     <div className="flex-1">
                         <p className="text-sm font-medium text-muted-foreground capitalize">{title}</p>
-                        <h4 className={`${large ? 'text-5xl' : 'text-3xl'} font-bold tracking-tight`}>
+                        <h4 className={`${large ? 'text-5xl' : 'text-2xl'} font-bold tracking-tight`}>
                             {value} {unit && <span className="text-sm font-normal text-slate-400">{unit}</span>}
                         </h4>
                         {subtitle && <p className="text-xs text-muted-foreground mt-1">{subtitle}</p>}
@@ -113,9 +112,9 @@ const getMetricConfig = (metricName: string) => {
 };
 
 const getEfficiencyColor = (score: number): string => {
-    if (score >= 70) return "green";
-    if (score >= 40) return "amber";
-    return "red";
+    if (score === "Infrautilizado") return "red";
+    if (score === "Uso Bajo") return "amber";
+    return "green";
 };
 
 export const Ec2ConsumeViewCardsComponent = ({
@@ -124,15 +123,35 @@ export const Ec2ConsumeViewCardsComponent = ({
     efficiency,
     isLoading
 }: Ec2ConsumeViewCardsComponentProps) => {
-    // const sinBilling = useMemo(() => {
-    //     return instancias.filter(i => i.tiene_billing === false);
-    // }, [instancias]);
+    const allHistory = useMemo<ConsumeViewEc2InfoInstancesHistory[]>(() => {
+        if (!instancias?.length) return [];
+        return instancias.flatMap(inst => inst.history);
+    }, [instancias]);
 
-    const costoDescripcion = useMemo(() => {
-        // if (sinBilling.length > 0) return null;
-        if (summary?.costo_total_usd === 0) return "Instancias en Free Tier de AWS.";
-        return "Costo mensual total de todas las instancias.";
-    }, [summary?.costo_total_usd]);
+    const costoTotal = useMemo(() => {
+        return allHistory.reduce((sum, h) => sum + (h.costo_usd || 0), 0);
+    }, [allHistory]);
+
+    const metricas = useMemo(() => {
+        if (!allHistory.length) return { cpu: 0, network_in_out: 0, cpu_credit_usage: 0, cpu_credit_balance: 0 };
+
+        const total = allHistory.reduce((acc, h) => ({
+            cpu: acc.cpu + (h.avg_cpu_utilization || 0),
+            network_in: acc.network_in + (h.avg_network_in || 0),
+            network_out: acc.network_out + (h.avg_network_out || 0),
+            cpu_credit_usage: acc.cpu_credit_usage + (h.avg_cpu_credit_usage || 0),
+            cpu_credit_balance: acc.cpu_credit_balance + (h.avg_cpu_credit_balance || 0),
+        }), { cpu: 0, network_in: 0, network_out: 0, cpu_credit_usage: 0, cpu_credit_balance: 0 });
+
+        const count = allHistory.length;
+        return {
+            cpu: total.cpu / count,
+            network_in: total.network_in / count,
+            network_out: total.network_out / count,
+            cpu_credit_usage: total.cpu_credit_usage / count,
+            cpu_credit_balance: total.cpu_credit_balance / count,
+        };
+    }, [allHistory]);
 
     // Loading State
     if (isLoading) {
@@ -163,9 +182,8 @@ export const Ec2ConsumeViewCardsComponent = ({
             {efficiency && (
                 <StatCard
                     title="Eficiencia Global"
-                    value={`${efficiency.global_efficiency_score.toFixed(1)}%`}
-                    subtitle={efficiency.interpretation}
-                    description="Puntaje unificado de eficiencia de recursos."
+                    value={`${efficiency.global_efficiency}`}
+                    description={`Promedio ponderado de eficiencia de CPU basado en ${efficiency.metrics_detail[0].samples} muestras.`}
                     icon={Zap}
                     colorClass={getEfficiencyColor(efficiency.global_efficiency_score)}
                     large
@@ -200,90 +218,50 @@ export const Ec2ConsumeViewCardsComponent = ({
                 />
                 <StatCard
                     title="Costo Total"
-                    value={`$ ${formatGeneric(summary.costo_total_usd)}`}
-                    // value={`$${summary.costo_total_usd.toPrecision(2)}`}
-                    unit="USD/mes"
-                    description={costoDescripcion ?? ''}
+                    value={`$ ${formatGeneric(costoTotal)}`}
+                    unit="USD"
+                    description="Costo total de todas las instancias en el período."
                     icon={DollarSign}
                     colorClass="green"
-                // warning={sinBilling.length > 0}
                 />
             </div>
 
-            {/* FILA 3: Métricas Dinámicas (Iteración sobre metrics_detail) */}
-            {sortedMetricDetail && sortedMetricDetail.length > 0 && (
-                <div className={`grid grid-cols-1 md:grid-cols-${Math.min(sortedMetricDetail.length, 4)} gap-4`}>
-                    {sortedMetricDetail.map((metricDetail, index) => {
-                        // Obtener icono y color basado en el nombre de la métrica
-                        const config = getMetricConfig(metricDetail.metric);
-                        if (metricDetail.metric === 'CPUUtilization') {
-                            return (
-                                <StatCard
-                                    key={`${metricDetail.metric}-${index}`}
-                                    title={config.label}
-                                    value={metricDetail.avg_utilization.toFixed(2)}
-                                    unit="%"
-                                    description={`Máx observado: ${metricDetail.max_utilization.toFixed(1)}%`}
-                                    subtitle={`Score Eficiencia: ${metricDetail.efficiency_score.toFixed(0)}/100`}
-                                    icon={config.icon}
-                                    colorClass={config.color}
-                                />
-                            );
-                        }
-                        if (metricDetail.metric === 'NetworkIn' || metricDetail.metric === 'NetworkOut') {
-                            return (
-                                <StatCard
-                                    key={`${metricDetail.metric}-${index}`}
-                                    title={config.label}
-                                    value={formatBytes(metricDetail.avg_utilization)}
-                                    description={`Máx observado: ${formatBytes(metricDetail.max_utilization)}`}
-                                    icon={config.icon}
-                                    colorClass={config.color}
-                                />
-                            )
-                        }
-                        if (metricDetail.metric === "CPUCreditBalance" || metricDetail.metric === "CPUCreditUsage") {
-                            return (
-                                <StatCard
-                                    key={`${metricDetail.metric}-${index}`}
-                                    title={config.label}
-                                    value={metricDetail.avg_utilization}
-                                    unit="Créditos"
-                                    description={`Máx observado: ${metricDetail.max_utilization}`}
-                                    icon={config.icon}
-                                    colorClass={config.color}
-                                />
-                            )
-                    }
-                    if (metricDetail.metric === 'StatusCheckFailed') {
-                            return (
-                    <StatCard
-                        key={`${metricDetail.metric}-${index}`}
-                        title={config.label}
-                        value={metricDetail.avg_utilization}
-                        unit='Fallos'
-                        description={`Máx observado: ${metricDetail.max_utilization}`}
-                        icon={config.icon}
-                        colorClass={config.color}
-                    />
-                    )
-                        }
-                        // else {
-                        //     return (
-                        //         <StatCard
-                        //             key={`${metricDetail.metric}-${index}`}
-                        //             title={config.label}
-                        //             value={metricDetail.avg_utilization.toFixed(2)}
-                        //             unit="%"
-                        //             description={`Máx observado: ${metricDetail.max_utilization.toFixed(1)}%`}
-                        //             icon={config.icon}
-                        //             colorClass={config.color}
-                        //         />
-                        //     )
-                        // }
-                    })}
-                </div>
-            )}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <StatCard
+                    title="Promedio CPU"
+                    value={formatGeneric(metricas.cpu)}
+                    unit="%"
+                    description="Uso promedio de CPU en el período."
+                    icon={Cpu}
+                    colorClass="blue"
+                />
+                <StatCard
+                    title="Promedio Créditos CPU Usados"
+                    value={formatGeneric(metricas.cpu_credit_usage)}
+                    unit="Créditos"
+                    description="Promedio de créditos CPU consumidos."
+                    icon={Cpu}
+                    colorClass="amber"
+                />
+                <StatCard
+                    title="Promedio Créditos CPU Disponibles"
+                    value={formatGeneric(metricas.cpu_credit_balance)}
+                    unit="Créditos"
+                    description="Promedio de créditos CPU disponibles."
+                    icon={Cpu}
+                    colorClass="amber"
+                />
+                <StatCard
+                    title="Promedio Entrada/Salida de Red"
+                    value={`${formatBytes(metricas.network_in)} / ${formatBytes(metricas.network_out)}`}
+                    unit="B/s"
+                    description="Tasa promedio de tráfico de red."
+                    icon={Network}
+                    colorClass="purple"
+                    large={false}
+                />
+
+            </div>
         </div>
     );
 };

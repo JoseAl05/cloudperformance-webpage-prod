@@ -4,13 +4,15 @@ import { LoaderComponent } from '@/components/general_aws/LoaderComponent'
 import useSWR from 'swr'
 import { MessageCard } from '@/components/aws/cards/MessageCards'
 import { AlertCircle, ChartBar, Clock, Info } from 'lucide-react'
-import { ConsumeViewRdsPgCpuMetrics, ConsumeViewRdsPgCreditsMetrics, ConsumeViewRdsPgDbConnectionsMetrics, ConsumeViewRdsPgFreeStorageMetrics, RdsConsumeViewInstance } from '@/interfaces/vista-consumos/rdsPgConsumeViewInterfaces'
+import { ConsumeViewRdsMetrics, ConsumeViewRdsPgCpuMetrics, ConsumeViewRdsPgCreditsMetrics, ConsumeViewRdsPgDbConnectionsMetrics, ConsumeViewRdsPgFreeStorageMetrics, RdsConsumeViewEfficiencyData, RdsConsumeViewInfo, RdsConsumeViewInstance } from '@/interfaces/vista-consumos/rdsConsumeViewInterfaces'
 import { RdsInfoConsumeViewComponent } from '@/components/aws/vista-consumos/rds/info/RdsInfoConsumeViewComponent'
 import { RdsConsumeViewUsageCpuComponent } from '@/components/aws/vista-consumos/rds/graficos/RdsConsumeViewUsageCpuComponent'
 import { RdsConsumeViewUsageCreditsComponent } from '@/components/aws/vista-consumos/rds/graficos/RdsConsumeViewUsageCreditsComponent'
 import { RdsConsumeViewDbConnectionsComponent } from '@/components/aws/vista-consumos/rds/graficos/RdsConsumeViewDbConnectionsComponent'
 import { RdsConsumeViewFreeStorageComponent } from '@/components/aws/vista-consumos/rds/graficos/RdsConsumeViewFreeStorageComponent'
 import { RdsConsumeViewInstanceTable } from '@/components/aws/vista-consumos/rds/table/RdsConsumeViewInstanceTable'
+import { RdsConsumeViewChartComponent } from '@/components/aws/vista-consumos/rds/graficos/RdsConsumeViewChartComponent'
+import { RdsInfoConsumeViewCardsComponent } from '@/components/aws/vista-consumos/rds/info/RdsInfoConsumeViewCardsComponent'
 
 interface RdsInstancesConsumeComponentProps {
     startDate: Date
@@ -32,103 +34,125 @@ export const RdsInstancesConsumeComponent = ({ startDate, endDate, instance, reg
     const startDateFormatted = startDate.toISOString().replace('Z', '').slice(0, -4);
     const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : '';
 
-    let url = '';
+    const url = '/api/aws/bridge/rds/consumo_rds';
+    let rdsType = '';
     switch (instancesService) {
         case 'rds-pg':
-            url = `/api/aws/bridge/db/consumo_rds_postgresql`
+            rdsType = 'postgresql'
             break;
         case 'rds-mysql':
-            url = `/api/aws/bridge/db/consumo_rds_mysql`
+            rdsType = 'mysql'
             break;
         case 'rds-oracle':
-            url = `/api/aws/bridge/db/consumo_rds_oracle`
+            rdsType = 'oracle'
             break;
         case 'rds-sqlserver':
-            url = `/api/aws/bridge/db/consumo_rds_sqlserver`
+            rdsType = 'sqlserver'
             break;
         case 'rds-mariadb':
-            url = `/api/aws/bridge/db/consumo_rds_mariadb`
+            rdsType = 'mariadb'
             break;
         default:
             break;
     }
 
-    const rdsPgCpuMetrics = useSWR(
+    const rdsCpuMetrics = useSWR(
         instance
-            ? `${url}/cpu_usage?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&resource=${instance}`
+            ? `${url}/cpu_usage?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&resource=${instance}&db_type=${rdsType}`
             : null,
         fetcher
     );
-    const rdsPgCreditsMetrics = useSWR(
+    const rdsMemoryMetrics = useSWR(
         instance
-            ? `${url}/credits_usage?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&resource=${instance}`
+            ? `${url}/memory?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&resource=${instance}&db_type=${rdsType}`
             : null,
         fetcher
     );
-    const rdsPgDbConnectionsMetrics = useSWR(
+    const rdsCreditsUsageMetrics = useSWR(
         instance
-            ? `${url}/db_connections?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&resource=${instance}`
+            ? `${url}/credits_usage?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&resource=${instance}&db_type=${rdsType}`
             : null,
         fetcher
     );
-    const rdsPgFreeStorageMetrics = useSWR(
+    const rdsCreditsBalanceMetrics = useSWR(
         instance
-            ? `${url}/free_storage?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&resource=${instance}`
+            ? `${url}/credits_balance?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&resource=${instance}&db_type=${rdsType}`
             : null,
         fetcher
     );
-    const rdsPgInfo = useSWR(
+    const rdsDbConnectionsMetrics = useSWR(
         instance
-            ? `${url}/info?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&resource=${instance}`
+            ? `${url}/connections?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&resource=${instance}&db_type=${rdsType}`
             : null,
         fetcher
     );
-    const rdsPgGlobalCreditsEfficiency = useSWR(
+    const rdsFreeStorageMetrics = useSWR(
         instance
-            ? `${url}/global_credits_efficiency?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&resource=${instance}`
+            ? `${url}/storage?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&resource=${instance}&db_type=${rdsType}`
+            : null,
+        fetcher
+    );
+    const rdsInfo = useSWR(
+        instance
+            ? `${url}/info?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&resource=${instance}&db_type=${rdsType}`
+            : null,
+        fetcher
+    );
+    const rdsGlobalCreditsEfficiency = useSWR(
+        instance
+            ? `${url}/global_efficiency?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&resource=${instance}&db_type=${rdsType}`
             : null,
         fetcher
     );
 
     const anyLoading =
-        rdsPgCpuMetrics.isLoading ||
-        rdsPgCreditsMetrics.isLoading ||
-        rdsPgDbConnectionsMetrics.isLoading ||
-        rdsPgFreeStorageMetrics.isLoading ||
-        rdsPgGlobalCreditsEfficiency.isLoading ||
-        rdsPgInfo.isLoading
+        rdsCpuMetrics.isLoading ||
+        rdsCreditsUsageMetrics.isLoading ||
+        rdsCreditsBalanceMetrics.isLoading ||
+        rdsDbConnectionsMetrics.isLoading ||
+        rdsFreeStorageMetrics.isLoading ||
+        rdsGlobalCreditsEfficiency.isLoading ||
+        rdsInfo.isLoading
 
     const anyError =
-        !!rdsPgCpuMetrics.error ||
-        !!rdsPgCreditsMetrics.error ||
-        !!rdsPgDbConnectionsMetrics.error ||
-        !!rdsPgFreeStorageMetrics.error ||
-        !!rdsPgGlobalCreditsEfficiency.error ||
-        !!rdsPgInfo.error
+        !!rdsCpuMetrics.error ||
+        !!rdsCreditsUsageMetrics.error ||
+        !!rdsCreditsBalanceMetrics.error ||
+        !!rdsDbConnectionsMetrics.error ||
+        !!rdsFreeStorageMetrics.error ||
+        !!rdsGlobalCreditsEfficiency.error ||
+        !!rdsInfo.error
 
-    const cpuMetricsData: ConsumeViewRdsPgCpuMetrics[] | null =
-        isNonEmptyArray<ConsumeViewRdsPgCpuMetrics>(rdsPgCpuMetrics.data) ? rdsPgCpuMetrics.data : null;
+    const cpuMetricsData: ConsumeViewRdsMetrics[] | null =
+        isNonEmptyArray<ConsumeViewRdsMetrics>(rdsCpuMetrics.data) ? rdsCpuMetrics.data : null;
 
-    const creditsMetricsData: ConsumeViewRdsPgCreditsMetrics[] | null =
-        isNonEmptyArray<ConsumeViewRdsPgCreditsMetrics>(rdsPgCreditsMetrics.data) ? rdsPgCreditsMetrics.data : null;
+    const memoryMetricsData: ConsumeViewRdsMetrics[] | null =
+        isNonEmptyArray<ConsumeViewRdsMetrics>(rdsMemoryMetrics.data) ? rdsMemoryMetrics.data : null;
 
-    const dbConnectionsMetricsData: ConsumeViewRdsPgDbConnectionsMetrics[] | null =
-        isNonEmptyArray<ConsumeViewRdsPgDbConnectionsMetrics>(rdsPgDbConnectionsMetrics.data) ? rdsPgDbConnectionsMetrics.data : null;
+    const creditsUsageMetricsData: ConsumeViewRdsMetrics[] | null =
+        isNonEmptyArray<ConsumeViewRdsMetrics>(rdsCreditsUsageMetrics.data) ? rdsCreditsUsageMetrics.data : null;
 
-    const freeStorageMetricsData: ConsumeViewRdsPgFreeStorageMetrics[] | null =
-        isNonEmptyArray<ConsumeViewRdsPgFreeStorageMetrics>(rdsPgFreeStorageMetrics.data) ? rdsPgFreeStorageMetrics.data : null;
+    const creditsBalanceMetricsData: ConsumeViewRdsMetrics[] | null =
+        isNonEmptyArray<ConsumeViewRdsMetrics>(rdsCreditsBalanceMetrics.data) ? rdsCreditsBalanceMetrics.data : null;
 
-    const infoData: RdsConsumeViewInstance[] | null =
-        isNonEmptyArray<RdsConsumeViewInstance>(rdsPgInfo.data) ? rdsPgInfo.data : null
+    const dbConnectionsMetricsData: ConsumeViewRdsMetrics[] | null =
+        isNonEmptyArray<ConsumeViewRdsMetrics>(rdsDbConnectionsMetrics.data) ? rdsDbConnectionsMetrics.data : null;
 
-    const globalEfficiencyData: unknown = isNullish(rdsPgGlobalCreditsEfficiency.data)
+    const freeStorageMetricsData: ConsumeViewRdsMetrics[] | null =
+        isNonEmptyArray<ConsumeViewRdsMetrics>(rdsFreeStorageMetrics.data) ? rdsFreeStorageMetrics.data : null;
+
+    const infoData: RdsConsumeViewInfo | null = isNullish(rdsInfo.data) ? null : rdsInfo.data;
+
+    const globalEfficiencyData: RdsConsumeViewEfficiencyData | null = isNullish(rdsGlobalCreditsEfficiency.data)
         ? null
-        : rdsPgGlobalCreditsEfficiency.data
+        : rdsGlobalCreditsEfficiency.data
 
     const hasCpuData = !!cpuMetricsData && cpuMetricsData.length > 0;
-    const hasCreditsData = !!creditsMetricsData && creditsMetricsData.length > 0;
+    const hasCreditsUsageData = !!creditsUsageMetricsData && creditsUsageMetricsData.length > 0;
+    const hasCreditsBalanceData = !!creditsBalanceMetricsData && creditsBalanceMetricsData.length > 0;
     const hasDbConnectionsData = !!dbConnectionsMetricsData && dbConnectionsMetricsData.length > 0;
     const hasFreeStorageData = !!freeStorageMetricsData && freeStorageMetricsData.length > 0;
+    const hasMemoryData = !!memoryMetricsData && memoryMetricsData.length > 0;
 
     if (anyLoading) {
         return (
@@ -156,7 +180,7 @@ export const RdsInstancesConsumeComponent = ({ startDate, endDate, instance, reg
         )
     }
 
-    const noneHasData = !hasCpuData && !hasCreditsData && !hasDbConnectionsData && !hasFreeStorageData;
+    const noneHasData = !hasCpuData && !hasCreditsUsageData && !hasCreditsBalanceData && !hasDbConnectionsData && !hasFreeStorageData && !hasMemoryData;
 
     if (noneHasData) {
         return (
@@ -171,40 +195,92 @@ export const RdsInstancesConsumeComponent = ({ startDate, endDate, instance, reg
         )
     }
     return (
-        <div className="w-full min-w-0 px-4 py-6">
+        <div className="space-y-6 mt-6 px-4">
+            {/* Tarjetas */}
+            <RdsInfoConsumeViewCardsComponent
+                summary={infoData?.resumen}
+                instancias={infoData?.instancias || []}
+                efficiency={globalEfficiencyData}
+                isLoading={rdsInfo?.isLoading}
+            />
+
+            {/* Gráficos de métricas */}
             <div className="flex-1 space-y-6 min-w-0 overflow-hidden">
-                <RdsInfoConsumeViewComponent
-                    cpuData={cpuMetricsData}
-                    creditsData={creditsMetricsData}
-                    infoData={infoData}
-                    creditsGlobalEfficiency={globalEfficiencyData}
+                <RdsConsumeViewChartComponent
+                    data={cpuMetricsData}
+                    unit='%'
+                    title='Uso de CPU'
+                    metricName='CPUUtilization'
+                />
+                <RdsConsumeViewChartComponent
+                    data={creditsUsageMetricsData}
+                    unit='Créditos'
+                    title='Uso Créditos de CPU'
+                    metricName='CPUCreditUsage'
+                />
+                <RdsConsumeViewChartComponent
+                    data={creditsBalanceMetricsData}
+                    unit='Créditos'
+                    title='Saldo Créditos de CPU'
+                    metricName='CPUCreditBalance'
+                />
+                <RdsConsumeViewChartComponent
+                    data={memoryMetricsData}
+                    unit='Bytes'
+                    title='Memoria Disponible'
+                    metricName='FreeableMemory'
+                />
+                <RdsConsumeViewChartComponent
+                    data={dbConnectionsMetricsData}
+                    unit='Conexiones'
+                    title='Conexiones a la Base de Datos'
+                    metricName='DatabaseConnections'
+                />
+                <RdsConsumeViewChartComponent
+                    data={freeStorageMetricsData}
+                    unit='Bytes'
+                    title='Almacenamiento Libre'
+                    metricName='FreeStorageSpace'
                 />
             </div>
 
-            <div className="flex flex-col gap-5 mt-10">
-                <div className="flex items-center gap-3 my-5">
-                    <ChartBar className="h-8 w-8 text-blue-500" />
-                    <h1 className="text-3xl font-bold text-foreground">Métricas de la Instancia</h1>
-                </div>
-
-                <RdsConsumeViewUsageCreditsComponent data={creditsMetricsData} />
-                <RdsConsumeViewUsageCpuComponent data={cpuMetricsData} />
-                <RdsConsumeViewDbConnectionsComponent data={dbConnectionsMetricsData} />
-                <RdsConsumeViewFreeStorageComponent data={freeStorageMetricsData} />
-            </div>
-            <div className="flex flex-col gap-5 mt-10">
-                <div className="flex items-center gap-3 my-5">
-                    <Clock className="h-8 w-8 text-blue-500" />
-                    <h1 className="text-3xl font-bold text-foreground">Detalle Instancias</h1>
-                </div>
-                <RdsConsumeViewInstanceTable
-                    data={infoData}
-                    startDate={startDate}
-                    endDate={endDate}
-                    instance={instance}
-                    enableGrouping
-                />
-            </div>
+            {/* Tabla */}
+            <RdsConsumeViewInstanceTable data={infoData?.instancias || []} />
         </div>
+        // <div className="w-full min-w-0 px-4 py-6">
+        //     <div className="flex-1 space-y-6 min-w-0 overflow-hidden">
+        //         <RdsInfoConsumeViewComponent
+        //             cpuData={cpuMetricsData}
+        //             creditsData={creditsMetricsData}
+        //             infoData={infoData}
+        //             creditsGlobalEfficiency={globalEfficiencyData}
+        //         />
+        //     </div>
+
+        //     <div className="flex flex-col gap-5 mt-10">
+        //         <div className="flex items-center gap-3 my-5">
+        //             <ChartBar className="h-8 w-8 text-blue-500" />
+        //             <h1 className="text-3xl font-bold text-foreground">Métricas de la Instancia</h1>
+        //         </div>
+
+        //         <RdsConsumeViewUsageCreditsComponent data={creditsMetricsData} />
+        //         <RdsConsumeViewUsageCpuComponent data={cpuMetricsData} />
+        //         <RdsConsumeViewDbConnectionsComponent data={dbConnectionsMetricsData} />
+        //         <RdsConsumeViewFreeStorageComponent data={freeStorageMetricsData} />
+        //     </div>
+        //     <div className="flex flex-col gap-5 mt-10">
+        //         <div className="flex items-center gap-3 my-5">
+        //             <Clock className="h-8 w-8 text-blue-500" />
+        //             <h1 className="text-3xl font-bold text-foreground">Detalle Instancias</h1>
+        //         </div>
+        //         <RdsConsumeViewInstanceTable
+        //             data={infoData}
+        //             startDate={startDate}
+        //             endDate={endDate}
+        //             instance={instance}
+        //             enableGrouping
+        //         />
+        //     </div>
+        // </div>
     )
 }

@@ -5,7 +5,7 @@ import { createColumns } from '@/components/data-table/columns';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { DataTableGrouping } from '@/components/data-table/data-table-grouping';
 import { Server } from 'lucide-react';
-import { getEc2ConsumeColumns } from '@/components/aws/vista-consumos/ec2/table/Ec2InstancesConsumeColumns';
+import { getEc2ConsumeColumns, Ec2TableRow } from '@/components/aws/vista-consumos/ec2/table/Ec2InstancesConsumeColumns';
 import { ConsumeViewEc2InfoInstances } from '@/interfaces/vista-consumos/ec2ConsumeViewInterfaces';
 
 interface Ec2InstancesConsumeTableComponentProps {
@@ -27,31 +27,31 @@ const TableLegend = () => (
 
 export const Ec2InstancesConsumeTableComponent = ({ data }: Ec2InstancesConsumeTableComponentProps) => {
 
-    const { maxCpu, maxCost } = useMemo(() => {
-        if (!data || data.length === 0) return { maxCpu: 0, maxCost: 0 };
+    const processedData = useMemo<Ec2TableRow[]>(() => {
+        if (!data) return [];
+        return data
+            .filter(inst => inst.history.length > 0)
+            .map(inst => {
+                const latest = inst.history[inst.history.length - 1];
+                return {
+                    ...latest,
+                    _instance: inst,
+                    InstanceId: inst.InstanceId,
+                    sort_cpu: latest.avg_cpu_utilization,
+                    sort_netinout: latest.avg_network_in + latest.avg_network_out,
+                    sort_billing: latest.costo_usd,
+                };
+            });
+    }, [data]);
 
-        const cpus = data.map(d => d.avg_cpu_utilization);
-        const costs = data.map(d => d.costo_usd);
+    const { maxCpu, maxCost } = useMemo(() => {
+        if (!processedData.length) return { maxCpu: 0, maxCost: 0 };
 
         return {
-            maxCpu: Math.max(...cpus),
-            maxCost: Math.max(...costs)
+            maxCpu: Math.max(...processedData.map(d => d.avg_cpu_utilization)),
+            maxCost: Math.max(...processedData.map(d => d.costo_usd)),
         };
-    }, [data]);
-
-    const processedData = useMemo(() => {
-        if (!data) return [];
-        return data.map(row => {
-            return {
-                ...row,
-                sort_cpu: row.avg_cpu_utilization,
-                sort_netinout: row.avg_network_in + row.avg_network_out,
-                sort_creditbalance: row.avg_cpu_credit_balance,
-                sort_creditusage: row.avg_cpu_credit_usage,
-                sort_billing: row.costo_usd
-            };
-        });
-    }, [data]);
+    }, [processedData]);
 
     const columns = createColumns(getEc2ConsumeColumns(maxCpu, maxCost));
 
@@ -92,8 +92,6 @@ export const Ec2InstancesConsumeTableComponent = ({ data }: Ec2InstancesConsumeT
                     data={processedData}
                     filterColumn="InstanceId"
                     filterPlaceholder="Filtrar por nombre de instancia..."
-                    enableGrouping
-                    groupByColumn='InstanceId'
                     pageSizeItems={10}
                 />
             </CardContent>

@@ -86,9 +86,8 @@ export interface ConsumeViewEc2InfoInstacesTags {
   [key: string]: string;
 }
 
-export interface ConsumeViewEc2InfoInstances {
+export interface ConsumeViewEc2InfoInstancesHistory {
   name: string;
-  InstanceId: string;
   InstanceType: string;
   region: string;
   availability_zone: string;
@@ -102,7 +101,9 @@ export interface ConsumeViewEc2InfoInstances {
   avg_network_out: number;
   max_network_out: number;
   avg_cpu_credit_usage: number;
+  max_cpu_credit_usage: number;
   avg_cpu_credit_balance: number;
+  max_cpu_credit_balance: number;
   is_idle: boolean;
   is_underutilized: boolean;
   costo_usd: number;
@@ -110,14 +111,24 @@ export interface ConsumeViewEc2InfoInstances {
   private_ip: string;
   vpc_id: string;
   ebs_devices?: ConsumeViewEc2InfoInstacesEbs[];
-  devices_attached: number;
-  devices_not_attached: number;
+  devices_attached_count: number;
+  devices_not_attached_count: number;
   network_interfaces?: ConsumeViewEc2InfoInstancesNetworkInterfaces[];
   interfaces_inuse_count: number;
   interfaces_not_inuse_count: number;
-  LaunchTime: string;
-  sync_time: string;
+  LaunchTime: {
+    $date: string;
+  };
+  sync_time: {
+    $date: string;
+  };
   Tags?: ConsumeViewEc2InfoInstacesTags[];
+}
+
+export interface ConsumeViewEc2InfoInstances {
+  name: string;
+  InstanceId: string;
+  history: ConsumeViewEc2InfoInstancesHistory[];
 }
 
 export interface ConsumeViewEc2Info {
@@ -125,23 +136,19 @@ export interface ConsumeViewEc2Info {
     total_instancias: number;
     instancias_idle: number;
     instancias_infrautilizadas: number;
-    costo_total_usd: number;
-    sync_time: string;
   };
   instancias: ConsumeViewEc2InfoInstances[];
 }
 
-export interface ConsumeViewEc2GlobalEfficiencyMetricsDetails{
-    samples: number;
-    metric: string;
-    avg_utilization: number;
-    max_utilization: number;
-    min_utilization: number;
-    efficiency_score: number;
+export interface ConsumeViewEc2GlobalEfficiencyMetricsDetails {
+  metric: string;
+  avg_utilization: number;
+  max_utilization: number;
+  min_utilization: number;
+  samples:number;
 }
 
 export interface ConsumeViewEc2GlobalEfficiency {
-    global_efficiency_score: number;
-    metrics_detail: ConsumeViewEc2GlobalEfficiencyMetricsDetails[];
-    interpretation: string;
+  global_efficiency: string;
+  metrics_detail: ConsumeViewEc2GlobalEfficiencyMetricsDetails[];
 }

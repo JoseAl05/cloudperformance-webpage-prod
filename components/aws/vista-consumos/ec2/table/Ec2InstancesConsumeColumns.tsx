@@ -3,12 +3,19 @@
 import { DynamicColumn } from '@/components/data-table/columns';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Eye, Server, ArrowDown, ArrowUp, ChevronUp, ChevronDown, ArrowUpDown } from 'lucide-react';
+import { Eye, Server, ArrowDown, ArrowUp } from 'lucide-react';
 import { useState } from 'react';
 import { HistoryModal, HistoryModalTab } from '@/components/general_gcp/modal/HistoryModal';
-import { Ec2InfoView, Ec2LabelsView, Ec2MetricasView, Ec2RecomendacionView } from '@/components/aws/vista-consumos/ec2/info/Ec2InstancesConsumeInsightModalComponent';
-import { ConsumeViewEc2InfoInstances } from '@/interfaces/ec2ConsumeViewInterfaces';
+import { Ec2InfoView, Ec2TagsView, Ec2MetricasView, Ec2RecomendacionView } from '@/components/aws/vista-consumos/ec2/info/Ec2InstancesConsumeInsightModalComponent';
+import { ConsumeViewEc2InfoInstances, ConsumeViewEc2InfoInstancesHistory } from '@/interfaces/ec2ConsumeViewInterfaces';
 
+export interface Ec2TableRow extends ConsumeViewEc2InfoInstancesHistory {
+    _instance: ConsumeViewEc2InfoInstances;
+    InstanceId: string;
+    sort_cpu: number;
+    sort_netinout: number;
+    sort_billing: number;
+}
 
 const CPUCell = ({ cpu, maxCpu }: { cpu: number; maxCpu: number }) => {
     const percentage = maxCpu > 0 ? (cpu / maxCpu) * 100 : 0;
@@ -52,7 +59,7 @@ const CostCell = ({ cost, maxCost }: { cost: number; maxCost: number }) => {
     );
 };
 
-const ClasificacionCell = ({ row }: { row: ConsumeViewEc2InfoInstances }) => {
+const ClasificacionCell = ({ row }: { row: Ec2TableRow }) => {
     const badges = [];
 
     if (row.is_idle) {
@@ -101,29 +108,29 @@ const NetworkCell = ({ ingress, egress }: { ingress: number, egress: number }) =
     );
 };
 
-const DetailsCell = ({ row }: { row: ConsumeViewEc2InfoInstances }) => {
+const DetailsCell = ({ row }: { row: Ec2TableRow }) => {
     const [isOpen, setIsOpen] = useState(false);
 
     const instanciaTabs: HistoryModalTab[] = [
         {
             value: "info",
             label: "Información",
-            content: <Ec2InfoView data={row} />
+            content: <Ec2InfoView data={row._instance} />
         },
         {
             value: "metricas",
             label: "Métricas",
-            content: <Ec2MetricasView data={row} />
+            content: <Ec2MetricasView data={row._instance} />
         },
         {
             value: "labels",
             label: "Tags",
-            content: <Ec2LabelsView data={row} />
+            content: <Ec2TagsView data={row._instance} />
         },
         {
             value: "recomendacion",
             label: "Recomendación",
-            content: <Ec2RecomendacionView data={row} />
+            content: <Ec2RecomendacionView data={row._instance} />
         }
     ];
 
@@ -149,29 +156,34 @@ const DetailsCell = ({ row }: { row: ConsumeViewEc2InfoInstances }) => {
     );
 };
 
-export const getEc2ConsumeColumns = (maxCpu: number, maxCost: number): DynamicColumn<ConsumeViewEc2InfoInstances>[] => [
+export const getEc2ConsumeColumns = (maxCpu: number, maxCost: number): DynamicColumn<Ec2TableRow>[] => [
     {
         header: "Instancia",
         accessorKey: "InstanceId",
-        cell: (info) => (
+        cell: ({ row }) => (
             <div className="flex flex-col justify-center">
                 <div className="flex items-center gap-2 mb-1">
                     <div className="p-1.5 bg-slate-50 dark:bg-slate-900 rounded border border-slate-100 dark:border-slate-800">
                         <Server className="h-3.5 w-3.5 text-slate-500 dark:text-slate-400" />
                     </div>
-                    <span className="font-semibold text-sm text-slate-700 dark:text-slate-200 truncate max-w-[180px]" title={info.getValue() as string}>
-                        {info.getValue() as string}
-                    </span>
+                    <div className='flex flex-col'>
+                        <span className="font-semibold text-sm text-slate-700 dark:text-slate-200 truncate max-w-[180px]" title={row.original.InstanceId}>
+                            {row.original.InstanceId}
+                        </span>
+                        <span className='text-xs text-muted-foreground bg-slate-100 rounded p-1.5 dark:bg-slate-900'>
+                            {row.original.name || 'Sin nombre'}
+                        </span>
+                    </div>
                 </div>
             </div>
         ),
-        size: 220
+        size: 230
     },
     {
         header: "Estado",
         accessorKey: "status",
         cell: (info) => <StatusCell status={info.getValue() as string} />,
-        size: 90
+        size: 150
     },
     {
         header: "Región",
@@ -191,7 +203,7 @@ export const getEc2ConsumeColumns = (maxCpu: number, maxCost: number): DynamicCo
         header: "CPU Promedio",
         accessorKey: "sort_cpu",
         cell: ({ row }) => <CPUCell cpu={row.original.avg_cpu_utilization} maxCpu={maxCpu} />,
-        size: 140
+        size: 180
     },
     {
         header: "Red (In/Out)",
@@ -202,13 +214,13 @@ export const getEc2ConsumeColumns = (maxCpu: number, maxCost: number): DynamicCo
                 egress={row.original.avg_network_out}
             />
         ),
-        size: 130
+        size: 150
     },
     {
         header: "Clasificación",
         accessorKey: "is_idle",
         cell: ({ row }) => <ClasificacionCell row={row.original} />,
-        size: 140
+        size: 150
     },
     {
         header: "Costo Mes",
@@ -219,15 +231,15 @@ export const getEc2ConsumeColumns = (maxCpu: number, maxCost: number): DynamicCo
                 maxCost={maxCost}
             />
         ),
-        size: 130
+        size: 150
     },
     {
         header: "Sync Time",
         accessorKey: "sync_time",
         cell: (info) => {
-            const val = info.getValue() as string;
-            if (!val) return <span className="text-xs text-muted-foreground">-</span>;
-            const dateObj = new Date(val);
+            const syncTime = (info.getValue() as { $date: string })?.$date;
+            if (!syncTime) return <span className="text-xs text-muted-foreground">-</span>;
+            const dateObj = new Date(syncTime);
             return (
                 <div className="flex flex-col text-xs">
                     <span className="font-semibold text-slate-700 dark:text-slate-300">
@@ -239,12 +251,12 @@ export const getEc2ConsumeColumns = (maxCpu: number, maxCost: number): DynamicCo
                 </div>
             );
         },
-        size: 110
+        size: 150
     },
     {
         id: "actions",
-        header: " ",
+        header: "Historial",
         cell: ({ row }) => <DetailsCell row={row.original} />,
-        size: 50
+        size: 100
     }
 ];
