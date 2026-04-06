@@ -29,7 +29,7 @@ const fetcherPost = (url: string, tags: { Key: string; Value: string } | null = 
         body: tags ? JSON.stringify([tags]) : null,
     }).then(res => res.json());
 
-const fetcherGet = (url: string) =>
+const fetcherGet = (url: string, _tags: { Key: string; Value: string } | null = null) =>
     fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
         .then(r => r.json());
 
@@ -45,9 +45,13 @@ export const InstancesFilterComponent = ({
     const startDateFormatted = startDate.toISOString().replace('Z', '').slice(0, -4);
     const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : '';
 
+    const tagQueryParams = selectedKey !== 'allKeys' && selectedValue && selectedValue !== 'allValues' 
+        ? `&tagKey=${encodeURIComponent(selectedKey)}&tagValue=${encodeURIComponent(selectedValue)}` 
+        : '';
+
     switch (service) {
         case 'ec2':
-            url = (selectedKey && selectedValue) ? `/api/aws/bridge/vm/all-instances-ec2?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}` : null;
+            url = (selectedKey && selectedValue) ? `/api/aws/bridge/vm/all-instances-ec2?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}${tagQueryParams}` : null;
             break;
         case 'unused-ec2':
             url = (selectedKey && selectedValue) ? `/api/aws/bridge/unused/ec2/all_unused_ec2_instances?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}` : null;
@@ -59,19 +63,19 @@ export const InstancesFilterComponent = ({
             url = (selectedKey && selectedValue) ? `/api/aws/bridge/unused/ebs/all_unused_ebs?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}` : null;
             break;
         case 'rds-pg':
-            url = (selectedKey && selectedValue) ? `/api/aws/bridge/db/all-instances-rds-pg?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}` : null;
+            url = (selectedKey && selectedValue) ? `/api/aws/bridge/db/all-instances-rds-pg?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}${tagQueryParams}` : null;
             break;
         case 'rds-mysql':
-            url = (selectedKey && selectedValue) ? `/api/aws/bridge/db/all-instances-rds-mysql?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}` : null;
+            url = (selectedKey && selectedValue) ? `/api/aws/bridge/db/all-instances-rds-mysql?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}${tagQueryParams}` : null;
             break;
         case 'rds-oracle':
-            url = (selectedKey && selectedValue) ? `/api/aws/bridge/db/all-instances-rds-oracle?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}` : null;
+            url = (selectedKey && selectedValue) ? `/api/aws/bridge/db/all-instances-rds-oracle?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}${tagQueryParams}` : null;
             break;
         case 'rds-sqlserver':
-            url = (selectedKey && selectedValue) ? `/api/aws/bridge/db/all-instances-rds-sqlserver?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}` : null;
+            url = (selectedKey && selectedValue) ? `/api/aws/bridge/db/all-instances-rds-sqlserver?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}${tagQueryParams}` : null;
             break;
         case 'rds-mariadb':
-            url = (selectedKey && selectedValue) ? `/api/aws/bridge/db/all-instances-rds-mariadb?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}` : null;
+            url = (selectedKey && selectedValue) ? `/api/aws/bridge/db/all-instances-rds-mariadb?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}${tagQueryParams}` : null;
             break;
         case 'asg':
             url = (selectedKey && selectedValue) ? `/api/aws/bridge/autoscaling/all-autoscaling-groups?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}` : null;
@@ -83,8 +87,11 @@ export const InstancesFilterComponent = ({
             url = '';
     }
 
-    const tagsBody = selectedKey !== 'allKeys' && selectedValue && selectedValue !== 'allValues' ? { Key: selectedKey, Value: selectedValue } : null;
-
+    //const tagsBody = selectedKey !== 'allKeys' && selectedValue && selectedValue !== 'allValues' ? { Key: selectedKey, Value: selectedValue } : null;
+    const hasTag = selectedKey && selectedKey !== 'allKeys';
+    
+    const tagsBody = hasTag ? { Key: selectedKey, Value: selectedValue || 'allValues' } : null;
+    
     const apiMethod = service === "infraUsed" ? fetcherGet : fetcherPost;
     const { data, error, isLoading } = useSWR<(string | { resource_id: string; resource_name: string; cpu_avg: number })[]>(
         url ? [url, tagsBody] : null,
