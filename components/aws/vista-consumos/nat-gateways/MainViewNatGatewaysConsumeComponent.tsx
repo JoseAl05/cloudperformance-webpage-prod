@@ -26,8 +26,9 @@ export const MainViewNatGatewaysConsumeComponent = () => {
                     Component={NatGatewaysConsumeComponent}
                     dateFilter
                     regionFilter
-                    natGatewaysFilter
-                    isNatGatewaysMultiselect
+                    instancesFilter
+                    isInstanceMultiSelect
+                    instancesService='nat_gateway'
                     tagsFilter
                     collection='aws_nat_gateways'
                     tagColumnName='Tags'

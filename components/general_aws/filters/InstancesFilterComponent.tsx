@@ -76,6 +76,9 @@ export const InstancesFilterComponent = ({
         case 'asg':
             url = (selectedKey && selectedValue) ? `/api/aws/bridge/autoscaling/all-autoscaling-groups?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}` : null;
             break;
+        case 'nat_gateway':
+            url = (selectedKey && selectedValue) ? `/api/aws/bridge/nat_gateways/all_nat_gateways?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}` : null;
+            break;
         case "infraUsed":
             url = region ? `/api/aws/bridge/ec2/all_unused_ec2_instances?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}` : null;
             break;

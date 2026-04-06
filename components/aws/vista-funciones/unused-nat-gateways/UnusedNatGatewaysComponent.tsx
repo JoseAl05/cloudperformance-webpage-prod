@@ -84,6 +84,7 @@ export const UnusedNatGatewaysComponent = ({ startDate, endDate, region, unusedN
             </div>
         )
     }
+    console.log(unusedNatGwData)
     return (
         <>
             <div className='w-full min-w-0 px-4 py-6'>

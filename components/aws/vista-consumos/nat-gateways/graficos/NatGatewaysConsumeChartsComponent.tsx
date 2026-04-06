@@ -1,110 +1,229 @@
-'use client'
+'use client';
 
-import { NatGatewaysConsumeSingleChartComponent } from '@/components/aws/vista-consumos/nat-gateways/graficos/NatGatewaysConsumeSingleChartComponent';
-import { NatGatewayMetrics } from '@/interfaces/vista-consumos/natGwConsumeViewInterfaces';
-import { bytesToMB } from '@/lib/bytesToMbs';
-import { formatMetric } from '@/lib/metricUtils';
-import { Activity, AlertTriangle, BarChart3, Info } from 'lucide-react';
-import { useMemo } from 'react';
+import { useMemo, useRef } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Info } from 'lucide-react';
+import { useTheme } from 'next-themes';
+import {
+    createChartOption,
+    deepMerge,
+    makeBaseOptions,
+    useECharts,
+} from '@/lib/echartsGlobalConfig';
+import { ConsumeViewEc2Metrics } from '@/interfaces/vista-consumos/ec2ConsumeViewInterfaces';
+import { NatGatewayConsumeMetrics } from '@/interfaces/vista-consumos/natGwConsumeViewInterfaces';
+import { formatBytes, formatGeneric } from '@/lib/bytesToMbs';
 
-interface NatGatewaysConsumeChartsComponentProps {
-    data: NatGatewayMetrics[];
+
+interface SingleMetricChartProps {
+    data: ConsumeViewEc2Metrics[];
+    title: string;
 }
 
-const CHART_GROUPS = [
-    {
-        id: 'volume',
-        title: 'Volumen de Datos',
-        icon: BarChart3,
-        description: 'Métricas de transferencia entrante y saliente.',
-        metrics: [
-            'BytesOutToDestination Average',
-            'BytesInFromSource Average'
-        ]
-    },
-    {
-        id: 'connections',
-        title: 'Conexiones y Estado',
-        icon: Activity,
-        description: 'Concurrencia y estado de salud.',
-        metrics: [
-            'ActiveConnectionCount Average',
-            'ErrorPortAllocation Average'
-        ]
-    }
-];
 
-export const NatGatewaysConsumeChartsComponent = ({ data }: NatGatewaysConsumeChartsComponentProps) => {
+// --- Configuración de Métricas ---
+const METRIC_CONFIG: Record<string, { label: string; unit: string; formatType: 'percent' | 'bytes' | 'count' }> = {
+    activeconnectioncount: { label: 'Conexiones Activas', unit: 'Conexiones', formatType: 'count' },
+    bytesinfromsource: { label: 'Datos Enviados a Internet', unit: 'B/s', formatType: 'bytes' },
+    bytesouttodestination: { label: 'Datos Entregados al Destino', unit: 'B/s', formatType: 'bytes' },
+    errorportallocation: { label: 'Error de asignación de puertos', unit: 'Errores', formatType: 'count' }
+};
 
-    const metricsMap = useMemo(() => {
-        const groups = new Map<string, [string, string | number][]>();
+const SingleMetricChart = ({ data, title }: SingleMetricChartProps) => {
+    const { theme, resolvedTheme } = useTheme();
+    const currentTheme = resolvedTheme || theme;
+    const isDark = currentTheme === 'dark';
+    console.log(title)
 
-        data.forEach((item) => {
-            if (!groups.has(item.metric_name)) {
-                groups.set(item.metric_name, []);
-            }
+    const chartRef = useRef<HTMLDivElement>(null);
+    const safeData = Array.isArray(data) ? data : [];
+    const metricNameLowercase = title.toLowerCase();
+    const config = METRIC_CONFIG[metricNameLowercase] || {
+        label: title.replace(/_/g, ' '),
+        unit: '',
+        formatType: 'count'
+    };
 
-            const value = (item.metric_name.includes('Bytes'))
-                ? bytesToMB(item.avg_value)
-                : formatMetric(item.avg_value);
+    // --- Preparación de Datos ---
+    const { avgMetric, maxMetric, minMetric } = useMemo(() => {
+        const sortedData = [...safeData].sort(
+            (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+        );
 
-            groups.get(item.metric_name)?.push([item.timestamp, value]);
+        const avgMetric: [string, number][] = sortedData.map(item => [
+            item.timestamp,
+            item.avg_value
+        ]);
+
+        const maxMetric: [string, number][] = sortedData.map(item => [
+            item.timestamp,
+            item.max_value
+        ]);
+
+        const minMetric: [string, number][] = sortedData.map(item => [
+            item.timestamp,
+            item.min_value
+        ]);
+
+        return { avgMetric, maxMetric, minMetric };
+    }, [safeData]);
+
+    // --- Configuración de Opciones de ECharts ---
+    const option = useMemo(() => {
+        // 1. Definir formateadores dinámicos según el tipo de métrica
+        let axisLabelFormatter = (value: number) => `${formatGeneric(value)}`;
+        let tooltipFormatter = (v: number | null) => v != null ? `${Number(v).toLocaleString()}` : '-';
+        let yAxisName = config.label;
+
+        if (config.formatType === 'percent') {
+            yAxisName = `${config.label} (%)`;
+            axisLabelFormatter = (value: number) => `${value.toFixed(0)}%`;
+            tooltipFormatter = (v: number | null) => v != null ? `${Number(v).toFixed(2)}%` : '-';
+        }
+        else if (config.formatType === 'bytes') {
+            // Nota: El label del eje Y suele omitir la unidad si es dinámica (MB/s vs GB/s), 
+            // pero podemos poner la unidad base.
+            yAxisName = config.label;
+            axisLabelFormatter = (value: number) => formatBytes(value);
+            tooltipFormatter = (v: number | null) => v != null ? formatBytes(Number(v)) : '-';
+        }
+        else if (config.formatType === 'count') {
+            yAxisName = `${config.label}`;
+            axisLabelFormatter = (value: number) => `${formatGeneric(value)} ${config.unit}`;
+            tooltipFormatter = (v: number | null) => v != null ? `${Number(v).toFixed(2)} ${config.unit}` : '-';
+        }
+
+        const base = makeBaseOptions({
+            legend: ['Promedio', 'Máximo', 'Mínimo'],
+            // unitLabel se usa para el tooltip base, pero lo sobrescribiremos con valueFormatter
+            unitLabel: config.unit,
+            useUTC: true,
+            showToolbox: true,
+            metricType: config.formatType === 'percent' ? 'percent' : 'standard',
         });
 
-        return groups;
+        const lines = createChartOption({
+            kind: 'line',
+            xAxisType: 'time',
+            legend: true,
+            tooltip: true,
+            series: [
+                {
+                    kind: 'line',
+                    name: 'Promedio',
+                    data: avgMetric,
+                    smooth: true,
+                    extra: { color: '#36A2EB' }
+                },
+                {
+                    kind: 'line',
+                    name: 'Máximo',
+                    data: maxMetric,
+                    smooth: true,
+                    extra: { color: '#FF6384' }
+                },
+                {
+                    kind: 'line',
+                    name: 'Mínimo',
+                    data: minMetric,
+                    smooth: true,
+                    extra: { color: '#28e995' }
+                },
+            ],
+            extraOption: {
+                // Aplicamos los formateadores específicos al tooltip y eje Y
+                tooltip: {
+                    trigger: 'axis',
+                    valueFormatter: tooltipFormatter,
+                },
+                yAxis: {
+                    name: yAxisName,
+                    nameTextStyle: {
+                        align: 'left',
+                        padding: [0, 0, 0, 0]
+                    },
+                    min: config.formatType === 'percent' ? 0 : undefined,
+                    max: config.formatType === 'percent' ? 100 : undefined,
+                    axisLabel: {
+                        formatter: axisLabelFormatter
+                    }
+                },
+                xAxis: { axisLabel: { rotate: 30 } },
+                grid: { left: 50, right: 20, top: 56, bottom: 64, containLabel: true },
+            },
+        });
+
+        return deepMerge(base, lines);
+    }, [avgMetric, maxMetric, minMetric, config]);
+
+    const isEmpty = safeData.length === 0;
+
+    useECharts(chartRef, option, [option], isDark ? 'cp-dark' : 'cp-light');
+
+    return (
+        <Card className="w-full">
+            <CardHeader>
+                <CardTitle className="capitalize">{config.label}</CardTitle>
+            </CardHeader>
+            <CardContent>
+                <div className="flex items-center justify-center gap-2 mb-2">
+                    <Info className="w-5 h-5 text-blue-500 flex-shrink-0" />
+                    <p className="text-xs text-muted-foreground">
+                        Las marcas de tiempo (Timestamps) están en formato <strong>UTC</strong>.
+                    </p>
+                </div>
+                {isEmpty ? (
+                    <div className="w-full h-[200px] flex items-center justify-center">
+                        <p className="text-sm text-muted-foreground">
+                            No hay métricas de {config.label} disponibles.
+                        </p>
+                    </div>
+                ) : (
+                    <div ref={chartRef} className="w-full h-[400px] md:h-[450px] lg:h-[500px]" />
+                )}
+            </CardContent>
+        </Card>
+    );
+};
+
+// --- Componente Principal ---
+interface NatGatewaysConsumeChartsComponentProps {
+    data: NatGatewayConsumeMetrics[] | null;
+}
+
+export const NatGatewaysConsumeChartsComponent = ({ data }: NatGatewaysConsumeChartsComponentProps) => {
+    console.log(data);
+    const groupedData = useMemo(() => {
+        if (!data || !Array.isArray(data)) return {};
+        return data.reduce((acc, curr) => {
+            const key = curr.metric || 'unknown';
+            if (!acc[key]) {
+                acc[key] = [];
+            }
+            acc[key].push(curr);
+            return acc;
+        }, {} as Record<string, NatGatewayConsumeMetrics[]>);
     }, [data]);
 
-    if (metricsMap.size === 0) {
+    const metricKeys = Object.keys(groupedData).sort();
+
+    if (metricKeys.length === 0) {
         return (
-            <div className="flex flex-col items-center justify-center p-12 border rounded-lg bg-muted/10 border-dashed">
-                <BarChart3 className="w-10 h-10 text-muted-foreground/50 mb-3" />
-                <div className="text-center text-muted-foreground font-medium">No hay métricas disponibles para visualizar.</div>
+            <div className="w-full p-4 text-center text-muted-foreground">
+                No hay datos disponibles para mostrar.
             </div>
         );
     }
 
     return (
-        <div className="w-full space-y-8">
-            <div className="flex items-center gap-2 px-1 bg-blue-50 dark:bg-blue-900/20 p-3 rounded-md border border-blue-100 dark:border-blue-900">
-                <Info className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                <p className="text-xs text-blue-700 dark:text-blue-300">
-                    Las marcas de tiempo de los gráficos están sincronizadas en formato <strong>UTC</strong>.
-                </p>
-            </div>
-
-            {CHART_GROUPS.map((group) => {
-                const groupMetrics = group.metrics.filter(m => metricsMap.has(m) && metricsMap.get(m)!.length > 0);
-
-                if (groupMetrics.length === 0) return null;
-
-                const GroupIcon = group.icon;
-
-                return (
-                    <div key={group.id} className="space-y-4 animate-in fade-in-50 duration-500">
-                        <div className="flex items-center gap-2 pb-2 border-b">
-                            <div className="p-2 bg-secondary rounded-full">
-                                <GroupIcon className="w-5 h-5 text-primary" />
-                            </div>
-                            <div>
-                                <h3 className="text-lg font-semibold text-foreground">{group.title}</h3>
-                                <p className="text-xs text-muted-foreground">{group.description}</p>
-                            </div>
-                        </div>
-
-                        <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
-                            {groupMetrics.map((metricName) => {
-                                return (
-                                    <NatGatewaysConsumeSingleChartComponent
-                                        key={metricName}
-                                        metricName={metricName}
-                                        dataPoints={metricsMap.get(metricName)!}
-                                    />
-                                );
-                            })}
-                        </div>
-                    </div>
-                );
-            })}
+        <div className="flex flex-col gap-6 w-full">
+            {metricKeys.map((metricName) => (
+                <SingleMetricChart
+                    key={metricName}
+                    title={metricName}
+                    data={groupedData[metricName]}
+                />
+            ))}
         </div>
     );
-}
+};
