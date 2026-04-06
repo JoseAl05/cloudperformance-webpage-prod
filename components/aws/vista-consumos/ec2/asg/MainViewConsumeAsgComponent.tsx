@@ -32,6 +32,7 @@ export const MainViewConsumeAsgComponent = () => {
                     tagsFilter
                     collection='aws_auto_scaling_groups'
                     tagColumnName='Tags'
+                    localService='Amazon Elastic Compute Cloud - Compute'
                 />
             </div>
         </div>

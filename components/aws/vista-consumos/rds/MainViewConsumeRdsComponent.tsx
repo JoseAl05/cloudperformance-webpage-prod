@@ -76,6 +76,7 @@ export const MainViewConsumeRdsComponent = ({ rdsType }: MainViewConsumeRdsCompo
                     tagsFilter
                     collection={collection}
                     tagColumnName={tagColumnName}
+                    localService='Amazon Relational Database Service'
                 />
             </div>
         </div>
