@@ -27,8 +27,9 @@ export const MainViewElbV2ConsumeComponent = () => {
                     Component={ElbV2ConsumeComponent}
                     dateFilter
                     regionFilter
-                    elbV2Filter
-                    isElbV2Multiselect
+                    instancesFilter
+                    isInstanceMultiSelect
+                    instancesService='loadbalancerv2'
                 />
             </div>
         </div>

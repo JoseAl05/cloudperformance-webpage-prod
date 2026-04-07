@@ -1,267 +1,293 @@
 'use client'
 
-import { Badge } from '@/components/ui/badge';
+import React, { useMemo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { LoadbalancerV2CardsSummary } from '@/interfaces/vista-consumos/elbV2ConsumeViewInterfaces';
-import { bytesToMB } from '@/lib/bytesToMbs';
+import { Activity, DollarSign, AlertTriangle, TrendingDown, Zap, LucideIcon, Plug, X, Workflow, ArrowUpDown, Globe, RefreshCw, FileText, RotateCcw, Gauge } from 'lucide-react';
+import { formatBytes, formatGeneric } from '@/lib/bytesToMbs';
 import {
-    Activity,
-    AlertTriangle,
-    ArrowRightLeft,
-    BarChart3,
-    Coins,
-    Database,
-    Globe,
-    LucideIcon,
-    Network,
-    ServerCrash
-} from 'lucide-react';
-import { useMemo } from 'react';
+    LoadbalancerV2ConsumeGlobalEfficiency,
+    LoadbalancerV2ConsumeInfoInstances,
+    LoadbalancerV2ConsumeInfoInstancesHistory
+} from '@/interfaces/vista-consumos/elbV2ConsumeViewInterfaces';
 
 interface ElbV2ConsumeCardsComponentProps {
-    data: LoadbalancerV2CardsSummary[]
+    summary: {
+        total_loadbalancersv2: number;
+        loadbalancersv2_idle: number;
+        loadbalancersv2_infrautilizadas: number;
+    };
+    instancias: LoadbalancerV2ConsumeInfoInstances[];
+    efficiency: LoadbalancerV2ConsumeGlobalEfficiency;
+    isLoading: boolean;
 }
 
-type CardVariant = 'default' | 'destructive' | 'warning' | 'info' | 'success';
-
-interface StatCardProps {
+const StatCard = ({
+    title,
+    value,
+    unit,
+    icon: Icon,
+    description,
+    colorClass = "blue",
+    warning = false,
+    subtitle,
+    large = false
+}: {
     title: string;
     value: string | number;
-    description: string;
+    unit?: string;
     icon: LucideIcon;
-    variant?: CardVariant;
-    actionLabel?: string;
-    footer?: string;
-}
+    description?: string;
+    colorClass?: string;
+    warning?: boolean;
+    subtitle?: string;
+    large?: boolean;
+}) => {
 
-const getVariantStyles = (variant: CardVariant) => {
-    switch (variant) {
-        case 'destructive':
-            return {
-                border: 'border-l-red-500',
-                bgIcon: 'bg-red-100 dark:bg-red-900/30',
-                textIcon: 'text-red-600 dark:text-red-400',
-                badge: 'bg-red-100 text-red-700 border-red-200'
-            };
-        case 'warning':
-            return {
-                border: 'border-l-amber-500',
-                bgIcon: 'bg-amber-100 dark:bg-amber-900/30',
-                textIcon: 'text-amber-600 dark:text-amber-400',
-                badge: 'bg-amber-100 text-amber-700 border-amber-200'
-            };
-        case 'success':
-            return {
-                border: 'border-l-emerald-500',
-                bgIcon: 'bg-emerald-100 dark:bg-emerald-900/30',
-                textIcon: 'text-emerald-600 dark:text-emerald-400',
-                badge: 'bg-emerald-100 text-emerald-700 border-emerald-200'
-            };
-        case 'info':
-            return {
-                border: 'border-l-blue-500',
-                bgIcon: 'bg-blue-100 dark:bg-blue-900/30',
-                textIcon: 'text-blue-600 dark:text-blue-400',
-                badge: 'bg-blue-100 text-blue-700 border-blue-200'
-            };
-        default:
-            return {
-                border: 'border-l-slate-500',
-                bgIcon: 'bg-slate-100 dark:bg-slate-800',
-                textIcon: 'text-slate-600 dark:text-slate-400',
-                badge: 'bg-slate-100 text-slate-700 border-slate-200'
-            };
-    }
-};
+    const colorStyles = {
+        blue: { border: "border-l-blue-500", bgIcon: "bg-blue-100 text-blue-600" },
+        amber: { border: "border-l-amber-500", bgIcon: "bg-amber-100 text-amber-600" },
+        green: { border: "border-l-green-500", bgIcon: "bg-green-100 text-green-600" },
+        red: { border: "border-l-red-500", bgIcon: "bg-red-100 text-red-600" },
+        purple: { border: "border-l-purple-500", bgIcon: "bg-purple-100 text-purple-600" },
+        slate: { border: "border-l-slate-500", bgIcon: "bg-slate-100 text-slate-600" },
+    };
 
-const StatCard = ({ title, value, description, icon: Icon, variant = 'default', actionLabel, footer }: StatCardProps) => {
-    const styles = getVariantStyles(variant);
+    const style = colorStyles[colorClass as keyof typeof colorStyles] || colorStyles.blue;
 
     return (
-        <Card className={`border-l-4 shadow-sm hover:shadow-md transition-all duration-200 ${styles.border} flex flex-col justify-between h-full`}>
-            <CardContent className="p-5">
-                <div className="flex items-start justify-between mb-4">
-                    <div>
-                        <p className="text-sm font-medium text-muted-foreground mb-1 uppercase tracking-tight">{title}</p>
-                        <h4 className="text-2xl font-bold tracking-tight text-foreground">{value}</h4>
+        <Card className={`border-l-4 shadow-sm ${style.border}`}>
+            <CardContent className={large ? "p-8" : "p-6"}>
+                <div className="flex justify-between items-start mb-4">
+                    <div className="flex-1">
+                        <p className="text-sm font-medium text-muted-foreground capitalize">{title}</p>
+                        <h4 className={`${large ? 'text-5xl' : 'text-2xl'} font-bold tracking-tight`}>
+                            {value} {unit && <span className="text-sm font-normal text-slate-400">{unit}</span>}
+                        </h4>
+                        {subtitle && <p className="text-xs text-muted-foreground mt-1">{subtitle}</p>}
                     </div>
-                    <div className={`p-2.5 rounded-xl ${styles.bgIcon}`}>
-                        <Icon className={`w-5 h-5 ${styles.textIcon}`} />
+                    <div className={`p-3 rounded-xl ${style.bgIcon}`}>
+                        <Icon className={large ? "w-8 h-8" : "w-6 h-6"} />
                     </div>
                 </div>
-
-                <div className="space-y-3">
-                    <p className="text-xs text-muted-foreground leading-snug line-clamp-2">
-                        {description}
-                    </p>
-                    <div className="flex items-center justify-between">
-                        {actionLabel && (
-                            <Badge variant="outline" className={`text-[10px] font-semibold px-2 py-0.5 h-auto ${styles.badge}`}>
-                                {actionLabel}
-                            </Badge>
-                        )}
-                        {footer && (
-                            <span className="text-[10px] font-mono text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
-                                {footer}
-                            </span>
-                        )}
-                    </div>
+                <div className="space-y-2">
+                    {warning ? (
+                        <div className="flex items-start gap-2 text-xs text-amber-600 bg-amber-50 dark:bg-amber-900/20 p-2 rounded">
+                            <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
+                            <div>
+                                <p className="font-semibold">Sin detalle de facturación</p>
+                            </div>
+                        </div>
+                    ) : (
+                        <p className="text-xs text-muted-foreground">{description}</p>
+                    )}
                 </div>
             </CardContent>
         </Card>
-    );
+    )
+}
+
+const getEfficiencyColor = (score: string): string => {
+    if (score === "Infrautilizado") return "red";
+    if (score === "Bajo Uso") return "amber";
+    return "green";
 };
 
-export const ElbV2ConsumeCardsComponent = ({ data }: ElbV2ConsumeCardsComponentProps) => {
+export const ElbV2ConsumeCardsComponent = ({
+    summary,
+    instancias,
+    efficiency,
+    isLoading
+}: ElbV2ConsumeCardsComponentProps) => {
+    const allHistory = useMemo<LoadbalancerV2ConsumeInfoInstancesHistory[]>(() => {
+        if (!instancias?.length) return [];
+        return instancias.flatMap(inst => inst.history);
+    }, [instancias]);
 
-    const kpis = useMemo(() => {
-        const result = {
-            totalNewFlows: { val: 0, peak: 0 },
-            totalActiveFlow: { val: 0, peak: 0 },
-            totalProcessedBytes: { val: 0, peak: 0 },
-            totalTcpClientReset: { val: 0, peak: 0 },
-            totalConsumedLcu: { val: 0, peak: 0 },
-            totalActiveConnections: { val: 0, peak: 0 },
-            totalCode5xx: { val: 0, peak: 0 },
-            totalNewConnections: { val: 0, peak: 0 },
-            totalRequestCount: { val: 0, peak: 0 },
-            totalRuleEvaluations: { val: 0, peak: 0 },
+    const costoTotal = useMemo(() => {
+        return allHistory.reduce((sum, h) => sum + (h.costo_usd || 0), 0);
+    }, [allHistory]);
+
+    const metricas = useMemo(() => {
+        if (!allHistory.length) return {
+            active_connection_count: 0,
+            new_connection_count: 0,
+            processed_bytes: 0,
+            request_count: 0,
+            consumed_lcus: 0,
+            http_5xx_count: 0,
+            tcp_client_reset_count: 0,
+            rule_evaluations: 0,
         };
 
-        if (!data || data.length === 0) return result;
+        const total = allHistory.reduce((acc, h) => ({
+            active_connection_count: acc.active_connection_count + (h.avg_active_connection_count || 0),
+            new_connection_count: acc.new_connection_count + (h.avg_new_connection_count || 0),
+            processed_bytes: acc.processed_bytes + (h.avg_processed_bytes || 0),
+            request_count: acc.request_count + (h.avg_request_count || 0),
+            consumed_lcus: acc.consumed_lcus + (h.avg_consumed_lcus || 0),
+            http_5xx_count: acc.http_5xx_count + (h.avg_http_5xx_count || 0),
+            tcp_client_reset_count: acc.tcp_client_reset_count + (h.avg_tcp_client_reset_count || 0),
+            rule_evaluations: acc.rule_evaluations + (h.avg_rule_evaluations || 0),
+        }), {
+            active_connection_count: 0,
+            new_connection_count: 0,
+            processed_bytes: 0,
+            request_count: 0,
+            consumed_lcus: 0,
+            http_5xx_count: 0,
+            tcp_client_reset_count: 0,
+            rule_evaluations: 0,
+        });
 
-        const findMetric = (namePart: string) => {
-            return data.find(m => m.metric_name.toLowerCase().includes(namePart.toLowerCase()));
+        const count = allHistory.length;
+        return {
+            active_connection_count: total.active_connection_count / count,
+            new_connection_count: total.new_connection_count / count,
+            processed_bytes: total.processed_bytes / count,
+            request_count: total.request_count / count,
+            consumed_lcus: total.consumed_lcus / count,
+            http_5xx_count: total.http_5xx_count / count,
+            tcp_client_reset_count: total.tcp_client_reset_count / count,
+            rule_evaluations: total.rule_evaluations / count,
         };
+    }, [allHistory]);
 
-        const activeConn = findMetric('activeconnectioncount');
-        if (activeConn) result.totalActiveConnections = { val: activeConn.value, peak: activeConn.peak_value };
-
-        const activeFlow = findMetric('activeflowcount');
-        if (activeFlow) result.totalActiveFlow = { val: activeFlow.value, peak: activeFlow.peak_value };
-
-        const lcus = findMetric('consumedlcus');
-        if (lcus) result.totalConsumedLcu = { val: lcus.value, peak: lcus.peak_value };
-
-        const code5xx = findMetric('5xx_count');
-        if (code5xx) result.totalCode5xx = { val: code5xx.value, peak: code5xx.peak_value };
-
-        const newConn = findMetric('newconnectioncount');
-        if (newConn) result.totalNewConnections = { val: newConn.value, peak: newConn.peak_value };
-
-        const newFlow = findMetric('newflowcount');
-        if (newFlow) result.totalNewFlows = { val: newFlow.value, peak: newFlow.peak_value };
-
-        const bytes = findMetric('processedbytes');
-        if (bytes) result.totalProcessedBytes = { val: bytes.value, peak: bytes.peak_value };
-
-        const reqCount = findMetric('requestcount');
-        if (reqCount) result.totalRequestCount = { val: reqCount.value, peak: reqCount.peak_value };
-
-        const rules = findMetric('ruleevaluations');
-        if (rules) result.totalRuleEvaluations = { val: rules.value, peak: rules.peak_value };
-
-        const tcpReset = findMetric('tcp_client_reset');
-        if (tcpReset) result.totalTcpClientReset = { val: tcpReset.value, peak: tcpReset.peak_value };
-
-        return result;
-    }, [data]);
-
-    const formatNumber = (num: number) => new Intl.NumberFormat('en-US', { maximumFractionDigits: 5 }).format(num);
-    const formatDecimals = (num: number) => new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 }).format(num);
-
-    const formatBytes = (bytes: number) => {
-        if (bytes === 0) return '0 GB';
-        const mb = bytesToMB(bytes);
-        return `${new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 }).format(mb)} MB`;
-    };
-
-    const formatBytesPeak = (bytes: number) => {
-        if (bytes === 0) return '0 MB';
-        const mb = bytesToMB(bytes);
-        // if (mb < 1) return `${(mb * 1024).toFixed(0)} KB`;
-        return mb;
+    if (isLoading) {
+        return (
+            <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 animate-pulse">
+                    {[1, 2, 3, 4].map((i) => (
+                        <div key={i} className="h-40 bg-slate-100 dark:bg-slate-800 rounded-lg"></div>
+                    ))}
+                </div>
+                <div className="h-48 bg-slate-100 dark:bg-slate-800 rounded-lg animate-pulse"></div>
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 animate-pulse">
+                    {[1, 2, 3, 4].map((i) => (
+                        <div key={i} className="h-40 bg-slate-100 dark:bg-slate-800 rounded-lg"></div>
+                    ))}
+                </div>
+            </div>
+        );
     }
+
+    if (!summary) return null;
 
     return (
         <div className="space-y-6">
-            <div>
-                <h3 className="text-sm font-semibold text-muted-foreground mb-3 flex items-center gap-2">
-                    <Activity className="h-4 w-4" />
-                    Impacto y Salud (Totales)
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <StatCard
-                        title="Total LCUs"
-                        value={formatDecimals(kpis.totalConsumedLcu.val)}
-                        description="LCUs consumidas (Promedio global por hora/recurso)."
-                        footer={`Peak: ${formatDecimals(kpis.totalConsumedLcu.peak)}`}
-                        icon={Coins}
-                        variant="default"
-                    />
-                    <StatCard
-                        title="Volumen Total"
-                        value={formatBytes(kpis.totalProcessedBytes.val)}
-                        description="Promedio Datos procesados acumulados en el periodo."
-                        footer={`Peak: ${formatBytesPeak(kpis.totalProcessedBytes.peak)}`}
-                        icon={Database}
-                        variant="info"
-                    />
-                    <StatCard
-                        title="Total Errores 5xx"
-                        value={formatNumber(kpis.totalCode5xx.val)}
-                        description="Promedio Errores backend."
-                        footer={`Peak: ${formatNumber(kpis.totalCode5xx.peak)}`}
-                        icon={AlertTriangle}
-                        variant={kpis.totalCode5xx.val > 0 ? 'destructive' : 'success'}
-                        actionLabel={kpis.totalCode5xx.val > 0 ? "Incidentes" : "Estable"}
-                    />
-                </div>
+            {efficiency && (
+                <StatCard
+                    title="Eficiencia Global"
+                    value={`${efficiency.global_efficiency}`}
+                    description={`Promedio ponderado de eficiencia basado en LCUs consumidos con ${efficiency.metrics_detail[0]?.samples ?? 0} muestras.`}
+                    icon={Zap}
+                    colorClass={getEfficiencyColor(efficiency.global_efficiency)}
+                    large
+                />
+            )}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <StatCard
+                    title="Total Load Balancers"
+                    value={summary.total_loadbalancersv2}
+                    unit="Load Balancers"
+                    description="Total de Load Balancers v2."
+                    icon={Workflow}
+                    colorClass="blue"
+                />
+                <StatCard
+                    title="Load Balancers Idle"
+                    value={summary.loadbalancersv2_idle}
+                    unit="sin uso"
+                    description="Load Balancers sin actividad."
+                    icon={Activity}
+                    colorClass="red"
+                />
+                <StatCard
+                    title="Infrautilizadas"
+                    value={summary.loadbalancersv2_infrautilizadas}
+                    unit="recursos"
+                    description="Con sobre-provisionamiento de recursos."
+                    icon={TrendingDown}
+                    colorClass="amber"
+                />
+                <StatCard
+                    title="Costo Total"
+                    value={`$ ${formatGeneric(costoTotal)}`}
+                    unit="USD"
+                    description="Costo total de todos los Load Balancers en el período."
+                    icon={DollarSign}
+                    colorClass="green"
+                />
             </div>
-            <div>
-                <h3 className="text-sm font-semibold text-muted-foreground mb-3 flex items-center gap-2">
-                    <Network className="h-4 w-4" />
-                    Carga de Tráfico (Acumulado)
-                </h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <StatCard
-                        title="Total Requests (ALB)"
-                        value={formatNumber(kpis.totalRequestCount.val)}
-                        description="Promedio Peticiones HTTP/HTTPS totales."
-                        footer={`Peak: ${formatNumber(kpis.totalRequestCount.peak)}`}
-                        icon={Globe}
-                    />
-                    <StatCard
-                        title="Conexiones Activas"
-                        value={formatNumber(kpis.totalActiveConnections.val)}
-                        description="Promedio de concurrencia."
-                        footer={`Peak: ${formatNumber(kpis.totalActiveConnections.peak)}`}
-                        icon={ArrowRightLeft}
-                    />
-                    <StatCard
-                        title="Nuevos Flujos"
-                        value={formatNumber(kpis.totalNewFlows.val)}
-                        description="Promedio Flujos iniciados."
-                        footer={`Peak: ${kpis.totalNewFlows.peak}`}
-                        icon={BarChart3}
-                    />
-                    <StatCard
-                        title="Flujos Activos"
-                        value={formatNumber(kpis.totalActiveFlow.val)}
-                        description="Promedio Flujos Activos."
-                        footer={`Peak: ${formatNumber(kpis.totalActiveFlow.peak)}`}
-                        icon={BarChart3}
-                    />
-                    <StatCard
-                        title="Resets TCP"
-                        value={formatNumber(kpis.totalTcpClientReset.val)}
-                        description="Promedio Reinicios de conexión total."
-                        footer={`Peak: ${formatNumber(kpis.totalTcpClientReset.peak)}`}
-                        icon={ServerCrash}
-                        variant={kpis.totalTcpClientReset.val > 100 ? 'warning' : 'default'}
-                    />
-                </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <StatCard
+                    title="Promedio Conexiones Activas"
+                    value={formatGeneric(metricas.active_connection_count)}
+                    unit="Conexiones"
+                    description="Conexiones activas promedio en el período."
+                    icon={Plug}
+                    colorClass="blue"
+                />
+                <StatCard
+                    title="Promedio Nuevas Conexiones"
+                    value={formatGeneric(metricas.new_connection_count)}
+                    unit="Conexiones"
+                    description="Nuevas conexiones promedio en el período."
+                    icon={RefreshCw}
+                    colorClass="blue"
+                />
+                <StatCard
+                    title="Promedio Datos Procesados"
+                    value={formatBytes(metricas.processed_bytes)}
+                    unit=""
+                    description="Flujo promedio de datos procesados por los Load Balancers."
+                    icon={ArrowUpDown}
+                    colorClass="purple"
+                />
+                <StatCard
+                    title="Promedio LCUs Consumidos"
+                    value={formatGeneric(metricas.consumed_lcus)}
+                    unit="LCUs"
+                    description="Unidades de capacidad consumidas promedio en el período."
+                    icon={Gauge}
+                    colorClass="green"
+                />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <StatCard
+                    title="Promedio Requests"
+                    value={formatGeneric(metricas.request_count)}
+                    unit="Requests"
+                    description="Cantidad promedio de requests procesados en el período."
+                    icon={Globe}
+                    colorClass="blue"
+                />
+                <StatCard
+                    title="Promedio Errores HTTP 5XX"
+                    value={formatGeneric(metricas.http_5xx_count)}
+                    unit="Errores"
+                    description="Errores 5XX promedio generados por los targets."
+                    icon={X}
+                    colorClass="red"
+                />
+                <StatCard
+                    title="Promedio TCP Client Resets"
+                    value={formatGeneric(metricas.tcp_client_reset_count)}
+                    unit="Resets"
+                    description="Resets TCP iniciados por clientes promedio en el período."
+                    icon={RotateCcw}
+                    colorClass="amber"
+                />
+                <StatCard
+                    title="Promedio Rule Evaluations"
+                    value={formatGeneric(metricas.rule_evaluations)}
+                    unit="Evaluaciones"
+                    description="Evaluaciones de reglas promedio en el período (ALB)."
+                    icon={FileText}
+                    colorClass="slate"
+                />
             </div>
         </div>
     );
-}
+};

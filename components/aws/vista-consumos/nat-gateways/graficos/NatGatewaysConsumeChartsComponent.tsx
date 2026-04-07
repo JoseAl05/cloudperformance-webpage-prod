@@ -16,7 +16,7 @@ import { formatBytes, formatGeneric } from '@/lib/bytesToMbs';
 
 
 interface SingleMetricChartProps {
-    data: ConsumeViewEc2Metrics[];
+    data: NatGatewayConsumeMetrics[];
     title: string;
 }
 

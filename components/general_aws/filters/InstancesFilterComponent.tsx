@@ -83,6 +83,9 @@ export const InstancesFilterComponent = ({
         case 'nat_gateway':
             url = (selectedKey && selectedValue) ? `/api/aws/bridge/nat_gateways/all_nat_gateways?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}` : null;
             break;
+        case 'loadbalancerv2':
+            url = region ? `/api/aws/bridge/loadbalancersv2/all_load_balancersv2?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}` : null;
+            break;
         case "infraUsed":
             url = region ? `/api/aws/bridge/ec2/all_unused_ec2_instances?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}` : null;
             break;
@@ -94,12 +97,23 @@ export const InstancesFilterComponent = ({
     const hasTag = selectedKey && selectedKey !== 'allKeys';
     
     const tagsBody = hasTag ? { Key: selectedKey, Value: selectedValue || 'allValues' } : null;
+    let apiMethod: (url: string, tags?: { Key: string; Value: string } | null) => Promise<unknown>;
     
-    const apiMethod = service === "infraUsed" ? fetcherGet : fetcherPost;
+    switch (service) {
+        case 'infraused':
+        case 'loadbalancerv2':
+            apiMethod = fetcherGet;
+            break;
+        default:
+            apiMethod = fetcherPost;
+            break;
+    }
+    // const apiMethod = service === "infraUsed" || service === "loadbalancerv2" ? fetcherGet : fetcherPost;
     const { data, error, isLoading } = useSWR<(string | { resource_id: string; resource_name: string; cpu_avg: number })[]>(
         url ? [url, tagsBody] : null,
-        ([u, t]) => fetcherPost(u, t)
+        ([u, t]) => apiMethod(u, t)
     );
+    console.log(data);
 
     useEffect(() => {
         if (!isLoading && !error) {
@@ -113,31 +127,38 @@ export const InstancesFilterComponent = ({
     if (isLoading) return <LoaderComponent size='small' />
     if (error) return <div>Error al cargar datos</div>
 
-    const list: string[] = Array.isArray(data)
+    const list: { id: string; name: string }[] = Array.isArray(data)
         ? data.map((item) =>
-            typeof item === 'string' ? item : item.resource_id
+            typeof item === 'string'
+                ? { id: item, name: item }
+                : { id: item.resource_id, name: item.resource_name || item.resource_id }
         )
         : [];
     const noInstances = list.length === 0
 
     const selectedInstancesArray = instance ? instance.split(',').filter(Boolean) : [];
 
+    const getDisplayName = (id: string) => {
+        const found = list.find((item) => item.id === id);
+        return found ? found.name : id;
+    };
+
 
     const getDisplayText = () => {
         if (noInstances) return 'Sin instancias en la región/criterios seleccionados';
         if (!instance) return 'Seleccione una instancia';
         if (!isInstanceMultiSelect && instance === 'all') return 'Seleccione una instancia';
-        const allSelected = list.length > 0 && list.every((i) => selectedInstancesArray.includes(i));
+        const allSelected = list.length > 0 && list.every((i) => selectedInstancesArray.includes(i.id));
         if (isInstanceMultiSelect && allSelected) return 'Todas las Instancias';
-        if (selectedInstancesArray.length === 1) return selectedInstancesArray[0];
+        if (selectedInstancesArray.length === 1) return getDisplayName(selectedInstancesArray[0]);
         return `${selectedInstancesArray.length} instancias seleccionadas`;
     };
 
     const handleInstanceToggle = (instanceValue: string) => {
         let instances = selectedInstancesArray.slice();
         if (instanceValue === 'all') {
-            const allSelected = list.every((i) => selectedInstancesArray.includes(i));
-            instances = allSelected ? [] : [...list];
+            const allSelected = list.every((i) => selectedInstancesArray.includes(i.id));
+            instances = allSelected ? [] : list.map((i) => i.id);
         } else {
             if (instances.includes(instanceValue)) instances = instances.filter((i) => i !== instanceValue);
             else instances.push(instanceValue);
@@ -169,10 +190,10 @@ export const InstancesFilterComponent = ({
                         <CommandEmpty>{noInstances ? 'No hay instancias disponibles.' : 'No se encontró instancia.'}</CommandEmpty>
                         {!noInstances && (
                             <CommandGroup className='max-h-[250px] overflow-y-auto'>
-                                {list.map((i: string) => (
-                                    <CommandItem key={i} value={i} onSelect={() => { setInstance(i); setOpen(false); }}>
-                                        <Check className={cn('mr-2 h-4 w-4', instance === i ? 'opacity-100' : 'opacity-0')} />
-                                        {i}
+                                {list.map((item,index:number) => (
+                                    <CommandItem key={`${item.id}-${index}`} value={item.name} onSelect={() => { setInstance(item.id); setOpen(false); }}>
+                                        <Check className={cn('mr-2 h-4 w-4', instance === item.id ? 'opacity-100' : 'opacity-0')} />
+                                        {item.name}
                                     </CommandItem>
                                 ))}
                             </CommandGroup>
@@ -204,13 +225,13 @@ export const InstancesFilterComponent = ({
                     {!noInstances && (
                         <CommandGroup className='max-h-[200px] overflow-y-auto'>
                             <CommandItem value='all' onSelect={() => handleInstanceToggle('all')}>
-                                <Check className={cn('mr-2 h-4 w-4', list.every((i) => selectedInstancesArray.includes(i)) ? 'opacity-100' : 'opacity-0')} />
+                                <Check className={cn('mr-2 h-4 w-4', list.every((i) => selectedInstancesArray.includes(i.id)) ? 'opacity-100' : 'opacity-0')} />
                                 Todas las Instancias
                             </CommandItem>
-                            {list.map((i: string) => (
-                                <CommandItem key={i} value={i} onSelect={() => handleInstanceToggle(i)}>
-                                    <Check className={cn('mr-2 h-4 w-4', selectedInstancesArray.includes(i) ? 'opacity-100' : 'opacity-0')} />
-                                    {i}
+                            {list.map((item,index:number) => (
+                                <CommandItem key={`${item.id}-${index}`} value={item.name} onSelect={() => handleInstanceToggle(item.id)}>
+                                    <Check className={cn('mr-2 h-4 w-4', selectedInstancesArray.includes(item.id) ? 'opacity-100' : 'opacity-0')} />
+                                    {item.name}
                                 </CommandItem>
                             ))}
                         </CommandGroup>
