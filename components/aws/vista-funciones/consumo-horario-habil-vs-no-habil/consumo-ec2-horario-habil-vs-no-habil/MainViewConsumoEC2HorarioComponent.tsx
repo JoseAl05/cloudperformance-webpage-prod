@@ -35,6 +35,7 @@ export const ViewConsumoEC2Horario = () => {
         tagsFilter
         tagColumnName='Tags'
         collection='aws_ec2_instances'
+        localService='Amazon Elastic Compute Cloud - Compute'
       />
     </div>
   )

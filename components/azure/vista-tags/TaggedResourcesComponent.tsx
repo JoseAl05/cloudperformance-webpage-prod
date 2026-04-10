@@ -27,7 +27,7 @@ import { TagsDataTableAzure } from './table/TagsDataTable'
 export interface ResourceItemAzure {
   resource: string
   id_resource: string
-  sub_service: string
+  sub_services: string[]
   subscription_guid: string    
   subscription_name: string  
   region: string 

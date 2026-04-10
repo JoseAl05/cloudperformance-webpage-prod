@@ -34,6 +34,7 @@ export const MainViewBlobVsStorageComponent = () => {
                     tagsColumnName='tags'
                     tagsRegionField='location'
                     tagsSubscriptionField='subscription_id'
+                    tagsLocalService='Storage'
                 />
             </div>
         </div>

@@ -36,11 +36,10 @@ export const MainViewTendenciaPagoPorUsoComponent = () => {
                     tagsColumnName='tags'
                     tagsRegionField = 'resource_location'
                     tagsSubscriptionField = 'subscription_name'
+                    tagsLocalService='Virtual Machines'
                     resourceGroupFilter
                     resourceGroupCollection='azure_consumption_billing_account_modern_usage_details'
                     resourceGroupSubscriptionField='subscription_guid'
-                    //metricsFilter
-                    //metricsCollection='custom_db_metrics_logs'
                     instancesFilter
                 />
             </div>

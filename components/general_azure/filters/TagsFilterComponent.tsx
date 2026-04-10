@@ -21,6 +21,7 @@ interface TagFilterComponentProps {
     subscriptionField?: string,
     selectedKey?: string | null,
     selectedValue?: string | null,
+    localService?: string | null,
     setSelectedKey: Dispatch<SetStateAction<string | null>>,
     setSelectedValue: Dispatch<SetStateAction<string | null>>,
     setTagsData?: Dispatch<SetStateAction<unknown[]>>,
@@ -51,6 +52,7 @@ export const TagsFilterComponent = ({
     subscriptionField = 'subscription_id',
     selectedKey,
     selectedValue,
+    localService,
     setSelectedKey,
     setSelectedValue,
     setTagsData,
@@ -67,7 +69,7 @@ export const TagsFilterComponent = ({
 
     const { data, error, isLoading } = useSWR(
         shouldFetch
-            ? `/api/azure/bridge/azure/get-all-tags?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&region_field=${regionField}&subscription=${subscription}&subscription_field=${subscriptionField}&collection=${collection}&tag_column_name=${tagColumnName}`
+            ? `/api/azure/bridge/azure/get-all-tags?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&region_field=${regionField}&subscription=${subscription}&subscription_field=${subscriptionField}&collection=${collection}&tag_column_name=${tagColumnName}&local_service=${localService}`
             : null,
         fetcher
     )

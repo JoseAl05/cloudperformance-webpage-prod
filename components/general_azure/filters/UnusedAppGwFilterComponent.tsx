@@ -17,6 +17,8 @@ interface UnusedAppGwFilterComponentProps {
     resourceGroup: string;
     setUnusedAppGw: Dispatch<SetStateAction<string>>;
     isUnusedAppGFilterMultiselect: boolean;
+    selectedTagKey?: string | null;
+    selectedTagValue?: string | null;
 }
 
 type ApiUnusedAppGw =
@@ -35,13 +37,17 @@ export const UnusedAppGwFilterComponent = ({
     unusedAppGw,
     resourceGroup,
     setUnusedAppGw,
-    isUnusedAppGFilterMultiselect
+    isUnusedAppGFilterMultiselect,
+    selectedTagKey,
+    selectedTagValue
 }: UnusedAppGwFilterComponentProps) => {
     const [open, setOpen] = useState(false);
     const startDateFormatted = startDate ? startDate.toISOString().replace('Z', '').slice(0, -4) : '';
     const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : '';
+    const tagKeyParam = selectedTagKey || 'allKeys';
+    const tagValueParam = selectedTagValue || 'allValues';
 
-    const url = `/api/azure/bridge/azure/apps_gateway/all_unused_application_gateways?date_from=${startDateFormatted}&date_to=${endDateFormatted}&subscription_id=${subscription}&location=${region}&resource_groups=${resourceGroup}`
+    const url = `/api/azure/bridge/azure/apps_gateway/all_unused_application_gateways?date_from=${startDateFormatted}&date_to=${endDateFormatted}&subscription_id=${subscription}&location=${region}&resource_groups=${resourceGroup}&nombre_tag=${tagKeyParam}&valor_tag=${tagValueParam}`
     const { data, error, isLoading } = useSWR<ApiUnusedAppGw[]>(url, fetcher)
 
     const unusedAppsGw = useMemo(() => {

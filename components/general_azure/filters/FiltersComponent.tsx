@@ -68,6 +68,7 @@ interface FiltersComponentProps {
     tagsColumnName?: string;
     tagsRegionField?: string;
     tagsSubscriptionField?: string;
+    tagsLocalService?: string;
     isRegionMultiSelect?: boolean;
     metricsFilter?: boolean;
     metricsCollection?: string;
@@ -119,6 +120,7 @@ export const FiltersComponent = ({
     tagsColumnName = '',
     tagsRegionField = '',
     tagsSubscriptionField = '',
+    tagsLocalService = '',
     isRegionMultiSelect = false,
     metricsFilter = false,
     metricsCollection = '',
@@ -607,6 +609,7 @@ export const FiltersComponent = ({
                                     selectedValue={tempTagValue}
                                     setSelectedKey={setTempTagKey}
                                     setSelectedValue={setTempTagValue}
+                                    localService={tagsLocalService}
                                 />
                             </div>
                         )}
@@ -879,6 +882,8 @@ export const FiltersComponent = ({
                                     resourceGroup={tempResourceGroup}
                                     setUnusedAppGw={setTempUnusedAppGw}
                                     isUnusedAppGFilterMultiselect={isUnusedAppGFilterMultiselect}
+                                    selectedTagKey={tempTagKey}
+                                    selectedTagValue={tempTagValue}
                                 />
                             </div>
                         )}
@@ -897,6 +902,8 @@ export const FiltersComponent = ({
                                     resourceGroup={tempResourceGroup}
                                     setUnusedTm={setTempUnusedTm}
                                     isUnusedTmFilterMultiselect={isUnusedTmFilterMultiselect}
+                                    selectedTagKey={tempTagKey}
+                                    selectedTagValue={tempTagValue}
                                 />
                             </div>
                         )}
@@ -915,6 +922,8 @@ export const FiltersComponent = ({
                                     resourceGroup={tempResourceGroup}
                                     setTm={setTempTm}
                                     isTmFilterMultiselect={isTmFilterMultiselect}
+                                    selectedTagKey={tempTagKey}
+                                    selectedTagValue={tempTagValue}
                                 />
                             </div>
                         )}
@@ -933,6 +942,8 @@ export const FiltersComponent = ({
                                     setAppGw={setTempAppGw}
                                     resourceGroup={tempResourceGroup}
                                     isAppGFilterMultiselect={isAppGFilterMultiselect}
+                                    selectedTagKey={tempTagKey}
+                                    selectedTagValue={tempTagValue}
                                 />
                             </div>
                         )}

@@ -37,6 +37,7 @@ export const MainViewConsumoDbComponent = () => {
                     tagsColumnName='tags'
                     tagsRegionField='location'
                     tagsSubscriptionField='resource_id'
+                    tagsLocalService=''
                     resourceGroupFilter
                     resourceGroupCollection='custom_db_metrics_logs'
                     resourceGroupSubscriptionField='resource_id'
