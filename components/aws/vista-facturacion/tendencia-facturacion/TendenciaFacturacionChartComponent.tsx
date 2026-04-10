@@ -1,7 +1,7 @@
 'use client'
 import useSWR from 'swr';
 import { useState, useMemo } from 'react';
-import { TrendingUp, DollarSign, Calendar, Info, Tag } from 'lucide-react'; // Agregamos el icono Tag
+import { TrendingUp, DollarSign, Calendar, Info, Tag, LucideIcon } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { LoaderComponent } from '@/components/general_aws/LoaderComponent';
 import { TendenciaFacturacionLineChartComponent } from '@/components/aws/vista-facturacion/tendencia-facturacion/grafico/TendenciaFacturacionLineChartComponent';
@@ -104,7 +104,7 @@ export const TendenciaFacturacionChartComponent = ({ startDate, endDate, service
 
     const metrics = calculateMetrics(filteredData);
 
-    const DetailPopover = ({ title, items, icon: Icon }: { title: string, items: string[], icon: any }) => (
+    const DetailPopover = ({ title, items, icon: Icon }: { title: string, items: string[], icon: LucideIcon }) => (
         <Popover>
             <PopoverTrigger asChild>
                 <Button variant='ghost' className="ml-2 p-1 rounded-full cursor-pointer hover:bg-muted transition-colors text-muted-foreground hover:text-foreground focus:outline-none">
@@ -272,7 +272,6 @@ export const TendenciaFacturacionChartComponent = ({ startDate, endDate, service
                             <p className="font-medium">{metrics.servicesList.length}</p>
                         </div>
                         
-                        {/* Se agrega indicador de Tag si está activo */}
                         {selectedKey && selectedValue && (
                             <div className="col-span-2 md:col-span-4 mt-2 pt-4 border-t border-border">
                                 <span className="text-muted-foreground flex items-center gap-1 mb-1">
