@@ -17,6 +17,8 @@ interface UnusedTrafficManagerFilterProps {
     resourceGroup: string;
     setUnusedTm: Dispatch<SetStateAction<string>>;
     isUnusedTmFilterMultiselect: boolean;
+    selectedTagKey?: string | null;
+    selectedTagValue?: string | null;
 }
 
 type ApiUnusedTm =
@@ -35,13 +37,17 @@ export const UnusedTrafficManagerFilter = ({
     unusedTm,
     setUnusedTm,
     resourceGroup,
-    isUnusedTmFilterMultiselect
+    isUnusedTmFilterMultiselect,
+    selectedTagKey,
+    selectedTagValue
 }: UnusedTrafficManagerFilterProps) => {
     const [open, setOpen] = useState(false);
     const startDateFormatted = startDate ? startDate.toISOString().replace('Z', '').slice(0, -4) : '';
     const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : '';
+    const tagKeyParam = selectedTagKey || 'allKeys';
+    const tagValueParam = selectedTagValue || 'allValues';
 
-    const url = `/api/azure/bridge/azure/traffic_managers/all_unused_traffic_managers?date_from=${startDateFormatted}&date_to=${endDateFormatted}&subscription_id=${subscription}&location=${region}&resource_groups=${resourceGroup}`
+    const url = `/api/azure/bridge/azure/traffic_managers/all_unused_traffic_managers?date_from=${startDateFormatted}&date_to=${endDateFormatted}&subscription_id=${subscription}&location=${region}&resource_groups=${resourceGroup}&nombre_tag=${tagKeyParam}&valor_tag=${tagValueParam}`
     const { data, error, isLoading } = useSWR<ApiUnusedTm[]>(url, fetcher)
 
     const unusedTms = useMemo(() => {

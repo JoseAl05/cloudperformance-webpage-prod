@@ -31,6 +31,9 @@ export const MainViewTendenciaFacturacionComponent = () => {
                     regionFilter
                     isRegionMultiSelect
                     serviceFilter
+                    tagsFilter
+                    collection='aws_resources'
+                    tagColumnName='Tags'
                 />
             </div>
         </div>

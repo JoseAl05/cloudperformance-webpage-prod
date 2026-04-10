@@ -35,11 +35,12 @@ export const MainViewUnusedTrafficManagerComponent = () => {
                     tagsColumnName='tags'
                     tagsRegionField='location'
                     tagsSubscriptionField='subscription_id'
+                    tagsLocalService='Traffic Manager'
                     resourceGroupFilter
                     resourceGroupCollection='azure_traffic_managers'
                     resourceGroupSubscriptionField='subscription_id'
                 />
-            </div>
+            </div> 
         </div>
     )
 }

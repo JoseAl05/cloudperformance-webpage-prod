@@ -35,6 +35,7 @@ export const MainViewConsumoVmComponent = () => {
                     tagsCollection='custom_vm_metrics_logs'
                     tagsColumnName='tags'
                     tagsRegionField = 'location'
+                    tagsLocalService='Virtual Machines'
                     tagsSubscriptionField = 'vm_id'
                     resourceGroupFilter
                     resourceGroupCollection='custom_vm_metrics_logs'

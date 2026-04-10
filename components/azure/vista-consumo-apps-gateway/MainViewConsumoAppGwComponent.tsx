@@ -37,6 +37,7 @@ export const MainViewConsumoAppGwComponent = () => {
                     tagsColumnName='tags'
                     tagsRegionField='location'
                     tagsSubscriptionField='subscription_id'
+                    tagsLocalService='Application Gateway'
                     resourceGroupFilter
                     resourceGroupCollection='azure_app_gateways'
                     resourceGroupSubscriptionField='subscription_id'

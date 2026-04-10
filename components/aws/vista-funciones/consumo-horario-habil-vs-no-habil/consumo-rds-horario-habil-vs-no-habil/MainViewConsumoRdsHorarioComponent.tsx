@@ -59,6 +59,7 @@ export const MainViewConsumoRdsHorario = ({ dbType }: { dbType: string }) => {
                 tagsFilter
                 tagColumnName='TagList'
                 collection={dbCollection}
+                localService='Amazon Relational Database Service'
             />
         </div>
     )

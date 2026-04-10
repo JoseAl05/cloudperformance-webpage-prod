@@ -1,7 +1,7 @@
 'use client'
 import useSWR from 'swr';
 import { useState, useMemo } from 'react';
-import { TrendingUp, DollarSign, Calendar, Info } from 'lucide-react'; // Agregamos Info
+import { TrendingUp, DollarSign, Calendar, Info, Tag, LucideIcon } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { LoaderComponent } from '@/components/general_aws/LoaderComponent';
 import { TendenciaFacturacionLineChartComponent } from '@/components/aws/vista-facturacion/tendencia-facturacion/grafico/TendenciaFacturacionLineChartComponent';
@@ -24,6 +24,8 @@ interface TendenciaFacturacionProps {
     endDate: Date;
     services?: string;
     region?: string;
+    selectedKey?: string,
+    selectedValue?: string,
 }
 
 interface FacturacionData {
@@ -39,13 +41,17 @@ const fetcher = (url: string) =>
     fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
         .then(r => r.json());
 
-export const TendenciaFacturacionChartComponent = ({ startDate, endDate, services, region }: TendenciaFacturacionProps) => {
+export const TendenciaFacturacionChartComponent = ({ startDate, endDate, services, region, selectedKey, selectedValue }: TendenciaFacturacionProps) => {
     const [topN, setTopN] = useState<string>("all");
 
     const startDateFormatted = startDate.toISOString().split('.')[0];
     const endDateFormatted = endDate.toISOString().split('.')[0];
 
-    const apiUrl = `/api/aws/bridge/facturacion/tendencia-facturacion?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&services=${services}`;
+    let apiUrl = `/api/aws/bridge/facturacion/tendencia-facturacion?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&service=${services}`;
+    
+    if (selectedKey && selectedValue) {
+        apiUrl += `&tag_key=${encodeURIComponent(selectedKey)}&tag_value=${encodeURIComponent(selectedValue)}`;
+    }
 
     const { data, error, isLoading } = useSWR<FacturacionData[]>(apiUrl, fetcher);
 
@@ -98,7 +104,7 @@ export const TendenciaFacturacionChartComponent = ({ startDate, endDate, service
 
     const metrics = calculateMetrics(filteredData);
 
-    const DetailPopover = ({ title, items, icon: Icon }: { title: string, items: string[], icon: unknown }) => (
+    const DetailPopover = ({ title, items, icon: Icon }: { title: string, items: string[], icon: LucideIcon }) => (
         <Popover>
             <PopoverTrigger asChild>
                 <Button variant='ghost' className="ml-2 p-1 rounded-full cursor-pointer hover:bg-muted transition-colors text-muted-foreground hover:text-foreground focus:outline-none">
@@ -188,7 +194,6 @@ export const TendenciaFacturacionChartComponent = ({ startDate, endDate, service
                                 <p className="text-sm font-medium text-muted-foreground">Servicios</p>
                                 <div className="flex items-center">
                                     <p className="text-2xl font-bold text-blue-600">{metrics.servicesList.length}</p>
-                                    {/* 3. Integración de Popover de Detalles */}
                                     <DetailPopover
                                         title="Servicios Mostrados"
                                         items={metrics.servicesList}
@@ -209,7 +214,6 @@ export const TendenciaFacturacionChartComponent = ({ startDate, endDate, service
                                 <p className="text-sm font-medium text-muted-foreground">Regiones</p>
                                 <div className="flex items-center">
                                     <p className="text-2xl font-bold text-purple-600">{metrics.regionsList.length}</p>
-                                    {/* 3. Integración de Popover de Detalles */}
                                     <DetailPopover
                                         title="Regiones Involucradas"
                                         items={metrics.regionsList}
@@ -267,6 +271,19 @@ export const TendenciaFacturacionChartComponent = ({ startDate, endDate, service
                             <span className="text-muted-foreground">Servicios:</span>
                             <p className="font-medium">{metrics.servicesList.length}</p>
                         </div>
+                        
+                        {selectedKey && selectedValue && (
+                            <div className="col-span-2 md:col-span-4 mt-2 pt-4 border-t border-border">
+                                <span className="text-muted-foreground flex items-center gap-1 mb-1">
+                                    <Tag className="h-3 w-3" /> Filtro por Etiqueta (Tag):
+                                </span>
+                                <div className="inline-flex items-center gap-2 bg-secondary text-secondary-foreground px-3 py-1.5 rounded-md font-medium text-xs">
+                                    <span className="opacity-70">{selectedKey}</span>
+                                    <span className="font-bold">=</span>
+                                    <span>{selectedValue}</span>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </CardContent>
             </Card>

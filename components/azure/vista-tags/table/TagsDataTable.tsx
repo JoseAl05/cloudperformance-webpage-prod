@@ -10,7 +10,7 @@ import { ServiceGroupAzure } from '@/components/azure/vista-tags/TaggedResources
 
 export interface FlattenedResource {
     service: string;
-    sub_service: string;
+    sub_services: string[];
     id_resource: string;
     resourceId: string;
     subscription_guid: string;
@@ -41,7 +41,7 @@ export const TagsDataTableAzure = ({ data }: TagsDataTableProps) => {
                 const hasTags = res.tags !== "SIN TAGS";
                 flat.push({
                     service: grupo.service,
-                    sub_service: res.sub_service || "n/a",
+                    sub_services: res.sub_services || [],
                     id_resource: res.id_resource, 
                     resourceId: res.resource,
                     subscription_guid: res.subscription_guid || "n/a",
@@ -83,7 +83,7 @@ export const TagsDataTableAzure = ({ data }: TagsDataTableProps) => {
             id: selectedResource.id_resource,
             provider: 'azure',
             service: selectedResource.service,
-            sub_service: selectedResource.sub_service,
+            sub_service: selectedResource.sub_services?.sort()[0] || "general",
             subscription_guid: selectedResource.subscription_guid,
             subscription_name: selectedResource.subscription_name,
             region: selectedResource.region || 'global',
@@ -115,8 +115,20 @@ export const TagsDataTableAzure = ({ data }: TagsDataTableProps) => {
             header: "Servicio Azure",
             cell: ({ row }) => (
                 <div className="flex flex-col">
-                    <span className="text-[11px] font-medium text-gray-700">{row.original.service}</span>
-                    <span className="text-[9px] text-gray-400 font-mono">{row.original.sub_service}</span>
+                    <span className="text-[11px] font-medium text-gray-700">
+                        {row.original.service}
+                    </span>
+
+                    <div className="flex flex-wrap gap-1 mt-1">
+                        {row.original.sub_services.map((sub, i) => (
+                            <span
+                                key={i}
+                                className="text-[9px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-600 border border-gray-200"
+                            >
+                                {sub}
+                            </span>
+                        ))}
+                    </div>
                 </div>
             )
         },

@@ -17,6 +17,8 @@ interface TrafficManagerFilterComponentProps {
     resourceGroup: string;
     setTm: Dispatch<SetStateAction<string>>;
     isTmFilterMultiselect: boolean;
+    selectedTagKey?: string | null;
+    selectedTagValue?: string | null;
 }
 
 type ApiTm =
@@ -35,13 +37,17 @@ export const TrafficManagerFilterComponent = ({
     tm,
     setTm,
     resourceGroup,
-    isTmFilterMultiselect
+    isTmFilterMultiselect,
+    selectedTagKey,
+    selectedTagValue
 }: TrafficManagerFilterComponentProps) => {
     const [open, setOpen] = useState(false);
     const startDateFormatted = startDate ? startDate.toISOString().replace('Z', '').slice(0, -4) : '';
     const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : '';
+    const tagKeyParam = selectedTagKey || 'allKeys';
+    const tagValueParam = selectedTagValue || 'allValues';
 
-    const url = `/api/azure/bridge/azure/traffic_managers/all_traffic_managers?date_from=${startDateFormatted}&date_to=${endDateFormatted}&subscription_id=${subscription}&location=${region}&resource_groups=${resourceGroup}`
+    const url = `/api/azure/bridge/azure/traffic_managers/all_traffic_managers?date_from=${startDateFormatted}&date_to=${endDateFormatted}&subscription_id=${subscription}&location=${region}&resource_groups=${resourceGroup}&nombre_tag=${tagKeyParam}&valor_tag=${tagValueParam}`
     const { data, error, isLoading } = useSWR<ApiTm[]>(url, fetcher)
 
     const tms = useMemo(() => {

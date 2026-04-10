@@ -17,6 +17,8 @@ interface AppGwFilterComponentProps {
     setAppGw: Dispatch<SetStateAction<string>>;
     isAppGFilterMultiselect: boolean;
     resourceGroup:string;
+    selectedTagKey?: string | null;
+    selectedTagValue?: string | null;
 }
 
 type ApiAppGw =
@@ -35,12 +37,16 @@ export const AppGwFilterComponent = ({
     appGw,
     setAppGw,
     resourceGroup,
-    isAppGFilterMultiselect
+    isAppGFilterMultiselect,
+    selectedTagKey,
+    selectedTagValue
 }: AppGwFilterComponentProps) => {
     const [open, setOpen] = useState(false);
     const startDateFormatted = startDate ? startDate.toISOString().replace('Z', '').slice(0, -4) : '';
     const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : '';
-    const url = `/api/azure/bridge/azure/apps_gateway/all_application_gateways?date_from=${startDateFormatted}&date_to=${endDateFormatted}&subscription_id=${subscription}&location=${region}&resource_groups=${resourceGroup}`
+    const tagKeyParam = selectedTagKey || 'allKeys';
+    const tagValueParam = selectedTagValue || 'allValues';
+    const url = `/api/azure/bridge/azure/apps_gateway/all_application_gateways?date_from=${startDateFormatted}&date_to=${endDateFormatted}&subscription_id=${subscription}&location=${region}&resource_groups=${resourceGroup}&nombre_tag=${tagKeyParam}&valor_tag=${tagValueParam}`
     const { data, error, isLoading } = useSWR<ApiAppGw[]>(url,fetcher)
 
     const appsGw = useMemo(() => {
