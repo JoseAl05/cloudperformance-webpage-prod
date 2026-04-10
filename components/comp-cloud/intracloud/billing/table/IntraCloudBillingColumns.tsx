@@ -188,7 +188,7 @@ export const getIntraCloudBillingColumns = (
                 const cost = row.original[tenantId] as number | undefined;
                 return <CostCell cost={cost} />;
             },
-            size: 140,
+            size: 200,
             desc: true,
             isDefaultSort: index === 0
         });
@@ -200,7 +200,7 @@ export const getIntraCloudBillingColumns = (
         cell: ({ row }) => (
             <ComparisonCell row={row.original} tenantIds={tenantIds} />
         ),
-        size: 240
+        size: 600
     });
 
     return columns;

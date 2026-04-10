@@ -108,13 +108,18 @@ import { createChartOption, deepMerge, makeBaseOptions, useECharts } from '@/lib
 import { useTheme } from 'next-themes';
 import { formatMetric } from '@/lib/metricUtils';
 import { ReqPayload } from '@/components/comp-cloud/intracloud/IntraCloudConfigComponent';
-import { IntraCloudBilling } from '@/interfaces/vista-intracloud/billing/intraCloudBillingInterfaces';
+import { IntraCloudBilling, IntraCloudMonthlyBilling } from '@/interfaces/vista-intracloud/billing/intraCloudBillingInterfaces';
 
 interface IntraCloudBillingCostUsdChartComponentProps {
-  data: IntraCloudBilling[];
+  data: IntraCloudMonthlyBilling[];
   payload: ReqPayload;
 }
 
+const MONTH_ORDER: Record<string, number> = {
+  Enero: 1, Febrero: 2, Marzo: 3, Abril: 4,
+  Mayo: 5, Junio: 6, Julio: 7, Agosto: 8,
+  Septiembre: 9, Octubre: 10, Noviembre: 11, Diciembre: 12,
+};
 
 export const IntraCloudBillingCostUsdChartComponent = ({ data, payload }: IntraCloudBillingCostUsdChartComponentProps) => {
   const { theme, resolvedTheme } = useTheme();
@@ -126,22 +131,44 @@ export const IntraCloudBillingCostUsdChartComponent = ({ data, payload }: IntraC
   const chartSeriesData = useMemo(() => {
     if (!data || !Array.isArray(data)) return [];
 
+    const monthSet = new Set<{ month: string; cost_in_usd: number }>()
+
+    // return data.map((tenant, index) => {
+    //   tenant.billing_data.forEach((bd) => {
+    //     monthSet.add({
+    //       month: bd.month,
+    //       cost_in_usd: bd.cost_in_usd
+    //     })
+    //   })
+    //   const sortedData = Array.from(monthSet).sort((a, b) => {
+    //     return a.month.localeCompare(b.month);
+    //   })
+
+    //   const chartData: [string, string][] = sortedData.map(item => [
+    //     item.month,
+    //     formatMetric(item.cost_in_usd)
+    //   ]);
+
+    //   const name = `Tenant ${index + 1}`;
+
+    //   return {
+    //     name,
+    //     data: chartData
+    //   };
+    // });
     return data.map((tenant, index) => {
-      const sortedData = [...tenant.billing_data].sort((a, b) =>
-        new Date(a.start_date).getTime() - new Date(b.start_date).getTime()
+      const sortedData = [...tenant.billing_data].sort(
+        (a, b) => (MONTH_ORDER[a.month] ?? 0) - (MONTH_ORDER[b.month] ?? 0)
       );
 
       const chartData: [string, string][] = sortedData.map(item => [
-        item.start_date,
-        formatMetric(item.cost_in_usd_sum)
+        item.month,
+        formatMetric(item.cost_in_usd)
       ]);
 
       const name = `Tenant ${index + 1}`;
 
-      return {
-        name,
-        data: chartData
-      };
+      return { name, data: chartData };
     });
   }, [data]);
 
@@ -165,7 +192,7 @@ export const IntraCloudBillingCostUsdChartComponent = ({ data, payload }: IntraC
 
     const lines = createChartOption({
       kind: 'line',
-      xAxisType: 'time',
+      xAxisType: 'category',
       legend: true,
       tooltip: true,
       series: seriesConfig as unknown,

@@ -88,6 +88,7 @@
 import { IntraCloudBillingCostUsdChartComponent } from '@/components/comp-cloud/intracloud/billing/grafico/IntraCloudBillingCostUsdChartComponent';
 import { IntraCloudBillingCardsComponent } from '@/components/comp-cloud/intracloud/billing/info/IntraCloudBillingCardsComponent';
 import { IntraCloudBillingTable } from '@/components/comp-cloud/intracloud/billing/table/IntraCloudBillingTable';
+import { IntraCloudMonthlyBillingTable } from '@/components/comp-cloud/intracloud/billing/table/IntraCloudMontlhyBillingTable';
 import { ReqPayload } from '@/components/comp-cloud/intracloud/IntraCloudConfigComponent';
 import { DynamicFilterProps } from '@/components/general_comp_cloud/filters/FilterComponent';
 import { IntraCloudBilling } from '@/interfaces/vista-intracloud/billing/intraCloudBillingInterfaces';
@@ -141,6 +142,7 @@ export const IntraCloudBillingComponent = ({
     const startDateFormatted = startDate.toISOString().replace('Z', '').slice(0, -4);
     const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : '';
 
+
     const filtersPayload: Record<string, unknown> = {};
 
     if (payload.tenants) {
@@ -167,8 +169,8 @@ export const IntraCloudBillingComponent = ({
 
     const urlAcumulatedBilling =
         payload.cloud_provider === 'Azure'
-        ? `/api/comparison-cloud/bridge/intracloud/azure/billing/get_tenants_billing?date_from=${startDateFormatted}&date_to=${endDateFormatted}`
-        : `/api/comparison-cloud/bridge/intracloud/aws/billing/get_tenants_billing?date_from=${startDateFormatted}&date_to=${endDateFormatted}`
+            ? `/api/comparison-cloud/bridge/intracloud/azure/billing/get_tenants_billing?date_from=${startDateFormatted}&date_to=${endDateFormatted}`
+            : `/api/comparison-cloud/bridge/intracloud/aws/billing/get_tenants_billing?date_from=${startDateFormatted}&date_to=${endDateFormatted}`
 
     const acumulatedBilling = useSWR(
         [urlAcumulatedBilling, fullPayload],
@@ -180,8 +182,8 @@ export const IntraCloudBillingComponent = ({
     );
 
     const urlBillingByDimension = payload.cloud_provider === 'Azure'
-    ? `/api/comparison-cloud/bridge/intracloud/azure/billing/get_tenants_billing_by_dimension?date_from=${startDateFormatted}&date_to=${endDateFormatted}&dimension=${dimension}`
-    : `/api/comparison-cloud/bridge/intracloud/aws/billing/get_tenants_billing_by_dimension?date_from=${startDateFormatted}&date_to=${endDateFormatted}&dimension=${dimension}`;
+        ? `/api/comparison-cloud/bridge/intracloud/azure/billing/get_tenants_billing_by_dimension?date_from=${startDateFormatted}&date_to=${endDateFormatted}&dimension=${dimension}`
+        : `/api/comparison-cloud/bridge/intracloud/aws/billing/get_tenants_billing_by_dimension?date_from=${startDateFormatted}&date_to=${endDateFormatted}&dimension=${dimension}`;
 
     const shouldFetchUrlBillingByDimension = dimension ? true : false;
 
@@ -194,6 +196,20 @@ export const IntraCloudBillingComponent = ({
         }
     );
 
+    const urlMonthlyBilling = payload.cloud_provider === 'Azure'
+        ? `/api/comparison-cloud/bridge/intracloud/azure/billing/get_tenants_monthly_billing?date_from=${startDateFormatted}&date_to=${endDateFormatted}&dimension=${dimension}`
+        : `/api/comparison-cloud/bridge/intracloud/aws/billing/get_tenants_monthly_billing?date_from=${startDateFormatted}&date_to=${endDateFormatted}&dimension=${dimension}`;
+
+    const monthlyBilling = useSWR(
+        [urlMonthlyBilling, fullPayload],
+        fetcherPost,
+        {
+            revalidateOnFocus: false,
+            shouldRetryOnError: false
+        }
+    );
+
+    console.log(monthlyBilling.data)
 
     return (
         <div className="p-4 bg-white space-y-6">
@@ -218,19 +234,23 @@ export const IntraCloudBillingComponent = ({
                     <IntraCloudBillingCardsComponent
                         data={acumulatedBilling.data}
                     />
-                    <IntraCloudBillingCostUsdChartComponent
+                    {/* <IntraCloudBillingCostUsdChartComponent
                         data={acumulatedBilling.data}
+                    /> */}
+                    <IntraCloudBillingCostUsdChartComponent
+                        data={monthlyBilling.data}
                     />
                     <IntraCloudBillingTable
                         dimension={dimension}
                         setDimension={setDimension}
                         data={billingByDimension.data ? billingByDimension.data : []}
                         payload={payload}
+                        isLoading={billingByDimension.isLoading}
                     />
-                    <div className="mt-4 p-2 bg-slate-100 rounded text-[10px] font-mono">
-                        Payload enviado: {JSON.stringify(filtersPayload, null, 2)}
-                    </div>
-
+                    <IntraCloudMonthlyBillingTable
+                        data={monthlyBilling.data}
+                        isLoading={monthlyBilling.isLoading}
+                    />
                 </>
             )}
         </div>

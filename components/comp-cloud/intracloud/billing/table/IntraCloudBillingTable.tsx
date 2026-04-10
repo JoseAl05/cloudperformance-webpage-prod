@@ -7,15 +7,17 @@ import { BarChart3 } from 'lucide-react';
 import { Dispatch, SetStateAction, useMemo } from 'react';
 import { IntraCloudBillingDimSelectionComponent } from '@/components/comp-cloud/intracloud/billing/table/IntraCloudBillingDimSelectionComponent';
 import { ReqPayload } from '@/components/comp-cloud/intracloud/IntraCloudConfigComponent';
+import { LoaderComponent } from '@/components/general_aws/LoaderComponent';
 
 interface IntraCloudBillingTableProps {
     data: IntraCloudBillingByDimension[];
     dimension: string;
     setDimension: Dispatch<SetStateAction<string>>;
     payload: ReqPayload;
+    isLoading: boolean;
 }
 
-export const IntraCloudBillingTable = ({ data, dimension, setDimension, payload }: IntraCloudBillingTableProps) => {
+export const IntraCloudBillingTable = ({ data, dimension, setDimension, payload, isLoading }: IntraCloudBillingTableProps) => {
 
     const aggregatedData = useMemo(() => {
         if (!dimension || !data.length) return [];
@@ -63,22 +65,25 @@ export const IntraCloudBillingTable = ({ data, dimension, setDimension, payload 
                 </div>
             </CardHeader>
             <CardContent className="p-0">
-                {dimension && aggregatedData.length > 0 ? (
-                    <div className="p-4">
-                        <DataTableGrouping
-                            columns={columns}
-                            data={aggregatedData}
-                            filterColumn="dimension_value"
-                            filterPlaceholder="Buscar por dimensión..."
-                            enableGrouping={false}
-                            pageSizeGroups={10}
-                            pageSizeItems={10}
-                        />
-                    </div>
-                ) : (
-                    <div className="text-center text-gray-500 py-16">
-                        {!dimension ? 'Selecciona una dimensión para analizar los costos.' : 'No hay datos disponibles para la dimensión seleccionada.'}
-                    </div>
+                {
+                    isLoading ? (
+                        <LoaderComponent />
+                    ) : dimension && aggregatedData.length > 0 ? (
+                        <div className="p-4">
+                            <DataTableGrouping
+                                columns={columns}
+                                data={aggregatedData}
+                                filterColumn="dimension_value"
+                                filterPlaceholder="Buscar por dimensión..."
+                                enableGrouping={false}
+                                pageSizeGroups={10}
+                                pageSizeItems={10}
+                            />
+                        </div>
+                    ) : (
+                        <div className="text-center text-gray-500 py-16">
+                            {!dimension ? 'Selecciona una dimensión para analizar los costos.' : 'No hay datos disponibles para la dimensión seleccionada.'}
+                        </div>
                 )}
                 {aggregatedData.length > 0 && (
                     <div className="border-t bg-muted/50 px-6 py-3">

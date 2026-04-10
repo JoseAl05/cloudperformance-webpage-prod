@@ -42,6 +42,7 @@ interface FiltersComponentProps {
     regionFilter?: boolean;
     subscriptionIdFilter?: boolean;
     isRegionMultiSelect?: boolean;
+    isOnlyYearFilter?: boolean;
     tagsFilter?: boolean;
     resourceGroupFilter?: boolean;
     serviceFilter?: boolean;
@@ -107,6 +108,7 @@ export const FiltersComponent = ({
     regionFilter = false,
     subscriptionIdFilter = false,
     isRegionMultiSelect = false,
+    isOnlyYearFilter = false,
     tagsFilter = false,
     resourceGroupFilter = false,
     serviceFilter = false,
@@ -141,6 +143,7 @@ export const FiltersComponent = ({
     const getInitialFilters = () => {
         const startDateParam = searchParams.get('startDate');
         const endDateParam = searchParams.get('endDate');
+        const yearParam = searchParams.get('year');
         const regionParam = searchParams.get('region');
         const serviceParam = searchParams.get('service') || getDefaultService();
 
@@ -161,8 +164,12 @@ export const FiltersComponent = ({
 
         });
 
-        const startDate = startDateParam ? new Date(startDateParam) : yesterday;
-        const endDate = endDateParam ? new Date(endDateParam) : new Date();
+        const startDate = isOnlyYearFilter
+            ? new Date(Date.UTC(yearParam ? Number(yearParam) : yesterday.getFullYear(), 0, 1))
+            : (startDateParam ? new Date(startDateParam) : yesterday);
+        const endDate = isOnlyYearFilter
+            ? new Date(Date.UTC(yearParam ? Number(yearParam) : new Date().getFullYear(), 11, 31))
+            : (endDateParam ? new Date(endDateParam) : new Date());
 
         return {
             startDate,
@@ -180,6 +187,10 @@ export const FiltersComponent = ({
     const [filters, setFilters] = useState(getInitialFilters);
 
     const [tempRange, setTempRange] = useState<[Date | null, Date | null]>([filters.startDate, filters.endDate]);
+    const [tempYear, setTempYear] = useState<Date>(() => {
+        const yearParam = searchParams.get('year');
+        return new Date(yearParam ? Number(yearParam) : new Date().getFullYear(), 0, 1);
+    });
     const [tempRegion, setTempRegion] = useState(filters.region);
 
     const [tempSubs, setTempSubs] = useState<Record<string, string>>(filters.subscriptions);
@@ -193,6 +204,8 @@ export const FiltersComponent = ({
         const newFilters = getInitialFilters();
         setFilters(newFilters);
         setTempRange([newFilters.startDate, newFilters.endDate]);
+        const yearParam = searchParams.get('year');
+        setTempYear(new Date(yearParam ? Number(yearParam) : new Date().getFullYear(), 0, 1));
         setTempRegion(newFilters.region);
         setTempSubs(newFilters.subscriptions);
         setTempRGs(newFilters.resourceGroups);
@@ -203,44 +216,84 @@ export const FiltersComponent = ({
     }, [searchParams, payload]);
 
     const onChangeDate = (dates: [Date | null, Date | null]) => setTempRange(dates);
-    const tempStartDate = useMemo(() => (tempRange[0] ?? filters.startDate), [tempRange, filters.startDate]);
-    const tempEndDate = useMemo(() => (tempRange[1] ?? filters.endDate), [tempRange, filters.endDate]);
+    const onChangeYear = (date: Date | null) => { if (date) setTempYear(date); };
+    const tempStartDate = useMemo(() => {
+        if (isOnlyYearFilter) return new Date(Date.UTC(tempYear.getFullYear(), 0, 1));
+        return tempRange[0] ?? filters.startDate;
+    }, [isOnlyYearFilter, tempYear, tempRange, filters.startDate]);
+
+    const tempEndDate = useMemo(() => {
+        if (isOnlyYearFilter) return new Date(Date.UTC(tempYear.getFullYear(), 11, 31));
+        return tempRange[1] ?? filters.endDate;
+    }, [isOnlyYearFilter, tempYear, tempRange, filters.endDate]);
 
     const applyFilters = () => {
-        const [start, end] = tempRange;
-        if (!start || !end) return;
-
-        const newFilters = {
-            startDate: start,
-            endDate: end,
-            region: tempRegion,
-            subscriptions: tempSubs,
-            resourceGroups: tempRGs,
-            tagKeys: tempTagKeys,
-            tagValues: tempTagValues,
-            service: tempService,
-            resources: tempResources
-        };
-
-        setFilters(newFilters as unknown);
-
         const query = new URLSearchParams();
-        query.set('startDate', newFilters.startDate.toISOString());
-        query.set('endDate', newFilters.endDate.toISOString());
-        if (regionFilter && newFilters.region !== 'all_regions') query.set('region', newFilters.region);
-        query.set('service', newFilters.service);
 
-        payload.tenants.forEach((id, index) => {
-            if (subscriptionIdFilter && tempSubs[id]) query.set(`sub_${index}`, tempSubs[id]);
-            if (resourceGroupFilter && tempRGs[id]) query.set(`rg_${index}`, tempRGs[id]);
-            if (tagsFilter) {
-                if (tempTagKeys[id] && !tempTagKeys[id]?.startsWith('allKeys')) query.set(`tagKey_${index}`, tempTagKeys[id] as string);
-                if (tempTagValues[id] && !tempTagValues[id]?.startsWith('allValues')) query.set(`tagValue_${index}`, tempTagValues[id] as string);
-            }
-            if (resourceFilter && tempResources[id]) query.set(`resource_${index}`, tempResources[id]);
-        });
+        if (isOnlyYearFilter) {
+            const year = tempYear.getFullYear();
+            const newFilters = {
+                startDate: new Date(Date.UTC(year, 0, 1)),
+                endDate: new Date(Date.UTC(year, 11, 31)),
+                region: tempRegion,
+                subscriptions: tempSubs,
+                resourceGroups: tempRGs,
+                tagKeys: tempTagKeys,
+                tagValues: tempTagValues,
+                service: tempService,
+                resources: tempResources
+            };
 
-        router.push(`${window.location.pathname}?${query.toString()}`,{ scroll: false });
+            setFilters(newFilters as unknown);
+
+            query.set('year', year.toString());
+            if (regionFilter && newFilters.region !== 'all_regions') query.set('region', newFilters.region);
+            query.set('service', newFilters.service);
+
+            payload.tenants.forEach((id, index) => {
+                if (subscriptionIdFilter && tempSubs[id]) query.set(`sub_${index}`, tempSubs[id]);
+                if (resourceGroupFilter && tempRGs[id]) query.set(`rg_${index}`, tempRGs[id]);
+                if (tagsFilter) {
+                    if (tempTagKeys[id] && !tempTagKeys[id]?.startsWith('allKeys')) query.set(`tagKey_${index}`, tempTagKeys[id] as string);
+                    if (tempTagValues[id] && !tempTagValues[id]?.startsWith('allValues')) query.set(`tagValue_${index}`, tempTagValues[id] as string);
+                }
+                if (resourceFilter && tempResources[id]) query.set(`resource_${index}`, tempResources[id]);
+            });
+        } else {
+            const [start, end] = tempRange;
+            if (!start || !end) return;
+
+            const newFilters = {
+                startDate: start,
+                endDate: end,
+                region: tempRegion,
+                subscriptions: tempSubs,
+                resourceGroups: tempRGs,
+                tagKeys: tempTagKeys,
+                tagValues: tempTagValues,
+                service: tempService,
+                resources: tempResources
+            };
+
+            setFilters(newFilters as unknown);
+
+            query.set('startDate', newFilters.startDate.toISOString());
+            query.set('endDate', newFilters.endDate.toISOString());
+            if (regionFilter && newFilters.region !== 'all_regions') query.set('region', newFilters.region);
+            query.set('service', newFilters.service);
+
+            payload.tenants.forEach((id, index) => {
+                if (subscriptionIdFilter && tempSubs[id]) query.set(`sub_${index}`, tempSubs[id]);
+                if (resourceGroupFilter && tempRGs[id]) query.set(`rg_${index}`, tempRGs[id]);
+                if (tagsFilter) {
+                    if (tempTagKeys[id] && !tempTagKeys[id]?.startsWith('allKeys')) query.set(`tagKey_${index}`, tempTagKeys[id] as string);
+                    if (tempTagValues[id] && !tempTagValues[id]?.startsWith('allValues')) query.set(`tagValue_${index}`, tempTagValues[id] as string);
+                }
+                if (resourceFilter && tempResources[id]) query.set(`resource_${index}`, tempResources[id]);
+            });
+        }
+
+        router.push(`${window.location.pathname}?${query.toString()}`, { scroll: false });
     };
 
     const clearFilters = () => {
@@ -250,6 +303,7 @@ export const FiltersComponent = ({
         const defaultTagsV = tenants.reduce((acc, id) => ({ ...acc, [id]: TAG_CONSTANTS.DEFAULT_VALUE }), {});
 
         setTempRange([yesterday, new Date()]);
+        setTempYear(new Date(new Date().getFullYear(), 0, 1));
         setTempRegion('all_regions');
         setTempSubs(emptyMapString);
         setTempRGs(emptyMapString);
@@ -258,7 +312,7 @@ export const FiltersComponent = ({
         setTempResources(emptyMapString);
         setTempService(getDefaultService());
 
-        router.push(window.location.pathname,{ scroll: false });
+        router.push(window.location.pathname, { scroll: false });
     };
 
     return (
@@ -281,16 +335,26 @@ export const FiltersComponent = ({
                                     <div className='space-y-2'>
                                         <label className='text-sm font-medium text-foreground flex items-center gap-2'>
                                             <Calendar className='h-4 w-4 text-gray-400' />
-                                            Período
+                                            {isOnlyYearFilter ? 'Año' : 'Período'}
                                         </label>
-                                        <DatePicker
-                                            selected={tempRange[0]}
-                                            onChange={onChangeDate}
-                                            startDate={tempRange[0]}
-                                            endDate={tempRange[1]}
-                                            selectsRange
-                                            className='w-full px-3 py-2 border border-input bg-background text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent text-sm'
-                                        />
+                                        {isOnlyYearFilter ? (
+                                            <DatePicker
+                                                selected={tempYear}
+                                                onChange={onChangeYear}
+                                                showYearPicker
+                                                dateFormat="yyyy"
+                                                className='w-full px-3 py-2 border border-input bg-background text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent text-sm'
+                                            />
+                                        ) : (
+                                            <DatePicker
+                                                selected={tempRange[0]}
+                                                onChange={onChangeDate}
+                                                startDate={tempRange[0]}
+                                                endDate={tempRange[1]}
+                                                selectsRange
+                                                className='w-full px-3 py-2 border border-input bg-background text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent text-sm'
+                                            />
+                                        )}
                                     </div>
                                 )}
                                 {regionFilter && payload.cloud_provider === 'AWS' && (

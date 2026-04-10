@@ -92,6 +92,7 @@ export const MainViewIntraCloudBillingComponent = ({ payload }: MainViewIntraClo
                         <FiltersComponent
                             Component={IntraCloudBillingComponent}
                             regionFilter
+                            isOnlyYearFilter
                             isRegionMultiSelect
                             subscriptionIdFilter
                             tagsFilter

@@ -58,3 +58,15 @@ export interface IntraCloudBillingByDimensionData {
       | 'reservation_id'
   ]: string;
 }
+
+export interface IntraCloudMonthlyBillingData {
+  cost_in_usd: number;
+  pay_cost_in_usd: number;
+  year: number;
+  month: string;
+}
+
+export interface IntraCloudMonthlyBilling {
+  tenant_id: string;
+  billing_data: IntraCloudMonthlyBillingData[];
+}
