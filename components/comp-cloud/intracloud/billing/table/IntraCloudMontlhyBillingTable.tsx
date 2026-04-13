@@ -36,7 +36,7 @@ export const IntraCloudMonthlyBillingTable = ({
   data, isLoading
 }: IntraCloudMonthlyBillingTableProps) => {
   const months = useMemo(() => {
-    if (!data && data.length === 0) return [];
+    if (data && data.length === 0 || !data) return [];
     const monthSet = new Set<string>()
     data.forEach((tenant) =>
       tenant.billing_data?.forEach((bd) => {
@@ -51,7 +51,7 @@ export const IntraCloudMonthlyBillingTable = ({
   }, [data])
 
   const billingMap = useMemo(() => {
-    if (!data && data.length === 0) return {};
+    if (data && data.length === 0 || !data) return {};
     const map: Record<string, Record<string, IntraCloudMonthlyBillingData>> = {}
     data.forEach((tenant) => {
       map[tenant.tenant_id] = {}
@@ -64,7 +64,7 @@ export const IntraCloudMonthlyBillingTable = ({
   }, [data])
 
   const summaryByMonth = useMemo(() => {
-    if (!data && data.length === 0) return {};
+    if (data && data.length === 0 || !data) return {};
     const totals: Record<string, number> = {}
     months.forEach((m) => {
       totals[m] = data.reduce((sum, t) => {
