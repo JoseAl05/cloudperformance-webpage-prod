@@ -38,7 +38,7 @@ const CostCell = ({ cost }: { cost: number | undefined }) => {
     );
 };
 
-const ComparisonCell = ({ row, tenantIds }: { row: AggregatedBillingRow, tenantIds: string[] }) => {
+const ComparisonCell = ({ row, tenantIds, aliasMap }: { row: AggregatedBillingRow, tenantIds: string[], aliasMap: Record<string, string> }) => {
     const costs = tenantIds.map(tid => Number(row[tid]) || 0);
     const validCosts = costs.filter(c => c > 0);
 
@@ -53,8 +53,8 @@ const ComparisonCell = ({ row, tenantIds }: { row: AggregatedBillingRow, tenantI
 
     const maxIndex = costs.indexOf(maxCost);
     const minIndex = costs.indexOf(minCost);
-    const highestTenant = `Tenant ${maxIndex + 1}`;
-    const lowestTenant = `Tenant ${minIndex + 1}`;
+    const highestTenant = aliasMap[tenantIds[maxIndex]] || `Tenant ${maxIndex + 1}`;
+    const lowestTenant = aliasMap[tenantIds[minIndex]] || `Tenant ${minIndex + 1}`;
 
     const stdDev = validCosts.length > 1 ? Math.sqrt(
         validCosts.reduce((sum, cost) => sum + Math.pow(cost - avgCost, 2), 0) / validCosts.length
@@ -93,7 +93,7 @@ const ComparisonCell = ({ row, tenantIds }: { row: AggregatedBillingRow, tenantI
                                             <Button variant="outline"></Button>
                                         </TooltipTrigger>
                                         <TooltipContent>
-                                            Tenant {idx + 1}: {pct}%
+                                            {aliasMap[tid] || `Tenant ${idx + 1}`}: {pct}%
                                         </TooltipContent>
                                     </Tooltip>
                                     // <div
@@ -114,7 +114,7 @@ const ComparisonCell = ({ row, tenantIds }: { row: AggregatedBillingRow, tenantI
                                 const pct = parseFloat(percentages[idx]);
                                 if (pct === 0) return null;
                                 return (
-                                    <span key={tid}>Tenant {idx + 1}: {pct}%</span>
+                                    <span key={tid}>{aliasMap[tid] || `Tenant ${idx + 1}`}: {pct}%</span>
                                 );
                             })}
                         </div>
@@ -162,6 +162,8 @@ export const getIntraCloudBillingColumns = (
     allData: IntraCloudBillingByDimension[]
 ): DynamicColumn<AggregatedBillingRow>[] => {
     const tenantIds = Array.from(new Set(allData.map(t => t.tenant_id))).sort();
+    const aliasMap: Record<string, string> = {};
+    allData.forEach(t => { aliasMap[t.tenant_id] = t.tenant_alias; });
     const columns: DynamicColumn<AggregatedBillingRow>[] = [
         {
             header: "Dimensión",
@@ -182,7 +184,7 @@ export const getIntraCloudBillingColumns = (
 
     tenantIds.forEach((tenantId, index) => {
         columns.push({
-            header: `Tenant ${index + 1}`,
+            header: aliasMap[tenantId] ?? `Tenant ${index + 1}`,
             accessorKey: tenantId,
             cell: ({ row }) => {
                 const cost = row.original[tenantId] as number | undefined;
@@ -198,7 +200,7 @@ export const getIntraCloudBillingColumns = (
         header: "Análisis Comparativo",
         id: "comparison",
         cell: ({ row }) => (
-            <ComparisonCell row={row.original} tenantIds={tenantIds} />
+            <ComparisonCell row={row.original} tenantIds={tenantIds} aliasMap={aliasMap} />
         ),
         size: 600
     });

@@ -1,5 +1,6 @@
 export interface IntraCloudBilling {
   tenant_id: string;
+  tenant_alias: string;
   billing_data: IntraCloudBillingData[];
 }
 
@@ -12,6 +13,7 @@ export interface IntraCloudBillingData {
 
 export interface IntraCloudBillingByDimension {
   tenant_id: string;
+  tenant_alias: string;
   billing_data: IntraCloudBillingByDimensionData[];
 }
 
@@ -68,5 +70,6 @@ export interface IntraCloudMonthlyBillingData {
 
 export interface IntraCloudMonthlyBilling {
   tenant_id: string;
+  tenant_alias: string;
   billing_data: IntraCloudMonthlyBillingData[];
 }

@@ -265,7 +265,7 @@ export const IntraCloudMonthlyBillingTable = ({
                 <td colSpan={months.length + 2} className="py-1 bg-gray-100 dark:bg-gray-950" />
               </tr>
               {renderSectionRows(
-                `Ppto Tenant ${index + 1}`,
+                `Ppto ${tenant.tenant_alias}`,
                 tenantMonthly,
                 tenantTotal,
                 'bg-blue-600/90 dark:bg-blue-800/90 text-white',

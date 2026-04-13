@@ -76,7 +76,7 @@ export const IntraCloudBillingCardsComponent = ({ data }: IntraCloudBillingCards
 
             if (billingData.length === 0) {
                 return {
-                    cardTitle: `Costo real acumulado Tenant ${index + 1}`,
+                    cardTitle: `Costo real acumulado ${tenant.tenant_alias || `Tenant ${index + 1}`}`,
                     acc_cost: 0,
                     dateLabel: "Sin datos registrados",
                     tenant_id: tenant.tenant_id,
@@ -112,7 +112,7 @@ export const IntraCloudBillingCardsComponent = ({ data }: IntraCloudBillingCards
                 : "Sin rango de fechas";
 
             return {
-                cardTitle: `Costo real acumulado Tenant ${index + 1}`,
+                cardTitle: `Costo real acumulado Tenant ${tenant.tenant_alias || `Tenant ${index + 1}`}`,
                 acc_cost: totalCost,
                 tenant_id: tenant.tenant_id,
                 description: `Costo Retail: $${formatMetric(totalRetailCost)}`,
