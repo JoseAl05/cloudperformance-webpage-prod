@@ -157,6 +157,12 @@ export const IntraCloudBillingCostUsdChartComponent = ({ data, payload }: IntraC
     //   };
     // });
     return data.map((tenant, index) => {
+      if(tenant.billing_data.length && tenant.billing_data.length === 0) {
+        return {
+          name: '',
+          data: []
+        }
+      }
       const sortedData = [...tenant.billing_data].sort(
         (a, b) => (MONTH_ORDER[a.month] ?? 0) - (MONTH_ORDER[b.month] ?? 0)
       );

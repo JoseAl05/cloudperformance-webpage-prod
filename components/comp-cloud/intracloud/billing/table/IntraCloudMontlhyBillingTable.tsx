@@ -35,12 +35,11 @@ const generateDummyProjected = (invoiced: number): number =>
 export const IntraCloudMonthlyBillingTable = ({
   data, isLoading
 }: IntraCloudMonthlyBillingTableProps) => {
-  console.log(data);
   const months = useMemo(() => {
     if (!data && data.length === 0) return [];
     const monthSet = new Set<string>()
     data.forEach((tenant) =>
-      tenant.billing_data.forEach((bd) => {
+      tenant.billing_data?.forEach((bd) => {
         monthSet.add(`${bd.month}-${bd.year}`)
       })
     )
@@ -56,6 +55,7 @@ export const IntraCloudMonthlyBillingTable = ({
     const map: Record<string, Record<string, IntraCloudMonthlyBillingData>> = {}
     data.forEach((tenant) => {
       map[tenant.tenant_id] = {}
+      if (!tenant.billing_data || tenant.billing_data.length === 0) return {};
       tenant.billing_data.forEach((bd) => {
         map[tenant.tenant_id][`${bd.month}-${bd.year}`] = bd
       })
