@@ -10,6 +10,7 @@ import { DynamicColumn } from '@/components/general/data-table/columns';
 import { IntraCloudBillingByDimension } from '@/interfaces/vista-intracloud/billing/intraCloudBillingInterfaces';
 import { Button } from '@/components/ui/button';
 import { formatMetric } from '@/lib/metricUtils';
+import { formatGeneric } from '@/lib/bytesToMbs';
 
 interface AggregatedBillingRow {
     dimension_value: string;
@@ -32,7 +33,7 @@ const CostCell = ({ cost }: { cost: number | undefined }) => {
     return (
         <div className="flex flex-col gap-0.5">
             <span className="font-semibold text-foreground">
-                ${formatMetric(amount)}
+                ${formatGeneric(amount)}
             </span>
         </div>
     );
@@ -187,6 +188,7 @@ export const getIntraCloudBillingColumns = (
             header: aliasMap[tenantId] ?? `Tenant ${index + 1}`,
             accessorKey: tenantId,
             cell: ({ row }) => {
+                console.log(row.original);
                 const cost = row.original[tenantId] as number | undefined;
                 return <CostCell cost={cost} />;
             },

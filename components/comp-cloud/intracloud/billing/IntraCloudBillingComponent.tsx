@@ -7,6 +7,7 @@ import { IntraCloudMonthlyBillingTable } from '@/components/comp-cloud/intraclou
 import { ReqPayload } from '@/components/comp-cloud/intracloud/IntraCloudConfigComponent';
 import { DynamicFilterProps } from '@/components/general_comp_cloud/filters/FilterComponent';
 import { IntraCloudBilling } from '@/interfaces/vista-intracloud/billing/intraCloudBillingInterfaces';
+import { url } from 'inspector';
 import { AlertCircle, Loader2 } from 'lucide-react';
 import { useState } from 'react';
 import useSWR from 'swr';
@@ -16,6 +17,9 @@ type IntraCloudBillingComponentProps = DynamicFilterProps;
 interface BackendPayload extends ReqPayload {
     filters: Record<string, {
         resource_group?: string;
+        project_id?: string;
+        location_region?: string;
+        region?: string;
         subscription?: string;
         tagKey?: string | null;
         tagValue?: string | null;
@@ -43,6 +47,7 @@ export const IntraCloudBillingComponent = ({
     payload,
     startDate,
     endDate,
+    projects,
     resourceGroups,
     subscriptions,
     tagKeys,
@@ -50,7 +55,21 @@ export const IntraCloudBillingComponent = ({
     region
 }: IntraCloudBillingComponentProps) => {
 
-    const dimensionDefaultValue = payload.cloud_provider === 'Azure' ? 'service_family' : 'SERVICE';
+    let dimensionDefaultValue = '';
+    switch (payload.cloud_provider) {
+        case 'Azure':
+            dimensionDefaultValue = 'service_family';
+            break;
+        case 'AWS':
+            dimensionDefaultValue = 'SERVICE';
+            break;
+        case 'GCP':
+            dimensionDefaultValue = 'service_description';
+            break;
+        default:
+            dimensionDefaultValue = '';
+            break;
+    }
 
     const [dimension, setDimension] = useState<string>(dimensionDefaultValue);
 
@@ -73,6 +92,11 @@ export const IntraCloudBillingComponent = ({
                 filtersPayload[tenantId] = {
                     region: region[tenantId] || 'all_regions'
                 };
+            } else if (payload.cloud_provider === 'GCP') {
+                filtersPayload[tenantId] = {
+                    project_id: projects[tenantId] || 'all',
+                    location_region: region[tenantId] || 'all_regions'
+                }
             }
         });
     }
@@ -82,10 +106,29 @@ export const IntraCloudBillingComponent = ({
         filters: filtersPayload
     };
 
-    const urlAcumulatedBilling =
-        payload.cloud_provider === 'Azure'
-            ? `/api/comparison-cloud/bridge/intracloud/azure/billing/get_tenants_billing?date_from=${startDateFormatted}&date_to=${endDateFormatted}`
-            : `/api/comparison-cloud/bridge/intracloud/aws/billing/get_tenants_billing?date_from=${startDateFormatted}&date_to=${endDateFormatted}`
+    let urlAcumulatedBilling = '';
+    let urlBillingByDimension = '';
+    let urlMonthlyBilling = '';
+    switch (payload.cloud_provider) {
+        case 'Azure':
+            urlAcumulatedBilling = `/api/comparison-cloud/bridge/intracloud/azure/billing/get_tenants_billing?date_from=${startDateFormatted}&date_to=${endDateFormatted}`;
+            urlBillingByDimension = `/api/comparison-cloud/bridge/intracloud/azure/billing/get_tenants_billing_by_dimension?date_from=${startDateFormatted}&date_to=${endDateFormatted}&dimension=${dimension}`;
+            urlMonthlyBilling = `/api/comparison-cloud/bridge/intracloud/azure/billing/get_tenants_monthly_billing?date_from=${startDateFormatted}&date_to=${endDateFormatted}`;
+            break;
+        case 'AWS':
+            urlAcumulatedBilling = `/api/comparison-cloud/bridge/intracloud/aws/billing/get_tenants_billing?date_from=${startDateFormatted}&date_to=${endDateFormatted}`;
+            urlBillingByDimension = `/api/comparison-cloud/bridge/intracloud/aws/billing/get_tenants_billing_by_dimension?date_from=${startDateFormatted}&date_to=${endDateFormatted}&dimension=${dimension}`;
+            urlMonthlyBilling = `/api/comparison-cloud/bridge/intracloud/aws/billing/get_tenants_monthly_billing?date_from=${startDateFormatted}&date_to=${endDateFormatted}`;
+            break;
+        case 'GCP':
+            urlAcumulatedBilling = `/api/comparison-cloud/bridge/intracloud/gcp/billing/get_tenants_billing?date_from=${startDateFormatted}&date_to=${endDateFormatted}`;
+            urlBillingByDimension = `/api/comparison-cloud/bridge/intracloud/gcp/billing/get_tenants_billing_by_dimension?date_from=${startDateFormatted}&date_to=${endDateFormatted}&dimension=${dimension}`;
+            urlMonthlyBilling = `/api/comparison-cloud/bridge/intracloud/gcp/billing/get_tenants_monthly_billing?date_from=${startDateFormatted}&date_to=${endDateFormatted}`;
+            break;
+        default:
+            urlAcumulatedBilling = null;
+            break;
+    }
 
     const acumulatedBilling = useSWR(
         [urlAcumulatedBilling, fullPayload],
@@ -95,10 +138,6 @@ export const IntraCloudBillingComponent = ({
             shouldRetryOnError: false
         }
     );
-
-    const urlBillingByDimension = payload.cloud_provider === 'Azure'
-        ? `/api/comparison-cloud/bridge/intracloud/azure/billing/get_tenants_billing_by_dimension?date_from=${startDateFormatted}&date_to=${endDateFormatted}&dimension=${dimension}`
-        : `/api/comparison-cloud/bridge/intracloud/aws/billing/get_tenants_billing_by_dimension?date_from=${startDateFormatted}&date_to=${endDateFormatted}&dimension=${dimension}`;
 
     const shouldFetchUrlBillingByDimension = dimension ? true : false;
 
@@ -110,10 +149,6 @@ export const IntraCloudBillingComponent = ({
             shouldRetryOnError: false
         }
     );
-
-    const urlMonthlyBilling = payload.cloud_provider === 'Azure'
-        ? `/api/comparison-cloud/bridge/intracloud/azure/billing/get_tenants_monthly_billing?date_from=${startDateFormatted}&date_to=${endDateFormatted}&dimension=${dimension}`
-        : `/api/comparison-cloud/bridge/intracloud/aws/billing/get_tenants_monthly_billing?date_from=${startDateFormatted}&date_to=${endDateFormatted}&dimension=${dimension}`;
 
     const monthlyBilling = useSWR(
         [urlMonthlyBilling, fullPayload],

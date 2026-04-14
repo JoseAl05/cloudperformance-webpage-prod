@@ -6,7 +6,7 @@ import { IntraCloudCompute, IntraCloudComputeMetricsSummary } from '@/interfaces
 import { formatMetric } from '@/lib/metricUtils';
 import { cn } from '@/lib/utils';
 import { Server, CircuitBoard, AlertTriangle, CheckCircle2, TrendingUp, Info, LucideIcon, Zap, Gauge, HelpCircle } from 'lucide-react';
-import { bytesToGB } from '@/lib/bytesToMbs';
+import { bytesToGB, formatBytes, formatGeneric } from '@/lib/bytesToMbs';
 
 interface IntraCloudComputeCardsComponentProps {
     data?: IntraCloudCompute[];
@@ -21,11 +21,12 @@ const gridColsMap: Record<number, string> = {
 
 const getMetricUnit = (metricName: string): string => {
     const name = metricName.toLowerCase();
-    if (name.includes('percent') || name.includes('percentage') || name.includes('cpuutilization')) return '%';
+    if (name.includes('percent') || name.includes('percentage') || name.includes('cpuutilization') || name.includes('cpu_utilization')) return '%';
     if (name.includes('credits') || name.includes('credit')) return 'Créditos';
     if (name.includes('iops')) return 'IOPS';
-    if (name.includes('bytes') || name.includes('storage used') || name.includes('memory') || name.includes('networkin') || name.includes('networkout') || name.includes('freestorage')) return 'GB';
+    if (name.includes('bytes') || name.includes('storage used') || name.includes('memory') || name.includes('networkin') || name.includes('networkout') || name.includes('freestorage')) return '';
     if (name.includes('connections')) return 'Conexiones';
+    if (name.includes('pps')) return 'Paquetes/s';
     return '';
 };
 
@@ -49,7 +50,8 @@ interface StatusAnalysis {
 const analyzeResourceStatus = (metrics: IntraCloudComputeMetricsSummary[]): StatusAnalysis => {
     const cpuMetric = metrics.find(m =>
         m.metric_name.toLowerCase().includes('percentage cpu') ||
-        m.metric_name.toLowerCase().includes('cpuutilization')
+        m.metric_name.toLowerCase().includes('cpuutilization') ||
+        m.metric_name.toLowerCase().includes('cpu_utilization')
     );
     const memPercentMetric = metrics.find(m =>
         m.metric_name.toLowerCase().includes('memory percent') ||
@@ -322,15 +324,19 @@ export const IntraCloudComputeCardsByTenantComponent = ({ data }: IntraCloudComp
                                             let metricValue: string | number;
 
                                             if (
-                                                (metric.metric_name.toLowerCase().includes("memory") && !metric.metric_name.toLowerCase().includes("percent")) ||
-                                                metric.metric_name.toLowerCase().includes("storage used") || metric.metric_name.toLowerCase().includes("bytes") ||
-                                                metric.metric_name.toLowerCase().includes("networkin") ||
-                                                metric.metric_name.toLowerCase().includes("networkout") ||
-                                                metric.metric_name.toLowerCase().includes("freestorage")
+                                                (metric.metric_name.toLowerCase().includes('memory') && !metric.metric_name.toLowerCase().includes('percent')) ||
+                                                metric.metric_name.toLowerCase().includes('storage used') || metric.metric_name.toLowerCase().includes('bytes') ||
+                                                metric.metric_name.toLowerCase().includes('networkin') ||
+                                                metric.metric_name.toLowerCase().includes('networkout') ||
+                                                metric.metric_name.toLowerCase().includes('freestorage') ||
+                                                metric.metric_name.toLowerCase().includes('disk_read_throughput') ||
+                                                metric.metric_name.toLowerCase().includes('disk_write_throughput') ||
+                                                metric.metric_name.toLowerCase().includes('network_egress_throughput') ||
+                                                metric.metric_name.toLowerCase().includes('network_ingress_throughput')
                                             ) {
-                                                metricValue = bytesToGB(metric.avg_value);
+                                                metricValue = formatBytes(metric.avg_value);
                                             } else {
-                                                metricValue = formatMetric(metric.avg_value);
+                                                metricValue = formatGeneric(metric.avg_value);
                                             }
 
                                             return (

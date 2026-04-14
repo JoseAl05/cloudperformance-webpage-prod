@@ -65,7 +65,8 @@ const CostCell = ({ cost, subLabel }: { cost: number | undefined, subLabel?: str
 
 const ComparisonCell = ({ row, tenantIds, cloudProvider }: { row: AggregatedComputeRow, tenantIds: string[], cloudProvider: string }) => {
     const costs = tenantIds.map(tid => Number(row[tid]) || 0);
-    const validCosts = costs.filter(c => c >= 0);
+    // const validCosts = costs.filter(c => c >= 0);
+    const validCosts = costs;
 
     if (validCosts.length === 0) {
         return <span className="text-muted-foreground text-xs">-</span>;
@@ -161,7 +162,7 @@ const ComparisonCell = ({ row, tenantIds, cloudProvider }: { row: AggregatedComp
                 })}
             </div>
 
-            {cloudProvider === 'Azure' && (
+            {(cloudProvider === 'Azure' || cloudProvider === 'GCP') && (
                 <DialogTrigger asChild>
                     <Button variant="ghost" size="sm" className="h-6 w-full text-[10px] text-muted-foreground cursor-pointer hover:text-emerald-600 mt-1 border border-dashed border-slate-200 hover:border-emerald-200 hover:bg-emerald-50">
                         <Maximize2 size={10} className="mr-1.5" />
@@ -172,9 +173,9 @@ const ComparisonCell = ({ row, tenantIds, cloudProvider }: { row: AggregatedComp
         </div>
     );
 
-    if (cloudProvider !== 'Azure') {
-        return content;
-    }
+    // if (cloudProvider !== 'Azure') {
+    //     return content;
+    // }
 
     return (
         <Dialog>

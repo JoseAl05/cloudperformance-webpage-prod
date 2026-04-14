@@ -25,7 +25,20 @@ interface IntraCloudConfigComponentProps {
 export const IntraCloudConfigComponent = ({ cloudType, accounts, onReqReady }: IntraCloudConfigComponentProps) => {
     const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
-    const unitLabel = cloudType === 'Azure' ? 'Tenant' : 'Cuenta';
+    let unitLabel = '';
+    switch (cloudType) {
+        case 'Azure':
+            unitLabel = 'Tenant';
+            break;
+        case 'AWS':
+            unitLabel = 'Cuenta';
+            break;
+        case 'GCP':
+            unitLabel = 'Proyecto';
+            break;
+        default:
+            break;
+    }
     const isStepComplete = selectedIds.length >= 2;
 
     const handleToggleAccount = (id: string) => {

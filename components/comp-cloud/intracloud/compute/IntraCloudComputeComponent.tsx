@@ -5,6 +5,7 @@ import { IntraCloudComputeCardsByTenantComponent } from '@/components/comp-cloud
 import { ReqPayload } from '@/components/comp-cloud/intracloud/IntraCloudConfigComponent';
 import { IntraCloudServicesBillingTable } from '@/components/comp-cloud/intracloud/services_billing/table/IntraCloudServicesBillingTable';
 import { DynamicFilterProps } from '@/components/general_comp_cloud/filters/FilterComponent';
+import { url } from 'inspector';
 import { AlertCircle, Loader2 } from 'lucide-react';
 import { useState } from 'react';
 import useSWR from 'swr';
@@ -15,6 +16,9 @@ interface BackendPayload extends ReqPayload {
     filters: Record<string, {
         resource_group?: string;
         resources?: string;
+        region?: string;
+        location_region?: string;
+        project_id?: string;
     }>;
 }
 
@@ -48,7 +52,23 @@ export const IntraCloudComputeComponent = ({
     const startDateFormatted = startDate.toISOString().replace('Z', '').slice(0, -4);
     const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : '';
 
-    const [dimension, setDimension] = useState<string>(payload.cloud_provider === 'Azure' ? 'pricing_model' : 'RESOURCE_ID');
+        let dimensionDefaultValue = '';
+    switch (payload.cloud_provider) {
+        case 'Azure':
+            dimensionDefaultValue = 'pricing_model';
+            break;
+        case 'AWS':
+            dimensionDefaultValue = 'RESOURCE_ID';
+            break;
+        case 'GCP':
+            dimensionDefaultValue = 'service_description';
+            break;
+        default:
+            dimensionDefaultValue = '';
+            break;
+    }
+
+    const [dimension, setDimension] = useState<string>(dimensionDefaultValue);
 
     const filtersPayload: Record<string, unknown> = {};
 
@@ -64,6 +84,12 @@ export const IntraCloudComputeComponent = ({
                     region: region[tenantId] || 'all_regions',
                     resources: resources[tenantId] || 'all'
                 };
+            } else if (payload.cloud_provider === 'GCP') {
+                filtersPayload[tenantId] = {
+                    location_region: region[tenantId] || 'all_regions',
+                    resources: resources[tenantId] || 'all',
+                    project_id: payload.project_id || 'all'
+                };
             }
         });
     }
@@ -73,15 +99,25 @@ export const IntraCloudComputeComponent = ({
         filters: filtersPayload
     };
 
-    const urlComputeMetrics =
-        payload.cloud_provider === 'Azure'
-            ? `/api/comparison-cloud/bridge/intracloud/azure/compute/get_compute_usage?date_from=${startDateFormatted}&date_to=${endDateFormatted}&service=${service}`
-            : `/api/comparison-cloud/bridge/intracloud/aws/compute/get_compute_usage?date_from=${startDateFormatted}&date_to=${endDateFormatted}&service=${service}`
+    let urlComputeMetrics = '';
+    let urlBillingCompute = '';
 
-    const urlBillingCompute = payload.cloud_provider === 'Azure'
-        ? `/api/comparison-cloud/bridge/intracloud/azure/compute/get_compute_billing_data?date_from=${startDateFormatted}&date_to=${endDateFormatted}&service=${service}&dimension=${dimension}`
-        : `/api/comparison-cloud/bridge/intracloud/aws/compute/get_compute_billing_data?date_from=${startDateFormatted}&date_to=${endDateFormatted}&dimension=${dimension}&service=${service}`;
-
+    switch (payload.cloud_provider) {
+        case 'Azure':
+            urlComputeMetrics = `/api/comparison-cloud/bridge/intracloud/azure/compute/get_compute_usage?date_from=${startDateFormatted}&date_to=${endDateFormatted}&service=${service}`;
+            urlBillingCompute = `/api/comparison-cloud/bridge/intracloud/azure/compute/get_compute_billing_data?date_from=${startDateFormatted}&date_to=${endDateFormatted}&service=${service}&dimension=${dimension}`;
+            break;
+        case 'AWS':
+            urlComputeMetrics = `/api/comparison-cloud/bridge/intracloud/aws/compute/get_compute_usage?date_from=${startDateFormatted}&date_to=${endDateFormatted}&service=${service}`;
+            urlBillingCompute = `/api/comparison-cloud/bridge/intracloud/aws/compute/get_compute_billing_data?date_from=${startDateFormatted}&date_to=${endDateFormatted}&dimension=${dimension}&service=${service}`;
+            break;
+        case 'GCP':
+             urlComputeMetrics = `/api/comparison-cloud/bridge/intracloud/gcp/compute/get_compute_usage?date_from=${startDateFormatted}&date_to=${endDateFormatted}&service=${service}`;
+             urlBillingCompute = `/api/comparison-cloud/bridge/intracloud/gcp/compute/get_compute_billing_data?date_from=${startDateFormatted}&date_to=${endDateFormatted}&dimension=${dimension}&service=${service}`;
+            break
+        default:
+            break;
+    }
 
     const computeMetrics = useSWR(
         [urlComputeMetrics, fullPayload],

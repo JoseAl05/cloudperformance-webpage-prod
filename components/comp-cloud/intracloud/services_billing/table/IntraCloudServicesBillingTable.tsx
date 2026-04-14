@@ -140,6 +140,7 @@ export const IntraCloudServicesBillingTable = ({ data, dimension, setDimension, 
 
         return Array.from(dimensionMap.values());
     }, [data, dimension, cloudProvider]);
+    console.log(aggregatedData);
 
     const columns = createColumns(getIntraCloudServicesBillingColumns(data, cloudProvider));
 
@@ -229,7 +230,7 @@ export const IntraCloudServicesBillingTable = ({ data, dimension, setDimension, 
                 </CardHeader>
                 <CardContent className="p-0">
                     {
-                        cloudProvider === 'Azure' && (
+                        (cloudProvider === 'Azure' || cloudProvider === 'GCP') && (
                             <div className="p-2 flex justify-end">
                                 <IntraCloudBillingDimSelectionComponent
                                     dimension={dimension}

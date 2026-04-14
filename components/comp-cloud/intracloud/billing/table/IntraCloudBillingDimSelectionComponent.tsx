@@ -105,6 +105,31 @@ export const IntraCloudBillingDimSelectionComponent = ({ dimension, setDimension
                 keys: ["SAVINGS_PLANS_TYPE", "RESERVATION_ID"] as AwsDimensionKey[]
             }
         ];
+    } else if (payload.cloud_provider === 'GCP') {
+        DIMENSIONS_MAPPING = {
+            "service_description": "Servicio GCP",
+            "sku_description": "Detalle de Uso (SKU)",
+            "location_region": "Ubicación",
+            "project_id": "ID del Proyecto",
+            "project_name": "Nombre del Proyecto",
+            "usage_unit": "Unidad de Uso",
+            "usage_billed_unit": "Unidad Facturada"
+        } as const;
+
+        GROUPS = [
+            {
+                label: "General y Ubicación",
+                keys: ["service_description", "location_region", "project_id"] as GcpDimensionKey[]
+            },
+            {
+                label: "Detalle Técnico",
+                keys: ["sku_description", "usage_unit", "usage_billed_unit"] as GcpDimensionKey[]
+            },
+            {
+                label: "Organización",
+                keys: ["project_name"] as GcpDimensionKey[]
+            }
+        ];
     }
     return (
         <Select value={dimension} onValueChange={setDimension}>

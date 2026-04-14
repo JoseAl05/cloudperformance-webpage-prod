@@ -88,7 +88,8 @@ export const MainViewIntraCloudBillingComponent = ({ payload }: MainViewIntraClo
             </div>
             <div className='w-full min-w-0 space-y-6'>
                 {
-                    payload.cloud_provider === 'Azure' ? (
+                    payload.cloud_provider === 'Azure' &&
+                    (
                         <FiltersComponent
                             Component={IntraCloudBillingComponent}
                             regionFilter
@@ -99,12 +100,30 @@ export const MainViewIntraCloudBillingComponent = ({ payload }: MainViewIntraClo
                             resourceGroupFilter
                             payload={payload}
                         />
-                    ) : (
+                    )
+                }
+                {
+                    payload.cloud_provider === 'AWS' &&
+                    (
                         <FiltersComponent
                             Component={IntraCloudBillingComponent}
                             regionFilter
                             isRegionMultiSelect
                             payload={payload}
+                            isOnlyYearFilter
+                        />
+                    )
+                }
+                {
+                    payload.cloud_provider === 'GCP' &&
+                    (
+                        <FiltersComponent
+                            Component={IntraCloudBillingComponent}
+                            regionFilter
+                            isRegionMultiSelect
+                            projectIdFilter
+                            payload={payload}
+                            isOnlyYearFilter
                         />
                     )
                 }

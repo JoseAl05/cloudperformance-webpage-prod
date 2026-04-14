@@ -3,8 +3,9 @@
 import { useEffect, useState, useMemo } from 'react';
 import { DatePicker } from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
-import { RegionFilterComponent } from '@/components/general_azure/filters/RegionFilterComponent';
+import { RegionFilterComponent as AzureRegionFilterComponent } from '@/components/general_azure/filters/RegionFilterComponent';
 import { RegionFilterComponent as AwsRegionFilterComponent } from '@/components/general_aws/filters/RegionFilterComponent';
+import { RegionsFilterComponent as GcpRegionFilterComponent } from '@/components/general_gcp/filters/RegionsFilterComponent';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
     Calendar,
@@ -22,12 +23,14 @@ import { MultiTenantTagsFilterComponent, TAG_CONSTANTS } from '@/components/gene
 import { MultiTenantResourceGroupFilterComponent } from '@/components/general_comp_cloud/filters/MultiTenantResourceGroupFilterComponent';
 import { MultiTenantServiceFilterComponent } from '@/components/general_comp_cloud/filters/MultiTenantServiceFilterComponent';
 import { MultiTenantResourceFilterComponent } from '@/components/general_comp_cloud/filters/MultiTenantResourceFilterComponent';
+import { MultiTenantProjectsFilterComponent } from '@/components/general_comp_cloud/filters/MultiTenantProjectsFilterComponent';
 
 export interface DynamicFilterProps {
     startDate: Date;
     endDate?: Date;
     region: string;
     subscriptions: Record<string, string>;
+    projects: Record<string, string>;
     resourceGroups: Record<string, string>;
     tagKeys: Record<string, string | null>;
     tagValues: Record<string, string | null>;
@@ -41,6 +44,7 @@ interface FiltersComponentProps {
     dateFilter?: boolean;
     regionFilter?: boolean;
     subscriptionIdFilter?: boolean;
+    projectIdFilter?: boolean;
     isRegionMultiSelect?: boolean;
     isOnlyYearFilter?: boolean;
     tagsFilter?: boolean;
@@ -107,6 +111,7 @@ export const FiltersComponent = ({
     dateFilter = true,
     regionFilter = false,
     subscriptionIdFilter = false,
+    projectIdFilter = false,
     isRegionMultiSelect = false,
     isOnlyYearFilter = false,
     tagsFilter = false,
@@ -125,6 +130,7 @@ export const FiltersComponent = ({
     const getDefaultService = () => {
         const isAzure = payload.cloud_provider === 'Azure';
         const isAws = payload.cloud_provider === 'AWS';
+        const isGcp = payload.cloud_provider === 'GCP';
         if (isAzure) {
             if (serviceType === 'storage') return '';
             if (serviceType === 'compute') return 'vm';
@@ -134,6 +140,12 @@ export const FiltersComponent = ({
         if (isAws) {
             if (serviceType === 'storage') return '';
             if (serviceType === 'compute') return 'ec2';
+            return 'billing';
+        }
+
+        if (isGcp) {
+            if (serviceType === 'storage') return '';
+            if (serviceType === 'compute') return 'compute_engine';
             return 'billing';
         }
 
@@ -150,6 +162,7 @@ export const FiltersComponent = ({
         const tenants = payload.tenants || [];
 
         const initialSubs: Record<string, string> = {};
+        const initialProjects: Record<string, string> = {};
         const initialRGs: Record<string, string> = {};
         const initialTagKeys: Record<string, string> = {};
         const initialTagValues: Record<string, string> = {};
@@ -157,6 +170,7 @@ export const FiltersComponent = ({
 
         tenants.forEach((id, index) => {
             initialSubs[id] = searchParams.get(`sub_${index}`) || '';
+            initialProjects[id] = searchParams.get(`project_${index}`) || '';
             initialRGs[id] = searchParams.get(`rg_${index}`) || '';
             initialTagKeys[id] = searchParams.get(`tagKey_${index}`) || TAG_CONSTANTS.DEFAULT_KEY;
             initialTagValues[id] = searchParams.get(`tagValue_${index}`) || TAG_CONSTANTS.DEFAULT_VALUE;
@@ -176,6 +190,7 @@ export const FiltersComponent = ({
             endDate,
             region: regionParam || 'all_regions',
             subscriptions: initialSubs,
+            projects: initialProjects,
             resourceGroups: initialRGs,
             tagKeys: initialTagKeys,
             tagValues: initialTagValues,
@@ -194,6 +209,7 @@ export const FiltersComponent = ({
     const [tempRegion, setTempRegion] = useState(filters.region);
 
     const [tempSubs, setTempSubs] = useState<Record<string, string>>(filters.subscriptions);
+    const [tempProjects, setTempProjects] = useState<Record<string, string>>(filters.projects);
     const [tempRGs, setTempRGs] = useState<Record<string, string>>(filters.resourceGroups);
     const [tempTagKeys, setTempTagKeys] = useState<Record<string, string | null>>(filters.tagKeys);
     const [tempTagValues, setTempTagValues] = useState<Record<string, string | null>>(filters.tagValues);
@@ -208,6 +224,7 @@ export const FiltersComponent = ({
         setTempYear(new Date(yearParam ? Number(yearParam) : new Date().getFullYear(), 0, 1));
         setTempRegion(newFilters.region);
         setTempSubs(newFilters.subscriptions);
+        setTempProjects(newFilters.projects);
         setTempRGs(newFilters.resourceGroups);
         setTempTagKeys(newFilters.tagKeys);
         setTempTagValues(newFilters.tagValues);
@@ -237,6 +254,7 @@ export const FiltersComponent = ({
                 endDate: new Date(Date.UTC(year, 11, 31)),
                 region: tempRegion,
                 subscriptions: tempSubs,
+                projects: tempProjects,
                 resourceGroups: tempRGs,
                 tagKeys: tempTagKeys,
                 tagValues: tempTagValues,
@@ -252,6 +270,7 @@ export const FiltersComponent = ({
 
             payload.tenants.forEach((id, index) => {
                 if (subscriptionIdFilter && tempSubs[id]) query.set(`sub_${index}`, tempSubs[id]);
+                if (projectIdFilter && tempProjects[id]) query.set(`project_${index}`, tempProjects[id]);
                 if (resourceGroupFilter && tempRGs[id]) query.set(`rg_${index}`, tempRGs[id]);
                 if (tagsFilter) {
                     if (tempTagKeys[id] && !tempTagKeys[id]?.startsWith('allKeys')) query.set(`tagKey_${index}`, tempTagKeys[id] as string);
@@ -268,6 +287,7 @@ export const FiltersComponent = ({
                 endDate: end,
                 region: tempRegion,
                 subscriptions: tempSubs,
+                projects: tempProjects,
                 resourceGroups: tempRGs,
                 tagKeys: tempTagKeys,
                 tagValues: tempTagValues,
@@ -284,6 +304,7 @@ export const FiltersComponent = ({
 
             payload.tenants.forEach((id, index) => {
                 if (subscriptionIdFilter && tempSubs[id]) query.set(`sub_${index}`, tempSubs[id]);
+                if (projectIdFilter && tempProjects[id]) query.set(`project_${index}`, tempProjects[id]);
                 if (resourceGroupFilter && tempRGs[id]) query.set(`rg_${index}`, tempRGs[id]);
                 if (tagsFilter) {
                     if (tempTagKeys[id] && !tempTagKeys[id]?.startsWith('allKeys')) query.set(`tagKey_${index}`, tempTagKeys[id] as string);
@@ -306,6 +327,7 @@ export const FiltersComponent = ({
         setTempYear(new Date(new Date().getFullYear(), 0, 1));
         setTempRegion('all_regions');
         setTempSubs(emptyMapString);
+        setTempProjects(emptyMapString);
         setTempRGs(emptyMapString);
         setTempTagKeys(defaultTagsK);
         setTempTagValues(defaultTagsV);
@@ -367,6 +389,15 @@ export const FiltersComponent = ({
                                         />
                                     </div>
                                 )}
+                                {regionFilter && payload.cloud_provider === 'GCP' && (
+                                    <div className='space-y-1.5 flex flex-col'>
+                                        <label className='text-sm font-medium text-gray-600'>Región de Nube</label>
+                                        <GcpRegionFilterComponent
+                                            regions={tempRegion}
+                                            setRegions={setTempRegion}
+                                        />
+                                    </div>
+                                )}
                                 {
                                     serviceFilter && (
                                         <div className='space-y-1.5 flex flex-col'>
@@ -382,7 +413,6 @@ export const FiltersComponent = ({
                                 }
                             </div>
                         </div>
-
                         {subscriptionIdFilter && payload.cloud_provider === 'Azure' && (
                             <>
                                 <FilterSeparator />
@@ -406,6 +436,45 @@ export const FiltersComponent = ({
                                 </div>
                             </>
                         )}
+                        {
+                            projectIdFilter && payload.cloud_provider === 'GCP' && (
+                                <>
+                                    <FilterSeparator />
+                                    <div className="border rounded-lg p-5 shadow-sm ">
+                                        <div className="grid grid-cols-1 gap-6">
+                                            {projectIdFilter && (
+                                                <div className='space-y-2'>
+                                                    <label className='text-xs font-medium text-gray-600 flex items-center gap-2'>
+                                                        Proyectos.
+                                                    </label>
+                                                    <MultiTenantProjectsFilterComponent
+                                                        projectsMap={tempProjects}
+                                                        setProjectsMap={setTempProjects}
+                                                        startDate={tempStartDate}
+                                                        endDate={tempEndDate}
+                                                        payload={payload}
+                                                    />
+
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                </>
+                            )
+                        }
+                        {/* {
+                            regionFilter && payload.cloud_provider === 'GCP' && (
+                                <>
+                                    <div className='space-y-1.5 flex flex-col'>
+                                        <label className='text-sm font-medium text-gray-600'>Región de Nube</label>
+                                        <GcpRegionFilterComponent
+                                            regions={tempRegion}
+                                            setRegions={setTempRegion}
+                                        />
+                                    </div>
+                                </>
+                            )
+                        } */}
                         {regionFilter && payload.cloud_provider === 'Azure' && (
                             <>
                                 <FilterSeparator />
@@ -414,7 +483,7 @@ export const FiltersComponent = ({
                                         <label className='text-xs font-medium text-gray-600 flex items-center gap-2'>
                                             Región
                                         </label>
-                                        <RegionFilterComponent
+                                        <AzureRegionFilterComponent
                                             selectedRegion={tempRegion}
                                             setSelectedRegion={setTempRegion}
                                             isRegionMultiSelect={isRegionMultiSelect}
@@ -515,6 +584,7 @@ export const FiltersComponent = ({
                         endDate={filters.endDate}
                         region={filters.region}
                         subscriptions={filters.subscriptions}
+                        projects={filters.projects}
                         resourceGroups={filters.resourceGroups}
                         tagKeys={filters.tagKeys}
                         tagValues={filters.tagValues}

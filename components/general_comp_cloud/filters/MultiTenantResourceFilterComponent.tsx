@@ -60,6 +60,8 @@ export const MultiTenantResourceFilterComponent = ({
         url = service ? `/api/comparison-cloud/bridge/intracloud/azure/resources/get_all_resources?date_from=${startDateFormatted}&date_to=${endDateFormatted}&service=${service}` : null;
     } else if (payload.cloud_provider === 'AWS') {
         url = service ? `/api/comparison-cloud/bridge/intracloud/aws/resources/get_all_resources?date_from=${startDateFormatted}&date_to=${endDateFormatted}&service=${service}` : null;
+    } else if (payload.cloud_provider === 'GCP') {
+        url = service ? `/api/comparison-cloud/bridge/intracloud/gcp/resources/get_all_resources?date_from=${startDateFormatted}&date_to=${endDateFormatted}&service=${service}` : null;
     }
 
     const { data, error, isLoading } = useSWR(

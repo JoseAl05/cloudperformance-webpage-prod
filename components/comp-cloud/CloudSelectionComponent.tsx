@@ -87,12 +87,15 @@ export const CloudSelectionComponent = () => {
 
     const isAwsMultitenant = user && user.is_aws_multi_tenant;
     const isAzureMultitenant = user && user.is_azure_multi_tenant;
+    const isGcpMultitenant = user && user.is_gcp_multi_tenant;
 
     let activeAccounts: CloudAccount[] = [];
     if (selectedCloud === 'Azure' && user?.azure_accounts) {
         activeAccounts = user.azure_accounts;
     } else if (selectedCloud === 'AWS' && user?.aws_accounts) {
         activeAccounts = user.aws_accounts;
+    } else if (selectedCloud === 'GCP' && user?.gcp_accounts) {
+        activeAccounts = user.gcp_accounts;
     }
 
     return (
@@ -121,6 +124,7 @@ export const CloudSelectionComponent = () => {
                         <SelectContent>
                             {isAzureMultitenant && <SelectItem value='Azure'>Azure (Tenants)</SelectItem>}
                             {isAwsMultitenant && <SelectItem value='AWS'>AWS (Cuentas)</SelectItem>}
+                            {isGcpMultitenant && <SelectItem value='GCP'>GCP (Proyectos)</SelectItem>}
                         </SelectContent>
                     </Select>
                 </CardContent>

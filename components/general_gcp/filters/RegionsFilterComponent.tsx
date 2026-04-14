@@ -41,9 +41,9 @@ export const RegionsFilterComponent = ({
     const getDisplayText = () => {
         if (!regions || regions.trim() === '') return 'Selecciona región';
         if (regions === 'all_regions') return 'Todas las Regiones';
-        
+
         const regionArray = regions.split(',').filter((s) => s.trim() !== '');
-        
+
         if (regionArray.length === 1) {
             const found = gcp_regions.find((r) => r.value === regionArray[0]);
             return found ? found.label : regionArray[0];
@@ -59,7 +59,7 @@ export const RegionsFilterComponent = ({
         } else {
             // Si selecciono una específica, quito "all_regions"
             regionArray = regionArray.filter((r) => r !== 'all_regions');
-            
+
             if (regionArray.includes(regionValue)) {
                 // Si ya estaba, la quito (toggle off)
                 regionArray = regionArray.filter((r) => r !== regionValue);
@@ -87,35 +87,35 @@ export const RegionsFilterComponent = ({
                     <CommandInput placeholder="Buscar región..." />
                     <CommandList>
                         <CommandEmpty>No se encontró la región.</CommandEmpty>
-                    <CommandGroup className="max-h-[250px] overflow-y-auto">
-                        
-                        {/* 1. Opción Manual "Todas las Regiones" (Déjala tal cual) */}
-                        <CommandItem value="all_regions" onSelect={() => handleRegionToggle('all_regions')}>
-                            <Check className={cn('mr-2 h-4 w-4', regions === 'all_regions' ? 'opacity-100' : 'opacity-0')} />
-                            Todas las Regiones
-                        </CommandItem>
+                        <CommandGroup className="max-h-[250px] overflow-y-auto">
 
-                        {/* 2. Lista filtrada (Aquí es donde agregamos el .filter) */}
-                        {gcp_regions
-                            .filter((r) => r.value !== 'all_regions') // <--- ESTA ES LA LÍNEA MÁGICA
-                            .map((region) => (
-                                <CommandItem 
-                                    key={region.value} 
-                                    value={region.value} 
-                                    onSelect={() => handleRegionToggle(region.value)}
-                                >
-                                    <Check
-                                        className={cn(
-                                            'mr-2 h-4 w-4',
-                                            selectedRegionArray.includes(region.value) && !selectedRegionArray.includes('all_regions') 
-                                                ? 'opacity-100' 
-                                                : 'opacity-0'
-                                        )}
-                                    />
-                                    {region.label}
-                                </CommandItem>
-                        ))}
-                    </CommandGroup>
+                            {/* 1. Opción Manual "Todas las Regiones" (Déjala tal cual) */}
+                            <CommandItem value="all_regions" onSelect={() => handleRegionToggle('all_regions')}>
+                                <Check className={cn('mr-2 h-4 w-4', regions === 'all_regions' ? 'opacity-100' : 'opacity-0')} />
+                                Todas las Regiones
+                            </CommandItem>
+
+                            {/* 2. Lista filtrada (Aquí es donde agregamos el .filter) */}
+                            {gcp_regions
+                                .filter((r) => r.value !== 'all_regions') // <--- ESTA ES LA LÍNEA MÁGICA
+                                .map((region) => (
+                                    <CommandItem
+                                        key={region.value}
+                                        value={region.value}
+                                        onSelect={() => handleRegionToggle(region.value)}
+                                    >
+                                        <Check
+                                            className={cn(
+                                                'mr-2 h-4 w-4',
+                                                selectedRegionArray.includes(region.value) && !selectedRegionArray.includes('all_regions')
+                                                    ? 'opacity-100'
+                                                    : 'opacity-0'
+                                            )}
+                                        />
+                                        {region.label}
+                                    </CommandItem>
+                                ))}
+                        </CommandGroup>
                     </CommandList>
                 </Command>
             </PopoverContent>

@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Info } from 'lucide-react';
 import { createChartOption, deepMerge, makeBaseOptions, useECharts } from '@/lib/echartsGlobalConfig';
 import { useTheme } from 'next-themes';
-import { bytesToGB } from '@/lib/bytesToMbs';
+import { formatBytes } from '@/lib/bytesToMbs';
 
 interface ComputeMetric {
     avg_value: number;
@@ -34,14 +34,7 @@ const SingleMetricChart = ({ metricName, data }: { metricName: string; data: Ten
                 .filter((m) => m.metric_name === metricName)
                 .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime())
                 .map((m) => {
-                    let metricValue = 0;
-                    if (m.metric_name.includes("Available Memory") || m.metric_name.includes("Storage Used")) {
-                        metricValue = bytesToGB(m.avg_value);
-                    } else {
-                        metricValue = m.avg_value;
-                    }
-
-                    return [m.timestamp, metricValue];
+                    return [m.timestamp, m.avg_value];
                 });
 
             return {
@@ -56,7 +49,7 @@ const SingleMetricChart = ({ metricName, data }: { metricName: string; data: Ten
 
     const option = useMemo(() => {
         const base = makeBaseOptions({
-            legend: data.map((t,index) => `Tenant ${index + 1}`),
+            legend: data.map((t, index) => `Tenant ${index + 1}`),
             useUTC: true,
             showToolbox: true,
             metricType: 'default',
@@ -76,27 +69,41 @@ const SingleMetricChart = ({ metricName, data }: { metricName: string; data: Ten
             return n.toLocaleString('en-US', { maximumFractionDigits: 2 });
         };
 
-        if (metricName.includes('Percent') || metricName.includes('Percentage')) {
+        if (metricName.includes('Percent') || metricName.includes('Percentage') || metricName.includes('CPUUtilization') || metricName.includes('cpu_utilization')) {
             yAxisName = `${metricName} (%)`;
             axisLabelFormatter = (value: number) => `${value}%`;
             tooltipFormatter = (v: number | null) => {
                 if (v == null) return '-';
                 return `${Number(v).toFixed(2)}%`;
             };
-        } else if (metricName.includes('Available Memory') || metricName.includes('Storage Used')) {
-            yAxisName = `${metricName} (GB)`;
-            axisLabelFormatter = (value: number) => `${value.toFixed(1)} GB`;
+        } else if (metricName.includes('Available Memory') || metricName.includes('Storage Used') || metricName.includes('disk_write_throughput') || metricName.includes('disk_read_throughput') || metricName.includes('networkin') || metricName.includes('networkout') || metricName.toLowerCase().includes('freestorage') || metricName.includes('network_egress_throughput') || metricName.includes('network_ingress_throughput')) {
+            yAxisName = metricName;
+            axisLabelFormatter = (value: number) => formatBytes(value);
             tooltipFormatter = (v: number | null) => {
                 if (v == null) return '-';
-                return `${Number(v).toFixed(2)} GB`;
+                return formatBytes(Number(v));
             };
-        } else if (metricName.includes('IOPS')) {
+        } else if (metricName.includes('IOPS') || metricName.includes('iops')) {
             yAxisName = `${metricName} (IOPS)`;
             axisLabelFormatter = (value: number) => `${value.toFixed(1)} (IOPS)`;
             tooltipFormatter = (v: number | null) => {
                 if (v == null) return '-';
                 return `${Number(v).toFixed(2)} (IOPS)`;
             };
+        } else if (metricName.includes('Connections') || metricName.includes('connections')) {
+            yAxisName = `${metricName} (Connections)`;
+            axisLabelFormatter = (value: number) => `${value.toFixed(1)} (Connections)`;
+            tooltipFormatter = (v: number | null) => {
+                if (v == null) return '-';
+                return `${Number(v).toFixed(2)} (Conexiones)`;
+            }
+        } else if (metricName.includes('PPS') || metricName.includes('pps')) {
+            yAxisName = `${metricName} (Paquetes/s)`;
+            axisLabelFormatter = (value: number) => `${value.toFixed(1)} (Paquetes/s)`;
+            tooltipFormatter = (v: number | null) => {
+                if (v == null) return '-';
+                return `${Number(v).toFixed(2)} (Paquetes/s)`;
+            }
         }
 
         const chartOptions = createChartOption({

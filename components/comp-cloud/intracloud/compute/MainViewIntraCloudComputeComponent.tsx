@@ -102,7 +102,8 @@ export const MainViewIntraCloudComputeComponent = ({ payload }: MainViewIntraClo
             </div>
             <div className='w-full min-w-0 space-y-6'>
                 {
-                    payload.cloud_provider === 'Azure' ? (
+                    payload.cloud_provider === 'Azure' &&
+                    (
                         <FiltersComponent
                             Component={IntraCloudComputeComponent}
                             regionFilter
@@ -115,7 +116,25 @@ export const MainViewIntraCloudComputeComponent = ({ payload }: MainViewIntraClo
                             resourceFilter
                             payload={payload}
                         />
-                    ) : (
+                    )
+                }
+                {
+                    payload.cloud_provider === 'AWS' &&
+                    (
+                        <FiltersComponent
+                            Component={IntraCloudComputeComponent}
+                            regionFilter
+                            isRegionMultiSelect
+                            serviceFilter
+                            serviceType='compute'
+                            resourceFilter
+                            payload={payload}
+                        />
+                    )
+                }
+                {
+                    payload.cloud_provider === 'GCP' &&
+                    (
                         <FiltersComponent
                             Component={IntraCloudComputeComponent}
                             regionFilter

@@ -19,6 +19,7 @@ import {
 import { azure_compute_services, azure_storage_services } from '@/lib/azure_services';
 import { ReqPayload } from '@/components/comp-cloud/intracloud/IntraCloudConfigComponent';
 import { aws_compute_services, aws_storage_services } from '@/lib/aws_services';
+import { gcp_compute_services, gcp_storage_services } from '@/lib/gcp_services';
 
 interface MultiTenantServiceFilterComponentProps {
     service: string;
@@ -38,16 +39,22 @@ export const MultiTenantServiceFilterComponent = ({
     let servicesList = [];
 
     if (payload.cloud_provider === 'Azure') {
-        if (serviceType === 'compute'){
+        if (serviceType === 'compute') {
             servicesList = azure_compute_services;
-        } else if (serviceType === 'storage'){
+        } else if (serviceType === 'storage') {
             servicesList = azure_storage_services;
         }
     } else if (payload.cloud_provider === 'AWS') {
-        if (serviceType === 'compute'){
+        if (serviceType === 'compute') {
             servicesList = aws_compute_services;
-        } else if (serviceType === 'storage'){
+        } else if (serviceType === 'storage') {
             servicesList = aws_storage_services;
+        }
+    } else if (payload.cloud_provider === 'GCP') {
+        if (serviceType === 'compute') {
+            servicesList = gcp_compute_services;
+        } else if (serviceType === 'storage') {
+            servicesList = gcp_storage_services;
         }
     }
 

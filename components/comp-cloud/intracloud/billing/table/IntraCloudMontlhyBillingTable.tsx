@@ -6,23 +6,15 @@ import {
 import { LoaderComponent } from '@/components/general_aws/LoaderComponent';
 import { Button } from '@/components/ui/button'
 import { buildExportRows, exportToCSV, exportToExcel } from '@/lib/exportExcelBillingIntracloud';
+import { formatGeneric } from '@/lib/bytesToMbs';
 
 interface IntraCloudMonthlyBillingTableProps {
   data: IntraCloudMonthlyBilling[];
   isLoading: boolean;
 }
 
-const formatCurrency = (value: number): string => {
-  const abs = Math.abs(value)
-  const formatted = abs.toLocaleString('en-US', {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  })
-  return value < 0 ? `($${formatted})` : `$${formatted}`
-}
-
 const formatPercent = (value: number): string => {
-  const formatted = Math.abs(value).toFixed(1)
+  const formatted = Math.abs(value).toFixed(2)
   return value < 0 ? `-${formatted}%` : `${formatted}%`
 }
 
@@ -86,11 +78,11 @@ export const IntraCloudMonthlyBillingTable = ({
   }
 
   const deviationColor = (value: number) =>
-    value < 0 ? 'text-green-400' : value > 0 ? 'text-yellow-400' : ''
+    value < 0 ? 'text-green-700 dark:text-green-400' : value > 0 ? 'text-yellow-700 dark:text-yellow-400' : ''
 
-  const cellBase = 'px-2 py-1 text-right text-sm whitespace-nowrap border-r border-white/10'
-  const headerCell = 'px-2 py-1 text-center text-sm font-semibold whitespace-nowrap border-r border-white/10'
-  const labelCell = 'px-3 py-1 text-left text-sm whitespace-nowrap border-r border-white/10'
+  const cellBase = 'px-2 py-1 text-right text-sm whitespace-nowrap border-r border-gray-200 dark:border-white/10'
+  const headerCell = 'px-2 py-1 text-center text-sm font-semibold whitespace-nowrap border-r border-blue-200 dark:border-white/10'
+  const labelCell = 'px-3 py-1 text-left text-sm whitespace-nowrap border-r border-gray-200 dark:border-white/10'
 
   const renderSectionRows = (
     label: string,
@@ -135,48 +127,48 @@ export const IntraCloudMonthlyBillingTable = ({
         <tr className={headerBg ?? bgBase}>
           <td className={`${labelCell} font-semibold`}>{label}</td>
           {months.map((m) => (
-            <td key={m} className={`${cellBase} font-semibold`}>{formatCurrency(monthlyBudget[m])}</td>
+            <td key={m} className={`${cellBase} font-semibold`}>{formatGeneric(monthlyBudget[m])}</td>
           ))}
-          <td className={`${cellBase} font-semibold`}>{formatCurrency(budgetSum)}</td>
+          <td className={`${cellBase} font-semibold`}>{formatGeneric(budgetSum)}</td>
         </tr>
         <tr className={bgBase}>
           <td className={`${labelCell} pl-6`}>Facturado</td>
           {months.map((m) => (
-            <td key={m} className={cellBase}>{formatCurrency(monthlyInvoiced[m] ?? 0)}</td>
+            <td key={m} className={cellBase}>{formatGeneric(monthlyInvoiced[m] ?? 0)}</td>
           ))}
-          <td className={`${cellBase} font-semibold`}>{formatCurrency(totalInvoiced)}</td>
+          <td className={`${cellBase} font-semibold`}>{formatGeneric(totalInvoiced)}</td>
         </tr>
-        <tr className={`${bgBase} border-t border-yellow-400/40`}>
-          <td className={`${labelCell} pl-6 italic text-yellow-200`}>↕ Var. vs mes anterior ($)</td>
+        <tr className={`${bgBase} border-t border-yellow-500/40 dark:border-yellow-400/40`}>
+          <td className={`${labelCell} pl-6 italic text-yellow-700 dark:text-yellow-200`}>↕ Var. vs mes anterior ($)</td>
           {months.map((m) => (
-            <td key={m} className={`${cellBase} font-medium ${facDiff[m] !== null ? deviationColor(facDiff[m]!) : 'text-white/40'}`}>
-              {facDiff[m] !== null ? formatCurrency(facDiff[m]!) : '-'}
+            <td key={m} className={`${cellBase} font-medium ${facDiff[m] !== null ? deviationColor(facDiff[m]!) : 'text-gray-400 dark:text-white/40'}`}>
+              {facDiff[m] !== null ? formatGeneric(facDiff[m]!) : '-'}
             </td>
           ))}
-          <td className={`${cellBase} text-white/40`}>-</td>
+          <td className={`${cellBase} text-gray-400 dark:text-white/40`}>-</td>
         </tr>
-        <tr className={`${bgBase} border-b border-yellow-400/40`}>
-          <td className={`${labelCell} pl-6 italic text-yellow-200`}>↕ Var. vs mes anterior (%)</td>
+        <tr className={`${bgBase} border-b border-yellow-500/40 dark:border-yellow-400/40`}>
+          <td className={`${labelCell} pl-6 italic text-yellow-700 dark:text-yellow-200`}>↕ Var. vs mes anterior (%)</td>
           {months.map((m) => (
-            <td key={m} className={`${cellBase} font-medium ${facDiffPct[m] !== null ? deviationColor(facDiffPct[m]!) : 'text-white/40'}`}>
+            <td key={m} className={`${cellBase} font-medium ${facDiffPct[m] !== null ? deviationColor(facDiffPct[m]!) : 'text-gray-400 dark:text-white/40'}`}>
               {facDiffPct[m] !== null ? formatPercent(facDiffPct[m]!) : '-'}
             </td>
           ))}
-          <td className={`${cellBase} text-white/40`}>-</td>
+          <td className={`${cellBase} text-gray-400 dark:text-white/40`}>-</td>
         </tr>
         <tr className={bgBase}>
           <td className={`${labelCell} pl-6`}>Proyectado</td>
           {months.map((m) => (
-            <td key={m} className={cellBase}>{formatCurrency(monthlyProjected[m])}</td>
+            <td key={m} className={cellBase}>{formatGeneric(monthlyProjected[m])}</td>
           ))}
-          <td className={cellBase}>{formatCurrency(projectedSum)}</td>
+          <td className={cellBase}>{formatGeneric(projectedSum)}</td>
         </tr>
         <tr className={bgBase}>
           <td className={`${labelCell} font-semibold`}>Total</td>
           {months.map((m) => (
-            <td key={m} className={`${cellBase} font-semibold`}>{formatCurrency(monthlyInvoiced[m] ?? 0)}</td>
+            <td key={m} className={`${cellBase} font-semibold`}>{formatGeneric(monthlyInvoiced[m] ?? 0)}</td>
           ))}
-          <td className={`${cellBase} font-semibold`}>{formatCurrency(totalInvoiced)}</td>
+          <td className={`${cellBase} font-semibold`}>{formatGeneric(totalInvoiced)}</td>
         </tr>
         <tr className={bgBase}>
           <td className={`${labelCell} pl-6`}>Desviación ($)</td>
@@ -184,11 +176,11 @@ export const IntraCloudMonthlyBillingTable = ({
             const dev = monthlyBudget[m] - (monthlyInvoiced[m] ?? 0)
             return (
               <td key={m} className={`${cellBase} ${deviationColor(dev)}`}>
-                {formatCurrency(dev)}
+                {formatGeneric(dev)}
               </td>
             )
           })}
-          <td className={`${cellBase} ${deviationColor(devTotal)}`}>{formatCurrency(devTotal)}</td>
+          <td className={`${cellBase} ${deviationColor(devTotal)}`}>{formatGeneric(devTotal)}</td>
         </tr>
         <tr className={bgBase}>
           <td className={`${labelCell} pl-6`}>Desviación (%)</td>
@@ -235,7 +227,7 @@ export const IntraCloudMonthlyBillingTable = ({
     <div className="overflow-x-auto rounded-md border border-border">
       <table className="w-full border-collapse">
         <thead>
-          <tr className="bg-blue-900 dark:bg-blue-950 text-white">
+          <tr className="bg-blue-300 text-blue-950 dark:bg-blue-950 dark:text-white">
             <th className={headerCell}>Apertura</th>
             {months.map((m) => (
               <th key={m} className={headerCell}>{formatMonth(m)}</th>
@@ -248,7 +240,7 @@ export const IntraCloudMonthlyBillingTable = ({
             'Presupuesto (Total)',
             Object.fromEntries(months.map((m) => [m, summaryByMonth[m] ?? 0])),
             summaryTotal,
-            'bg-blue-800/90 dark:bg-blue-900/90 text-white',
+            'bg-blue-200/90 text-gray-900 dark:bg-blue-900/90 dark:text-white',
           )}
         </tbody>
 
@@ -268,8 +260,8 @@ export const IntraCloudMonthlyBillingTable = ({
                 `Ppto ${tenant.tenant_alias}`,
                 tenantMonthly,
                 tenantTotal,
-                'bg-blue-600/90 dark:bg-blue-800/90 text-white',
-                'bg-blue-800 dark:bg-blue-950 text-white',
+                'bg-white text-gray-900 dark:bg-blue-800/90 dark:text-white',
+                'bg-blue-200 text-blue-950 dark:bg-blue-950 dark:text-white',
               )}
             </tbody>
           )

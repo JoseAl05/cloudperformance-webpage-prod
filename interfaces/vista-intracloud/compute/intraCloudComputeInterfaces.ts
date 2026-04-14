@@ -64,6 +64,8 @@ export interface IntraCloudComputeBillingData {
       | 'savings_plans_type'
       | 'savings_plan_arn'
       | 'reservation_id'
+      | 'service_description'
+      | 'sku_description'
   ]: string;
 }
 
@@ -106,8 +108,11 @@ export interface IntraCloudComputeBillingMostExpensive {
       | 'savings_plans_type'
       | 'savings_plan_arn'
       | 'reservation_id'
+      | 'service_description'
+      | 'sku_description'
   ]: string;
   resource: string;
+  resource_global_name?: string;
 }
 
 export interface IntraCloudComputeBillingLeastExpensive {
@@ -149,6 +154,9 @@ export interface IntraCloudComputeBillingLeastExpensive {
       | 'savings_plans_type'
       | 'savings_plan_arn'
       | 'reservation_id'
+      | 'service_description'
+      | 'sku_description'
   ]: string;
   resource: string;
+  resource_global_name?: string;
 }
