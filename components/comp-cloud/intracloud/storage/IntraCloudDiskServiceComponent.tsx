@@ -10,6 +10,8 @@ import { IntraCloudAzureStorageCardsByTenantComponent } from '@/components/comp-
 import { AlertCircle, Loader2 } from 'lucide-react';
 import { useState } from 'react';
 import { DynamicFilterProps } from '@/components/general_comp_cloud/filters/FilterComponent';
+import { IntraCloudGcpStorageCardsByTenantComponent } from '@/components/comp-cloud/intracloud/storage/gcp/info/IntraCloudGcpStorageCardsByTenantComponent';
+import { IntraCloudGcpStorageChartComponent } from '@/components/comp-cloud/intracloud/storage/gcp/grafico/IntraCloudGcpStorageChartComponent';
 
 type IntraCloudDiskServiceComponentProps = DynamicFilterProps;
 
@@ -17,6 +19,7 @@ interface BackendPayload extends ReqPayload {
     filters: Record<string, {
         resource_group?: string;
         resources?: string;
+        project_id?: string;
     }>;
 }
 
@@ -41,13 +44,30 @@ export const IntraCloudDiskServiceComponent = ({
     endDate,
     resourceGroups,
     resources,
+    projects,
     service,
     region
 }: IntraCloudDiskServiceComponentProps) => {
     const startDateFormatted = startDate.toISOString().replace('Z', '').slice(0, -4);
     const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : '';
 
-    const [dimension, setDimension] = useState<string>(payload.cloud_provider === 'Azure' ? 'pricing_model' : 'RESOURCE_ID');
+    let dimensionDefaultValue = '';
+    switch (payload.cloud_provider) {
+        case 'Azure':
+            dimensionDefaultValue = 'pricing_model';
+            break;
+        case 'AWS':
+            dimensionDefaultValue = 'RESOURCE_ID';
+            break;
+        case 'GCP':
+            dimensionDefaultValue = 'service_description';
+            break;
+        default:
+            dimensionDefaultValue = '';
+            break;
+    }
+
+    const [dimension, setDimension] = useState<string>(dimensionDefaultValue);
     const filtersPayload: Record<string, unknown> = {};
 
     if (payload.tenants) {
@@ -62,6 +82,11 @@ export const IntraCloudDiskServiceComponent = ({
                     region: region[tenantId] || 'all_regions',
                     resources: resources[tenantId] || 'all'
                 };
+            } else if (payload.cloud_provider === 'GCP') {
+                filtersPayload[tenantId] = {
+                    resources: resources[tenantId] || 'all',
+                    project_id: payload.project_id || 'all'
+                };
             }
         });
     }
@@ -71,14 +96,23 @@ export const IntraCloudDiskServiceComponent = ({
         filters: filtersPayload
     };
 
-    const urlDisksMetrics =
-        payload.cloud_provider === 'Azure'
-            ? `/api/comparison-cloud/bridge/intracloud/azure/storage/get_disks_usage?date_from=${startDateFormatted}&date_to=${endDateFormatted}&service=${service}`
-            : `/api/comparison-cloud/bridge/intracloud/aws/storage/get_disks_usage?date_from=${startDateFormatted}&date_to=${endDateFormatted}&service=${service}`
+    let urlDisksMetrics = '';
+    let urlBillingDisks = '';
 
-    const urlBillingDisks = payload.cloud_provider === 'Azure'
-        ? `/api/comparison-cloud/bridge/intracloud/azure/storage/get_disks_billing_data?date_from=${startDateFormatted}&date_to=${endDateFormatted}&service=${service}&dimension=${dimension}`
-        : `/api/comparison-cloud/bridge/intracloud/aws/storage/get_disks_billing_data?date_from=${startDateFormatted}&date_to=${endDateFormatted}&dimension=${dimension}&service=${service}`;
+    switch (payload.cloud_provider) {
+        case 'Azure':
+            urlDisksMetrics = `/api/comparison-cloud/bridge/intracloud/azure/storage/get_disks_usage?date_from=${startDateFormatted}&date_to=${endDateFormatted}&service=${service}`;
+            urlBillingDisks = `/api/comparison-cloud/bridge/intracloud/azure/storage/get_disks_billing_data?date_from=${startDateFormatted}&date_to=${endDateFormatted}&service=${service}&dimension=${dimension}`;
+            break;
+        case 'AWS':
+            urlDisksMetrics = `/api/comparison-cloud/bridge/intracloud/aws/storage/get_disks_usage?date_from=${startDateFormatted}&date_to=${endDateFormatted}&service=${service}`;
+            urlBillingDisks = `/api/comparison-cloud/bridge/intracloud/aws/storage/get_disks_billing_data?date_from=${startDateFormatted}&date_to=${endDateFormatted}&dimension=${dimension}&service=${service}`;
+            break;
+        case 'GCP':
+            urlDisksMetrics = `/api/comparison-cloud/bridge/intracloud/gcp/storage/get_disks_usage?date_from=${startDateFormatted}&date_to=${endDateFormatted}&service=${service}`;
+            urlBillingDisks = `/api/comparison-cloud/bridge/intracloud/gcp/storage/get_disks_billing_data?date_from=${startDateFormatted}&date_to=${endDateFormatted}&dimension=${dimension}&service=${service}`;
+            break;
+    }
 
 
     const disksMetrics = useSWR(
@@ -120,7 +154,7 @@ export const IntraCloudDiskServiceComponent = ({
                 disksMetrics.data && (
                     <>
                         {
-                            payload.cloud_provider === 'AWS' ? (
+                            payload.cloud_provider === 'AWS' && (
                                 <>
                                     <IntraCloudAwsStorageCardsByTenantComponent
                                         data={disksMetrics.data}
@@ -131,13 +165,29 @@ export const IntraCloudDiskServiceComponent = ({
                                         service={service}
                                     />
                                 </>
-                            ) : (
+                            )
+                        }
+                        {
+                            payload.cloud_provider === 'Azure' && (
                                 <>
                                     <IntraCloudAzureStorageCardsByTenantComponent
                                         data={disksMetrics.data}
                                         service={service}
                                     />
                                     <IntraCloudAzureStorageChartComponent
+                                        data={disksMetrics.data}
+                                        service={service}
+                                    />
+                                </>
+                            )
+                        }
+                        {
+                            payload.cloud_provider === 'GCP' && (
+                                <>
+                                    <IntraCloudGcpStorageCardsByTenantComponent
+                                        data={disksMetrics.data}
+                                        service={service}                                     />
+                                    <IntraCloudGcpStorageChartComponent
                                         data={disksMetrics.data}
                                         service={service}
                                     />

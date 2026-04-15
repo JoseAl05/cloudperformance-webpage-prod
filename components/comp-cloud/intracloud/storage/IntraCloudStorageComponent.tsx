@@ -50,7 +50,7 @@ export const IntraCloudStorageComponent = ({
     return (
         <div className="p-4 space-y-6">
             {
-                service === 'strg_account' && (
+                (service === 'strg_account' || service === 'storage_buckets' || service === 'storage') && (
                     <>
                         <IntraCloudStorageServiceComponent
                             payload={payload}

@@ -52,7 +52,7 @@ export const IntraCloudComputeComponent = ({
     const startDateFormatted = startDate.toISOString().replace('Z', '').slice(0, -4);
     const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : '';
 
-        let dimensionDefaultValue = '';
+    let dimensionDefaultValue = '';
     switch (payload.cloud_provider) {
         case 'Azure':
             dimensionDefaultValue = 'pricing_model';

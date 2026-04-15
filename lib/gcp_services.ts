@@ -21,7 +21,7 @@ export const gcp_compute_services = [
 ]
 
 export const gcp_storage_services = [
-  { value: 'cloud_storage', label: 'Cloud Storage' },
+  { value: 'storage_buckets', label: 'Cloud Storage Buckets' },
   // { value: 'filestore', label: 'Filestore' },
   { value: 'disks', label: 'Persistent Disks' },
 ]

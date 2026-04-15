@@ -144,7 +144,7 @@ export const FiltersComponent = ({
         }
 
         if (isGcp) {
-            if (serviceType === 'storage') return '';
+            if (serviceType === 'storage') return 'storage_buckets';
             if (serviceType === 'compute') return 'compute_engine';
             return 'billing';
         }

@@ -52,7 +52,7 @@ export const MainViewIntraCloudStorageComponent = ({ payload }: MainViewIntraClo
             </div>
             <div className='w-full min-w-0 space-y-6'>
                 {
-                    payload.cloud_provider === 'Azure' ? (
+                    payload.cloud_provider === 'Azure' && (
                         <FiltersComponent
                             Component={IntraCloudStorageComponent}
                             regionFilter
@@ -65,7 +65,23 @@ export const MainViewIntraCloudStorageComponent = ({ payload }: MainViewIntraClo
                             resourceFilter
                             payload={payload}
                         />
-                    ) : (
+                    )
+                }
+                {
+                    payload.cloud_provider === 'AWS' && (
+                        <FiltersComponent
+                            Component={IntraCloudStorageComponent}
+                            regionFilter
+                            isRegionMultiSelect
+                            serviceFilter
+                            serviceType='storage'
+                            resourceFilter
+                            payload={payload}
+                        />
+                    )
+                }
+                {
+                    payload.cloud_provider === 'GCP' && (
                         <FiltersComponent
                             Component={IntraCloudStorageComponent}
                             regionFilter
