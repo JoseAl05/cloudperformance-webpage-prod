@@ -28,6 +28,8 @@ export const MainViewTendenciaFacturacionComponent = () => {
                 <FiltersComponent
                     Component={TendenciaFacturacionComponent}
                     dateFilter
+                    serviceFilter
+                    isServiceMultiSelect
                     tagsFilter
                     tagCollection="gcp_billing_export_detailed"
                     tagColumn="labels"

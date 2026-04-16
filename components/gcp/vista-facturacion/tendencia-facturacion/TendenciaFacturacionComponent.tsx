@@ -1,7 +1,7 @@
 'use client'
 import useSWR from 'swr';
 import { useState, useMemo } from 'react';
-import { TrendingUp, DollarSign, Info, TrendingDown } from 'lucide-react';
+import { TrendingUp, DollarSign, Info, TrendingDown, Table2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { LoaderComponent } from '@/components/general_gcp/LoaderComponent';
 import { TendenciaFacturacionLineChartComponent } from '@/components/gcp/vista-facturacion/tendencia-facturacion/grafico/TendenciaFacturacionLineChartComponent';
@@ -20,11 +20,15 @@ import {
 import { Button } from '@/components/ui/button';
 import { SelectCurrencyComponent } from '@/components/gcp/vista-facturacion/tendencia-facturacion/SelectCurrencyComponent';
 
+// IMPORTAMOS TU COMPONENTE DE TABLA REUTILIZABLE
+import { HistoricalBillingTable, RespuestaHistoricoConsumo } from './table/HistoricalBillingTable'; // Ajusta la ruta si es necesario
+
 interface TendenciaFacturacionComponentProps {
     startDate: Date;
     endDate: Date;
     regions: string;
     projects?: string[];
+    service: string;
     tagKey?: string;
     tagValue?: string;
 }
@@ -48,16 +52,13 @@ const fetcher = (url: string) =>
     }).then(res => res.json())
 
 export function parseScientific(num: string): string {
-    // If the number is not in scientific notation return it as it is.
     if (!/\d+\.?\d*e[+-]*\d+/i.test(num)) {
         return num;
     }
 
-    // Remove the sign.
     const numberSign = Math.sign(Number(num));
     num = Math.abs(Number(num)).toString();
 
-    // Parse into coefficient and exponent.
     const [coefficient, exponent] = num.toLowerCase().split("e");
     let zeros = Math.abs(Number(exponent));
     const exponentSign = Math.sign(Number(exponent));
@@ -80,32 +81,35 @@ export function parseScientific(num: string): string {
     return numberSign < 0 ? "-" + num : num;
 }
 
-export const TendenciaFacturacionComponent = ({ startDate, endDate, projects, regions, tagKey, tagValue }: TendenciaFacturacionComponentProps) => {
+export const TendenciaFacturacionComponent = ({ startDate, endDate, projects, regions, service, tagKey, tagValue }: TendenciaFacturacionComponentProps) => {
     const [topN, setTopN] = useState<string>("all");
     const [currency, setCurrency] = useState<string>("original");
     const startDateFormatted = startDate.toISOString().split('.')[0];
     const endDateFormatted = endDate.toISOString().split('.')[0];
 
-    const baseUrl = `/api/gcp/bridge/gcp/facturacion/tendencia_facturacion?date_from=${startDateFormatted}&date_to=${endDateFormatted}&project_id=${projects}&region=${regions}`; 
-    let apiUrl = baseUrl;
+    const baseUrl = `/api/gcp/bridge/gcp/facturacion/tendencia_facturacion?date_from=${startDateFormatted}&date_to=${endDateFormatted}&project_id=${projects}&region=${regions}&service_name=${service}`; 
+    let apiUrlOriginal = baseUrl;
 
     if (tagKey && tagKey !== 'allKeys') {
-        apiUrl += `&nombre_tag=${encodeURIComponent(tagKey)}`;
+        apiUrlOriginal += `&nombre_tag=${encodeURIComponent(tagKey)}`;
 
         if (tagValue && tagValue !== 'allValues') {
-            apiUrl += `&valor_tag=${encodeURIComponent(tagValue)}`;
+            apiUrlOriginal += `&valor_tag=${encodeURIComponent(tagValue)}`;
         }
     }
 
-    const { data, error, isLoading } = useSWR<FacturacionData[]>(apiUrl, fetcher);
+    const apiUrlHistorico = `/api/gcp/bridge/gcp/facturacion/historico-consumo?date_from=${startDateFormatted}&date_to=${endDateFormatted}&project_id=${projects}&region=${regions}`;
+
+    const { data: dataOriginal, error: errorOriginal, isLoading: isLoadingOriginal } = useSWR<FacturacionData[]>(apiUrlOriginal, fetcher);
+    const { data: dataHistorico, error: errorHistorico, isLoading: isLoadingHistorico } = useSWR<RespuestaHistoricoConsumo>(apiUrlHistorico, fetcher);
 
     const filteredData = useMemo(() => {
-        if (!data) return [];
-        if (topN === 'all') return data;
+        if (!dataOriginal) return [];
+        if (topN === 'all') return dataOriginal;
 
         const serviceTotals = new Map<string, number>();
 
-        data.forEach(item => {
+        dataOriginal.forEach(item => {
             const current = serviceTotals.get(item.service) || 0;
             if (currency === "original") {
                 serviceTotals.set(item.service, current + item.cost_net_clp);
@@ -119,8 +123,8 @@ export const TendenciaFacturacionComponent = ({ startDate, endDate, projects, re
             .slice(0, Number(topN))
             .map(entry => entry[0]);
 
-        return data.filter(item => topServicesNames.includes(item.service));
-    }, [data, topN, currency]);
+        return dataOriginal.filter(item => topServicesNames.includes(item.service));
+    }, [dataOriginal, topN, currency]);
 
     const calculateMetrics = (processedData: FacturacionData[]) => {
         if (!processedData?.length) return { total: 0, servicesList: [] };
@@ -137,9 +141,9 @@ export const TendenciaFacturacionComponent = ({ startDate, endDate, projects, re
         return { total, servicesList };
     };
 
-    if (isLoading) return <LoaderComponent />;
+    if (isLoadingOriginal || isLoadingHistorico) return <LoaderComponent />;
 
-    if (error)
+    if (errorOriginal)
         return (
             <div className="text-red-500 p-4 bg-red-50 rounded-lg border border-red-200">
                 <h3 className="font-semibold">Error al cargar datos</h3>
@@ -147,7 +151,7 @@ export const TendenciaFacturacionComponent = ({ startDate, endDate, projects, re
             </div>
         );
 
-    if (!data)
+    if (!dataOriginal)
         return (
             <div className="text-gray-500 p-8 text-center rounded-lg">
                 <TrendingUp className="h-12 w-12 mx-auto mb-4 text-gray-400" />
@@ -294,7 +298,6 @@ export const TendenciaFacturacionComponent = ({ startDate, endDate, projects, re
                             <div>
                                 <p className="text-sm font-medium text-muted-foreground">Servicios</p>
                                 <div className="flex items-center">
-                                    {/* Aquí se agrega el conteo de servicios */}
                                     <p className="text-2xl font-bold text-blue-600">
                                         {metrics.servicesList.length}
                                     </p>
@@ -353,6 +356,28 @@ export const TendenciaFacturacionComponent = ({ startDate, endDate, projects, re
                             <p className="font-medium">{metrics.servicesList.length}</p>
                         </div>
                     </div>
+                </CardContent>
+            </Card>
+
+            <Card className="mt-5 shadow-lg border-emerald-500/20">
+                <CardHeader className="pb-4">
+                    <CardTitle className="flex items-center gap-2 text-lg">
+                        <Table2 className="h-5 w-5 text-emerald-600" />
+                        Análisis Histórico y Desviaciones
+                    </CardTitle>
+                    <p className="text-sm text-muted-foreground">
+                        Desglose mes a mes del consumo de servicios GCP (USD) con variaciones frente al período anterior.
+                    </p>
+                </CardHeader>
+                <CardContent>
+                    {errorHistorico ? (
+                        <div className="text-red-500 text-sm">Error al cargar la tabla histórica.</div>
+                    ) : (
+                        <HistoricalBillingTable 
+                            data={dataHistorico ?? null} 
+                            isLoading={isLoadingHistorico} 
+                        />
+                    )}
                 </CardContent>
             </Card>
         </div>

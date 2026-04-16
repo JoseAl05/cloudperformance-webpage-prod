@@ -181,6 +181,23 @@ export const exportHistoricalBillingToExcel = async (
       }
     })
   }
+  
+  // --- AJUSTE DE ANCHO DE COLUMNAS (AUTOMÁTICO) ---
+  ws.columns.forEach((column) => {
+    let maxLength = 0;
+    
+    column.eachCell({ includeEmpty: true }, (cell) => {
+      const cellValue = cell.value ? cell.value.toString() : ''; 
+      const extraPadding = cell.numFmt ? 5 : 0;       
+      const currentLength = cellValue.length + extraPadding;
+      
+      if (currentLength > maxLength) {
+        maxLength = currentLength;
+      }
+    });
+
+    column.width = maxLength < 15 ? 15 : maxLength + 2;
+  });
 
   const buffer = await wb.xlsx.writeBuffer()
   const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })

@@ -1,7 +1,7 @@
 'use client'
 import useSWR from 'swr';
 import { useState, useMemo } from 'react';
-import { TrendingUp, DollarSign, Calendar, Info, Tag, LucideIcon } from 'lucide-react';
+import { TrendingUp, DollarSign, Calendar, Info, Tag, LucideIcon, Table2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { LoaderComponent } from '@/components/general_aws/LoaderComponent';
 import { TendenciaFacturacionLineChartComponent } from '@/components/aws/vista-facturacion/tendencia-facturacion/grafico/TendenciaFacturacionLineChartComponent';
@@ -18,6 +18,8 @@ import {
     PopoverTrigger,
 } from "@/components/ui/popover";
 import { Button } from '@/components/ui/button';
+
+import { HistoricalBillingTable, RespuestaHistoricoConsumo } from './table/HistoricalBillingTable'; 
 
 interface TendenciaFacturacionProps {
     startDate: Date;
@@ -47,20 +49,22 @@ export const TendenciaFacturacionChartComponent = ({ startDate, endDate, service
     const startDateFormatted = startDate.toISOString().split('.')[0];
     const endDateFormatted = endDate.toISOString().split('.')[0];
 
-    let apiUrl = `/api/aws/bridge/facturacion/tendencia-facturacion?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&service=${services}`;
-    
+    let apiUrlOriginal = `/api/aws/bridge/facturacion/tendencia-facturacion?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&service=${services}`;
     if (selectedKey && selectedValue) {
-        apiUrl += `&tag_key=${encodeURIComponent(selectedKey)}&tag_value=${encodeURIComponent(selectedValue)}`;
+        apiUrlOriginal += `&tag_key=${encodeURIComponent(selectedKey)}&tag_value=${encodeURIComponent(selectedValue)}`;
     }
 
-    const { data, error, isLoading } = useSWR<FacturacionData[]>(apiUrl, fetcher);
+    const apiUrlHistorico = `/api/aws/bridge/facturacion/historico-consumo?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&service=${services}`;
+
+    const { data: dataOriginal, error: errorOriginal, isLoading: isLoadingOriginal } = useSWR<FacturacionData[]>(apiUrlOriginal, fetcher);
+    const { data: dataHistorico, error: errorHistorico, isLoading: isLoadingHistorico } = useSWR<RespuestaHistoricoConsumo>(apiUrlHistorico, fetcher);
 
     const filteredData = useMemo(() => {
-        if (!data) return [];
-        if (topN === 'all') return data;
+        if (!dataOriginal) return [];
+        if (topN === 'all') return dataOriginal;
 
         const serviceTotals = new Map<string, number>();
-        data.forEach(item => {
+        dataOriginal.forEach(item => {
             const current = serviceTotals.get(item.SERVICE) || 0;
             serviceTotals.set(item.SERVICE, current + item.unblendedcost);
         });
@@ -70,8 +74,8 @@ export const TendenciaFacturacionChartComponent = ({ startDate, endDate, service
             .slice(0, Number(topN))
             .map(entry => entry[0]);
 
-        return data.filter(item => topServicesNames.includes(item.SERVICE));
-    }, [data, topN]);
+        return dataOriginal.filter(item => topServicesNames.includes(item.SERVICE));
+    }, [dataOriginal, topN]);
 
     const calculateMetrics = (processedData: FacturacionData[]) => {
         if (!processedData?.length) return { total: 0, servicesList: [], regionsList: [] };
@@ -83,9 +87,9 @@ export const TendenciaFacturacionChartComponent = ({ startDate, endDate, service
         return { total, servicesList, regionsList };
     };
 
-    if (isLoading) return <LoaderComponent />;
+    if (isLoadingOriginal || isLoadingHistorico) return <LoaderComponent />;
 
-    if (error)
+    if (errorOriginal)
         return (
             <div className="text-red-500 p-4 bg-red-50 rounded-lg border border-red-200">
                 <h3 className="font-semibold">Error al cargar datos</h3>
@@ -93,7 +97,7 @@ export const TendenciaFacturacionChartComponent = ({ startDate, endDate, service
             </div>
         );
 
-    if (!data)
+    if (!dataOriginal)
         return (
             <div className="text-gray-500 p-8 text-center rounded-lg">
                 <TrendingUp className="h-12 w-12 mx-auto mb-4 text-gray-400" />
@@ -285,6 +289,29 @@ export const TendenciaFacturacionChartComponent = ({ startDate, endDate, service
                             </div>
                         )}
                     </div>
+                </CardContent>
+            </Card>
+
+            <Card className="mt-5 shadow-lg border-emerald-500/20">
+                <CardHeader className="pb-4">
+                    <CardTitle className="flex items-center gap-2 text-lg">
+                        <Table2 className="h-5 w-5 text-emerald-600" />
+                        Análisis Histórico y Desviaciones
+                    </CardTitle>
+                    <p className="text-sm text-muted-foreground">
+                        Desglose mes a mes del consumo de servicios AWS con variaciones frente al período anterior.
+                    </p>
+                </CardHeader>
+                <CardContent>
+                    {errorHistorico ? (
+                        <div className="text-red-500 text-sm">Error al cargar la tabla histórica.</div>
+                    ) : (
+                        <HistoricalBillingTable 
+                            data={dataHistorico ?? null} 
+                            isLoading={isLoadingHistorico} 
+                            cloudProvider="AWS"
+                        />
+                    )}
                 </CardContent>
             </Card>
         </div>
