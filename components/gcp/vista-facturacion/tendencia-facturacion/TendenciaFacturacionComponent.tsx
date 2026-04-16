@@ -20,8 +20,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { SelectCurrencyComponent } from '@/components/gcp/vista-facturacion/tendencia-facturacion/SelectCurrencyComponent';
 
-// IMPORTAMOS TU COMPONENTE DE TABLA REUTILIZABLE
-import { HistoricalBillingTable, RespuestaHistoricoConsumo } from './table/HistoricalBillingTable'; // Ajusta la ruta si es necesario
+import { HistoricalBillingTable, RespuestaHistoricoConsumo } from './table/HistoricalBillingTable'; 
 
 interface TendenciaFacturacionComponentProps {
     startDate: Date;
@@ -98,7 +97,7 @@ export const TendenciaFacturacionComponent = ({ startDate, endDate, projects, re
         }
     }
 
-    const apiUrlHistorico = `/api/gcp/bridge/gcp/facturacion/historico-consumo?date_from=${startDateFormatted}&date_to=${endDateFormatted}&project_id=${projects}&region=${regions}`;
+    const apiUrlHistorico = `/api/gcp/bridge/gcp/facturacion/historico-consumo?date_from=${startDateFormatted}&date_to=${endDateFormatted}&project_id=${projects}&region=${regions}&service_name=${service}`;
 
     const { data: dataOriginal, error: errorOriginal, isLoading: isLoadingOriginal } = useSWR<FacturacionData[]>(apiUrlOriginal, fetcher);
     const { data: dataHistorico, error: errorHistorico, isLoading: isLoadingHistorico } = useSWR<RespuestaHistoricoConsumo>(apiUrlHistorico, fetcher);
@@ -375,7 +374,8 @@ export const TendenciaFacturacionComponent = ({ startDate, endDate, projects, re
                     ) : (
                         <HistoricalBillingTable 
                             data={dataHistorico ?? null} 
-                            isLoading={isLoadingHistorico} 
+                            isLoading={isLoadingHistorico}
+                            cloudProvider="GCP" 
                         />
                     )}
                 </CardContent>
