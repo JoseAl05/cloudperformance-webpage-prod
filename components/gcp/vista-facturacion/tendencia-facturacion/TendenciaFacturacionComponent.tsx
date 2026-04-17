@@ -86,18 +86,22 @@ export const TendenciaFacturacionComponent = ({ startDate, endDate, projects, re
     const startDateFormatted = startDate.toISOString().split('.')[0];
     const endDateFormatted = endDate.toISOString().split('.')[0];
 
-    const baseUrl = `/api/gcp/bridge/gcp/facturacion/tendencia_facturacion?date_from=${startDateFormatted}&date_to=${endDateFormatted}&project_id=${projects}&region=${regions}&service_name=${service}`; 
-    let apiUrlOriginal = baseUrl;
+    const baseParams = `date_from=${startDateFormatted}&date_to=${endDateFormatted}&project_id=${projects}&region=${regions}&service_name=${service}`;
+
+    let apiUrlOriginal = `/api/gcp/bridge/gcp/facturacion/tendencia_facturacion?${baseParams}`;
+    let apiUrlHistorico = `/api/gcp/bridge/gcp/facturacion/historico-consumo?${baseParams}`;
 
     if (tagKey && tagKey !== 'allKeys') {
-        apiUrlOriginal += `&nombre_tag=${encodeURIComponent(tagKey)}`;
+        const keyParam = `&nombre_tag=${encodeURIComponent(tagKey)}`;
+        apiUrlOriginal += keyParam;
+        apiUrlHistorico += keyParam;
 
         if (tagValue && tagValue !== 'allValues') {
-            apiUrlOriginal += `&valor_tag=${encodeURIComponent(tagValue)}`;
+            const valueParam = `&valor_tag=${encodeURIComponent(tagValue)}`;
+            apiUrlOriginal += valueParam;
+            apiUrlHistorico += valueParam;
         }
     }
-
-    const apiUrlHistorico = `/api/gcp/bridge/gcp/facturacion/historico-consumo?date_from=${startDateFormatted}&date_to=${endDateFormatted}&project_id=${projects}&region=${regions}&service_name=${service}`;
 
     const { data: dataOriginal, error: errorOriginal, isLoading: isLoadingOriginal } = useSWR<FacturacionData[]>(apiUrlOriginal, fetcher);
     const { data: dataHistorico, error: errorHistorico, isLoading: isLoadingHistorico } = useSWR<RespuestaHistoricoConsumo>(apiUrlHistorico, fetcher);

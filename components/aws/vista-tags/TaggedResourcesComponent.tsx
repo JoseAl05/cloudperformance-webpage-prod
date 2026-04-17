@@ -275,7 +275,7 @@ export const TagsAnalysisComponentAWS = ({ startDate, endDate, services }: TagsA
                   <div className="flex items-center gap-3">
                     <div className="p-2 bg-blue-100 text-[#0078D4] rounded-md"><Cloud className="h-5 w-5" /></div>
                     <div>
-                      <p className="text-sm font-semibold text-slate-800">Solo en Azure</p>
+                      <p className="text-sm font-semibold text-slate-800">Solo en AWS</p>
                       <p className="text-xs text-slate-500">Tags nativos de la nube</p>
                     </div>
                   </div>
@@ -306,7 +306,7 @@ export const TagsAnalysisComponentAWS = ({ startDate, endDate, services }: TagsA
                     <div className="p-2 bg-emerald-100 text-emerald-600 rounded-md"><Layers className="h-5 w-5" /></div>
                     <div>
                       <p className="text-sm font-semibold text-slate-800">Mixtos</p>
-                      <p className="text-xs text-slate-500">Tienen tags en Azure y Locales</p>
+                      <p className="text-xs text-slate-500">Tienen tags en AWS y Locales</p>
                     </div>
                   </div>
                   <div className="text-right">

@@ -49,12 +49,23 @@ export const TendenciaFacturacionChartComponent = ({ startDate, endDate, service
     const startDateFormatted = startDate.toISOString().split('.')[0];
     const endDateFormatted = endDate.toISOString().split('.')[0];
 
-    let apiUrlOriginal = `/api/aws/bridge/facturacion/tendencia-facturacion?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&service=${services}`;
-    if (selectedKey && selectedValue) {
-        apiUrlOriginal += `&tag_key=${encodeURIComponent(selectedKey)}&tag_value=${encodeURIComponent(selectedValue)}`;
-    }
+    // let apiUrlOriginal = `/api/aws/bridge/facturacion/tendencia-facturacion?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&service=${services}`;
+    // if (selectedKey && selectedValue) {
+    //     apiUrlOriginal += `&tag_key=${encodeURIComponent(selectedKey)}&tag_value=${encodeURIComponent(selectedValue)}`;
+    // }
 
-    const apiUrlHistorico = `/api/aws/bridge/facturacion/historico-consumo?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&service=${services}`;
+    // const apiUrlHistorico = `/api/aws/bridge/facturacion/historico-consumo?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&service=${services}`;
+    
+    let apiUrlOriginal = `/api/aws/bridge/facturacion/tendencia-facturacion?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&service=${services}`;
+    let apiUrlHistorico = `/api/aws/bridge/facturacion/historico-consumo?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&service=${services}`;
+
+    if (selectedKey) {
+        const safeValue = selectedValue ? encodeURIComponent(selectedValue) : "";
+        const tagParams = `&tag_key=${encodeURIComponent(selectedKey)}&tag_value=${safeValue}`;
+        
+        apiUrlOriginal += tagParams;
+        apiUrlHistorico += tagParams;
+    }   
 
     const { data: dataOriginal, error: errorOriginal, isLoading: isLoadingOriginal } = useSWR<FacturacionData[]>(apiUrlOriginal, fetcher);
     const { data: dataHistorico, error: errorHistorico, isLoading: isLoadingHistorico } = useSWR<RespuestaHistoricoConsumo>(apiUrlHistorico, fetcher);
@@ -126,8 +137,13 @@ export const TendenciaFacturacionChartComponent = ({ startDate, endDate, service
                 <div className="max-h-[250px] overflow-y-auto p-2">
                     {items.length > 0 ? (
                         <ul className="text-sm space-y-1">
-                            {items.map((item) => (
-                                <li key={item} className="px-2 py-1 rounded hover:bg-muted/50 truncate" title={item}>
+                            {items.map((item, index) => (
+                                <li 
+                                    key={`${item}-${index}`} 
+                                    className="px-2 py-1 rounded hover:bg-muted/50 truncate" 
+                                    title={item}
+                                    
+                                >
                                     {item}
                                 </li>
                             ))}
@@ -276,7 +292,7 @@ export const TendenciaFacturacionChartComponent = ({ startDate, endDate, service
                             <p className="font-medium">{metrics.servicesList.length}</p>
                         </div>
                         
-                        {selectedKey && selectedValue && (
+                        {/* {selectedKey && selectedValue && (
                             <div className="col-span-2 md:col-span-4 mt-2 pt-4 border-t border-border">
                                 <span className="text-muted-foreground flex items-center gap-1 mb-1">
                                     <Tag className="h-3 w-3" /> Filtro por Etiqueta (Tag):
@@ -287,7 +303,7 @@ export const TendenciaFacturacionChartComponent = ({ startDate, endDate, service
                                     <span>{selectedValue}</span>
                                 </div>
                             </div>
-                        )}
+                        )} */}
                     </div>
                 </CardContent>
             </Card>
