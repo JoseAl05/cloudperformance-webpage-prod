@@ -14,17 +14,18 @@ const ACTIONS = [
         href: '/comparacion-nubes/intranube',
         bgColor: 'bg-blue-500/10',
         textColor: 'text-blue-600',
-        role: ['usuario', 'admin_empresa','admin_global'],
+        role: ['usuario', 'admin_empresa', 'admin_global'],
     },
     {
         name: 'Comparacion Internube',
-        description: 'Compara datos entre tus nubes de Azure y AWS.',
+        description: 'Compara datos entre tus nubes de Azure, AWS y GCP.',
         icon: ChevronsLeftRightEllipsis,
-        href: '/perfilamiento/usuarios/crear',
+        href: '/comparacion-nubes/internube',
         bgColor: 'bg-green-500/10',
         textColor: 'text-green-600',
-        role: ['usuario', 'admin_empresa'],
+        role: ['usuario', 'admin_empresa', 'admin_global'],
     }
+
 ];
 
 export default function ComparissionIndexPage() {

@@ -18,7 +18,8 @@ import {
 import { Button } from '@/components/ui/button';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { MultiTenantSubscriptionsFilterComponent } from '@/components/general_comp_cloud/filters/MultiTenantSubscriptionsFilterComponent';
-import { ReqPayload } from '@/components/comp-cloud/intracloud/IntraCloudConfigComponent';
+import { ReqPayload as IntraCloudReqPayload} from '@/components/comp-cloud/intracloud/IntraCloudConfigComponent';
+import { InterCloudReqPayload } from '@/components/comp-cloud/intercloud/InterCloudConfigComponent';
 import { MultiTenantTagsFilterComponent, TAG_CONSTANTS } from '@/components/general_comp_cloud/filters/MultiTenantTagsFilterComponent';
 import { MultiTenantResourceGroupFilterComponent } from '@/components/general_comp_cloud/filters/MultiTenantResourceGroupFilterComponent';
 import { MultiTenantServiceFilterComponent } from '@/components/general_comp_cloud/filters/MultiTenantServiceFilterComponent';
@@ -36,7 +37,7 @@ export interface DynamicFilterProps {
     tagValues: Record<string, string | null>;
     resources: Record<string, string>;
     service: string;
-    payload: ReqPayload;
+    payload: IntraCloudReqPayload | InterCloudReqPayload;
 }
 
 interface FiltersComponentProps {
@@ -52,7 +53,7 @@ interface FiltersComponentProps {
     serviceFilter?: boolean;
     serviceType?: string;
     resourceFilter?: boolean;
-    payload: ReqPayload;
+    payload: IntraCloudReqPayload | InterCloudReqPayload;
 }
 
 const FilterSeparator = () => (

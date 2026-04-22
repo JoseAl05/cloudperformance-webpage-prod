@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react';
-import { ServiceSelectionComponent, ServiceType } from '@/components/comp-cloud/intracloud/ServiceSelectionComponent';
+import { IntraCloudServiceSelectionComponent, ServiceType } from '@/components/comp-cloud/intracloud/IntraCloudServiceSelectionComponent';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -128,7 +128,7 @@ export const IntraCloudConfigComponent = ({ cloudType, accounts, onReqReady }: I
             </Card>
 
             {isStepComplete && (
-                <ServiceSelectionComponent
+                <IntraCloudServiceSelectionComponent
                     key={selectedIds.join('-')}
                     cloudType={cloudType}
                     onServiceSelected={handleServiceSelected}
