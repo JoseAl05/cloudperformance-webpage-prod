@@ -1,5 +1,5 @@
 import { InterCloudReqPayload } from '@/components/comp-cloud/intercloud/InterCloudConfigComponent';
-import InterCloudVmCardsComponent from '@/components/comp-cloud/intercloud/virtual_machines/info/InterCloudVmCardsComponent';
+import { InterCloudVmCardsComponent } from '@/components/comp-cloud/intercloud/virtual_machines/info/InterCloudVmCardsComponent';
 import { DynamicFilterProps } from '@/components/general_comp_cloud/filters/FilterComponent';
 import { AlertCircle, Loader2 } from 'lucide-react';
 import useSWR from 'swr';
@@ -80,7 +80,6 @@ export const InterCloudVmComponent = ({
             shouldRetryOnError: false
         }
     );
-    console.log(payload.cloud_provider)
 
     return (
         <div className="p-4 space-y-6">

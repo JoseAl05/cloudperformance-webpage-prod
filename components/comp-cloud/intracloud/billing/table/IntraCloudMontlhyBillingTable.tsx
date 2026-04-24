@@ -6,7 +6,7 @@ import {
 import { LoaderComponent } from '@/components/general_aws/LoaderComponent';
 import { Button } from '@/components/ui/button'
 import { buildExportRows, exportToCSV, exportToExcel } from '@/lib/exportExcelBillingIntracloud';
-import { formatGeneric } from '@/lib/bytesToMbs';
+import { formatUsd } from '@/lib/bytesToMbs';
 
 interface IntraCloudMonthlyBillingTableProps {
   data: IntraCloudMonthlyBilling[];
@@ -127,22 +127,22 @@ export const IntraCloudMonthlyBillingTable = ({
         <tr className={headerBg ?? bgBase}>
           <td className={`${labelCell} font-semibold`}>{label}</td>
           {months.map((m) => (
-            <td key={m} className={`${cellBase} font-semibold`}>{formatGeneric(monthlyBudget[m])}</td>
+            <td key={m} className={`${cellBase} font-semibold`}>{formatUsd(monthlyBudget[m])}</td>
           ))}
-          <td className={`${cellBase} font-semibold`}>{formatGeneric(budgetSum)}</td>
+          <td className={`${cellBase} font-semibold`}>{formatUsd(budgetSum)}</td>
         </tr>
         <tr className={bgBase}>
           <td className={`${labelCell} pl-6`}>Facturado</td>
           {months.map((m) => (
-            <td key={m} className={cellBase}>{formatGeneric(monthlyInvoiced[m] ?? 0)}</td>
+            <td key={m} className={cellBase}>{formatUsd(monthlyInvoiced[m] ?? 0)}</td>
           ))}
-          <td className={`${cellBase} font-semibold`}>{formatGeneric(totalInvoiced)}</td>
+          <td className={`${cellBase} font-semibold`}>{formatUsd(totalInvoiced)}</td>
         </tr>
         <tr className={`${bgBase} border-t border-yellow-500/40 dark:border-yellow-400/40`}>
           <td className={`${labelCell} pl-6 italic text-yellow-700 dark:text-yellow-200`}>↕ Var. vs mes anterior ($)</td>
           {months.map((m) => (
             <td key={m} className={`${cellBase} font-medium ${facDiff[m] !== null ? deviationColor(facDiff[m]!) : 'text-gray-400 dark:text-white/40'}`}>
-              {facDiff[m] !== null ? formatGeneric(facDiff[m]!) : '-'}
+              {facDiff[m] !== null ? formatUsd(facDiff[m]!) : '-'}
             </td>
           ))}
           <td className={`${cellBase} text-gray-400 dark:text-white/40`}>-</td>
@@ -159,16 +159,16 @@ export const IntraCloudMonthlyBillingTable = ({
         <tr className={bgBase}>
           <td className={`${labelCell} pl-6`}>Proyectado</td>
           {months.map((m) => (
-            <td key={m} className={cellBase}>{formatGeneric(monthlyProjected[m])}</td>
+            <td key={m} className={cellBase}>{formatUsd(monthlyProjected[m])}</td>
           ))}
-          <td className={cellBase}>{formatGeneric(projectedSum)}</td>
+          <td className={cellBase}>{formatUsd(projectedSum)}</td>
         </tr>
         <tr className={bgBase}>
           <td className={`${labelCell} font-semibold`}>Total</td>
           {months.map((m) => (
-            <td key={m} className={`${cellBase} font-semibold`}>{formatGeneric(monthlyInvoiced[m] ?? 0)}</td>
+            <td key={m} className={`${cellBase} font-semibold`}>{formatUsd(monthlyInvoiced[m] ?? 0)}</td>
           ))}
-          <td className={`${cellBase} font-semibold`}>{formatGeneric(totalInvoiced)}</td>
+          <td className={`${cellBase} font-semibold`}>{formatUsd(totalInvoiced)}</td>
         </tr>
         <tr className={bgBase}>
           <td className={`${labelCell} pl-6`}>Desviación ($)</td>
@@ -176,11 +176,11 @@ export const IntraCloudMonthlyBillingTable = ({
             const dev = monthlyBudget[m] - (monthlyInvoiced[m] ?? 0)
             return (
               <td key={m} className={`${cellBase} ${deviationColor(dev)}`}>
-                {formatGeneric(dev)}
+                {formatUsd(dev)}
               </td>
             )
           })}
-          <td className={`${cellBase} ${deviationColor(devTotal)}`}>{formatGeneric(devTotal)}</td>
+          <td className={`${cellBase} ${deviationColor(devTotal)}`}>{formatUsd(devTotal)}</td>
         </tr>
         <tr className={bgBase}>
           <td className={`${labelCell} pl-6`}>Desviación (%)</td>

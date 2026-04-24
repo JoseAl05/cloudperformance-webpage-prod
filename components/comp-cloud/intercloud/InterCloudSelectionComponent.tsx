@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { InterCloudConfigComponent, InterCloudReqPayload } from '@/components/comp-cloud/intercloud/InterCloudConfigComponent';
+import { InterCloudServiceSelectionComponent, ServiceType } from '@/components/comp-cloud/intercloud/InterCloudServiceSelectionComponent';
 import { LoaderComponent } from '@/components/general_aws/LoaderComponent';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
@@ -79,13 +80,30 @@ export const InterCloudSelectionComponent = () => {
     const isGcp = user && user.is_gcp;
 
     let activeAccounts: CloudAccount[] = [];
-    if (selectedCloud === 'Azure' && user?.azure_accounts) {
-        activeAccounts = user.azure_accounts;
-    } else if (selectedCloud === 'AWS' && user?.aws_accounts) {
-        activeAccounts = user.aws_accounts;
-    } else if (selectedCloud === 'GCP' && user?.gcp_accounts) {
-        activeAccounts = user.gcp_accounts;
+    let isMultiTenant = false;
+    let singleTenantId: string | undefined;
+    if (selectedCloud === 'Azure') {
+        isMultiTenant = !!user?.is_azure_multi_tenant;
+        activeAccounts = user?.azure_accounts ?? [];
+        singleTenantId = user?.user_db_azure;
+    } else if (selectedCloud === 'AWS') {
+        isMultiTenant = !!user?.is_aws_multi_tenant;
+        activeAccounts = user?.aws_accounts ?? [];
+        singleTenantId = user?.user_db_aws;
+    } else if (selectedCloud === 'GCP') {
+        isMultiTenant = !!user?.is_gcp_multi_tenant;
+        activeAccounts = user?.gcp_accounts ?? [];
+        singleTenantId = user?.user_db_gcp;
     }
+
+    const handleSingleTenantServiceSelected = (service: ServiceType) => {
+        if (!singleTenantId) return;
+        setReqPayload({
+            tenant_id: singleTenantId,
+            cloud_provider: selectedCloud,
+            service_type: service,
+        });
+    };
 
     return (
         <div className="w-full max-w-4xl mx-auto space-y-6">
@@ -119,12 +137,20 @@ export const InterCloudSelectionComponent = () => {
                 </CardContent>
             </Card>
 
-            {selectedCloud && activeAccounts.length > 0 && (
+            {selectedCloud && isMultiTenant && activeAccounts.length > 0 && (
                 <InterCloudConfigComponent
                     key={selectedCloud}
                     cloudType={selectedCloud}
                     accounts={activeAccounts}
                     onReqReady={setReqPayload}
+                />
+            )}
+
+            {selectedCloud && !isMultiTenant && singleTenantId && (
+                <InterCloudServiceSelectionComponent
+                    key={selectedCloud}
+                    cloudType={selectedCloud}
+                    onServiceSelected={handleSingleTenantServiceSelected}
                 />
             )}
         </div>

@@ -26,3 +26,7 @@ export const formatBytes = (value: number) => {
     const i = Math.max(0, Math.floor(Math.log(value) / Math.log(k)));
     return parseFloat((value / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
 };
+
+export const formatUsd = (value: number) => {
+    return `$${value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+};
