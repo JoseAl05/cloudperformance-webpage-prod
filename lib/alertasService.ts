@@ -11,7 +11,7 @@ export const alertasService = {
         return await response.json();
     },
     
-    crearAlerta: async (alertaData: AlertConfig): Promise<any> => {
+    crearAlerta: async (alertaData: AlertConfig): Promise<unknown> => {
         const response = await fetch(`${NEXT_INTERNAL_API}/configurar?cloud=${alertaData.cloud_provider}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -39,7 +39,7 @@ export const alertasService = {
         return await response.json();
     },    
 
-    actualizarAlerta: async (id: string, alertaData: AlertConfig): Promise<any> => {
+    actualizarAlerta: async (id: string, alertaData: AlertConfig): Promise<unknown> => {
         const response = await fetch(`${NEXT_INTERNAL_API}/configurar/${id}?cloud=${alertaData.cloud_provider}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
@@ -49,7 +49,7 @@ export const alertasService = {
         return await response.json();
     },
 
-    eliminarAlerta: async (id: string, provider: string): Promise<any> => {
+    eliminarAlerta: async (id: string, provider: string): Promise<unknown> => {
         const response = await fetch(`${NEXT_INTERNAL_API}/configurar/${id}?cloud=${provider}`, {
             method: 'DELETE',
             headers: { 'Content-Type': 'application/json' }

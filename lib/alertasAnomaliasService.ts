@@ -13,7 +13,7 @@ export const alertasAnomaliasService = {
         return response.json();
     },
 
-    crearAlertaAnomalia: async (alerta: AnomalyConfig, provider: string) => {
+    crearAlertaAnomalia: async (alerta: AnomalyConfig, provider: string): Promise<unknown> => {
         const response = await fetch(`${NEXT_INTERNAL_API}/anomalias/configurar?cloud=${provider}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -23,7 +23,7 @@ export const alertasAnomaliasService = {
         return response.json();
     },
 
-    actualizarAlertaAnomalia: async (id: string, alerta: Partial<AnomalyConfig>, provider: string) => {
+    actualizarAlertaAnomalia: async (id: string, alerta: Partial<AnomalyConfig>, provider: string): Promise<unknown> => {
         const response = await fetch(`${NEXT_INTERNAL_API}/anomalias/configurar/${id}?cloud=${provider}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
@@ -33,7 +33,7 @@ export const alertasAnomaliasService = {
         return response.json();
     },
 
-    eliminarAlertaAnomalia: async (id: string, provider: string) => {
+    eliminarAlertaAnomalia: async (id: string, provider: string): Promise<unknown> => {
         const response = await fetch(`${NEXT_INTERNAL_API}/anomalias/configurar/${id}?cloud=${provider}`, {
             method: 'DELETE',
             headers: { 'Content-Type': 'application/json' }

@@ -22,7 +22,7 @@ export const budgetAlertsService = {
         return response.json();
     },
 
-    saveConfig: async (config: GlobalBudgetConfig, provider: string): Promise<any> => {
+    saveConfig: async (config: GlobalBudgetConfig, provider: string): Promise<unknown> => {
         const payload = { ...config, cloud_provider: provider };
         const response = await fetch(`${NEXT_INTERNAL_API}/configurar?cloud=${provider}`, {
             method: 'POST',
