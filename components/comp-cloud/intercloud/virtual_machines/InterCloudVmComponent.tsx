@@ -8,11 +8,13 @@ type InterCloudVmComponentProps = DynamicFilterProps;
 
 interface BackendPayload extends InterCloudReqPayload {
     filters: Record<string, {
-        resource_group?: string;
+        resourceGgroup?: string;
         resources?: string;
         region?: string;
         location_region?: string;
         project_id?: string;
+        subscription?: string;
+        location?: string;
     }>;
 }
 
@@ -35,6 +37,9 @@ const isNullish = (v: unknown) => v === null || v === undefined
 
 export const InterCloudVmComponent = ({
     region,
+    subscriptions,
+    resourceGroups,
+    projects,
     payload
 }: InterCloudVmComponentProps) => {
 
@@ -43,7 +48,9 @@ export const InterCloudVmComponent = ({
     if (payload.tenant_id) {
         if (payload.cloud_provider === 'Azure') {
             filtersPayload[payload.tenant_id] = {
-                resource_group: resourceGroups[payload.tenant_id] || 'all'
+                resourceGroup: resourceGroups[payload.tenant_id] || 'all',
+                subscription: subscriptions[payload.tenant_id] || 'all',
+                location: region[payload.tenant_id] || 'all_regions'
             };
         } else if (payload.cloud_provider === 'AWS') {
             filtersPayload[payload.tenant_id] = {
@@ -51,8 +58,8 @@ export const InterCloudVmComponent = ({
             };
         } else if (payload.cloud_provider === 'GCP') {
             filtersPayload[payload.tenant_id] = {
-                location_region: region[payload.tenant_id] || 'all_regions',
-                project_id: payload.project_id || 'all'
+                region: region[payload.tenant_id] || 'all_regions',
+                project: projects[payload.tenant_id] || 'all'
             };
         }
     }
@@ -67,6 +74,12 @@ export const InterCloudVmComponent = ({
     switch (payload.cloud_provider) {
         case 'AWS':
             urlVmComparison = `/api/comparison-cloud/bridge/intercloud/aws/ec2/get_virtual_machine_cloud_comparison`;
+            break;
+        case 'Azure':
+            urlVmComparison = `/api/comparison-cloud/bridge/intercloud/azure/vms/get_virtual_machine_cloud_comparison`;
+            break;
+        case 'GCP':
+            urlVmComparison = `/api/comparison-cloud/bridge/intercloud/gcp/vms/get_virtual_machine_cloud_comparison`;
             break;
         default:
             break;

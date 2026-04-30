@@ -52,7 +52,7 @@ export const InterCloudSelectionComponent = () => {
                     reqPayload.service_type === 'vms' && (
                         <>
                             <MainViewInterCloudVmComponent payload={reqPayload} />
-                            <Card className="border-l-4 border-l-green-500 shadow-sm my-5">
+                            {/* <Card className="border-l-4 border-l-green-500 shadow-sm my-5">
                                 <CardHeader>
                                     <CardTitle className="text-lg text-gray-700 flex items-center gap-2">
                                         <CloudCog size={18} className="text-green-600" />
@@ -67,7 +67,7 @@ export const InterCloudSelectionComponent = () => {
                                         {JSON.stringify(reqPayload, null, 2)}
                                     </pre>
                                 </CardContent>
-                            </Card>
+                            </Card> */}
                         </>
                     )
                 }
