@@ -4,6 +4,7 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  output: 'standalone',
 
   // Configuración recomendada para Next.js 15
   serverExternalPackages: [

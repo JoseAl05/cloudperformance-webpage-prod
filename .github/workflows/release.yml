@@ -52,3 +52,34 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          build-args: |
+            MONGO_URI=mongodb://placeholder:placeholder@localhost:27017/placeholder
+            MONGODB_URI=mongodb://placeholder:placeholder@localhost:27017/placeholder
+            MONGODB_USER_DB=placeholder
+            MONGO_DB_AWS=placeholder
+            MONGO_DB_AZURE=placeholder
+            JWT_SECRET=placeholder-build-time-secret
+            SECRET_KEY=placeholder-build-time-key
+            AZURE_DB_USER=placeholder
+            AZURE_DB_PASSWORD=placeholder
+            AZURE_DB_HOST=placeholder
+            AZURE_DB_PORT=5432
+            AZURE_DB_NAME=placeholder
+            AWS_DB_USER=placeholder
+            AWS_DB_PASSWORD=placeholder
+            AWS_DB_HOST=placeholder
+            AWS_DB_PORT=5432
+            AWS_DB_NAME=placeholder
+            API_AWS_URL=http://placeholder
+            API_AZURE_URL=http://placeholder
+            API_GCP_URL=http://placeholder
+            API_CLOUD_COMPARISON=http://placeholder
+            API_ALERTAS_URL=http://placeholder
+            API_PRESUPUESTO=http://placeholder
+            MAIL_FROM=placeholder@placeholder.com
+            SMTP_HOST=placeholder
+            SMTP_PORT=587
+            SMTP_USER=placeholder
+            SMTP_PASS=placeholder
+            AZURE_STORAGE_ACCOUNT_NAME=placeholder
+            AZURE_STORAGE_ACCOUNT_KEY=placeholder
