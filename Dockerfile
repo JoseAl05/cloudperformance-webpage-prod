@@ -17,7 +17,7 @@ RUN addgroup -g 1001 -S nodejs && adduser -S nextjs -u 1001
 
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
-ENV PORT=3000
+ENV PORT=3100
 ENV HOSTNAME=localhost
 
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
@@ -26,9 +26,9 @@ COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 
 USER nextjs
 
-EXPOSE 3000
+EXPOSE 3100
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
-    CMD wget --quiet --tries=1 --spider http://localhost:3000/api/health || exit 1
+    CMD wget --quiet --tries=1 --spider http://localhost:3100/api/health || exit 1
 
 CMD ["node", "server.js"]
