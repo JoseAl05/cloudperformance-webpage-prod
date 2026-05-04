@@ -41,23 +41,18 @@ export const MainViewInterCloudVmComponent = ({ payload }: MainViewInterCloudVmC
                 </div>
             </div>
             <div className='w-full min-w-0 space-y-6'>
-                {/* {
+                {
                     payload.cloud_provider === 'Azure' &&
                     (
                         <FiltersComponent
-                            Component={IntraCloudComputeComponent}
+                            Component={InterCloudVmComponent}
+                            dateFilter={false}
                             regionFilter
                             isRegionMultiSelect
-                            subscriptionIdFilter
-                            tagsFilter
-                            resourceGroupFilter
-                            serviceFilter
-                            serviceType='compute'
-                            resourceFilter
                             payload={payload}
                         />
                     )
-                } */}
+                }
                 {
                     payload.cloud_provider === 'AWS' &&
                     (
@@ -70,20 +65,18 @@ export const MainViewInterCloudVmComponent = ({ payload }: MainViewInterCloudVmC
                         />
                     )
                 }
-                {/* {
+                {
                     payload.cloud_provider === 'GCP' &&
                     (
                         <FiltersComponent
-                            Component={IntraCloudComputeComponent}
+                            Component={InterCloudVmComponent}
+                            dateFilter={false}
                             regionFilter
                             isRegionMultiSelect
-                            serviceFilter
-                            serviceType='compute'
-                            resourceFilter
                             payload={payload}
                         />
                     )
-                } */}
+                }
             </div>
         </div>
     )

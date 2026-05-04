@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useMemo, useState, type ReactNode } from "react"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
@@ -28,6 +28,8 @@ import {
   Clock,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { InterCloudVmProjectionComponent } from '@/components/comp-cloud/intercloud/virtual_machines/info/InterCloudVmProjectionComponent'
+
 
 export type CloudProvider = "AWS" | "Azure" | "GCP"
 
@@ -41,6 +43,12 @@ export interface VmMatch {
   monthly_usd_730h: number
   precision_treshold: string
   precision_treshold_description: string
+  projected_cost_30d: number | null
+  savings_vs_actual_30d: number | null
+  savings_vs_on_demand_30d: number | null
+  savings_pct_vs_on_demand: number | null
+  confidence: "high" | "medium" | "low" | "unknown"
+  status: "ok" | "missing_billing" | "missing_metrics" | "missing_both" | "error"
 }
 
 export interface InterCloudVm {
@@ -56,6 +64,15 @@ export interface InterCloudVm {
   type_memory_gb: number
   hourly_usd: number
   monthly_usd_730h: number
+  billed_hours_30d: number | null
+  actual_vm_cost_30d: number | null
+  on_demand_equivalent_cost_30d: number | null
+  billing_days_with_data: number
+  cpu_utilization_max_30d: number | null
+  cpu_utilization_avg_30d: number | null
+  cpu_credit_balance_min_30d: number | null
+  cpu_credit_usage_max_30d: number | null
+  projection_status: "ok" | "missing_billing" | "missing_metrics" | "missing_both" | "error"
   azure_vms_match?: VmMatch[]
   gcp_vms_match?: VmMatch[]
   aws_vms_match?: VmMatch[]
@@ -126,6 +143,25 @@ const formatPercent = (value: number): string =>
   `${value > 0 ? "+" : ""}${value.toFixed(1)}%`
 
 type DiffDirection = "down" | "up" | "equal"
+
+const InfoHint = ({
+  children,
+  side = "top",
+}: {
+  children: ReactNode
+  side?: "top" | "right" | "bottom" | "left"
+}) => (
+  <TooltipProvider delayDuration={150}>
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Info className="ml-1 inline h-3 w-3 cursor-help text-slate-400 align-middle" />
+      </TooltipTrigger>
+      <TooltipContent side={side} className="max-w-xs">
+        <div className="text-xs leading-relaxed">{children}</div>
+      </TooltipContent>
+    </Tooltip>
+  </TooltipProvider>
+)
 
 type PriceDiff = {
   delta: number
@@ -412,9 +448,45 @@ const MatchesTable = ({
               <th className="px-3 py-2 text-left">Región</th>
               <th className="px-3 py-2 text-left">vCPU</th>
               <th className="px-3 py-2 text-left">RAM</th>
-              <th className="px-3 py-2 text-left">Precisión</th>
-              <th className="px-3 py-2 text-right">Por hora</th>
-              <th className="px-3 py-2 text-right">Mensual (730h)</th>
+              <th className="px-3 py-2 text-left">
+                Precisión
+                <InfoHint>
+                  <p className="mb-1 font-semibold">Nivel de coincidencia</p>
+                  <p>
+                    <strong>Alta:</strong> coincidencia exacta en vCPU, memoria,
+                    región y SO.
+                    <br />
+                    <strong>Baja:</strong> aproximación basada en una proporción
+                    similar de recursos, sin coincidencia exacta en una de las
+                    dimensiones.
+                  </p>
+                </InfoHint>
+              </th>
+              <th className="px-3 py-2 text-right">
+                Por hora
+                <InfoHint>
+                  <p className="mb-1 font-semibold">Costo por hora (catálogo)</p>
+                  <p>
+                    Precio público on-demand de la SKU destino en su región,
+                    obtenido del catálogo de precios del proveedor. Bajo cada
+                    valor se muestra la diferencia respecto al precio por hora
+                    de la instancia original.
+                  </p>
+                </InfoHint>
+              </th>
+              <th className="px-3 py-2 text-right">
+                Mensual (730h)
+                <InfoHint>
+                  <p className="mb-1 font-semibold">Costo mensual teórico</p>
+                  <p>
+                    Costo por hora × 730 horas. 730 es el promedio de horas en
+                    un mes (8.760 / 12). Es una proyección teórica suponiendo
+                    funcionamiento continuo durante todo el mes; no refleja
+                    horas reales de uso. La diferencia inferior compara con el
+                    costo mensual del original al mismo cálculo.
+                  </p>
+                </InfoHint>
+              </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
@@ -622,6 +694,13 @@ const VmDetailPanel = ({
           <div className="rounded-md bg-slate-50 px-2.5 py-1.5">
             <p className="text-[15px] font-medium uppercase tracking-wider text-slate-500">
               POR HORA
+              <InfoHint>
+                <p className="mb-1 font-semibold">Costo por hora (catálogo)</p>
+                <p>
+                  Precio público on-demand de esta SKU en su región. No
+                  considera descuentos por reserva ni Savings Plans / CUDs.
+                </p>
+              </InfoHint>
             </p>
             <p className="truncate text-md font-semibold text-slate-900">
               {formatHourly(vm.hourly_usd)}
@@ -630,6 +709,15 @@ const VmDetailPanel = ({
           <div className="rounded-md bg-slate-50 px-2.5 py-1.5">
             <p className="text-[15px] font-medium uppercase tracking-wider text-slate-500">
               MENSUAL (730h)
+              <InfoHint>
+                <p className="mb-1 font-semibold">Costo mensual teórico</p>
+                <p>
+                  Costo por hora × 730. 730 es el promedio de horas en un mes
+                  (8.760 / 12). Asume operación continua todo el mes y no
+                  refleja horas reales de uso. Para el costo basado en uso
+                  real, ver la sección <em>Proyección de costos</em> abajo.
+                </p>
+              </InfoHint>
             </p>
             <p className="truncate text-md font-semibold text-slate-900">
               {formatMonthly(vm.monthly_usd_730h)}
@@ -647,6 +735,18 @@ const VmDetailPanel = ({
             <div className="min-w-0 flex-1">
               <p className="text-[10px] font-medium uppercase tracking-wider text-emerald-700">
                 Mejor opción entre nubes
+                <InfoHint>
+                  <p className="mb-1 font-semibold">
+                    ¿Cómo se elige la mejor opción?
+                  </p>
+                  <p>
+                    Entre todas las recomendaciones de las nubes destino, se
+                    selecciona aquella con el menor costo mensual teórico
+                    (Mensual 730h). El criterio se basa solo en el precio del catálogo y no
+                    considera el uso real del workload — para esa comparación
+                    revisar la sección <em>Proyección de costos</em>.
+                  </p>
+                </InfoHint>
               </p>
               <div className="mt-0.5 flex flex-wrap items-center gap-2">
                 <span className="font-mono text-sm font-bold text-slate-900">
@@ -673,6 +773,14 @@ const VmDetailPanel = ({
             <div className="shrink-0 text-right">
               <p className="text-[10px] font-medium uppercase tracking-wider text-slate-500">
                 Mensual
+                <InfoHint side="left">
+                  <p className="mb-1 font-semibold">Mensual teórico (730h)</p>
+                  <p>
+                    Costo mensual de la mejor opción al precio de catálogo, y
+                    la diferencia absoluta respecto al mensual de la instancia
+                    original (mismo cálculo: costo por hora × 730).
+                  </p>
+                </InfoHint>
               </p>
               <div className="font-mono text-lg font-bold text-emerald-700">
                 {formatMonthly(bestOverall.match.monthly_usd_730h)} {bestOverallVsOriginal(bestOverall.match.monthly_usd_730h, vm.monthly_usd_730h)}
@@ -714,6 +822,8 @@ const VmDetailPanel = ({
           ))}
         </Tabs>
       )}
+
+      <InterCloudVmProjectionComponent vm={vm} sourceCloud={sourceCloud} />
     </div>
   )
 }
@@ -880,6 +990,15 @@ const InfrastructureOverview = ({
           <div className="mb-3 flex items-center justify-between gap-2">
             <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-600">
               Infraestructura actual
+              <InfoHint>
+                <p className="mb-1 font-semibold">Resumen agregado del origen</p>
+                <p>
+                  Suma de costos de catálogo de todas las instancias detectadas
+                  en la nube origen, agrupadas por tipo. Los valores son
+                  teóricos (no consideran descuentos por reserva ni horas
+                  reales de uso).
+                </p>
+              </InfoHint>
             </p>
             <Badge
               variant="outline"
@@ -902,6 +1021,9 @@ const InfrastructureOverview = ({
             <div>
               <p className="text-[10px] font-medium uppercase tracking-wider text-slate-500">
                 Por hora
+                <InfoHint>
+                  <p>Suma de las costos por hora de catálogo de todas las instancias.</p>
+                </InfoHint>
               </p>
               <p className="font-mono text-lg font-bold text-slate-900 tabular-nums">
                 {formatHourly(summary.original.hourly)}
@@ -910,6 +1032,12 @@ const InfrastructureOverview = ({
             <div>
               <p className="text-[10px] font-medium uppercase tracking-wider text-slate-500">
                 Mensual (730h)
+                <InfoHint>
+                  <p>
+                    Suma de los costos mensuales teóricos (costo por hora × 730)
+                    de todas las instancias.
+                  </p>
+                </InfoHint>
               </p>
               <p className="font-mono text-lg font-bold text-slate-900 tabular-nums">
                 {formatMonthly(summary.original.monthly)}
@@ -920,6 +1048,12 @@ const InfrastructureOverview = ({
           <div>
             <p className="mb-1.5 text-[10px] font-medium uppercase tracking-wider text-slate-500">
               Tipos de instancia
+              <InfoHint>
+                <p>
+                  Cada chip muestra una SKU única de la nube origen y la
+                  cantidad de instancias de ese tipo detectadas.
+                </p>
+              </InfoHint>
             </p>
             <div className="flex flex-wrap gap-1">
               {summary.original.types.map(({ instance_type, count }) => (
@@ -940,6 +1074,18 @@ const InfrastructureOverview = ({
           <div className="mb-3 flex items-center justify-between gap-2">
             <p className="text-[10px] font-semibold uppercase tracking-wider text-emerald-700">
               Mejor alternativa entre nubes
+              <InfoHint>
+                <p className="mb-1 font-semibold">
+                  Cómo se construye la mejor alternativa
+                </p>
+                <p>
+                  Para cada instancia origen se elige su recomendación más
+                  económica entre todas las nubes destino. Estos valores
+                  agregan los costos de catálogo de esas elecciones. Si una
+                  instancia no tiene recomendación, se cuenta como{" "}
+                  <em>sin alternativa</em> y no participa de la suma.
+                </p>
+              </InfoHint>
             </p>
             {summary.best.unmatched > 0 && (
               <Badge
@@ -957,6 +1103,13 @@ const InfrastructureOverview = ({
                 <div>
                   <p className="text-[10px] font-medium uppercase tracking-wider text-slate-500">
                     Por hora
+                    <InfoHint>
+                      <p>
+                        Suma de las costos por hora de la mejor recomendación
+                        de cada instancia. La diferencia inferior es vs la
+                        infraestructura actual.
+                      </p>
+                    </InfoHint>
                   </p>
                   <p className="font-mono text-lg font-bold text-emerald-700 tabular-nums">
                     {formatHourly(summary.best.hourly)}
@@ -968,6 +1121,12 @@ const InfrastructureOverview = ({
                 <div>
                   <p className="text-[10px] font-medium uppercase tracking-wider text-slate-500">
                     Mensual (730h)
+                    <InfoHint>
+                      <p>
+                        Suma de los costos mensuales teóricos de la mejor
+                        recomendación de cada instancia (costo por hora × 730).
+                      </p>
+                    </InfoHint>
                   </p>
                   <p className="font-mono text-lg font-bold text-emerald-700 tabular-nums">
                     {formatMonthly(summary.best.monthly)}
@@ -985,6 +1144,13 @@ const InfrastructureOverview = ({
               <div>
                 <p className="mb-1.5 text-[10px] font-medium uppercase tracking-wider text-slate-500">
                   Mezcla óptima
+                  <InfoHint>
+                    <p>
+                      Distribución de SKUs destino que componen la mejor
+                      alternativa: cada chip muestra un tipo de instancia, su
+                      nube de destino, y cuántas veces fue elegida.
+                    </p>
+                  </InfoHint>
                 </p>
                 <div className="flex flex-wrap gap-1">
                   {summary.best.breakdown.map((item) => {

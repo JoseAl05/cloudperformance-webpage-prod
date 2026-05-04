@@ -16,9 +16,9 @@ import {
     Mail,
     Cloud,
     House,
-    CircleDollarSign,
     Users,
     SplitSquareHorizontal,
+    Bell,
 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { usePathname } from 'next/navigation'
@@ -26,7 +26,6 @@ import Image from 'next/image'
 import { useTheme } from 'next-themes'
 import Link from 'next/link'
 import { useSession } from '@/hooks/useSession'
-import { User } from '@/types/db'
 
 const useMenuStyles = () => {
     const { resolvedTheme } = useTheme()
@@ -193,6 +192,21 @@ export const SidebarProfileComponent = ({
                                     </Link>
                                 </SidebarMenuButton>
                             )}
+                            {/* =================================================== */}
+                            {/* NUEVA SECCIÓN: ALERTAS */}
+                            {/* =================================================== */}
+                            <SidebarMenuButton asChild>
+                                <Link
+                                    href='/alertas'
+                                    className={cn(
+                                        'flex items-center gap-3 px-3 py-2 rounded-md cursor-pointer transition-colors duration-150',
+                                        getMenuItemClasses(pathname.startsWith('/alertas'))
+                                    )}
+                                >
+                                    <Bell className="h-5 w-5 text-blue-500" />
+                                    <span className="text-sm font-medium">Alertas</span>
+                                </Link>
+                            </SidebarMenuButton>
                         </SidebarMenuItem>
                     </SidebarMenu>
                 </SidebarGroup>
