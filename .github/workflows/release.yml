@@ -1,4 +1,4 @@
-name: Release
+name: Creacion de imagen pag web prueba
 
 on:
   push:
@@ -6,63 +6,49 @@ on:
       - 'v*'
 
 env:
-  REGISTRY: docker.io
-  IMAGE_OWNER: ${{ secrets.DOCKERHUB_USERNAME }}
+  REGISTRY: cloudperformance-desarrollo.eastus2.cloudapp.azure.com:5443
+  IMAGE_OWNER: ${{ secrets.INTAC_REGISTRY_USERNAME }}
+  IMAGE_NAME: pag-web-prueba
 
 jobs:
-  build:
+  build-and-push-image:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - name: frontend
-            context: ./frontend
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - uses: docker/setup-buildx-action@v3
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
-      - uses: docker/login-action@v3
+      - name: Log in to the self-managed registry
+        uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          username: ${{ secrets.INTAC_REGISTRY_USERNAME }}
+          password: ${{ secrets.INTAC_REGISTRY_PASSWORD }}
 
-      - id: meta
+      - name: Extract metadata for Docker
+        id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.REGISTRY }}/cloudperformance-${{ matrix.name }}
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_OWNER }}/${{ env.IMAGE_NAME }}
           tags: |
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+            type=raw,value=latest
 
-      - uses: docker/build-push-action@v5
+      - name: Build and push Docker image
+        id: push
+        uses: docker/build-push-action@v6
         with:
-          context: ${{ matrix.context }}
+          context: .
+          file: ./Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha,scope=${{ matrix.name }}
-          cache-to: type=gha,mode=max,scope=${{ matrix.name }}
-
-  package:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Build deployment archive
-        run: |
-          VERSION=${GITHUB_REF#refs/tags/}
-          mkdir -p dist/cloudperformance
-          cp -r deploy/* dist/cloudperformance/
-          sed -i "s|^CLOUDPERF_VERSION=.*|CLOUDPERF_VERSION=${VERSION}|" dist/cloudperformance/.env.template
-          cd dist && tar -czf cloudperformance-config-${VERSION}.tar.gz cloudperformance/
-
-      - uses: softprops/action-gh-release@v2
-        with:
-          files: dist/cloudperformance-config-*.tar.gz
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
