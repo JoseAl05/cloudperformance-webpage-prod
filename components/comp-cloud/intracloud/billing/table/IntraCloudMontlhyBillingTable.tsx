@@ -18,12 +18,6 @@ const formatPercent = (value: number): string => {
   return value < 0 ? `-${formatted}%` : `${formatted}%`
 }
 
-const generateDummyBudget = (invoiced: number): number =>
-  Math.round(invoiced * 1.05)
-
-const generateDummyProjected = (invoiced: number): number =>
-  Math.round(invoiced * 1.02)
-
 export const IntraCloudMonthlyBillingTable = ({
   data, isLoading
 }: IntraCloudMonthlyBillingTableProps) => {
@@ -67,6 +61,42 @@ export const IntraCloudMonthlyBillingTable = ({
     return totals
   }, [data, months, billingMap])
 
+  const summaryBudgetByMonth = useMemo(() => {
+    if (data && data.length === 0 || !data) return {};
+    const totals: Record<string, number> = {}
+    months.forEach((m) => {
+      totals[m] = data.reduce((sum, t) => {
+        const bd = billingMap[t.tenant_id]?.[m]
+        return sum + (bd?.monthly_associated_amount ?? 0)
+      }, 0)
+    })
+    return totals
+  }, [data, months, billingMap])
+
+  const summaryActualByMonth = useMemo(() => {
+    if (data && data.length === 0 || !data) return {};
+    const totals: Record<string, number> = {}
+    months.forEach((m) => {
+      totals[m] = data.reduce((sum, t) => {
+        const bd = billingMap[t.tenant_id]?.[m]
+        return sum + (bd?.actual_monthly_amount ?? 0)
+      }, 0)
+    })
+    return totals
+  }, [data, months, billingMap])
+
+  const summaryProjectedByMonth = useMemo(() => {
+    if (data && data.length === 0 || !data) return {};
+    const totals: Record<string, number> = {}
+    months.forEach((m) => {
+      totals[m] = data.reduce((sum, t) => {
+        const bd = billingMap[t.tenant_id]?.[m]
+        return sum + (bd?.monthly_forecast_amount ?? 0)
+      }, 0)
+    })
+    return totals
+  }, [data, months, billingMap])
+
   const summaryTotal = useMemo(
     () => Object.values(summaryByMonth).reduce((a, b) => a + b, 0),
     [summaryByMonth]
@@ -87,21 +117,21 @@ export const IntraCloudMonthlyBillingTable = ({
   const renderSectionRows = (
     label: string,
     monthlyInvoiced: Record<string, number>,
+    monthlyBudget: Record<string, number>,
+    monthlyActual: Record<string, number>,
+    monthlyProjected: Record<string, number>,
     totalInvoiced: number,
     bgBase: string,
     headerBg?: string,
   ) => {
-    const monthlyBudget: Record<string, number> = {}
-    const monthlyProjected: Record<string, number> = {}
     let budgetSum = 0
+    let actualSum = 0
     let projectedSum = 0
 
     months.forEach((m) => {
-      const inv = monthlyInvoiced[m] ?? 0
-      monthlyBudget[m] = generateDummyBudget(inv)
-      monthlyProjected[m] = generateDummyProjected(inv)
-      budgetSum += monthlyBudget[m]
-      projectedSum += monthlyProjected[m]
+      budgetSum += monthlyBudget[m] ?? 0
+      actualSum += monthlyActual[m] ?? 0
+      projectedSum += monthlyProjected[m] ?? 0
     })
 
     const devTotal = budgetSum - totalInvoiced
@@ -127,9 +157,23 @@ export const IntraCloudMonthlyBillingTable = ({
         <tr className={headerBg ?? bgBase}>
           <td className={`${labelCell} font-semibold`}>{label}</td>
           {months.map((m) => (
-            <td key={m} className={`${cellBase} font-semibold`}>{formatUsd(monthlyBudget[m])}</td>
+            <td key={m} className={`${cellBase} font-semibold`}>{formatUsd(monthlyBudget[m] ?? 0)}</td>
           ))}
           <td className={`${cellBase} font-semibold`}>{formatUsd(budgetSum)}</td>
+        </tr>
+        <tr className={bgBase}>
+          <td className={`${labelCell} pl-6`}>Real</td>
+          {months.map((m) => (
+            <td key={m} className={cellBase}>{formatUsd(monthlyActual[m] ?? 0)}</td>
+          ))}
+          <td className={cellBase}>{formatUsd(actualSum)}</td>
+        </tr>
+        <tr className={bgBase}>
+          <td className={`${labelCell} pl-6`}>Proyectado</td>
+          {months.map((m) => (
+            <td key={m} className={cellBase}>{formatUsd(monthlyProjected[m] ?? 0)}</td>
+          ))}
+          <td className={cellBase}>{formatUsd(projectedSum)}</td>
         </tr>
         <tr className={bgBase}>
           <td className={`${labelCell} pl-6`}>Facturado</td>
@@ -157,13 +201,6 @@ export const IntraCloudMonthlyBillingTable = ({
           <td className={`${cellBase} text-gray-400 dark:text-white/40`}>-</td>
         </tr>
         <tr className={bgBase}>
-          <td className={`${labelCell} pl-6`}>Proyectado</td>
-          {months.map((m) => (
-            <td key={m} className={cellBase}>{formatUsd(monthlyProjected[m])}</td>
-          ))}
-          <td className={cellBase}>{formatUsd(projectedSum)}</td>
-        </tr>
-        <tr className={bgBase}>
           <td className={`${labelCell} font-semibold`}>Total</td>
           {months.map((m) => (
             <td key={m} className={`${cellBase} font-semibold`}>{formatUsd(monthlyInvoiced[m] ?? 0)}</td>
@@ -171,9 +208,9 @@ export const IntraCloudMonthlyBillingTable = ({
           <td className={`${cellBase} font-semibold`}>{formatUsd(totalInvoiced)}</td>
         </tr>
         <tr className={bgBase}>
-          <td className={`${labelCell} pl-6`}>Desviación ($)</td>
+          <td className={`${labelCell} pl-6`}>Desviación Ppto vs Facturado ($)</td>
           {months.map((m) => {
-            const dev = monthlyBudget[m] - (monthlyInvoiced[m] ?? 0)
+            const dev = (monthlyBudget[m] ?? 0) - (monthlyInvoiced[m] ?? 0)
             return (
               <td key={m} className={`${cellBase} ${deviationColor(dev)}`}>
                 {formatUsd(dev)}
@@ -183,9 +220,9 @@ export const IntraCloudMonthlyBillingTable = ({
           <td className={`${cellBase} ${deviationColor(devTotal)}`}>{formatUsd(devTotal)}</td>
         </tr>
         <tr className={bgBase}>
-          <td className={`${labelCell} pl-6`}>Desviación (%)</td>
+          <td className={`${labelCell} pl-6`}>Desviación Ppto vs Facturado (%)</td>
           {months.map((m) => {
-            const bgt = monthlyBudget[m]
+            const bgt = monthlyBudget[m] ?? 0
             const inv = monthlyInvoiced[m] ?? 0
             const pct = bgt !== 0 ? ((bgt - inv) / bgt) * 100 : 0
             return (
@@ -239,6 +276,9 @@ export const IntraCloudMonthlyBillingTable = ({
           {renderSectionRows(
             'Presupuesto (Total)',
             Object.fromEntries(months.map((m) => [m, summaryByMonth[m] ?? 0])),
+            Object.fromEntries(months.map((m) => [m, summaryBudgetByMonth[m] ?? 0])),
+            Object.fromEntries(months.map((m) => [m, summaryActualByMonth[m] ?? 0])),
+            Object.fromEntries(months.map((m) => [m, summaryProjectedByMonth[m] ?? 0])),
             summaryTotal,
             'bg-blue-200/90 text-gray-900 dark:bg-blue-900/90 dark:text-white',
           )}
@@ -246,8 +286,15 @@ export const IntraCloudMonthlyBillingTable = ({
 
         {data.map((tenant, index) => {
           const tenantMonthly: Record<string, number> = {}
+          const tenantBudget: Record<string, number> = {}
+          const tenantActual: Record<string, number> = {}
+          const tenantProjected: Record<string, number> = {}
           months.forEach((m) => {
-            tenantMonthly[m] = billingMap[tenant.tenant_id]?.[m]?.cost_in_usd ?? 0
+            const bd = billingMap[tenant.tenant_id]?.[m]
+            tenantMonthly[m] = bd?.cost_in_usd ?? 0
+            tenantBudget[m] = bd?.monthly_associated_amount ?? 0
+            tenantActual[m] = bd?.actual_monthly_amount ?? 0
+            tenantProjected[m] = bd?.monthly_forecast_amount ?? 0
           })
           const tenantTotal = Object.values(tenantMonthly).reduce((a, b) => a + b, 0)
 
@@ -259,6 +306,9 @@ export const IntraCloudMonthlyBillingTable = ({
               {renderSectionRows(
                 `Ppto ${tenant.tenant_alias}`,
                 tenantMonthly,
+                tenantBudget,
+                tenantActual,
+                tenantProjected,
                 tenantTotal,
                 'bg-white text-gray-900 dark:bg-blue-800/90 dark:text-white',
                 'bg-blue-200 text-blue-950 dark:bg-blue-950 dark:text-white',

@@ -63,9 +63,12 @@ export interface IntraCloudBillingByDimensionData {
 
 export interface IntraCloudMonthlyBillingData {
   cost_in_usd: number;
-  pay_cost_in_usd: number;
+  payg_cost_in_usd: number;
   year: number;
   month: string;
+  monthly_associated_amount: number;
+  actual_monthly_amount: number;
+  monthly_forecast_amount: number;
 }
 
 export interface IntraCloudMonthlyBilling {
