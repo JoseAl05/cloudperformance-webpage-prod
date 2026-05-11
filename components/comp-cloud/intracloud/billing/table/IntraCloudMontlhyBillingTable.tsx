@@ -108,7 +108,7 @@ export const IntraCloudMonthlyBillingTable = ({
   }
 
   const deviationColor = (value: number) =>
-    value < 0 ? 'text-green-700 dark:text-green-400' : value > 0 ? 'text-yellow-700 dark:text-yellow-400' : ''
+    value > 0 ? 'text-green-700 dark:text-green-400' : value < 0 ? 'text-yellow-700 dark:text-yellow-400' : ''
 
   const cellBase = 'px-2 py-1 text-right text-sm whitespace-nowrap border-r border-gray-200 dark:border-white/10'
   const headerCell = 'px-2 py-1 text-center text-sm font-semibold whitespace-nowrap border-r border-blue-200 dark:border-white/10'

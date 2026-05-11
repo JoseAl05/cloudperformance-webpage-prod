@@ -1,3 +1,5 @@
+export type RecommendationStatus = 'En ejecución' | 'Finalizada' | 'Rechazada' | 'Pospuesta';
+
 export interface AiRecommendationReference {
   title: string;
   url: string;
@@ -66,6 +68,7 @@ export interface AiRecommendationResource {
   diagnosis: AiRecommendationDiagnosis;
   impact_matrix: AiRecommendationImpactMatrix;
   action_plan: AiRecommendationActionPlan;
+  execution_status?: RecommendationStatus;
 }
 
 export interface AiRecommendationPrioritizationStrategy {
@@ -82,4 +85,48 @@ export interface AiRecommendationReport {
   prioritization_strategy: AiRecommendationPrioritizationStrategy[];
   resources: AiRecommendationResource[];
   sync_time: string;
+}
+
+export interface RecommendationStatusEvent {
+  report_id: string;
+  recommendation_group_id: string;
+  cloud_provider: string;
+  resource_type: string;
+  recommendation_subtype: string;
+  resource_id: string | string[];
+  resource_name: string | string[];
+  recommendation_summary: string;
+  action_plan: AiRecommendationActionPlan;
+  execution_status: RecommendationStatus;
+  status_assigned_at: string;
+  recommendation_created_at: string;
+  comment?: string;
+}
+
+export interface AssignExecutionStatusResponse {
+  recommendation_updated: boolean;
+  status_event_created: boolean;
+  execution_status: RecommendationStatus;
+  status_event_id: string | null;
+  error_detail: string | null;
+}
+
+export interface RecommendationStatusGroupReport {
+  report_id: string;
+  cloud_provider: string;
+  resource_type: string;
+  recommendation_subtype: string;
+  resource_id: string | string[];
+  resource_name: string | string[];
+  recommendation_summary: string;
+  action_plan: AiRecommendationActionPlan;
+  execution_status: RecommendationStatus;
+  status_assigned_at: string;
+  recommendation_created_at: string;
+  comment: string | null;
+}
+
+export interface RecommendationStatusGroup {
+  reports: RecommendationStatusGroupReport[];
+  recommendation_group_id: string;
 }
