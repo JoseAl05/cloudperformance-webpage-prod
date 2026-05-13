@@ -3,7 +3,7 @@
 import React from 'react';
 import { useSession } from '@/hooks/useSession';
 import Link from 'next/link';
-import { ArrowRight, Users, PlusCircle, DollarSign, Key, SplitSquareHorizontal, ChevronsLeftRightEllipsis } from 'lucide-react';
+import { ArrowRight, Users, PlusCircle, DollarSign, Key, SplitSquareHorizontal, ChevronsLeftRightEllipsis, TrendingUp } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const ACTIONS = [
@@ -23,6 +23,15 @@ const ACTIONS = [
         href: '/comparacion-nubes/internube',
         bgColor: 'bg-green-500/10',
         textColor: 'text-green-600',
+        role: ['usuario', 'admin_empresa', 'admin_global'],
+    },
+    {
+        name: 'Consolidado Multinube', 
+        description: 'Vista agregada de facturación global entre tus cuentas de Azure, AWS y GCP.',
+        icon: TrendingUp, 
+        href: '/comparacion-nubes/multinube', 
+        bgColor: 'bg-indigo-500/10', 
+        textColor: 'text-indigo-600',
         role: ['usuario', 'admin_empresa', 'admin_global'],
     }
 
