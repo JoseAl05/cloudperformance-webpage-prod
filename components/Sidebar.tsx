@@ -172,6 +172,7 @@ export const SidebarComponent = ({
             { label: 'Eventos', icon: Zap, href: '/aws/eventos' },
             { label: 'Vista Advisor', icon: Pyramid, href: '/aws/advisor' },
             { label: 'Vista Saving Plans', icon: HandCoins, href: '/aws/saving-plan' },
+            { label: 'Presupuestos', icon: CircleDollarSign, href: '/aws/presupuesto' },
             { label: 'Métricas Finops', icon: ChartNetwork, href: '/aws/finops-metrics-ai' },
             { label: 'Mantenedor de Etiquetas (Tags)', icon: Tags, href: '/aws/tags' },
         ],
