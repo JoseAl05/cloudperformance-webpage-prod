@@ -31,3 +31,4 @@ remove-unused-imports.mjs
 *.7z
 unlighthouse.config.ts
 .unlighthouse
+.vscode/
