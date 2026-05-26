@@ -18,22 +18,22 @@ const MainMenuComponent: React.FC = () => {
     {
       title: '📊 Costos vs Presupuesto',
       description: 'Visualiza y compara el presupuesto con los costos reales.',
-      path: '/aws/presupuesto/costos-vs-presupuesto',
+      path: '/azure/presupuesto/costos-vs-presupuesto',
     },
     {
       title: '🏷️ Centros de Costo',
       description: 'Carga y gestiona los centros de costo',
-      path: '/aws/presupuesto/centro-de-costo',
+      path: '/azure/presupuesto/centro-de-costo',
     },
     {
       title: '💰 Presupuestos Anuales',
       description: 'Carga y administra los presupuestos anuales',
-      path: '/aws/presupuesto/presupuesto-anual',
+      path: '/azure/presupuesto/presupuesto-anual',
     },
     {
       title: '💰 Presupuestos Mensuales',
       description: 'Carga y administra los presupuestos mensuales',
-      path: '/aws/presupuesto/presupuesto-mensual',
+      path: '/azure/presupuesto/presupuesto-mensual',
     },
     // Puedes agregar más módulos aquí
   ];
