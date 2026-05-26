@@ -136,6 +136,18 @@ export const SidebarProfileComponent = ({
                             </SidebarMenuButton>
                             <SidebarMenuButton asChild>
                                 <Link
+                                    href='/perfil/conectores'
+                                    className={cn(
+                                        'flex items-center gap-3 px-3 py-2 rounded-md cursor-pointer transition-colors duration-150',
+                                        getMenuItemClasses(pathname.startsWith('/perfil/conectores'))
+                                    )}
+                                >
+                                    <Cloud className="h-5 w-5 text-blue-500" />
+                                    <span className="text-sm font-medium">Conectores</span>
+                                </Link>
+                            </SidebarMenuButton>
+                            <SidebarMenuButton asChild>
+                                <Link
                                     href='/perfil/nubes'
                                     className={cn(
                                         'flex items-center gap-3 px-3 py-2 rounded-md cursor-pointer transition-colors duration-150',

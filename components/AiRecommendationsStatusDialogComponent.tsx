@@ -15,9 +15,10 @@ interface AiRecommendationsStatusDialogComponentProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
     recGroupId: string | null;
+    cloud: string;
 }
 
-const HISTORY_ENDPOINT = '/api/azure/bridge/azure/get_recommendation_execution_status_history';
+
 
 type FetcherError = Error & { status?: number };
 
@@ -35,7 +36,23 @@ export const AiRecommendationsStatusDialogComponent = ({
     open,
     onOpenChange,
     recGroupId,
+    cloud,
 }: AiRecommendationsStatusDialogComponentProps) => {
+    let HISTORY_ENDPOINT = '/api/azure/bridge/azure/get_recommendation_execution_status_history';
+
+    switch (cloud) {
+        case 'azure':
+            HISTORY_ENDPOINT = '/api/azure/bridge/azure/get_recommendation_execution_status_history';
+            break;
+        case 'aws':
+            HISTORY_ENDPOINT = '/api/aws/bridge/advisor/get_recommendation_execution_status_history';
+            break;
+        case 'gcp':
+            HISTORY_ENDPOINT = '/api/gcp/bridge/gcp/ai_recommendations/get_recommendation_execution_status_history';
+             break;
+        default:
+            break;
+    }
     const swrKey = open && recGroupId
         ? `${HISTORY_ENDPOINT}?rec_group_id=${encodeURIComponent(recGroupId)}`
         : null;

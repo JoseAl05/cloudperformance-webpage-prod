@@ -132,6 +132,7 @@ export const RecommenderComponent = ({
             </div>
             <AiRecommendationsComponent
                 data={aiRecommendationsData}
+                cloud='gcp'
             />
         </div>
     )

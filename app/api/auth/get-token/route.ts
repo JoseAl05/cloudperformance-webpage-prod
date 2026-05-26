@@ -63,7 +63,6 @@ export async function POST(req: Request) {
       user_db_azure: user.user_db_azure,
       is_aws: user.is_aws,
       is_azure: user.is_azure,
-
       user_db_gcp: user.user_db_gcp,
       is_gcp: user.is_gcp,
     };

@@ -132,6 +132,7 @@ export const AdvisorViewComponent = ({
             </div>
             <AiRecommendationsComponent
                 data={aiRecommendationsData}
+                cloud='aws'
             />
         </div>
     )

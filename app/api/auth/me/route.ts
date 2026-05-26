@@ -46,6 +46,17 @@ export async function GET() {
 
     const userTyped = user as UserWithTenancy;
 
+    const userClient = payload.client;
+    console.log(userClient)
+
+    const connectorCollection = await getCollection('cloudperformance_external_connectors');
+
+    const connector = await connectorCollection
+      .find({ "created_by.client": userClient })
+      .project({ _id: 0, connector_type: 1, created_by: 1, config: 1, created_at: 1, updated_at: 1, status: 1 })
+      .toArray();
+
+
     const sessionUser: SessionUser = {
       _id: user._id,
       email: user.email,
@@ -72,6 +83,8 @@ export async function GET() {
       azure_accounts: user.azure_accounts || [],
       aws_accounts: user.aws_accounts || [],
       gcp_accounts: user.gcp_accounts || [],
+
+      connectors: connector || []
     };
 
     return NextResponse.json({ user: sessionUser });

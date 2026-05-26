@@ -44,11 +44,62 @@ import { AiRecommendationsStatusDialogComponent } from '@/components/AiRecommend
 
 interface AiRecommendationsComponentProps {
     data: AiRecommendationReport[] | null;
+    cloud: string;
 }
 
-const STATUS_ENDPOINT = '/api/azure/bridge/azure/assign_recommendation_execution_status';
-
 type FetcherError = Error & { status?: number };
+
+type StatusFeedback = {
+    recommendation_updated: boolean;
+    status_event_created: boolean;
+    error?: string;
+};
+
+interface StatusFeedbackToastProps {
+    feedback: StatusFeedback;
+    onDismiss: () => void;
+}
+
+interface StatusSectionProps {
+    resource: AiRecommendationResource;
+    onSubmit: (newStatus: RecommendationStatus, comment: string) => Promise<void>;
+    onOpenHistory: () => void;
+}
+
+interface ResourceCardProps {
+    resource: AiRecommendationResource;
+    onStatusChange: (newStatus: RecommendationStatus, comment: string) => Promise<void>;
+    onOpenHistory: () => void;
+}
+
+type SortField = 'savings' | 'risk';
+type SortDirection = 'desc' | 'asc';
+type StatusFilterValue = RecommendationStatus | 'unassigned';
+
+interface FindingsSectionProps {
+    resources: AiRecommendationResource[];
+    onStatusChange: (resourceIndex: number, newStatus: RecommendationStatus, comment: string) => Promise<void>;
+    onOpenHistory: (resourceIndex: number) => void;
+}
+
+
+
+const STATUS_OPTIONS: RecommendationStatus[] = ['En ejecución', 'Finalizada', 'Rechazada', 'Pospuesta'];
+
+const STATUS_STYLES: Record<RecommendationStatus, string> = {
+    'En ejecución': 'bg-blue-100 text-blue-900 border-blue-200 dark:bg-blue-900/40 dark:text-blue-300 dark:border-blue-800',
+    'Finalizada': 'bg-emerald-100 text-emerald-900 border-emerald-200 dark:bg-emerald-900/40 dark:text-emerald-300 dark:border-emerald-800',
+    'Rechazada': 'bg-red-100 text-red-900 border-red-200 dark:bg-red-900/40 dark:text-red-300 dark:border-red-800',
+    'Pospuesta': 'bg-amber-100 text-amber-900 border-amber-200 dark:bg-amber-900/40 dark:text-amber-300 dark:border-amber-800',
+};
+
+const UNASSIGNED_BADGE = 'bg-slate-100 text-slate-600 border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700';
+
+const RISK_ORDER: Record<string, number> = { high: 3, alto: 3, medium: 2, medio: 2, low: 1, bajo: 1 };
+
+const ITEMS_PER_PAGE = 10;
+
+const ALL_STATUS_FILTERS: StatusFilterValue[] = ['En ejecución', 'Finalizada', 'Rechazada', 'Pospuesta', 'unassigned'];
 
 const statusFetcher = async (
     url: string,
@@ -66,17 +117,6 @@ const statusFetcher = async (
     }
     return response.json();
 };
-
-const STATUS_OPTIONS: RecommendationStatus[] = ['En ejecución', 'Finalizada', 'Rechazada', 'Pospuesta'];
-
-const STATUS_STYLES: Record<RecommendationStatus, string> = {
-    'En ejecución': 'bg-blue-100 text-blue-900 border-blue-200 dark:bg-blue-900/40 dark:text-blue-300 dark:border-blue-800',
-    'Finalizada': 'bg-emerald-100 text-emerald-900 border-emerald-200 dark:bg-emerald-900/40 dark:text-emerald-300 dark:border-emerald-800',
-    'Rechazada': 'bg-red-100 text-red-900 border-red-200 dark:bg-red-900/40 dark:text-red-300 dark:border-red-800',
-    'Pospuesta': 'bg-amber-100 text-amber-900 border-amber-200 dark:bg-amber-900/40 dark:text-amber-300 dark:border-amber-800',
-};
-
-const UNASSIGNED_BADGE = 'bg-slate-100 text-slate-600 border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700';
 
 const formatCurrency = (amount: number, currency: string = 'USD') => {
     return new Intl.NumberFormat('en-US', {
@@ -113,16 +153,9 @@ const computeRecommendationGroupId = (resource: AiRecommendationResource, cloudP
     return `${cloudProvider}::${resource.resource_type}::${resource.recommendation_subtype}::${ids}`;
 };
 
-type StatusFeedback = {
-    recommendation_updated: boolean;
-    status_event_created: boolean;
-    error?: string;
+const getRiskWeight = (level: string): number => {
+    return RISK_ORDER[level.toLowerCase()] ?? 0;
 };
-
-interface StatusFeedbackToastProps {
-    feedback: StatusFeedback;
-    onDismiss: () => void;
-}
 
 const StatusFeedbackToast = ({ feedback, onDismiss }: StatusFeedbackToastProps) => {
     const { recommendation_updated, status_event_created, error } = feedback;
@@ -187,12 +220,6 @@ const StatusFeedbackToast = ({ feedback, onDismiss }: StatusFeedbackToastProps) 
     );
 };
 
-interface StatusSectionProps {
-    resource: AiRecommendationResource;
-    onSubmit: (newStatus: RecommendationStatus, comment: string) => Promise<void>;
-    onOpenHistory: () => void;
-}
-
 const StatusSection = ({ resource, onSubmit, onOpenHistory }: StatusSectionProps) => {
     const currentStatus = resource.execution_status;
     const [selected, setSelected] = useState<RecommendationStatus | ''>('');
@@ -224,7 +251,7 @@ const StatusSection = ({ resource, onSubmit, onOpenHistory }: StatusSectionProps
                     variant="outline"
                     size="sm"
                     onClick={onOpenHistory}
-                    className="gap-1.5 text-xs cursor-pointer bg-sky-900 text-white hover:bg-sky-900/90 hover:text-white dark:bg-sky-300 dark:text-black dark:hover:bg-sky-300/90 dark:text-black"
+                    className="gap-1.5 text-xs cursor-pointer bg-sky-900 text-white hover:bg-sky-900/90 hover:text-white dark:bg-sky-300 dark:text-black dark:hover:bg-sky-300/90"
                 >
                     <History className="h-3.5 w-3.5" />
                     Seguimiento recomendación
@@ -299,12 +326,6 @@ const StatusSection = ({ resource, onSubmit, onOpenHistory }: StatusSectionProps
     );
 };
 
-interface ResourceCardProps {
-    resource: AiRecommendationResource;
-    onStatusChange: (newStatus: RecommendationStatus, comment: string) => Promise<void>;
-    onOpenHistory: () => void;
-}
-
 const ResourceCard = ({ resource, onStatusChange, onOpenHistory }: ResourceCardProps) => {
     const [expanded, setExpanded] = useState(false);
     const { diagnosis, impact_matrix, action_plan, resource_name, resource_id, execution_status } = resource;
@@ -313,6 +334,8 @@ const ResourceCard = ({ resource, onStatusChange, onOpenHistory }: ResourceCardP
     const displayTitle = isMultipleResources
         ? `Múltiples recursos afectados (${resource_name.length})`
         : resource_name;
+    
+    console.log(resource)
 
     return (
         <div className="border rounded-xl bg-card overflow-hidden shadow-sm transition-all hover:shadow-md">
@@ -538,26 +561,6 @@ const ResourceCard = ({ resource, onStatusChange, onOpenHistory }: ResourceCardP
         </div>
     );
 };
-
-type SortField = 'savings' | 'risk';
-type SortDirection = 'desc' | 'asc';
-type StatusFilterValue = RecommendationStatus | 'unassigned';
-
-const RISK_ORDER: Record<string, number> = { high: 3, alto: 3, medium: 2, medio: 2, low: 1, bajo: 1 };
-
-const getRiskWeight = (level: string): number => {
-    return RISK_ORDER[level.toLowerCase()] ?? 0;
-};
-
-const ITEMS_PER_PAGE = 10;
-
-const ALL_STATUS_FILTERS: StatusFilterValue[] = ['En ejecución', 'Finalizada', 'Rechazada', 'Pospuesta', 'unassigned'];
-
-interface FindingsSectionProps {
-    resources: AiRecommendationResource[];
-    onStatusChange: (resourceIndex: number, newStatus: RecommendationStatus, comment: string) => Promise<void>;
-    onOpenHistory: (resourceIndex: number) => void;
-}
 
 const FindingsSection = ({ resources, onStatusChange, onOpenHistory }: FindingsSectionProps) => {
     const [activeTab, setActiveTab] = useState<'all' | 'top10'>('all');
@@ -796,7 +799,7 @@ const FindingsSection = ({ resources, onStatusChange, onOpenHistory }: FindingsS
     );
 };
 
-export const AiRecommendationsComponent = ({ data }: AiRecommendationsComponentProps) => {
+export const AiRecommendationsComponent = ({ data, cloud }: AiRecommendationsComponentProps) => {
 
     const [reports, setReports] = useState<AiRecommendationReport[]>(() => data ?? []);
     const [feedback, setFeedback] = useState<StatusFeedback | null>(null);
@@ -805,7 +808,23 @@ export const AiRecommendationsComponent = ({ data }: AiRecommendationsComponentP
         recGroupId: null,
     });
 
+    let STATUS_ENDPOINT = '';
+
+    switch (cloud) {
+        case 'azure':
+            STATUS_ENDPOINT = '/api/azure/bridge/azure/assign_recommendation_execution_status';
+            break;
+        case 'aws':
+            STATUS_ENDPOINT = '/api/aws/bridge/advisor/assign_recommendation_execution_status';
+            break;
+        case 'gcp':
+            STATUS_ENDPOINT = '/api/gcp/bridge/gcp/ai_recommendations/assign_recommendation_execution_status';
+            break;
+        default:
+            break;
+    }
     const { trigger: triggerStatusUpdate } = useSWRMutation(STATUS_ENDPOINT, statusFetcher);
+
 
     useEffect(() => {
         setReports(data ?? []);
@@ -894,8 +913,6 @@ export const AiRecommendationsComponent = ({ data }: AiRecommendationsComponentP
         );
     }
 
-    console.log(data)
-
     return (
         <div className="space-y-8">
             {feedback && (
@@ -909,6 +926,7 @@ export const AiRecommendationsComponent = ({ data }: AiRecommendationsComponentP
                 open={historyDialog.open}
                 onOpenChange={(open) => setHistoryDialog((prev) => ({ ...prev, open }))}
                 recGroupId={historyDialog.recGroupId}
+                cloud={cloud}
             />
 
             {reports.map((report) => (

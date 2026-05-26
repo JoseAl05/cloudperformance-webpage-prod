@@ -1,4 +1,5 @@
 import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar"
+import { Toaster } from "@/components/ui/sonner";
 import { SidebarComponent } from "@/components/Sidebar"
 import { Navbar } from '@/components/Navbar';
 import { cookies } from 'next/headers';
@@ -24,7 +25,7 @@ export default async function DashboardLayout({
                 } as React.CSSProperties
             }
         >
-            <SidebarComponent/>
+            <SidebarComponent />
             <SidebarInset className="min-w-0 ">
                 <div className='flex items-center gap-3 p-5'>
                     {

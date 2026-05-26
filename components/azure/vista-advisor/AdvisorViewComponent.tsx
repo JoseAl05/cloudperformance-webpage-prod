@@ -143,6 +143,7 @@ export const AdvisorViewComponent = ({
             </div>
             <AiRecommendationsComponent
                 data={aiRecommendationsData}
+                cloud='azure'
             />
         </div>
     )

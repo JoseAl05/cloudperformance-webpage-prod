@@ -4,6 +4,7 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 import { ClientContextProvider } from "@/components/context/ClientContext";
 import { SWRProvider } from '@/components/SWRProvider';
 import "@/app/globals.css";
+import { Toaster } from '@/components/ui/sonner';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -39,6 +40,12 @@ export default function RootLayout({
           >
             <SWRProvider>
               {children}
+              <Toaster
+                richColors
+                position='top-center'
+                closeButton
+                duration={4000}
+              />
             </SWRProvider>
           </ThemeProvider>
         </ClientContextProvider>

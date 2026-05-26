@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { getCollection } from '@/lib/mongodb';
 import { signAuthToken } from '@/lib/auth';
+import { get } from 'http';
 
 const VerifySchema = z.object({
   userId: z.string().min(1),
@@ -46,6 +47,13 @@ export async function POST(req: Request) {
   const clients = await getCollection('Empresas')
   const clientData = await clients.findOne({ name: user.client });
 
+  // Obtener datos de conectores asociados al cliente
+  const connectors = await getCollection('cloudperformance_external_connectors');
+  const connectorData = await connectors
+    .find({ "created_by.email": user.email, "created_by.username": user.username })
+    .project({ _id: 0, connector_type: 1, created_by: 1, config: 1, created_at: 1, updated_at: 1, status: 1, encrypted_credentials: 1 })
+    .toArray();
+
 
   const codes = await getCollection('twofactor_codes');
   const tf = await codes.findOne({ userId, code, purpose: 'login' });
@@ -61,6 +69,7 @@ export async function POST(req: Request) {
   await signAuthToken({
     sub: String(user._id),
     username: user.username,
+    email: user.email,
     client: user.client,
     role: user.role,
     user_db_aws: user.user_db_aws,
@@ -76,6 +85,7 @@ export async function POST(req: Request) {
     aws_accounts: clientData.aws_accounts || [],
     gcp_accounts: clientData.gcp_accounts || [],
     planName: user.planName,
+    connectors: connectorData || []
   });
 
   const sessions = await getCollection('sessions');

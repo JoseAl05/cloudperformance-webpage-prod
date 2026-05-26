@@ -64,10 +64,13 @@ export interface User {
 
   recoveryToken?: string;
   recoveryTokenExpires?: Date;
+
+  connectors?: []
 }
 
 export interface AuthUserPayload {
   userId: string;
+  email: string;
   username: string;
   client: string;
   role: UserRole;
@@ -87,4 +90,27 @@ export interface AuthUserPayload {
   user_db_gcp: string | null;
   is_gcp: boolean;
   gcp_accounts?: CloudAccount[];
+}
+
+export interface ClientConnector {
+  created_by:{
+    username: string;
+    email: string;
+    client: string;
+    role: UserRole;
+  };
+  connector_type: string;
+  config:{
+    [key: string]: string;
+  };
+  encrypted_credentials: {
+    ciphertext: string;
+    encrypted_data_key?: string;
+    encryption_version: number;
+  };
+  status: string;
+  created_at: Date;
+  updated_at: Date;
+  last_validated_at: Date;
+
 }

@@ -111,6 +111,22 @@ export interface AssignExecutionStatusResponse {
   error_detail: string | null;
 }
 
+export interface JiraTicketReference {
+  created_at: string;
+  key: string;
+  subtasks: string[];
+  url: string;
+}
+
+export interface ServiceNowTicketReference {
+  created_at: string;
+  key: string;
+  sys_id: string;
+  table: string;
+  url: string;
+  subtasks: string[];
+}
+
 export interface RecommendationStatusGroupReport {
   report_id: string;
   cloud_provider: string;
@@ -124,9 +140,52 @@ export interface RecommendationStatusGroupReport {
   status_assigned_at: string;
   recommendation_created_at: string;
   comment: string | null;
+  jira_ticket?: JiraTicketReference;
+  servicenow_ticket?: ServiceNowTicketReference;
 }
 
 export interface RecommendationStatusGroup {
   reports: RecommendationStatusGroupReport[];
   recommendation_group_id: string;
+}
+
+export interface CreateJiraTicketResponse {
+    issue: Record<string, unknown>;
+    key: string;
+    subtasks: string[];
+    subtask_errors: string[];
+    transition_errors: string[];
+    persistence_warning: string | null;
+}
+
+export interface CreateServiceNowTicketResponse {
+    record: Record<string, unknown>;
+    key: string;
+    sys_id: string;
+    url: string;
+    subtasks: string[];
+    subtask_errors: string[];
+    persistence_warning: string | null;
+}
+
+export interface TicketValidationResult {
+    exists: boolean;
+    key: string;
+    summary?: string | null;
+    status?: string | null;
+    issue_type?: string | null;
+    sys_id?: string | null;
+    url?: string | null;
+    error?: string;
+    cleanup_status?: string | null;
+}
+
+export interface BatchValidationResponse {
+    results: Record<string, TicketValidationResult>;
+}
+
+export interface ValidationItem {
+    issue_key: string;
+    rec_group_id: string;
+    cloud_provider: string;
 }
