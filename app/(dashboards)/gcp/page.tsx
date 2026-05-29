@@ -76,7 +76,7 @@ export default function DashboardGCPPage() {
                                 <CardContent className="space-y-3">
                                     <div className="text-xs uppercase tracking-wider text-primary font-semibold">Acciones Rápidas</div>
                                     <div className="flex flex-col gap-2 rounded-xl border-2 border-primary/30 bg-gradient-to-br from-primary/5 to-primary/10 p-4 dark:from-primary/10 dark:to-primary/20">
-                                        <Link href="/gcp/facturacion/tendencia-pago-por-uso">
+                                        <Link href="/gcp/facturacion/tendencia-facturacion">
                                             <Button
                                                 size="default"
                                                 variant="default"
@@ -113,7 +113,7 @@ export default function DashboardGCPPage() {
                                 <CardContent className="space-y-3">
                                     <div className="text-xs uppercase tracking-wider text-primary font-semibold">Acciones Rápidas</div>
                                     <div className="flex flex-col gap-2 rounded-xl border-2 border-primary/30 bg-gradient-to-br from-primary/5 to-primary/10 p-4 dark:from-primary/10 dark:to-primary/20">
-                                        <Link href="/gcp/advisor">
+                                        <Link href="/gcp/recommender">
                                             <Button
                                                 size="default"
                                                 variant="default"
@@ -149,7 +149,7 @@ export default function DashboardGCPPage() {
                                     <div className="grid md:grid-cols-2 gap-4">
                                         <div className="flex flex-col gap-2 rounded-xl border-2 border-primary/30 bg-gradient-to-br from-primary/5 to-primary/10 p-4 dark:from-primary/10 dark:to-primary/20">
                                             <div className="text-xs font-semibold text-primary mb-1">Descuentos por Uso</div>
-                                            <Link href="/gcp/saving-plan">
+                                            <Link href="/gcp/cuds/spend-based-cuds">
                                                 <Button
                                                     size="default"
                                                     variant="default"
@@ -193,7 +193,7 @@ export default function DashboardGCPPage() {
                                     <div className="grid md:grid-cols-2 gap-4">
                                         <div className="flex flex-col gap-2 rounded-xl border-2 border-primary/30 bg-gradient-to-br from-primary/5 to-primary/10 p-4 dark:from-primary/10 dark:to-primary/20">
                                             <div className="text-xs font-semibold text-primary mb-1">Análisis de Storage</div>
-                                            <Link href="/gcp/funciones/storage-classes-analysis">
+                                            <Link href="/gcp/funciones/top-cloud-storage-buckets">
                                                 <Button
                                                     size="default"
                                                     variant="default"
@@ -203,7 +203,7 @@ export default function DashboardGCPPage() {
                                                 </Button>
                                             </Link>
                                         </div>
-                                        <div className="flex flex-col gap-2 rounded-xl border-2 border-primary/30 bg-gradient-to-br from-primary/5 to-primary/10 p-4 dark:from-primary/10 dark:to-primary/20">
+                                        {/* <div className="flex flex-col gap-2 rounded-xl border-2 border-primary/30 bg-gradient-to-br from-primary/5 to-primary/10 p-4 dark:from-primary/10 dark:to-primary/20">
                                             <div className="text-xs font-semibold text-primary mb-1">Discos Huérfanos</div>
                                             <Link href="/gcp/funciones/unused-resources/persistent-disks">
                                                 <Button
@@ -214,7 +214,7 @@ export default function DashboardGCPPage() {
                                                     <HardDrive className="h-4 w-4" /> Discos no utilizados
                                                 </Button>
                                             </Link>
-                                        </div>
+                                        </div> */}
                                     </div>
                                 </CardContent>
                             </Card>
@@ -240,7 +240,7 @@ export default function DashboardGCPPage() {
                             <CardDescription>Explora facturación, cuotas y salud del servicio</CardDescription>
                         </CardHeader>
                         <CardContent className="flex flex-wrap gap-2">
-                            <Link href="/gcp/facturacion/tendencia-pago-por-uso">
+                            <Link href="/gcp/facturacion/tendencia-facturacion">
                                 <Button size="sm" variant="outline" className="gap-2 cursor-pointer bg-transparent">
                                     <LineChart className="h-4 w-4" /> Tendencia de Facturación
                                 </Button>
@@ -250,17 +250,17 @@ export default function DashboardGCPPage() {
                                     <Gauge className="h-4 w-4" /> Cuotas (Quotas)
                                 </Button>
                             </Link>
-                            <Link href="/gcp/deployments">
+                            {/* <Link href="/gcp/deployments">
                                 <Button size="sm" variant="outline" className="gap-2 cursor-pointer bg-transparent">
                                     <CalendarClock className="h-4 w-4" /> Deployments (Cloud Build)
                                 </Button>
-                            </Link>
-                            <Link href="/gcp/advisor">
+                            </Link> */}
+                            <Link href="/gcp/recommender">
                                 <Button size="sm" variant="outline" className="gap-2 cursor-pointer bg-transparent">
                                     <Pyramid className="h-4 w-4" /> Recommender (Advisor)
                                 </Button>
                             </Link>
-                            <Link href="/gcp/saving-plan">
+                            <Link href="/gcp/cuds/spend-based-cuds">
                                 <Button size="sm" variant="outline" className="gap-2 cursor-pointer bg-transparent">
                                     <HandCoins className="h-4 w-4" /> CUDs
                                 </Button>
@@ -281,12 +281,7 @@ export default function DashboardGCPPage() {
                                     Top de Facturación
                                 </div>
                                 <div className="flex flex-wrap gap-2">
-                                    <Link href="/gcp/funciones/top-10-recursos-uso">
-                                        <Button size="sm" variant="outline" className="gap-2 cursor-pointer bg-transparent">
-                                            <Stars className="h-4 w-4" /> Top Recursos
-                                        </Button>
-                                    </Link>
-                                    <Link href="/gcp/funciones/promedio-por-localizacion">
+                                    <Link href="/gcp/funciones/top-facturacion-region">
                                         <Button size="sm" variant="outline" className="gap-2 cursor-pointer bg-transparent">
                                             <Globe2 className="h-4 w-4" /> Por Región
                                         </Button>
@@ -301,19 +296,39 @@ export default function DashboardGCPPage() {
                                     Consumo: hábil vs no hábil
                                 </div>
                                 <div className="flex flex-wrap gap-2">
-                                    <Link href="/gcp/funciones/analisis-vms-horario">
+                                    <Link href="/gcp/funciones/uso-horario-habil-no-habil/compute-engines">
                                         <Button size="sm" variant="outline" className="gap-2 cursor-pointer bg-transparent">
                                             <Clock className="h-4 w-4" /> Compute Engine
                                         </Button>
                                     </Link>
-                                    <Link href="/gcp/consumo-sql">
+                                    <Link href="/gcp/funciones/uso-horario-habil-no-habil/instance-group">
                                         <Button size="sm" variant="outline" className="gap-2 cursor-pointer bg-transparent">
-                                            <Database className="h-4 w-4" /> Cloud SQL
+                                            <Container className="h-4 w-4" /> Instance Groups
                                         </Button>
                                     </Link>
-                                    <Link href="/gcp/consumo-gke">
+                                    <Link href="/gcp/funciones/uso-horario-habil-no-habil/cloud-sql/postgresql">
+                                        <Button size="sm" variant="outline" className="gap-2 cursor-pointer bg-transparent">
+                                            <Database className="h-4 w-4" /> Cloud SQL Postgresql
+                                        </Button>
+                                    </Link>
+                                    <Link href="/gcp/funciones/uso-horario-habil-no-habil/cloud-sql/mysql">
+                                        <Button size="sm" variant="outline" className="gap-2 cursor-pointer bg-transparent">
+                                            <Database className="h-4 w-4" /> Cloud SQL Mysql
+                                        </Button>
+                                    </Link>
+                                    <Link href="/gcp/funciones/uso-horario-habil-no-habil/cloud-sql/sqlserver">
+                                        <Button size="sm" variant="outline" className="gap-2 cursor-pointer bg-transparent">
+                                            <Database className="h-4 w-4" /> Cloud SQL SQL Server
+                                        </Button>
+                                    </Link>
+                                    <Link href="/gcp/funciones/uso-horario-habil-no-habil/cluster-gke">
                                         <Button size="sm" variant="outline" className="gap-2 cursor-pointer bg-transparent">
                                             <Container className="h-4 w-4" /> GKE Clusters
+                                        </Button>
+                                    </Link>
+                                    <Link href="/gcp/funciones/uso-horario-habil-no-habil/filestore">
+                                        <Button size="sm" variant="outline" className="gap-2 cursor-pointer bg-transparent">
+                                            <Container className="h-4 w-4" /> Cloud Filestore
                                         </Button>
                                     </Link>
                                 </div>
@@ -351,7 +366,7 @@ export default function DashboardGCPPage() {
                         </CardHeader>
 
                         <CardContent className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                            <Link href="/gcp/recursos-vm" className="group">
+                            <Link href="/gcp/recursos/compute-engine" className="group">
                                 <div className="rounded-xl border p-3 hover:bg-muted transition">
                                     <div className="flex items-center gap-2 font-medium text-sm">
                                         <Server className="h-4 w-4" /> Compute Engine (VMs)
@@ -360,7 +375,7 @@ export default function DashboardGCPPage() {
                                 </div>
                             </Link>
 
-                            <Link href="/gcp/funciones/unused-resources/instance-groups" className="group">
+                            <Link href="/gcp/recursos/instance-groups" className="group">
                                 <div className="rounded-xl border p-3 hover:bg-muted transition">
                                     <div className="flex items-center gap-2 font-medium text-sm">
                                         <TrendingUp className="h-4 w-4" /> Instance Groups (MIGs)
@@ -369,7 +384,7 @@ export default function DashboardGCPPage() {
                                 </div>
                             </Link>
 
-                            <Link href="/gcp/consumo-sql" className="group">
+                            <Link href="/gcp/recursos/cloudsql/postgresql" className="group">
                                 <div className="rounded-xl border p-3 hover:bg-muted transition">
                                     <div className="flex items-center gap-2 font-medium text-sm">
                                         <Database className="h-4 w-4" /> Cloud SQL (PostgreSQL)
@@ -378,7 +393,7 @@ export default function DashboardGCPPage() {
                                 </div>
                             </Link>
 
-                            <Link href="/gcp/consumo-sql" className="group">
+                            <Link href="/gcp/recursos/cloudsql/mysql" className="group">
                                 <div className="rounded-xl border p-3 hover:bg-muted transition">
                                     <div className="flex items-center gap-2 font-medium text-sm">
                                         <Database className="h-4 w-4" /> Cloud SQL (MySQL)
@@ -387,7 +402,7 @@ export default function DashboardGCPPage() {
                                 </div>
                             </Link>
 
-                             <Link href="/gcp/consumo-sql" className="group">
+                            <Link href="/gcp/recursos/cloudsql/sqlserver" className="group">
                                 <div className="rounded-xl border p-3 hover:bg-muted transition">
                                     <div className="flex items-center gap-2 font-medium text-sm">
                                         <Database className="h-4 w-4" /> Cloud SQL (SQL Server)
@@ -396,12 +411,12 @@ export default function DashboardGCPPage() {
                                 </div>
                             </Link>
 
-                            <Link href="/gcp/funciones/unused-resources/persistent-disks" className="group">
+                            <Link href="/gcp/recursos/clusters-gke" className="group">
                                 <div className="rounded-xl border p-3 hover:bg-muted transition">
                                     <div className="flex items-center gap-2 font-medium text-sm">
-                                        <HardDrive className="h-4 w-4" /> Persistent Disks
+                                        <Server className="h-4 w-4" /> Clusters GKE (Nodos)
                                     </div>
-                                    <div className="text-xs text-muted-foreground">Almacenamiento en bloque</div>
+                                    <div className="text-xs text-muted-foreground">Nodos y métricas</div>
                                 </div>
                             </Link>
                         </CardContent>
