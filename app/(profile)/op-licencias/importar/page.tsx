@@ -3,6 +3,11 @@
 import React, { useState } from 'react';
 import { useSession } from '@/hooks/useSession';
 import { FileUp, ArrowLeft, Loader2, Building2, Users, UserPlus, ShieldCheck } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { DataTableGrouping } from '@/components/data-table/data-table-grouping';
+import { createColumns } from '@/components/data-table/columns';
+import { ColumnDef } from '@tanstack/react-table';
 import Link from 'next/link';
 
 interface CSVMeta {
@@ -19,25 +24,28 @@ interface CSVUser {
   fecha_solicitud: string;
 }
 
-interface ParsedCSV {
-  meta: CSVMeta;
-  users: CSVUser[];
+interface EmpresaGroup {
+  nombre: string;
+  nuevos: CSVUser[];
+  existentes: CSVUser[];
 }
 
-interface KPIs {
-  empresas: number;
-  usuariosExistentes: number;
-  usuariosNuevos: number;
-  licenciasAGenerar: number;
+interface TablaRow {
+  id: string;
+  email: string;
+  empresa: string;
+  fecha_solicitud: string;
+  tipo: 'Nuevo' | 'Existente';
 }
 
 export default function ImportarCSVPage() {
   const { user, isLoading } = useSession();
-  const [dragging, setDragging]         = useState(false);
-  const [parsed, setParsed]             = useState<ParsedCSV | null>(null);
-  const [kpis, setKpis]                 = useState<KPIs | null>(null);
-  const [processing, setProcessing]     = useState(false);
-  const [error, setError]               = useState('');
+  const [dragging, setDragging]             = useState(false);
+  const [meta, setMeta]                     = useState<CSVMeta | null>(null);
+  const [empresaGroups, setEmpresaGroups]   = useState<EmpresaGroup[]>([]);
+  const [processing, setProcessing]         = useState(false);
+  const [error, setError]                   = useState('');
+  const [fileName, setFileName]             = useState('');
 
   if (isLoading) return (
     <div className="flex items-center gap-2 p-8 text-muted-foreground">
@@ -49,33 +57,38 @@ export default function ImportarCSVPage() {
     return <div className="p-4 bg-red-100 text-red-700 rounded">Acceso denegado.</div>;
   }
 
-  function parseCSVText(text: string): ParsedCSV | null {
+  // KPIs calculados
+  const totalEmpresas   = empresaGroups.length;
+  const totalExistentes = empresaGroups.reduce((s, e) => s + e.existentes.length, 0);
+  const totalNuevos     = empresaGroups.reduce((s, e) => s + e.nuevos.length, 0);
+  const totalLicencias  = totalNuevos;
+
+  function parseCSVText(text: string) {
     const lines = text.split('\n').map(l => l.trim()).filter(l => l);
-    const meta: Partial<CSVMeta> = {};
+    const parsedMeta: Partial<CSVMeta> = {};
     const users: CSVUser[] = [];
 
     for (const line of lines) {
       if (line.startsWith('#')) {
         const content = line.replace('#', '').trim();
-        if (content.startsWith('Partner:'))        meta.partner     = content.replace('Partner:', '').trim();
-        if (content.startsWith('Solicitante:'))    meta.solicitante = content.replace('Solicitante:', '').trim();
-        if (content.startsWith('Fecha Solicitud:'))meta.fecha       = content.replace('Fecha Solicitud:', '').trim();
-        if (content.startsWith('Total Usuarios:')) meta.total       = content.replace('Total Usuarios:', '').trim();
+        if (content.startsWith('Partner:'))         parsedMeta.partner     = content.replace('Partner:', '').trim();
+        if (content.startsWith('Solicitante:'))     parsedMeta.solicitante = content.replace('Solicitante:', '').trim();
+        if (content.startsWith('Fecha Solicitud:')) parsedMeta.fecha       = content.replace('Fecha Solicitud:', '').trim();
+        if (content.startsWith('Total Usuarios:'))  parsedMeta.total       = content.replace('Total Usuarios:', '').trim();
       } else if (!line.startsWith('id_mongodb')) {
         const cols = line.split(',');
         if (cols.length >= 3) {
           users.push({
-            id:             cols[0].trim(),
-            email:          cols[1].trim(),
-            empresa:        cols[2].trim(),
+            id:              cols[0].trim(),
+            email:           cols[1].trim(),
+            empresa:         cols[2].trim(),
             fecha_solicitud: cols[3]?.trim() || '',
           });
         }
       }
     }
 
-    if (!meta.partner || users.length === 0) return null;
-    return { meta: meta as CSVMeta, users };
+    return { meta: parsedMeta as CSVMeta, users };
   }
 
   async function processFile(file: File) {
@@ -86,41 +99,32 @@ export default function ImportarCSVPage() {
 
     setProcessing(true);
     setError('');
-    setParsed(null);
-    setKpis(null);
+    setFileName(file.name);
 
     try {
       const text = await file.text();
-      const result = parseCSVText(text);
+      const { meta: parsedMeta, users } = parseCSVText(text);
 
-      if (!result) {
-        setError('El archivo no tiene el formato correcto. Debe ser generado desde CloudPerformance OnPremises.');
+      if (!parsedMeta.partner || users.length === 0) {
+        setError('El archivo no tiene el formato correcto. Debe ser generado desde CP OnPremises.');
         return;
       }
 
-      setParsed(result);
+      setMeta(parsedMeta);
 
-      // Consultar licencias existentes para calcular KPIs
-      const res = await fetch('/api/op-licencias/comparar', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ partner: result.meta.partner, users: result.users }),
-        credentials: 'include',
+      // Agrupar por empresa — por ahora todos son nuevos
+      const grouped = new Map<string, EmpresaGroup>();
+      users.forEach(u => {
+        if (!grouped.has(u.empresa)) {
+          grouped.set(u.empresa, { nombre: u.empresa, nuevos: [], existentes: [] });
+        }
+        grouped.get(u.empresa)!.nuevos.push(u);
       });
 
-      if (res.ok) {
-        const data = await res.json();
-        setKpis(data.kpis);
-      } else {
-        // Si no existe la API aún, calculamos básico en frontend
-        const empresas = new Set(result.users.map(u => u.empresa)).size;
-        setKpis({
-          empresas,
-          usuariosExistentes: 0,
-          usuariosNuevos: result.users.length,
-          licenciasAGenerar: result.users.length,
-        });
-      }
+      setEmpresaGroups(Array.from(grouped.values()));
+      sessionStorage.setItem('op_csv_users', JSON.stringify(users));
+      sessionStorage.setItem('op_csv_meta', JSON.stringify(parsedMeta));
+
     } catch {
       setError('Error al procesar el archivo.');
     } finally {
@@ -140,11 +144,48 @@ export default function ImportarCSVPage() {
     if (file) processFile(file);
   }
 
+  const hasDatos = empresaGroups.length > 0;
+
+  // Construir filas para la tabla
+  const tablaRows: TablaRow[] = empresaGroups.flatMap(e => [
+    ...e.nuevos.map(u => ({ ...u, tipo: 'Nuevo' as const })),
+    ...e.existentes.map(u => ({ ...u, tipo: 'Existente' as const })),
+  ]);
+
+  const tablaColumns = createColumns<TablaRow>([
+    {
+      header: 'Email',
+      accessorKey: 'email',
+      size: 300,
+    },
+    {
+      header: 'Empresa',
+      accessorKey: 'empresa',
+      size: 400,
+    },
+    {
+      header: 'Fecha Solicitud',
+      accessorKey: 'fecha_solicitud',
+      size: 170,
+    },
+    {
+      header: 'Tipo',
+      accessorKey: 'tipo',
+      size: 120,
+      cell: (info) => {
+        const val = (info as { getValue: () => string }).getValue();
+        return val === 'Nuevo'
+          ? <Badge className="bg-green-500/10 text-green-600 border-green-200 hover:bg-green-500/20">🟢 Nuevo</Badge>
+          : <Badge className="bg-amber-500/10 text-amber-600 border-amber-200 hover:bg-amber-500/20">✓ Existente</Badge>;
+      }
+    },
+  ]);
+
   return (
-    <section className="mx-auto max-w-4xl px-4 py-8">
+    <section className="px-4 py-8 space-y-6">
 
       {/* Header */}
-      <div className="flex items-center gap-3 mb-8">
+      <div className="flex items-center gap-3">
         <Link href="/op-licencias" className="text-muted-foreground hover:text-foreground transition">
           <ArrowLeft className="h-5 w-5" />
         </Link>
@@ -156,69 +197,77 @@ export default function ImportarCSVPage() {
         </div>
       </div>
 
-      {/* Zona de carga */}
+      {/* Zona de carga — compacta */}
       <div
         onDragOver={e => { e.preventDefault(); setDragging(true); }}
         onDragLeave={() => setDragging(false)}
         onDrop={handleDrop}
         onClick={() => document.getElementById('csvInput')?.click()}
         className={`
-          border-2 border-dashed rounded-2xl p-12 text-center cursor-pointer transition-all
+          border-2 border-dashed rounded-2xl px-6 py-5 cursor-pointer transition-all
+          flex items-center gap-4
           ${dragging
             ? 'border-blue-500 bg-blue-500/10'
-            : 'border-border hover:border-blue-400 hover:bg-blue-500/5'
+            : hasDatos
+              ? 'border-green-400 bg-green-500/5'
+              : 'border-border hover:border-blue-400 hover:bg-blue-500/5'
           }
         `}
       >
         <input type="file" id="csvInput" accept=".csv" className="hidden" onChange={handleSelect} />
         {processing ? (
-          <div className="flex flex-col items-center gap-3 text-muted-foreground">
-            <Loader2 className="h-10 w-10 animate-spin text-blue-500" />
-            <p className="text-sm">Procesando archivo...</p>
-          </div>
+          <Loader2 className="h-8 w-8 animate-spin text-blue-500 shrink-0" />
         ) : (
-          <div className="flex flex-col items-center gap-3">
-            <FileUp className="h-10 w-10 text-blue-500" />
-            <p className="text-base font-medium">Arrastra el CSV aquí o haz click para seleccionar</p>
-            <p className="text-xs text-muted-foreground">
-              Archivo generado desde "Generar Solicitud de Licencias" en CP OnPremises
-            </p>
-          </div>
+          <FileUp className={`h-8 w-8 shrink-0 ${hasDatos ? 'text-green-500' : 'text-blue-500'}`} />
         )}
+        <div>
+          {processing ? (
+            <p className="text-sm font-medium">Procesando archivo...</p>
+          ) : hasDatos ? (
+            <>
+              <p className="text-sm font-medium text-green-600">{fileName}</p>
+              <p className="text-xs text-muted-foreground">Haz click para cargar otro archivo</p>
+            </>
+          ) : (
+            <>
+              <p className="text-sm font-medium">Arrastra el CSV aquí o haz click para seleccionar</p>
+              <p className="text-xs text-muted-foreground">Archivo generado desde "Generar Solicitud de Licencias" en CP OnPremises</p>
+            </>
+          )}
+        </div>
       </div>
 
       {/* Error */}
       {error && (
-        <div className="mt-4 p-4 bg-red-500/10 border border-red-300 text-red-600 rounded-xl text-sm">
+        <div className="p-4 bg-red-500/10 border border-red-300 text-red-600 rounded-xl text-sm">
           {error}
         </div>
       )}
 
       {/* Resultado */}
-      {parsed && kpis && (
-        <div className="mt-8 space-y-6">
-
-          {/* Metadata del partner */}
+      {hasDatos && meta && (
+        <>
+          {/* Metadata */}
           <div className="rounded-2xl border bg-card p-5 shadow-sm">
-            <h3 className="text-sm font-semibold mb-4 text-muted-foreground uppercase tracking-wide">
+            <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-3">
               Datos de la Solicitud
             </h3>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div>
                 <p className="text-xs text-muted-foreground">Partner</p>
-                <p className="font-semibold">{parsed.meta.partner}</p>
+                <p className="font-semibold">{meta.partner}</p>
               </div>
               <div>
                 <p className="text-xs text-muted-foreground">Solicitante</p>
-                <p className="font-semibold">{parsed.meta.solicitante}</p>
+                <p className="font-semibold">{meta.solicitante}</p>
               </div>
               <div>
                 <p className="text-xs text-muted-foreground">Fecha Solicitud</p>
-                <p className="font-semibold">{parsed.meta.fecha}</p>
+                <p className="font-semibold">{meta.fecha}</p>
               </div>
               <div>
                 <p className="text-xs text-muted-foreground">Usuarios en CSV</p>
-                <p className="font-semibold">{parsed.users.length}</p>
+                <p className="font-semibold">{meta.total || empresaGroups.reduce((s,e) => s + e.nuevos.length + e.existentes.length, 0)}</p>
               </div>
             </div>
           </div>
@@ -227,37 +276,54 @@ export default function ImportarCSVPage() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="rounded-2xl border bg-blue-500/10 p-5 shadow-sm">
               <Building2 className="h-6 w-6 text-blue-600 mb-2" />
-              <p className="text-2xl font-bold text-blue-600">{kpis.empresas}</p>
+              <p className="text-2xl font-bold text-blue-600">{totalEmpresas}</p>
               <p className="text-xs text-muted-foreground mt-1">Empresas detectadas</p>
             </div>
             <div className="rounded-2xl border bg-amber-500/10 p-5 shadow-sm">
               <Users className="h-6 w-6 text-amber-600 mb-2" />
-              <p className="text-2xl font-bold text-amber-600">{kpis.usuariosExistentes}</p>
+              <p className="text-2xl font-bold text-amber-600">{totalExistentes}</p>
               <p className="text-xs text-muted-foreground mt-1">Usuarios existentes</p>
             </div>
             <div className="rounded-2xl border bg-green-500/10 p-5 shadow-sm">
               <UserPlus className="h-6 w-6 text-green-600 mb-2" />
-              <p className="text-2xl font-bold text-green-600">{kpis.usuariosNuevos}</p>
+              <p className="text-2xl font-bold text-green-600">{totalNuevos}</p>
               <p className="text-xs text-muted-foreground mt-1">Usuarios nuevos</p>
             </div>
             <div className="rounded-2xl border bg-purple-500/10 p-5 shadow-sm">
               <ShieldCheck className="h-6 w-6 text-purple-600 mb-2" />
-              <p className="text-2xl font-bold text-purple-600">{kpis.licenciasAGenerar}</p>
+              <p className="text-2xl font-bold text-purple-600">{totalLicencias}</p>
               <p className="text-xs text-muted-foreground mt-1">Licencias a generar</p>
             </div>
           </div>
 
-          {/* Botón continuar */}
-          <div className="flex justify-end">
+          {/* Tabla de usuarios */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Detalle de Usuarios Solicitados</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <DataTableGrouping
+                columns={tablaColumns}
+                data={tablaRows}
+                filterColumn="email"
+                filterPlaceholder="Buscar por email..."
+                enableGrouping={true}
+                groupByColumn="empresa"
+                pageSizeItems={10}
+              />
+            </CardContent>
+          </Card>
+
+          {/* Botón generar */}
+          <div className="flex justify-end pt-2">
             <Link
-              href={`/op-licencias/solicitudes?partner=${encodeURIComponent(parsed.meta.partner)}`}
+              href={`/op-licencias/generar?partner=${encodeURIComponent(meta.partner)}`}
               className="flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-xl font-medium hover:bg-blue-700 transition"
             >
-              Revisar Solicitud →
+              Generar Licencias →
             </Link>
           </div>
-
-        </div>
+        </>
       )}
 
     </section>
