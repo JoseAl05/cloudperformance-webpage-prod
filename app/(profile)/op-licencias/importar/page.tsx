@@ -46,6 +46,7 @@ export default function ImportarCSVPage() {
   const [processing, setProcessing]         = useState(false);
   const [error, setError]                   = useState('');
   const [fileName, setFileName]             = useState('');
+  const [guardando, setGuardando]           = useState(false);
 
   if (isLoading) return (
     <div className="flex items-center gap-2 p-8 text-muted-foreground">
@@ -181,6 +182,45 @@ export default function ImportarCSVPage() {
     },
   ]);
 
+  async function handleGuardar(generar: boolean) {
+    if (!meta) return;
+    setGuardando(true);
+    try {
+      const usuarios = empresaGroups.flatMap(e => [
+        ...e.nuevos.map(u => ({ ...u, tipo: 'nuevo' })),
+        ...e.existentes.map(u => ({ ...u, tipo: 'existente' })),
+      ]);
+
+      const res = await fetch('/api/op-licencias/solicitudes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          partner:          meta.partner,
+          solicitante:      meta.solicitante,
+          fecha_solicitud:  meta.fecha,
+          usuarios,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        if (generar) {
+          window.location.href = `/op-licencias/generar?id=${data.id}&partner=${encodeURIComponent(meta.partner)}`;
+        } else {
+          window.location.href = '/op-licencias/generar';
+        }
+      } else {
+        setError(`Error al guardar: ${data.message}`);
+      }
+    } catch {
+      setError('Error de conexión.');
+    } finally {
+      setGuardando(false);
+    }
+  }
+
   return (
     <section className="px-4 py-8 space-y-6">
 
@@ -314,15 +354,27 @@ export default function ImportarCSVPage() {
             </CardContent>
           </Card>
 
-          {/* Botón generar */}
-          <div className="flex justify-end pt-2">
-            <Link
-              href={`/op-licencias/generar?partner=${encodeURIComponent(meta.partner)}`}
-              className="flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-xl font-medium hover:bg-blue-700 transition"
-            >
-              Generar Licencias →
-            </Link>
-          </div>
+{/* Botones guardar */}
+          {empresaGroups.length > 0 && (
+            <div className="flex justify-end gap-3 pt-2">
+              <button
+                onClick={() => handleGuardar(false)}
+                disabled={guardando}
+                className="flex items-center gap-2 border border-border bg-card px-6 py-3 rounded-xl font-medium hover:bg-muted transition disabled:opacity-50"
+              >
+                {guardando ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+                Guardar Solicitud
+              </button>
+              <button
+                onClick={() => handleGuardar(true)}
+                disabled={guardando}
+                className="flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-xl font-medium hover:bg-blue-700 transition disabled:opacity-50"
+              >
+                {guardando ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+                Guardar y Generar Licencias
+              </button>
+            </div>
+          )}
         </>
       )}
 
