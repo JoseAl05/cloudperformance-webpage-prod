@@ -19,6 +19,7 @@ import {
     Users,
     SplitSquareHorizontal,
     Bell,
+    ShieldCheck,
 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { usePathname } from 'next/navigation'
@@ -204,6 +205,25 @@ export const SidebarProfileComponent = ({
                                     </Link>
                                 </SidebarMenuButton>
                             )}
+
+                            {/* =================================================== */}
+                            {/* NUEVA SECCIÓN: LICENCIAS ONPREMISES */}
+                            {/* =================================================== */}
+                            {canAccessProfiling && (
+                                <SidebarMenuButton asChild>
+                                    <Link
+                                        href='/op-licencias'
+                                        className={cn(
+                                            'flex items-center gap-3 px-3 py-2 rounded-md cursor-pointer transition-colors duration-150',
+                                            getMenuItemClasses(pathname.startsWith('/op-licencias'))
+                                        )}
+                                    >
+                                        <ShieldCheck className="h-5 w-5 text-blue-500" />
+                                        <span className="text-sm font-medium">Licencias OnPremises</span>
+                                    </Link>
+                                </SidebarMenuButton>
+                            )}
+
                             {/* =================================================== */}
                             {/* NUEVA SECCIÓN: ALERTAS */}
                             {/* =================================================== */}
