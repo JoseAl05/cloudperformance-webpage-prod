@@ -41,6 +41,7 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import useSWRMutation from 'swr/mutation';
 import { AiRecommendationsStatusDialogComponent } from '@/components/AiRecommendationsStatusDialogComponent';
+import { Separator } from '@/components/ui/separator';
 
 interface AiRecommendationsComponentProps {
     data: AiRecommendationReport[] | null;
@@ -147,10 +148,7 @@ const cleanText = (text: string) => {
 };
 
 const computeRecommendationGroupId = (resource: AiRecommendationResource, cloudProvider: string): string => {
-    const ids = Array.isArray(resource.resource_id)
-        ? [...resource.resource_id].sort().join(',')
-        : resource.resource_id;
-    return `${cloudProvider}::${resource.resource_type}::${resource.recommendation_subtype}::${ids}`;
+    return `${cloudProvider}::${resource.resource_type}::${resource.recommendation_subtype}`;
 };
 
 const getRiskWeight = (level: string): number => {
@@ -328,14 +326,14 @@ const StatusSection = ({ resource, onSubmit, onOpenHistory }: StatusSectionProps
 
 const ResourceCard = ({ resource, onStatusChange, onOpenHistory }: ResourceCardProps) => {
     const [expanded, setExpanded] = useState(false);
-    const { diagnosis, impact_matrix, action_plan, resource_name, resource_id, execution_status } = resource;
+    const { diagnosis, impact_matrix, action_plan, resource_name, resource_id, execution_status, resource_type } = resource;
 
-    const isMultipleResources = Array.isArray(resource_name);
+    const isMultipleResources = resource_name[0] !== 'Sin recurso asociado' && resource_name.length > 1;
     const displayTitle = isMultipleResources
         ? `Múltiples recursos afectados (${resource_name.length})`
-        : resource_name;
-    
-    console.log(resource)
+        : resource_type.toUpperCase();
+
+    console.log(resource_name)
 
     return (
         <div className="border rounded-xl bg-card overflow-hidden shadow-sm transition-all hover:shadow-md">
@@ -662,8 +660,8 @@ const FindingsSection = ({ resources, onStatusChange, onOpenHistory }: FindingsS
                     <button
                         onClick={() => handleTabChange('all')}
                         className={`px-3 py-1.5 text-sm font-medium rounded-md cursor-pointer transition-colors ${activeTab === 'all'
-                                ? 'bg-background text-foreground shadow-sm'
-                                : 'text-muted-foreground hover:text-foreground'
+                            ? 'bg-background text-foreground shadow-sm'
+                            : 'text-muted-foreground hover:text-foreground'
                             }`}
                     >
                         Todos ({resources.length})
@@ -671,8 +669,8 @@ const FindingsSection = ({ resources, onStatusChange, onOpenHistory }: FindingsS
                     <button
                         onClick={() => handleTabChange('top10')}
                         className={`px-3 py-1.5 text-sm font-medium rounded-md cursor-pointer transition-colors ${activeTab === 'top10'
-                                ? 'bg-background text-foreground shadow-sm'
-                                : 'text-muted-foreground hover:text-foreground'
+                            ? 'bg-background text-foreground shadow-sm'
+                            : 'text-muted-foreground hover:text-foreground'
                             }`}
                     >
                         Top 10
@@ -987,7 +985,9 @@ export const AiRecommendationsComponent = ({ data, cloud }: AiRecommendationsCom
                             setHistoryDialog({ open: true, recGroupId });
                         }}
                     />
+                    <Separator className='bg-black'/>
                 </div>
+
             ))}
         </div>
     );

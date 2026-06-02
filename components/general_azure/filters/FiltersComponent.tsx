@@ -242,8 +242,8 @@ export const FiltersComponent = ({
             selectedResourceGroup: selectedResourceGroupParam || 'all_resource_groups',
             selectedInstanceV2: selectedInstanceV2Param || '',
             selectedOperation: selectedOperationParam || 'all_operations',
-            impact: impactParam !== null ? impactParam : null,
-            category: categoryParam !== null ? categoryParam : null,
+            impact: impactParam || '',
+            category: categoryParam || '',
             selectedUnusedLbParam: selectedUnusedLbParam || '',
             selectedUnusedAppGParam: selectedUnusedAppGParam || '',
             selectedAppGParam: selectedAppGParam || '',
@@ -727,8 +727,8 @@ export const FiltersComponent = ({
                                     Impacto
                                 </label>
                                 <ImpactFilterComponent
-                                    impact={tempImpact ?? ''}
-                                    setImpact={(v: string) => setTempImpact(v)}
+                                    impact={tempImpact}
+                                    setImpact={setTempImpact}
                                 />
                             </div>
                         )}
@@ -740,8 +740,8 @@ export const FiltersComponent = ({
                                     Categoría
                                 </label>
                                 <CategoryFilterComponent
-                                    category={tempCategory ?? ''}
-                                    setCategory={(v: string) => setTempCategory(v)}
+                                    category={tempCategory}
+                                    setCategory={setTempCategory}
                                 />
                             </div>
                         )}
@@ -983,8 +983,8 @@ export const FiltersComponent = ({
                     selectedResourceGroup={(filters as unknown).selectedResourceGroup}
                     selectedInstanceV2={(filters as unknown).selectedInstanceV2}
                     selectedOperation={(filters as unknown).selectedOperation}
-                    impact={(filters as unknown).impact}
-                    category={(filters as unknown).category}
+                    impact={filters.impact}
+                    category={filters.category}
                     selectedUnusedLb={filters.selectedUnusedLbParam}
                     selectedUnusedAppG={filters.selectedUnusedAppGParam}
                     selectedAppg={filters.selectedAppGParam}

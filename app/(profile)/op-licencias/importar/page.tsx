@@ -50,13 +50,14 @@ interface VigenteAutomatico {
 
 export default function ImportarCSVPage() {
   const { user, isLoading } = useSession();
+  const { user, isLoading } = useSession();
   const [dragging, setDragging]             = useState(false);
   const [meta, setMeta]                     = useState<CSVMeta | null>(null);
   const [empresaGroups, setEmpresaGroups]   = useState<EmpresaGroup[]>([]);
   const [processing, setProcessing]         = useState(false);
   const [error, setError]                   = useState('');
   const [fileName, setFileName]             = useState('');
-  const [guardando, setGuardando]               = useState(false);
+  const [guardando, setGuardando]           = useState(false);
   const [vigentesAutomaticos, setVigentesAuto]  = useState<VigenteAutomatico[]>([]);
   const [tablaRows, setTablaRows]               = useState<TablaRow[]>([]);
   const [kpisExtended, setKpisExtended]         = useState<{
@@ -64,7 +65,6 @@ export default function ImportarCSVPage() {
     usuariosVigentes: number;
     usuariosVencidos: number;
   } | null>(null);
-  
   if (isLoading) return (
     <div className="flex items-center gap-2 p-8 text-muted-foreground">
       <Loader2 className="h-4 w-4 animate-spin" /> Cargando...
@@ -76,10 +76,10 @@ export default function ImportarCSVPage() {
   }
 
   // KPIs calculados
-  const totalEmpresas   = empresaGroups.length;
+  const totalEmpresas = empresaGroups.length;
   const totalExistentes = empresaGroups.reduce((s, e) => s + e.existentes.length, 0);
-  const totalNuevos     = empresaGroups.reduce((s, e) => s + e.nuevos.length, 0);
-  const totalLicencias  = totalNuevos;
+  const totalNuevos = empresaGroups.reduce((s, e) => s + e.nuevos.length, 0);
+  const totalLicencias = totalNuevos;
 
   function parseCSVText(text: string) {
     const lines = text.split('\n').map(l => l.trim()).filter(l => l);
@@ -89,17 +89,17 @@ export default function ImportarCSVPage() {
     for (const line of lines) {
       if (line.startsWith('#')) {
         const content = line.replace('#', '').trim();
-        if (content.startsWith('Partner:'))         parsedMeta.partner     = content.replace('Partner:', '').trim();
-        if (content.startsWith('Solicitante:'))     parsedMeta.solicitante = content.replace('Solicitante:', '').trim();
-        if (content.startsWith('Fecha Solicitud:')) parsedMeta.fecha       = content.replace('Fecha Solicitud:', '').trim();
-        if (content.startsWith('Total Usuarios:'))  parsedMeta.total       = content.replace('Total Usuarios:', '').trim();
+        if (content.startsWith('Partner:')) parsedMeta.partner = content.replace('Partner:', '').trim();
+        if (content.startsWith('Solicitante:')) parsedMeta.solicitante = content.replace('Solicitante:', '').trim();
+        if (content.startsWith('Fecha Solicitud:')) parsedMeta.fecha = content.replace('Fecha Solicitud:', '').trim();
+        if (content.startsWith('Total Usuarios:')) parsedMeta.total = content.replace('Total Usuarios:', '').trim();
       } else if (!line.startsWith('id_mongodb')) {
         const cols = line.split(',');
         if (cols.length >= 3) {
           users.push({
-            id:              cols[0].trim(),
-            email:           cols[1].trim(),
-            empresa:         cols[2].trim(),
+            id: cols[0].trim(),
+            email: cols[1].trim(),
+            empresa: cols[2].trim(),
             fecha_solicitud: cols[3]?.trim() || '',
           });
         }
@@ -249,9 +249,9 @@ export default function ImportarCSVPage() {
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
         body: JSON.stringify({
-          partner:          meta.partner,
-          solicitante:      meta.solicitante,
-          fecha_solicitud:  meta.fecha,
+          partner: meta.partner,
+          solicitante: meta.solicitante,
+          fecha_solicitud: meta.fecha,
           usuarios,
         }),
       });
@@ -324,7 +324,7 @@ export default function ImportarCSVPage() {
           ) : (
             <>
               <p className="text-sm font-medium">Arrastra el CSV aquí o haz click para seleccionar</p>
-              <p className="text-xs text-muted-foreground">Archivo generado desde "Generar Solicitud de Licencias" en CP OnPremises</p>
+              <p className="text-xs text-muted-foreground">Archivo generado desde Generar Solicitud de Licencias en CP OnPremises</p>
             </>
           )}
         </div>
@@ -360,7 +360,7 @@ export default function ImportarCSVPage() {
               </div>
               <div>
                 <p className="text-xs text-muted-foreground">Usuarios en CSV</p>
-                <p className="font-semibold">{meta.total || empresaGroups.reduce((s,e) => s + e.nuevos.length + e.existentes.length, 0)}</p>
+                <p className="font-semibold">{meta.total || empresaGroups.reduce((s, e) => s + e.nuevos.length + e.existentes.length, 0)}</p>
               </div>
             </div>
           </div>
@@ -413,7 +413,7 @@ export default function ImportarCSVPage() {
             </CardContent>
           </Card>
 
-{/* Botones guardar */}
+          {/* Botones guardar */}
           {empresaGroups.length > 0 && (
             <div className="flex justify-end gap-3 pt-2">
               <button
