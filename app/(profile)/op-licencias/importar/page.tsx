@@ -35,7 +35,17 @@ interface TablaRow {
   email: string;
   empresa: string;
   fecha_solicitud: string;
-  tipo: 'Nuevo' | 'Existente';
+  estado: 'nuevo' | 'vencida' | 'por_vencer' | 'vigente';
+  diasRestantes: number | null;
+  expires?: string;
+}
+
+interface VigenteAutomatico {
+  id: string;
+  email: string;
+  empresa: string;
+  starts: string;
+  expires: string;
 }
 
 export default function ImportarCSVPage() {
@@ -46,8 +56,15 @@ export default function ImportarCSVPage() {
   const [processing, setProcessing]         = useState(false);
   const [error, setError]                   = useState('');
   const [fileName, setFileName]             = useState('');
-  const [guardando, setGuardando]           = useState(false);
-
+  const [guardando, setGuardando]               = useState(false);
+  const [vigentesAutomaticos, setVigentesAuto]  = useState<VigenteAutomatico[]>([]);
+  const [tablaRows, setTablaRows]               = useState<TablaRow[]>([]);
+  const [kpisExtended, setKpisExtended]         = useState<{
+    usuariosPorVencer: number;
+    usuariosVigentes: number;
+    usuariosVencidos: number;
+  } | null>(null);
+  
   if (isLoading) return (
     <div className="flex items-center gap-2 p-8 text-muted-foreground">
       <Loader2 className="h-4 w-4 animate-spin" /> Cargando...
@@ -126,6 +143,28 @@ export default function ImportarCSVPage() {
       sessionStorage.setItem('op_csv_users', JSON.stringify(users));
       sessionStorage.setItem('op_csv_meta', JSON.stringify(parsedMeta));
 
+      // Comparar con historial de licencias
+      const res = await fetch('/api/op-licencias/comparar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ partner: parsedMeta.partner, users }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setTablaRows(data.usuarios);
+        setVigentesAuto(data.vigentesAutomaticos);
+        setKpisExtended({
+          usuariosPorVencer: data.kpis.usuariosPorVencer,
+          usuariosVigentes:  data.kpis.usuariosVigentes,
+          usuariosVencidos:  data.kpis.usuariosVencidos,
+        });
+      } else {
+        // Sin historial — todos son nuevos
+        setTablaRows(users.map((u: CSVUser) => ({ ...u, estado: 'nuevo' as const, diasRestantes: null })));
+      }
+
     } catch {
       setError('Error al procesar el archivo.');
     } finally {
@@ -147,37 +186,51 @@ export default function ImportarCSVPage() {
 
   const hasDatos = empresaGroups.length > 0;
 
-  // Construir filas para la tabla
-  const tablaRows: TablaRow[] = empresaGroups.flatMap(e => [
-    ...e.nuevos.map(u => ({ ...u, tipo: 'Nuevo' as const })),
-    ...e.existentes.map(u => ({ ...u, tipo: 'Existente' as const })),
-  ]);
-
   const tablaColumns = createColumns<TablaRow>([
     {
       header: 'Email',
       accessorKey: 'email',
-      size: 300,
+      size: 280,
     },
     {
       header: 'Empresa',
       accessorKey: 'empresa',
-      size: 400,
+      size: 180,
     },
     {
       header: 'Fecha Solicitud',
       accessorKey: 'fecha_solicitud',
-      size: 170,
+      size: 140,
     },
     {
-      header: 'Tipo',
-      accessorKey: 'tipo',
-      size: 120,
+      header: 'Vencimiento Actual',
+      accessorKey: 'expires',
+      size: 150,
       cell: (info) => {
         const val = (info as { getValue: () => string }).getValue();
-        return val === 'Nuevo'
-          ? <Badge className="bg-green-500/10 text-green-600 border-green-200 hover:bg-green-500/20">🟢 Nuevo</Badge>
-          : <Badge className="bg-amber-500/10 text-amber-600 border-amber-200 hover:bg-amber-500/20">✓ Existente</Badge>;
+        if (!val) return <span className="text-muted-foreground text-xs">—</span>;
+        return <span className="text-xs">{new Date(val).toLocaleDateString('es-CL')}</span>;
+      }
+    },
+    {
+      header: 'Estado',
+      accessorKey: 'estado',
+      size: 160,
+      cell: (info) => {
+        const val = (info as { getValue: () => string }).getValue();
+        const row = (info as { row: { original: TablaRow } }).row.original;
+        switch(val) {
+          case 'nuevo':
+            return <Badge className="bg-green-500/10 text-green-600 border-green-200">🟢 Nuevo</Badge>;
+          case 'por_vencer':
+            return <Badge className="bg-amber-500/10 text-amber-600 border-amber-200">🔔 Por vencer ({row.diasRestantes}d)</Badge>;
+          case 'vigente':
+            return <Badge className="bg-blue-500/10 text-blue-600 border-blue-200">⚠️ Vigente ({row.diasRestantes}d)</Badge>;
+          case 'vencida':
+            return <Badge className="bg-red-500/10 text-red-600 border-red-200">❌ Vencida</Badge>;
+          default:
+            return <span>—</span>;
+        }
       }
     },
   ]);
@@ -186,10 +239,10 @@ export default function ImportarCSVPage() {
     if (!meta) return;
     setGuardando(true);
     try {
-      const usuarios = empresaGroups.flatMap(e => [
-        ...e.nuevos.map(u => ({ ...u, tipo: 'nuevo' })),
-        ...e.existentes.map(u => ({ ...u, tipo: 'existente' })),
-      ]);
+      const usuarios = [
+        ...tablaRows,
+        ...vigentesAutomaticos.map(v => ({ ...v, estado: 'vigente_auto', diasRestantes: null }))
+      ];
 
       const res = await fetch('/api/op-licencias/solicitudes', {
         method: 'POST',
@@ -319,19 +372,25 @@ export default function ImportarCSVPage() {
               <p className="text-2xl font-bold text-blue-600">{totalEmpresas}</p>
               <p className="text-xs text-muted-foreground mt-1">Empresas detectadas</p>
             </div>
-            <div className="rounded-2xl border bg-amber-500/10 p-5 shadow-sm">
-              <Users className="h-6 w-6 text-amber-600 mb-2" />
-              <p className="text-2xl font-bold text-amber-600">{totalExistentes}</p>
-              <p className="text-xs text-muted-foreground mt-1">Usuarios existentes</p>
-            </div>
             <div className="rounded-2xl border bg-green-500/10 p-5 shadow-sm">
               <UserPlus className="h-6 w-6 text-green-600 mb-2" />
-              <p className="text-2xl font-bold text-green-600">{totalNuevos}</p>
+              <p className="text-2xl font-bold text-green-600">
+                {tablaRows.filter(u => u.estado === 'nuevo').length}
+              </p>
               <p className="text-xs text-muted-foreground mt-1">Usuarios nuevos</p>
+            </div>
+            <div className="rounded-2xl border bg-amber-500/10 p-5 shadow-sm">
+              <Users className="h-6 w-6 text-amber-600 mb-2" />
+              <p className="text-2xl font-bold text-amber-600">
+                {(kpisExtended?.usuariosPorVencer ?? 0) + (kpisExtended?.usuariosVencidos ?? 0)}
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">Por vencer / Vencidas</p>
             </div>
             <div className="rounded-2xl border bg-purple-500/10 p-5 shadow-sm">
               <ShieldCheck className="h-6 w-6 text-purple-600 mb-2" />
-              <p className="text-2xl font-bold text-purple-600">{totalLicencias}</p>
+              <p className="text-2xl font-bold text-purple-600">
+                {tablaRows.filter(u => u.estado !== 'vigente').length}
+              </p>
               <p className="text-xs text-muted-foreground mt-1">Licencias a generar</p>
             </div>
           </div>

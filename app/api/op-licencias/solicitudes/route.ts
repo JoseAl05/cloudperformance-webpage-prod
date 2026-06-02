@@ -43,6 +43,21 @@ export async function POST(req: NextRequest) {
 
     const col = await getCollection('op_solicitudes');
 
+    // Verificar si algún usuario del CSV ya está en una solicitud pendiente
+    const idsNuevos = usuarios.map((u: { id: string }) => u.id);
+    const existente = await col.findOne({
+      partner,
+      estado: 'pendiente',
+      'usuarios.id': { $in: idsNuevos }
+    });
+
+    if (existente) {
+      return NextResponse.json(
+        { message: `Uno o más usuarios ya tienen una solicitud pendiente para ${partner}. Revísalas en "Generar Licencias" antes de crear una nueva.` },
+        { status: 409 }
+      );
+    }
+
     const nueva = {
       partner,
       solicitante,
