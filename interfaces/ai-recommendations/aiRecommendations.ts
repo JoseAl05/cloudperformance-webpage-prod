@@ -61,7 +61,7 @@ export interface AiRecommendationDiagnosis {
 
 export interface AiRecommendationResource {
   resource_id: string | string[];
-  resource_name: string | string[];
+  resource_name: string[];
   resource_type: string;
   icon: string;
   recommendation_subtype: string;
