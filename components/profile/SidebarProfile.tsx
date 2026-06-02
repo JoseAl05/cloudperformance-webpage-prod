@@ -60,6 +60,8 @@ export const SidebarProfileComponent = ({
 
     // Determinar si el usuario tiene permiso para ver el enlace de perfilamiento
     const canAccessProfiling = user && (user.role === 'admin_global' || user.role === 'admin_empresa');
+    // Determinar si el usuario tiene permiso para ver el enlace de OnPremises
+    const canAccessOPLicencias = user && user.role === 'admin_global';
 
     const isAwsMultiTenant = user && user.is_aws_multi_tenant;
     const isAzureMultiTenant = user && user.is_azure_multi_tenant;
@@ -208,9 +210,8 @@ export const SidebarProfileComponent = ({
 
                             {/* =================================================== */}
                             {/* NUEVA SECCIÓN: LICENCIAS ONPREMISES */}
-                            {/* =================================================== */}
-                            {/* TEMPORALMENTE DESHABILITADO
-                            {canAccessProfiling && (
+                            {/* =================================================== */}                            
+                            {canAccessOPLicencias && (
                                 <SidebarMenuButton asChild>
                                     <Link
                                         href='/op-licencias'
@@ -224,7 +225,6 @@ export const SidebarProfileComponent = ({
                                     </Link>
                                 </SidebarMenuButton>
                             )}
-                            */}
 
                             {/* =================================================== */}
                             {/* NUEVA SECCIÓN: ALERTAS */}
