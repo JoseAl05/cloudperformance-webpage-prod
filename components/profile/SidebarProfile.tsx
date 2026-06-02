@@ -209,6 +209,7 @@ export const SidebarProfileComponent = ({
                             {/* =================================================== */}
                             {/* NUEVA SECCIÓN: LICENCIAS ONPREMISES */}
                             {/* =================================================== */}
+                            {/* TEMPORALMENTE DESHABILITADO
                             {canAccessProfiling && (
                                 <SidebarMenuButton asChild>
                                     <Link
@@ -223,6 +224,7 @@ export const SidebarProfileComponent = ({
                                     </Link>
                                 </SidebarMenuButton>
                             )}
+                            */}
 
                             {/* =================================================== */}
                             {/* NUEVA SECCIÓN: ALERTAS */}
