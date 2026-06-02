@@ -356,7 +356,7 @@ const ResourceCard = ({ resource, onStatusChange, onOpenHistory }: ResourceCardP
                             </span>
                         </div>
                         <p className="text-sm font-normal text-slate-600 dark:text-slate-400 line-clamp-1">
-                            {resource.recommendation_subtype} • {cleanText(diagnosis.summary)}
+                            {cleanText(diagnosis.summary)}
                         </p>
                     </div>
                 </div>
