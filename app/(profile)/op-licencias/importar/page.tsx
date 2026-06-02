@@ -50,7 +50,6 @@ interface VigenteAutomatico {
 
 export default function ImportarCSVPage() {
   const { user, isLoading } = useSession();
-  const { user, isLoading } = useSession();
   const [dragging, setDragging]             = useState(false);
   const [meta, setMeta]                     = useState<CSVMeta | null>(null);
   const [empresaGroups, setEmpresaGroups]   = useState<EmpresaGroup[]>([]);
