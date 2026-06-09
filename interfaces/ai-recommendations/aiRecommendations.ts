@@ -60,6 +60,7 @@ export interface AiRecommendationDiagnosis {
 }
 
 export interface AiRecommendationResource {
+  rec_group_id: string;
   resource_id: string | string[];
   resource_name: string[];
   resource_type: string;
@@ -85,6 +86,11 @@ export interface AiRecommendationReport {
   prioritization_strategy: AiRecommendationPrioritizationStrategy[];
   resources: AiRecommendationResource[];
   sync_time: string;
+  past_recommendations_execution?: {
+    resources: AiRecommendationResource[];
+    report_id: string;
+    timestamp: string;
+  };
 }
 
 export interface RecommendationStatusEvent {

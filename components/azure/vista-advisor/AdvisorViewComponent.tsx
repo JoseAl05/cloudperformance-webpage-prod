@@ -120,6 +120,8 @@ export const AdvisorViewComponent = ({
         )
     }
 
+    console.log(aiRecommendationsData)
+
     return (
         <div className="w-full min-w-0 px-4 py-6">
             <div className="flex items-center gap-3 mb-6">
