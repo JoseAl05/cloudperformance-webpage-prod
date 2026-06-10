@@ -681,7 +681,7 @@ export const AdvisorViewInfoComponent = ({ data }: AdvisorViewInfoComponentProps
                 </div>
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 min-h-[60vh]">
-                <aside className="lg:col-span-5 xl:col-span-4 rounded-xl border bg-card">
+                <aside className="lg:col-span-5 xl:col-span-4 rounded-xl border">
                     <div className="p-3 border-b flex items-center justify-between">
                         <div className="text-sm text-muted-foreground">Resultados</div>
                         <div className="text-sm">{filteredRecs} ítems</div>
@@ -748,7 +748,7 @@ export const AdvisorViewInfoComponent = ({ data }: AdvisorViewInfoComponentProps
                         )}
                     </div>
                 </aside>
-                <section className="lg:col-span-7 xl:col-span-8 rounded-xl border bg-card">
+                <section className="lg:col-span-7 xl:col-span-8 rounded-xl border">
                     {!selectedRec ? (
                         <div className="h-full min-h-[50vh] grid place-items-center p-8 text-center">
                             <div className="max-w-md">
@@ -895,7 +895,7 @@ export const AdvisorViewInfoComponent = ({ data }: AdvisorViewInfoComponentProps
                     onClick={() => setHistoryOpen(false)}
                 >
                     <div
-                        className="relative w-full max-w-3xl max-h-[85vh] rounded-xl border bg-card shadow-xl flex flex-col mx-4"
+                        className="relative w-full max-w-3xl max-h-[85vh] rounded-xl border shadow-xl flex flex-col mx-4"
                         onClick={(e) => e.stopPropagation()}
                     >
                         <div className="flex items-center justify-between p-4 border-b">

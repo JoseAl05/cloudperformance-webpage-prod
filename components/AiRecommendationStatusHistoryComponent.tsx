@@ -32,6 +32,7 @@ import useSWRMutation from 'swr/mutation';
 import { useConnector } from '@/hooks/useConnectors';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
+import { TicketButtonComponent } from '@/components/TicketButtonComponent';
 
 interface AiRecommendationStatusHistoryComponentProps {
     data: RecommendationStatusGroup[] | null;
@@ -283,11 +284,11 @@ const StatusGroupCard = ({
         const isJira = connectorType === 'jira';
         const persistedTicket = isJira
             ? latest.jira_ticket
-            ? { key: latest.jira_ticket.key, url: latest.jira_ticket.url }
-            : null
+                ? { key: latest.jira_ticket.key, url: latest.jira_ticket.url }
+                : null
             : latest.servicenow_ticket
-            ? { key: latest.servicenow_ticket.key, url: latest.servicenow_ticket.url }
-            : null;
+                ? { key: latest.servicenow_ticket.key, url: latest.servicenow_ticket.url }
+                : null;
 
         const createdTicket = createdTickets[connectorType];
         const activeTicket = createdTicket ?? persistedTicket;
@@ -360,23 +361,13 @@ const StatusGroupCard = ({
         }
 
         return (
-            <Button
-                key={connectorType}
-                variant='outline'
-                size='sm'
-                onClick={onCreate}
-                disabled={isCreating}
-                className='gap-2 border-blue-600/20 hover:bg-blue-600 hover:border-black/20 hover:text-white dark:hover:bg-blue-400 dark:hover:border-blue-white dark:hover:text-black dark:border-blue-400 transition-all transition-duration-500 disabled:opacity-70 disabled:cursor-not-allowed'
-            >
-                {isCreating ? (
-                    <>
-                        <Loader2 className='h-4 w-4 animate-spin' />
-                        Creando ticket...
-                    </>
-                ) : (
-                    `Crear ticket en ${displayName}`
-                )}
-            </Button>
+            <TicketButtonComponent
+                key={`${group.recommendation_group_id}-${connectorType}`}
+                connectorType={connectorType}
+                onCreate={onCreate}
+                isCreating={isCreating}
+                displayName={displayName}
+            />
         );
     };
 
