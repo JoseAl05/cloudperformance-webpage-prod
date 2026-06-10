@@ -3,40 +3,40 @@
 import React from 'react';
 import { useSession } from '@/hooks/useSession';
 import Link from 'next/link';
-import { ArrowRight, FileUp, Search, ShieldCheck, History } from 'lucide-react'; 
+import { ArrowRight, FileJson, UserCog, LayoutDashboard, History } from 'lucide-react'; 
 import { cn } from '@/lib/utils';
 
 const ACTIONS = [
     {
-        name: 'Importar Solicitud CSV',
-        description: 'Carga el archivo CSV enviado por el partner con los usuarios que requieren licencia.',
-        icon: FileUp,
+        name: 'Gestión de Partner',
+        description: 'Busca un partner, revisa sus UCs licenciadas y agrega o renueva unidades de cómputo manualmente.',
+        icon: UserCog,
+        href: '/op-licencias/partner',
+        bgColor: 'bg-green-500/10',
+        textColor: 'text-green-600',
+        role: ['admin_global'],
+    },
+    {
+        name: 'Carga de Solicitud',
+        description: 'Importa el archivo solicitud.json generado por la plataforma OnPremises, revisa y genera el .lic.',
+        icon: FileJson,
         href: '/op-licencias/importar',
         bgColor: 'bg-blue-500/10',
         textColor: 'text-blue-600',
         role: ['admin_global'],
     },
     {
-        name: 'Revisar Solicitudes',
-        description: 'Compara la solicitud con las licencias existentes y detecta usuarios nuevos.',
-        icon: Search,
-        href: '/op-licencias/solicitudes',
+        name: 'Estado de Licencias',
+        description: 'Vista global de todos los partners y el estado actual de sus unidades de cómputo licenciadas.',
+        icon: LayoutDashboard,
+        href: '/op-licencias/estado',
         bgColor: 'bg-amber-500/10',
         textColor: 'text-amber-600',
         role: ['admin_global'],
     },
     {
-        name: 'Generar Licencias',
-        description: 'Genera el archivo .lic con las licencias validadas listo para entregar al partner.',
-        icon: ShieldCheck,
-        href: '/op-licencias/generar',
-        bgColor: 'bg-green-500/10',
-        textColor: 'text-green-600',
-        role: ['admin_global'],
-    },
-    {
         name: 'Historial de Entregas',
-        description: 'Revisa los archivos .lic generados anteriormente por partner y fecha.',
+        description: 'Revisa los archivos .lic generados anteriormente por partner y fecha con opción de redownload.',
         icon: History,
         href: '/op-licencias/historial',
         bgColor: 'bg-purple-500/10',
@@ -76,7 +76,7 @@ export default function OpLicenciasPage() {
                 </p>
             </header>
 
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2">
                 {availableActions.map((action) => {
                     const IconComponent = action.icon;
                     return (
