@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getAuthFromRequest } from '@/lib/auth';
 import { getCollection } from '@/lib/mongodb';
+import { ObjectId } from 'mongodb';
 import crypto from 'crypto';
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
@@ -22,6 +23,7 @@ interface GenerarLicenciaBody {
   solicitante: string;
   fingerprint: string;
   compute_units: ComputeUnitInput[];
+  solicitudes_ids?: string[]; // IDs de solicitudes pendientes que se están procesando
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -76,7 +78,7 @@ export async function POST(req: Request) {
 
     // ── 2. Leer y validar body ────────────────────────────────────────────────
     const body: GenerarLicenciaBody = await req.json();
-    const { partner, rut, solicitante, fingerprint, compute_units } = body;
+    const { partner, rut, solicitante, fingerprint, compute_units, solicitudes_ids } = body;
 
     if (!partner || !rut || !solicitante || !fingerprint) {
       return NextResponse.json(
@@ -176,6 +178,22 @@ export async function POST(req: Request) {
       lic_hash:     licHash,
       createdAt:    new Date(),
     });
+
+    // ── 8b. Marcar solicitudes pendientes como procesadas ────────────────────
+    if (solicitudes_ids && solicitudes_ids.length > 0) {
+      const colSol = await getCollection('op_solicitudes');
+      await colSol.updateMany(
+        { _id: { $in: solicitudes_ids.map(id => new ObjectId(id)) } },
+        {
+          $set: {
+            estado:        'procesada',
+            procesada_por: sessionTyped.email,
+            procesada_at:  new Date().toISOString(),
+            updatedAt:     new Date(),
+          }
+        }
+      );
+    }
 
     // ── 9. Responder ──────────────────────────────────────────────────────────
     return NextResponse.json({

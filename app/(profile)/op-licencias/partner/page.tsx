@@ -102,8 +102,9 @@ export default function PartnerPage() {
   const [partner, setPartner]       = useState<PartnerData | null>(null);
   const [searchError, setSearchError] = useState('');
 
-  const [nuevasUCs, setNuevasUCs]   = useState<Omit<ComputeUnit, 'uc_fp'>[]>([]);
-  const [formUC, setFormUC]         = useState(ucVacia());
+  const [nuevasUCs, setNuevasUCs]         = useState<Omit<ComputeUnit, 'uc_fp'>[]>([]);
+  const [solicitudesUsadas, setSolicitudesUsadas] = useState<string[]>([]); // IDs de solicitudes agregadas
+  const [formUC, setFormUC]               = useState(ucVacia());
 
   const [generando, setGenerando]   = useState(false);
   const [licGenerada, setLicGenerada] = useState<{ content: string; partner: string } | null>(null);
@@ -189,6 +190,10 @@ export default function PartnerPage() {
     const yaExisten = nuevasUCs.map(u => u.db);
     const nuevas = sol.compute_units.filter(u => !yaExisten.includes(u.db));
     setNuevasUCs(prev => [...prev, ...nuevas]);
+    // Trackear el ID de la solicitud para marcarla como procesada al generar
+    setSolicitudesUsadas(prev => 
+      prev.includes(sol._id) ? prev : [...prev, sol._id]
+    );
   }
 
   // ── Generar nuevo .lic ──────────────────────────────────────────────────────
@@ -218,19 +223,32 @@ export default function PartnerPage() {
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
         body: JSON.stringify({
-          partner:       partner.partner,
-          rut:           partner.rut,
-          solicitante:   user.username || user.email,
-          fingerprint:   partner.fingerprint,
-          compute_units: todasUCs,
+          partner:          partner.partner,
+          rut:              partner.rut,
+          solicitante:      user.username || user.email,
+          fingerprint:      partner.fingerprint,
+          compute_units:    todasUCs,
+          solicitudes_ids:  solicitudesUsadas, // marcar solicitudes como procesadas
         }),
       });
 
       const data = await res.json();
 
       if (res.ok) {
+        // Descargar automáticamente
+        const blob = new Blob([data.lic_content], { type: 'text/plain' });
+        const url  = URL.createObjectURL(blob);
+        const a    = document.createElement('a');
+        a.href     = url;
+        a.download = 'cloudperformance.lic';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
         setLicGenerada({ content: data.lic_content, partner: partner.partner });
         setNuevasUCs([]);
+        setSolicitudesUsadas([]);
         // Refrescar datos del partner
         handleBuscar();
       } else {
@@ -360,12 +378,18 @@ export default function PartnerPage() {
                         {sol.compute_units.length} unidad{sol.compute_units.length !== 1 ? 'es' : ''} de cómputo
                       </p>
                     </div>
-                    <button
-                      onClick={() => handleAgregarSolicitud(sol)}
-                      className="flex items-center gap-2 bg-amber-600 text-white px-4 py-2 rounded-xl text-xs font-medium hover:bg-amber-700 transition"
-                    >
-                      <Plus className="h-3 w-3" /> Agregar UCs
-                    </button>
+                    {solicitudesUsadas.includes(sol._id) ? (
+                      <span className="flex items-center gap-1 text-xs text-green-600 font-medium px-4 py-2">
+                        <CheckCircle className="h-3 w-3" /> Agregada
+                      </span>
+                    ) : (
+                      <button
+                        onClick={() => handleAgregarSolicitud(sol)}
+                        className="flex items-center gap-2 bg-amber-600 text-white px-4 py-2 rounded-xl text-xs font-medium hover:bg-amber-700 transition"
+                      >
+                        <Plus className="h-3 w-3" /> Agregar UCs
+                      </button>
+                    )}
                   </div>
                 ))}
               </CardContent>
