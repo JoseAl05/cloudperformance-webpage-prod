@@ -166,10 +166,24 @@ export interface MaturityAssessmentAnalysisCriteria {
   details: MaturityAssessmentAnalysisCriteriaDetails[];
 }
 
+export interface MaturityAssessmentAnalysisCapabilitiesAssessed {
+  capability: string;
+  level: string;
+  evidence: string;
+  gap: string;
+}
+
 export interface MaturityAssessmentAnalysis extends BaseMetricAnalysis {
-  finops_maturity_level: string;
-  maturity_level_description: string;
-  criteria_analyzed: MaturityAssessmentAnalysisCriteria[];
+  status: string;
+  root_cause_analysis: string;
+  recommendation: string;
+  effort: string;
+  priority: string;
+  risk: string;
+  assigned_to: string;
+  references: string;
+  metric_name: string;
+  capabilities_assessed: MaturityAssessmentAnalysisCapabilitiesAssessed[];
 }
 
 export interface AiFinopsMetricsForecastDeterministic {

@@ -24,7 +24,6 @@ import {
     Target,
     TrendingUp,
     Zap,
-    ArrowRight,
     Activity,
     Server,
     Hammer,
@@ -448,16 +447,15 @@ const StandardMetricDetail = ({ metricData, type }: StandardMetricDetailProps) =
 const MaturityDetail = ({ metricData }: { metricData: MaturityAssessmentAnalysis }) => {
     return (
         <div className="space-y-6 animate-in fade-in zoom-in-95 duration-300">
-            {/* Header Card */}
             <Card className="overflow-hidden border-purple-200 dark:border-purple-900">
                 <div className="bg-purple-50 dark:bg-purple-950/20 p-6 flex flex-col items-center justify-center border-b border-purple-100 dark:border-purple-900">
                     <CheckCircle2 className="h-10 w-10 text-purple-600 dark:text-purple-400 mb-3" />
-                    <h3 className="text-3xl font-extrabold text-foreground mb-1">
-                        {metricData.finops_maturity_level}
+                    <h3 className="text-3xl font-extrabold text-foreground mb-2 text-center">
+                        {metricData.metric_name}
                     </h3>
-                    <p className="text-center text-muted-foreground text-sm max-w-2xl">
-                        {metricData.maturity_level_description}
-                    </p>
+                    <Badge className={`${getStatusColor(metricData.status)} border`} variant="outline">
+                        {metricData.status}
+                    </Badge>
                 </div>
                 <CardContent className="pt-6 grid gap-6">
                     <div className="space-y-2">
@@ -471,50 +469,31 @@ const MaturityDetail = ({ metricData }: { metricData: MaturityAssessmentAnalysis
                 </CardContent>
             </Card>
 
-            {/* Listado de Criterios Analizados */}
             <div className="grid gap-4">
-                <h3 className="font-semibold text-lg">Detalle de Criterios Evaluados</h3>
-                {metricData.criteria_analyzed.map((criteria, idx) => (
+                <h3 className="font-semibold text-lg">Capacidades Evaluadas</h3>
+                {metricData.capabilities_assessed.map((capability, idx) => (
                     <Card key={idx} className="overflow-hidden">
                         <CardHeader className="bg-muted/20 py-3">
-                            <div className="flex justify-between items-center">
-                                <CardTitle className="text-sm font-semibold">{criteria.criteria}</CardTitle>
-                                <Badge variant="outline" className="text-xs font-normal">
-                                    {criteria.service_analyzed}
+                            <div className="flex justify-between items-center gap-3">
+                                <CardTitle className="text-sm font-semibold">{capability.capability}</CardTitle>
+                                <Badge variant="outline" className="text-xs font-normal shrink-0">
+                                    {capability.level}
                                 </Badge>
                             </div>
                         </CardHeader>
-                        <CardContent className="pt-4 grid sm:grid-cols-2 gap-4 text-sm">
+                        <CardContent className="pt-4 grid gap-4 text-sm">
                             <div>
-                                <span className="block text-xs font-bold uppercase text-muted-foreground mb-1">Valor Detectado</span>
-                                <div className="p-2 bg-blue-50 dark:bg-blue-950/10 border border-blue-100 dark:border-blue-900 rounded text-blue-800 dark:text-blue-300">
-                                    {criteria.value}
+                                <span className="block text-xs font-bold uppercase text-muted-foreground mb-1">Evidencia</span>
+                                <div className="p-3 bg-blue-50 dark:bg-blue-950/10 border border-blue-100 dark:border-blue-900 rounded text-blue-900 dark:text-blue-300 leading-relaxed">
+                                    {capability.evidence}
                                 </div>
                             </div>
                             <div>
-                                <span className="block text-xs font-bold uppercase text-muted-foreground mb-1">Valor Esperado</span>
-                                <div className="p-2 bg-green-50 dark:bg-green-950/10 border border-green-100 dark:border-green-900 rounded text-green-800 dark:text-green-300">
-                                    {criteria.expected_value}
+                                <span className="block text-xs font-bold uppercase text-muted-foreground mb-1">Brecha Identificada</span>
+                                <div className="p-3 bg-amber-50 dark:bg-amber-950/10 border border-amber-100 dark:border-amber-900 rounded text-amber-900 dark:text-amber-300 leading-relaxed">
+                                    {capability.gap}
                                 </div>
                             </div>
-
-                            {/* Detalles anidados del criterio si existen */}
-                            {criteria.details && criteria.details.length > 0 && (
-                                <div className="col-span-2 mt-2 pt-2 border-t">
-                                    <span className="block text-xs font-bold uppercase text-muted-foreground mb-2">Análisis Técnico</span>
-                                    <ul className="space-y-2">
-                                        {criteria.details.map((d, dIdx) => (
-                                            <li key={dIdx} className="text-xs text-muted-foreground flex items-start gap-2">
-                                                <ArrowRight className="h-3 w-3 mt-0.5 text-blue-500 shrink-0" />
-                                                <span>
-                                                    {d.name && <span className="font-semibold text-foreground mr-1">{d.name}:</span>}
-                                                    {d.detail_description}
-                                                </span>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                </div>
-                            )}
                         </CardContent>
                     </Card>
                 ))}
