@@ -172,10 +172,75 @@ export interface MaturityAssessmentAnalysis extends BaseMetricAnalysis {
   criteria_analyzed: MaturityAssessmentAnalysisCriteria[];
 }
 
-export interface AiFinopsMetricsForecast {
+export interface AiFinopsMetricsForecastDeterministic {
+  engine: string;
+  field_used: string;
+  data_points_analyzed: number;
+  frequency: string;
+  season_length: number;
+  preprocessing: {
+    trailing_days_dropped: number;
+    outlier_dates_adjusted: string[];
+  };
+  diagnostics: {
+    daily_mean_usd: number;
+    trend_slope_usd_per_day: number;
+    trend_direction: string;
+    weekly_seasonality_detected: boolean;
+    coefficient_of_variation_pct: number;
+    models_considered: string[];
+    validation: {
+      performed: boolean;
+      horizon_days: number;
+      n_windows: number;
+    };
+  };
+  projections: {
+    forecast_30d_autoets: number;
+    forecast_90d_autoets: number;
+    forecast_30d_autoarima: number;
+    forecast_90d_autoarima: number;
+    forecast_30d_autotheta: number;
+    forecast_90d_autotheta: number;
+    forecast_30d_ces: number;
+    forecast_90d_ces: number;
+  };
+  interval_80_usd: {
+    '30d': {
+      low: number;
+      point: number;
+      high: number;
+    };
+    '90d': {
+      low: number;
+      point: number;
+      high: number;
+    };
+  };
+  backtest_mape_pct: {
+    autoets: number;
+    autoarima: number;
+    autotheta: number;
+    ces: number;
+  };
+  recommended_method: string;
+  confidence_level: string;
+}
+
+export interface AiFinopsMetricsForecastAiInterpretation {
   strategy_used: string;
+  formulas_used: {
+    formula: string;
+    description: string;
+    selected_method: string;
+  }[];
   data_points_analyzed: number;
   short_term_forecast: ForecastPeriod;
   long_term_forecast: ForecastPeriod;
   recommendation: string;
+}
+
+export interface AiFinopsMetricsForecast {
+  deterministic: AiFinopsMetricsForecastDeterministic;
+  ai_interpretation: AiFinopsMetricsForecastAiInterpretation;
 }
