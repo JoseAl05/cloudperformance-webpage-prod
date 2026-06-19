@@ -15,6 +15,7 @@ interface ComputeUnitInput {
   type: 'subscription' | 'perpetual';
   starts: string;
   expires: string | null;
+  fingerprint_cliente?: string | null;
 }
 
 interface GenerarLicenciaBody {
@@ -23,7 +24,18 @@ interface GenerarLicenciaBody {
   solicitante: string;
   fingerprint: string;
   compute_units: ComputeUnitInput[];
-  solicitudes_ids?: string[]; // IDs de solicitudes pendientes que se están procesando
+  solicitudes_ids?: string[];
+}
+
+// Resultado de un .lic generado
+interface LicGenerado {
+  tipo: 'subscription' | 'perpetual';
+  nombre: string;       // nombre descriptivo para el archivo
+  cliente: string;      // a quién pertenece
+  rut_cliente: string;
+  lic_content: string;
+  lic_hash: string;
+  compute_units: object[];
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -57,8 +69,28 @@ function calcularHash(content: string): string {
 function obtenerClavePrivada(): string | null {
   const raw = process.env.INTAC_PRIVATE_KEY;
   if (!raw) return null;
-  // Normalizar saltos de línea en caso de que vengan como \n literal
   return raw.replace(/\\n/g, '\n');
+}
+
+function slugify(str: string): string {
+  return str
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]/g, '_')
+    .replace(/_+/g, '_')
+    .slice(0, 20);
+}
+
+function generarLicContent(payload: object, privateKey: string): { licContent: string; licHash: string; sig: string } {
+  const payloadStr = JSON.stringify(payload);
+  const sig        = firmarRSA(payloadStr, privateKey);
+  const fullContent = { data: payloadStr, sig };
+  const licContent  = Buffer.from(
+    unescape(encodeURIComponent(JSON.stringify(fullContent)))
+  ).toString('base64');
+  const licHash = calcularHash(licContent);
+  return { licContent, licHash, sig };
 }
 
 // ─── Handler ──────────────────────────────────────────────────────────────────
@@ -107,6 +139,12 @@ export async function POST(req: Request) {
           { status: 400 }
         );
       }
+      if (uc.type === 'perpetual' && !uc.fingerprint_cliente) {
+        return NextResponse.json(
+          { error: `UC perpetua sin fingerprint_cliente: ${uc.alias}` },
+          { status: 400 }
+        );
+      }
     }
 
     // ── 3. Obtener clave privada ──────────────────────────────────────────────
@@ -118,68 +156,130 @@ export async function POST(req: Request) {
       );
     }
 
-    // ── 4. Construir compute_units con uc_fp ──────────────────────────────────
-    const ucConFp = compute_units.map(uc => ({
-      cloud:    uc.cloud,
-      db:       uc.db,
-      rut:      uc.rut,
-      cliente:  uc.cliente,
-      alias:    uc.alias,
-      type:     uc.type,
-      starts:   uc.starts,
-      expires:  uc.expires,
-      uc_fp:    calcularUcFp(rut, partner, uc.rut, uc.cliente, uc.db),
-    }));
+    const generado_at = new Date().toISOString();
+    const licsGenerados: LicGenerado[] = [];
+    const col = await getCollection('op_licencias');
 
-    // ── 5. Construir payload del .lic ─────────────────────────────────────────
-    const payload = {
-      partner,
-      rut,
-      solicitante,
-      fingerprint,
-      generated: new Date().toISOString(),
-      version: '2.0',
-      compute_units: ucConFp,
-    };
+    // ── 4. Separar UCs por tipo ───────────────────────────────────────────────
+    const ucsSubscription = compute_units.filter(uc => uc.type === 'subscription');
+    const ucsPerpetual    = compute_units.filter(uc => uc.type === 'perpetual');
 
-    const payloadStr = JSON.stringify(payload);
-
-    // ── 6. Firmar con RSA ─────────────────────────────────────────────────────
-    let sig: string;
-    try {
-      sig = firmarRSA(payloadStr, privateKey);
-    } catch (e) {
-      console.error('[OP-LICENCIAS] Error firmando con RSA:', e);
-      return NextResponse.json(
-        { error: 'Error al firmar la licencia — verifica INTAC_PRIVATE_KEY' },
-        { status: 500 }
-      );
+    // Agrupar perpetuos por cliente (rut)
+    const perpetuosPorCliente = new Map<string, ComputeUnitInput[]>();
+    for (const uc of ucsPerpetual) {
+      const key = uc.rut;
+      if (!perpetuosPorCliente.has(key)) perpetuosPorCliente.set(key, []);
+      perpetuosPorCliente.get(key)!.push(uc);
     }
 
-    // ── 7. Codificar en Base64 ────────────────────────────────────────────────
-    const fullContent = { data: payloadStr, sig };
-    const licContent  = Buffer.from(
-      unescape(encodeURIComponent(JSON.stringify(fullContent)))
-    ).toString('base64');
-    const licHash = calcularHash(licContent);
+    // ── 5. Generar .lic de suscripciones (si hay) ─────────────────────────────
+    if (ucsSubscription.length > 0) {
+      const ucConFp = ucsSubscription.map(uc => ({
+        cloud:   uc.cloud,
+        db:      uc.db,
+        rut:     uc.rut,
+        cliente: uc.cliente,
+        alias:   uc.alias,
+        type:    uc.type,
+        starts:  uc.starts,
+        expires: uc.expires,
+        uc_fp:   calcularUcFp(rut, partner, uc.rut, uc.cliente, uc.db),
+      }));
 
-    // ── 8. Guardar en op_licencias ────────────────────────────────────────────
-    const col = await getCollection('op_licencias');
-    await col.insertOne({
-      partner,
-      rut,
-      solicitante,
-      fingerprint,
-      generado_por: sessionTyped.email,
-      generado_at:  new Date().toISOString(),
-      version:      '2.0',
-      compute_units: ucConFp,
-      lic_content:  licContent,
-      lic_hash:     licHash,
-      createdAt:    new Date(),
-    });
+      const payload = {
+        partner, rut, solicitante, fingerprint,
+        generated: generado_at, version: '2.0',
+        compute_units: ucConFp,
+      };
 
-    // ── 8b. Marcar solicitudes pendientes como procesadas ────────────────────
+      const { licContent, licHash } = generarLicContent(payload, privateKey);
+
+      await col.insertOne({
+        partner, rut, solicitante, fingerprint,
+        tipo_lic: 'subscription',
+        generado_por: sessionTyped.email,
+        generado_at, version: '2.0',
+        compute_units: ucConFp,
+        lic_content: licContent,
+        lic_hash: licHash,
+        createdAt: new Date(),
+      });
+      
+      //variables necesarias para construir nombre del archivo suscripción
+      const fecha = generado_at.slice(0,10).replace(/-/g,'');
+      const rutSlug = rut.replace(/[^0-9kK]/g,'');
+      licsGenerados.push({
+        tipo:        'subscription',
+        // suscripción
+        nombre: `solicitud-s-${fecha}-${rutSlug}.lic`,
+        cliente:     partner,
+        rut_cliente: rut,
+        lic_content: licContent,
+        lic_hash:    licHash,
+        compute_units: ucConFp,
+      });
+    }
+
+    // ── 6. Generar .lic por cada cliente perpetuo ─────────────────────────────
+    for (const [rutCliente, ucs] of perpetuosPorCliente) {
+      const primerUC     = ucs[0];
+      const nombreCliente = primerUC.cliente;
+      // El fingerprint del perpetuo viene de la UC
+      const fpCliente    = primerUC.fingerprint_cliente!;
+
+      const ucConFp = ucs.map(uc => ({
+        cloud:   uc.cloud,
+        db:      uc.db,
+        rut:     uc.rut,
+        cliente: uc.cliente,
+        alias:   uc.alias,
+        type:    uc.type,
+        starts:  uc.starts,
+        expires: uc.expires,
+        uc_fp:   calcularUcFp(rut, partner, uc.rut, uc.cliente, uc.db),
+      }));
+
+      const payload = {
+        partner:     nombreCliente,  // el cliente perpetuo es el "partner" de su propio .lic
+        rut:         rutCliente,
+        solicitante,
+        fingerprint: fpCliente,      // fingerprint del servidor del cliente
+        generated:   generado_at,
+        version:     '2.0',
+        compute_units: ucConFp,
+      };
+
+      const { licContent, licHash } = generarLicContent(payload, privateKey);
+
+      await col.insertOne({
+        partner:     nombreCliente,
+        rut:         rutCliente,
+        solicitante,
+        fingerprint: fpCliente,
+        tipo_lic:    'perpetual',
+        generado_por: sessionTyped.email,
+        generado_at, version: '2.0',
+        compute_units: ucConFp,
+        lic_content:  licContent,
+        lic_hash:     licHash,
+        createdAt:    new Date(),
+      });
+      //variables necesarias para construir nombre del archivo perpetuo
+      const fecha = generado_at.slice(0,10).replace(/-/g,'');
+      const rutClienteSlug = rutCliente.replace(/[^0-9kK]/g,'');      
+      licsGenerados.push({
+        tipo:        'perpetual',
+        // perpetuo
+        nombre: `solicitud-p-${fecha}-${rutClienteSlug}.lic`,
+        cliente:     nombreCliente,
+        rut_cliente: rutCliente,
+        lic_content: licContent,
+        lic_hash:    licHash,
+        compute_units: ucConFp,
+      });
+    }
+
+    // ── 7. Marcar solicitudes como procesadas ─────────────────────────────────
     if (solicitudes_ids && solicitudes_ids.length > 0) {
       const colSol = await getCollection('op_solicitudes');
       await colSol.updateMany(
@@ -195,14 +295,13 @@ export async function POST(req: Request) {
       );
     }
 
-    // ── 9. Responder ──────────────────────────────────────────────────────────
+    // ── 8. Responder ──────────────────────────────────────────────────────────
     return NextResponse.json({
-      ok:           true,
-      lic_content:  licContent,
+      ok:             true,
+      lics:           licsGenerados,      // array de .lic generados
+      total:          licsGenerados.length,
       partner,
-      rut,
-      compute_units: ucConFp,
-      generado_at:  payload.generated,
+      generado_at,
     });
 
   } catch (err) {

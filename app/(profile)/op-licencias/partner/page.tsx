@@ -107,7 +107,12 @@ export default function PartnerPage() {
   const [formUC, setFormUC]               = useState(ucVacia());
 
   const [generando, setGenerando]   = useState(false);
-  const [licGenerada, setLicGenerada] = useState<{ content: string; partner: string } | null>(null);
+  const [licsGenerados, setLicsGenerados] = useState<{
+    tipo: string;
+    nombre: string;
+    cliente: string;
+    lic_content: string;
+  }[]>([]);
   const [genError, setGenError]     = useState('');
 
   // ── SII autocomplete ────────────────────────────────────────────────────────
@@ -155,7 +160,7 @@ export default function PartnerPage() {
     setSearchError('');
     setPartner(null);
     setNuevasUCs([]);
-    setLicGenerada(null);
+    //setLicsGenerados([]);
 
     try {
       const res = await fetch(`/api/op-licencias/partner?q=${encodeURIComponent(query)}`, {
@@ -201,7 +206,7 @@ export default function PartnerPage() {
     if (!partner) return;
     setGenerando(true);
     setGenError('');
-    setLicGenerada(null);
+    setLicsGenerados([]);
 
     // UCs acumulativas: las existentes vigentes + las nuevas
     const ucsExistentes = partner.compute_units.filter(uc => {
@@ -235,22 +240,13 @@ export default function PartnerPage() {
       const data = await res.json();
 
       if (res.ok) {
-        // Descargar automáticamente
-        const blob = new Blob([data.lic_content], { type: 'text/plain' });
-        const url  = URL.createObjectURL(blob);
-        const a    = document.createElement('a');
-        a.href     = url;
-        a.download = 'cloudperformance.lic';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-
-        setLicGenerada({ content: data.lic_content, partner: partner.partner });
+        console.log('[DEBUG] respuesta API:', JSON.stringify(data));
+        const lics = data.lics ?? [];
+        console.log('[DEBUG] lics a setear:', lics.length);
+        setLicsGenerados([...lics]);
         setNuevasUCs([]);
-        setSolicitudesUsadas([]);
-        // Refrescar datos del partner
-        handleBuscar();
+        {/*setSolicitudesUsadas([]);
+        handleBuscar();*/}
       } else {
         setGenError(`Error: ${data.error}`);
       }
@@ -261,15 +257,30 @@ export default function PartnerPage() {
     }
   }
 
-  function downloadLic(content: string, partnerName: string) {
-    const slug = partnerName
-      .toLowerCase().normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '_').slice(0, 20);
-    const date = new Date().toISOString().slice(0, 10);
+  function downloadLic(content: string, nombre: string) {
     const a = document.createElement('a');
     a.href = URL.createObjectURL(new Blob([content], { type: 'text/plain' }));
-    a.download = `cloudperformance_${slug}_${date}.lic`;
+    a.download = nombre;
+    document.body.appendChild(a);
     a.click();
+    document.body.removeChild(a);
+  }
+
+  async function downloadZip() {
+    const JSZip = (await import('jszip')).default;
+    const zip = new JSZip();
+    licsGenerados.forEach(lic => {
+      zip.file(lic.nombre, lic.lic_content);
+    });
+    const blob = await zip.generateAsync({ type: 'blob' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href     = url;
+    a.download = `cloudperformance_${new Date().toISOString().slice(0, 10)}.zip`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   }
 
   return (
@@ -534,20 +545,40 @@ export default function PartnerPage() {
             </Card>
           )}
 
-          {/* Licencia generada */}
-          {licGenerada && (
+          {/* Licencias generadas */}
+          {licsGenerados.length > 0 && (
             <div className="rounded-2xl border border-green-300 bg-green-500/5 p-5 space-y-3">
               <div className="flex items-center gap-2 text-green-600 font-semibold">
                 <CheckCircle className="h-5 w-5" />
-                .lic generado correctamente para {licGenerada.partner}
+                {licsGenerados.length === 1
+                  ? '1 archivo .lic generado correctamente'
+                  : `${licsGenerados.length} archivos .lic generados correctamente`
+                }
               </div>
-              <button
-                onClick={() => downloadLic(licGenerada.content, licGenerada.partner)}
-                className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-green-700 transition"
-              >
-                <Download className="h-4 w-4" />
-                Descargar cloudperformance.lic
-              </button>
+              <div className="space-y-2">
+                {licsGenerados.map((lic, i) => (
+                  <button
+                    key={i}
+                    onClick={() => downloadLic(lic.lic_content, lic.nombre)}
+                    className="flex items-center gap-2 border border-green-300 bg-white dark:bg-card text-green-700 px-4 py-2 rounded-xl text-sm font-medium hover:bg-green-50 transition w-full"
+                  >
+                    <Download className="h-4 w-4 shrink-0" />
+                    <span className="flex-1 text-left">{lic.nombre}</span>
+                    <span className="text-xs opacity-60">
+                      {lic.tipo === 'perpetual' ? '∞ Perpetuo' : 'Suscripción'}
+                    </span>
+                  </button>
+                ))}
+              </div>
+              {licsGenerados.length > 1 && (
+                <button
+                  onClick={downloadZip}
+                  className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-green-700 transition w-full justify-center"
+                >
+                  <Download className="h-4 w-4" />
+                  Descargar todos como .zip
+                </button>
+              )}
             </div>
           )}
 
