@@ -24,13 +24,19 @@ import {
     Target,
     TrendingUp,
     Zap,
-    ArrowRight,
     Activity,
     Server,
     Hammer,
     ChevronLeft,
     ChevronRight,
-    FilterX
+    FilterX,
+    TrendingDown,
+    Minus,
+    Percent,
+    Layers,
+    CalendarRange,
+    Award,
+    ShieldCheck
 } from 'lucide-react';
 import {
     AiFinopsMetrics,
@@ -441,16 +447,15 @@ const StandardMetricDetail = ({ metricData, type }: StandardMetricDetailProps) =
 const MaturityDetail = ({ metricData }: { metricData: MaturityAssessmentAnalysis }) => {
     return (
         <div className="space-y-6 animate-in fade-in zoom-in-95 duration-300">
-            {/* Header Card */}
             <Card className="overflow-hidden border-purple-200 dark:border-purple-900">
                 <div className="bg-purple-50 dark:bg-purple-950/20 p-6 flex flex-col items-center justify-center border-b border-purple-100 dark:border-purple-900">
                     <CheckCircle2 className="h-10 w-10 text-purple-600 dark:text-purple-400 mb-3" />
-                    <h3 className="text-3xl font-extrabold text-foreground mb-1">
-                        {metricData.finops_maturity_level}
+                    <h3 className="text-3xl font-extrabold text-foreground mb-2 text-center">
+                        {metricData.metric_name}
                     </h3>
-                    <p className="text-center text-muted-foreground text-sm max-w-2xl">
-                        {metricData.maturity_level_description}
-                    </p>
+                    <Badge className={`${getStatusColor(metricData.status)} border`} variant="outline">
+                        {metricData.status}
+                    </Badge>
                 </div>
                 <CardContent className="pt-6 grid gap-6">
                     <div className="space-y-2">
@@ -464,50 +469,31 @@ const MaturityDetail = ({ metricData }: { metricData: MaturityAssessmentAnalysis
                 </CardContent>
             </Card>
 
-            {/* Listado de Criterios Analizados */}
             <div className="grid gap-4">
-                <h3 className="font-semibold text-lg">Detalle de Criterios Evaluados</h3>
-                {metricData.criteria_analyzed.map((criteria, idx) => (
+                <h3 className="font-semibold text-lg">Capacidades Evaluadas</h3>
+                {metricData.capabilities_assessed.map((capability, idx) => (
                     <Card key={idx} className="overflow-hidden">
                         <CardHeader className="bg-muted/20 py-3">
-                            <div className="flex justify-between items-center">
-                                <CardTitle className="text-sm font-semibold">{criteria.criteria}</CardTitle>
-                                <Badge variant="outline" className="text-xs font-normal">
-                                    {criteria.service_analyzed}
+                            <div className="flex justify-between items-center gap-3">
+                                <CardTitle className="text-sm font-semibold">{capability.capability}</CardTitle>
+                                <Badge variant="outline" className="text-xs font-normal shrink-0">
+                                    {capability.level}
                                 </Badge>
                             </div>
                         </CardHeader>
-                        <CardContent className="pt-4 grid sm:grid-cols-2 gap-4 text-sm">
+                        <CardContent className="pt-4 grid gap-4 text-sm">
                             <div>
-                                <span className="block text-xs font-bold uppercase text-muted-foreground mb-1">Valor Detectado</span>
-                                <div className="p-2 bg-blue-50 dark:bg-blue-950/10 border border-blue-100 dark:border-blue-900 rounded text-blue-800 dark:text-blue-300">
-                                    {criteria.value}
+                                <span className="block text-xs font-bold uppercase text-muted-foreground mb-1">Evidencia</span>
+                                <div className="p-3 bg-blue-50 dark:bg-blue-950/10 border border-blue-100 dark:border-blue-900 rounded text-blue-900 dark:text-blue-300 leading-relaxed">
+                                    {capability.evidence}
                                 </div>
                             </div>
                             <div>
-                                <span className="block text-xs font-bold uppercase text-muted-foreground mb-1">Valor Esperado</span>
-                                <div className="p-2 bg-green-50 dark:bg-green-950/10 border border-green-100 dark:border-green-900 rounded text-green-800 dark:text-green-300">
-                                    {criteria.expected_value}
+                                <span className="block text-xs font-bold uppercase text-muted-foreground mb-1">Brecha Identificada</span>
+                                <div className="p-3 bg-amber-50 dark:bg-amber-950/10 border border-amber-100 dark:border-amber-900 rounded text-amber-900 dark:text-amber-300 leading-relaxed">
+                                    {capability.gap}
                                 </div>
                             </div>
-
-                            {/* Detalles anidados del criterio si existen */}
-                            {criteria.details && criteria.details.length > 0 && (
-                                <div className="col-span-2 mt-2 pt-2 border-t">
-                                    <span className="block text-xs font-bold uppercase text-muted-foreground mb-2">Análisis Técnico</span>
-                                    <ul className="space-y-2">
-                                        {criteria.details.map((d, dIdx) => (
-                                            <li key={dIdx} className="text-xs text-muted-foreground flex items-start gap-2">
-                                                <ArrowRight className="h-3 w-3 mt-0.5 text-blue-500 shrink-0" />
-                                                <span>
-                                                    {d.name && <span className="font-semibold text-foreground mr-1">{d.name}:</span>}
-                                                    {d.detail_description}
-                                                </span>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                </div>
-                            )}
                         </CardContent>
                     </Card>
                 ))}
@@ -517,7 +503,41 @@ const MaturityDetail = ({ metricData }: { metricData: MaturityAssessmentAnalysis
 }
 
 // --- Sub-componente: Detalle Forecast ---
+const MODEL_LABELS: Record<string, string> = {
+    autoets: 'AutoETS',
+    autoarima: 'AutoARIMA',
+    autotheta: 'AutoTheta',
+    ces: 'CES',
+    rwd: 'Random Walk + Drift',
+};
+
+const getConfidenceClasses = (confidence: string) => {
+    const c = (confidence || '').toLowerCase();
+    if (c.includes('high') || c.includes('alta'))
+        return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300';
+    if (c.includes('medium') || c.includes('media'))
+        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300';
+    return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300';
+};
+
+const TrendIcon = ({ direction }: { direction: string }) => {
+    if (direction === 'increasing') return <TrendingUp className="h-4 w-4 text-red-500" />;
+    if (direction === 'decreasing') return <TrendingDown className="h-4 w-4 text-green-500" />;
+    return <Minus className="h-4 w-4 text-muted-foreground" />;
+};
+
+const trendLabel = (direction: string) => {
+    if (direction === 'increasing') return 'Al alza';
+    if (direction === 'decreasing') return 'A la baja';
+    return 'Estable';
+};
+
 const ForecastDetail = ({ forecastData }: { forecastData: AiFinopsMetrics['spending_forecast'] }) => {
+    console.log(forecastData);
+    const det = forecastData.deterministic;
+    const ai = forecastData.ai_interpretation;
+    const recommendedLabel = MODEL_LABELS[det.recommended_method] ?? det.recommended_method;
+
     return (
         <div className="space-y-6 animate-in fade-in zoom-in-95 duration-300">
             <Card>
@@ -527,29 +547,141 @@ const ForecastDetail = ({ forecastData }: { forecastData: AiFinopsMetrics['spend
                         Proyección de Gasto (Forecast)
                     </CardTitle>
                     <CardDescription>
-                        Basado en {forecastData.data_points_analyzed} puntos de datos históricos.
+                        Basado en {det.data_points_analyzed} puntos de datos históricos
+                        {' · '}campo <span className="font-mono">{det.field_used}</span>
+                        {' · '}motor <span className="font-mono">{det.engine}</span>
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
                     <div className="grid gap-6">
+                        <div className="p-4 rounded-lg border bg-muted/20 flex flex-col sm:flex-row sm:items-center gap-4">
+                            <div className="flex items-center gap-3">
+                                <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-950/40">
+                                    <Award className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                                </div>
+                                <div>
+                                    <span className="text-xs text-muted-foreground uppercase tracking-wider">Método seleccionado</span>
+                                    <div className="text-lg font-bold tracking-tight">{recommendedLabel}</div>
+                                </div>
+                            </div>
+                            <div className="flex flex-wrap items-center gap-2 sm:ml-auto">
+                                <Badge className={`${getConfidenceClasses(det.confidence_level)} border-0`}>
+                                    Confianza: {det.confidence_level}
+                                </Badge>
+                                <Badge variant="outline" className="gap-1">
+                                    <CalendarRange className="h-3 w-3" />
+                                    {det.season_length > 1 ? `Estacionalidad ${det.season_length}d` : 'Sin estacionalidad'}
+                                </Badge>
+                                <Badge variant="outline" className="gap-1">
+                                    <ShieldCheck className="h-3 w-3" />
+                                    {det.diagnostics.validation.performed
+                                        ? `Validado · ${det.diagnostics.validation.n_windows} ventana(s) × ${det.diagnostics.validation.horizon_days}d`
+                                        : 'Sin validación cruzada'}
+                                </Badge>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                            <StatTile
+                                icon={<TrendIcon direction={det.diagnostics.trend_direction} />}
+                                label="Tendencia"
+                                value={trendLabel(det.diagnostics.trend_direction)}
+                                hint={`${det.diagnostics.trend_slope_usd_per_day >= 0 ? '+' : ''}$${det.diagnostics.trend_slope_usd_per_day.toFixed(4)}/día`}
+                            />
+                            <StatTile
+                                icon={<DollarSign className="h-4 w-4 text-emerald-500" />}
+                                label="Gasto diario medio"
+                                value={`$${det.diagnostics.daily_mean_usd.toLocaleString()}`}
+                            />
+                            <StatTile
+                                icon={<Percent className="h-4 w-4 text-indigo-500" />}
+                                label="Volatilidad (CV)"
+                                value={`${det.diagnostics.coefficient_of_variation_pct.toFixed(2)}%`}
+                            />
+                            <StatTile
+                                icon={<CalendarRange className="h-4 w-4 text-blue-500" />}
+                                label="Patrón semanal"
+                                value={det.diagnostics.weekly_seasonality_detected ? 'Detectado' : 'No detectado'}
+                            />
+                        </div>
+
                         <div className="p-4 rounded-lg border bg-muted/20">
                             <h4 className="font-semibold text-sm mb-2 text-foreground">Estrategia Utilizada</h4>
                             <div className="text-sm text-muted-foreground">
-                                <MarkdownText content={forecastData.strategy_used} />
+                                <MarkdownText content={ai.strategy_used} />
                             </div>
                         </div>
 
                         <div className="grid md:grid-cols-2 gap-6">
-                            <ForecastCard periods={forecastData.short_term_forecast} title="Corto Plazo" icon={Zap} iconColor="text-amber-500" />
-                            <ForecastCard periods={forecastData.long_term_forecast} title="Largo Plazo" icon={BarChart3} iconColor="text-indigo-500" />
+                            <ForecastCard
+                                periods={ai.short_term_forecast}
+                                interval={det.interval_80_usd['30d']}
+                                title="Corto Plazo"
+                                icon={Zap}
+                                iconColor="text-amber-500"
+                            />
+                            <ForecastCard
+                                periods={ai.long_term_forecast}
+                                interval={det.interval_80_usd['90d']}
+                                title="Largo Plazo"
+                                icon={BarChart3}
+                                iconColor="text-indigo-500"
+                            />
                         </div>
+
+                        <ModelComparisonTable
+                            projections={det.projections}
+                            mape={det.backtest_mape_pct}
+                            recommended={det.recommended_method}
+                            modelsConsidered={det.diagnostics.models_considered}
+                        />
+
+                        {(det.preprocessing.outlier_dates_adjusted.length > 0 ||
+                            det.preprocessing.trailing_days_dropped > 0) && (
+                            <div className="p-3 rounded-lg border bg-muted/10 text-xs text-muted-foreground flex flex-wrap items-center gap-x-4 gap-y-1">
+                                <span className="flex items-center gap-1 font-medium text-foreground">
+                                    <FilterX className="h-3.5 w-3.5" /> Preprocesamiento
+                                </span>
+                                <span>Días finales descartados: {det.preprocessing.trailing_days_dropped}</span>
+                                {det.preprocessing.outlier_dates_adjusted.length > 0 && (
+                                    <span>
+                                        Anomalías ajustadas: {det.preprocessing.outlier_dates_adjusted.join(', ')}
+                                    </span>
+                                )}
+                            </div>
+                        )}
+
+                        {/* {ai.formulas_used?.length > 0 && (
+                            <div className="p-4 rounded-lg border bg-muted/20">
+                                <h4 className="font-semibold text-sm mb-3 text-foreground flex items-center gap-2">
+                                    <Layers className="h-4 w-4 text-muted-foreground" /> Métodos Aplicados
+                                </h4>
+                                <div className="space-y-3">
+                                    {ai.formulas_used.map((f, idx) => (
+                                        <div key={idx} className="pl-4 border-l-2 border-muted">
+                                            <div className="flex items-center gap-2 flex-wrap">
+                                                <span className="text-sm font-semibold text-foreground">
+                                                    {MODEL_LABELS[f.selected_method] ?? f.selected_method}
+                                                </span>
+                                                <code className="text-xs font-mono bg-muted px-1.5 py-0.5 rounded text-muted-foreground">
+                                                    {f.formula}
+                                                </code>
+                                            </div>
+                                            <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                                                {f.description}
+                                            </p>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )} */}
 
                         <div className="p-4 rounded-lg border border-blue-200 bg-blue-50 dark:bg-blue-950/20 dark:border-blue-800">
                             <h4 className="font-semibold text-sm mb-2 text-blue-800 dark:text-blue-300 flex items-center gap-2">
                                 <Lightbulb className="h-4 w-4" /> Recomendación del Modelo
                             </h4>
                             <div className="text-sm text-blue-700 dark:text-blue-400">
-                                <MarkdownText content={forecastData.recommendation} />
+                                <MarkdownText content={ai.recommendation} />
                             </div>
                         </div>
                     </div>
@@ -559,24 +691,115 @@ const ForecastDetail = ({ forecastData }: { forecastData: AiFinopsMetrics['spend
     )
 }
 
+// Sub-componente: Tile de diagnóstico
+const StatTile = ({
+    icon,
+    label,
+    value,
+    hint,
+}: {
+    icon: React.ReactNode;
+    label: string;
+    value: string;
+    hint?: string;
+}) => (
+    <div className="p-3 rounded-lg border bg-card flex flex-col gap-1">
+        <div className="flex items-center gap-2">
+            {icon}
+            <span className="text-[11px] text-muted-foreground uppercase tracking-wider">{label}</span>
+        </div>
+        <span className="text-base font-bold tracking-tight">{value}</span>
+        {hint && <span className="text-[11px] font-mono text-muted-foreground">{hint}</span>}
+    </div>
+);
+
+// Sub-componente: Tabla comparativa de modelos (proyección + backtest)
+interface ModelComparisonTableProps {
+    projections: AiFinopsMetrics['spending_forecast']['deterministic']['projections'];
+    mape: AiFinopsMetrics['spending_forecast']['deterministic']['backtest_mape_pct'];
+    recommended: string;
+    modelsConsidered: string[];
+}
+
+const ModelComparisonTable = ({ projections, mape, recommended, modelsConsidered }: ModelComparisonTableProps) => {
+    const rows = modelsConsidered.map((key) => ({
+        key,
+        label: MODEL_LABELS[key] ?? key,
+        thirty: (projections as Record<string, number>)[`forecast_30d_${key}`],
+        ninety: (projections as Record<string, number>)[`forecast_90d_${key}`],
+        mape: (mape as Record<string, number>)[key],
+    }));
+
+    return (
+        <div className="rounded-lg border overflow-hidden">
+            <div className="p-3 border-b bg-muted/10">
+                <h4 className="font-semibold text-sm text-foreground flex items-center gap-2">
+                    <Activity className="h-4 w-4 text-muted-foreground" /> Comparación de Modelos
+                </h4>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                    Proyección acumulada y error de validación (MAPE) por modelo. Menor MAPE es mejor.
+                </p>
+            </div>
+            <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                    <thead>
+                        <tr className="text-left text-xs text-muted-foreground uppercase tracking-wider border-b bg-muted/5">
+                            <th className="px-4 py-2 font-medium">Modelo</th>
+                            <th className="px-4 py-2 font-medium text-right">30 días</th>
+                            <th className="px-4 py-2 font-medium text-right">90 días</th>
+                            <th className="px-4 py-2 font-medium text-right">Error (MAPE)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {rows.map((r) => {
+                            const isRec = r.key === recommended;
+                            return (
+                                <tr
+                                    key={r.key}
+                                    className={`border-b last:border-0 ${isRec ? 'bg-blue-50 dark:bg-blue-950/20' : ''}`}
+                                >
+                                    <td className="px-4 py-2">
+                                        <span className="flex items-center gap-2 font-medium text-foreground">
+                                            {r.label}
+                                            {isRec && (
+                                                <Badge className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300 border-0 gap-1">
+                                                    <Award className="h-3 w-3" /> Elegido
+                                                </Badge>
+                                            )}
+                                        </span>
+                                    </td>
+                                    <td className="px-4 py-2 text-right font-mono">
+                                        {typeof r.thirty === 'number' ? `$${r.thirty.toFixed(0)}` : '—'}
+                                    </td>
+                                    <td className="px-4 py-2 text-right font-mono">
+                                        {typeof r.ninety === 'number' ? `$${r.ninety.toFixed(0)}` : '—'}
+                                    </td>
+                                    <td className="px-4 py-2 text-right font-mono">
+                                        {typeof r.mape === 'number' ? `${r.mape.toFixed(2)}%` : '—'}
+                                    </td>
+                                </tr>
+                            );
+                        })}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    );
+};
+
 // Sub-componente Forecast Card
 interface ForecastCardProps {
     periods: ForecastPeriod;
+    interval?: { low: number; point: number; high: number };
     title: string;
     icon: React.ElementType;
     iconColor: string;
 }
 
-const ForecastCard = ({ periods, title, icon: Icon, iconColor }: ForecastCardProps) => {
-    const getConfidenceBadge = (confidence: string) => {
-        const c = confidence.toLowerCase();
-        let color = "bg-gray-100 text-gray-800";
-        if (c.includes('high') || c.includes('alta')) color = "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300";
-        else if (c.includes('medium') || c.includes('media')) color = "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300";
-        else color = "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300";
-
-        return <Badge className={`${color} border-0 ml-auto`}>{confidence}</Badge>;
-    };
+const ForecastCard = ({ periods, interval, title, icon: Icon, iconColor }: ForecastCardProps) => {
+    const getConfidenceBadge = (confidence: string) => (
+        <Badge className={`${getConfidenceClasses(confidence)} border-0 ml-auto`}>{confidence}</Badge>
+    );
 
     return (
         <div className="flex flex-col h-full border rounded-xl overflow-hidden shadow-sm bg-card">
@@ -589,8 +812,16 @@ const ForecastCard = ({ periods, title, icon: Icon, iconColor }: ForecastCardPro
                 <div>
                     <span className="text-xs text-muted-foreground uppercase">Gasto Estimado ({periods.period})</span>
                     <div className="text-3xl font-bold mt-1 tracking-tight">
-                        ${periods.predicted_spend_usd.toLocaleString()}
+                        ${periods.predicted_spend_usd.toFixed(0)}
                     </div>
+                    {interval && (
+                        <div className="mt-2 text-xs text-muted-foreground">
+                            <span className="uppercase tracking-wider">Intervalo de Confianza</span>
+                            <div className="font-mono mt-0.5 text-foreground/80">
+                                ${interval.low.toFixed(0)} — ${interval.high.toFixed(0)}
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
             <div className="p-4 bg-white dark:bg-transparent flex-grow">
@@ -604,7 +835,7 @@ const ForecastCard = ({ periods, title, icon: Icon, iconColor }: ForecastCardPro
                                 <span className="text-sm font-semibold text-foreground">{driver.service_name}</span>
                                 {driver.value_detected > 0 && (
                                     <span className="text-xs font-mono text-muted-foreground">
-                                        ${driver.value_detected.toFixed(2)}
+                                        ${driver.value_detected.toFixed(0)}
                                     </span>
                                 )}
                             </div>
