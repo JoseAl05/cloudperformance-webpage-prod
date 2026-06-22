@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import { LoginFormComponent } from '@/components/auth/LoginFormComponent';
 import { Suspense } from 'react';
+import { Cloud } from 'lucide-react';
 
 export default function LoginPage() {
 
@@ -18,7 +19,10 @@ export default function LoginPage() {
                 className='object-cover'
               />
             </div>
-            Cloudperformance
+            <div className="flex items-center gap-1.5">
+              Cloudperformance
+              <Cloud className="h-5 w-5 text-muted-foreground" aria-label="SaaS" title="Versión SaaS" />
+            </div>
           </a>
         </div>
         <div className='flex flex-1 items-center justify-center'>
