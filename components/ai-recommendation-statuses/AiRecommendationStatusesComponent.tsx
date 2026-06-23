@@ -92,6 +92,8 @@ export const AiRecommendationStatusesComponent = ({ startDate, endDate, cloud }:
 
     const recData = recStatusesData;
 
+    console.log(recData);
+
     return (
         <div className="w-full min-w-0 px-4 py-6">
             <div className="flex items-center gap-3 mb-6">

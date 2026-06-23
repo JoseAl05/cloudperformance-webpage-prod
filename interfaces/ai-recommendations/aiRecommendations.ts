@@ -104,6 +104,7 @@ export interface RecommendationStatusEvent {
   recommendation_summary: string;
   action_plan: AiRecommendationActionPlan;
   execution_status: RecommendationStatus;
+  saving_value: number;
   status_assigned_at: string;
   recommendation_created_at: string;
   comment?: string;
@@ -143,6 +144,7 @@ export interface RecommendationStatusGroupReport {
   recommendation_summary: string;
   action_plan: AiRecommendationActionPlan;
   execution_status: RecommendationStatus;
+  saving_value: number;
   status_assigned_at: string;
   recommendation_created_at: string;
   comment: string | null;

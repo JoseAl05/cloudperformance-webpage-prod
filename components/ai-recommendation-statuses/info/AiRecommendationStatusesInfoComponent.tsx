@@ -35,7 +35,8 @@ import {
     X,
     ClipboardCheck,
     ExternalLink,
-    Ticket
+    Ticket,
+    CircleDollarSign
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -89,6 +90,8 @@ interface GroupCardProps {
     servicenowValidationResult: TicketValidationResult | undefined;
     isValidatingJira: boolean;
     isValidatingServiceNow: boolean;
+    anchorId?: string;
+    expandRequestToken?: number;
     onStatusChange: (newStatus: RecommendationStatus, comment: string) => Promise<void>;
 }
 
@@ -179,6 +182,9 @@ const formatDate = (dateStr: string) => {
         timeZone: 'UTC'
     }).format(new Date(dateStr));
 };
+
+const formatCurrency = (value: number) =>
+    new Intl.NumberFormat('es', { style: 'currency', currency: 'USD' }).format(value);
 
 
 
@@ -366,7 +372,7 @@ const StatusSection = ({ currentStatus, onSubmit }: StatusSectionProps) => {
 
 
 
-const GroupCard = ({ group, sortedReports, allExecutionStatuses, isValidatingJira, isValidatingServiceNow, jiraValidationResult, servicenowValidationResult, onStatusChange }: GroupCardProps) => {
+const GroupCard = ({ group, sortedReports, allExecutionStatuses, isValidatingJira, isValidatingServiceNow, jiraValidationResult, servicenowValidationResult, anchorId, expandRequestToken, onStatusChange }: GroupCardProps) => {
     const [expanded, setExpanded] = useState(false);
     const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
     const [createdTickets, setCreatedTickets] = useState<Record<'jira' | 'servicenow', TicketState | null>>({
@@ -392,6 +398,12 @@ const GroupCard = ({ group, sortedReports, allExecutionStatuses, isValidatingJir
         const id = setTimeout(() => setFeedback(null), 5000);
         return () => clearTimeout(id);
     }, [feedback]);
+
+    useEffect(() => {
+        if (expandRequestToken !== undefined) {
+            setExpanded(true);
+        }
+    }, [expandRequestToken]);
 
 
     const latest = sortedReports[sortedReports.length - 1];
@@ -588,7 +600,7 @@ const GroupCard = ({ group, sortedReports, allExecutionStatuses, isValidatingJir
     };
 
     return (
-        <div className="border rounded-xl overflow-hidden shadow-sm transition-all hover:shadow-md">
+        <div id={anchorId} className="border rounded-xl overflow-hidden shadow-sm transition-all hover:shadow-md">
             <Button
                 onClick={() => setExpanded(!expanded)}
                 variant="ghost"
@@ -660,6 +672,12 @@ const GroupCard = ({ group, sortedReports, allExecutionStatuses, isValidatingJir
                         <span className="text-xs font-normal text-slate-500 dark:text-slate-400 mb-1">Última actualización</span>
                         <span className="text-xs font-medium text-slate-700 dark:text-slate-300 tabular-nums">
                             {formatDate(latest.status_assigned_at)}
+                        </span>
+                    </div>
+                    <div className="flex flex-col items-end">
+                        <span className="text-xs font-normal text-slate-500 dark:text-slate-400 mb-1">Ahorro Est.</span>
+                        <span className="text-xs font-medium text-slate-700 dark:text-slate-300 tabular-nums">
+                            {formatCurrency(latest.saving_value)}
                         </span>
                     </div>
                     <div className="ml-2 text-slate-500">
@@ -850,6 +868,92 @@ const GroupCard = ({ group, sortedReports, allExecutionStatuses, isValidatingJir
     );
 };
 
+interface InactionCostContributor {
+    groupId: string;
+    resourceName: string;
+    recommendationSubtype: string;
+    cloudProvider: string;
+    status: RecommendationStatus;
+    savingValue: number;
+}
+
+interface InactionCostCardProps {
+    total: number;
+    contributors: InactionCostContributor[];
+    onSelect: (groupId: string) => void;
+}
+
+const InactionCostCard = ({ total, contributors, onSelect }: InactionCostCardProps) => {
+    return (
+        <div className="border border-amber-200 dark:border-amber-900 rounded-xl p-5">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-4">
+                <h2 className="text-lg font-bold text-amber-950 dark:text-amber-100 flex items-center gap-2">
+                    <CircleDollarSign className="h-5 w-5" />
+                    Costo de Inacción
+                </h2>
+                <div className="flex flex-col sm:items-end">
+                    <span className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
+                        Ahorro no capturado
+                    </span>
+                    <span className="text-2xl font-black text-amber-700 dark:text-amber-300 tabular-nums">
+                        {formatCurrency(total)}
+                    </span>
+                </div>
+            </div>
+
+            {contributors.length > 0 ? (
+                <>
+                    <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
+                        Recomendaciones con último estado Rechazada o Pospuesta que componen el ahorro no capturado. Selecciona una para ver su detalle.
+                    </p>
+
+                    <ul className="space-y-2 max-h-72 overflow-y-auto pr-1">
+                        {contributors.map((contributor) => (
+                            <li key={contributor.groupId}>
+                                <Button
+                                    variant="ghost"
+                                    onClick={() => onSelect(contributor.groupId)}
+                                    className="w-full h-auto whitespace-normal cursor-pointer flex items-center justify-between gap-3 p-3 text-left border rounded-lg hover:bg-muted/40 transition-colors"
+                                >
+                                    <span className="flex items-start gap-3 min-w-0 flex-1">
+                                        <span className={cn('mt-1 block h-2 w-2 rounded-full flex-shrink-0', STATUS_DOT_COLOR[contributor.status])} />
+                                        <span className="min-w-0 block">
+                                            <span className="flex flex-wrap items-center gap-2">
+                                                <span className="text-sm font-semibold truncate text-slate-900 dark:text-slate-100">
+                                                    {contributor.resourceName}
+                                                </span>
+                                                <span className="text-xs px-2 py-0.5 rounded-full bg-secondary text-secondary-foreground font-medium">
+                                                    {contributor.cloudProvider}
+                                                </span>
+                                                <span className={cn('text-xs font-semibold px-2 py-0.5 rounded border', STATUS_STYLES[contributor.status])}>
+                                                    {contributor.status}
+                                                </span>
+                                            </span>
+                                            <span className="block text-xs text-slate-600 dark:text-slate-400 line-clamp-1 mt-0.5">
+                                                {contributor.recommendationSubtype}
+                                            </span>
+                                        </span>
+                                    </span>
+                                    <span className="flex items-center gap-2 flex-shrink-0">
+                                        <span className="text-sm font-bold text-amber-700 dark:text-amber-300 tabular-nums">
+                                            {formatCurrency(contributor.savingValue)}
+                                        </span>
+                                        <ChevronRight className="h-4 w-4 text-slate-400" />
+                                    </span>
+                                </Button>
+                            </li>
+                        ))}
+                    </ul>
+                </>
+            ) : (
+                <p className="text-sm text-center text-slate-500 dark:text-slate-400 py-6">
+                    No hay costo de inacción. No existen recomendaciones con estado Rechazada o Pospuesta.
+                </p>
+            )}
+        </div>
+    );
+};
+
 export const AiRecommendationStatusesInfoComponent = ({ data }: AiRecommendationStatusesInfoComponentProps) => {
     const [groups, setGroups] = useState<RecommendationStatusGroup[]>(() => data ?? []);
     const [feedback, setFeedback] = useState<StatusFeedback | null>(null);
@@ -858,6 +962,10 @@ export const AiRecommendationStatusesInfoComponent = ({ data }: AiRecommendation
     const [sortField, setSortField] = useState<SortField>('latest_activity');
     const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
     const [currentPage, setCurrentPage] = useState(1);
+    const [expandTokens, setExpandTokens] = useState<Record<string, number>>({});
+    const [scrollTarget, setScrollTarget] = useState<{ groupId: string; nonce: number } | null>(null);
+
+    console.log(data);
 
     const { connectors } = useConnector();
 
@@ -1036,6 +1144,31 @@ export const AiRecommendationStatusesInfoComponent = ({ data }: AiRecommendation
         return { counts, totalEvents };
     }, [enriched]);
 
+    const inactionCost = useMemo(() => {
+        const contributors: InactionCostContributor[] = [];
+        let total = 0;
+        for (const group of groups) {
+            const sortedReports = [...group.reports].sort(
+                (a, b) => new Date(a.status_assigned_at).getTime() - new Date(b.status_assigned_at).getTime()
+            );
+            const latest = sortedReports[sortedReports.length - 1];
+            if (!latest) continue;
+            if (latest.execution_status !== 'Rechazada' && latest.execution_status !== 'Pospuesta') continue;
+            total += latest.saving_value;
+            contributors.push({
+                groupId: group.recommendation_group_id,
+                resourceName: Array.isArray(latest.resource_name)
+                    ? `Múltiples recursos afectados (${latest.resource_name.length})`
+                    : latest.resource_name,
+                recommendationSubtype: latest.recommendation_subtype,
+                cloudProvider: latest.cloud_provider,
+                status: latest.execution_status,
+                savingValue: latest.saving_value,
+            });
+        }
+        return { contributors, total };
+    }, [groups]);
+
     const filtered = useMemo(() => {
         const q = searchQuery.trim().toLowerCase();
         return enriched.filter((entry) => {
@@ -1069,6 +1202,33 @@ export const AiRecommendationStatusesInfoComponent = ({ data }: AiRecommendation
     const safePage = Math.min(currentPage, totalPages);
     const paginated = sorted.slice((safePage - 1) * ITEMS_PER_PAGE, safePage * ITEMS_PER_PAGE);
 
+    useEffect(() => {
+        if (!scrollTarget) return;
+        const index = sorted.findIndex(
+            (entry) => entry.group.recommendation_group_id === scrollTarget.groupId
+        );
+        if (index === -1) return;
+        const targetPage = Math.floor(index / ITEMS_PER_PAGE) + 1;
+        setCurrentPage((prev) => (prev === targetPage ? prev : targetPage));
+    }, [scrollTarget, sorted]);
+
+    useEffect(() => {
+        if (!scrollTarget) return;
+        const startIndex = (safePage - 1) * ITEMS_PER_PAGE;
+        const endIndex = safePage * ITEMS_PER_PAGE;
+        const index = sorted.findIndex(
+            (entry) => entry.group.recommendation_group_id === scrollTarget.groupId
+        );
+        if (index < startIndex || index >= endIndex) return;
+        const targetId = scrollTarget.groupId;
+        const frame = requestAnimationFrame(() => {
+            const element = document.getElementById(`rec-card-${targetId}`);
+            element?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            setScrollTarget(null);
+        });
+        return () => cancelAnimationFrame(frame);
+    }, [scrollTarget, safePage, sorted]);
+
     const toggleStatusFilter = (value: RecommendationStatus) => {
         setStatusFilter((prev) => {
             const next = new Set(prev);
@@ -1097,6 +1257,18 @@ export const AiRecommendationStatusesInfoComponent = ({ data }: AiRecommendation
         setCurrentPage(1);
     };
 
+    const handleFocusRecommendation = (groupId: string) => {
+        setStatusFilter((prev) => {
+            const next = new Set(prev);
+            next.add('Rechazada');
+            next.add('Pospuesta');
+            return next;
+        });
+        setSearchQuery('');
+        setExpandTokens((prev) => ({ ...prev, [groupId]: (prev[groupId] ?? 0) + 1 }));
+        setScrollTarget({ groupId, nonce: Date.now() });
+    };
+
     const handleStatusChange = async (
         groupId: string,
         newStatus: RecommendationStatus,
@@ -1123,6 +1295,7 @@ export const AiRecommendationStatusesInfoComponent = ({ data }: AiRecommendation
             recommendation_summary: latest.recommendation_summary,
             action_plan: latest.action_plan,
             execution_status: newStatus,
+            saving_value: latest.saving_value,
             status_assigned_at: statusAssignedAt,
             recommendation_created_at: latest.recommendation_created_at,
             comment: comment.length > 0 ? comment : undefined,
@@ -1236,6 +1409,12 @@ export const AiRecommendationStatusesInfoComponent = ({ data }: AiRecommendation
                 </div>
             </div>
 
+            <InactionCostCard
+                total={inactionCost.total}
+                contributors={inactionCost.contributors}
+                onSelect={handleFocusRecommendation}
+            />
+
             <div className="space-y-3">
                 <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
                     <div className="relative flex-1 lg:max-w-md">
@@ -1328,6 +1507,8 @@ export const AiRecommendationStatusesInfoComponent = ({ data }: AiRecommendation
                             servicenowValidationResult={servicenowValidationResult}
                             isValidatingJira={isValidatingJira}
                             isValidatingServiceNow={isValidatingServiceNow}
+                            anchorId={`rec-card-${entry.group.recommendation_group_id}`}
+                            expandRequestToken={expandTokens[entry.group.recommendation_group_id]}
                             onStatusChange={(newStatus, comment) =>
                                 handleStatusChange(entry.group.recommendation_group_id, newStatus, comment)
                             }
