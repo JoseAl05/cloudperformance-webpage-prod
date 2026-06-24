@@ -296,7 +296,7 @@ export const SidebarComponent = ({
             { label: 'Métricas Finops', icon: ChartNetwork, href: '/gcp/finops-metrics-ai' },
             { label: 'Reservations', icon: Server, href: '/gcp/reservas' },
             { label: 'Committed Use Discounts', icon: HandCoins, href: '/gcp/cuds/spend-based-cuds'},
-            // { label: 'Presupuestos', icon: CircleDollarSign, href: '/gcp/presupuesto' },
+            { label: 'Presupuestos', icon: CircleDollarSign, href: '/gcp/presupuesto' },
             { label: 'Mantenedor de Etiquetas (Tags)', icon: Tags, href: '/gcp/tags' },
         ],
         recursos: [

@@ -4,7 +4,10 @@ import React, { useState } from 'react';
 import { DollarSign, ArrowRight, ArrowLeft, TrendingUp, Wallet } from 'lucide-react';
 import BillingAlertsView from './billing/BillingAlertsView';
 import AnomalyAlertsView from './anomalies/AnomalyAlertsView';
-import GlobalBudgetView from './budget/GlobalBudgetView';
+//import GlobalBudgetView from './budget/GlobalBudgetView';
+import CostCenterBudgetView from './budget/CostCenterBudgetView';
+
+CostCenterBudgetView
 
 interface AlertsManagerProps {
     provider: string; 
@@ -109,7 +112,7 @@ export default function AlertsManager({ provider }: AlertsManagerProps) {
 
             <div className="mt-2">
                 {activeModule === 'budget' && (
-                    <GlobalBudgetView provider={provider} />
+                    <CostCenterBudgetView provider={provider} />
                 )}
 
                 {activeModule === 'billing' && (

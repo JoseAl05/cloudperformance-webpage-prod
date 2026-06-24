@@ -33,6 +33,15 @@ export const alertasAnomaliasService = {
         return response.json();
     },
 
+    getHistorialAnomalia: async (id: string, provider: string): Promise<unknown> => {
+        const response = await fetch(`${NEXT_INTERNAL_API}/anomalias/historial/${id}?cloud=${provider}`, {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' }
+        });
+        if (!response.ok) throw new Error('Error al obtener el RCA de la anomalía');
+        return response.json();
+    },
+
     eliminarAlertaAnomalia: async (id: string, provider: string): Promise<unknown> => {
         const response = await fetch(`${NEXT_INTERNAL_API}/anomalias/configurar/${id}?cloud=${provider}`, {
             method: 'DELETE',

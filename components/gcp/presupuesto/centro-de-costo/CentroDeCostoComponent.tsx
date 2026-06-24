@@ -1,305 +1,16 @@
-// "use client";
-
-// import { useState } from "react";
-// import { mutate } from "swr";
-// import { Search, TicketsIcon, AlertCircle, Trash2, CheckCircle } from "lucide-react";
-// import { Button } from "@/components/ui/button";
-// import {
-//   Dialog,
-//   DialogContent,
-//   DialogHeader,
-//   DialogTitle,
-//   DialogDescription
-// } from "@/components/ui/dialog";
-// import {
-//   AlertDialog,
-//   AlertDialogAction,
-//   AlertDialogCancel,
-//   AlertDialogContent,
-//   AlertDialogDescription,
-//   AlertDialogFooter,
-//   AlertDialogHeader,
-//   AlertDialogTitle,
-// } from "@/components/ui/alert-dialog";
-// import { CentroDeCostoTableComponent } from "@/components/azure/presupuesto/centro-de-costo/table/CentroDeCostoTableComponent";
-// import { CentroDeCostoFormComponent, CentroCosto } from "@/components/azure/presupuesto/centro-de-costo/form/CentroDeCostoFormComponent";
-// import { SessionGate } from "@/components/general_presupuesto/session/SesionGate";
-
-// interface CentroDeCostoComponentProps {
-//   cloud: string;
-// }
-
-// const fetcher = (url: string) => fetch(url).then((r) => r.json());
-
-// export const CentroDeCostoComponentV2 = () => {
-
-//   const cloudType = "azure";
-
-//   // --- Estados
-//   const [editingCentro, setEditingCentro] = useState<CentroCosto | null>(null);
-//   const [showForm, setShowForm] = useState(false);
-//   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-//   const [centroToDelete, setCentroToDelete] = useState<number | string | null>(null);
-//   const [errorDialogOpen, setErrorDialogOpen] = useState(false);
-//   const [errorMessage, setErrorMessage] = useState("");
-//   const [successDialogOpen, setSuccessDialogOpen] = useState(false);
-//   const [successMessage, setSuccessMessage] = useState("");
-
-//   if (!cloudType) {
-//     return (
-//       <div className="bg-white dark:bg-gray-900 rounded-xl py-16 text-center">
-//         <div className="flex flex-col items-center justify-center space-y-3">
-//           <Search className="w-12 h-12 text-gray-300 dark:text-gray-600" />
-//           <div>
-//             <p className="text-lg font-semibold">No se encontraron resultados</p>
-//             <p className="text-sm text-gray-400 mt-1">
-//               Intenta con otros términos de búsqueda
-//             </p>
-//           </div>
-//         </div>
-//       </div>
-//     );
-//   }
-
-//   // --- Acciones
-//   const handleEdit = (centro: CentroCosto) => {
-//     setEditingCentro(centro);
-//     setShowForm(true);
-//   };
-
-//   const handleFormClose = () => {
-//     setEditingCentro(null);
-//     setShowForm(false);
-//   };
-
-//   const handleFormSubmit = async (data: CentroCosto) => {
-//     try {
-//       const isEditing = !!editingCentro;
-//       const method = isEditing ? "PUT" : "POST";
-//       const url = isEditing
-//         ? `/api/presupuesto/bridge/${cloudType}/centro-costo/${data.id_centro_costo}`
-//         : `/api/presupuesto/bridge/${cloudType}/centro-costo`;
-
-//       const res = await fetch(url, {
-//         method,
-//         headers: { "Content-Type": "application/json" },
-//         body: JSON.stringify(data),
-//       });
-
-//       if (!res.ok) throw new Error(await res.text());
-
-//       mutate(`/api/presupuesto/bridge/${cloudType}/centro-costo`);
-//       handleFormClose();
-
-//       // Mostrar mensaje de éxito
-//       setSuccessMessage(isEditing
-//         ? "Centro de costo actualizado exitosamente"
-//         : "Centro de costo creado exitosamente"
-//       );
-//       setSuccessDialogOpen(true);
-//     } catch (err) {
-//       console.error(err);
-//       setErrorMessage(err instanceof Error ? err.message : "Error al guardar el centro de costo");
-//       setErrorDialogOpen(true);
-//     }
-//   };
-
-//   const handleDeleteClick = (id: number | string) => {
-//     setCentroToDelete(id);
-//     setDeleteDialogOpen(true);
-//   };
-
-//   const handleDeleteConfirm = async () => {
-//     if (!centroToDelete) return;
-
-//     try {
-//       const res = await fetch(
-//         `/api/presupuesto/bridge/${cloudType}/centro-costo/${centroToDelete}`,
-//         { method: "DELETE" }
-//       );
-
-//       if (!res.ok) throw new Error("Error al eliminar el centro de costo");
-
-//       mutate(`/api/presupuesto/bridge/${cloudType}/centro-costo`);
-//       setDeleteDialogOpen(false);
-//       setCentroToDelete(null);
-
-//       // Mostrar mensaje de éxito
-//       setSuccessMessage("Centro de costo eliminado exitosamente");
-//       setSuccessDialogOpen(true);
-//     } catch (err) {
-//       console.error(err);
-//       setErrorMessage(err instanceof Error ? err.message : "Error al eliminar el centro de costo");
-//       setErrorDialogOpen(true);
-//       setDeleteDialogOpen(false);
-//       setCentroToDelete(null);
-//     }
-//   };
-
-//   const handleDeleteCancel = () => {
-//     setDeleteDialogOpen(false);
-//     setCentroToDelete(null);
-//   };
-
-//   // --- Render
-//   return (
-//     <SessionGate>
-//       <div className="w-full min-w-0 space-y-6 p-6">
-//         <div className="mb-8">
-//           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-//             <div className="flex items-center gap-3 mb-2">
-//               <div className="h-12 w-12 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
-//                 <TicketsIcon className="h-6 w-6 text-blue-600 dark:text-blue-400" />
-//               </div>
-//               <div>
-//                 <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
-//                   Centros de costo {cloudType}
-//                 </h1>
-//                 {/* <p className="text-gray-500 dark:text-gray-400">
-//                   Administración de centros de costo 🏷️
-//                 </p> */}
-//               </div>
-//             </div>
-//             <Button
-//               onClick={() => {
-//                 setEditingCentro(null);
-//                 setShowForm(true);
-//               }}
-//               className="flex items-center gap-2 bg-green-600 cursor-pointer hover:bg-green-700 text-white"
-//             >
-//               + Nuevo Centro
-//             </Button>
-//           </div>
-//         </div>
-
-//         <CentroDeCostoTableComponent
-//           cloud={cloudType}
-//           onEdit={handleEdit}
-//           onDelete={handleDeleteClick}
-//         />
-
-//         {/* --- MODAL FORMULARIO --- */}
-//         <Dialog open={showForm} onOpenChange={setShowForm}>
-//           <DialogContent className="max-w-3xl">
-//             <DialogHeader>
-//               <DialogTitle>
-//                 {editingCentro ? `Editar Centro de Costo ${cloudType}` : `Nuevo Centro de Costo ${cloudType}`}
-//               </DialogTitle>
-//               <DialogDescription>
-//                 Complete los campos para {editingCentro ? "actualizar" : "crear"} el centro de costo.
-//               </DialogDescription>
-//             </DialogHeader>
-
-//             <CentroDeCostoFormComponent
-//               initialData={editingCentro ?? undefined}
-//               onSubmit={handleFormSubmit}
-//               onCancel={handleFormClose}
-//             />
-//           </DialogContent>
-//         </Dialog>
-
-//         {/* --- DIALOG CONFIRMACIÓN DE ELIMINACIÓN --- */}
-//         <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-//           <AlertDialogContent className="bg-white dark:bg-gray-800">
-//             <AlertDialogHeader>
-//               <div className="flex items-center gap-3">
-//                 <div className="h-12 w-12 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
-//                   <Trash2 className="h-6 w-6 text-red-600 dark:text-red-400" />
-//                 </div>
-//                 <div>
-//                   <AlertDialogTitle className="text-gray-900 dark:text-gray-100">
-//                     ¿Eliminar centro de costo?
-//                   </AlertDialogTitle>
-//                 </div>
-//               </div>
-//               <AlertDialogDescription className="text-gray-600 dark:text-gray-400">
-//                 Esta acción no se puede deshacer. El centro de costo será eliminado permanentemente del sistema.
-//               </AlertDialogDescription>
-//             </AlertDialogHeader>
-//             <AlertDialogFooter>
-//               <AlertDialogCancel
-//                 onClick={handleDeleteCancel}
-//                 className="bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-900 dark:text-gray-100"
-//               >
-//                 Cancelar
-//               </AlertDialogCancel>
-//               <AlertDialogAction
-//                 onClick={handleDeleteConfirm}
-//                 className="bg-red-600 hover:bg-red-700 text-white"
-//               >
-//                 Eliminar
-//               </AlertDialogAction>
-//             </AlertDialogFooter>
-//           </AlertDialogContent>
-//         </AlertDialog>
-
-//         {/* --- DIALOG ERROR --- */}
-//         <AlertDialog open={errorDialogOpen} onOpenChange={setErrorDialogOpen}>
-//           <AlertDialogContent className="bg-white dark:bg-gray-800">
-//             <AlertDialogHeader>
-//               <div className="flex items-center gap-3">
-//                 <div className="h-12 w-12 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
-//                   <AlertCircle className="h-6 w-6 text-red-600 dark:text-red-400" />
-//                 </div>
-//                 <div>
-//                   <AlertDialogTitle className="text-gray-900 dark:text-gray-100">
-//                     Error
-//                   </AlertDialogTitle>
-//                 </div>
-//               </div>
-//               <AlertDialogDescription className="text-gray-600 dark:text-gray-400">
-//                 {errorMessage}
-//               </AlertDialogDescription>
-//             </AlertDialogHeader>
-//             <AlertDialogFooter>
-//               <AlertDialogAction
-//                 onClick={() => setErrorDialogOpen(false)}
-//                 className="bg-red-600 hover:bg-red-700 text-white"
-//               >
-//                 Entendido
-//               </AlertDialogAction>
-//             </AlertDialogFooter>
-//           </AlertDialogContent>
-//         </AlertDialog>
-
-//         {/* --- DIALOG ÉXITO --- */}
-//         <AlertDialog open={successDialogOpen} onOpenChange={setSuccessDialogOpen}>
-//           <AlertDialogContent className="bg-white dark:bg-gray-800">
-//             <AlertDialogHeader>
-//               <div className="flex items-center gap-3">
-//                 <div className="h-12 w-12 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-//                   <CheckCircle className="h-6 w-6 text-green-600 dark:text-green-400" />
-//                 </div>
-//                 <div>
-//                   <AlertDialogTitle className="text-gray-900 dark:text-gray-100">
-//                     ¡Éxito!
-//                   </AlertDialogTitle>
-//                 </div>
-//               </div>
-//               <AlertDialogDescription className="text-gray-600 dark:text-gray-400">
-//                 {successMessage}
-//               </AlertDialogDescription>
-//             </AlertDialogHeader>
-//             <AlertDialogFooter>
-//               <AlertDialogAction
-//                 onClick={() => setSuccessDialogOpen(false)}
-//                 className="bg-green-600 hover:bg-green-700 text-white"
-//               >
-//                 Aceptar
-//               </AlertDialogAction>
-//             </AlertDialogFooter>
-//           </AlertDialogContent>
-//         </AlertDialog>
-//       </div>
-//     </SessionGate>
-//   );
-// };
-
 "use client";
 
 import { useState } from "react";
 import { mutate } from "swr";
-import { Search, TicketsIcon, AlertCircle, Trash2, CheckCircle, CloudDownload, Loader2 } from "lucide-react";
+import { 
+  Search, 
+  TicketsIcon, 
+  AlertCircle, 
+  Trash2, 
+  CheckCircle, 
+  CloudDownload, 
+  Loader2 
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -318,60 +29,43 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { CentroDeCostoTableComponent } from "@/components/azure/presupuesto/centro-de-costo/table/CentroDeCostoTableComponent";
-import { CentroDeCostoFormComponent, CentroCosto } from "@/components/azure/presupuesto/centro-de-costo/form/CentroDeCostoFormComponent";
+import { CentroDeCostoTableComponent, CentroCosto } from "@/components/gcp/presupuesto/centro-de-costo/table/CentroDeCostoTableComponent";
+import { CentroDeCostoFormComponent } from "@/components/gcp/presupuesto/centro-de-costo/form/CentroDeCostoFormComponent";
 import { SessionGate } from "@/components/general_presupuesto/session/SesionGate";
 
-export const CentroDeCostoComponentV2 = () => {
-  const cloudType = "azure";
+interface CloudTag {
+  id: string;
+  nombre: string;
+}
 
-  // --- Estados Originales ---
+export const CentroDeCostoComponent = () => {
+  const cloudType = "gcp";
+
   const [editingCentro, setEditingCentro] = useState<CentroCosto | null>(null);
-  const [showForm, setShowForm] = useState(false);
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [centroToDelete, setCentroToDelete] = useState<number | string | null>(null);
-  const [errorDialogOpen, setErrorDialogOpen] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
-  const [successDialogOpen, setSuccessDialogOpen] = useState(false);
-  const [successMessage, setSuccessMessage] = useState("");
+  const [showForm, setShowForm] = useState<boolean>(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState<boolean>(false);
+  const [centroToDelete, setCentroToDelete] = useState<number | null>(null);
+  const [errorDialogOpen, setErrorDialogOpen] = useState<boolean>(false);
+  const [errorMessage, setErrorMessage] = useState<string>("");
+  const [successDialogOpen, setSuccessDialogOpen] = useState<boolean>(false);
+  const [successMessage, setSuccessMessage] = useState<string>("");
 
-  // --- Nuevos Estados (Importación Dinámica) ---
-  const [showImportDialog, setShowImportDialog] = useState(false);
-  const [isImportLoading, setIsImportLoading] = useState(false);
-  const [isImporting, setIsImporting] = useState(false);
+  const [showImportDialog, setShowImportDialog] = useState<boolean>(false);
+  const [isImportLoading, setIsImportLoading] = useState<boolean>(false);
+  const [isImporting, setIsImporting] = useState<boolean>(false);
   
-  // Nomenclaturas por defecto
-  const [importKeys, setImportKeys] = useState("CentroCosto, CostCenter"); 
-  const [hasScanned, setHasScanned] = useState(false); // Controla el paso 1 vs paso 2
-  
-  const [importSearchTerm, setImportSearchTerm] = useState("");
+  const [importKeys, setImportKeys] = useState<string>("CentroCosto, CostCenter"); 
+  const [hasScanned, setHasScanned] = useState<boolean>(false); 
+  const [importSearchTerm, setImportSearchTerm] = useState<string>("");
   const [selectedImportIds, setSelectedImportIds] = useState<string[]>([]);
-  const [cloudTags, setCloudTags] = useState<{ id: string; nombre: string }[]>([]);
+  const [cloudTags, setCloudTags] = useState<CloudTag[]>([]);
 
-  if (!cloudType) {
-    return (
-      <div className="bg-white dark:bg-gray-900 rounded-xl py-16 text-center">
-        <div className="flex flex-col items-center justify-center space-y-3">
-          <Search className="w-12 h-12 text-gray-300 dark:text-gray-600" />
-          <div>
-            <p className="text-lg font-semibold">No se encontraron resultados</p>
-            <p className="text-sm text-gray-400 mt-1">Intenta con otros términos de búsqueda</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // --- Acciones Originales ---
   const handleEdit = (centro: CentroCosto) => {
-    // Sanitizamos los datos para que React no falle con inputs en "null"
-    const sanitizedCentro = {
+    const sanitizedCentro: CentroCosto = {
       ...centro,
       responsable_centro: centro.responsable_centro ?? "",
       localizacion: centro.localizacion ?? "",
-      tags: centro.tags ?? []
     };
-
     setEditingCentro(sanitizedCentro);
     setShowForm(true);
   };
@@ -385,9 +79,10 @@ export const CentroDeCostoComponentV2 = () => {
     try {
       const isEditing = !!editingCentro;
       const method = isEditing ? "PUT" : "POST";
+      
       const url = isEditing
         ? `/api/presupuesto/bridge/${cloudType}/centro-costo/${data.id_centro_costo}`
-        : `/api/presupuesto/bridge/${cloudType}/centro-costo`;
+        : `/api/presupuesto/bridge/${cloudType}/centro-costo/`;
 
       const res = await fetch(url, {
         method,
@@ -395,7 +90,34 @@ export const CentroDeCostoComponentV2 = () => {
         body: JSON.stringify(data),
       });
 
-      if (!res.ok) throw new Error(await res.text());
+      if (!res.ok) {
+        const errorText = await res.text();
+        let errorMsg = "Error inesperado en el servidor";
+        
+        try {
+          const errorJson = JSON.parse(errorText);
+          let extracted = errorJson.detail || errorJson.message || errorJson.error;
+          
+          if (Array.isArray(extracted)) {
+            errorMsg = extracted.map((e: { msg: string }) => e.msg).join(", ");
+          } else if (typeof extracted === "string") {
+            if (extracted.startsWith('{') && extracted.includes('detail')) {
+              try {
+                extracted = JSON.parse(extracted).detail;
+              } catch 
+            }
+            errorMsg = extracted;
+          } else if (extracted) {
+            errorMsg = JSON.stringify(extracted);
+          } else {
+            errorMsg = errorText;
+          }
+        } catch {
+          errorMsg = errorText || `Error HTTP: ${res.status}`;
+        }
+        
+        throw new Error(errorMsg);
+      }
 
       mutate(`/api/presupuesto/bridge/${cloudType}/centro-costo`);
       handleFormClose();
@@ -404,23 +126,37 @@ export const CentroDeCostoComponentV2 = () => {
         isEditing ? "Centro de costo actualizado exitosamente" : "Centro de costo creado exitosamente"
       );
       setSuccessDialogOpen(true);
-    } catch (err) {
-      console.error(err);
-      setErrorMessage(err instanceof Error ? err.message : "Error al guardar el centro de costo");
+    } catch (err: unknown) {
+      let cleanMessage = err instanceof Error ? err.message : "Error al guardar el centro de costo";
+      
+      try {
+        if (cleanMessage.startsWith('{') && cleanMessage.includes('detail')) {
+          cleanMessage = JSON.parse(cleanMessage).detail || cleanMessage;
+        }
+      } catch {
+
+      }
+
+      setErrorMessage(cleanMessage);
       setErrorDialogOpen(true);
     }
   };
 
-  const handleDeleteClick = (id: number | string) => {
+  const handleDeleteClick = (id: number) => {
     setCentroToDelete(id);
     setDeleteDialogOpen(true);
   };
 
   const handleDeleteConfirm = async () => {
-    if (!centroToDelete) return;
+    if (centroToDelete === null) return;
     try {
-      const res = await fetch(`/api/presupuesto/bridge/${cloudType}/centro-costo/${centroToDelete}`, { method: "DELETE" });
-      if (!res.ok) throw new Error("Error al eliminar el centro de costo");
+      const res = await fetch(`/api/presupuesto/bridge/${cloudType}/centro-costo/${centroToDelete}`, { 
+        method: "DELETE" 
+      });
+      
+      if (!res.ok) {
+        throw new Error("Error al eliminar el centro de costo");
+      }
 
       mutate(`/api/presupuesto/bridge/${cloudType}/centro-costo`);
       setDeleteDialogOpen(false);
@@ -428,7 +164,7 @@ export const CentroDeCostoComponentV2 = () => {
 
       setSuccessMessage("Centro de costo eliminado exitosamente");
       setSuccessDialogOpen(true);
-    } catch (err) {
+    } catch (err: unknown) {
       console.error(err);
       setErrorMessage(err instanceof Error ? err.message : "Error al eliminar");
       setErrorDialogOpen(true);
@@ -442,7 +178,6 @@ export const CentroDeCostoComponentV2 = () => {
     setCentroToDelete(null);
   };
 
-  // --- INTEGRACIÓN: ESCANEAR TAGS DINÁMICAMENTE ---
   const handleOpenImport = () => {
     setShowImportDialog(true);
     setHasScanned(false);
@@ -468,17 +203,17 @@ export const CentroDeCostoComponentV2 = () => {
       });
 
       const response = await fetch(
-        `/api/presupuesto/bridge/${cloudType}/obtener-centro-costo?${params.toString()}`
+        `/api/presupuesto/bridge/${cloudType}/gcp/obtener-centro-costo?${params.toString()}`
       );
 
       if (!response.ok) {
         throw new Error("Error al consultar los recursos en la nube");
       }
 
-      const data = await response.json();
+      const data: CloudTag[] = await response.json();
       setCloudTags(data);
       setHasScanned(true);
-    } catch (err) {
+    } catch (err: unknown) {
       console.error(err);
       setErrorMessage(err instanceof Error ? err.message : "Error de conexión con la nube");
       setShowImportDialog(false);
@@ -506,12 +241,11 @@ export const CentroDeCostoComponentV2 = () => {
     }
   };
 
-  // --- INTEGRACIÓN: GUARDADO MASIVO ---
   const handleImportSubmit = async () => {
     setIsImporting(true);
     try {
       const response = await fetch(
-        `/api/presupuesto/bridge/${cloudType}/centro-costo/importar-masivo`,
+        `/api/${cloudType}/gcp/centro-costo/importar-masivo`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -519,7 +253,9 @@ export const CentroDeCostoComponentV2 = () => {
         }
       );
 
-      if (!response.ok) throw new Error("Ocurrió un error durante la importación masiva");
+      if (!response.ok) {
+        throw new Error("Ocurrió un error durante la importación masiva");
+      }
 
       const result = await response.json();
       
@@ -527,11 +263,11 @@ export const CentroDeCostoComponentV2 = () => {
       setShowImportDialog(false);
       
       setSuccessMessage(
-        `${result.mensaje}.\nImportados: ${result.estadisticas.importados_exitosamente}\nOmitidos (ya existían): ${result.estadisticas.omitidos_por_duplicidad_o_error}`
+        `${result.mensaje}.\nImportados: ${result.estadisticas?.importados_exitosamente ?? 0}\nOmitidos (ya existían): ${result.estadisticas?.omitidos_por_duplicidad_o_error ?? 0}`
       );
       setSuccessDialogOpen(true);
       
-    } catch (err) {
+    } catch (err: unknown) {
       console.error(err);
       setErrorMessage(err instanceof Error ? err.message : "Error al importar");
       setErrorDialogOpen(true);
@@ -540,7 +276,6 @@ export const CentroDeCostoComponentV2 = () => {
     }
   };
 
-  // --- Render ---
   return (
     <SessionGate>
       <div className="w-full min-w-0 space-y-6 p-6">
@@ -552,7 +287,7 @@ export const CentroDeCostoComponentV2 = () => {
               </div>
               <div>
                 <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
-                  Centros de costo {cloudType}
+                  Centros de costo {cloudType.toUpperCase()}
                 </h1>
               </div>
             </div>
@@ -586,12 +321,11 @@ export const CentroDeCostoComponentV2 = () => {
           onDelete={handleDeleteClick}
         />
 
-        {/* --- MODAL FORMULARIO --- */}
         <Dialog open={showForm} onOpenChange={setShowForm}>
           <DialogContent className="max-w-3xl">
             <DialogHeader>
               <DialogTitle>
-                {editingCentro ? `Editar Centro de Costo ${cloudType}` : `Nuevo Centro de Costo ${cloudType}`}
+                {editingCentro ? `Editar Centro de Costo ${cloudType.toUpperCase()}` : `Nuevo Centro de Costo ${cloudType.toUpperCase()}`}
               </DialogTitle>
               <DialogDescription>
                 Complete los campos para {editingCentro ? "actualizar" : "crear"} el centro de costo.
@@ -599,14 +333,13 @@ export const CentroDeCostoComponentV2 = () => {
             </DialogHeader>
 
             <CentroDeCostoFormComponent
-              initialData={editingCentro ?? undefined}
-              onSubmit={handleFormSubmit}
+              initialData={editingCentro ? { ...editingCentro, id_centro_costo: String(editingCentro.id_centro_costo) } : undefined}
+              onSubmit={(data) => handleFormSubmit({ ...data, id_centro_costo: Number(data.id_centro_costo) })}
               onCancel={handleFormClose}
             />
           </DialogContent>
         </Dialog>
 
-        {/* --- MODAL DE IMPORTACIÓN CLOUD DINÁMICO --- */}
         <Dialog open={showImportDialog} onOpenChange={(open) => !isImporting && setShowImportDialog(open)}>
           <DialogContent className="max-w-2xl bg-white dark:bg-gray-900">
             <DialogHeader>
@@ -615,7 +348,7 @@ export const CentroDeCostoComponentV2 = () => {
                 Importar Centros de Costo
               </DialogTitle>
               <DialogDescription>
-                Define las nomenclaturas de tags que usas en {cloudType} para encontrar tus centros de costo.
+                Define las nomenclaturas de tags que usas en {cloudType.toUpperCase()} para encontrar tus centros de costo.
               </DialogDescription>
             </DialogHeader>
 
@@ -704,7 +437,7 @@ export const CentroDeCostoComponentV2 = () => {
                                 Tag: {tag.nombre}
                               </span>
                               <span className="text-xs text-gray-500 dark:text-gray-400">
-                                Encontrado en recursos de {cloudType}
+                                Encontrado en recursos de {cloudType.toUpperCase()}
                               </span>
                             </div>
                           </label>
@@ -745,7 +478,6 @@ export const CentroDeCostoComponentV2 = () => {
           </DialogContent>
         </Dialog>
 
-        {/* --- DIALOG CONFIRMACIÓN DE ELIMINACIÓN --- */}
         <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
           <AlertDialogContent className="bg-white dark:bg-gray-800">
             <AlertDialogHeader>
@@ -780,7 +512,6 @@ export const CentroDeCostoComponentV2 = () => {
           </AlertDialogContent>
         </AlertDialog>
 
-        {/* --- DIALOG ERROR --- */}
         <AlertDialog open={errorDialogOpen} onOpenChange={setErrorDialogOpen}>
           <AlertDialogContent className="bg-white dark:bg-gray-800">
             <AlertDialogHeader>
@@ -809,7 +540,6 @@ export const CentroDeCostoComponentV2 = () => {
           </AlertDialogContent>
         </AlertDialog>
 
-        {/* --- DIALOG ÉXITO --- */}
         <AlertDialog open={successDialogOpen} onOpenChange={setSuccessDialogOpen}>
           <AlertDialogContent className="bg-white dark:bg-gray-800">
             <AlertDialogHeader>

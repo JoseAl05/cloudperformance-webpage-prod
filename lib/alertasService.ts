@@ -56,6 +56,15 @@ export const alertasService = {
         });
         if (!response.ok) throw new Error('Error al eliminar alerta');
         return await response.json();
-    }
+    },
+
+    getHistorialAlerta: async (id: string, provider: string): Promise<unknown> => {
+        const response = await fetch(`${NEXT_INTERNAL_API}/historial/${id}?cloud=${provider}`, {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' }
+        });
+        if (!response.ok) throw new Error('Error al cargar el historial de la alerta');
+        return await response.json();
+    },
    
 };

@@ -5,7 +5,8 @@ import { Pencil, Trash2, Loader2 } from "lucide-react";
 export const getAnomalyAlertsColumns = (
     handleEditClick: (alerta: AnomalyConfig) => void,
     handleDelete: (id: string) => void,
-    isDeleting: string | null
+    isDeleting: string | null,
+    onInspectAlert: (alertaId: string, cloudProvider: string) => void
 ): ColumnDef<AnomalyConfig>[] => [
     {
         accessorKey: "project_id",
@@ -56,6 +57,42 @@ export const getAnomalyAlertsColumns = (
         }
     },
     {
+        id: "estado",
+        header: () => <div className="text-center">Estado</div>,
+        cell: ({ row }) => {
+            const a = row.original;
+            const isSpike = a.status === "spike_detected";
+
+            return (
+                <div className="flex flex-col items-center justify-center gap-1.5">
+                    {isSpike ? (
+                        <button 
+                            onClick={() => {
+                                if (a._id && a.cloud_provider) {
+                                    onInspectAlert(a._id, a.cloud_provider);
+                                }
+                            }}
+                            className="bg-purple-50 text-purple-700 px-3 py-1 rounded-full text-[11px] font-bold border border-purple-200 shadow-sm hover:bg-purple-100 transition-colors flex items-center gap-1 cursor-pointer"
+                            title="Ver Causa Raíz de la Anomalía"
+                        >
+                            📈 Variación Detectada <span className="text-[10px] opacity-70 underline ml-1">Ver detalle</span>
+                        </button>
+                    ) : (
+                        <span className="bg-emerald-50 text-emerald-700 px-3 py-1 rounded-full text-[11px] font-bold border border-emerald-200 shadow-sm">
+                            ✅ Normal
+                        </span>
+                    )}
+                    
+                    {a.last_triggered && isSpike && (
+                        <span className="text-[10px] text-gray-500 font-medium">
+                            Detectado: {new Date(a.last_triggered).toLocaleDateString('es-CL')}
+                        </span>
+                    )}
+                </div>
+            );
+        }
+    },
+    {
         id: "acciones",
         header: () => <div className="text-center">Acciones</div>,
         cell: ({ row }) => (
@@ -63,6 +100,7 @@ export const getAnomalyAlertsColumns = (
                 <button 
                     onClick={() => handleEditClick(row.original)} 
                     className="p-2 text-gray-400 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors"
+                    title="Editar Regla"
                 >
                     <Pencil className="w-4 h-4" />
                 </button>
@@ -72,6 +110,7 @@ export const getAnomalyAlertsColumns = (
                     }} 
                     disabled={isDeleting === row.original._id} 
                     className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
+                    title="Eliminar Regla"
                 >
                     {isDeleting === row.original._id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
                 </button>

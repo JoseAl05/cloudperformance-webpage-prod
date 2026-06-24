@@ -5,7 +5,8 @@ import { Pencil, Trash2, Loader2 } from "lucide-react";
 export const getBillingAlertsColumns = (
     handleEditClick: (alerta: AlertConfig) => void,
     handleDelete: (id: string) => void,
-    isDeleting: string | null
+    isDeleting: string | null,
+    onInspectAlert: (alertaId: string, cloudProvider: string) => void
 ): ColumnDef<AlertConfig>[] => [
     {
         accessorKey: "project_id",
@@ -54,13 +55,21 @@ export const getBillingAlertsColumns = (
             return (
                 <div className="flex flex-col items-center justify-center gap-1.5">
                     {isExceeded ? (
-                        <span className="bg-red-50 text-red-700 px-3 py-1 rounded-full text-[11px] font-bold border border-red-200 shadow-sm">
-                            🚨 Límite Superado
-                        </span>
+                        <button 
+                            onClick={() => onInspectAlert(a._id!, a.cloud_provider)}
+                            className="bg-red-50 text-red-700 px-3 py-1 rounded-full text-[11px] font-bold border border-red-200 shadow-sm hover:bg-red-100 transition-colors flex items-center gap-1 cursor-pointer"
+                            title="Ver Análisis de Causa Raíz"
+                        >
+                            🚨 Límite Superado <span className="text-[10px] opacity-70 underline ml-1">Ver detalle</span>
+                        </button>
                     ) : hasWarnings ? (
-                        <span className="bg-amber-50 text-amber-700 px-3 py-1 rounded-full text-[11px] font-bold border border-amber-200 shadow-sm">
-                            ⚠️ Precaución {Math.max(...warnings.filter(w => w !== 100))}%
-                        </span>
+                        <button 
+                            onClick={() => onInspectAlert(a._id!, a.cloud_provider)}
+                            className="bg-amber-50 text-amber-700 px-3 py-1 rounded-full text-[11px] font-bold border border-amber-200 shadow-sm hover:bg-amber-100 transition-colors flex items-center gap-1 cursor-pointer"
+                            title="Ver Análisis de Causa Raíz"
+                        >
+                            ⚠️ Precaución {Math.max(...warnings.filter(w => w !== 100))}% <span className="text-[10px] opacity-70 underline ml-1">Ver detalle</span>
+                        </button>
                     ) : (
                         <span className="bg-emerald-50 text-emerald-700 px-3 py-1 rounded-full text-[11px] font-bold border border-emerald-200 shadow-sm">
                             ✅ Óptimo
