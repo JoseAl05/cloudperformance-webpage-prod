@@ -1,7 +1,7 @@
-import { MainViewPresupuestoComponent } from '@/components/azure/presupuesto/MainViewPresupuestoComponent';
+import { MainViewPresupuestoComponent } from '@/components/azure/presupuesto-v2/MainViewPresupuestoComponent';
 import { Suspense } from 'react';
 
-export default function DashboardAwsEventsPage() {
+export default function DashboardAzureEventsPage() {
     return (
         <div className=''>
             <Suspense fallback={<div>Cargando...</div>}>

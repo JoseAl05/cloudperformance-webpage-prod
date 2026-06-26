@@ -1,4 +1,4 @@
-import { MainViewPresupuestoComponent } from '@/components/azure/presupuesto/MainViewPresupuestoComponent';
+import { MainViewPresupuestoComponent } from '@/components/aws/presupuesto-v2/MainViewPresupuestoComponent';
 import { Suspense } from 'react';
 
 export default function DashboardAwsPresupuestoPage() {

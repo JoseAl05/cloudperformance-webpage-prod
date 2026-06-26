@@ -1,11 +1,11 @@
-import { MainViewCostoVsPresupuestoComponent } from '@/components/azure/presupuesto/costo-vs-presupuesto/MainViewCostoVsPresupuestoComponent';
+import { MainViewCostoVsPresupuestoAzure } from '@/components/azure/presupuesto-v2/costo-vs-presupuesto/MainViewCostoVsPresupuestoComponent';
 import { Suspense } from 'react';
 
 export default function DashboardPresupuestoPage() {
     return (
         <div className=''>
             <Suspense fallback={<div>Cargando...</div>}>
-                <MainViewCostoVsPresupuestoComponent />
+                <MainViewCostoVsPresupuestoAzure />
             </Suspense>
         </div>
     )
