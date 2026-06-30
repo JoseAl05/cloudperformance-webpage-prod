@@ -44,7 +44,7 @@ export const RecommenderComponent = ({
     )
 
     const allAiRecommendations = useSWR(
-        (category && priority) ? `/api/gcp/bridge/gcp/ai_recommendations/get_recommendations?date_from=${startDateFormatted}&date_to=${endDateFormatted}` : null,
+        (category && priority) ? `/api/gcp/bridge/gcp/ai_recommendations/get_ai_recommendations?date_from=${startDateFormatted}&date_to=${endDateFormatted}` : null,
         fetcher
     )
 
