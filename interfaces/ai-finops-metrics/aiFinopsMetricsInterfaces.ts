@@ -46,6 +46,7 @@ interface BaseMetricAnalysis {
   priority: Priority;
   risk: RiskLevel;
   assigned_to: string;
+  metric_potential_savings_usd: number;
   references: AiFinopsMetricsReferences[];
   metric_name: string;
 }
@@ -88,6 +89,7 @@ export interface AiFinopsMetrics {
   executive_summary: AiFinopsMetricsExecutiveSummary;
   metrics_summary: AiFinopsMetricsSummary;
   metrics_analysis: AiFinopsMetricsAnalysis;
+  idle_resources?: IdleResources;
   spending_forecast: AiFinopsMetricsForecast;
 }
 
@@ -127,15 +129,25 @@ export interface AiFinopsMetricsAnalysis {
   maturity_assessment: MaturityAssessmentAnalysis;
 }
 
+export interface OpportunityCostRecommendationAnalysis {
+  recommendation_summary: string;
+  oci_analysis: string;
+}
+
 export interface OpportunityCostAnalysis extends BaseMetricAnalysis {
   total_potential_savings_usd: number;
-  savings_threshold_rule: string;
+  total_inaction_costs_usd: number;
+  recommendations_analysis: OpportunityCostRecommendationAnalysis[]
 }
 
 export interface CostVolatilityAnalysis extends BaseMetricAnalysis {
   volatility_percentage: number;
   volatility_threshold: string;
-  anomalous_resources: {
+  anomalous_services?: {
+    services_flagged_count: number;
+    services_analyzed_count: number;
+  };
+  anomalous_resources?: {
     services_flagged_count: number;
     services_analyzed_count: number;
   };
@@ -257,4 +269,29 @@ export interface AiFinopsMetricsForecastAiInterpretation {
 export interface AiFinopsMetricsForecast {
   deterministic: AiFinopsMetricsForecastDeterministic;
   ai_interpretation: AiFinopsMetricsForecastAiInterpretation;
+}
+
+
+export interface IdleDisk {
+  id: string;
+  name: string;
+  managed_by: string | null;
+  disk_state: string;
+  disk_size_gb: number;
+  reason: string;
+  monthly_cost_in_usd: number;
+}
+
+export interface IdlePublicIp {
+  id: string;
+  name: string;
+  allocation_method: string | null;
+  monthly_cost_in_usd: number;
+}
+
+export interface IdleResources {
+  metric: string;
+  idle_disks: IdleDisk[];
+  idle_public_ips: IdlePublicIp[];
+  total_savings_usd: number;
 }

@@ -5,10 +5,11 @@ import { GeneralStatus } from '@/components/ai-finops-metrics/general-status/Gen
 import { AnalyzedMetricsSummary } from '@/components/ai-finops-metrics/summary/AnalyzedMetricsSummary';
 import { FinancialSummary } from '@/components/ai-finops-metrics/summary/FinancialSummary';
 import { TechnicalSummary } from '@/components/ai-finops-metrics/summary/TechnicalSummary';
+import { IdleResources } from '@/components/ai-finops-metrics/summary/IdleResources';
 import { MessageCard } from '@/components/aws/cards/MessageCards';
 import { LoaderComponent } from '@/components/general_aws/LoaderComponent';
 import { AiFinopsMetrics } from '@/interfaces/ai-finops-metrics/aiFinopsMetricsInterfaces'
-import { AlertCircle, AtomIcon, Book, DollarSign, Info, ToolCase } from 'lucide-react';
+import { AlertCircle, AtomIcon, Book, DollarSign, HardDrive, Info, ToolCase } from 'lucide-react';
 import useSWR from 'swr';
 
 interface AiFinopsMetricsComponentProps {
@@ -128,6 +129,14 @@ export const AiFinopsMetricsComponent = ({ startDate, endDate, cloud }: AiFinops
                     </div>
                     <GeneralStatus data={reportData} />
                 </section>
+
+                {/* <section>
+                    <div className="flex items-center gap-2 mb-4">
+                        <HardDrive className="h-6 w-6 text-blue-500" />
+                        <h2 className="text-2xl font-semibold tracking-tight">Recursos Inactivos</h2>
+                    </div>
+                    <IdleResources data={reportData} />
+                </section> */}
 
                 <section>
                     <div className="flex items-center gap-2 mb-4">
