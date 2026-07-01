@@ -148,7 +148,7 @@ const cleanText = (text: string) => {
 };
 
 const computeRecommendationGroupId = (resource: AiRecommendationResource, cloudProvider: string): string => {
-    return `${cloudProvider}::${resource.resource_type}::${resource.recommendation_subtype}`;
+    return resource.rec_group_id;
 };
 
 const getRiskWeight = (level: string): number => {
