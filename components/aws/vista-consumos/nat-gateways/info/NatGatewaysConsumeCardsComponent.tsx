@@ -173,7 +173,7 @@ export const NatGatewaysConsumeCardsComponent = ({
                 <StatCard
                     title="Eficiencia Global"
                     value={`${efficiency.global_efficiency}`}
-                    description={`Promedio ponderado de eficiencia de cantidad de datos de red enviados a VPC basado en ${efficiency.metrics_detail[0].samples} muestras.`}
+                    description={efficiency.metrics_detail.length !== 0 ? `Promedio ponderado de eficiencia de cantidad de datos de red enviados a VPC basado en ${efficiency.metrics_detail[0].samples} muestras. ` : 'No hay métricas de eficiencia disponibles.'}
                     icon={Zap}
                     colorClass={getEfficiencyColor(efficiency.global_efficiency_score)}
                     large
