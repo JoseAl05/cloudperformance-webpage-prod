@@ -2,7 +2,7 @@
 
 import { Card, CardContent } from '@/components/ui/card';
 import { AllStorageCapacity } from '@/interfaces/vista-blob-vs-storage/allStorageCapacityInterfaces'
-import { bytesToGB, formatBytes } from '@/lib/bytesToMbs';
+import { bytesToGB, formatCapacity } from '@/lib/bytesToMbs';
 import { Cylinder, Database, File, MessageSquare, Table } from 'lucide-react';
 import { ForwardRefExoticComponent, RefAttributes } from 'react';
 import { LucideProps } from 'lucide-react';
@@ -56,7 +56,7 @@ export const BlobVsStorageCardsComponent = ({ strgCapacityData }: BlobVsStorageC
         return {
             key: s.metric_name,
             label,
-            value: formatBytes(s.total_capacity ?? 0),
+            value: formatCapacity(s.total_capacity ?? 0),
             vsSA,
             Icon,
             border
@@ -77,7 +77,7 @@ export const BlobVsStorageCardsComponent = ({ strgCapacityData }: BlobVsStorageC
                             Capacidad Utilizada Storage Account
                         </h3>
                         <p className='text-4xl font-extrabold tracking-tight'>
-                            {formatBytes(usedCapacity)}
+                            {formatCapacity(usedCapacity)}
                         </p>
                         <p className='text-xs text-muted-foreground'>
                             Base de comparación para los servicios File, Queue, Table y Blob.
