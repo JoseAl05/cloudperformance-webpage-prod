@@ -20,6 +20,8 @@ import {
     SplitSquareHorizontal,
     Bell,
     ShieldCheck,
+    Cable,
+    Bot,
 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { usePathname } from 'next/navigation'
@@ -145,7 +147,7 @@ export const SidebarProfileComponent = ({
                                         getMenuItemClasses(pathname.startsWith('/perfil/conectores'))
                                     )}
                                 >
-                                    <Cloud className="h-5 w-5 text-blue-500" />
+                                    <Cable className="h-5 w-5 text-blue-500" />
                                     <span className="text-sm font-medium">Conectores</span>
                                 </Link>
                             </SidebarMenuButton>
@@ -159,6 +161,18 @@ export const SidebarProfileComponent = ({
                                 >
                                     <Cloud className="h-5 w-5 text-blue-500" />
                                     <span className="text-sm font-medium">Nubes</span>
+                                </Link>
+                            </SidebarMenuButton>
+                            <SidebarMenuButton asChild>
+                                <Link
+                                    href='/perfil/servicios-ia'
+                                    className={cn(
+                                        'flex items-center gap-3 px-3 py-2 rounded-md cursor-pointer transition-colors duration-150',
+                                        getMenuItemClasses(pathname.startsWith('/perfil/servicios-ia'))
+                                    )}
+                                >
+                                    <Bot className="h-5 w-5 text-blue-500" />
+                                    <span className="text-sm font-medium">Servicios IA</span>
                                 </Link>
                             </SidebarMenuButton>
                             {/* <SidebarMenuButton asChild>
@@ -210,7 +224,7 @@ export const SidebarProfileComponent = ({
 
                             {/* =================================================== */}
                             {/* NUEVA SECCIÓN: LICENCIAS ONPREMISES */}
-                            {/* =================================================== */}                            
+                            {/* =================================================== */}
                             {canAccessOPLicencias && (
                                 <SidebarMenuButton asChild>
                                     <Link

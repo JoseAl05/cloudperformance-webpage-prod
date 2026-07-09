@@ -7,7 +7,7 @@ import { AUTH_COOKIE } from '@/lib/cookies';
 import { verifyAuthToken } from '@/lib/auth';
 
 
-export default async function DashboardLayout({
+export default async function DashboardAIServicesLayout({
     children,
 }: Readonly<{
     children: React.ReactNode;
