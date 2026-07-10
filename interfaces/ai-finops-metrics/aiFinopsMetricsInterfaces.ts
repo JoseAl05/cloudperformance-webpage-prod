@@ -93,6 +93,8 @@ export interface AiFinopsMetrics {
   spending_forecast: AiFinopsMetricsForecast;
 }
 
+
+
 export interface AiFinopsMetricsMetadata {
   cloud_provider: string;
   data_last_sync_time: string;
@@ -253,6 +255,11 @@ export interface AiFinopsMetricsForecastDeterministic {
   confidence_level: string;
 }
 
+export interface AiFinopsMetricsForecastDeterministicIncomplete {
+  status: string;
+  data_points_analyzed: number;
+}
+
 export interface AiFinopsMetricsForecastAiInterpretation {
   strategy_used: string;
   formulas_used: {
@@ -267,7 +274,7 @@ export interface AiFinopsMetricsForecastAiInterpretation {
 }
 
 export interface AiFinopsMetricsForecast {
-  deterministic: AiFinopsMetricsForecastDeterministic;
+  deterministic: AiFinopsMetricsForecastDeterministic | AiFinopsMetricsForecastDeterministicIncomplete;
   ai_interpretation: AiFinopsMetricsForecastAiInterpretation;
 }
 

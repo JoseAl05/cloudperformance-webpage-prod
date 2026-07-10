@@ -333,6 +333,7 @@ const ResourceCard = ({ resource, onStatusChange, onOpenHistory }: ResourceCardP
         ? `Múltiples recursos afectados (${resource_name.length})`
         : resource_type.toUpperCase();
 
+
     return (
         <div className="border rounded-xl overflow-hidden shadow-sm transition-all hover:shadow-md">
             <Button
@@ -364,7 +365,7 @@ const ResourceCard = ({ resource, onStatusChange, onOpenHistory }: ResourceCardP
                         <span className="text-xs font-normal text-slate-500 dark:text-slate-400 mb-1">Ahorro Est.</span>
                         <span className="text-sm font-bold text-emerald-700 dark:text-emerald-400 flex items-center gap-1">
                             <DollarSign className="h-4 w-4" />
-                            {formatCurrency(impact_matrix.savings_value, impact_matrix.currency)}
+                            {formatCurrency(impact_matrix.savings_value, impact_matrix.currency || 'USD')}
                         </span>
                     </div>
                     <div className="flex flex-col items-end">
@@ -803,6 +804,7 @@ export const AiRecommendationsComponent = ({ data, cloud }: AiRecommendationsCom
         open: false,
         recGroupId: null,
     });
+    console.log(data)
 
     let STATUS_ENDPOINT = '';
 

@@ -646,9 +646,79 @@ const trendLabel = (direction: string) => {
 };
 
 const ForecastDetail = ({ forecastData }: { forecastData: AiFinopsMetrics['spending_forecast'] }) => {
-    console.log(forecastData);
     const det = forecastData.deterministic;
     const ai = forecastData.ai_interpretation;
+
+    if ('status' in det) {
+        return (
+            <div className="space-y-6 animate-in fade-in zoom-in-95 duration-300">
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                            <LineChart className="h-6 w-6 text-amber-500" />
+                            Proyección de Gasto
+                        </CardTitle>
+
+                        <CardDescription>
+                            No hay suficiente información histórica para generar
+                            una proyección determinística.
+                        </CardDescription>
+                    </CardHeader>
+
+                    <CardContent>
+                        <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 dark:border-amber-800 dark:bg-amber-950/20">
+                            <div className="space-y-2">
+                                <p className="font-medium text-amber-800 dark:text-amber-300">
+                                    Forecast no disponible
+                                </p>
+
+                                <p className="text-sm text-amber-700 dark:text-amber-400">
+                                    Se analizaron {det.data_points_analyzed} puntos
+                                    de datos, pero no son suficientes para generar
+                                    una predicción confiable.
+                                </p>
+
+                                <Badge variant="outline">
+                                    Estado: {det.status}
+                                </Badge>
+                            </div>
+                        </div>
+                        <div className="grid md:grid-cols-2 gap-6">
+                            <ForecastCard
+                                periods={ai.short_term_forecast}
+                                // interval={det.interval_80_usd['30d']}
+                                title="Corto Plazo"
+                                icon={Zap}
+                                iconColor="text-amber-500"
+                            />
+                            <ForecastCard
+                                periods={ai.long_term_forecast}
+                                // interval={det.interval_80_usd['90d']}
+                                title="Largo Plazo"
+                                icon={BarChart3}
+                                iconColor="text-indigo-500"
+                            />
+                        </div>
+                        <div className="p-4 rounded-lg border bg-muted/20">
+                            <h4 className="font-semibold text-sm mb-2 text-foreground">Estrategia Utilizada</h4>
+                            <div className="text-sm text-muted-foreground">
+                                <MarkdownText content={ai.strategy_used} />
+                            </div>
+                        </div>
+                        <div className="p-4 rounded-lg border border-blue-200 bg-blue-50 dark:bg-blue-950/20 dark:border-blue-800">
+                            <h4 className="font-semibold text-sm mb-2 text-blue-800 dark:text-blue-300 flex items-center gap-2">
+                                <Lightbulb className="h-4 w-4" /> Recomendación del Modelo
+                            </h4>
+                            <div className="text-sm text-blue-700 dark:text-blue-400">
+                                <MarkdownText content={ai.recommendation} />
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+            </div>
+        );
+    }
+
     const recommendedLabel = MODEL_LABELS[det.recommended_method] ?? det.recommended_method;
 
     return (
@@ -751,18 +821,18 @@ const ForecastDetail = ({ forecastData }: { forecastData: AiFinopsMetrics['spend
 
                         {(det.preprocessing.outlier_dates_adjusted.length > 0 ||
                             det.preprocessing.trailing_days_dropped > 0) && (
-                            <div className="p-3 rounded-lg border bg-muted/10 text-xs text-muted-foreground flex flex-wrap items-center gap-x-4 gap-y-1">
-                                <span className="flex items-center gap-1 font-medium text-foreground">
-                                    <FilterX className="h-3.5 w-3.5" /> Preprocesamiento
-                                </span>
-                                <span>Días finales descartados: {det.preprocessing.trailing_days_dropped}</span>
-                                {det.preprocessing.outlier_dates_adjusted.length > 0 && (
-                                    <span>
-                                        Anomalías ajustadas: {det.preprocessing.outlier_dates_adjusted.join(', ')}
+                                <div className="p-3 rounded-lg border bg-muted/10 text-xs text-muted-foreground flex flex-wrap items-center gap-x-4 gap-y-1">
+                                    <span className="flex items-center gap-1 font-medium text-foreground">
+                                        <FilterX className="h-3.5 w-3.5" /> Preprocesamiento
                                     </span>
-                                )}
-                            </div>
-                        )}
+                                    <span>Días finales descartados: {det.preprocessing.trailing_days_dropped}</span>
+                                    {det.preprocessing.outlier_dates_adjusted.length > 0 && (
+                                        <span>
+                                            Anomalías ajustadas: {det.preprocessing.outlier_dates_adjusted.join(', ')}
+                                        </span>
+                                    )}
+                                </div>
+                            )}
 
                         {/* {ai.formulas_used?.length > 0 && (
                             <div className="p-4 rounded-lg border bg-muted/20">
