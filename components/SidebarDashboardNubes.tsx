@@ -65,6 +65,7 @@ import { usePathname } from 'next/navigation'
 import Image from 'next/image'
 import { useTheme } from 'next-themes'
 import Link from 'next/link'
+
 const useMenuStyles = () => {
     const { resolvedTheme } = useTheme()
 
@@ -88,7 +89,7 @@ const useMenuStyles = () => {
     return { getMenuItemClasses, getIconClasses }
 }
 
-export const SidebarComponent = ({
+export const SidebarDashboardNubesComponent = ({
     ...props
 }: React.ComponentProps<typeof Sidebar>) => {
     const pathname = usePathname();
@@ -99,17 +100,19 @@ export const SidebarComponent = ({
     const [isAzure, setIsAzure] = useState(false);
     const [isAws, setIsAws] = useState(false);
     const [isGcp, setIsGcp] = useState(false);
+    const [isAmazonBedrock, setIsAmazonBedrock] = useState(false);
 
     const provider = useMemo(() => {
         if (!pathname) return null
         if (pathname.startsWith('/aws')) return 'aws'
         if (pathname.startsWith('/azure')) return 'azure'
         if (pathname.startsWith('/gcp')) return 'gcp'
+        if (pathname.startsWith('/amazon-bedrock')) return 'amazon-bedrock'
         return null
     }, [pathname])
 
-
-    const topFacturaciones = [
+    // AWS
+    const awsTopFacturaciones = [
         { label: 'Top Facturaciones por Región', href: '/aws/funciones/top-dolares-region', icon: Globe2, color: 'text-purple-500' },
         { label: 'Top Facturaciones por SO', href: '/aws/funciones/top-dolares-so', icon: Monitor, color: 'text-purple-500' },
         { label: 'Top Facturaciones por Tipo de Instancia', href: '/aws/funciones/top-dolares-por-tipo-de-instancia', icon: Server, color: 'text-teal-600' },
@@ -120,7 +123,7 @@ export const SidebarComponent = ({
         { label: 'Top Recursos', href: '/aws/funciones/top-recursos', icon: Stars, color: 'text-blue-500' },
     ]
 
-    const consumoHorario = [
+    const awsConsumoHorario = [
         { label: 'Instancias EC2', href: '/aws/funciones/consumo-ec2-horario-habil-vs-no-habil', icon: Clock, color: 'text-green-500' },
         { label: 'Instancias EC2 AutoscalingGroups', href: '/aws/funciones/consumo-ec2-autoscaling-groups-horario-habil-vs-no-habil', icon: TrendingUp, color: 'text-green-500' },
         { label: 'Instancias EC2 Nodos EKS', href: '/aws/funciones/consumo-ec2-nodos-eks-horario-habil-vs-no-habil', icon: Boxes, color: 'text-green-500' },
@@ -131,7 +134,7 @@ export const SidebarComponent = ({
         { label: 'Instancias RDS MariaDB', href: '/aws/funciones/consumo-rds-mariadb-horario-habil-vs-no-habil', icon: Database, color: 'text-green-500' },
     ]
 
-    const consumoLoc = [
+    const awsConsumoLoc = [
         { label: 'Instancias EC2', href: '/aws/funciones/avg-uso-loc-inst-ec2', icon: MapPin, color: 'text-green-500' },
         { label: 'Instancias RDS Postgresql', href: '/aws/funciones/avg-uso-loc-inst-rds-pg', icon: Database, color: 'text-green-500' },
         { label: 'Instancias RDS Mysql', href: '/aws/funciones/avg-uso-loc-inst-rds-mysql', icon: Database, color: 'text-green-500' },
@@ -140,7 +143,7 @@ export const SidebarComponent = ({
         { label: 'Instancias RDS MariaDB', href: '/aws/funciones/avg-uso-loc-inst-rds-mariadb', icon: Database, color: 'text-green-500' },
     ]
 
-    const infrausedAws = [
+    const awsInfraused = [
         //{ label: 'Instancias EC2', icon: Computer, href: '/aws/recursos/infrautilizadas/ec2' },
         { label: 'Instancias EC2', icon: Computer, href: '/aws/funciones/ec2-no-utilizados' },
         { label: 'Instancias EC2 AutoscalingGroups', icon: Computer, href: '/aws/funciones/ec2-no-utilizados/autoscaling' },
@@ -151,7 +154,7 @@ export const SidebarComponent = ({
         { label: 'Route 53', icon: Workflow, href: '/aws/funciones/routes53-no-utilizados' }
     ]
 
-    const consumeSubItems = [
+    const awsConsumeSubItems = [
         { label: 'Instancias EC2', icon: Computer, href: '/aws/consumos/ec2' },
         { label: 'Instancias EC2 AutoscalingGroups', icon: Computer, href: '/aws/consumos/asg' },
         { label: 'Instancias EC2 Nodos EKS', icon: Computer, href: '/aws/consumos/eks' },
@@ -164,7 +167,7 @@ export const SidebarComponent = ({
         { label: 'Loadbalancers V2', icon: Workflow, href: '/aws/consumos/elbv2' }
     ]
 
-    const AwsRoutes = {
+    const awsRoutes = {
         routes: [
             { label: 'Inicio', icon: LayoutDashboard, href: '/aws' },
             { label: 'Tendencia Facturación', icon: Grid2X2, href: '/aws/facturacion/tendencia-facturacion' },
@@ -186,19 +189,20 @@ export const SidebarComponent = ({
             { label: 'Instancias RDS Oracle', icon: Database, href: '/aws/recursos/instancias-rds-oracle', color: 'text-red-600' },
             { label: 'Instancias RDS MariaDB', icon: Database, href: '/aws/recursos/instancias-rds-mariadb', color: 'text-amber-600' },
         ],
-        consumes: [{ label: 'Consumos', subItems: consumeSubItems, icon: Zap }],
+        consumes: [{ label: 'Consumos', subItems: awsConsumeSubItems, icon: Zap }],
         funciones: [
-            { label: 'Top Facturaciones', subItems: topFacturaciones, icon: Zap },
-            { label: 'Consumo horario hábil vs no hábil', subItems: consumoHorario, icon: Clock },
-            { label: 'Consumo por Localización', subItems: consumoLoc, icon: Map },
-            { label: 'Recursos no utilizados', subItems: infrausedAws, icon: TrendingDown },
+            { label: 'Top Facturaciones', subItems: awsTopFacturaciones, icon: Zap },
+            { label: 'Consumo horario hábil vs no hábil', subItems: awsConsumoHorario, icon: Clock },
+            { label: 'Consumo por Localización', subItems: awsConsumoLoc, icon: Map },
+            { label: 'Recursos no utilizados', subItems: awsInfraused, icon: TrendingDown },
             { label: 'Spot vs Vm', href: '/aws/funciones/spot-vs-vm', icon: Zap },
             { label: 'Top S3 Buckets', href: '/aws/funciones/top-s3-buckets', icon: Box },
             { label: 'Variación consumo de recursos', href: '/aws/funciones/variacion-tendencia-uso-de-recursos', icon: Diff },
         ],
     }
 
-    const infrausedAzure = [
+    // AZURE
+    const azureInfraused = [
         { label: 'VM', icon: Computer, href: '/azure/funciones/unused-resources/vm' },
         { label: 'VMSS', icon: Computer, href: '/azure/funciones/unused-resources/vmss' },
         { label: 'Extensiones VM', icon: Puzzle, href: '/azure/funciones/unused-resources/extensions' },
@@ -206,15 +210,15 @@ export const SidebarComponent = ({
         { label: 'Applications Gateway', icon: Workflow, href: '/azure/funciones/apps-gateway-infrautilizados' },
         { label: 'Traffic Managers', icon: Workflow, href: '/azure/funciones/traffic-managers-infrautilizados' }
     ]
-    const consumeSubItemsAzure = [
+
+    const azureConsumeSubItems = [
         { label: 'Maquinas Virtuales', icon: Computer, href: '/azure/consumo-vm' },
         { label: 'Base de Datos', icon: Database, href: '/azure/consumo-db' },
         { label: 'Nodos', icon: Server, href: '/azure/consumo-nodos' },
         { label: 'Applications Gateway', icon: Workflow, href: '/azure/consumo-apps-gateway' }
     ]
 
-    const AzureRoutes = {
-
+    const azureRoutes = {
         routes: [
             { label: 'Inicio', icon: LayoutDashboard, href: '/azure' },
             { label: 'Tendencia Facturación', icon: Grid2X2, href: '/azure/facturacion/tendencia-pago-por-uso' },
@@ -232,7 +236,7 @@ export const SidebarComponent = ({
             { label: 'Maquinas Virtuales', icon: Computer, href: '/azure/recursos-vm' },
             { label: 'Traffic Managers', icon: Workflow, href: '/azure/recursos-traffic-manager' }
         ],
-        consumes: [{ label: 'Consumos', subItems: consumeSubItemsAzure, icon: Zap }],
+        consumes: [{ label: 'Consumos', subItems: azureConsumeSubItems, icon: Zap }],
         funciones: [
             { label: 'Blob Storage vs Storage General', icon: Cylinder, href: '/azure/funciones/blob-vs-storage-general' },
             { label: 'Variación Storage', icon: Cylinder, href: '/azure/funciones/variacion-storage' },
@@ -241,17 +245,17 @@ export const SidebarComponent = ({
             { label: 'Spot vs Regular VMs', icon: Computer, href: '/azure/funciones/spot-vs-regular-vm' },
             { label: 'Promedio de uso por localización', icon: MapPin, href: '/azure/funciones/promedio-por-localizacion' },
             { label: 'Consumo horario hábil vs no hábil', icon: Clock, href: '/azure/funciones/analisis-vms-horario' },
-            { label: 'Recursos no utilizados', subItems: infrausedAzure, icon: TrendingDown }
+            { label: 'Recursos no utilizados', subItems: azureInfraused, icon: TrendingDown }
         ],
     }
 
-    const NetworkingGCP = [
+    // GCP
+    const gcpNetworking = [
         { label: 'IPs Externas sin Uso', icon: Globe2, href: '/gcp/funciones/networking/ips-sin-uso' },
         { label: 'Subnets sin Recursos Asociados', icon: Split, href: '/gcp/funciones/networking/subnets-sin-recursos' },
     ]
 
-    // CORREGIDO: Rutas apuntando a /gcp en lugar de /gpc
-    const infrausedGCP = [
+    const gcpInfraused = [
         { label: 'Compute Engine', icon: Computer, href: '/gcp/funciones/unused-resources/compute-engine' },
         { label: 'Instance Groups', icon: Boxes, href: '/gcp/funciones/unused-resources/instance-groups' },
         { label: 'Clusters GKE', icon: Boxes, href: '/gcp/funciones/unused-resources/clusters-gke' },
@@ -262,7 +266,7 @@ export const SidebarComponent = ({
         // { label: 'Cloud DNS', icon: Globe2, href: '/gcp/funciones/cloud-dns-infrautilizados' }
     ]
 
-    const consumeSubItemsGCP = [
+    const gcpConsumeSubItems = [
         { label: 'Compute Engine', icon: Computer, href: '/gcp/consumos/compute-engine' },
         { label: 'Instances Group', icon: Boxes, href: '/gcp/consumos/instances-group' },
         { label: 'Clusters GKE', icon: Server, href: '/gcp/consumos/clusters-gke' },
@@ -272,7 +276,7 @@ export const SidebarComponent = ({
         { label: 'Cloud Filestore', icon: Box, href: '/gcp/consumos/filestore' },
     ]
 
-    const workingNonWorkingItemsGCP = [
+    const gcpConsumoHorario = [
         { label: 'Compute Engine', icon: Computer, href: '/gcp/funciones/uso-horario-habil-no-habil/compute-engines' },
         { label: 'Instance Groups', icon: Boxes, href: '/gcp/funciones/uso-horario-habil-no-habil/instance-group' },
         { label: 'Clusters GKE', icon: Server, href: '/gcp/funciones/uso-horario-habil-no-habil/cluster-gke' },
@@ -283,7 +287,7 @@ export const SidebarComponent = ({
 
     ]
 
-    const GCPRoutes = {
+    const gcpRoutes = {
         routes: [
             { label: 'Inicio', icon: LayoutDashboard, href: '/gcp' },
             { label: 'Tendencia Facturación', icon: Grid2X2, href: '/gcp/facturacion/tendencia-facturacion' },
@@ -307,7 +311,7 @@ export const SidebarComponent = ({
             { label: 'Cloud SQL Mysql', icon: Database, href: '/gcp/recursos/cloudsql/mysql' },
             { label: 'Cloud SQL Sql Server', icon: Database, href: '/gcp/recursos/cloudsql/sqlserver' },
         ],
-        consumes: [{ label: 'Consumos', subItems: consumeSubItemsGCP, icon: Zap }],
+        consumes: [{ label: 'Consumos', subItems: gcpConsumeSubItems, icon: Zap }],
         funciones: [
             { label: 'Top Cloud Storage Buckets', icon: LineChart, href: '/gcp/funciones/top-cloud-storage-buckets' },
             { label: 'Top Filestore Sub-Utilizados', icon: TrendingDown, href: '/gcp/funciones/top-filestore-sub-utilizado' },
@@ -315,19 +319,28 @@ export const SidebarComponent = ({
             { label: 'Spot vs Standard VMs', icon: Computer, href: '/gcp/funciones/spot-vs-standard-vm' },
             { label: 'Promedio de uso por región', icon: MapPin, href: '/gcp/funciones/uso-costo-por-localizacion' },
             { label: 'Top Facturación por Región', icon: DollarSign, href: '/gcp/funciones/top-facturacion-region' },
-            { label: 'Consumo horario hábil vs no hábil', subItems: workingNonWorkingItemsGCP, icon: Clock },
-            { label: 'Recursos no utilizados', subItems: infrausedGCP, icon: TrendingDown },
-            { label: 'Networking', subItems: NetworkingGCP, icon: Network },
+            { label: 'Consumo horario hábil vs no hábil', subItems: gcpConsumoHorario, icon: Clock },
+            { label: 'Recursos no utilizados', subItems: gcpInfraused, icon: TrendingDown },
+            { label: 'Networking', subItems: gcpNetworking, icon: Network },
         ],
     }
 
+    // Amazon Bedrock
+
+    const amazonBedrockRoutes = {
+        routes: [
+            { label: 'Inicio', icon: LayoutDashboard, href: '/amazon-bedrock' },
+            { label: 'Costo y Optimización', icon: Grid2X2, href: '/amazon-bedrock/costo-optimización' },
+        ]
+    }
 
     const { routes, recursos, consumes, funciones } = useMemo(() => {
-        if (isAws) return AwsRoutes
-        if (isAzure) return AzureRoutes
-        if (isGcp) return GCPRoutes
+        if (isAws) return awsRoutes
+        if (isAzure) return azureRoutes
+        if (isGcp) return gcpRoutes
+        if (isAmazonBedrock) return amazonBedrockRoutes
         return { routes: [], recursos: [], consumes: [], funciones: [] }
-    }, [isAws, isAzure, isGcp]);
+    }, [isAws, isAzure, isGcp, isAmazonBedrock]);
 
     const defaultOpenRecursos = useMemo(
         () => recursos.some((r) => r.href === pathname),
@@ -375,6 +388,7 @@ export const SidebarComponent = ({
         setIsAws(pathname.startsWith('/aws'))
         setIsAzure(pathname.startsWith('/azure'))
         setIsGcp(pathname.startsWith('/gcp'))
+        setIsAmazonBedrock(pathname.startsWith('/amazon-bedrock'))
     }, [pathname])
 
     useEffect(() => {

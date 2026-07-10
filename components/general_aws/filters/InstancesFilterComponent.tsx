@@ -45,8 +45,8 @@ export const InstancesFilterComponent = ({
     const startDateFormatted = startDate.toISOString().replace('Z', '').slice(0, -4);
     const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : '';
 
-    const tagQueryParams = selectedKey !== 'allKeys' && selectedValue && selectedValue !== 'allValues' 
-        ? `&tagKey=${encodeURIComponent(selectedKey)}&tagValue=${encodeURIComponent(selectedValue)}` 
+    const tagQueryParams = selectedKey !== 'allKeys' && selectedValue && selectedValue !== 'allValues'
+        ? `&tagKey=${encodeURIComponent(selectedKey)}&tagValue=${encodeURIComponent(selectedValue)}`
         : '';
 
     switch (service) {
@@ -86,8 +86,11 @@ export const InstancesFilterComponent = ({
         case 'loadbalancerv2':
             url = region ? `/api/aws/bridge/loadbalancersv2/all_load_balancersv2?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}` : null;
             break;
-        case "infraUsed":
+        case 'infraUsed':
             url = region ? `/api/aws/bridge/ec2/all_unused_ec2_instances?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}` : null;
+            break;
+        case 'bedrock-inference-profiles':
+            url = region ? `/api/aws/bridge/bedrock/all_inference_profiles?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}` : null;
             break;
         default:
             url = '';
@@ -95,13 +98,14 @@ export const InstancesFilterComponent = ({
 
     //const tagsBody = selectedKey !== 'allKeys' && selectedValue && selectedValue !== 'allValues' ? { Key: selectedKey, Value: selectedValue } : null;
     const hasTag = selectedKey && selectedKey !== 'allKeys';
-    
+
     const tagsBody = hasTag ? { Key: selectedKey, Value: selectedValue || 'allValues' } : null;
     let apiMethod: (url: string, tags?: { Key: string; Value: string } | null) => Promise<unknown>;
-    
+
     switch (service) {
         case 'infraused':
         case 'loadbalancerv2':
+        case 'bedrock-inference-profiles':
             apiMethod = fetcherGet;
             break;
         default:
@@ -113,7 +117,6 @@ export const InstancesFilterComponent = ({
         url ? [url, tagsBody] : null,
         ([u, t]) => apiMethod(u, t)
     );
-    console.log(data);
 
     useEffect(() => {
         if (!isLoading && !error) {
@@ -190,7 +193,7 @@ export const InstancesFilterComponent = ({
                         <CommandEmpty>{noInstances ? 'No hay instancias disponibles.' : 'No se encontró instancia.'}</CommandEmpty>
                         {!noInstances && (
                             <CommandGroup className='max-h-[250px] overflow-y-auto'>
-                                {list.map((item,index:number) => (
+                                {list.map((item, index: number) => (
                                     <CommandItem key={`${item.id}-${index}`} value={item.name} onSelect={() => { setInstance(item.id); setOpen(false); }}>
                                         <Check className={cn('mr-2 h-4 w-4', instance === item.id ? 'opacity-100' : 'opacity-0')} />
                                         {item.name}
@@ -228,7 +231,7 @@ export const InstancesFilterComponent = ({
                                 <Check className={cn('mr-2 h-4 w-4', list.every((i) => selectedInstancesArray.includes(i.id)) ? 'opacity-100' : 'opacity-0')} />
                                 Todas las Instancias
                             </CommandItem>
-                            {list.map((item,index:number) => (
+                            {list.map((item, index: number) => (
                                 <CommandItem key={`${item.id}-${index}`} value={item.name} onSelect={() => handleInstanceToggle(item.id)}>
                                     <Check className={cn('mr-2 h-4 w-4', selectedInstancesArray.includes(item.id) ? 'opacity-100' : 'opacity-0')} />
                                     {item.name}
