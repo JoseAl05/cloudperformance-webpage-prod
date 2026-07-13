@@ -20,19 +20,17 @@ export const Ec2ResourceViewUsageCpuComponent = ({ data }: ResourceViewUsageCpuC
   const chartRef = useRef<HTMLDivElement>(null);
 
 
-  const { totalData, usedData, unusedData, yMaxRounded } = useMemo(() => {
+  const { valueData, yMaxRounded } = useMemo(() => {
     const cpuData = data?.metrics_data.filter(item => item.MetricLabel === 'Uso de CPU (Promedio)') || [];
     cpuData.sort((a, b) => new Date(a.Timestamp).getTime() - new Date(b.Timestamp).getTime());
 
-    const totalData: [string, number][] = cpuData.map(item => [item.Timestamp, item.total]);
-    const usedData: [string, number][] = cpuData.map(item => [item.Timestamp, item.used]);
-    const unusedData: [string, number][] = cpuData.map(item => [item.Timestamp, item.unused]);
+    const valueData: [string, number][] = cpuData.map(item => [item.Timestamp, item.Value]);
 
-    const maxTotalValue = totalData.length ? Math.max(...totalData.map(item => item[1])) : 0;
+    const maxTotalValue = valueData.length ? Math.max(...valueData.map(item => item[1])) : 0;
     const yMaxRaw = Math.ceil(maxTotalValue * 1.5);
     const yMaxRounded = Math.floor(yMaxRaw / 1) * 1;
 
-    return { totalData, usedData, unusedData, yMaxRounded };
+    return { valueData, yMaxRounded };
   }, [data]);
 
   const getThemeColors = () => {
@@ -66,11 +64,11 @@ export const Ec2ResourceViewUsageCpuComponent = ({ data }: ResourceViewUsageCpuC
   const option = useMemo(() => {
     const colors = getThemeColors();
     const base = makeBaseOptions({
-      legend: ['Total', 'Usado', 'No Usado'],
-      unitLabel: 'vCores',
+      legend: ['% CPU'],
+      unitLabel: '%',
       useUTC: true,
       showToolbox: true,
-      metricType: 'count',
+      metricType: 'percent',
     });
 
     const lines = createChartOption({
@@ -81,23 +79,14 @@ export const Ec2ResourceViewUsageCpuComponent = ({ data }: ResourceViewUsageCpuC
       series: [
         {
           kind: 'line',
-          name: 'Total',
-          data: totalData,
-          smooth: true,
-          extra: {
-            color: colors.totalColor,
-          }
-        },
-        {
-          kind: 'line',
           name: 'Usado',
-          data: usedData,
+          data: valueData,
           smooth: true,
           extra: {
             color: colors.usageColor,
             markPoint: {
               symbol: 'pin',
-              symbolSize: usedData.length > 2000 ? 10 : 25,
+              symbolSize: valueData.length > 2000 ? 10 : 25,
               label: {
                 show: false,
               },
@@ -111,7 +100,7 @@ export const Ec2ResourceViewUsageCpuComponent = ({ data }: ResourceViewUsageCpuC
                 formatter: (param: unknown) => {
                   if (param.data.coord) {
                     const date = new Date(param.data.coord[0]).toUTCString();
-                    return `${param.name}<br/>${date}<br/>${param.data.coord[1]} vCores`;
+                    return `${param.name}<br/>${date}<br/>${param.data.coord[1]} %`;
                   }
                   return `${param.name}: ${param.value}`;
                 }
@@ -122,7 +111,7 @@ export const Ec2ResourceViewUsageCpuComponent = ({ data }: ResourceViewUsageCpuC
                   name: 'Max',
                   label: {
                     formatter: (params: unknown) => {
-                      return `Max \n${params.data.coord[1]} vCores`;
+                      return `Max \n${params.data.coord[1]} %`;
                     }
                   }
                 },
@@ -131,78 +120,17 @@ export const Ec2ResourceViewUsageCpuComponent = ({ data }: ResourceViewUsageCpuC
                   name: 'Min',
                   label: {
                     formatter: (params: unknown) => {
-                      return `Min \n${params.data.coord[1]} vCores`;
+                      return `Min \n${params.data.coord[1]} %`;
                     }
                   }
                 },
                 {
-                  coord: usedData.length ? [usedData[usedData.length - 1][0], usedData[usedData.length - 1][1]] : null,
+                  coord: valueData.length ? [valueData[valueData.length - 1][0], valueData[valueData.length - 1][1]] : null,
                   name: 'Último',
-                  value: usedData.length ? usedData[usedData.length - 1][1] : null,
+                  value: valueData.length ? valueData[valueData.length - 1][1] : null,
                   label: {
                     formatter: (params: unknown) => {
-                      return `Último \n${params.data.coord[1]} vCores`;
-                    }
-                  }
-                }
-              ]
-            }
-          }
-        },
-        {
-          kind: 'line',
-          name: 'No Usado',
-          data: usedData,
-          smooth: true,
-          extra: {
-            color: '#FF6384',
-            markPoint: {
-              symbol: 'pin',
-              symbolSize: unusedData.length > 2000 ? 10 : 25,
-              label: {
-                show: false,
-              },
-              itemStyle: {
-                color: '#FF6384',
-                borderColor: isDark ? '#18181b' : '#ffffff',
-                borderWidth: 2
-              },
-              tooltip: {
-                trigger: 'item',
-                formatter: (param: unknown) => {
-                  if (param.data.coord) {
-                    const date = new Date(param.data.coord[0]).toUTCString();
-                    return `${param.name}<br/>${date}<br/>${param.data.coord[1]} vCores`;
-                  }
-                  return `${param.name}: ${param.value}`;
-                }
-              },
-              data: [
-                {
-                  type: 'max',
-                  name: 'Max',
-                  label: {
-                    formatter: (params: unknown) => {
-                      return `Max \n${params.data.coord[1]} vCores`;
-                    }
-                  }
-                },
-                {
-                  type: 'min',
-                  name: 'Min',
-                  label: {
-                    formatter: (params: unknown) => {
-                      return `Min \n${params.data.coord[1]} vCores`;
-                    }
-                  }
-                },
-                {
-                  coord: unusedData.length ? [unusedData[unusedData.length - 1][0], unusedData[unusedData.length - 1][1]] : null,
-                  name: 'Último',
-                  value: unusedData.length ? unusedData[unusedData.length - 1][1] : null,
-                  label: {
-                    formatter: (params: unknown) => {
-                      return `Último \n${params.data.coord[1]} vCores`;
+                      return `Último \n${params.data.coord[1]} %`;
                     }
                   }
                 }
@@ -226,7 +154,7 @@ export const Ec2ResourceViewUsageCpuComponent = ({ data }: ResourceViewUsageCpuC
   return (
     <Card className="w-full">
       <CardHeader>
-        <CardTitle>Uso de Cores de CPU</CardTitle>
+        <CardTitle>% Uso de CPU</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="flex items-center justify-center gap-2 mb-2">

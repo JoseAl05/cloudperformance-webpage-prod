@@ -127,6 +127,7 @@ export const Ec2ConsumeViewCardsComponent = ({
         if (!instancias?.length) return [];
         return instancias.flatMap(inst => inst.history);
     }, [instancias]);
+    console.log(allHistory);
 
     const costoTotal = useMemo(() => {
         return allHistory.reduce((sum, h) => sum + (h.costo_usd || 0), 0);

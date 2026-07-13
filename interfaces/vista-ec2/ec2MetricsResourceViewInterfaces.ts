@@ -12,5 +12,5 @@ export interface Ec2ResourceViewMetricData {
 }
 
 export interface Ec2ResourceViewMetricsApiResponse {
-  metrics_data: MetricData[];
+  metrics_data: Ec2ResourceViewMetricData[];
 }

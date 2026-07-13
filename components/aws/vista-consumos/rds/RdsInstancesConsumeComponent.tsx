@@ -88,7 +88,19 @@ export const RdsInstancesConsumeComponent = ({ startDate, endDate, instance, reg
     );
     const rdsFreeStorageMetrics = useSWR(
         instance
-            ? `${url}/storage?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&resource=${instance}&db_type=${rdsType}`
+            ? `${url}/freestorage?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&resource=${instance}&db_type=${rdsType}`
+            : null,
+        fetcher
+    );
+    const rdsReadIopsMetrics = useSWR(
+        instance
+            ? `${url}/readiops?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&resource=${instance}&db_type=${rdsType}`
+            : null,
+        fetcher
+    );
+    const rdsWriteIopsMetrics = useSWR(
+        instance
+            ? `${url}/writeiops?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&resource=${instance}&db_type=${rdsType}`
             : null,
         fetcher
     );
@@ -111,6 +123,8 @@ export const RdsInstancesConsumeComponent = ({ startDate, endDate, instance, reg
         rdsCreditsBalanceMetrics.isLoading ||
         rdsDbConnectionsMetrics.isLoading ||
         rdsFreeStorageMetrics.isLoading ||
+        rdsReadIopsMetrics.isLoading ||
+        rdsWriteIopsMetrics.isLoading ||
         rdsGlobalCreditsEfficiency.isLoading ||
         rdsInfo.isLoading
 
@@ -120,6 +134,8 @@ export const RdsInstancesConsumeComponent = ({ startDate, endDate, instance, reg
         !!rdsCreditsBalanceMetrics.error ||
         !!rdsDbConnectionsMetrics.error ||
         !!rdsFreeStorageMetrics.error ||
+        !!rdsReadIopsMetrics.error ||
+        !!rdsWriteIopsMetrics.error ||
         !!rdsGlobalCreditsEfficiency.error ||
         !!rdsInfo.error
 
@@ -138,6 +154,12 @@ export const RdsInstancesConsumeComponent = ({ startDate, endDate, instance, reg
     const dbConnectionsMetricsData: ConsumeViewRdsMetrics[] | null =
         isNonEmptyArray<ConsumeViewRdsMetrics>(rdsDbConnectionsMetrics.data) ? rdsDbConnectionsMetrics.data : null;
 
+    const readIopsMetricsData: ConsumeViewRdsMetrics[] | null =
+        isNonEmptyArray<ConsumeViewRdsMetrics>(rdsReadIopsMetrics.data) ? rdsReadIopsMetrics.data : null;
+
+    const writeIopsMetricsData: ConsumeViewRdsMetrics[] | null =
+        isNonEmptyArray<ConsumeViewRdsMetrics>(rdsWriteIopsMetrics.data) ? rdsWriteIopsMetrics.data : null;
+    
     const freeStorageMetricsData: ConsumeViewRdsMetrics[] | null =
         isNonEmptyArray<ConsumeViewRdsMetrics>(rdsFreeStorageMetrics.data) ? rdsFreeStorageMetrics.data : null;
 
@@ -151,6 +173,8 @@ export const RdsInstancesConsumeComponent = ({ startDate, endDate, instance, reg
     const hasCreditsUsageData = !!creditsUsageMetricsData && creditsUsageMetricsData.length > 0;
     const hasCreditsBalanceData = !!creditsBalanceMetricsData && creditsBalanceMetricsData.length > 0;
     const hasDbConnectionsData = !!dbConnectionsMetricsData && dbConnectionsMetricsData.length > 0;
+    const hasReadIopsData = !!readIopsMetricsData && readIopsMetricsData.length > 0;
+    const hasWriteIopsData = !!writeIopsMetricsData && writeIopsMetricsData.length > 0;
     const hasFreeStorageData = !!freeStorageMetricsData && freeStorageMetricsData.length > 0;
     const hasMemoryData = !!memoryMetricsData && memoryMetricsData.length > 0;
 
@@ -180,7 +204,7 @@ export const RdsInstancesConsumeComponent = ({ startDate, endDate, instance, reg
         )
     }
 
-    const noneHasData = !hasCpuData && !hasCreditsUsageData && !hasCreditsBalanceData && !hasDbConnectionsData && !hasFreeStorageData && !hasMemoryData;
+    const noneHasData = !hasCpuData && !hasCreditsUsageData && !hasCreditsBalanceData && !hasDbConnectionsData && !hasFreeStorageData && !hasReadIopsData && !hasWriteIopsData && !hasMemoryData;
 
     if (noneHasData) {
         return (
@@ -239,8 +263,20 @@ export const RdsInstancesConsumeComponent = ({ startDate, endDate, instance, reg
                 <RdsConsumeViewChartComponent
                     data={freeStorageMetricsData}
                     unit='Bytes'
-                    title='Almacenamiento Libre'
+                    title='Storage Libre'
                     metricName='FreeStorageSpace'
+                />
+                <RdsConsumeViewChartComponent
+                    data={readIopsMetricsData}
+                    unit='IOPS'
+                    title='Lectura IOPS'
+                    metricName='ReadIops'
+                />
+                <RdsConsumeViewChartComponent
+                    data={writeIopsMetricsData}
+                    unit='IOPS'
+                    title='Escritura IOPS'
+                    metricName='WriteIops'
                 />
             </div>
 

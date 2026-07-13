@@ -53,10 +53,6 @@ interface RdsMetricItem {
   Unit?: string;
 }
 
-interface RdsMetricsData {
-  metrics_data: RdsMetricItem[];
-  calculated_summary?: Record<string, unknown>;
-}
 
 interface MetricPoint {
   sync_time: { $date: string };
@@ -69,6 +65,12 @@ interface MetricPoint {
   MetricId: string;
   MetricLabel: string;
 }
+
+interface RdsMetricsData {
+  metrics_data: MetricPoint[];
+  calculated_summary?: Record<string, unknown>;
+}
+
 
 const fetcher = (url: string) =>
     fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
@@ -333,8 +335,8 @@ export const InstanciasRdsPgChartComponent = ({
                 </CardHeader>
                 <CardContent>
                   <RdsResourceViewCpuUsageComponent
-                    data={transformMetricsForChart(metricsData)}
-                    title="Uso vs No Uso de Cores de CPU"
+                    data={metricsData}
+                    title="% Uso de CPU"
                     height="300px"
                   />
                 </CardContent>

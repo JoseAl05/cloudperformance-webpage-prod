@@ -121,7 +121,6 @@ export const EksFilterComponent = ({
         }
         setEks(clustersEks.length ? clustersEks.join(',') : '');
     };
-
     return (
         <div className='space-y-2'>
             <Popover open={open} onOpenChange={setOpen}>

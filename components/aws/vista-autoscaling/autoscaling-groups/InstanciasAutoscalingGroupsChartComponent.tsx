@@ -36,9 +36,10 @@ export const InstanciasAutoscalingGroupsChartComponent = (props: unknown) => {
   const { startDate, endDate, region, instance, selectedKey, selectedValue } = props;
 
 
+
   // Construir URL usando la estructura correcta que espera tu API
-  const startDateFormatted = startDate.toISOString().split(".")[0];
-  const endDateFormatted = endDate.toISOString().split(".")[0];
+  const startDateFormatted = startDate.toISOString().replace('Z', '').slice(0, -4);
+  const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : '';
 
   let apiUrl = `/api/aws/bridge/autoscaling/autoscaling_groups?date_from=${startDateFormatted}&date_to=${endDateFormatted}`;
 

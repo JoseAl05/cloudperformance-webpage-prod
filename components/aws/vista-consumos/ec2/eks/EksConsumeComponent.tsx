@@ -12,7 +12,7 @@ import { Ec2InstancesConsumeTableComponent } from '@/components/aws/vista-consum
 interface EksConsumeComponentProps {
     startDate: Date
     endDate: Date
-    instance: string
+    eksAsgInstance: string
     region: string
 }
 
@@ -26,27 +26,27 @@ const isNullish = (v: unknown) => v === null || v === undefined
 export const EksConsumeComponent = ({
     startDate,
     endDate,
-    instance,
+    eksAsgInstance,
     region,
 }: EksConsumeComponentProps) => {
     const startDateFormatted = startDate.toISOString().replace('Z', '').slice(0, -4)
     const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : ''
 
     const ec2Metrics = useSWR(
-        instance
-            ? `/api/aws/bridge/eks/consumo_ec2?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&resource=${instance}`
+        eksAsgInstance
+            ? `/api/aws/bridge/eks/consumo_ec2?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&resource=${eksAsgInstance}`
             : null,
         fetcher
     )
     const ec2Info = useSWR(
-        instance
-            ? `/api/aws/bridge/eks/ec2/info?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&resource=${instance}`
+        eksAsgInstance
+            ? `/api/aws/bridge/eks/ec2/info?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&resource=${eksAsgInstance}`
             : null,
         fetcher
     )
     const ec2GlobalEfficiency = useSWR(
-        instance
-            ? `/api/aws/bridge/eks/ec2/global_efficiency?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&resource=${instance}`
+        eksAsgInstance
+            ? `/api/aws/bridge/eks/ec2/global_efficiency?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&resource=${eksAsgInstance}`
             : null,
         fetcher
     )
@@ -92,7 +92,7 @@ export const EksConsumeComponent = ({
         )
     }
 
-    if (!instance) {
+    if (!eksAsgInstance) {
         return (
             <div className="max-w-7xl mx-auto px-6 py-8">
                 <div className="text-center text-gray-500 text-lg font-medium">No se ha seleccionado ninguna instancia.</div>
@@ -126,6 +126,8 @@ export const EksConsumeComponent = ({
             </div>
         )
     }
+
+    console.log(infoData)
 
     return (
         <div className="space-y-6 mt-6 px-4">
