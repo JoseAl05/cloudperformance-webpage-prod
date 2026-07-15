@@ -90,7 +90,13 @@ export const InstancesFilterComponent = ({
             url = region ? `/api/aws/bridge/ec2/all_unused_ec2_instances?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}` : null;
             break;
         case 'bedrock-inference-profiles':
-            url = region ? `/api/aws/bridge/bedrock/all_inference_profiles?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}` : null;
+            url = region ? `/api/aws/bridge/bedrock/inference_profile/all_inference_profiles?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}` : null;
+            break;
+        case 'bedrock-custom-models':
+            url = region ? `/api/aws/bridge/bedrock/custom_models/all_custom_models?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}` : null;
+            break;
+        case 'bedrock-foundation-models':
+            url = region ? `/api/aws/bridge/bedrock/foundation_models/all_foundation_models?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}` : null;
             break;
         default:
             url = '';
@@ -106,6 +112,8 @@ export const InstancesFilterComponent = ({
         case 'infraused':
         case 'loadbalancerv2':
         case 'bedrock-inference-profiles':
+        case 'bedrock-custom-models':
+        case 'bedrock-foundation-models':
             apiMethod = fetcherGet;
             break;
         default:

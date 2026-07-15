@@ -1,13 +1,13 @@
 'use client'
 
-import { COInferenceProfilesCardsComponent } from '@/components/amazon-bedrock/costo-optimizacion/inference-profiles/info/COInferenceProfilesCardsComponent'
+import { COCustomModelsCardsComponent } from '@/components/amazon-bedrock/costo-optimizacion/custom-models/info/COCustomModelsCardsComponent'
 import { MessageCard } from '@/components/aws/cards/MessageCards'
 import { LoaderComponent } from '@/components/general_aws/LoaderComponent'
-import { InferenceProfilesPriceRate } from '@/interfaces/bedrock-cost-optimization/inferenceProfiles'
+import { CustomModelsPriceRate } from '@/interfaces/bedrock-cost-optimization/customModels'
 import { AlertCircle, Info } from 'lucide-react'
 import useSWR from 'swr'
 
-interface COInferenceProfilesComponentProps {
+interface COCustomModelsComponentProps {
     startDate: Date
     endDate: Date
     instance: string
@@ -21,23 +21,22 @@ const fetcher = (url: string) =>
 const isNonEmptyArray = <T,>(v: unknown): v is T[] => Array.isArray(v) && v.length > 0
 const isNullish = (v: unknown) => v === null || v === undefined
 
-export const COInferenceProfilesComponent = ({ startDate, endDate, instance, region }: COInferenceProfilesComponentProps) => {
-
+export const COCustomModelsComponent = ({ startDate, endDate, instance, region }: COCustomModelsComponentProps) => {
     const startDateFormatted = startDate.toISOString().replace('Z', '').slice(0, -4)
     const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : ''
 
-    const iPPriceRate = useSWR(
+    const cMPriceRate = useSWR(
         instance
-            ? `/api/aws/bridge/bedrock/inference_profile/get_model_price_rate?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&model_name=${instance}`
+            ? `/api/aws/bridge/bedrock/custom_models/get_model_price_rate?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&model_name=${instance}`
             : null,
         fetcher
     )
-    const anyLoading = iPPriceRate.isLoading
+    const anyLoading = cMPriceRate.isLoading
 
-    const anyError = !!iPPriceRate.error
+    const anyError = !!cMPriceRate.error
 
-    const priceRateData: InferenceProfilesPriceRate[] | null =
-        isNonEmptyArray<InferenceProfilesPriceRate>(iPPriceRate.data) ? iPPriceRate.data : null
+    const priceRateData: CustomModelsPriceRate[] | null =
+        isNonEmptyArray<CustomModelsPriceRate>(cMPriceRate.data) ? cMPriceRate.data : null
 
     const hasPriceRateData = !!priceRateData && priceRateData.length > 0
 
@@ -51,7 +50,7 @@ export const COInferenceProfilesComponent = ({ startDate, endDate, instance, reg
     if (!instance) {
         return (
             <div className="max-w-7xl mx-auto px-6 py-8">
-                <div className="text-center text-gray-500 text-lg font-medium">No se ha seleccionado ningún perfil.</div>
+                <div className="text-center text-gray-500 text-lg font-medium">No se ha seleccionado ningún modelo custom.</div>
             </div>
         )
     }
@@ -76,7 +75,7 @@ export const COInferenceProfilesComponent = ({ startDate, endDate, instance, reg
                 <MessageCard
                     icon={Info}
                     title="Sin datos para mostrar"
-                    description="No encontramos métricas ni información del/los perfil/es en el rango seleccionado."
+                    description="No encontramos métricas ni información del/los modelo/s custom en el rango seleccionado."
                     tone="warn"
                 />
             </div>
@@ -85,7 +84,7 @@ export const COInferenceProfilesComponent = ({ startDate, endDate, instance, reg
 
     return (
         <div className='p-3'>
-            <COInferenceProfilesCardsComponent
+            <COCustomModelsCardsComponent
                 data={priceRateData}
             />
         </div>

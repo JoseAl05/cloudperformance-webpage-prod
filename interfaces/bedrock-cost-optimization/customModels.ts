@@ -1,4 +1,4 @@
-export interface InferenceProfilesPriceRateComparison {
+export interface CustomModelsPriceRateComparison {
   modelName: string;
   provider: string;
   estimated_cost: number;
@@ -10,12 +10,13 @@ export interface InferenceProfilesPriceRateComparison {
   missing_rates: string[];
 }
 
-export interface InferenceProfilesPriceRate {
+export interface CustomModelsPriceRate {
   modelName: string;
   modelId: string;
   region: string;
-  inferenceProfileId: string;
-  inferenceProfileName: string;
+  customModelArn: string;
+  customModelName: string;
+  customModelDeploymentArn: string;
   provider: string;
   rates: {
     input: {
@@ -44,5 +45,5 @@ export interface InferenceProfilesPriceRate {
     input:number;
     output: number;
   }
-  price_comparison: InferenceProfilesPriceRateComparison[];
+  price_comparison: CustomModelsPriceRateComparison[];
 }

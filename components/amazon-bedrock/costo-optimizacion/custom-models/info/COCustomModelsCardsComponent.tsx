@@ -23,7 +23,7 @@ import {
   TriangleAlert,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { InferenceProfilesPriceRate } from "@/interfaces/bedrock-cost-optimization/inferenceProfiles";
+import { CustomModelsPriceRate } from '@/interfaces/bedrock-cost-optimization/customModels';
 
 const currencyFormatter = new Intl.NumberFormat("es-CL", {
   style: "currency",
@@ -67,23 +67,23 @@ const rateRows = [
   { key: "cache_write", label: "Escritura de caché" },
 ] as const;
 
-const InferenceProfileCard = ({
-  profile,
+const CustomModelCard = ({
+  customModel,
   expanded = false,
 }: {
-  profile: InferenceProfilesPriceRate;
+  customModel: CustomModelsPriceRate;
   expanded?: boolean;
 }) => {
   const formatted = useMemo(
     () => ({
-      cost: currencyFormatter.format(profile.cost),
-      costInput: currencyFormatter.format(profile.cost_breakdown.input),
-      costOutput: currencyFormatter.format(profile.cost_breakdown.output),
-      tokensInput: tokenFormatter.format(profile.tokens.input),
-      tokensOutput: tokenFormatter.format(profile.tokens.output),
-      modelName: profile.modelName,
-      provider: profile.provider,
-      comparison: profile.price_comparison.map((pc) => {
+      cost: currencyFormatter.format(customModel.cost),
+      costInput: currencyFormatter.format(customModel.cost_breakdown.input),
+      costOutput: currencyFormatter.format(customModel.cost_breakdown.output),
+      tokensInput: tokenFormatter.format(customModel.tokens.input),
+      tokensOutput: tokenFormatter.format(customModel.tokens.output),
+      modelName: customModel.modelName,
+      provider: customModel.provider,
+      comparison: customModel.price_comparison.map((pc) => {
         const delta = pc.delta_pct_vs_current;
         const hasDelta = typeof delta === "number";
         const missing = pc.missing_rates ?? [];
@@ -108,9 +108,9 @@ const InferenceProfileCard = ({
         };
       }),
     }),
-    [profile],
+    [customModel],
   );
-
+  console.log(customModel.cost)
   return (
     <Card
       className={cn(
@@ -126,10 +126,10 @@ const InferenceProfileCard = ({
             </span>
             <div className="min-w-0">
               <CardTitle className="truncate text-base font-semibold leading-tight text-foreground">
-                {profile.provider} - {profile.modelName}
+                {customModel.provider} - {customModel.modelName}
               </CardTitle>
               <p className="mt-0.5 truncate text-sm text-muted-foreground">
-                {profile.inferenceProfileName}
+                {customModel.customModelArn}
               </p>
             </div>
           </div>
@@ -138,7 +138,7 @@ const InferenceProfileCard = ({
             className="shrink-0 gap-1 border-primary/30 text-primary"
           >
             <MapPin className="h-3 w-3" />
-            {profile.region}
+            {customModel.region}
           </Badge>
         </div>
       </CardHeader>
@@ -227,10 +227,10 @@ const InferenceProfileCard = ({
                   {row.label}
                 </span>
                 <span className="text-right font-medium tabular-nums text-foreground">
-                  {formatRate(profile.rates[row.key].price_per_1k_tokens)}
+                  {formatRate(customModel.rates[row.key].price_per_1k_tokens)}
                 </span>
                 <span className="text-right font-medium tabular-nums text-foreground">
-                  {formatRate(profile.rates[row.key].price_per_1m_tokens)}
+                  {formatRate(customModel.rates[row.key].price_per_1m_tokens)}
                 </span>
               </div>
             ))}
@@ -361,14 +361,14 @@ const InferenceProfileCard = ({
             <Fingerprint className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
             <span className="shrink-0 text-muted-foreground">Modelo:</span>
             <span className="min-w-0 flex-1 truncate font-mono text-foreground">
-              {profile.modelId}
+              {customModel.modelName}
             </span>
           </div>
           <div className="flex items-center gap-1.5">
             <Fingerprint className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-            <span className="shrink-0 text-muted-foreground">Perfil:</span>
+            <span className="shrink-0 text-muted-foreground">Modelo Custom:</span>
             <span className="min-w-0 flex-1 truncate font-mono text-foreground">
-              {profile.inferenceProfileId}
+              {customModel.customModelArn}
             </span>
           </div>
         </div>
@@ -378,10 +378,10 @@ const InferenceProfileCard = ({
   );
 };
 
-export const COInferenceProfilesCardsComponent = ({
+export const COCustomModelsCardsComponent = ({
   data,
 }: {
-  data: InferenceProfilesPriceRate[];
+  data: CustomModelsPriceRate[];
 }) => {
   if (data.length === 0) {
     return (
@@ -401,10 +401,10 @@ export const COInferenceProfilesCardsComponent = ({
           data.length > 2 && "grid-cols-1 md:grid-cols-2 xl:grid-cols-3",
         )}
       >
-        {data.map((profile) => (
-          <InferenceProfileCard
-            key={`${profile.inferenceProfileId}-${profile.region}`}
-            profile={profile}
+        {data.map((customModel) => (
+          <CustomModelCard
+            key={`${customModel.customModelArn}-${customModel.region}`}
+            customModel={customModel}
             expanded={data.length === 1}
           />
         ))}

@@ -1,13 +1,13 @@
 'use client'
 
-import { COInferenceProfilesCardsComponent } from '@/components/amazon-bedrock/costo-optimizacion/inference-profiles/info/COInferenceProfilesCardsComponent'
+import { COFoundationCardsComponent } from '@/components/amazon-bedrock/costo-optimizacion/foundation-models/info/COFoundationCardsComponent'
 import { MessageCard } from '@/components/aws/cards/MessageCards'
 import { LoaderComponent } from '@/components/general_aws/LoaderComponent'
-import { InferenceProfilesPriceRate } from '@/interfaces/bedrock-cost-optimization/inferenceProfiles'
+import { FoundationModelsPriceRate } from '@/interfaces/bedrock-cost-optimization/foundationModels'
 import { AlertCircle, Info } from 'lucide-react'
 import useSWR from 'swr'
 
-interface COInferenceProfilesComponentProps {
+interface COFoundationComponentProps {
     startDate: Date
     endDate: Date
     instance: string
@@ -21,23 +21,23 @@ const fetcher = (url: string) =>
 const isNonEmptyArray = <T,>(v: unknown): v is T[] => Array.isArray(v) && v.length > 0
 const isNullish = (v: unknown) => v === null || v === undefined
 
-export const COInferenceProfilesComponent = ({ startDate, endDate, instance, region }: COInferenceProfilesComponentProps) => {
+export const COFoundationComponent = ({ startDate, endDate, instance, region }: COFoundationComponentProps) => {
 
     const startDateFormatted = startDate.toISOString().replace('Z', '').slice(0, -4)
     const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : ''
 
-    const iPPriceRate = useSWR(
+    const fMPriceRate = useSWR(
         instance
-            ? `/api/aws/bridge/bedrock/inference_profile/get_model_price_rate?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&model_name=${instance}`
+            ? `/api/aws/bridge/bedrock/foundation_models/get_model_price_rate?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&model_name=${instance}`
             : null,
         fetcher
     )
-    const anyLoading = iPPriceRate.isLoading
+    const anyLoading = fMPriceRate.isLoading
 
-    const anyError = !!iPPriceRate.error
+    const anyError = !!fMPriceRate.error
 
-    const priceRateData: InferenceProfilesPriceRate[] | null =
-        isNonEmptyArray<InferenceProfilesPriceRate>(iPPriceRate.data) ? iPPriceRate.data : null
+    const priceRateData: FoundationModelsPriceRate[] | null =
+        isNonEmptyArray<FoundationModelsPriceRate>(fMPriceRate.data) ? fMPriceRate.data : null
 
     const hasPriceRateData = !!priceRateData && priceRateData.length > 0
 
@@ -51,7 +51,7 @@ export const COInferenceProfilesComponent = ({ startDate, endDate, instance, reg
     if (!instance) {
         return (
             <div className="max-w-7xl mx-auto px-6 py-8">
-                <div className="text-center text-gray-500 text-lg font-medium">No se ha seleccionado ningún perfil.</div>
+                <div className="text-center text-gray-500 text-lg font-medium">No se ha seleccionado ningún modelo.</div>
             </div>
         )
     }
@@ -85,7 +85,7 @@ export const COInferenceProfilesComponent = ({ startDate, endDate, instance, reg
 
     return (
         <div className='p-3'>
-            <COInferenceProfilesCardsComponent
+            <COFoundationCardsComponent
                 data={priceRateData}
             />
         </div>
