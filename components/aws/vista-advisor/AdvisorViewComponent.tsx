@@ -46,12 +46,7 @@ export const AdvisorViewComponent = ({
         fetcher,
     )
 
-    const advisorAiData = useSWR<AiRecommendationReport>(
-        advisorCategory || advisorStatus
-            ? `/api/aws/bridge/advisor/get_ai_recommendations?date_from=${startDateFormatted}&date_to=${endDateFormatted}`
-            : null,
-        fetcher,
-    )
+    const advisorAiData = useSWR<AiRecommendationReport>(`/api/aws/bridge/advisor/get_ai_recommendations?date_from=${startDateFormatted}&date_to=${endDateFormatted}`, fetcher,)
 
     const advisorData: AdvisorApiResponse | null =
         isNonEmptyArray<AdvisorApiResponse>(advisor.data) ? advisor.data : null;
@@ -73,16 +68,6 @@ export const AdvisorViewComponent = ({
         return <LoaderComponent />
     }
 
-    if (!advisorCategory || !advisorStatus) {
-        return (
-            <div className="max-w-7xl mx-auto px-6 py-8">
-                <div className="text-center text-muted-foreground text-lg font-medium">
-                    No se ha seleccionado ninguna categoría o status.
-                </div>
-            </div>
-        )
-    }
-
     if (anyError) {
         return (
             <div className="w-full min-w-0 px-4 py-10 flex flex-col items-center gap-4">
@@ -96,44 +81,66 @@ export const AdvisorViewComponent = ({
         )
     }
 
-    if (!hasAdvisorData) {
-        return (
-            <div className="w-full min-w-0 px-4 py-6">
-                <MessageCard
-                    icon={Info}
-                    title="Sin datos para mostrar"
-                    description="No encontramos información del advisor en el rango seleccionado."
-                    tone="warn"
-                />
-            </div>
-        )
-    }
-
-    console.log(advisorData);
-
     return (
         <div className="w-full min-w-0 px-4 py-6">
             <div className="flex items-center gap-3 mb-6">
                 <ChartBar className="h-7 w-7 text-blue-500" />
                 <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Recomendaciones</h1>
             </div>
-            <div className='my-5'>
-                <AdvisorViewPieChartComponent
-                    data={advisorData}
-                />
-            </div>
-            <AdvisorViewInfoComponent
-                data={advisorData}
-            />
+            {
+                !advisorCategory || !advisorStatus ? (
+                    <div className="max-w-7xl mx-auto px-6 py-8">
+                        <div className="text-center text-muted-foreground text-lg font-medium">
+                            No se ha seleccionado ninguna categoría o status.
+                        </div>
+                    </div>
+                ) : (
+                    hasAdvisorData ? (
+                        <>
+                            <div className='my-5'>
+                                <AdvisorViewPieChartComponent
+                                    data={advisorData}
+                                />
+                            </div>
+                            <AdvisorViewInfoComponent
+                                data={advisorData}
+                            />
+                        </>
+                    ) : (
+                        <div className="w-full min-w-0 px-4 py-6">
+                            <MessageCard
+                                icon={Info}
+                                title="Sin datos para mostrar"
+                                description="No encontramos información del advisor en el rango seleccionado."
+                                tone="warn"
+                            />
+                        </div>
+                    )
+                )
+            }
+
 
             <div className="flex items-center gap-3 my-10">
                 <AtomIcon className="h-7 w-7 text-blue-500" />
                 <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Recomendaciones IA</h1>
             </div>
-            <AiRecommendationsComponent
-                data={aiRecommendationsData}
-                cloud='aws'
-            />
+            {
+                hasAiRecommendationsData ? (
+                    <AiRecommendationsComponent
+                        data={aiRecommendationsData}
+                        cloud='aws'
+                    />
+                ) : (
+                    <div className="w-full min-w-0 px-4 py-6">
+                        <MessageCard
+                            icon={Info}
+                            title="Sin datos para mostrar"
+                            description="No se han generado recomendaciones con IA en el rango seleccionado."
+                            tone="warn"
+                        />
+                    </div>
+                )
+            }
         </div>
     )
 }
