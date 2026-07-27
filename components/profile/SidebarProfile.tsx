@@ -1,264 +1,78 @@
 'use client'
 
+import { useMemo } from 'react'
 import {
-    Sidebar,
-    SidebarHeader,
-    SidebarContent,
-    SidebarGroup,
-    SidebarMenu,
-    SidebarMenuButton,
-    SidebarMenuItem,
-    useSidebar
-} from '@/components/ui/sidebar'
-import { cn } from '@/lib/utils'
-import {
-    Shield,
-    Mail,
+    Bell,
+    Bot,
+    Cable,
     Cloud,
     House,
-    Users,
-    SplitSquareHorizontal,
-    Bell,
+    Mail,
+    Shield,
     ShieldCheck,
-    Cable,
-    Bot,
+    SplitSquareHorizontal,
+    Users,
 } from 'lucide-react'
-import { useEffect, useState } from 'react'
-import { usePathname } from 'next/navigation'
-import Image from 'next/image'
-import { useTheme } from 'next-themes'
-import Link from 'next/link'
+import { SidebarNav, type NavItem } from '@/components/SidebarNav'
+import type { Sidebar } from '@/components/ui/sidebar'
 import { useSession } from '@/hooks/useSession'
 
-const useMenuStyles = () => {
-    const { resolvedTheme } = useTheme()
+const BASE_ITEMS: NavItem[] = [
+    { label: 'Inicio', icon: House, href: '/perfil' },
+    { label: 'Modificar Contraseña', icon: Shield, href: '#' },
+    { label: 'Modificar Correo', icon: Mail, href: '#' },
+    { label: 'Conectores', icon: Cable, href: '/perfil/conectores', prefix: true },
+    { label: 'Nubes', icon: Cloud, href: '/perfil/nubes', prefix: true },
+    { label: 'Servicios IA', icon: Bot, href: '/perfil/servicios-ia', prefix: true },
+]
 
-    const getMenuItemClasses = (isActive: boolean) => {
-        if (isActive) {
-            return resolvedTheme === 'dark'
-                ? 'bg-blue-700 text-white'
-                : 'bg-blue-600 text-white'
-        }
-        return resolvedTheme === 'dark'
-            ? 'hover:bg-blue-800 hover:text-blue-100 text-gray-300'
-            : 'hover:bg-blue-50 hover:text-blue-900 text-gray-700'
-    }
+const MULTITENANT_ITEM: NavItem = {
+    label: 'Comparación Nubes',
+    icon: SplitSquareHorizontal,
+    href: '/comparacion-nubes',
+    prefix: true,
+}
 
-    return { getMenuItemClasses }
+const PROFILING_ITEM: NavItem = {
+    label: 'Perfilamiento',
+    icon: Users,
+    href: '/perfilamiento',
+    prefix: true,
+}
+
+const ONPREM_LICENSES_ITEM: NavItem = {
+    label: 'Licencias OnPremises',
+    icon: ShieldCheck,
+    href: '/op-licencias',
+    prefix: true,
+}
+
+const ALERTS_ITEM: NavItem = {
+    label: 'Alertas',
+    icon: Bell,
+    href: '/alertas',
+    prefix: true,
 }
 
 export const SidebarProfileComponent = ({
     ...props
 }: React.ComponentProps<typeof Sidebar>) => {
-    const pathname = usePathname();
-    const { state, open } = useSidebar()
-    const isExpanded = open || state === 'mobile'
-    const { getMenuItemClasses } = useMenuStyles();
-    const [isMounted, setIsMounted] = useState(false);
-    const [isActive, setIsActive] = useState(false);
+    const { user } = useSession()
 
-    // CARGAR SESIÓN para obtener el rol
-    const { user, isLoading } = useSession();
+    const canAccessProfiling = user?.role === 'admin_global' || user?.role === 'admin_empresa'
+    const canAccessOPLicencias = user?.role === 'admin_global'
+    const hasMultitenant = Boolean(user?.is_aws_multi_tenant || user?.is_azure_multi_tenant)
 
-    // Determinar si el usuario tiene permiso para ver el enlace de perfilamiento
-    const canAccessProfiling = user && (user.role === 'admin_global' || user.role === 'admin_empresa');
-    // Determinar si el usuario tiene permiso para ver el enlace de OnPremises
-    const canAccessOPLicencias = user && user.role === 'admin_global';
-
-    const isAwsMultiTenant = user && user.is_aws_multi_tenant;
-    const isAzureMultiTenant = user && user.is_azure_multi_tenant;
-
-    const hasMultitenant = isAwsMultiTenant || isAzureMultiTenant;
-
-    useEffect(() => {
-        // Asegúrate de que este chequeo de pathname también verifique las nuevas rutas
-        setIsActive(pathname.startsWith('/perfil/nubes') || pathname.startsWith('/presupuesto') || pathname.startsWith('/perfilamiento'));
-    }, [pathname]) // Se actualiza cada vez que la ruta cambia
-
-    useEffect(() => {
-        setIsMounted(true);
-    }, []);
-
-    if (!isMounted || isLoading) {
-        return null;
-    }
-
-    return (
-        <Sidebar collapsible="icon" {...props}>
-            <SidebarHeader className="flex flex-col items-center gap-2 py-4">
-                <Image
-                    width={100}
-                    height={100}
-                    alt="Logo Intac"
-                    src="/logo-intac.svg"
-                    className="object-cover"
-                />
-                {open && (
-                    <span className="text-xl font-bold tracking-wide">
-                        Cloud Performance
-                    </span>
-                )}
-            </SidebarHeader>
-            <SidebarContent>
-                <SidebarGroup>
-                    <SidebarMenu>
-                        <SidebarMenuItem>
-                            <SidebarMenuButton asChild>
-                                <Link
-                                    href="/perfil"
-                                    className={cn(
-                                        'flex items-center gap-3 px-3 py-2 rounded-md cursor-pointer transition-colors duration-150',
-                                        getMenuItemClasses(pathname === '/perfil') // Corregir chequeo de activación
-                                    )}
-                                >
-                                    <House className="h-5 w-5 text-blue-500" />
-                                    <span className="text-sm font-medium">Inicio</span>
-                                </Link>
-                            </SidebarMenuButton>
-                            <SidebarMenuButton asChild>
-                                <Link
-                                    href="#"
-                                    className={cn(
-                                        'flex items-center gap-3 px-3 py-2 rounded-md cursor-pointer transition-colors duration-150',
-                                        getMenuItemClasses(false) // Dejar inactivo
-                                    )}
-                                >
-                                    <Shield className="h-5 w-5 text-blue-500" />
-                                    <span className="text-sm font-medium">Modificar Contraseña</span>
-                                </Link>
-                            </SidebarMenuButton>
-                            <SidebarMenuButton asChild>
-                                <Link
-                                    href="#"
-                                    className={cn(
-                                        'flex items-center gap-3 px-3 py-2 rounded-md cursor-pointer transition-colors duration-150',
-                                        getMenuItemClasses(false) // Dejar inactivo
-                                    )}
-                                >
-                                    <Mail className="h-5 w-5 text-blue-500" />
-                                    <span className="text-sm font-medium">Modificar Correo</span>
-                                </Link>
-                            </SidebarMenuButton>
-                            <SidebarMenuButton asChild>
-                                <Link
-                                    href='/perfil/conectores'
-                                    className={cn(
-                                        'flex items-center gap-3 px-3 py-2 rounded-md cursor-pointer transition-colors duration-150',
-                                        getMenuItemClasses(pathname.startsWith('/perfil/conectores'))
-                                    )}
-                                >
-                                    <Cable className="h-5 w-5 text-blue-500" />
-                                    <span className="text-sm font-medium">Conectores</span>
-                                </Link>
-                            </SidebarMenuButton>
-                            <SidebarMenuButton asChild>
-                                <Link
-                                    href='/perfil/nubes'
-                                    className={cn(
-                                        'flex items-center gap-3 px-3 py-2 rounded-md cursor-pointer transition-colors duration-150',
-                                        getMenuItemClasses(pathname.startsWith('/perfil/nubes'))
-                                    )}
-                                >
-                                    <Cloud className="h-5 w-5 text-blue-500" />
-                                    <span className="text-sm font-medium">Nubes</span>
-                                </Link>
-                            </SidebarMenuButton>
-                            <SidebarMenuButton asChild>
-                                <Link
-                                    href='/perfil/servicios-ia'
-                                    className={cn(
-                                        'flex items-center gap-3 px-3 py-2 rounded-md cursor-pointer transition-colors duration-150',
-                                        getMenuItemClasses(pathname.startsWith('/perfil/servicios-ia'))
-                                    )}
-                                >
-                                    <Bot className="h-5 w-5 text-blue-500" />
-                                    <span className="text-sm font-medium">Servicios IA</span>
-                                </Link>
-                            </SidebarMenuButton>
-                            {/* <SidebarMenuButton asChild>
-                                <Link
-                                    href='/presupuesto'
-                                    className={cn(
-                                        'flex items-center gap-3 px-3 py-2 rounded-md cursor-pointer transition-colors duration-150',
-                                        getMenuItemClasses(pathname.startsWith('/presupuesto'))
-                                    )}
-                                >
-                                    <CircleDollarSign className="h-5 w-5 text-blue-500" />
-                                    <span className="text-sm font-medium">Presupuesto</span>
-                                </Link>
-                            </SidebarMenuButton> */}
-                            {
-                                hasMultitenant && (
-                                    <SidebarMenuButton asChild>
-                                        <Link
-                                            href='/comparacion-nubes'
-                                            className={cn(
-                                                'flex items-center gap-3 px-3 py-2 rounded-md cursor-pointer transition-colors duration-150',
-                                                getMenuItemClasses(pathname.startsWith('/comparacion-nubes'))
-                                            )}
-                                        >
-                                            <SplitSquareHorizontal className="h-5 w-5 text-blue-500" />
-                                            <span className="text-sm font-medium">Comparación Nubes</span>
-                                        </Link>
-                                    </SidebarMenuButton>
-                                )
-                            }
-
-                            {/* =================================================== */}
-                            {/* NUEVA SECCIÓN: PERFILAMIENTO */}
-                            {/* =================================================== */}
-                            {canAccessProfiling && (
-                                <SidebarMenuButton asChild>
-                                    <Link
-                                        href='/perfilamiento'
-                                        className={cn(
-                                            'flex items-center gap-3 px-3 py-2 rounded-md cursor-pointer transition-colors duration-150',
-                                            getMenuItemClasses(pathname.startsWith('/perfilamiento'))
-                                        )}
-                                    >
-                                        <Users className="h-5 w-5 text-blue-500" />
-                                        <span className="text-sm font-medium">Perfilamiento</span>
-                                    </Link>
-                                </SidebarMenuButton>
-                            )}
-
-                            {/* =================================================== */}
-                            {/* NUEVA SECCIÓN: LICENCIAS ONPREMISES */}
-                            {/* =================================================== */}
-                            {canAccessOPLicencias && (
-                                <SidebarMenuButton asChild>
-                                    <Link
-                                        href='/op-licencias'
-                                        className={cn(
-                                            'flex items-center gap-3 px-3 py-2 rounded-md cursor-pointer transition-colors duration-150',
-                                            getMenuItemClasses(pathname.startsWith('/op-licencias'))
-                                        )}
-                                    >
-                                        <ShieldCheck className="h-5 w-5 text-blue-500" />
-                                        <span className="text-sm font-medium">Licencias OnPremises</span>
-                                    </Link>
-                                </SidebarMenuButton>
-                            )}
-
-                            {/* =================================================== */}
-                            {/* NUEVA SECCIÓN: ALERTAS */}
-                            {/* =================================================== */}
-                            <SidebarMenuButton asChild>
-                                <Link
-                                    href='/alertas'
-                                    className={cn(
-                                        'flex items-center gap-3 px-3 py-2 rounded-md cursor-pointer transition-colors duration-150',
-                                        getMenuItemClasses(pathname.startsWith('/alertas'))
-                                    )}
-                                >
-                                    <Bell className="h-5 w-5 text-blue-500" />
-                                    <span className="text-sm font-medium">Alertas</span>
-                                </Link>
-                            </SidebarMenuButton>
-                        </SidebarMenuItem>
-                    </SidebarMenu>
-                </SidebarGroup>
-            </SidebarContent>
-        </Sidebar>
+    const items = useMemo<NavItem[]>(
+        () => [
+            ...BASE_ITEMS,
+            ...(hasMultitenant ? [MULTITENANT_ITEM] : []),
+            ...(canAccessProfiling ? [PROFILING_ITEM] : []),
+            ...(canAccessOPLicencias ? [ONPREM_LICENSES_ITEM] : []),
+            ALERTS_ITEM,
+        ],
+        [hasMultitenant, canAccessProfiling, canAccessOPLicencias]
     )
+
+    return <SidebarNav items={items} {...props} />
 }
