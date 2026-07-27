@@ -1,7 +1,7 @@
 "use client"
 
 import useSWR from "swr"
-import { ColumnDef } from "@tanstack/react-table"
+import { ColumnDef, CellContext } from "@tanstack/react-table"
 import { DataTableGrouping } from "@/components/data-table/data-table-grouping"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Receipt, Calendar, Cloud, FileSpreadsheet } from "lucide-react"
@@ -9,7 +9,7 @@ import { Receipt, Calendar, Cloud, FileSpreadsheet } from "lucide-react"
 type TableDataTop = {
   service_dimension: string
   end_date: string
-  record_type: string
+  record_type?: string
   dimension?: string 
   costo_neto: number | string
   costo_bruto: number | string
@@ -30,6 +30,7 @@ const formatCurrency = (value: number | string, maxDecimals: number = 4) => {
     maximumFractionDigits: maxDecimals,
   }).format(num)
 }
+
 export const TableComponentTop = ({
   startDateFormatted,
   endDateFormatted,
@@ -44,18 +45,23 @@ export const TableComponentTop = ({
     fetcher
   )
 
-  // Filtrar fuera los valores con 0
-  const filteredData = (data ?? []).filter((item) => {
-    const costoNeto = typeof item.costo_neto === "string" ? parseFloat(item.costo_neto) : item.costo_neto
-    const costoBruto = typeof item.costo_bruto === "string" ? parseFloat(item.costo_bruto) : item.costo_bruto
-    return costoNeto !== 0 && costoBruto !== 0
-  })
+  // Normalizamos dimension y unificamos el filtro de costo cero
+  const filteredData = (data ?? [])
+    .map((item) => ({
+      ...item,
+      dimension: item.dimension ?? item.record_type ?? "Sin definir",
+    }))
+    .filter((item) => {
+      const costoNeto = typeof item.costo_neto === "string" ? parseFloat(item.costo_neto) : item.costo_neto
+      const costoBruto = typeof item.costo_bruto === "string" ? parseFloat(item.costo_bruto) : item.costo_bruto
+      return !(costoNeto === 0 && costoBruto === 0)
+    })
 
   const columns: ColumnDef<TableDataTop>[] = [
     {
       accessorKey: "dimension",
       header: "Tipo de Cobro",
-      cell: ({ getValue }) => (
+      cell: ({ getValue }: CellContext<TableDataTop, unknown>) => (
         <div className="flex items-center gap-2 min-w-[150px]">
           <Receipt className="h-4 w-4 text-slate-400 shrink-0" />
           <span className="font-medium text-slate-700">{getValue() as string}</span>
@@ -65,7 +71,7 @@ export const TableComponentTop = ({
     {
       accessorKey: "service_dimension",
       header: "Servicio",
-      cell: ({ getValue }) => (
+      cell: ({ getValue }: CellContext<TableDataTop, unknown>) => (
         <div className="flex items-center gap-2 min-w-[300px] w-full">
           <Cloud className="h-4 w-4 text-indigo-400 shrink-0" />
           <span className="text-slate-600 font-medium" title={getValue() as string}>
@@ -77,7 +83,7 @@ export const TableComponentTop = ({
     {
       accessorKey: "end_date",
       header: "Fecha",
-      cell: ({ getValue, row }) => {
+      cell: ({ getValue, row }: CellContext<TableDataTop, unknown>) => {
         if (row.getIsGrouped()) return null
         const value = getValue()
         if (!value || typeof value !== "string") return "-"
@@ -101,7 +107,7 @@ export const TableComponentTop = ({
     {
       accessorKey: "costo_bruto",
       header: () => <div className="text-right w-full block">Costo Bruto</div>,
-      cell: ({ getValue }) => {
+      cell: ({ getValue }: CellContext<TableDataTop, unknown>) => {
         const value = getValue() as number | string
         const num = typeof value === "string" ? parseFloat(value) : value
         return (
@@ -114,7 +120,7 @@ export const TableComponentTop = ({
     {
       accessorKey: "costo_neto",
       header: () => <div className="text-right w-full block">Costo Neto</div>,
-      cell: ({ getValue }) => {
+      cell: ({ getValue }: CellContext<TableDataTop, unknown>) => {
         const value = getValue() as number | string
         const num = typeof value === "string" ? parseFloat(value) : value
         return (

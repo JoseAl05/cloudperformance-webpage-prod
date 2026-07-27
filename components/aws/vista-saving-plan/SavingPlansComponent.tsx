@@ -33,9 +33,51 @@ import { SavingPlansBarChartComponent } from '@/components/aws/vista-saving-plan
 import { SavingPlansLineChartComponent } from '@/components/aws/vista-saving-plan/graficos/SavingPlansLineChartComponent'
 import { LoaderComponent } from '@/components/general_aws/LoaderComponent'
 
+interface SavingsPlanItem {
+  savingsPlanArn: string
+  savingsPlanId?: string
+  savingsPlanType?: string
+  planType?: string
+  type?: string
+  state?: string
+  status?: string
+  estado?: string
+  [key: string]: unknown
+}
+
+interface CostUsageItem {
+  dimensions?: { SERVICE?: string; [key: string]: string | undefined }
+  SERVICE?: string
+  amortizedcost?: number | string
+  unblendedcost?: number | string
+  [key: string]: unknown
+}
+
+interface SpCostData {
+  commitment_hourly?: number
+  costo_diario?: number
+  costo_mensual?: number
+}
+
+interface DashboardStats {
+  planes_retirados?: number
+  planes_registrados?: number
+  planes_activos?: number
+}
+
+interface Ec2InstancesPrices {
+  total_unique_instances?: number
+  total_price_usd?: number
+}
+
+interface SavingPlansComponentProps {
+  startDate: Date | string
+  endDate: Date | string
+}
+
 const fetcher = (url: string) =>
   fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
-    .then(r => r.json());
+    .then(r => r.json())
 
 const formatUSD = (value: number) =>
   new Intl.NumberFormat("en-US", {
@@ -45,102 +87,110 @@ const formatUSD = (value: number) =>
     maximumFractionDigits: 2,
   }).format(value)
 
-interface SavingPlansComponentProps {
-  startDate: Date
-  endDate: Date
-}
-
 export const SavingPlansViewComponent = ({ startDate, endDate }: SavingPlansComponentProps) => {
-  const startDateFormatted = startDate.toISOString().replace("Z", "").slice(0, -4)
-  const endDateFormatted = endDate ? endDate.toISOString().replace("Z", "").slice(0, -4) : ""
+  const startObj = useMemo(() => new Date(startDate), [startDate])
+  const endObj = useMemo(() => (endDate ? new Date(endDate) : null), [endDate])
+
+  const startDateFormatted = !isNaN(startObj.getTime()) ? startObj.toISOString().replace("Z", "").slice(0, -4) : ""
+  const endDateFormatted = endObj && !isNaN(endObj.getTime()) ? endObj.toISOString().replace("Z", "").slice(0, -4) : ""
 
   const [selectedPlanType, setSelectedPlanType] = useState<string>("all")
   const [selectedArn, setSelectedArn] = useState<string>("")
   const [isSwitchingArn, setIsSwitchingArn] = useState<boolean>(false)
 
-  const { data: plansData, isLoading: loadingPlans } = useSWR(
-    `/api/aws/bridge/saving-plans/vista-saving-plans?date_from=${startDateFormatted}&date_to=${endDateFormatted}`,
+  const { data: plansData, isLoading: loadingPlans } = useSWR<SavingsPlanItem[]>(
+    startDateFormatted && endDateFormatted
+      ? `/api/aws/bridge/saving-plans/vista-saving-plans?date_from=${startDateFormatted}&date_to=${endDateFormatted}`
+      : null,
     fetcher
   )
 
-  const { data: stats, isLoading: loadingStats } = useSWR(
-    `/api/aws/bridge/saving-plans/vista-saving-plans/dashboard-stats?date_from=${startDateFormatted}&date_to=${endDateFormatted}`,
+  const { data: stats, isLoading: loadingStats } = useSWR<DashboardStats>(
+    startDateFormatted && endDateFormatted
+      ? `/api/aws/bridge/saving-plans/vista-saving-plans/dashboard-stats?date_from=${startDateFormatted}&date_to=${endDateFormatted}`
+      : null,
     fetcher
   )
 
   const totalActivePlansInAccount = useMemo(() => {
-    if (!plansData || !Array.isArray(plansData)) return 0;
-    return plansData.filter((plan: any) => 
+    if (!plansData || !Array.isArray(plansData)) return 0
+    return plansData.filter((plan) => 
       !plan.state || plan.state?.toLowerCase() === 'active' || plan.status?.toLowerCase() === 'active' || plan.estado === 'ACTIVO'
-    ).length;
-  }, [plansData]);
+    ).length
+  }, [plansData])
 
   const availableTypes = useMemo(() => {
-    if (!plansData || !Array.isArray(plansData)) return [];
-    const typesSet = new Set<string>();
-    plansData.forEach((plan: any) => {
-      const type = plan.savingsPlanType || plan.planType || plan.type;
-      if (type) typesSet.add(type);
-    });
-    return Array.from(typesSet);
-  }, [plansData]);
+    if (!plansData || !Array.isArray(plansData)) return []
+    const typesSet = new Set<string>()
+    plansData.forEach((plan) => {
+      const type = plan.savingsPlanType || plan.planType || plan.type
+      if (type && typeof type === "string") typesSet.add(type)
+    })
+    return Array.from(typesSet)
+  }, [plansData])
 
   const activePlans = useMemo(() => {
-    if (!plansData || !Array.isArray(plansData)) return [];
-    const filtered = plansData.filter((plan: any) => {
-      const isActive = !plan.state || plan.state?.toLowerCase() === 'active' || plan.status?.toLowerCase() === 'active' || plan.estado === 'ACTIVO';
-      const planType = plan.savingsPlanType || plan.planType || plan.type || "";
-      const matchesType = selectedPlanType === "all" || planType.toLowerCase().includes(selectedPlanType.toLowerCase());
-      return isActive && matchesType;
-    });
+    if (!plansData || !Array.isArray(plansData)) return []
+    const filtered = plansData.filter((plan) => {
+      const isActive = !plan.state || plan.state?.toLowerCase() === 'active' || plan.status?.toLowerCase() === 'active' || plan.estado === 'ACTIVO'
+      const planType = plan.savingsPlanType || plan.planType || plan.type || ""
+      const matchesType = selectedPlanType === "all" || (typeof planType === "string" && planType.toLowerCase().includes(selectedPlanType.toLowerCase()))
+      return isActive && matchesType
+    })
 
-    const uniquePlansMap = new Map();
-    filtered.forEach((plan: any) => {
+    const uniquePlansMap = new Map<string, SavingsPlanItem>()
+    filtered.forEach((plan) => {
       if (plan.savingsPlanArn && !uniquePlansMap.has(plan.savingsPlanArn)) {
-        uniquePlansMap.set(plan.savingsPlanArn, plan);
+        uniquePlansMap.set(plan.savingsPlanArn, plan)
       }
-    });
+    })
 
-    return Array.from(uniquePlansMap.values());
-  }, [plansData, selectedPlanType]);
+    return Array.from(uniquePlansMap.values())
+  }, [plansData, selectedPlanType])
 
   useEffect(() => {
     if (activePlans.length > 0) {
-      const currentArnExists = activePlans.some((p: any) => p.savingsPlanArn === selectedArn);
+      const currentArnExists = activePlans.some((p) => p.savingsPlanArn === selectedArn)
       if (!selectedArn || !currentArnExists) {
-        setIsSwitchingArn(true);
-        setSelectedArn(activePlans[0].savingsPlanArn);
+        setIsSwitchingArn(true)
+        setSelectedArn(activePlans[0].savingsPlanArn)
       }
     } else {
-      setSelectedArn(""); 
-      setIsSwitchingArn(false);
+      setSelectedArn("") 
+      setIsSwitchingArn(false)
     }
-  }, [activePlans, selectedArn]);
+  }, [activePlans, selectedArn])
 
   const isComputePlan = useMemo(() => {
-    const currentPlan = activePlans.find((p: any) => p.savingsPlanArn === selectedArn);
-    const typeToCheck = (currentPlan?.savingsPlanType || currentPlan?.planType || currentPlan?.type || selectedPlanType).toLowerCase();
+    const currentPlan = activePlans.find((p) => p.savingsPlanArn === selectedArn)
+    const typeToCheck = String(currentPlan?.savingsPlanType || currentPlan?.planType || currentPlan?.type || selectedPlanType).toLowerCase()
     
     if (typeToCheck.includes("database") || typeToCheck.includes("rds") || typeToCheck.includes("db") || typeToCheck.includes("sagemaker")) {
-      return false;
+      return false
     }
-    return true;
-  }, [selectedPlanType, selectedArn, activePlans]);
+    return true
+  }, [selectedPlanType, selectedArn, activePlans])
 
-  const { data: costUsage, error: errorUsage, isLoading: loadingUsage, isValidating: validatingUsage } = useSWR(
-    selectedArn ? `/api/aws/bridge/saving-plans/saving-plan-cost-usage?date_from=${startDateFormatted}&date_to=${endDateFormatted}&savings_plan_arn=${selectedArn}` : null,
+  const { data: costUsage, error: errorUsage, isLoading: loadingUsage, isValidating: validatingUsage } = useSWR<CostUsageItem[]>(
+    selectedArn && startDateFormatted && endDateFormatted
+      ? `/api/aws/bridge/saving-plans/saving-plan-cost-usage?date_from=${startDateFormatted}&date_to=${endDateFormatted}&savings_plan_arn=${selectedArn}`
+      : null,
     fetcher,
     { keepPreviousData: false }
   )
 
-  const { data: spcost, isLoading: loadingSpCost, isValidating: validatingSpCost } = useSWR(
-    selectedArn ? `/api/aws/bridge/saving-plans/savings-plan-cost?date_from=${startDateFormatted}&date_to=${endDateFormatted}&savings_plan_arn=${selectedArn}` : null,
+  const { data: spcost, isLoading: loadingSpCost, isValidating: validatingSpCost } = useSWR<SpCostData>(
+    selectedArn && startDateFormatted && endDateFormatted
+      ? `/api/aws/bridge/saving-plans/savings-plan-cost?date_from=${startDateFormatted}&date_to=${endDateFormatted}&savings_plan_arn=${selectedArn}`
+      : null,
     fetcher,
     { keepPreviousData: false }
   )
 
-  const { data: ec2Intances, isLoading: loadingEc2, isValidating: validatingEc2 } = useSWR(
-    isComputePlan ? `/api/aws/bridge/saving-plans/ec2-instances-prices/?date_from=${startDateFormatted}&date_to=${endDateFormatted}` : null,
+  const { data: ec2Intances, isLoading: loadingEc2, isValidating: validatingEc2 } = useSWR<Ec2InstancesPrices>(
+    isComputePlan && startDateFormatted && endDateFormatted
+      ? `/api/aws/bridge/saving-plans/ec2-instances-prices/?date_from=${startDateFormatted}&date_to=${endDateFormatted}`
+      : null,
     fetcher,
     { keepPreviousData: false }
   )
@@ -148,13 +198,13 @@ export const SavingPlansViewComponent = ({ startDate, endDate }: SavingPlansComp
   useEffect(() => {
     if (selectedArn && !loadingUsage && !validatingUsage && !loadingSpCost && !validatingSpCost) {
       const timer = setTimeout(() => {
-        setIsSwitchingArn(false);
-      }, 350);
-      return () => clearTimeout(timer);
+        setIsSwitchingArn(false)
+      }, 350)
+      return () => clearTimeout(timer)
     }
-  }, [selectedArn, loadingUsage, validatingUsage, loadingSpCost, validatingSpCost]);
+  }, [selectedArn, loadingUsage, validatingUsage, loadingSpCost, validatingSpCost])
 
-  const isWaitingForInitialArn = activePlans.length > 0 && !selectedArn;
+  const isWaitingForInitialArn = activePlans.length > 0 && !selectedArn
   
   const isGlobalLoading = 
     loadingPlans || 
@@ -162,10 +212,10 @@ export const SavingPlansViewComponent = ({ startDate, endDate }: SavingPlansComp
     isWaitingForInitialArn || 
     isSwitchingArn || 
     (selectedArn !== "" && (loadingUsage || validatingUsage || loadingSpCost || validatingSpCost)) || 
-    (isComputePlan && (loadingEc2 || validatingEc2));
+    (isComputePlan && (loadingEc2 || validatingEc2))
 
   if (isGlobalLoading) {
-    return <LoaderComponent />;
+    return <LoaderComponent />
   }
 
   if (!plansData || plansData.length === 0 || totalActivePlansInAccount === 0) {
@@ -189,39 +239,40 @@ export const SavingPlansViewComponent = ({ startDate, endDate }: SavingPlansComp
           </CardContent>
         </Card>
       </div>
-    );
+    )
   }
 
   if (errorUsage) return <p className="p-4 text-sm text-red-500">Ocurrió un error cargando los datos del plan.</p>
 
   const getCoverageStatus = () => {
-    if (!spcost || !costUsage || costUsage.length === 0) {
+    if (!spcost || !costUsage || !Array.isArray(costUsage) || costUsage.length === 0) {
       return { 
         label: "Sin Datos", color: "text-gray-400", bg: "border-l-gray-400", 
         icon: <Activity className="h-8 w-8 text-gray-400" />, 
         utilizado: 0, compromiso: 0, desperdicio: 0 
-      };
+      }
     }
 
-    let totalUsoReal = 0;    
-    let totalCompromiso = 0; 
+    let totalUsoReal = 0    
+    let totalCompromiso = 0 
 
-    costUsage.forEach((curr: any) => {
-      const serviceName = curr.dimensions?.SERVICE || curr.SERVICE || "";
+    costUsage.forEach((curr) => {
+      const serviceName = curr.dimensions?.SERVICE || curr.SERVICE || ""
       if (serviceName.includes("Savings Plans")) {
-        totalUsoReal += Number(curr.amortizedcost) || 0; 
-        totalCompromiso += Number(curr.unblendedcost) || 0;
+        totalUsoReal += Number(curr.amortizedcost) || 0 
+        totalCompromiso += Number(curr.unblendedcost) || 0
       }
-    });
+    })
 
     if (totalCompromiso === 0) {
-      const diffTime = Math.abs(endDate.getTime() - startDate.getTime());
-      const diasDelPeriodo = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) || 1;
-      totalCompromiso = spcost.costo_diario * diasDelPeriodo;
-      totalUsoReal = costUsage.reduce((acc: number, curr: any) => acc + (Number(curr.amortizedcost) || 0), 0);
+      const endTime = endObj ? endObj.getTime() : startObj.getTime()
+      const diffTime = Math.abs(endTime - startObj.getTime())
+      const diasDelPeriodo = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) || 1
+      totalCompromiso = (Number(spcost.costo_diario) || 0) * diasDelPeriodo
+      totalUsoReal = costUsage.reduce((acc, curr) => acc + (Number(curr.amortizedcost) || 0), 0)
     }
 
-    const diferencia = totalCompromiso - totalUsoReal;
+    const diferencia = totalCompromiso - totalUsoReal
 
     if (diferencia > totalCompromiso * 0.15) { 
       return { 
@@ -233,7 +284,7 @@ export const SavingPlansViewComponent = ({ startDate, endDate }: SavingPlansComp
         utilizado: totalUsoReal,
         compromiso: totalCompromiso,
         desperdicio: diferencia
-      };
+      }
     } else if (diferencia < -(totalCompromiso * 0.15)) {
       return { 
         label: "Baja Cobertura", 
@@ -244,7 +295,7 @@ export const SavingPlansViewComponent = ({ startDate, endDate }: SavingPlansComp
         utilizado: totalUsoReal,
         compromiso: totalCompromiso,
         desperdicio: Math.abs(diferencia)
-      };
+      }
     }
     
     return { 
@@ -256,10 +307,10 @@ export const SavingPlansViewComponent = ({ startDate, endDate }: SavingPlansComp
       utilizado: totalUsoReal,
       compromiso: totalCompromiso,
       desperdicio: 0
-    };
-  };
+    }
+  }
 
-  const coverage = getCoverageStatus();
+  const coverage = getCoverageStatus()
 
   return (
     <div className="space-y-6 p-4">
@@ -323,9 +374,9 @@ export const SavingPlansViewComponent = ({ startDate, endDate }: SavingPlansComp
             <Select 
               value={selectedPlanType} 
               onValueChange={(val) => {
-                setIsSwitchingArn(true);
-                setSelectedPlanType(val);
-                setSelectedArn(""); 
+                setIsSwitchingArn(true)
+                setSelectedPlanType(val)
+                setSelectedArn("") 
               }}
             >
               <SelectTrigger className="w-full bg-white dark:bg-slate-800 rounded-xl">
@@ -353,8 +404,8 @@ export const SavingPlansViewComponent = ({ startDate, endDate }: SavingPlansComp
             <Select 
               value={selectedArn} 
               onValueChange={(val) => {
-                setIsSwitchingArn(true);
-                setSelectedArn(val);
+                setIsSwitchingArn(true)
+                setSelectedArn(val)
               }}
               disabled={activePlans.length === 0}
             >
@@ -365,9 +416,9 @@ export const SavingPlansViewComponent = ({ startDate, endDate }: SavingPlansComp
                 {activePlans.length === 0 && (
                   <SelectItem value="none" disabled>No se encontraron planes activos</SelectItem>
                 )}
-                {activePlans.map((plan: any) => {
-                  const shortName = plan.savingsPlanId || plan.savingsPlanArn.split('/').pop() || plan.savingsPlanArn;
-                  const typeLabel = plan.savingsPlanType || plan.planType ? ` (${plan.savingsPlanType || plan.planType})` : '';
+                {activePlans.map((plan) => {
+                  const shortName = plan.savingsPlanId || plan.savingsPlanArn.split('/').pop() || plan.savingsPlanArn
+                  const typeLabel = plan.savingsPlanType || plan.planType ? ` (${plan.savingsPlanType || plan.planType})` : ''
 
                   return (
                     <SelectItem 
@@ -377,7 +428,7 @@ export const SavingPlansViewComponent = ({ startDate, endDate }: SavingPlansComp
                     >
                       {shortName}{typeLabel}
                     </SelectItem>
-                  );
+                  )
                 })}
               </SelectContent>
             </Select>
@@ -496,8 +547,8 @@ export const SavingPlansViewComponent = ({ startDate, endDate }: SavingPlansComp
         <div className="col-span-1 md:col-span-12">
           <SavingPlansLineChartComponent
             costUsage={costUsage ? costUsage : []}
-            startDate={startDate}
-            endDate={endDate}
+            startDate={startObj}
+            endDate={endObj || startObj}
           />
         </div>
 

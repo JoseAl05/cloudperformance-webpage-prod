@@ -1,7 +1,7 @@
 "use client"
 
 import useSWR from "swr"
-import { ColumnDef } from "@tanstack/react-table"
+import { ColumnDef, CellContext } from "@tanstack/react-table"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Hash, Calendar, Cloud, FileSpreadsheet } from "lucide-react"
 import { DataTableGrouping } from "@/components/data-table/data-table-grouping"
@@ -44,7 +44,6 @@ export const TableComponentTop = ({
     fetcher
   )
 
-  //Filtrar fuera los que tienen ambos costos = 0
   const filteredData = (data ?? []).filter((item) => {
     const costoNeto = typeof item.costo_neto === "string" ? parseFloat(item.costo_neto) : item.costo_neto
     const costoBruto = typeof item.costo_bruto === "string" ? parseFloat(item.costo_bruto) : item.costo_bruto
@@ -55,7 +54,7 @@ export const TableComponentTop = ({
     {
       accessorKey: "dimension",
       header: "Recurso",
-      cell: ({ getValue }) => (
+      cell: ({ getValue }: CellContext<TableDataTopResource, unknown>) => (
         <div className="flex items-center gap-2 min-w-[150px]">
           <Hash className="h-4 w-4 text-slate-400 shrink-0" />
           <span className="font-medium text-slate-700">{getValue() as string}</span>
@@ -65,7 +64,7 @@ export const TableComponentTop = ({
     {
       accessorKey: "service_dimension",
       header: "Servicio",
-      cell: ({ getValue }) => (
+      cell: ({ getValue }: CellContext<TableDataTopResource, unknown>) => (
         <div className="flex items-center gap-2 min-w-[300px] w-full">
           <Cloud className="h-4 w-4 text-indigo-400 shrink-0" />
           <span className="text-slate-600 font-medium" title={getValue() as string}>
@@ -77,7 +76,7 @@ export const TableComponentTop = ({
     {
       accessorKey: "end_date",
       header: "Fecha",
-      cell: ({ getValue, row }) => {
+      cell: ({ getValue, row }: CellContext<TableDataTopResource, unknown>) => {
         if (row.getIsGrouped()) return null
         const value = getValue()
         if (!value || typeof value !== "string") return "-"
@@ -101,7 +100,7 @@ export const TableComponentTop = ({
     {
       accessorKey: "costo_bruto",
       header: () => <div className="text-right w-full block">Costo Bruto</div>,
-      cell: ({ getValue }) => {
+      cell: ({ getValue }: CellContext<TableDataTopResource, unknown>) => {
         const value = getValue() as number | string
         const num = typeof value === "string" ? parseFloat(value) : value
         return (
@@ -114,7 +113,7 @@ export const TableComponentTop = ({
     {
       accessorKey: "costo_neto",
       header: () => <div className="text-right w-full block">Costo Neto</div>,
-      cell: ({ getValue }) => {
+      cell: ({ getValue }: CellContext<TableDataTopResource, unknown>) => {
         const value = getValue() as number | string
         const num = typeof value === "string" ? parseFloat(value) : value
         return (
