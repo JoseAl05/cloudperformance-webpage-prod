@@ -26,7 +26,7 @@ interface FacturacionAzureData {
     product: string;
     meter_category: string;
     instance_name: string;
-    cost_in_usd: number;
+    cost_in_billing_currency: number;
     resource_location: string;
 }
 
@@ -84,7 +84,7 @@ export const TendenciaFacturacionPagoPorUsoComponent = ({
 
     const calculateMetrics = (rawData: FacturacionAzureData[]) => {
         if (!rawData?.length) return { total: 0, services: 0, subscriptions: 0, locations: 0 };
-        const total = rawData.reduce((sum, item) => sum + item.cost_in_usd, 0);
+        const total = rawData.reduce((sum, item) => sum + item.cost_in_billing_currency, 0);
         const services = new Set(rawData.map((i) => i.meter_category)).size;
         const subscriptions = new Set(rawData.map((i) => i.subscription_name)).size;
         const locations = new Set(rawData.map((i) => i.resource_location)).size;

@@ -21,7 +21,7 @@ interface FacturacionAzureData {
     product: string;
     meter_category: string;
     instance_name: string;
-    cost_in_usd: number;
+    cost_in_billing_currency: number;
     resource_location: string;
 }
 
@@ -97,7 +97,7 @@ export const TendenciaFacturacionPagoPorUsoLineChartComponent = ({
         rawData.forEach((item) => {
             const service = item.meter_category || 'Sin categoria';
             const date = new Date(item.date).toISOString().slice(0, 10);
-            const cost = item.cost_in_usd;
+            const cost = item.cost_in_billing_currency;
 
             allDates.add(date);
             if (!serviceMap.has(service)) serviceMap.set(service, new Map());
