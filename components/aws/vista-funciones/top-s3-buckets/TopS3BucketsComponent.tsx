@@ -167,7 +167,7 @@ export const TopS3BucketsComponent = ({
       ) : (
         <div className="py-12 text-center border-2 border-dashed border-slate-200 rounded-2xl bg-slate-50/50">
           <p className="text-slate-500 font-medium">
-            Selecciona un bucket o la opción <span className="font-semibold text-slate-700">"Todos los buckets"</span> en el filtro superior para visualizar las métricas y gráficos.
+            Selecciona un bucket en el filtro superior para visualizar las métricas y gráficos.
           </p>
         </div>
       )}
