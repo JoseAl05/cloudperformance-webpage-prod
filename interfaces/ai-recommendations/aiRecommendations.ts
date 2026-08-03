@@ -66,6 +66,7 @@ export interface AiRecommendationResource {
   resource_type: string;
   icon: string;
   recommendation_subtype: string;
+  provider?: string;
   diagnosis: AiRecommendationDiagnosis;
   impact_matrix: AiRecommendationImpactMatrix;
   action_plan: AiRecommendationActionPlan;

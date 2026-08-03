@@ -353,6 +353,14 @@ const ResourceCard = ({ resource, onStatusChange, onOpenHistory }: ResourceCardP
                             <span className="text-xs px-2 py-0.5 rounded-full bg-secondary text-secondary-foreground font-medium">
                                 {resource.resource_type}
                             </span>
+                            {resource.provider === 'CloudPerformance' && (
+                                <img 
+                                    src="/firma-cloudperformance-h.png"
+                                    alt="CloudPerformance" 
+                                    className="h-4 sm:h-8 object-contain ml-1" 
+                                    title="Hallazgo detectado por el motor de CloudPerformance"
+                                />
+                            )}
                         </div>
                         <p className="text-sm font-normal text-slate-600 dark:text-slate-400 line-clamp-1">
                             {cleanText(diagnosis.summary)}
