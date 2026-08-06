@@ -566,9 +566,9 @@ const MaturityDetail = ({ metricData }: { metricData: MaturityAssessmentAnalysis
                     <h3 className="text-3xl font-extrabold text-foreground mb-2 text-center">
                         {metricData.metric_name}
                     </h3>
-                    <Badge className={`${getStatusColor(metricData.status)} border`} variant="outline">
+                    {/* <Badge className={`${getStatusColor(metricData.status)} border`} variant="outline">
                         {metricData.status}
-                    </Badge>
+                    </Badge> */}
                 </div>
                 <CardContent className="pt-6 grid gap-6">
                     <div className="space-y-2">
