@@ -33,7 +33,7 @@ interface TendenciaFacturacionProps {
 interface FacturacionData {
     SERVICE: string;
     start_date: string;
-    unblendedcost: number;
+    netamortizedcost: number;
     REGION: string;
     RESOURCE_ID: string | null;
     sync_time: { $date: string };
@@ -77,7 +77,7 @@ export const TendenciaFacturacionChartComponent = ({ startDate, endDate, service
         const serviceTotals = new Map<string, number>();
         dataOriginal.forEach(item => {
             const current = serviceTotals.get(item.SERVICE) || 0;
-            serviceTotals.set(item.SERVICE, current + item.unblendedcost);
+            serviceTotals.set(item.SERVICE, current + item.netamortizedcost);
         });
 
         const topServicesNames = Array.from(serviceTotals.entries())
@@ -91,7 +91,7 @@ export const TendenciaFacturacionChartComponent = ({ startDate, endDate, service
     const calculateMetrics = (processedData: FacturacionData[]) => {
         if (!processedData?.length) return { total: 0, servicesList: [], regionsList: [] };
 
-        const total = processedData.reduce((sum, item) => sum + item.unblendedcost, 0);
+        const total = processedData.reduce((sum, item) => sum + item.netamortizedcost, 0);
         const servicesList = Array.from(new Set(processedData.map((i) => i.SERVICE))).sort();
         const regionsList = Array.from(new Set(processedData.map((i) => i.REGION))).sort();
 
