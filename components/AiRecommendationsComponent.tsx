@@ -28,7 +28,9 @@ import {
     AlertTriangle,
     X,
     Loader2,
-    History
+    History,
+    Check,
+    Info
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -42,6 +44,8 @@ import { Textarea } from '@/components/ui/textarea';
 import useSWRMutation from 'swr/mutation';
 import { AiRecommendationsStatusDialogComponent } from '@/components/AiRecommendationsStatusDialogComponent';
 import { Separator } from '@/components/ui/separator';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import Image from 'next/image';
 
 interface AiRecommendationsComponentProps {
     data: AiRecommendationReport[] | null;
@@ -73,7 +77,9 @@ interface ResourceCardProps {
     onOpenHistory: () => void;
 }
 
-type SortField = 'savings' | 'risk';
+type SortField = 'savings' | 'potential' | 'risk';
+
+type PotentialConfidence = 'High' | 'Medium' | 'Low' | 'Not applicable';
 type SortDirection = 'desc' | 'asc';
 type StatusFilterValue = RecommendationStatus | 'unassigned';
 
@@ -98,6 +104,27 @@ const UNASSIGNED_BADGE = 'bg-slate-100 text-slate-600 border-slate-200 dark:bg-s
 
 const RISK_ORDER: Record<string, number> = { high: 3, alto: 3, medium: 2, medio: 2, low: 1, bajo: 1 };
 
+const CONFIDENCE_LABELS: Record<PotentialConfidence, string> = {
+    'High': 'Alta',
+    'Medium': 'Media',
+    'Low': 'Baja',
+    'Not applicable': 'No aplica',
+};
+
+const CONFIDENCE_STYLES: Record<PotentialConfidence, string> = {
+    'High': 'bg-emerald-100 text-emerald-900 border-emerald-200 dark:bg-emerald-900/40 dark:text-emerald-300 dark:border-emerald-800',
+    'Medium': 'bg-sky-100 text-sky-900 border-sky-200 dark:bg-sky-900/40 dark:text-sky-300 dark:border-sky-800',
+    'Low': 'bg-amber-100 text-amber-900 border-amber-200 dark:bg-amber-900/40 dark:text-amber-300 dark:border-amber-800',
+    'Not applicable': 'bg-slate-100 text-slate-600 border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700',
+};
+
+const CONFIDENCE_HINTS: Record<PotentialConfidence, string> = {
+    'High': 'El escenario optimista coincide con el conservador: no queda ningún supuesto por validar.',
+    'Medium': 'La cifra está tarificada con exactitud. Lo único pendiente es una decisión comercial, como aceptar un plazo de compromiso mayor.',
+    'Low': 'La cifra está tarificada con exactitud, pero depende de una premisa técnica que la evidencia no confirma. Es un techo a investigar.',
+    'Not applicable': 'El motor no pudo cuantificar ningún ahorro para este hallazgo.',
+};
+
 const ITEMS_PER_PAGE = 10;
 
 const ALL_STATUS_FILTERS: StatusFilterValue[] = ['En ejecución', 'Finalizada', 'Rechazada', 'Pospuesta', 'unassigned'];
@@ -120,12 +147,18 @@ const statusFetcher = async (
 };
 
 const formatCurrency = (amount: number, currency: string = 'USD') => {
-    return new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: currency,
+    const value = new Intl.NumberFormat('es-CL', {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2,
     }).format(amount);
+    return `${value} ${currency}`;
+};
+
+const formatRatio = (value: number) => {
+    return new Intl.NumberFormat('es-CL', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+    }).format(value);
 };
 
 const getRiskStyles = (risk: string) => {
@@ -153,6 +186,109 @@ const computeRecommendationGroupId = (resource: AiRecommendationResource, cloudP
 
 const getRiskWeight = (level: string): number => {
     return RISK_ORDER[level.toLowerCase()] ?? 0;
+};
+
+const normalizeConfidence = (value?: string): PotentialConfidence => {
+    if (value === 'High' || value === 'Medium' || value === 'Low') return value;
+    return 'Not applicable';
+};
+
+const ConfidenceBadge = ({ value, className = '' }: { value?: string; className?: string }) => {
+    const level = normalizeConfidence(value);
+    return (
+        <span
+            className={`text-xs font-semibold px-2 py-0.5 rounded border whitespace-nowrap ${CONFIDENCE_STYLES[level]} ${className}`}
+            title={CONFIDENCE_HINTS[level]}
+        >
+            {CONFIDENCE_LABELS[level]}
+        </span>
+    );
+};
+
+const SavingsScenarioSummary = ({
+    conservative,
+    optimistic,
+    confidence,
+    syncTime,
+}: {
+    conservative: number;
+    optimistic?: number | null;
+    confidence?: string;
+    syncTime?: string | Date | null;
+}) => {
+    const optimisticValue = typeof optimistic === 'number' ? optimistic : 0;
+    const hasUpside = optimisticValue > conservative + 0.01;
+    const upside = Math.max(optimisticValue - conservative, 0);
+    const ratio = conservative > 0 ? optimisticValue / conservative : 0;
+    const provenShare = optimisticValue > 0
+        ? Math.min(100, Math.max(0, (conservative / optimisticValue) * 100))
+        : 100;
+
+    return (
+        <div className="w-full bg-card border border-border rounded-xl p-5 shadow-sm">
+            <span className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-4">
+                Escenarios de ahorro mensual
+            </span>
+
+            <div className="flex items-baseline justify-between gap-4">
+                <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-400 uppercase tracking-wide">
+                    Conservador
+                </span>
+                <span className="text-2xl font-black text-emerald-700 dark:text-emerald-400 leading-none tabular-nums">
+                    {formatCurrency(conservative)}
+                </span>
+            </div>
+            <span className="block text-[11px] text-slate-500 dark:text-slate-400 mt-1">
+                Demostrado con datos
+            </span>
+
+            {hasUpside && (
+                <>
+                    <div className="flex items-baseline justify-between gap-4 mt-4">
+                        <span className="text-xs font-semibold text-amber-700 dark:text-amber-400 uppercase tracking-wide">
+                            Optimista
+                        </span>
+                        <span className="text-2xl font-black text-amber-700 dark:text-amber-400 leading-none tabular-nums">
+                            {formatCurrency(optimisticValue)}
+                        </span>
+                    </div>
+                    <div className="flex items-center justify-between gap-3 mt-1">
+                        <span className="text-[11px] text-slate-500 dark:text-slate-400">
+                            {ratio > 0 ? `${formatRatio(ratio)}x el conservador` : 'Requiere validación'}
+                        </span>
+                        <span className="flex items-center gap-1.5">
+                            <span className="text-[11px] text-slate-500 dark:text-slate-400">Confianza</span>
+                            <ConfidenceBadge value={confidence} />
+                        </span>
+                    </div>
+
+                    <div className="h-2 w-full rounded-full bg-amber-400 dark:bg-amber-600 overflow-hidden mt-4">
+                        <div
+                            className="h-full rounded-full bg-emerald-600 dark:bg-emerald-500"
+                            style={{ width: `${provenShare}%` }}
+                        />
+                    </div>
+                    <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-snug mt-3">
+                        El escenario optimista <strong>ya incluye</strong> el conservador. No son cifras sumables:
+                        los {formatCurrency(upside)} restantes son la misma acción valorada con supuestos que el
+                        cliente debe validar.
+                    </p>
+                </>
+            )}
+
+            {!hasUpside && (
+                <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-snug mt-4">
+                    No se identificó un escenario optimista distinto del conservador para este reporte.
+                </p>
+            )}
+
+            {syncTime && (
+                <span className="block text-[11px] text-slate-500 dark:text-slate-400 mt-4 pt-3 border-t border-border">
+                    Fecha observación: {new Date(syncTime).toLocaleString()}
+                </span>
+            )}
+        </div>
+    );
 };
 
 const StatusFeedbackToast = ({ feedback, onDismiss }: StatusFeedbackToastProps) => {
@@ -333,6 +469,8 @@ const ResourceCard = ({ resource, onStatusChange, onOpenHistory }: ResourceCardP
         ? `Múltiples recursos afectados (${resource_name.length})`
         : resource_type.toUpperCase();
 
+    const potentialValue = impact_matrix.potential_savings_value ?? 0;
+    const hasUpside = potentialValue > impact_matrix.savings_value + 0.01;
 
     return (
         <div className="border rounded-xl overflow-hidden shadow-sm transition-all hover:shadow-md">
@@ -354,10 +492,12 @@ const ResourceCard = ({ resource, onStatusChange, onOpenHistory }: ResourceCardP
                                 {resource.resource_type}
                             </span>
                             {resource.provider === 'CloudPerformance' && (
-                                <img 
+                                <Image
+                                    width={100}
+                                    height={100}
                                     src="/firma-cloudperformance-h.png"
-                                    alt="CloudPerformance" 
-                                    className="h-4 sm:h-8 object-contain ml-1" 
+                                    alt="CloudPerformance"
+                                    className="h-4 sm:h-8 object-contain ml-1"
                                     title="Hallazgo detectado por el motor de CloudPerformance"
                                 />
                             )}
@@ -368,13 +508,31 @@ const ResourceCard = ({ resource, onStatusChange, onOpenHistory }: ResourceCardP
                     </div>
                 </div>
 
-                <div className="flex items-center gap-4 sm:ml-4 flex-shrink-0">
-                    <div className="flex flex-col items-end">
-                        <span className="text-xs font-normal text-slate-500 dark:text-slate-400 mb-1">Ahorro Est.</span>
-                        <span className="text-sm font-bold text-emerald-700 dark:text-emerald-400 flex items-center gap-1">
-                            <DollarSign className="h-4 w-4" />
+                <div className="flex items-start gap-5 sm:ml-4 flex-shrink-0">
+                    <div className="flex flex-col items-end min-w-[7.5rem]">
+                        <span className="text-xs font-normal text-slate-500 dark:text-slate-400 mb-1">Conservador</span>
+                        <span className="text-sm font-bold text-emerald-700 dark:text-emerald-400 tabular-nums">
                             {formatCurrency(impact_matrix.savings_value, impact_matrix.currency || 'USD')}
                         </span>
+                    </div>
+                    <div
+                        className="flex flex-col items-end min-w-[7.5rem]"
+                        title={hasUpside
+                            ? 'Valoración alternativa de la misma acción. Ya incluye el ahorro conservador, por lo que ambas cifras no se suman.'
+                            : 'Sin escenario optimista distinto del conservador.'}
+                    >
+                        <span className="text-xs font-normal text-slate-500 dark:text-slate-400 mb-1">Optimista</span>
+                        {hasUpside ? (
+                            <span className="text-sm font-bold text-amber-600 dark:text-amber-400 tabular-nums">
+                                {formatCurrency(potentialValue, impact_matrix.currency || 'USD')}
+                            </span>
+                        ) : (
+                            <span className="text-sm font-bold text-slate-400 dark:text-slate-500">—</span>
+                        )}
+                    </div>
+                    <div className="flex flex-col items-end">
+                        <span className="text-xs font-normal text-slate-500 dark:text-slate-400 mb-1">Confianza</span>
+                        <ConfidenceBadge value={impact_matrix.potential_savings_confidence} />
                     </div>
                     <div className="flex flex-col items-end">
                         <span className="text-xs font-normal text-slate-500 dark:text-slate-400 mb-1">Riesgo</span>
@@ -469,11 +627,28 @@ const ResourceCard = ({ resource, onStatusChange, onOpenHistory }: ResourceCardP
                                         </thead>
                                         <tbody className="text-foreground">
                                             <tr className="bg-[#D9E1F2] dark:bg-slate-800/60 border-b border-border">
-                                                <td className="px-4 py-3 font-bold border-r border-border text-slate-900 dark:text-slate-200 align-top">Ahorro</td>
+                                                <td className="px-4 py-3 font-bold border-r border-border text-slate-900 dark:text-slate-200 align-top">Ahorro conservador</td>
                                                 <td className="px-4 py-3 align-top font-medium text-slate-800 dark:text-slate-200">
                                                     {impact_matrix.estimated_savings}
                                                 </td>
                                             </tr>
+                                            {hasUpside && (
+                                                <tr className="bg-background border-b border-border">
+                                                    <td className="px-4 py-3 font-bold border-r border-border text-slate-900 dark:text-slate-200 align-top">
+                                                        Ahorro optimista
+                                                    </td>
+                                                    <td className="px-4 py-3 align-top">
+                                                        <span className="flex flex-wrap items-center gap-2 font-semibold text-slate-900 dark:text-slate-100">
+                                                            {formatCurrency(potentialValue, impact_matrix.currency || 'USD')}
+                                                            <ConfidenceBadge value={impact_matrix.potential_savings_confidence} />
+                                                        </span>
+                                                        <span className="block text-sm text-slate-700 dark:text-slate-300 mt-1">
+                                                            {CONFIDENCE_HINTS[normalizeConfidence(impact_matrix.potential_savings_confidence)]} Esta cifra
+                                                            ya incluye el ahorro conservador, por lo que no se suman.
+                                                        </span>
+                                                    </td>
+                                                </tr>
+                                            )}
                                             <tr className="bg-background border-b border-border">
                                                 <td className="px-4 py-3 font-bold border-r border-border text-slate-900 dark:text-slate-200 align-top">Riesgo</td>
                                                 <td className="px-4 py-3 align-top">
@@ -623,6 +798,9 @@ const FindingsSection = ({ resources, onStatusChange, onOpenHistory }: FindingsS
             if (sortField === 'savings') {
                 return (b.resource.impact_matrix.savings_value - a.resource.impact_matrix.savings_value) * dir;
             }
+            if (sortField === 'potential') {
+                return ((b.resource.impact_matrix.potential_savings_value ?? 0) - (a.resource.impact_matrix.potential_savings_value ?? 0)) * dir;
+            }
             return (getRiskWeight(b.resource.impact_matrix.risk_level.level) - getRiskWeight(a.resource.impact_matrix.risk_level.level)) * dir;
         });
     }, [filtered, sortField, sortDirection]);
@@ -636,6 +814,9 @@ const FindingsSection = ({ resources, onStatusChange, onOpenHistory }: FindingsS
         return top.sort((a, b) => {
             if (sortField === 'savings') {
                 return (b.resource.impact_matrix.savings_value - a.resource.impact_matrix.savings_value) * dir;
+            }
+            if (sortField === 'potential') {
+                return ((b.resource.impact_matrix.potential_savings_value ?? 0) - (a.resource.impact_matrix.potential_savings_value ?? 0)) * dir;
             }
             return (getRiskWeight(b.resource.impact_matrix.risk_level.level) - getRiskWeight(a.resource.impact_matrix.risk_level.level)) * dir;
         });
@@ -714,6 +895,21 @@ const FindingsSection = ({ resources, onStatusChange, onOpenHistory }: FindingsS
                                 : <ChevronUp className="h-3.5 w-3.5" />
                         )}
                         {sortField !== 'savings' && <ArrowUpDown className="h-3.5 w-3.5 opacity-50" />}
+                    </Button>
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleSort('potential')}
+                        className={`gap-1.5 text-xs ${sortField === 'potential' ? 'border-blue-400 dark:border-blue-600' : ''}`}
+                    >
+                        <Lightbulb className="h-3.5 w-3.5" />
+                        Optimista
+                        {sortField === 'potential' && (
+                            sortDirection === 'desc'
+                                ? <ChevronDown className="h-3.5 w-3.5" />
+                                : <ChevronUp className="h-3.5 w-3.5" />
+                        )}
+                        {sortField !== 'potential' && <ArrowUpDown className="h-3.5 w-3.5 opacity-50" />}
                     </Button>
                 </div>
             </div>
@@ -812,7 +1008,6 @@ export const AiRecommendationsComponent = ({ data, cloud }: AiRecommendationsCom
         open: false,
         recGroupId: null,
     });
-    console.log(data)
 
     let STATUS_ENDPOINT = '';
 
@@ -966,18 +1161,13 @@ export const AiRecommendationsComponent = ({ data, cloud }: AiRecommendationsCom
                                 </div>
                             </div>
 
-                            <div className="flex-shrink-0 bg-white dark:bg-slate-900 border border-border rounded-xl p-5 min-w-[200px] text-center shadow-sm">
-                                <span className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-2 uppercase tracking-wider">
-                                    Ahorro mensual total identificado
-                                </span>
-                                <span className="text-3xl font-black text-emerald-700 dark:text-emerald-400">
-                                    {formatCurrency(report.total_monthly_savings)}
-                                </span>
-                                {report.sync_time && (
-                                    <span className="block text-xs text-slate-400 mt-1">
-                                        Fecha Observación: {new Date(report.sync_time).toLocaleString()}
-                                    </span>
-                                )}
+                            <div className="w-full lg:w-[24rem] lg:flex-shrink-0">
+                                <SavingsScenarioSummary
+                                    conservative={report.total_monthly_savings}
+                                    optimistic={report.total_potential_monthly_savings}
+                                    confidence={report.confidence_potential_monthly_savings}
+                                    syncTime={report.sync_time}
+                                />
                             </div>
                         </div>
                     </div>
@@ -994,7 +1184,7 @@ export const AiRecommendationsComponent = ({ data, cloud }: AiRecommendationsCom
                             setHistoryDialog({ open: true, recGroupId });
                         }}
                     />
-                    <Separator className='bg-black'/>
+                    <Separator className='bg-black' />
                 </div>
 
             ))}

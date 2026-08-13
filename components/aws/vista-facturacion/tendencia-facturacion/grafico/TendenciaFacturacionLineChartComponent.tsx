@@ -10,7 +10,7 @@ import { useEffect, useMemo, useRef } from 'react';
 interface FacturacionData {
     SERVICE: string;
     start_date: string;
-    unblendedcost: number;
+    netamortizedcost: number;
     REGION: string;
     RESOURCE_ID: string | null;
     sync_time: { $date: string };
@@ -85,7 +85,7 @@ export const TendenciaFacturacionLineChartComponent = ({ data }: TendenciaFactur
         rawData.forEach((item) => {
             const service = item.SERVICE;
             const date = new Date(item.start_date).toISOString().slice(0, 10);
-            const cost = item.unblendedcost;
+            const cost = item.netamortizedcost;
 
             allDates.add(date);
             if (!serviceMap.has(service)) serviceMap.set(service, new Map());

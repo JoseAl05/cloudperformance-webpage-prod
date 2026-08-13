@@ -45,6 +45,8 @@ export interface AiRecommendationImpactMatrixExecutionTime {
 export interface AiRecommendationImpactMatrix {
   estimated_savings: string;
   savings_value: number;
+  potential_savings_value:number;
+  potential_savings_confidence: number;
   currency: string;
   risk_level: AiRecommendationImpactMatrixRiskLevel;
   operational_impact: AiRecommendationImpactMatrixOperationalImpact;
@@ -83,6 +85,8 @@ export interface AiRecommendationReport {
   cloud_provider: string;
   timestamp: string;
   total_monthly_savings: number;
+  total_potential_monthly_savings: number;
+  confidence_potential_monthly_savings: string;
   executive_summary: string;
   prioritization_strategy: AiRecommendationPrioritizationStrategy[];
   resources: AiRecommendationResource[];
