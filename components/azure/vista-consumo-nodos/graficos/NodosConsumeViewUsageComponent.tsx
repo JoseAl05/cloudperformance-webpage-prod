@@ -58,10 +58,9 @@ const AzureMetricsChart = ({ data, title, metricUnit }: AzureMetricsChartProps) 
   const chartInstance = useRef<echarts.ECharts | null>(null);
   const resizeObserverRef = useRef<ResizeObserver | null>(null);
 
-  const safeData = Array.isArray(data) ? data : [];
+  const safeData = useMemo(() => (Array.isArray(data) ? data : []), [data]);
 
   const { totalData, usedData, unusedData, yMaxRounded } = useMemo(() => {
-    // Agrupar por timestamp y sumar los valores
     const grouped = safeData.reduce((acc, item) => {
       const timestamp = item.timestamp.$date;
       if (!acc[timestamp]) {
@@ -73,7 +72,6 @@ const AzureMetricsChart = ({ data, title, metricUnit }: AzureMetricsChartProps) 
       return acc;
     }, {} as Record<string, { total: number; used: number; unused: number }>);
 
-    // Convertir a arrays y ordenar
     const sortedTimestamps = Object.keys(grouped).sort((a, b) => 
       new Date(a).getTime() - new Date(b).getTime()
     );

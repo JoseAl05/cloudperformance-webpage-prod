@@ -177,7 +177,17 @@ const NAV: Record<Provider, NavItem[]> = {
         {
             label: 'Funciones',
             icon: Zap,
+            
             items: [
+             {
+                    label: 'Consumo horario hábil vs no hábil',
+                    icon: Clock,
+                    items: [
+                        { label: 'Maquinas Virtuales', icon: Computer, href: '/azure/funciones/analisis-vms-horario' },
+                        { label: 'Base de Datos', icon: Database, href: '/azure/funciones/consumo-bds-horario-habil-vs-no-habil' },
+                        { label: 'Nodos', icon: Server, href: '/azure/funciones/consumo-nodes-horario-habil-vs-no-habil' },
+                    ],
+                },
                 {
                     label: 'Recursos no utilizados',
                     icon: TrendingDown,
@@ -196,7 +206,6 @@ const NAV: Record<Provider, NavItem[]> = {
                 { label: 'Incremento Uso de Recursos', icon: LineChart, href: '/azure/funciones/incremento-top-recursos-uso' },
                 { label: 'Spot vs Regular VMs', icon: Computer, href: '/azure/funciones/spot-vs-regular-vm' },
                 { label: 'Promedio de uso por localización', icon: MapPin, href: '/azure/funciones/promedio-por-localizacion' },
-                { label: 'Consumo horario hábil vs no hábil', icon: Clock, href: '/azure/funciones/analisis-vms-horario' },
             ],
         },
         {

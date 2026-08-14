@@ -3,6 +3,7 @@
 import useSWR from "swr"
 import { ColumnDef } from "@tanstack/react-table"
 import { DataTableGrouping } from "@/components/data-table/data-table-grouping"
+import { useMemo } from "react"
 
 type EC2Instance = {
     InstanceId: string
@@ -34,6 +35,20 @@ export const Ec2TableComponent = ({
             : null,
         fetcher
     )
+
+    const uniqueInstances = useMemo(() => {
+        if (!data?.instances) return [];
+        
+        const mapUnicos = new Map<string, EC2Instance>();
+        
+        data.instances.forEach((inst) => {
+            if (!mapUnicos.has(inst.InstanceId)) {
+                mapUnicos.set(inst.InstanceId, inst);
+            }
+        });
+        
+        return Array.from(mapUnicos.values());
+    }, [data?.instances]);
 
     const columns: ColumnDef<EC2Instance>[] = [
         {
@@ -69,7 +84,7 @@ export const Ec2TableComponent = ({
     return (
         <DataTableGrouping
             columns={columns}
-            data={data?.instances ?? []}
+            data={uniqueInstances}
             filterColumn="InstanceId"
             filterPlaceholder="Buscar InstanceId…"
             groupByColumn='InstanceId'

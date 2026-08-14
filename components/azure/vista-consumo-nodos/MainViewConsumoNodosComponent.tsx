@@ -1,4 +1,3 @@
-// components/azure/vista-consumo/consumo-nodos/MainViewConsumoNodeComponent.tsx
 import { FiltersComponent } from '@/components/general_azure/filters/FiltersComponent'
 import  {AzureNodeMetricsComponent}  from '@/components/azure/vista-consumo-nodos/ConsumoNodosComponent'
 import { ChartLine } from 'lucide-react'

@@ -1,13 +1,23 @@
 'use client'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { createChartOption, deepMerge, makeBaseOptions, useECharts } from '@/lib/echartsGlobalConfig';
 import { EChartsOption } from 'echarts';
 import { useTheme } from 'next-themes';
-import { useMemo, useRef } from 'react';
+import { useMemo, useRef, useState } from 'react';
+import { ArrowLeft, BarChart3 } from 'lucide-react';
+
+interface CostUsageItem {
+    dimensions?: { SERVICE?: string };
+    SERVICE?: string;
+    amortizedcost?: number | string;
+    unblendedcost?: number | string;
+    [key: string]: unknown;
+}
 
 interface SavingPlansBarChartComponentProps {
-    costUsage: unknown[];
+    costUsage: CostUsageItem[];
 }
 
 const formatUSD = (value: number) =>
@@ -24,28 +34,59 @@ export const SavingPlansBarChartComponent = ({ costUsage }: SavingPlansBarChartC
     const isDark = currentTheme === 'dark';
 
     const chartRef = useRef<HTMLDivElement>(null);
+    
+    const [viewMode, setViewMode] = useState<'summary' | 'details'>('summary');
 
-    const costUsageData = useMemo(() => {
-        const aggregated = costUsage.reduce((acc: unknown, item: unknown) => {
-            const service = item.dimensions?.SERVICE || "Otro"
-            const amortized = Number(item.amortizedcost) || 0
-            const unblended = Number(item.unblendedcost) || 0
+    const { summaryData, detailsData } = useMemo(() => {
+        const planResumen = {
+            service: "",
+            compromisoTotal: 0,
+            capacidadNoUsada: 0
+        };
 
-            if (!acc[service]) acc[service] = { service, amortizedcost: 0, unblendedcost: 0 }
-            acc[service].amortizedcost += amortized
-            acc[service].unblendedcost += unblended
+        const serviciosDetalle: Record<string, { service: string; usoCubierto: number; gastoOnDemand: number }> = {};
 
-            return acc
-        }, {});
+        costUsage.forEach((item) => {
+            const service = item.dimensions?.SERVICE || item.SERVICE || "Otro";
+            const amortized = Number(item.amortizedcost) || 0;
+            const unblended = Number(item.unblendedcost) || 0;
 
-        const chartData = Object.values(aggregated);
+            if (service.includes("Savings Plans")) {
+                if (!planResumen.service) {
+                    planResumen.service = service; 
+                }
+                planResumen.compromisoTotal += unblended;
+                planResumen.capacidadNoUsada += amortized;
+            } else {
+                if (!serviciosDetalle[service]) {
+                    serviciosDetalle[service] = { 
+                        service, 
+                        usoCubierto: 0, 
+                        gastoOnDemand: 0 
+                    };
+                }
+                serviciosDetalle[service].usoCubierto += amortized;
+                serviciosDetalle[service].gastoOnDemand += unblended;
+            }
+        });
 
-        return { chartData };
+        if (!planResumen.service) {
+            planResumen.service = "Savings Plan"; 
+        }
+
+        return {
+            summaryData: [planResumen],
+            detailsData: Object.values(serviciosDetalle)
+        };
     }, [costUsage]);
 
     const option: EChartsOption = useMemo(() => {
+        const isSummary = viewMode === 'summary';
+
         const base = makeBaseOptions({
-            legend: ["Facturado sin el plan", "Facturado con el plan"],
+            legend: isSummary 
+                ? ["Compromiso del Plan", "Capacidad no utilizada"] 
+                : ["Uso cubierto por el plan", "Gasto extra (On-Demand)"],
             legendPos: 'top',
             unitLabel: '$',
             useUTC: true,
@@ -58,28 +99,45 @@ export const SavingPlansBarChartComponent = ({ costUsage }: SavingPlansBarChartC
             xAxisType: 'category',
             legend: true,
             tooltip: true,
-            series: [
+            series: isSummary ? [
                 {
-                    name: "Facturado sin el plan",
+                    name: "Compromiso del Plan",
                     kind: "bar",
-                    data: costUsageData.chartData?.map((d: unknown) => d.amortizedcost.toFixed(2)),
-                    smooth: true,
+                    data: summaryData.map(d => d.compromisoTotal.toFixed(2)),
+                    itemStyle: { color: '#8b5cf6' },
+                    barMaxWidth: 120
                 },
                 {
-                    name: "Facturado con el plan",
+                    name: "Capacidad no utilizada",
                     kind: "bar",
-                    data: costUsageData.chartData?.map((d: unknown) => d.unblendedcost.toFixed(2)),
+                    data: summaryData.map(d => d.capacidadNoUsada.toFixed(2)),
+                    itemStyle: { color: '#f97316' },
+                    barMaxWidth: 120
+                }
+            ] : [
+                {
+                    name: "Uso cubierto por el plan",
+                    kind: "bar",
+                    data: detailsData.map(d => d.usoCubierto.toFixed(2)),
+                    itemStyle: { color: '#84cc16' }
+                },
+                {
+                    name: "Gasto extra (On-Demand)",
+                    kind: "bar",
+                    data: detailsData.map(d => d.gastoOnDemand.toFixed(2)),
+                    itemStyle: { color: '#3b82f6' }
                 }
             ],
             extraOption: {
                 tooltip: {
-                    valueFormatter(value) {
-                        return `$${value}`
+                    filterMode: 'none',
+                    valueFormatter(value: number) {
+                        return formatUSD(value);
                     },
                 },
                 xAxis: {
                     type: "category",
-                    data: costUsageData.chartData.map((d: unknown) => d.service),
+                    data: isSummary ? summaryData.map(d => d.service) : detailsData.map(d => d.service),
                     axisLabel: {
                         interval: 0,
                         formatter: (value: string) =>
@@ -91,20 +149,42 @@ export const SavingPlansBarChartComponent = ({ costUsage }: SavingPlansBarChartC
                     },
                 },
                 yAxis: { min: 0 },
-                grid: { left: 44, right: 12, top: 56, bottom: 64, containLabel: true }
+                grid: { left: 56, right: 12, top: 60, bottom: 64, containLabel: true }
             },
         });
         return deepMerge(base, bars);
-    }, [costUsageData.chartData])
+    }, [viewMode, summaryData, detailsData]);
 
     useECharts(chartRef, option, [option], isDark ? 'cp-dark' : 'cp-light');
-
 
     return (
         <div className="col-span-1 md:col-span-8 space-y-6">
             <Card className="shadow-lg h-full rounded-2xl">
-                <CardHeader>
-                    <CardTitle>Consumo Acumulado por Servicio</CardTitle>
+                <CardHeader className="flex flex-row items-center justify-between pb-2">
+                    <div>
+                        <CardTitle>
+                            {viewMode === 'summary' ? 'Resumen de Inversión del Plan' : 'Desglose de Consumo por Servicio'}
+                        </CardTitle>
+                        <p className="text-xs text-muted-foreground mt-1">
+                            {viewMode === 'summary' 
+                                ? 'Muestra el total comprometido frente a lo que no se alcanzó a utilizar.' 
+                                : 'Muestra qué servicios específicos consumieron el plan.'}
+                        </p>
+                    </div>
+                    
+                    <div>
+                        {viewMode === 'summary' ? (
+                            <Button variant="outline" size="sm" onClick={() => setViewMode('details')} className="gap-2">
+                                <BarChart3 className="w-4 h-4" />
+                                Ver Servicios
+                            </Button>
+                        ) : (
+                            <Button variant="outline" size="sm" onClick={() => setViewMode('summary')} className="gap-2">
+                                <ArrowLeft className="w-4 h-4" />
+                                Volver al Resumen
+                            </Button>
+                        )}
+                    </div>
                 </CardHeader>
                 <CardContent className="h-[500px]">
                     <div ref={chartRef} className="w-full h-full" />

@@ -244,7 +244,7 @@ export const SavingPlansViewComponent = ({ startDate, endDate }: SavingPlansComp
 
   if (errorUsage) return <p className="p-4 text-sm text-red-500">Ocurrió un error cargando los datos del plan.</p>
 
-  const getCoverageStatus = () => {
+const getCoverageStatus = () => {
     if (!spcost || !costUsage || !Array.isArray(costUsage) || costUsage.length === 0) {
       return { 
         label: "Sin Datos", color: "text-gray-400", bg: "border-l-gray-400", 
@@ -255,15 +255,29 @@ export const SavingPlansViewComponent = ({ startDate, endDate }: SavingPlansComp
 
     let totalUsoReal = 0    
     let totalCompromiso = 0 
+    let totalDesperdicio = 0
+    let totalExcedente = 0
 
     costUsage.forEach((curr) => {
       const serviceName = curr.dimensions?.SERVICE || curr.SERVICE || ""
+      
+      // 1. Lógica para la línea del Savings Plan
       if (serviceName.includes("Savings Plans")) {
-        totalUsoReal += Number(curr.amortizedcost) || 0 
+        // unblendedcost = Lo que pagas fijo a AWS (Tu compromiso)
         totalCompromiso += Number(curr.unblendedcost) || 0
+        // amortizedcost = El dinero que sobró y no se usó (Desperdicio)
+        totalDesperdicio += Number(curr.amortizedcost) || 0
+      } 
+      // 2. Lógica para el uso de Cómputo (EC2, etc.)
+      else {
+        // amortizedcost = El cómputo que SÍ consumiste y fue cubierto por el plan
+        totalUsoReal += Number(curr.amortizedcost) || 0
+        // unblendedcost = Gasto extra fuera del plan (te pasaste de tu límite)
+        totalExcedente += Number(curr.unblendedcost) || 0
       }
     })
 
+    // Fallback de seguridad por si el array de costUsage viene incompleto
     if (totalCompromiso === 0) {
       const endTime = endObj ? endObj.getTime() : startObj.getTime()
       const diffTime = Math.abs(endTime - startObj.getTime())
@@ -272,9 +286,11 @@ export const SavingPlansViewComponent = ({ startDate, endDate }: SavingPlansComp
       totalUsoReal = costUsage.reduce((acc, curr) => acc + (Number(curr.amortizedcost) || 0), 0)
     }
 
-    const diferencia = totalCompromiso - totalUsoReal
+    const toleranciaDesperdicio = totalCompromiso * 0.15; // 15% de margen para subutilización
+    const toleranciaExcedente = totalCompromiso * 0.05;   // 5% de margen para gasto On-Demand
 
-    if (diferencia > totalCompromiso * 0.15) { 
+    // 3. Evaluamos el estado usando los umbrales relativos
+    if (totalDesperdicio > toleranciaDesperdicio) { 
       return { 
         label: "Excesivo / Subutilizado", 
         color: "text-orange-600", 
@@ -283,30 +299,31 @@ export const SavingPlansViewComponent = ({ startDate, endDate }: SavingPlansComp
         desc: "Estás pagando por capacidad que no estás usando. La barra verde de compromiso es mayor a la azul de uso.",
         utilizado: totalUsoReal,
         compromiso: totalCompromiso,
-        desperdicio: diferencia
+        desperdicio: totalDesperdicio
       }
-    } else if (diferencia < -(totalCompromiso * 0.15)) {
+    } else if (totalExcedente > toleranciaExcedente) {
       return { 
         label: "Baja Cobertura", 
         color: "text-blue-600", 
         bg: "border-l-blue-500",
         icon: <TrendingUp className="h-8 w-8 text-blue-500" />,
-        desc: "Tu consumo supera el plan. El excedente se está facturando a precio On-Demand normal.",
+        desc: "Tu consumo supera ampliamente el plan. Te sugerimos evaluar la compra de un Savings Plan adicional.",
         utilizado: totalUsoReal,
         compromiso: totalCompromiso,
-        desperdicio: Math.abs(diferencia)
+        desperdicio: totalExcedente
       }
     }
     
+    // Si el desperdicio y el excedente están dentro de los márgenes tolerados, es un plan perfecto
     return { 
       label: "Óptimo", 
       color: "text-green-600", 
       bg: "border-l-green-500",
       icon: <CheckCircle2 className="h-8 w-8 text-green-500" />,
-      desc: "Excelente balance. Estás aprovechando casi todo tu compromiso sin pasarte demasiado.",
+      desc: "Excelente balance. Estás aprovechando casi todo tu compromiso manteniendo el gasto extra bajo control.",
       utilizado: totalUsoReal,
       compromiso: totalCompromiso,
-      desperdicio: 0
+      desperdicio: totalDesperdicio // Mostramos el pequeño remanente (si lo hay) como información útil
     }
   }
 
@@ -489,6 +506,13 @@ export const SavingPlansViewComponent = ({ startDate, endDate }: SavingPlansComp
                   <div className="flex justify-between items-center p-2 bg-red-50 rounded-md border border-red-100 mt-2">
                     <span className="text-sm font-semibold text-red-600">Dinero Desperdiciado:</span>
                     <span className="text-sm font-bold text-red-600">{formatUSD(coverage.desperdicio)}</span>
+                  </div>
+                )}
+
+                {coverage.label === "Óptimo" && coverage.desperdicio > 0 && (
+                  <div className="flex justify-between items-center p-2 bg-slate-50 rounded-md border border-slate-200 mt-2">
+                    <span className="text-sm text-muted-foreground">Capacidad no utilizada (Margen aceptable):</span>
+                    <span className="text-sm font-bold text-slate-600">{formatUSD(coverage.desperdicio)}</span>
                   </div>
                 )}
 
