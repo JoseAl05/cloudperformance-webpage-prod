@@ -1,13 +1,17 @@
 'use client'
 
-import React from 'react'
+import React, { useMemo } from 'react'
 import useSWR from 'swr'
 import { Card, CardContent } from '@/components/ui/card'
-import { Database, Package, HardDrive, AlertCircle } from 'lucide-react'
+import { Database, Package, HardDrive, AlertCircle, Layers } from 'lucide-react'
 import { TopS3BucketsChart } from '@/components/aws/vista-funciones/top-s3-buckets/grafico/TopS3BucketsChart'
 import { TrendLineChart } from '@/components/aws/vista-funciones/top-s3-buckets/grafico/TrendLineChart'
+import { S3StorageTypeChart } from '@/components/aws/vista-funciones/top-s3-buckets/grafico/S3StorageTypeChart'
+import { S3VersioningTableComponent } from '@/components/aws/vista-funciones/top-s3-buckets/table/S3VersioningTableComponent'
+import { S3LifecycleTableComponent } from '@/components/aws/vista-funciones/top-s3-buckets/table/S3LifecycleTableComponent'
 import { LoaderComponent } from '@/components/general_aws/LoaderComponent'
 import { MessageCard } from '@/components/aws/cards/MessageCards'
+import { S3MetricItem, S3VersioningItem, S3LifecycleItem } from '@/interfaces/vista-top-s3-buckets/topS3BucketsInterfaces'
 
 interface S3InfoItem {
   total_size_gb?: number
@@ -15,8 +19,6 @@ interface S3InfoItem {
   total_buckets?: number
   [key: string]: unknown
 }
-
-type S3ChartDataItem = Record<string, unknown>
 
 interface TopS3BucketsProps {
   startDate: Date
@@ -47,16 +49,30 @@ export const TopS3BucketsComponent = ({
     fetcher
   )
 
-  const s3Tops = useSWR<S3ChartDataItem[]>(
+  const s3Tops = useSWR<S3MetricItem[]>(
     hasSelectedBucket
       ? `/api/aws/bridge/s3/top_s3_buckets/tops?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region || ''}&resources=${buckets}`
       : null,
     fetcher
   )
 
-  const s3Metrics = useSWR<S3ChartDataItem[]>(
+  const s3Metrics = useSWR<S3MetricItem[]>(
     hasSelectedBucket
       ? `/api/aws/bridge/s3/top_s3_buckets/metrics?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region || ''}&resources=${buckets}`
+      : null,
+    fetcher
+  )
+
+  const s3Versioning = useSWR<S3VersioningItem[]>(
+    hasSelectedBucket
+      ? `/api/aws/bridge/s3/top_s3_buckets/versioning?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region || ''}&resources=${buckets}`
+      : null,
+    fetcher
+  )
+
+  const s3Lifecycle = useSWR<S3LifecycleItem[]>(
+    hasSelectedBucket
+      ? `/api/aws/bridge/s3/top_s3_buckets/lifecycle?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region || ''}&resources=${buckets}`
       : null,
     fetcher
   )
@@ -64,12 +80,16 @@ export const TopS3BucketsComponent = ({
   const anyLoading =
     s3Info.isLoading ||
     s3Tops.isLoading ||
-    s3Metrics.isLoading
+    s3Metrics.isLoading ||
+    s3Versioning.isLoading ||
+    s3Lifecycle.isLoading
 
   const anyError =
     !!s3Info.error ||
     !!s3Tops.error ||
-    !!s3Metrics.error
+    !!s3Metrics.error ||
+    !!s3Versioning.error ||
+    !!s3Lifecycle.error
 
   const totalSizeGB = s3Info.data?.[0]?.total_size_gb ?? 0
   const totalObjects = s3Info.data?.[0]?.total_objects ?? 0
@@ -77,6 +97,18 @@ export const TopS3BucketsComponent = ({
 
   const s3TopsInfo = Array.isArray(s3Tops.data) ? s3Tops.data : []
   const s3MetricsInfo = Array.isArray(s3Metrics.data) ? s3Metrics.data : []
+  const s3VersioningInfo = Array.isArray(s3Versioning.data) ? s3Versioning.data : []
+  const s3LifecycleInfo = Array.isArray(s3Lifecycle.data) ? s3Lifecycle.data : []
+
+  const storageTypes = useMemo(() => {
+    const unique = new Set<string>()
+    s3TopsInfo.forEach(item => {
+      if (typeof item.storage_type === 'string' && item.storage_type !== '') unique.add(item.storage_type)
+    })
+    return Array.from(unique).sort()
+  }, [s3TopsInfo])
+
+  const hasStorageType = storageTypes.length > 0
 
   if (anyLoading) {
     return <LoaderComponent />
@@ -99,7 +131,7 @@ export const TopS3BucketsComponent = ({
     <div className="space-y-8 p-4">
       {hasSelectedBucket ? (
         <div className="space-y-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className={`grid grid-cols-1 gap-6 ${hasStorageType ? 'md:grid-cols-2 xl:grid-cols-4' : 'md:grid-cols-3'}`}>
             <Card className="border-l-4 border-l-indigo-500 shadow-lg rounded-2xl">
               <CardContent className="p-6 flex justify-between items-center">
                 <div>
@@ -132,6 +164,19 @@ export const TopS3BucketsComponent = ({
                 <Package className="h-8 w-8 text-blue-500" />
               </CardContent>
             </Card>
+
+            {hasStorageType && (
+              <Card className="border-l-4 border-l-amber-500 shadow-lg rounded-2xl">
+                <CardContent className="p-6 flex justify-between items-center">
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Clases de Almacenamiento</p>
+                    <p className="text-2xl font-bold text-amber-600">{storageTypes.length.toLocaleString()}</p>
+                    <p className="text-xs text-muted-foreground">Tipos detectados en el rango</p>
+                  </div>
+                  <Layers className="h-8 w-8 text-amber-500" />
+                </CardContent>
+              </Card>
+            )}
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -148,6 +193,16 @@ export const TopS3BucketsComponent = ({
             />
           </div>
 
+          {hasStorageType && (
+            <div className="grid grid-cols-1 gap-6">
+              <S3StorageTypeChart
+                data={s3TopsInfo}
+                metric="BucketSizeBytes Average"
+                title="Top Buckets por Clase de Almacenamiento"
+              />
+            </div>
+          )}
+
           <div className="grid grid-cols-1 gap-6">
             <TrendLineChart
               data={s3MetricsInfo}
@@ -163,6 +218,10 @@ export const TopS3BucketsComponent = ({
               yAxisLabel="Tamaño (GB)"
             />
           </div>
+
+          <S3VersioningTableComponent data={s3VersioningInfo} />
+
+          <S3LifecycleTableComponent data={s3LifecycleInfo} />
         </div>
       ) : (
         <div className="py-12 text-center border-2 border-dashed border-slate-200 rounded-2xl bg-slate-50/50">
