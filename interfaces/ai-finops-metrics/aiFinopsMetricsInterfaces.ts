@@ -93,8 +93,6 @@ export interface AiFinopsMetrics {
   spending_forecast: AiFinopsMetricsForecast;
 }
 
-
-
 export interface AiFinopsMetricsMetadata {
   cloud_provider: string;
   data_last_sync_time: string;
@@ -139,7 +137,7 @@ export interface OpportunityCostRecommendationAnalysis {
 export interface OpportunityCostAnalysis extends BaseMetricAnalysis {
   total_potential_savings_usd: number;
   total_inaction_costs_usd: number;
-  recommendations_analysis: OpportunityCostRecommendationAnalysis[]
+  recommendations_analysis: OpportunityCostRecommendationAnalysis[];
 }
 
 export interface CostVolatilityAnalysis extends BaseMetricAnalysis {
@@ -251,6 +249,12 @@ export interface AiFinopsMetricsForecastDeterministic {
     autotheta: number;
     ces: number;
   };
+  backtest_wape_pct?: {
+    autoets?: number;
+    autoarima?: number;
+    autotheta?: number;
+    ces?: number;
+  };
   recommended_method: string;
   confidence_level: string;
 }
@@ -274,10 +278,11 @@ export interface AiFinopsMetricsForecastAiInterpretation {
 }
 
 export interface AiFinopsMetricsForecast {
-  deterministic: AiFinopsMetricsForecastDeterministic | AiFinopsMetricsForecastDeterministicIncomplete;
+  deterministic:
+    | AiFinopsMetricsForecastDeterministic
+    | AiFinopsMetricsForecastDeterministicIncomplete;
   ai_interpretation: AiFinopsMetricsForecastAiInterpretation;
 }
-
 
 export interface IdleDisk {
   id: string;

@@ -41,6 +41,7 @@ import {
 } from 'lucide-react';
 import {
     AiFinopsMetrics,
+    AiFinopsMetricsForecastDeterministic,
     CostVolatilityAnalysis,
     CpuEfficiencyAnalysis,
     ElasticityAnalysis,
@@ -815,6 +816,7 @@ const ForecastDetail = ({ forecastData }: { forecastData: AiFinopsMetrics['spend
                         <ModelComparisonTable
                             projections={det.projections}
                             mape={det.backtest_mape_pct}
+                            wape={det.backtest_wape_pct}
                             recommended={det.recommended_method}
                             modelsConsidered={det.diagnostics.models_considered}
                         />
@@ -900,17 +902,21 @@ const StatTile = ({
 interface ModelComparisonTableProps {
     projections: AiFinopsMetrics['spending_forecast']['deterministic']['projections'];
     mape: AiFinopsMetrics['spending_forecast']['deterministic']['backtest_mape_pct'];
+    wape?: AiFinopsMetricsForecastDeterministic['backtest_wape_pct'];
     recommended: string;
     modelsConsidered: string[];
 }
 
-const ModelComparisonTable = ({ projections, mape, recommended, modelsConsidered }: ModelComparisonTableProps) => {
+const ModelComparisonTable = ({ projections, mape, wape, recommended, modelsConsidered }: ModelComparisonTableProps) => {
+    const wapeByModel = (wape ?? {}) as Record<string, number | undefined>;
+    const hasWape = modelsConsidered.some((key) => typeof wapeByModel[key] === 'number');
     const rows = modelsConsidered.map((key) => ({
         key,
         label: MODEL_LABELS[key] ?? key,
         thirty: (projections as Record<string, number>)[`forecast_30d_${key}`],
         ninety: (projections as Record<string, number>)[`forecast_90d_${key}`],
         mape: (mape as Record<string, number>)[key],
+        wape: wapeByModel[key],
     }));
 
     return (
@@ -920,7 +926,9 @@ const ModelComparisonTable = ({ projections, mape, recommended, modelsConsidered
                     <Activity className="h-4 w-4 text-muted-foreground" /> Comparación de Modelos
                 </h4>
                 <p className="text-xs text-muted-foreground mt-0.5">
-                    Proyección acumulada y error de validación (MAPE) por modelo. Menor MAPE es mejor.
+                    {hasWape
+                        ? 'Proyección acumulada y error de validación por modelo. La selección usa WAPE (error ponderado por gasto); MAPE se muestra como referencia. Menor error es mejor.'
+                        : 'Proyección acumulada y error de validación (MAPE) por modelo. Menor MAPE es mejor.'}
                 </p>
             </div>
             <div className="overflow-x-auto">
@@ -930,6 +938,9 @@ const ModelComparisonTable = ({ projections, mape, recommended, modelsConsidered
                             <th className="px-4 py-2 font-medium">Modelo</th>
                             <th className="px-4 py-2 font-medium text-right">30 días</th>
                             <th className="px-4 py-2 font-medium text-right">90 días</th>
+                            {hasWape && (
+                                <th className="px-4 py-2 font-medium text-right">Error (WAPE)</th>
+                            )}
                             <th className="px-4 py-2 font-medium text-right">Error (MAPE)</th>
                         </tr>
                     </thead>
@@ -957,7 +968,12 @@ const ModelComparisonTable = ({ projections, mape, recommended, modelsConsidered
                                     <td className="px-4 py-2 text-right font-mono">
                                         {typeof r.ninety === 'number' ? `$${r.ninety.toFixed(0)}` : '—'}
                                     </td>
-                                    <td className="px-4 py-2 text-right font-mono">
+                                    {hasWape && (
+                                        <td className="px-4 py-2 text-right font-mono tabular-nums font-semibold text-foreground">
+                                            {typeof r.wape === 'number' ? `${r.wape.toFixed(2)}%` : '—'}
+                                        </td>
+                                    )}
+                                    <td className="px-4 py-2 text-right font-mono tabular-nums text-muted-foreground">
                                         {typeof r.mape === 'number' ? `${r.mape.toFixed(2)}%` : '—'}
                                     </td>
                                 </tr>

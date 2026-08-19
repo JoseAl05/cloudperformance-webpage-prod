@@ -11,26 +11,26 @@ import {
   Info,
   ServerOff,
   PieChart,
-  Cloud,    
-  Laptop,   
-  Layers,   
-  X 
+  Cloud,
+  Laptop,
+  Layers,
+  X
 } from 'lucide-react'
 import { LoaderComponent } from '@/components/general_gcp/LoaderComponent'
 import { MessageCard } from '@/components/aws/cards/MessageCards'
-import { TagsDataTableAWS } from './table/TagsDataTable' 
+import { TagsDataTableAWS } from './table/TagsDataTable'
 import { useState } from 'react'
 
 const fetcher = (url: string) =>
-    fetch(url, {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' }
-    }).then(res => res.json())
+  fetch(url, {
+    method: 'GET',
+    headers: { 'Content-Type': 'application/json' }
+  }).then(res => res.json())
 
 export interface ResourceItemAWS {
   resource: string
   tags: Record<string, string> | "SIN TAGS"
-  local_keys?: string[] 
+  local_keys?: string[]
 }
 
 export interface ServiceGroupAWS {
@@ -65,7 +65,7 @@ export const TagsAnalysisComponentAWS = ({ startDate, endDate, services }: TagsA
   )
 
   if (isLoading) return <LoaderComponent />
-  
+
   if (error || !data) {
     return (
       <div className="w-full min-w-0 px-4 py-10">
@@ -91,38 +91,38 @@ export const TagsAnalysisComponentAWS = ({ startDate, endDate, services }: TagsA
   if (Array.isArray(data)) {
     gruposArray = data;
   } else if (data && typeof data === 'object') {
-      const apiResponse = data as ApiResponseWrapper;
+    const apiResponse = data as ApiResponseWrapper;
 
-      if (apiResponse.success === false && apiResponse.message) {
-        return (
-          <div className="w-full min-w-0 px-4 py-6">
-            <MessageCard 
-              icon={AlertTriangle} 
-              title="Configuración Requerida en AWS" 
-              description={apiResponse.message as string} 
-              tone="warn" 
-            />
-          </div>
-        )
-      }
-      
-      gruposArray = apiResponse.data || apiResponse.items || apiResponse.results || [];
-      
-      if (gruposArray.length === 0 && (apiResponse.detail || apiResponse.message)) {
-        const detail = apiResponse.detail;
-        const message = apiResponse.message;
-        
-        const errorMsg = typeof detail === 'string' 
-          ? detail 
-          : JSON.stringify(detail || message);
-        
-        return (
-          <div className="w-full min-w-0 px-4 py-6">
-            <MessageCard icon={AlertCircle} title="Aviso del Servidor" description={`El endpoint respondió con: ${errorMsg}`} tone="warn" />
-          </div>
-        )
-      }
+    if (apiResponse.success === false && apiResponse.message) {
+      return (
+        <div className="w-full min-w-0 px-4 py-6">
+          <MessageCard
+            icon={AlertTriangle}
+            title="Configuración Requerida en AWS"
+            description={apiResponse.message as string}
+            tone="warn"
+          />
+        </div>
+      )
     }
+
+    gruposArray = apiResponse.data || apiResponse.items || apiResponse.results || [];
+
+    if (gruposArray.length === 0 && (apiResponse.detail || apiResponse.message)) {
+      const detail = apiResponse.detail;
+      const message = apiResponse.message;
+
+      const errorMsg = typeof detail === 'string'
+        ? detail
+        : JSON.stringify(detail || message);
+
+      return (
+        <div className="w-full min-w-0 px-4 py-6">
+          <MessageCard icon={AlertCircle} title="Aviso del Servidor" description={`El endpoint respondió con: ${errorMsg}`} tone="warn" />
+        </div>
+      )
+    }
+  }
 
   if (gruposArray.length === 0) {
     return (
@@ -135,7 +135,7 @@ export const TagsAnalysisComponentAWS = ({ startDate, endDate, services }: TagsA
   gruposArray.forEach(grupo => {
     const resources = grupo.resources || [];
     totalRecursos += resources.length;
-    
+
     resources.forEach((r: ResourceItemAWS) => {
       if (r.tags === "SIN TAGS" || !r.tags || Object.keys(r.tags).length === 0) {
         recursosSinTags++;
@@ -158,7 +158,7 @@ export const TagsAnalysisComponentAWS = ({ startDate, endDate, services }: TagsA
   const isWarning = porcentajeCobertura >= 50 && porcentajeCobertura < 90;
 
   const calcPercent = (val: number) => totalRecursos > 0 ? Math.round((val / totalRecursos) * 100) : 0;
-  
+
   return (
     <div className="w-full min-w-0 px-4 py-6 space-y-6">
       <div className="flex items-center gap-3 mb-6">
@@ -166,23 +166,20 @@ export const TagsAnalysisComponentAWS = ({ startDate, endDate, services }: TagsA
         <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Análisis de Cobertura de Etiquetas</h1>
       </div>
 
-      <div className={`w-full p-4 rounded-xl border-l-4 flex flex-col sm:flex-row items-start sm:items-center gap-4 shadow-sm ${
-        isOptimal ? 'bg-green-50 border-green-500' : isWarning ? 'bg-yellow-50 border-yellow-500' : 'bg-red-50 border-red-500'
-      }`}>
-        <div className={`p-2.5 rounded-full shrink-0 ${
-          isOptimal ? 'bg-green-100 text-green-600' : isWarning ? 'bg-yellow-100 text-yellow-600' : 'bg-red-100 text-red-600'
+      <div className={`w-full p-4 rounded-xl border-l-4 flex flex-col sm:flex-row items-start sm:items-center gap-4 shadow-sm ${isOptimal ? 'bg-green-50 border-green-500' : isWarning ? 'bg-yellow-50 border-yellow-500' : 'bg-red-50 border-red-500'
         }`}>
+        <div className={`p-2.5 rounded-full shrink-0 ${isOptimal ? 'bg-green-100 text-green-600' : isWarning ? 'bg-yellow-100 text-yellow-600' : 'bg-red-100 text-red-600'
+          }`}>
           {isOptimal ? <CheckCircle2 className="h-6 w-6" /> : <AlertTriangle className="h-6 w-6" />}
         </div>
         <div className="flex-1">
-          <h3 className={`text-base sm:text-lg font-bold ${
-            isOptimal ? 'text-green-800' : isWarning ? 'text-yellow-800' : 'text-red-800'
-          }`}>
+          <h3 className={`text-base sm:text-lg font-bold ${isOptimal ? 'text-green-800' : isWarning ? 'text-yellow-800' : 'text-red-800'
+            }`}>
             Estado: {isOptimal ? 'Excelente' : isWarning ? 'Requiere Atención' : 'Crítico (Falta de visibilidad)'}
           </h3>
           <p className="text-sm text-gray-700 mt-1 leading-relaxed">
-            {isOptimal 
-              ? `Gran trabajo. El ${porcentajeCobertura}% de tu infraestructura está correctamente etiquetada.` 
+            {isOptimal
+              ? `Gran trabajo. El ${porcentajeCobertura}% de tu infraestructura está correctamente etiquetada.`
               : isWarning
                 ? `Tienes una cobertura del ${porcentajeCobertura}%. Se recomienda aplicar tags locales a los recursos huérfanos para mejorar el reporte FinOps.`
                 : `Atención: Solo el ${porcentajeCobertura}% de los recursos tiene tags. Tienes ${recursosSinTags} recursos generando gastos sin asignación clara.`
@@ -250,7 +247,7 @@ export const TagsAnalysisComponentAWS = ({ startDate, endDate, services }: TagsA
 
       {showDetailsModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4" onClick={() => setShowDetailsModal(false)}>
-          <div 
+          <div
             className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden transform transition-all"
             onClick={(e) => e.stopPropagation()} // Evita que el click dentro cierre el modal
           >
@@ -263,7 +260,7 @@ export const TagsAnalysisComponentAWS = ({ startDate, endDate, services }: TagsA
                 <X className="h-5 w-5" />
               </button>
             </div>
-            
+
             <div className="p-6 space-y-5">
               <p className="text-sm text-slate-600">
                 Desglose de tu <strong>{porcentajeCobertura}%</strong> de cobertura total, evaluado sobre <strong>{totalRecursos}</strong> recursos en tu infraestructura:
