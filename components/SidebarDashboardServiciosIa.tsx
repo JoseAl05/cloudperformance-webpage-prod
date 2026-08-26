@@ -6,13 +6,17 @@ import { DollarSign, LayoutDashboard } from 'lucide-react'
 import { SidebarNav, resolveNav, type NavItem } from '@/components/SidebarNav'
 import type { Sidebar } from '@/components/ui/sidebar'
 
-type Service = 'amazon-bedrock'
+type Service = 'amazon-bedrock' | 'microsoft-foundry'
 
 const NAV: Record<Service, NavItem[]> = {
     'amazon-bedrock': [
         { label: 'Inicio', icon: LayoutDashboard, href: '/amazon-bedrock' },
         { label: 'Costo y Optimización', icon: DollarSign, href: '/amazon-bedrock/costo-optimizacion' },
     ],
+    'microsoft-foundry': [
+        { label: 'Inicio', icon: LayoutDashboard, href: '/microsoft-foundry' },
+        { label: 'Costo y Optimización', icon: DollarSign, href: '/microsoft-foundry/costo-optimizacion' },
+    ]
 }
 
 export const SidebarDashboardServiciosIaComponent = ({

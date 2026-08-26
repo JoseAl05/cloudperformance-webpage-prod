@@ -15,6 +15,7 @@ interface InstancesFilterComponentProps {
     endDate: Date,
     region: string,
     subscription: string,
+    instancesService?: string, 
     selectedTagKey?: string | null,
     selectedTagValue?: string | null,
     selectedMeterCategory?: string | null,
@@ -43,6 +44,7 @@ export const InstancesFilterComponent = ({
     endDate,
     region,
     subscription,
+    instancesService, 
     selectedTagKey,
     selectedTagValue,
     selectedMeterCategory,
@@ -60,6 +62,13 @@ export const InstancesFilterComponent = ({
     const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : ''
 
     const buildUrl = () => {
+        if (instancesService === 'azure-foundry-accounts') {
+            const params = new URLSearchParams({
+                region: region,
+            });
+            return `/api/azure/bridge/azure/foundry/azure_foundry_accounts?${params.toString()}`;
+        }
+
         const params = new URLSearchParams({
             date_from: startDateFormatted,
             date_to: endDateFormatted,
@@ -75,16 +84,25 @@ export const InstancesFilterComponent = ({
 
     const shouldFetch = !!subscription && !!region
 
-    const { data, error, isLoading } = useSWR(
+    const { data: fetchedData, error, isLoading } = useSWR(
         shouldFetch ? buildUrl() : null,
         fetcher
     )
+
+    const data = useMemo(() => {
+        if (instancesService === 'azure-foundry-accounts' && Array.isArray(fetchedData)) {
+            return [{
+                meter_category: "Cuentas Azure AI",
+                instances: fetchedData.map((item: unknown) => (item as { instance_name?: string }).instance_name || item)
+            }];
+        }
+        return fetchedData;
+    }, [fetchedData, instancesService]);
 
     useEffect(() => {
         if (setInstancesData) setInstancesData(data || [])
     }, [data, setInstancesData])
 
-    // Construir mapa de meter_category -> instances
     const instanceMap: Record<string, Set<string>> = {};
     if (Array.isArray(data)) {
         data.forEach((item: MeterInstanceItem) => {
@@ -106,7 +124,6 @@ export const InstancesFilterComponent = ({
         [selectedMeterCategory, instanceMap]
     )
 
-
     const getDisplayName = (fullPath: string) => {
         const parts = fullPath.split('/')
         return parts[parts.length - 1] || fullPath
@@ -117,7 +134,6 @@ export const InstancesFilterComponent = ({
         selectedInstance &&
         (selectedInstance === 'all_instances' || (isValidMeterCategory && instancesForCategory.includes(selectedInstance)))
     )
-
 
     useEffect(() => {
         if (!data || isLoading) return

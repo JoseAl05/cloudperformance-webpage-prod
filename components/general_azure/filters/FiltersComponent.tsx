@@ -73,6 +73,7 @@ interface FiltersComponentProps {
     metricsFilter?: boolean;
     metricsCollection?: string;
     resourceTypeFilter?: boolean;
+    instancesService?: string;
     instancesFilter?: boolean;
     strgAccountFilter?: boolean;
     isStrgAccountMultiselect?: boolean;
@@ -126,6 +127,7 @@ export const FiltersComponent = ({
     metricsCollection = '',
     resourceTypeFilter = false,
     instancesFilter = false,
+    instancesService,
     strgAccountFilter = false,
     isStrgAccountMultiselect = false,
     resourcesFilter = false,
@@ -660,6 +662,7 @@ export const FiltersComponent = ({
                                     endDate={tempRange[1] ?? filters.endDate}
                                     region={tempRegion}
                                     subscription={tempSubscription}
+                                    instancesService={instancesService}
                                     selectedTagKey={tempTagKey}
                                     selectedTagValue={tempTagValue}
                                     selectedMeterCategory={tempMeterCategory}

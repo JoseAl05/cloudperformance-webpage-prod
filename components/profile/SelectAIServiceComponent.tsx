@@ -99,16 +99,14 @@ export const SelectAIServiceComponent = () => {
     }
 
     const handleEnterAzure = () => {
-        // Solo permitimos navegar si está listo
         if (!isAzureReady) return
 
-        // Si es cuenta única, aseguramos el token con la cuenta [0]
         if (!hasMultipleAzureAccounts && azureAccounts.length > 0) {
             const defaultAcc = azureAccounts[0]
             swapContextToken(clientName, defaultAcc.db, connectionData.dbAwsName, connectionData.dbGcpName)
         }
 
-        router.push(`/azure?client=${clientName}`)
+        router.push(`/microsoft-foundry?client=${clientName}`)
     }
 
     const handleEnterAws = () => {
