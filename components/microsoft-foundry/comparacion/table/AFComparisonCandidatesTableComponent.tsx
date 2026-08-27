@@ -110,6 +110,8 @@ export const AzureFoundryCandidatesTableComponent = ({ data }: AzureFoundryCandi
                     data={processedData}
                     filterColumn="bedrock_model_name"
                     filterPlaceholder="Buscar candidato..."
+                    enableGrouping
+                    groupByColumn='azure_model_name'
                     pageSizeItems={10}
                 />
             </CardContent>

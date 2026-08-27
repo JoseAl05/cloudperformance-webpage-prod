@@ -169,8 +169,79 @@ export interface AzureFoundryComparison {
     diagnostics: AzureFoundryDiagnostics;
 }
 
-export interface AzureFoundryModelRow {
+export type AzureFoundryComparisonResponse = AzureFoundryComparison[];
+
+export interface AzureFoundryCostBridgePoint {
+    model: string;
+    azure_cost_usd: number;
+    bedrock_cost_usd: number;
+    delta_usd: number;
+    delta_percent: number;
+    recommended_model: string;
+    has_recommendation: boolean;
+}
+
+export interface AzureFoundryTokenMixPoint {
+    model: string;
+    input: number;
+    cache_read: number;
+    cache_write: number;
+    output: number;
+    total: number;
+}
+
+export interface AzureFoundryMatrixPoint {
     azure_model_name: string;
+    bedrock_model_name: string;
+    provider: string;
+    equivalence: number;
+    delta_percent: number;
+    projected_cost_usd: number;
+    confidence: AzureFoundryConfidence;
+    is_recommended: boolean;
+    dimension_fallback: boolean;
+}
+
+export interface AzureFoundryDimensionLadderRow {
+    dimension: string;
+    dimension_label: string;
+    tokens: number;
+    token_share: number;
+    azure_price_per_1m_usd: number | null;
+    azure_cost_usd: number;
+    bedrock_price_per_1m_usd: number | null;
+    bedrock_cost_usd: number | null;
+    delta_usd: number | null;
+    dimension_fallback: boolean;
+}
+
+export interface AzureFoundryModelPanel {
+    azure_model_name: string;
+    azure_model_version: string;
+    model_class_label: string;
+    deployment_type: string;
+    azure_location: string;
+    aws_region: string;
+    lifecycle_status: string;
+    deprecation_label: string;
+    azure_cost_usd: number;
+    tokens_total: number;
+    blended_price_per_1m_usd: number;
+    deployments_total: number;
+    deployments_idle: number;
+    candidates_total: number;
+    recommended_model: string;
+    recommended_provider: string;
+    recommended_confidence: string;
+    recommended_cost_usd: number | null;
+    recommended_delta_usd: number | null;
+    recommended_delta_percent: number | null;
+    recommended_equivalence: number | null;
+    recommended_rationale: string;
+    ladder: AzureFoundryDimensionLadderRow[];
+}
+
+export interface AzureFoundryModelRow {    azure_model_name: string;
     azure_model_version: string;
     model_class_label: string;
     deployment_type: string;
