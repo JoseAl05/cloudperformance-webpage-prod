@@ -48,7 +48,7 @@ export const AdvisorViewComponent = ({
 }: AdvisorViewComponentProps) => {
     const startDateFormatted = startDate.toISOString().replace('Z', '').slice(0, -4);
     const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : '';
-    
+
     // Validación: Ambos filtros deben estar seleccionados
     // null/undefined = No seleccionado
     // '' (vacío) = "Ver todos" (SÍ está seleccionado)
@@ -56,11 +56,11 @@ export const AdvisorViewComponent = ({
     const hasImpactSelected = impact !== null && impact !== undefined;
     const hasCategorySelected = category !== null && category !== undefined;
     const shouldFetch = hasImpactSelected && hasCategorySelected;
-    
+
     // Construir URL con parámetros opcionales
     const buildUrl = () => {
         if (!shouldFetch) return null;
-        
+
         let url = `/api/azure/bridge/azure/vista-asesor?date_from=${startDateFormatted}&date_to=${endDateFormatted}`;
         // Solo agregar filtros si NO son vacíos (vacío = "Ver todos")
         if (impact) url += `&impact=${encodeURIComponent(impact)}`;
@@ -74,7 +74,7 @@ export const AdvisorViewComponent = ({
     )
 
     const aiRecommendations = useSWR(
-        (hasImpactSelected && hasCategorySelected) ? `/api/azure/bridge/azure/get_ai_recommendations?date_from=${startDateFormatted}&date_to=${endDateFormatted}` : null,
+        `/api/azure/bridge/azure/get_ai_recommendations?date_from=${startDateFormatted}&date_to=${endDateFormatted}`,
         fetcher,
     )
 
