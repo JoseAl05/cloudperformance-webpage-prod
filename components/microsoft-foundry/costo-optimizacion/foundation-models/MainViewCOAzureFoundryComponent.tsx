@@ -1,7 +1,7 @@
 'use client'
 import { FiltersComponent } from '@/components/general_azure/filters/FiltersComponent'
 import { ChartLine } from 'lucide-react'
-import { AzureFoundryComponent } from '@/components/microsoft-foundry/costo-optimizacion/foundation-models/COFoundationComponent'
+import { AzureFoundryComponent } from '@/components/microsoft-foundry/costo-optimizacion/foundation-models/COAzureFoundryComponent'
 
 
 export const MainViewAzureFoundryComponent = () => {
