@@ -188,18 +188,24 @@ export interface AzureFoundryTokenMixPoint {
     cache_write: number;
     output: number;
     total: number;
+    input_cost: number;
+    cache_read_cost: number;
+    cache_write_cost: number;
+    output_cost: number;
+    total_cost: number;
 }
 
-export interface AzureFoundryMatrixPoint {
+export interface AzureFoundryCandidateConfidenceRow {
     azure_model_name: string;
     bedrock_model_name: string;
     provider: string;
-    equivalence: number;
+    region: string;
+    equivalence_score: number;
     delta_percent: number;
     projected_cost_usd: number;
     confidence: AzureFoundryConfidence;
     is_recommended: boolean;
-    dimension_fallback: boolean;
+    is_eligible: boolean;
 }
 
 export interface AzureFoundryDimensionLadderRow {
@@ -239,48 +245,6 @@ export interface AzureFoundryModelPanel {
     recommended_equivalence: number | null;
     recommended_rationale: string;
     ladder: AzureFoundryDimensionLadderRow[];
-}
-
-export interface AzureFoundryModelRow {    azure_model_name: string;
-    azure_model_version: string;
-    model_class_label: string;
-    deployment_type: string;
-    azure_location: string;
-    aws_region: string;
-    azure_cost_usd: number;
-    tokens_total: number;
-    blended_price_per_1m_usd: number;
-    recommended_model: string;
-    recommended_cost_usd: number;
-    recommended_delta_usd: number;
-    recommended_delta_percent: number;
-    recommended_confidence: string;
-    candidates_total: number;
-    deployments_total: number;
-    deployments_idle: number;
-    lifecycle_status: string;
-    deprecation_label: string;
-}
-
-export interface AzureFoundryCandidateRow {
-    azure_model_name: string;
-    bedrock_model_name: string;
-    bedrock_model_id: string;
-    provider: string;
-    region: string;
-    equivalence_score: number;
-    price_similarity: number;
-    dimension_coverage: number;
-    confidence: AzureFoundryConfidence;
-    projected_cost_usd: number;
-    azure_cost_usd: number;
-    delta_usd: number;
-    delta_percent: number;
-    rank_label: string;
-    is_recommended: boolean;
-    dimension_fallback: boolean;
-    missing_dimensions_label: string;
-    rationale: string;
 }
 
 export interface AzureFoundryDeploymentRow {

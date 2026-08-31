@@ -1,6 +1,6 @@
 'use client'
 
-import { DynamicColumn } from '@/components/general/data-table/columns';
+import { DynamicColumn } from '@/components/data-table/columns';
 import { AzureFoundryDeploymentRow } from '@/interfaces/foundry-cost-optimization/azureFoundryInterfaces';
 import { formatCurrency, formatInteger, formatPercent, formatTokens } from '@/lib/azureFoundryFormatters';
 import { cn } from '@/lib/utils';

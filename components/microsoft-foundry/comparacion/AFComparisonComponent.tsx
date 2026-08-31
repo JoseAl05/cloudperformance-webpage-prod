@@ -3,9 +3,7 @@
 import { MessageCard } from '@/components/azure/cards/MessageCards';
 import { LoaderComponent } from '@/components/general_azure/LoaderComponent';
 import { AzureFoundryComparisonView } from '@/components/microsoft-foundry/comparacion/info/AFComparisonViewComponent';
-import { AzureFoundryModelsTableComponent } from '@/components/microsoft-foundry/comparacion/table/AFComparisonModelsTableComponent';
-import { AzureFoundryComparison } from '@/interfaces/foundry-cost-optimization/azureFoundryInterfaces';
-import { AlertCircle, Info } from 'lucide-react';
+import { AlertCircle } from 'lucide-react';
 import useSWR from 'swr';
 
 interface AzureFoundryComparisonComponent {
@@ -17,8 +15,6 @@ interface AzureFoundryComparisonComponent {
 const fetcher = (url: string) =>
     fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
         .then(r => r.json());
-
-const isNonEmptyArray = <T,>(v: unknown): v is T[] => Array.isArray(v) && v.length > 0
 
 export const AzureFoundryComparisonComponent = ({ startDate, endDate, selectedInstance }: AzureFoundryComparisonComponent) => {
 
@@ -32,15 +28,7 @@ export const AzureFoundryComparisonComponent = ({ startDate, endDate, selectedIn
         fetcher
     )
 
-    const anyLoading = foundryComparison.isLoading
-    const anyError = !!foundryComparison.error
-
-    const foundryComparisonData: AzureFoundryComparison[] | null =
-        isNonEmptyArray<AzureFoundryComparison>(foundryComparison.data) ? foundryComparison.data : null
-
-    const hasFoundryComparisonData = !!foundryComparisonData && foundryComparisonData.length > 0
-
-    if (anyLoading) {
+    if (foundryComparison.isLoading) {
         return (
             <LoaderComponent />
         )
@@ -54,7 +42,7 @@ export const AzureFoundryComparisonComponent = ({ startDate, endDate, selectedIn
         )
     }
 
-    if (anyError) {
+    if (foundryComparison.error) {
         return (
             <div className="w-full min-w-0 px-4 py-10 flex flex-col items-center gap-4">
                 <MessageCard
@@ -67,28 +55,11 @@ export const AzureFoundryComparisonComponent = ({ startDate, endDate, selectedIn
         )
     }
 
-    const noneHasData = !hasFoundryComparisonData
-    if (noneHasData) {
-        return (
-            <div className="w-full min-w-0 px-4 py-6">
-                <MessageCard
-                    icon={Info}
-                    title="Sin datos para mostrar"
-                    description="No encontramos información sobre la cuenta seleccionada."
-                    tone="warn"
-                />
-            </div>
-        )
-    }
-    console.log(foundryComparisonData)
-
     return (
-        <>
-            <div className='p-3'>
-                <AzureFoundryComparisonView
-                    data={foundryComparisonData[0]}
-                />
-            </div>
-        </>
+        <div className='p-3'>
+            <AzureFoundryComparisonView
+                data={foundryComparison.data}
+            />
+        </div>
     )
 }

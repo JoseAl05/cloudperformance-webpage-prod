@@ -4,7 +4,7 @@ import { useMemo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import { Cloud, TrendingDown, Layers, Server, ShieldCheck } from 'lucide-react';
-import { AzureFoundryComparison } from '@/interfaces/vista-azure-foundry/azureFoundryInterfaces';
+import { AzureFoundryComparison } from '@/interfaces/foundry-cost-optimization/azureFoundryInterfaces';
 import { deltaClass, formatCurrency, formatInteger, formatPercent, formatSignedPercent } from '@/lib/azureFoundryFormatters';
 
 interface AzureFoundrySummaryCardsProps {
