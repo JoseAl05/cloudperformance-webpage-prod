@@ -22,6 +22,7 @@ import {
   TriangleAlert,
   Server,
   ReceiptText,
+  Star,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { 
@@ -144,6 +145,7 @@ const AzureModelCard = ({
       tokensOutput: tokenFormatter.format(azureModel.tokens?.output || 0),
       modelName: azureModel.model_name,
       provider: azureModel.provider,
+      profile: azureModel.model_profile,
       
       comparison: azureModel.price_comparison?.map((pc: PriceComparison) => {
         const delta = pc.delta_pct_vs_billing;
@@ -160,6 +162,18 @@ const AzureModelCard = ({
             }))
           : [];
 
+        // --- Reporte Técnico y de Perfil ---
+        const techParity = pc.technical_parity_report;
+        const missingCaps = (techParity?.missing_capabilities && techParity.missing_capabilities.length > 0)
+          ? techParity.missing_capabilities.join(", ") 
+          : null;
+        const infraWarning = techParity?.infrastructure_warning !== "OK" 
+          ? techParity?.infrastructure_warning 
+          : null;
+
+        const diffAmount = pc.estimated_cost - azureModel.total_billing_cost;
+        const diffFormatted = formatCost(Math.abs(diffAmount));
+
         return {
           modelName: pc.modelName,
           provider: pc.provider,
@@ -170,7 +184,13 @@ const AzureModelCard = ({
           isNeutral: hasDelta && delta !== null && delta === 0,
           hasMissing: missing.length > 0,
           missingLabel: missing.map((key: string) => rateLabels[key] ?? key).join(", "),
-          detailedRates
+          detailedRates,
+          missingCaps,
+          infraWarning,
+          currentTpm: techParity?.current_max_tpm || 0,
+          candidateTpm: techParity?.candidate_max_tpm || 0,
+          diffFormatted,
+          profile: pc.model_profile // Perfil del modelo candidato
         };
       }) || [],
     }),
@@ -193,23 +213,64 @@ const AzureModelCard = ({
             <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
               <Boxes className="h-5 w-5" />
             </span>
-            <div className="min-w-0">
-              <CardTitle className="truncate text-base font-semibold leading-tight text-foreground">
-                {azureModel.provider} - {azureModel.model_name}
-              </CardTitle>
-              <p className="mt-0.5 flex items-center gap-1 truncate text-sm text-muted-foreground">
-                <Server className="h-3 w-3" />
-                {azureModel.account_name}
-              </p>
+            <div className="min-w-0 flex flex-col gap-1">
+              <div className="flex items-center gap-2 flex-wrap">
+                <CardTitle className="truncate text-base font-semibold leading-tight text-foreground">
+                  {azureModel.provider} - {azureModel.model_name}
+                </CardTitle>
+                
+                {/* SECCIÓN ESTRELLAS: MODELO ACTUAL */}
+                {formatted.profile && (
+                  <div className="flex items-center gap-0.5" title={formatted.profile?.tier}>
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <Star
+                        key={star}
+                        className={cn(
+                          "h-4 w-4",
+                          star <= (formatted.profile?.stars ?? 0)
+                            ? "fill-amber-400 text-amber-400"
+                            : "fill-muted text-muted-foreground/30"
+                        )}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div className="flex items-center gap-2 text-xs">
+                <p className="flex items-center gap-1 truncate text-muted-foreground">
+                  <Server className="h-3 w-3" />
+                  {azureModel.account_name}
+                </p>
+                {/* SECCIÓN CATEGORÍA: MODELO ACTUAL */}
+                {formatted.profile && (
+                  <>
+                    <span className="text-muted-foreground/50">•</span>
+                    <span className="font-medium text-sky-600 dark:text-sky-400">
+                      {formatted.profile?.tier}
+                    </span>
+                  </>
+                )}
+              </div>
+
+              {/* DESCRIPCIÓN: MODELO ACTUAL */}
+              {formatted.profile?.description && (
+                <p className="text-[11px] italic leading-snug text-slate-500 mt-1">
+                  "{formatted.profile?.description}"
+                </p>
+              )}
             </div>
           </div>
-          <Badge
-            variant="outline"
-            className="shrink-0 gap-1 border-primary/30 text-primary"
-          >
-            <MapPin className="h-3 w-3" />
-            {azureModel.region}
-          </Badge>
+          
+          <div className="flex flex-col items-end gap-1.5 shrink-0">
+            <Badge
+              variant="outline"
+              className="gap-1 border-primary/30 text-primary mb-1"
+            >
+              <MapPin className="h-3 w-3" />
+              {azureModel.region}
+            </Badge>
+          </div>
         </div>
       </CardHeader>
 
@@ -247,7 +308,6 @@ const AzureModelCard = ({
               </p>
             </div>
 
-            {/* SECCIÓN AGRUPADA: ENTRADA / SALIDA */}
             {(inputMeters.length > 0 || outputMeters.length > 0) && (
               <div className="flex flex-col gap-4 pt-3 border-t border-blue-200/60 dark:border-blue-800/50 mt-1">
                 <p className="text-[10px] font-semibold text-blue-800/70 dark:text-blue-300/70 uppercase tracking-wide">
@@ -328,18 +388,45 @@ const AzureModelCard = ({
                     >
                       <div className="flex items-start justify-between gap-2">
                         <div className="min-w-0 flex-1">
-                          <p className="truncate text-sm font-medium leading-tight text-foreground">
-                            {comp.modelName}
+                          <div className="flex items-center gap-2">
+                            <p className="truncate text-sm font-bold leading-tight text-foreground">
+                              {comp.modelName}
+                            </p>
+                            
+                            {/* SECCIÓN ESTRELLAS: MODELO CANDIDATO */}
+                            {comp.profile && (
+                              <div className="flex items-center gap-0.5" title={comp.profile?.tier}>
+                                {[1, 2, 3, 4, 5].map((star) => (
+                                  <Star
+                                    key={star}
+                                    className={cn(
+                                      "h-3 w-3",
+                                      star <= (comp.profile?.stars ?? 0)
+                                        ? "fill-amber-400 text-amber-400"
+                                        : "fill-muted text-muted-foreground/30"
+                                    )}
+                                  />
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                          <p className="truncate text-xs font-medium text-sky-600 mt-0.5">
+                            {comp.provider} 
+                            {comp.profile && <span className="text-muted-foreground font-normal ml-1">• {comp.profile?.tier}</span>}
                           </p>
-                          <p className="truncate text-xs text-sky-600">
-                            {comp.provider}
-                          </p>
+                          
+                          {/* DESCRIPCIÓN DEL MODELO CANDIDATO */}
+                          {comp.profile?.description && (
+                            <p className="mt-1 text-[11px] italic leading-snug text-slate-500">
+                              "{comp.profile?.description}"
+                            </p>
+                          )}
                         </div>
                         {comp.deltaLabel && (
                           <Badge
                             variant="outline"
                             className={cn(
-                              "shrink-0 gap-1 tabular-nums",
+                              "shrink-0 gap-1 tabular-nums mt-0.5",
                               comp.isCheaper &&
                                 "border-emerald-300 text-emerald-700 dark:border-emerald-900/50 dark:text-emerald-400",
                               comp.isMoreExpensive &&
@@ -386,20 +473,64 @@ const AzureModelCard = ({
                           ))}
                         </div>
                         
-                        <div className="flex justify-end items-end gap-2 mt-2">
-                          <p className="text-[11px] font-semibold text-muted-foreground mb-0.5">Total</p>
-                          <p className="text-base font-bold tabular-nums text-foreground leading-none">
-                            {comp.cost}
-                          </p>
+                        <div className="flex justify-between items-end mt-3 pt-3 border-t border-muted/50">
+                          <div className="flex flex-col gap-0.5">
+                            {comp.isCheaper && (
+                              <>
+                                <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-500 uppercase tracking-wider">Ahorro Proyectado</span>
+                                <span className="text-sm font-bold text-emerald-600 dark:text-emerald-500 tabular-nums">-{comp.diffFormatted}</span>
+                              </>
+                            )}
+                            {comp.isMoreExpensive && (
+                              <>
+                                <span className="text-[10px] font-bold text-rose-600 dark:text-rose-500 uppercase tracking-wider">Costo Adicional</span>
+                                <span className="text-sm font-bold text-rose-600 dark:text-rose-500 tabular-nums">+{comp.diffFormatted}</span>
+                              </>
+                            )}
+                            {comp.isNeutral && (
+                              <>
+                                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Diferencia</span>
+                                <span className="text-sm font-bold text-muted-foreground tabular-nums">{comp.diffFormatted}</span>
+                              </>
+                            )}
+                          </div>
+                          <div className="text-right flex flex-col gap-0.5">
+                            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Costo Estimado</span>
+                            <span className="text-lg font-bold tabular-nums text-foreground leading-none">
+                              {comp.cost}
+                            </span>
+                          </div>
                         </div>
                       </div>
-                      
+
+                      {/* --- ALERTA: Faltan Precios --- */}
                       {comp.hasMissing && (
-                        <p className="mt-2.5 flex items-center gap-1 text-[11px] leading-snug text-amber-600 dark:text-amber-400">
+                        <p className="mt-3 flex items-center gap-1 text-[11px] leading-snug text-amber-600 dark:text-amber-400">
                           <TriangleAlert className="h-3 w-3 shrink-0" />
                           Comparación parcial: sin tarifa para {comp.missingLabel}.
                         </p>
                       )}
+
+                      {/* --- ALERTA: Faltan Capacidades Técnicas --- */}
+                      {comp.missingCaps && (
+                        <div className="mt-3 flex items-start gap-1.5 rounded bg-amber-50 p-2 text-[11px] leading-snug text-amber-700 dark:bg-amber-950/30 dark:text-amber-400 border border-amber-200 dark:border-amber-900/50">
+                          <TriangleAlert className="h-3.5 w-3.5 shrink-0 mt-0.5" />
+                          <p>
+                            <span className="font-semibold">Faltan capacidades:</span> El candidato no soporta <span className="font-mono text-[10px] font-bold">{comp.missingCaps}</span>.
+                          </p>
+                        </div>
+                      )}
+
+                      {/* --- ALERTA: Degradación de Infraestructura (TPM) --- */}
+                      {comp.infraWarning && (
+                        <div className="mt-2 flex items-start gap-1.5 rounded bg-rose-50 p-2 text-[11px] leading-snug text-rose-700 dark:bg-rose-950/30 dark:text-rose-400 border border-rose-200 dark:border-rose-900/50">
+                          <TriangleAlert className="h-3.5 w-3.5 shrink-0 mt-0.5" />
+                          <p>
+                            <span className="font-semibold">Riesgo de cuota (TPM):</span> {comp.infraWarning} ({tokenFormatter.format(comp.candidateTpm)} vs {tokenFormatter.format(comp.currentTpm)} TPM).
+                          </p>
+                        </div>
+                      )}
+
                     </div>
                   ))}
                 </div>
