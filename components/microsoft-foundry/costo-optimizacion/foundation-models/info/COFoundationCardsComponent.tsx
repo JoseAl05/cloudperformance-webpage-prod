@@ -162,7 +162,6 @@ const AzureModelCard = ({
             }))
           : [];
 
-        // --- Reporte Técnico y de Perfil ---
         const techParity = pc.technical_parity_report;
         const missingCaps = (techParity?.missing_capabilities && techParity.missing_capabilities.length > 0)
           ? techParity.missing_capabilities.join(", ") 
@@ -190,7 +189,7 @@ const AzureModelCard = ({
           currentTpm: techParity?.current_max_tpm || 0,
           candidateTpm: techParity?.candidate_max_tpm || 0,
           diffFormatted,
-          profile: pc.model_profile // Perfil del modelo candidato
+          profile: pc.model_profile
         };
       }) || [],
     }),
@@ -219,7 +218,6 @@ const AzureModelCard = ({
                   {azureModel.provider} - {azureModel.model_name}
                 </CardTitle>
                 
-                {/* SECCIÓN ESTRELLAS: MODELO ACTUAL */}
                 {formatted.profile && (
                   <div className="flex items-center gap-0.5" title={formatted.profile?.tier}>
                     {[1, 2, 3, 4, 5].map((star) => (
@@ -242,7 +240,7 @@ const AzureModelCard = ({
                   <Server className="h-3 w-3" />
                   {azureModel.account_name}
                 </p>
-                {/* SECCIÓN CATEGORÍA: MODELO ACTUAL */}
+
                 {formatted.profile && (
                   <>
                     <span className="text-muted-foreground/50">•</span>
@@ -253,10 +251,9 @@ const AzureModelCard = ({
                 )}
               </div>
 
-              {/* DESCRIPCIÓN: MODELO ACTUAL */}
               {formatted.profile?.description && (
                 <p className="text-[11px] italic leading-snug text-slate-500 mt-1">
-                  "{formatted.profile?.description}"
+                  &quot;{formatted.profile?.description}&quot;
                 </p>
               )}
             </div>
@@ -393,7 +390,6 @@ const AzureModelCard = ({
                               {comp.modelName}
                             </p>
                             
-                            {/* SECCIÓN ESTRELLAS: MODELO CANDIDATO */}
                             {comp.profile && (
                               <div className="flex items-center gap-0.5" title={comp.profile?.tier}>
                                 {[1, 2, 3, 4, 5].map((star) => (
@@ -415,10 +411,9 @@ const AzureModelCard = ({
                             {comp.profile && <span className="text-muted-foreground font-normal ml-1">• {comp.profile?.tier}</span>}
                           </p>
                           
-                          {/* DESCRIPCIÓN DEL MODELO CANDIDATO */}
                           {comp.profile?.description && (
                             <p className="mt-1 text-[11px] italic leading-snug text-slate-500">
-                              "{comp.profile?.description}"
+                              &quot;{comp.profile?.description}&quot;
                             </p>
                           )}
                         </div>
@@ -503,7 +498,6 @@ const AzureModelCard = ({
                         </div>
                       </div>
 
-                      {/* --- ALERTA: Faltan Precios --- */}
                       {comp.hasMissing && (
                         <p className="mt-3 flex items-center gap-1 text-[11px] leading-snug text-amber-600 dark:text-amber-400">
                           <TriangleAlert className="h-3 w-3 shrink-0" />
@@ -511,7 +505,6 @@ const AzureModelCard = ({
                         </p>
                       )}
 
-                      {/* --- ALERTA: Faltan Capacidades Técnicas --- */}
                       {comp.missingCaps && (
                         <div className="mt-3 flex items-start gap-1.5 rounded bg-amber-50 p-2 text-[11px] leading-snug text-amber-700 dark:bg-amber-950/30 dark:text-amber-400 border border-amber-200 dark:border-amber-900/50">
                           <TriangleAlert className="h-3.5 w-3.5 shrink-0 mt-0.5" />
@@ -521,7 +514,6 @@ const AzureModelCard = ({
                         </div>
                       )}
 
-                      {/* --- ALERTA: Degradación de Infraestructura (TPM) --- */}
                       {comp.infraWarning && (
                         <div className="mt-2 flex items-start gap-1.5 rounded bg-rose-50 p-2 text-[11px] leading-snug text-rose-700 dark:bg-rose-950/30 dark:text-rose-400 border border-rose-200 dark:border-rose-900/50">
                           <TriangleAlert className="h-3.5 w-3.5 shrink-0 mt-0.5" />
