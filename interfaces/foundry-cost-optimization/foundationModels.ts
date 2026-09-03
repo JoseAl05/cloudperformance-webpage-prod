@@ -12,6 +12,19 @@ export interface MeterDetail {
     metric_type: string;
 }
 
+export interface TechnicalParityReport {
+    missing_capabilities?: string[];
+    infrastructure_warning?: string;
+    current_max_tpm?: number;
+    candidate_max_tpm?: number;
+}
+
+export interface ModelProfile {
+    tier?: string;
+    stars: number;
+    description?: string;
+}
+
 export interface PriceComparison {
     modelName: string;
     provider: string;
@@ -22,6 +35,8 @@ export interface PriceComparison {
     delta_pct_vs_billing?: number | null;
     detailed_cost_breakdown?: Record<string, number>;
     detailed_base_rates?: Record<string, RateObject>;
+    technical_parity_report?: TechnicalParityReport;
+    model_profile?: ModelProfile;
 }
 
 export interface AzureModelCost {
@@ -38,6 +53,7 @@ export interface AzureModelCost {
     billing_cost_breakdown: Record<string, number>;
     billing_rates: Record<string, RateObject>;
     meter_details: MeterDetail[];
+    model_profile?: ModelProfile;
 }
 
 export interface AzureFoundationModel {

@@ -32,7 +32,7 @@ export const MainViewCostOptimizationFoundryComponent = () => {
         // },
         {
             key: 'foundation-models',
-            title: 'Modelos Foundation',
+            title: 'Modelos Foundry',
             href: '/microsoft-foundry/costo-optimizacion/foundation-models',
             icon: Bot,
             iconWrapClass: 'bg-emerald-100 dark:bg-emerald-900/30',
