@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCollection, getDb } from '@/lib/mongodb';
 import { authorizeRequest } from '@/lib/authUtils';
-import { Empresa, User } from '@/types/db';
+import { CLOUD_PROVIDERS, cloneAccountsForUser } from '@/lib/cloudAccounts';
+import { CloudAccount, Empresa, User } from '@/types/db';
 import bcrypt from 'bcryptjs';
 import { Filter } from 'mongodb';
 
@@ -100,38 +101,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // --- CORRECCIÓN: Definir tipo extendido para evitar 'as any' ---
-    // Esto asegura que TS reconozca las propiedades multi-tenant si no están en la interfaz base
-    type EmpresaWithTenancy = Empresa & {
-      is_aws_multi_tenant?: boolean;
-      is_azure_multi_tenant?: boolean;
-      is_gcp_multi_tenant?: boolean;
-    };
-    const empresaTyped = empresa as EmpresaWithTenancy;
-
-    // 3. HERENCIA DE CONEXIONES Y PERMISOS MULTI-TENANT
-    const inherited_aws_db = empresa.user_db_aws || null;
-    const inherited_azure_db = empresa.user_db_azure || null;
-    const inherited_gcp_db = empresa.user_db_gcp || null;
-
-    const inherited_is_aws = empresa.is_aws || inherited_aws_db !== null;
-    const inherited_is_azure = empresa.is_azure || inherited_azure_db !== null;
-    const inherited_is_gcp = empresa.is_gcp || inherited_gcp_db !== null;
-
-    // 💡 NUEVA HERENCIA MULTI-TENANT (Ahora sin 'any')
-    const inherited_is_aws_multi_tenant =
-      empresaTyped.is_aws_multi_tenant || false;
-    const inherited_is_azure_multi_tenant =
-      empresaTyped.is_azure_multi_tenant || false;
-    const inherited_is_gcp_multi_tenant =
-      empresaTyped.is_gcp_multi_tenant || false;
-    const inherited_aws_accounts = empresa.aws_accounts || [];
-    const inherited_azure_accounts = empresa.azure_accounts || [];
-    const inherited_gcp_accounts = empresa.gcp_accounts || [];
-
-    const inherited_planName = empresa.planName || null;
-
-    // 4. Verificación de Límites
+    // 3. Verificación de Límites
     if (userCreating.role === 'admin_empresa') {
       if (client !== userCreating.client) {
         return NextResponse.json(
@@ -144,7 +114,7 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // 5. Construir el nuevo usuario
+    // 4. Construir el nuevo usuario
     const newUser: Omit<User, '_id'> = {
       email,
       username: username || email,
@@ -155,26 +125,59 @@ export async function POST(req: NextRequest) {
       updatedAt: new Date(),
       is_active: true,
 
-      // ASIGNACIÓN DE VALORES HEREDADOS
-      is_aws: inherited_is_aws,
-      user_db_aws: inherited_aws_db,
-      is_aws_multi_tenant: inherited_is_aws_multi_tenant,
-      aws_accounts: inherited_aws_accounts,
+      is_aws: false,
+      user_db_aws: null,
+      is_aws_multi_tenant: false,
 
-      // Azure
-      is_azure: inherited_is_azure,
-      user_db_azure: inherited_azure_db,
-      is_azure_multi_tenant: inherited_is_azure_multi_tenant,
-      azure_accounts: inherited_azure_accounts,
+      is_azure: false,
+      user_db_azure: null,
+      is_azure_multi_tenant: false,
 
-      // ✅ GCP
-      is_gcp: inherited_is_gcp,
-      user_db_gcp: inherited_gcp_db,
-      is_gcp_multi_tenant: inherited_is_gcp_multi_tenant,
-      gcp_accounts: inherited_gcp_accounts,
+      is_gcp: false,
+      user_db_gcp: null,
+      is_gcp_multi_tenant: false,
 
-      planName: inherited_planName,
+      planName: empresa.planName || null,
     };
+
+    // 5. HERENCIA DESDE LA EMPRESA
+    //    El usuario es un espejo de su empresa: en multi-tenant hereda
+    //    `<cloud>_accounts` con los MISMOS IDs `clp-<id>`; en single-tenant
+    //    no se crea el array y se hereda `user_db_<cloud>`.
+    const inheritedFields = newUser as unknown as Record<string, unknown>;
+
+    for (const cloud of CLOUD_PROVIDERS) {
+      const masterDb = empresa[`user_db_${cloud}`] ?? null;
+      const isMultiTenant = empresa[`is_${cloud}_multi_tenant`] === true;
+      const isEnabled = empresa[`is_${cloud}`] === true || masterDb !== null;
+
+      inheritedFields[`is_${cloud}`] = isEnabled;
+
+      if (!isEnabled) continue;
+
+      const accounts = isMultiTenant
+        ? cloneAccountsForUser(
+            empresa[`${cloud}_accounts`] as CloudAccount[] | undefined
+          )
+        : undefined;
+
+      if (accounts) {
+        inheritedFields[`is_${cloud}_multi_tenant`] = true;
+        inheritedFields[`${cloud}_accounts`] = accounts;
+        continue;
+      }
+
+      if (isMultiTenant) {
+        // Empresa marcada multi-tenant pero sin cuentas: dato heredado
+        // inconsistente. Se degrada a single-tenant en vez de copiar un
+        // array vacío que dejaría al usuario sin conexión utilizable.
+        console.warn(
+          `Empresa '${client}' es multi-tenant en ${cloud} pero no tiene ${cloud}_accounts.`
+        );
+      }
+
+      inheritedFields[`user_db_${cloud}`] = masterDb;
+    }
 
     // 6. Insertar y Actualizar
     await usersCollection.insertOne(newUser);

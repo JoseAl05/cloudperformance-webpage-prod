@@ -3,7 +3,13 @@ import { ObjectId } from 'mongodb';
 import { getCollection } from '@/lib/mongodb';
 import { authorizeRequest } from '@/lib/authUtils';
 import { PLAN_CONFIG } from '@/lib/plans';
-import { Empresa, User } from '@/types/db';
+import {
+  CLOUD_LABELS,
+  CLOUD_PROVIDERS,
+  CloudAccountsError,
+  normalizeCloudAccounts,
+} from '@/lib/cloudAccounts';
+import { CloudAccount, Empresa, User } from '@/types/db';
 
 // Define el tipo para los parámetros dinámicos de la ruta
 interface Params {
@@ -77,24 +83,8 @@ export async function PUT(req: NextRequest, { params }: Params) {
 
     const body = await req.json();
 
-    // CAMPOS DE LICENCIA Y CONEXIÓN (AMPLIADOS)
-    const {
-      planName,
-      userLimit: rawUserLimit,
-      is_aws,
-      user_db_aws,
-      is_azure,
-      user_db_azure,
-      is_aws_multi_tenant,
-      is_azure_multi_tenant,
-      aws_accounts,
-      azure_accounts,
-
-      is_gcp,
-      user_db_gcp,
-      is_gcp_multi_tenant,
-      gcp_accounts,
-    } = body;
+    // CAMPOS DE LICENCIA. La configuración por nube se lee dentro del bucle.
+    const { planName, userLimit: rawUserLimit } = body;
 
     const _id = new ObjectId(id);
     const empresasCollection = await getCollection<Empresa>('Empresas');
@@ -108,7 +98,14 @@ export async function PUT(req: NextRequest, { params }: Params) {
       );
     }
 
-    const updateFields: Partial<Empresa> = {};
+    // Campos a escribir en la empresa...
+    const setFields: Record<string, unknown> = {};
+    const unsetFields: Record<string, ''> = {};
+
+    // ...y su espejo exacto para los usuarios de la empresa.
+    const userSetFields: Record<string, unknown> = {};
+    const userUnsetFields: Record<string, ''> = {};
+
     let newLimit: number = currentEmpresa.userLimit;
 
     // 2. VALIDACIÓN Y ASIGNACIÓN DE PLAN/LÍMITE
@@ -120,7 +117,8 @@ export async function PUT(req: NextRequest, { params }: Params) {
           { status: 400 },
         );
       }
-      updateFields.planName = planName;
+      setFields.planName = planName;
+      userSetFields.planName = planName;
       newLimit = planConfig.userLimit;
     }
 
@@ -136,259 +134,112 @@ export async function PUT(req: NextRequest, { params }: Params) {
         { status: 409 },
       );
     }
-    updateFields.userLimit = newLimit;
+    setFields.userLimit = newLimit;
 
-    // 3. LÓGICA AMPLIADA: CONFIGURACIÓN AWS
-    if (typeof is_aws === 'boolean') {
-      updateFields.is_aws = is_aws;
+    // 3. CONFIGURACIÓN POR NUBE (AWS / Azure / GCP)
+    //    Multi-tenant  -> se persiste `<cloud>_accounts`, conservando los IDs
+    //                     ya existentes y generando `clp-<id>` para las nuevas.
+    //    Single-tenant -> se persiste `user_db_<cloud>` y se ELIMINA el array
+    //                     con `$unset` (nunca se escribe `undefined`, que el
+    //                     driver serializaría como `null` dejando IDs muertos).
+    for (const cloud of CLOUD_PROVIDERS) {
+      const isEnabled = body[`is_${cloud}`];
 
-      if (is_aws) {
-        // Verificar si es multi-tenant
-        if (is_aws_multi_tenant === true) {
-          updateFields.is_aws_multi_tenant = true;
-          updateFields.user_db_aws = null; // No usa DB maestra
+      // Si el body no declara la nube, no se toca ni aquí ni en los usuarios.
+      if (typeof isEnabled !== 'boolean') continue;
 
-          // Validar que hay cuentas
-          if (
-            !aws_accounts ||
-            !Array.isArray(aws_accounts) ||
-            aws_accounts.length === 0
-          ) {
-            return NextResponse.json(
-              {
-                message:
-                  'Debe proporcionar al menos una cuenta AWS en modo multi-tenant.',
-              },
-              { status: 400 },
-            );
-          }
+      const isMultiTenant = body[`is_${cloud}_multi_tenant`] === true;
+      const masterDb = body[`user_db_${cloud}`];
 
-          // Validar estructura de cuentas
-          for (const acc of aws_accounts) {
-            if (!acc.id || !acc.alias || !acc.db) {
-              return NextResponse.json(
-                {
-                  message: 'Todas las cuentas AWS deben tener id, alias y db.',
-                },
-                { status: 400 },
-              );
-            }
-          }
+      const enabledField = `is_${cloud}`;
+      const multiTenantField = `is_${cloud}_multi_tenant`;
+      const dbField = `user_db_${cloud}`;
+      const accountsField = `${cloud}_accounts`;
 
-          updateFields.aws_accounts = aws_accounts;
-        } else {
-          // Modo single-tenant tradicional
-          updateFields.is_aws_multi_tenant = false;
-          updateFields.aws_accounts = undefined; // Limpiar array
-          updateFields.user_db_aws = user_db_aws;
+      setFields[enabledField] = isEnabled;
 
-          if (!user_db_aws || user_db_aws.trim() === '') {
-            return NextResponse.json(
-              {
-                message:
-                  'La cadena de conexión AWS es requerida si el acceso está habilitado.',
-              },
-              { status: 400 },
-            );
-          }
-        }
+      if (isEnabled && isMultiTenant) {
+        setFields[multiTenantField] = true;
+        setFields[dbField] = null;
+        setFields[accountsField] = normalizeCloudAccounts(
+          cloud,
+          body[accountsField],
+          currentEmpresa[accountsField as keyof Empresa] as
+            | CloudAccount[]
+            | undefined,
+        );
       } else {
-        // AWS desactivado - limpiar todo
-        updateFields.user_db_aws = null;
-        updateFields.is_aws_multi_tenant = false;
-        updateFields.aws_accounts = undefined;
+        if (isEnabled && (typeof masterDb !== 'string' || !masterDb.trim())) {
+          return NextResponse.json(
+            {
+              message: `La cadena de conexión ${CLOUD_LABELS[cloud].label} es requerida si el acceso está habilitado.`,
+            },
+            { status: 400 },
+          );
+        }
+
+        setFields[multiTenantField] = false;
+        setFields[dbField] = isEnabled ? (masterDb as string).trim() : null;
+        unsetFields[accountsField] = '';
+      }
+
+      // Los usuarios reciben exactamente la misma configuración.
+      userSetFields[enabledField] = setFields[enabledField];
+      userSetFields[multiTenantField] = setFields[multiTenantField];
+      userSetFields[dbField] = setFields[dbField];
+
+      if (accountsField in setFields) {
+        userSetFields[accountsField] = setFields[accountsField];
+      } else {
+        userUnsetFields[accountsField] = '';
       }
     }
 
-    // 4. LÓGICA AMPLIADA: CONFIGURACIÓN AZURE
-    if (typeof is_azure === 'boolean') {
-      updateFields.is_azure = is_azure;
+    // 4. Ejecutar la actualización de la LICENCIA MAESTRA
+    setFields.updatedAt = new Date();
 
-      if (is_azure) {
-        // Verificar si es multi-tenant
-        if (is_azure_multi_tenant === true) {
-          updateFields.is_azure_multi_tenant = true;
-          updateFields.user_db_azure = null; // No usa DB maestra
-
-          // Validar que hay cuentas
-          if (
-            !azure_accounts ||
-            !Array.isArray(azure_accounts) ||
-            azure_accounts.length === 0
-          ) {
-            return NextResponse.json(
-              {
-                message:
-                  'Debe proporcionar al menos una cuenta Azure en modo multi-tenant.',
-              },
-              { status: 400 },
-            );
-          }
-
-          // Validar estructura de cuentas
-          for (const acc of azure_accounts) {
-            if (!acc.id || !acc.alias || !acc.db) {
-              return NextResponse.json(
-                {
-                  message:
-                    'Todas las cuentas Azure deben tener id, alias y db.',
-                },
-                { status: 400 },
-              );
-            }
-          }
-
-          updateFields.azure_accounts = azure_accounts;
-        } else {
-          // Modo single-tenant tradicional
-          updateFields.is_azure_multi_tenant = false;
-          updateFields.azure_accounts = undefined; // Limpiar array
-          updateFields.user_db_azure = user_db_azure;
-
-          if (!user_db_azure || user_db_azure.trim() === '') {
-            return NextResponse.json(
-              {
-                message:
-                  'La cadena de conexión Azure es requerida si el acceso está habilitado.',
-              },
-              { status: 400 },
-            );
-          }
-        }
-      } else {
-        // Azure desactivado - limpiar todo
-        updateFields.user_db_azure = null;
-        updateFields.is_azure_multi_tenant = false;
-        updateFields.azure_accounts = undefined;
-      }
+    const empresaUpdate: Record<string, unknown> = { $set: setFields };
+    if (Object.keys(unsetFields).length > 0) {
+      empresaUpdate.$unset = unsetFields;
     }
 
-    // 5. LÓGICA AMPLIADA: CONFIGURACIÓN GCP
-    if (typeof is_gcp === 'boolean') {
-      updateFields.is_gcp = is_gcp;
+    await empresasCollection.updateOne({ _id }, empresaUpdate);
 
-      if (is_gcp) {
-        if (is_gcp_multi_tenant === true) {
-          updateFields.is_gcp_multi_tenant = true;
-          updateFields.user_db_gcp = null;
-
-          if (
-            !gcp_accounts ||
-            !Array.isArray(gcp_accounts) ||
-            gcp_accounts.length === 0
-          ) {
-            return NextResponse.json(
-              {
-                message:
-                  'Debe proporcionar al menos un proyecto GCP en modo multi-tenant.',
-              },
-              { status: 400 },
-            );
-          }
-
-          for (const acc of gcp_accounts) {
-            if (!acc.id || !acc.alias || !acc.db) {
-              return NextResponse.json(
-                {
-                  message:
-                    'Todos los proyectos GCP deben tener id, alias y db.',
-                },
-                { status: 400 },
-              );
-            }
-          }
-
-          updateFields.gcp_accounts = gcp_accounts;
-        } else {
-          updateFields.is_gcp_multi_tenant = false;
-          updateFields.gcp_accounts = undefined;
-          updateFields.user_db_gcp = user_db_gcp;
-
-          if (!user_db_gcp || user_db_gcp.trim() === '') {
-            return NextResponse.json(
-              {
-                message:
-                  'La cadena de conexión GCP es requerida si el acceso está habilitado.',
-              },
-              { status: 400 },
-            );
-          }
-        }
-      } else {
-        updateFields.user_db_gcp = null;
-        updateFields.is_gcp_multi_tenant = false;
-        updateFields.gcp_accounts = undefined;
-      }
-    }
-
-    // Agregar la fecha de actualización de la licencia
-    updateFields.updatedAt = new Date();
-
-    // 5. Ejecutar la actualización de la LICENCIA MAESTRA
-    if (Object.keys(updateFields).length === 0) {
-      return NextResponse.json(
-        { message: 'No se proporcionaron campos válidos para actualizar.' },
-        { status: 200 },
-      );
-    }
-
-    const result = await empresasCollection.updateOne(
-      { _id },
-      { $set: updateFields },
-    );
-
-    // 6. PROPAGACIÓN DE CAMBIOS A USUARIOS ASOCIADOS
+    // 5. PROPAGACIÓN DE CAMBIOS A USUARIOS ASOCIADOS
+    //    El usuario queda como espejo exacto de la empresa: mismos flags,
+    //    misma DB maestra y mismas cuentas con los mismos IDs `clp-<id>`.
     const usersCollection = await getCollection<User>('Users');
 
-    const fieldsToPropagate: Partial<User> = {
-      is_aws: updateFields.is_aws,
-      is_azure: updateFields.is_azure,
-      is_gcp: updateFields.is_gcp,
-      is_aws_multi_tenant: updateFields.is_aws_multi_tenant,
-      is_azure_multi_tenant: updateFields.is_azure_multi_tenant,
-      is_gcp_multi_tenant: updateFields.is_gcp_multi_tenant,
-    };
+    let modifiedUsers = 0;
+    const hasUserUnset = Object.keys(userUnsetFields).length > 0;
 
-    if (updateFields.planName !== undefined) {
-      fieldsToPropagate.planName = updateFields.planName;
-    }
-    // Propagar según el modo
-    if (updateFields.is_aws_multi_tenant) {
-      fieldsToPropagate.user_db_aws = null; // Usuarios en multi-tenant no usan DB maestra
-      fieldsToPropagate.aws_accounts = updateFields.aws_accounts;
-    } else if (updateFields.is_aws) {
-      fieldsToPropagate.user_db_aws = updateFields.user_db_aws;
-      fieldsToPropagate.aws_accounts = undefined;
-    }
+    if (Object.keys(userSetFields).length > 0 || hasUserUnset) {
+      const userUpdate: Record<string, unknown> = {
+        $set: { ...userSetFields, updatedAt: new Date() },
+      };
+      if (hasUserUnset) {
+        userUpdate.$unset = userUnsetFields;
+      }
 
-    if (updateFields.is_azure_multi_tenant) {
-      fieldsToPropagate.user_db_azure = null; // Usuarios en multi-tenant no usan DB maestra
-      fieldsToPropagate.azure_accounts = updateFields.azure_accounts;
-    } else if (updateFields.is_azure) {
-      fieldsToPropagate.user_db_azure = updateFields.user_db_azure;
-      fieldsToPropagate.azure_accounts = undefined;
+      const updateUsersResult = await usersCollection.updateMany(
+        { client: currentEmpresa.name },
+        userUpdate,
+      );
+      modifiedUsers = updateUsersResult.modifiedCount;
     }
-    if (updateFields.is_gcp_multi_tenant) {
-      fieldsToPropagate.user_db_gcp = null;
-      fieldsToPropagate.gcp_accounts = updateFields.gcp_accounts;
-    } else if (updateFields.is_gcp) {
-      fieldsToPropagate.user_db_gcp = updateFields.user_db_gcp;
-      fieldsToPropagate.gcp_accounts = undefined;
-    }
-
-    const updateUsersResult = await usersCollection.updateMany(
-      { client: currentEmpresa.name },
-      { $set: fieldsToPropagate },
-    );
 
     return NextResponse.json(
       {
-        message: `Licencia de ${currentEmpresa.name} y ${updateUsersResult.modifiedCount} usuarios asociados actualizados exitosamente.`,
-        updatedFields: updateFields,
+        message: `Licencia de ${currentEmpresa.name} y ${modifiedUsers} usuarios asociados actualizados exitosamente.`,
+        updatedFields: setFields,
       },
       { status: 200 },
     );
   } catch (error) {
+    if (error instanceof CloudAccountsError) {
+      return NextResponse.json({ message: error.message }, { status: 400 });
+    }
+
     console.error('Error al editar licencia:', error);
     return NextResponse.json(
       { message: 'Error interno del servidor al editar la licencia.' },

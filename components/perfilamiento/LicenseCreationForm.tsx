@@ -1,100 +1,16 @@
-import React, { useState, FormEvent, useCallback, memo } from 'react';
+import React, { useState, FormEvent, useCallback } from 'react';
 import { useSession } from '@/hooks/useSession';
 import { PLAN_CONFIG } from '@/lib/plans';
-import { cn } from '@/lib/utils';
-import { Briefcase, Cloud, Plus, Trash2 } from 'lucide-react'; 
+import { Briefcase, Cloud } from 'lucide-react';
+import {
+    AccountListEditor,
+    CloudAccountRow,
+    CloudProvider,
+    newAccountRow,
+    toAccountsPayload,
+} from '@/components/perfilamiento/CloudAccountsEditor';
 
-type CloudAccount = { id: string; alias: string; db: string; };
-const generateAccountId = () => 'clp-' + Date.now().toString(36);
 const PLAN_NAMES = Object.keys(PLAN_CONFIG);
-
-// Actualizado para incluir 'gcp'
-interface AccountRowProps {
-    account: CloudAccount;
-    cloud: 'azure' | 'aws' | 'gcp';
-    onUpdate: (cloud: 'azure' | 'aws' | 'gcp', id: string, field: keyof CloudAccount, value: string) => void;
-    onRemove: (cloud: 'azure' | 'aws' | 'gcp', id: string) => void;
-}
-
-const AccountRow = memo(({ account, cloud, onUpdate, onRemove }: AccountRowProps) => {
-    // Lógica de colores: Azure=Blue, AWS=Amber, GCP=Emerald (Verde)
-    let themeColor = '';
-    if (cloud === 'azure') themeColor = 'text-blue-700 border-blue-300';
-    else if (cloud === 'aws') themeColor = 'text-amber-700 border-amber-300';
-    else themeColor = 'text-emerald-700 border-emerald-300'; // Estilo para GCP
-    
-    return (
-        <div className="grid grid-cols-6 gap-2 items-center py-2 border-b border-gray-200">
-            <input
-                type="text"
-                value={account.id}
-                disabled
-                title="ID generado automáticamente"
-                className="col-span-1 flex h-8 rounded-md border border-gray-100 bg-gray-50 px-2 text-xs text-gray-500 cursor-not-allowed"
-            />
-            <input
-                type="text"
-                value={account.alias}
-                onChange={(e) => onUpdate(cloud, account.id, 'alias', e.target.value)}
-                required
-                placeholder="Alias (Ej: Producción)"
-                className={cn("col-span-2 flex h-8 rounded-md border px-2 text-sm", themeColor)}
-            />
-            <input
-                type="text"
-                value={account.db}
-                onChange={(e) => onUpdate(cloud, account.id, 'db', e.target.value)}
-                required
-                placeholder="Cadena de Conexión DB"
-                className={cn("col-span-2 flex h-8 rounded-md border px-2 text-xs", themeColor)}
-            />
-            <button 
-                type="button" 
-                onClick={() => onRemove(cloud, account.id)}
-                className="col-span-1 text-red-500 hover:text-red-700 transition flex justify-center"
-            >
-                <Trash2 className="h-4 w-4" />
-            </button>
-        </div>
-    );
-});
-
-AccountRow.displayName = 'AccountRow';
-
-// Actualizado para incluir 'gcp'
-interface AccountListEditorProps {
-    cloud: 'azure' | 'aws' | 'gcp';
-    accounts: CloudAccount[];
-    onUpdate: (cloud: 'azure' | 'aws' | 'gcp', id: string, field: keyof CloudAccount, value: string) => void;
-    onRemove: (cloud: 'azure' | 'aws' | 'gcp', id: string) => void;
-    onAdd: (cloud: 'azure' | 'aws' | 'gcp') => void;
-}
-
-const AccountListEditor = memo(({ cloud, accounts, onUpdate, onRemove, onAdd }: AccountListEditorProps) => {
-    let accentColor = '';
-    if (cloud === 'azure') accentColor = 'text-blue-600 hover:text-blue-800';
-    else if (cloud === 'aws') accentColor = 'text-amber-600 hover:text-amber-800';
-    else accentColor = 'text-emerald-600 hover:text-emerald-800'; // Estilo para GCP
-
-    return (
-        <div className="space-y-2 pt-1 border-t mt-2">
-            <button type="button" onClick={() => onAdd(cloud)} className={cn("flex items-center text-sm font-medium transition", accentColor)}>
-                <Plus className="h-4 w-4 mr-1" /> Añadir Cuenta {cloud.toUpperCase()}
-            </button>
-            {accounts.map(acc => (
-                <AccountRow 
-                    key={acc.id} 
-                    account={acc} 
-                    cloud={cloud}
-                    onUpdate={onUpdate}
-                    onRemove={onRemove}
-                />
-            ))}
-        </div>
-    );
-});
-
-AccountListEditor.displayName = 'AccountListEditor';
 
 interface LicenseCreationFormProps {
     refreshLicenseStatus?: () => void;
@@ -104,9 +20,9 @@ export default function LicenseCreationForm({ refreshLicenseStatus }: LicenseCre
     const { user: userLoggedIn } = useSession();
     
     // Estados para las cuentas dinámicas
-    const [azureAccountsData, setAzureAccountsData] = useState<CloudAccount[]>([]);
-    const [awsAccountsData, setAwsAccountsData] = useState<CloudAccount[]>([]);
-    const [gcpAccountsData, setGcpAccountsData] = useState<CloudAccount[]>([]); // Nuevo estado GCP
+    const [azureAccountsData, setAzureAccountsData] = useState<CloudAccountRow[]>([]);
+    const [awsAccountsData, setAwsAccountsData] = useState<CloudAccountRow[]>([]);
+    const [gcpAccountsData, setGcpAccountsData] = useState<CloudAccountRow[]>([]); // Nuevo estado GCP
 
     const [formData, setFormData] = useState({
         name: '',
@@ -167,34 +83,30 @@ export default function LicenseCreationForm({ refreshLicenseStatus }: LicenseCre
     };
     
     // Handler unificado para añadir cuentas
-    const handleAddAccount = useCallback((cloud: 'azure' | 'aws' | 'gcp') => {
-        const newAccount: CloudAccount = {
-            id: generateAccountId(),
-            alias: `Nueva Cuenta ${cloud.toUpperCase()}`,
-            db: '',
-        };
+    const handleAddAccount = useCallback((cloud: CloudProvider) => {
+        const newAccount = newAccountRow(cloud);
         if (cloud === 'azure') setAzureAccountsData(prev => [...prev, newAccount]);
         else if (cloud === 'aws') setAwsAccountsData(prev => [...prev, newAccount]);
         else setGcpAccountsData(prev => [...prev, newAccount]); // Caso GCP
     }, []);
 
     // Handler unificado para actualizar cuentas
-    const handleUpdateAccount = useCallback((cloud: 'azure' | 'aws' | 'gcp', id: string, field: keyof CloudAccount, value: string) => {
+    const handleUpdateAccount = useCallback((cloud: CloudProvider, rowKey: string, field: 'alias' | 'db', value: string) => {
         let setter;
         if (cloud === 'azure') setter = setAzureAccountsData;
         else if (cloud === 'aws') setter = setAwsAccountsData;
         else setter = setGcpAccountsData; // Setter GCP
 
-        setter(prev => prev.map(acc => 
-            acc.id === id ? { ...acc, [field]: value } : acc
+        setter(prev => prev.map(acc =>
+            acc._key === rowKey ? { ...acc, [field]: value } : acc
         ));
     }, []);
-    
+
     // Handler unificado para eliminar cuentas
-    const handleRemoveAccount = useCallback((cloud: 'azure' | 'aws' | 'gcp', id: string) => {
-        if (cloud === 'azure') setAzureAccountsData(prev => prev.filter(acc => acc.id !== id));
-        else if (cloud === 'aws') setAwsAccountsData(prev => prev.filter(acc => acc.id !== id));
-        else setGcpAccountsData(prev => prev.filter(acc => acc.id !== id)); // Remover GCP
+    const handleRemoveAccount = useCallback((cloud: CloudProvider, rowKey: string) => {
+        if (cloud === 'azure') setAzureAccountsData(prev => prev.filter(acc => acc._key !== rowKey));
+        else if (cloud === 'aws') setAwsAccountsData(prev => prev.filter(acc => acc._key !== rowKey));
+        else setGcpAccountsData(prev => prev.filter(acc => acc._key !== rowKey)); // Remover GCP
     }, []);
 
     const handleSubmit = async (e: FormEvent) => {
@@ -238,21 +150,19 @@ export default function LicenseCreationForm({ refreshLicenseStatus }: LicenseCre
             setLoading(false); return;
         }
 
-        // Preparación de datos AWS
-        const finalAwsAccounts = formData.is_aws_multi_tenant 
-            ? awsAccountsData
-            : formData.is_aws ? [{ id: 'aws01', alias: formData.name + ' - Principal', db: formData.user_db_aws }] : undefined;
+        // Las cuentas SÓLO se envían en modo multi-tenant. En single-tenant la
+        // conexión vive en `user_db_<cloud>` y el backend no crea el array.
+        const finalAwsAccounts = formData.is_aws && formData.is_aws_multi_tenant
+            ? toAccountsPayload(awsAccountsData)
+            : undefined;
 
-        // Preparación de datos Azure
-        const finalAzureAccounts = formData.is_azure_multi_tenant 
-            ? azureAccountsData
-            : formData.is_azure ? [{ id: 'prod01', alias: formData.name + ' - Principal', db: formData.user_db_azure }] : undefined;
+        const finalAzureAccounts = formData.is_azure && formData.is_azure_multi_tenant
+            ? toAccountsPayload(azureAccountsData)
+            : undefined;
 
-        // Preparación de datos GCP
-        const finalGcpAccounts = formData.is_gcp_multi_tenant 
-            ? gcpAccountsData
-            : formData.is_gcp ? [{ id: 'gcp01', alias: formData.name + ' - Principal', db: formData.user_db_gcp }] : undefined;
-
+        const finalGcpAccounts = formData.is_gcp && formData.is_gcp_multi_tenant
+            ? toAccountsPayload(gcpAccountsData)
+            : undefined;
 
         try {
             const response = await fetch('/api/perfilamiento/empresas', {

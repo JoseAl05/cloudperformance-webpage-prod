@@ -4,17 +4,10 @@ import { AUTH_COOKIE } from '@/lib/cookies';
 import { verifyAuthToken } from '@/lib/auth';
 import { getCollection } from '@/lib/mongodb';
 import { ObjectId } from 'mongodb';
-import type { User, CloudAccount } from '@/types/db';
+import type { User } from '@/types/db';
 
-type SessionUser = Omit<User, 'passwordHash'> & {
-  planName?: string;
-  is_aws_multi_tenant?: boolean;
-  is_azure_multi_tenant?: boolean;
-  is_gcp_multi_tenant?: boolean;
-  azure_accounts?: CloudAccount[];
-  aws_accounts?: CloudAccount[];
-  gcp_accounts?: CloudAccount[];
-};
+// `User` ya declara planName, los flags multi-tenant y `<cloud>_accounts`.
+type SessionUser = Omit<User, 'passwordHash'>;
 
 export async function GET() {
   const cookieStore = await cookies();
@@ -37,14 +30,6 @@ export async function GET() {
     if (!user) {
       return NextResponse.json({ user: null }, { status: 404 });
     }
-
-    type UserWithTenancy = User & {
-      is_aws_multi_tenant?: boolean;
-      is_azure_multi_tenant?: boolean;
-      is_gcp_multi_tenant?: boolean;
-    };
-
-    const userTyped = user as UserWithTenancy;
 
     const userClient = payload.client;
     console.log(userClient)
@@ -76,10 +61,11 @@ export async function GET() {
       user_db_azure: user.user_db_azure,
       user_db_gcp: user.user_db_gcp,
 
-      is_aws_multi_tenant: userTyped.is_aws_multi_tenant || false,
-      is_azure_multi_tenant: userTyped.is_azure_multi_tenant || false,
-      is_gcp_multi_tenant: userTyped.is_gcp_multi_tenant || false,
+      is_aws_multi_tenant: user.is_aws_multi_tenant || false,
+      is_azure_multi_tenant: user.is_azure_multi_tenant || false,
+      is_gcp_multi_tenant: user.is_gcp_multi_tenant || false,
 
+      // Sólo existen en multi-tenant; en single-tenant manda `user_db_<cloud>`.
       azure_accounts: user.azure_accounts || [],
       aws_accounts: user.aws_accounts || [],
       gcp_accounts: user.gcp_accounts || [],

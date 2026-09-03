@@ -90,9 +90,26 @@ export async function POST(request: Request) {
         is_azure: targetCompany.is_azure,
         is_gcp: targetCompany.is_gcp,
 
-        azure_accounts: targetCompany.azure_accounts || [],
-        aws_accounts: targetCompany.aws_accounts || [],
-        gcp_accounts: targetCompany.gcp_accounts || [],
+        // Los flags se toman SIEMPRE de la empresa destino: si se heredaran del
+        // token anterior, un admin_global podría arrastrar un `multi_tenant`
+        // de otra empresa y quedar con cuentas que no le corresponden.
+        is_aws_multi_tenant: targetCompany.is_aws_multi_tenant === true,
+        is_azure_multi_tenant: targetCompany.is_azure_multi_tenant === true,
+        is_gcp_multi_tenant: targetCompany.is_gcp_multi_tenant === true,
+
+        // Sólo hay cuentas en multi-tenant; en single-tenant manda `user_db_<cloud>`.
+        aws_accounts:
+            targetCompany.is_aws_multi_tenant === true
+                ? targetCompany.aws_accounts || []
+                : [],
+        azure_accounts:
+            targetCompany.is_azure_multi_tenant === true
+                ? targetCompany.azure_accounts || []
+                : [],
+        gcp_accounts:
+            targetCompany.is_gcp_multi_tenant === true
+                ? targetCompany.gcp_accounts || []
+                : [],
 
         iat: Math.floor(Date.now() / 1000),
         exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24,

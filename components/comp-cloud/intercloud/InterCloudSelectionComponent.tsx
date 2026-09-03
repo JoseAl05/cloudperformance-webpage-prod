@@ -104,6 +104,7 @@ export const InterCloudSelectionComponent = () => {
             service_type: service,
         });
     };
+    console.log(user)
 
     return (
         <div className="w-full max-w-4xl mx-auto space-y-6">

@@ -60,6 +60,7 @@ export const InterCloudConfigComponent = ({ cloudType, accounts, onReqReady }: I
     };
 
     const selectedAccount = accounts.find(a => a.id === selectedId);
+    console.log('Selected Account:', selectedAccount);
 
     return (
         <div className="space-y-6">

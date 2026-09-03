@@ -68,6 +68,7 @@ export const InterCloudVmComponent = ({
         ...payload,
         filters: filtersPayload
     };
+    console.log(fullPayload)
 
     let urlVmComparison = '';
 

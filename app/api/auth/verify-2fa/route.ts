@@ -47,6 +47,16 @@ export async function POST(req: Request) {
   const clients = await getCollection('Empresas')
   const clientData = await clients.findOne({ name: user.client });
 
+  if (!clientData) {
+    return NextResponse.json(
+      {
+        error:
+          'Tu empresa no tiene una licencia activa. Contacta al soporte para más detalles.',
+      },
+      { status: 403 }
+    );
+  }
+
   // Obtener datos de conectores asociados al cliente
   const connectors = await getCollection('cloudperformance_external_connectors');
   const connectorData = await connectors
@@ -78,12 +88,22 @@ export async function POST(req: Request) {
     is_aws: user.is_aws,
     is_azure: user.is_azure,
     is_gcp: user.is_gcp,
-    is_aws_multi_tenant: clientData.is_aws_multi_tenant,
-    is_azure_multi_tenant: clientData.is_azure_multi_tenant,
-    is_gcp_multi_tenant: clientData.is_gcp_multi_tenant,
-    azure_accounts: clientData.azure_accounts || [],
-    aws_accounts: clientData.aws_accounts || [],
-    gcp_accounts: clientData.gcp_accounts || [],
+    is_aws_multi_tenant: clientData.is_aws_multi_tenant === true,
+    is_azure_multi_tenant: clientData.is_azure_multi_tenant === true,
+    is_gcp_multi_tenant: clientData.is_gcp_multi_tenant === true,
+    // Sólo hay cuentas en multi-tenant; en single-tenant manda `user_db_<cloud>`.
+    aws_accounts:
+      clientData.is_aws_multi_tenant === true
+        ? clientData.aws_accounts || []
+        : [],
+    azure_accounts:
+      clientData.is_azure_multi_tenant === true
+        ? clientData.azure_accounts || []
+        : [],
+    gcp_accounts:
+      clientData.is_gcp_multi_tenant === true
+        ? clientData.gcp_accounts || []
+        : [],
     planName: user.planName,
     connectors: connectorData || []
   });

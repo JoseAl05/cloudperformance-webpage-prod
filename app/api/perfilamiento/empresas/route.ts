@@ -2,6 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getCollection } from '@/lib/mongodb';
 import { authorizeRequest } from '@/lib/authUtils';
 import { PLAN_CONFIG } from '@/lib/plans';
+import {
+  CLOUD_LABELS,
+  CLOUD_PROVIDERS,
+  CloudAccountsError,
+  normalizeCloudAccounts,
+} from '@/lib/cloudAccounts';
 import { Empresa } from '@/types/db';
 
 // =========================================================================
@@ -70,25 +76,7 @@ export async function POST(req: NextRequest) {
   }
 
   const body = await req.json();
-  const {
-    name,
-    planName,
-    userLimit,
-
-    is_aws = false,
-    user_db_aws,
-    is_azure = false,
-    user_db_azure,
-    is_aws_multi_tenant = false,
-    is_azure_multi_tenant = false,
-    azure_accounts,
-    aws_accounts,
-
-    is_gcp = false,            
-    user_db_gcp,
-    is_gcp_multi_tenant = false,
-    gcp_accounts,
-  } = body;
+  const { name, planName, userLimit } = body;
 
   if (!name || !planName) {
     return NextResponse.json(
@@ -106,28 +94,6 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // 2. Validación de Cadenas de Conexión (Asegurar que la DB principal exista si NO es Multi-Tenant)
-  if (
-    !is_aws_multi_tenant &&
-    is_aws &&
-    (!user_db_aws || user_db_aws.trim() === '')
-  ) {
-    return NextResponse.json(
-      { message: 'El campo Nombre DB AWS Maestra es requerido.' },
-      { status: 400 }
-    );
-  }
-  if (
-    !is_azure_multi_tenant &&
-    is_azure &&
-    (!user_db_azure || user_db_azure.trim() === '')
-  ) {
-    return NextResponse.json(
-      { message: 'El campo Nombre DB Azure Maestra es requerido.' },
-      { status: 400 }
-    );
-  }
-
   try {
     const empresasCollection = await getCollection<Empresa>('Empresas');
 
@@ -138,32 +104,63 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 3. Construir el objeto final para la DB
+    // 2. Construir el objeto final para la DB
     const newEmpresa: Omit<Empresa, '_id'> = {
       name,
       planName,
       userLimit: userLimit || planConfig.userLimit,
       currentUsers: 0,
 
-      // CAMPOS DE CONEXIÓN MAESTRA (Legacy/Principal)
-      is_aws: is_aws,
-      user_db_aws: is_aws ? user_db_aws : null,
-      is_azure: is_azure,
-      user_db_azure: is_azure ? user_db_azure : null,
+      is_aws: false,
+      user_db_aws: null,
+      is_aws_multi_tenant: false,
 
-      is_aws_multi_tenant: is_aws_multi_tenant,
-      is_azure_multi_tenant: is_azure_multi_tenant,
+      is_azure: false,
+      user_db_azure: null,
+      is_azure_multi_tenant: false,
 
-      azure_accounts: azure_accounts,
-      aws_accounts: aws_accounts,
-
-      is_gcp,                                      
-      user_db_gcp: is_gcp ? user_db_gcp : null,   
-      is_gcp_multi_tenant,                         
-      gcp_accounts, 
+      is_gcp: false,
+      user_db_gcp: null,
+      is_gcp_multi_tenant: false,
 
       createdAt: new Date(),
+      updatedAt: new Date(),
     };
+
+    // 3. Configuración por nube.
+    //    Multi-tenant  -> se persiste `<cloud>_accounts` (IDs generados aquí).
+    //    Single-tenant -> se persiste `user_db_<cloud>` y NO se crea el array.
+    const cloudFields = newEmpresa as unknown as Record<string, unknown>;
+
+    for (const cloud of CLOUD_PROVIDERS) {
+      const isEnabled = body[`is_${cloud}`] === true;
+      const isMultiTenant = body[`is_${cloud}_multi_tenant`] === true;
+      const masterDb = body[`user_db_${cloud}`];
+
+      cloudFields[`is_${cloud}`] = isEnabled;
+
+      if (!isEnabled) continue;
+
+      if (isMultiTenant) {
+        cloudFields[`is_${cloud}_multi_tenant`] = true;
+        cloudFields[`${cloud}_accounts`] = normalizeCloudAccounts(
+          cloud,
+          body[`${cloud}_accounts`]
+        );
+        continue;
+      }
+
+      if (typeof masterDb !== 'string' || masterDb.trim() === '') {
+        return NextResponse.json(
+          {
+            message: `El campo Nombre DB ${CLOUD_LABELS[cloud].label} Maestra es requerido.`,
+          },
+          { status: 400 }
+        );
+      }
+
+      cloudFields[`user_db_${cloud}`] = masterDb.trim();
+    }
 
     const result = await empresasCollection.insertOne(newEmpresa);
 
@@ -177,6 +174,10 @@ export async function POST(req: NextRequest) {
       { status: 201 }
     );
   } catch (error) {
+    if (error instanceof CloudAccountsError) {
+      return NextResponse.json({ message: error.message }, { status: 400 });
+    }
+
     console.error('Error al crear empresa:', error);
     return NextResponse.json(
       { message: 'Error interno del servidor al crear empresa.' },
