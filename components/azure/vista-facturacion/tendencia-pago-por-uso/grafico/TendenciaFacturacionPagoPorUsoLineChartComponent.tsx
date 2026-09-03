@@ -178,15 +178,15 @@ export const TendenciaFacturacionPagoPorUsoLineChartComponent = ({
             kind: 'line',
             xAxisType: 'category',
             legend: true,
-            // legendOption: {
-            //     type: 'scroll',
-            //     orient: 'horizontal',
-            //     top: 10,
-            //     left: 'center',
-            //     textStyle: { fontSize: 11, color: '#666' },
-            //     selectedMode: 'multiple',
-            //     data: (series as unknown[]).map((s) => (s as { name: string }).name),
-            // },
+            legendOption: {
+                type: 'scroll',
+                orient: 'horizontal',
+                top: 5,
+                left: 'center',
+                textStyle: { fontSize: 11, color: '#666' },
+                selectedMode: 'multiple',
+                data: (series as unknown[]).map((s) => (s as { name: string }).name),
+            },
             tooltip: true,
             tooltipFormatter(params) {
                 if (!params || !(Array.isArray(params)) || !params.length) return '';
@@ -308,7 +308,7 @@ export const TendenciaFacturacionPagoPorUsoLineChartComponent = ({
                         return Math.max(0, obj.min - (obj.max - obj.min) * 0.1);
                     },
                 },
-                grid: { left: 60, right: 60, top: 50, bottom: 80, containLabel: true },
+                grid: { left: 60, right: 60, top: 100, bottom: 80, containLabel: true },
                 // dataZoom: [
                 //     { type: 'inside', start: 0, end: 100, filterMode: 'filter' },
                 //     {
