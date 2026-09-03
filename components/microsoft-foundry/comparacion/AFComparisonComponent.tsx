@@ -54,7 +54,7 @@ export const AzureFoundryComparisonComponent = ({ startDate, endDate, selectedIn
             </div>
         )
     }
-
+    console.log(foundryComparison.data)
     return (
         <div className='p-3'>
             <AzureFoundryComparisonView

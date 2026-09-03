@@ -3,11 +3,12 @@
 import { useMemo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
-import { AzureFoundryCandidateConfidenceRow, AzureFoundryModel } from '@/interfaces/foundry-cost-optimization/azureFoundryInterfaces';
+import { AzureFoundryCandidateConfidenceRow, AzureFoundryModel, AzureFoundryProviderKey } from '@/interfaces/foundry-cost-optimization/azureFoundryInterfaces';
 import { confidenceClasses, confidenceLabels, deltaClass, formatCurrency, formatPercent, formatSignedPercent } from '@/lib/azureFoundryFormatters';
 
 interface AzureFoundryCandidateConfidenceComponentProps {
     data: AzureFoundryModel[];
+    provider: AzureFoundryProviderKey;
 }
 
 interface CandidateGroup {
@@ -21,15 +22,15 @@ const CONFIDENCE_METER_COLOR: Record<string, string> = {
     LOW: 'bg-slate-400 dark:bg-slate-500'
 };
 
-export const AzureFoundryCandidateConfidenceComponent = ({ data }: AzureFoundryCandidateConfidenceComponentProps) => {
+export const AzureFoundryCandidateConfidenceComponent = ({ data, provider }: AzureFoundryCandidateConfidenceComponentProps) => {
     const groups = useMemo<CandidateGroup[]>(() => {
         return (data || []).map((model) => {
-            const rows: AzureFoundryCandidateConfidenceRow[] = model.candidates
+            const rows: AzureFoundryCandidateConfidenceRow[] = model[provider].candidates
                 .map((candidate) => ({
                     azure_model_name: model.azure_model_name,
-                    bedrock_model_name: candidate.bedrock_model_name,
+                    candidate_model_name: candidate.model_name,
                     provider: candidate.provider || '—',
-                    region: candidate.region,
+                    region: candidate.region || '—',
                     equivalence_score: candidate.equivalence_score,
                     delta_percent: candidate.delta_percent,
                     projected_cost_usd: candidate.projected_cost_usd,
@@ -44,7 +45,7 @@ export const AzureFoundryCandidateConfidenceComponent = ({ data }: AzureFoundryC
                 });
             return { azure_model_name: model.azure_model_name, rows };
         });
-    }, [data]);
+    }, [data, provider]);
 
     if (groups.length === 0) {
         return (
@@ -94,7 +95,7 @@ export const AzureFoundryCandidateConfidenceComponent = ({ data }: AzureFoundryC
                             ) : (
                                 group.rows.map((row) => (
                                     <div
-                                        key={row.bedrock_model_name}
+                                        key={row.candidate_model_name}
                                         className={cn(
                                             'grid grid-cols-[18px_minmax(150px,1.4fr)_minmax(140px,1fr)_92px_auto] items-center gap-3 border-b border-slate-50 py-2 last:border-b-0 dark:border-slate-900',
                                             !row.is_eligible && 'opacity-55'
@@ -104,7 +105,7 @@ export const AzureFoundryCandidateConfidenceComponent = ({ data }: AzureFoundryC
                                             {row.is_recommended ? '★' : '•'}
                                         </span>
                                         <div className="min-w-0">
-                                            <div className="truncate text-xs font-semibold text-slate-700 dark:text-slate-200">{row.bedrock_model_name}</div>
+                                            <div className="truncate text-xs font-semibold text-slate-700 dark:text-slate-200">{row.candidate_model_name}</div>
                                             <div className="truncate font-mono text-[10px] text-muted-foreground">{row.provider} · {row.region}</div>
                                         </div>
                                         <div className="flex items-center gap-2">

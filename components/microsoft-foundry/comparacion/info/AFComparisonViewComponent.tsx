@@ -1,13 +1,15 @@
 'use client'
 
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { AlertTriangle, Cloud, Info } from 'lucide-react';
 import { MessageCard } from '@/components/azure/cards/MessageCards';
 import {
     AzureFoundryComparison,
-    AzureFoundryComparisonResponse
+    AzureFoundryComparisonResponse,
+    AzureFoundryProviderKey
 } from '@/interfaces/foundry-cost-optimization/azureFoundryInterfaces';
 import { AzureFoundrySummaryCards } from '@/components/microsoft-foundry/comparacion/info/AFComparisonCardsComponent';
 import { AzureFoundryCostBridgeComponent } from '@/components/microsoft-foundry/comparacion/info/AFComparisonCostBridgeComponent';
@@ -15,7 +17,7 @@ import { AzureFoundryTokenMixComponent } from '@/components/microsoft-foundry/co
 import { AzureFoundryModelPanelsComponent } from '@/components/microsoft-foundry/comparacion/info/AFComparisonModelPanelsComponent';
 import { AzureFoundryCandidateConfidenceComponent } from '@/components/microsoft-foundry/comparacion/info/AFComparisonCandidateConfidenceComponent';
 import { AzureFoundryDeploymentsTableComponent } from '@/components/microsoft-foundry/comparacion/table/AFComparisonDeploymentsTableComponent';
-import { formatCurrency, formatInteger } from '@/lib/azureFoundryFormatters';
+import { formatCurrency, formatInteger, providerFullLabels, providerShortLabels } from '@/lib/azureFoundryFormatters';
 
 interface AzureFoundryComparisonViewProps {
     data: AzureFoundryComparison | AzureFoundryComparisonResponse | null | undefined;
@@ -42,11 +44,13 @@ const ChapterHeader = ({ step, eyebrow, question, sub }: ChapterHeaderProps) => 
 );
 
 export const AzureFoundryComparisonView = ({ data }: AzureFoundryComparisonViewProps) => {
+    const [provider, setProvider] = useState<AzureFoundryProviderKey>('bedrock');
     const comparison = Array.isArray(data) ? data[0] : data;
     const models = comparison?.models ?? [];
     const unmappedMeters = comparison?.unmapped_meters ?? [];
     const unresolvedMeters = comparison?.unresolved_meters ?? [];
     const diagnostics = comparison?.diagnostics;
+    const providerDiagnostics = comparison?.[provider]?.diagnostics;
 
     const pendingMeters = useMemo(
         () => [...unmappedMeters, ...unresolvedMeters],
@@ -86,16 +90,18 @@ export const AzureFoundryComparisonView = ({ data }: AzureFoundryComparisonViewP
                             </span>
                         </div>
                     </div>
-                    {diagnostics && (
-                        <div className="flex flex-wrap gap-6">
+                    <div className="flex flex-wrap items-center gap-6">
+                        {providerDiagnostics && (
                             <div className="flex flex-col">
                                 <span className="text-[11px] uppercase tracking-wide text-muted-foreground">
-                                    Catálogo Bedrock
+                                    Catálogo {providerFullLabels[provider]}
                                 </span>
                                 <span className="text-xs font-semibold tabular-nums text-slate-700 dark:text-slate-200">
-                                    {formatInteger(diagnostics.bedrock_catalog_models)} modelos
+                                    {formatInteger(providerDiagnostics.catalog_models)} modelos
                                 </span>
                             </div>
+                        )}
+                        {diagnostics && (
                             <div className="flex flex-col">
                                 <span className="text-[11px] uppercase tracking-wide text-muted-foreground">
                                     Líneas de facturación
@@ -104,12 +110,31 @@ export const AzureFoundryComparisonView = ({ data }: AzureFoundryComparisonViewP
                                     {formatInteger(diagnostics.billing_rows)}
                                 </span>
                             </div>
+                        )}
+                        <div className="flex flex-col gap-1">
+                            <span className="text-[11px] uppercase tracking-wide text-muted-foreground">
+                                Comparar contra
+                            </span>
+                            <div className="inline-flex gap-1 rounded-lg border border-slate-200 p-1 dark:border-slate-800">
+                                {(['bedrock', 'vertex'] as AzureFoundryProviderKey[]).map((key) => (
+                                    <Button
+                                        key={key}
+                                        type="button"
+                                        size="sm"
+                                        variant={provider === key ? 'default' : 'ghost'}
+                                        className="h-7 px-3 text-[11px]"
+                                        onClick={() => setProvider(key)}
+                                    >
+                                        {providerShortLabels[key]}
+                                    </Button>
+                                ))}
+                            </div>
                         </div>
-                    )}
+                    </div>
                 </CardContent>
             </Card>
 
-            <AzureFoundrySummaryCards data={comparison} />
+            <AzureFoundrySummaryCards data={comparison} provider={provider} />
 
             {pendingMeters.length > 0 && (
                 <Card className={cn('border-amber-200 bg-amber-50/50 dark:border-amber-900 dark:bg-amber-950/20')}>
@@ -131,7 +156,7 @@ export const AzureFoundryComparisonView = ({ data }: AzureFoundryComparisonViewP
                             ))}
                         </div>
                         <span className="text-[11px] text-muted-foreground">
-                            Estos consumos no se pudieron atribuir a un modelo desplegado o resolver contra el catálogo de Bedrock, y quedan fuera de la proyección.
+                            Estos consumos no se pudieron atribuir a un modelo desplegado o resolver contra el catálogo de {providerFullLabels[provider]}, y quedan fuera de la proyección.
                         </span>
                     </CardContent>
                 </Card>
@@ -141,10 +166,10 @@ export const AzureFoundryComparisonView = ({ data }: AzureFoundryComparisonViewP
                 <ChapterHeader
                     step={1}
                     eyebrow="Comparación de costos"
-                    question="¿Cuánto costaría lo mismo en AWS Bedrock?"
+                    question={`¿Cuánto costaría lo mismo en ${providerFullLabels[provider]}?`}
                     sub="El total a la izquierda compara lo facturado en Azure contra la proyección con el candidato recomendado de cada modelo. El ranking usa porcentaje, no dólares, así un modelo de US$4 y uno de US$400 son comparables en el mismo eje."
                 />
-                <AzureFoundryCostBridgeComponent data={models} />
+                <AzureFoundryCostBridgeComponent data={models} provider={provider} />
             </section>
 
             <section className="flex flex-col gap-3">
@@ -162,9 +187,9 @@ export const AzureFoundryComparisonView = ({ data }: AzureFoundryComparisonViewP
                     step={3}
                     eyebrow="Detalle por modelo"
                     question="Modelo por modelo: consumo, precio y mejor alternativa"
-                    sub="Una tarjeta por modelo facturado. La comparación Azure/Bedrock usa la escala propia de cada modelo para que uno chico no desaparezca al lado de uno grande."
+                    sub={`Una tarjeta por modelo facturado. La comparación Azure/${providerShortLabels[provider]} usa la escala propia de cada modelo para que uno chico no desaparezca al lado de uno grande.`}
                 />
-                <AzureFoundryModelPanelsComponent data={models} />
+                <AzureFoundryModelPanelsComponent data={models} provider={provider} />
             </section>
 
             <section className="flex flex-col gap-3">
@@ -174,7 +199,7 @@ export const AzureFoundryComparisonView = ({ data }: AzureFoundryComparisonViewP
                     question="¿Qué tan confiables son estas equivalencias?"
                     sub="Todos los candidatos evaluados por modelo, con el recomendado primero. Recomendado no es igual a más barato: los que no llegaron al umbral mínimo quedan atenuados, no ocultos."
                 />
-                <AzureFoundryCandidateConfidenceComponent data={models} />
+                <AzureFoundryCandidateConfidenceComponent data={models} provider={provider} />
             </section>
 
             <section className="flex flex-col gap-3">

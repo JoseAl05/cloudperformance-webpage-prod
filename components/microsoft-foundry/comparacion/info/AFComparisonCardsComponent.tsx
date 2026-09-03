@@ -4,15 +4,21 @@ import { useMemo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import { Cloud, TrendingDown, Layers, Server, ShieldCheck } from 'lucide-react';
-import { AzureFoundryComparison } from '@/interfaces/foundry-cost-optimization/azureFoundryInterfaces';
-import { deltaClass, formatCurrency, formatInteger, formatPercent, formatSignedPercent } from '@/lib/azureFoundryFormatters';
+import { AzureFoundryComparison, AzureFoundryProviderKey } from '@/interfaces/foundry-cost-optimization/azureFoundryInterfaces';
+import { deltaClass, formatCurrency, formatInteger, formatPercent, formatSignedPercent, providerFullLabels } from '@/lib/azureFoundryFormatters';
 
 interface AzureFoundrySummaryCardsProps {
     data: AzureFoundryComparison;
+    provider: AzureFoundryProviderKey;
 }
 
-export const AzureFoundrySummaryCards = ({ data }: AzureFoundrySummaryCardsProps) => {
+export const AzureFoundrySummaryCards = ({ data, provider }: AzureFoundrySummaryCardsProps) => {
     const summary = data.summary;
+    const providerData = data[provider];
+    const providerSummary = providerData.summary;
+    const projectedCost = provider === 'bedrock'
+        ? (providerSummary as AzureFoundryComparison['bedrock']['summary']).bedrock_projected_cost_usd
+        : (providerSummary as AzureFoundryComparison['vertex']['summary']).vertex_projected_cost_usd;
 
     const cards = useMemo(() => ([
         {
@@ -25,10 +31,10 @@ export const AzureFoundrySummaryCards = ({ data }: AzureFoundrySummaryCardsProps
             surface: 'bg-sky-50 dark:bg-sky-950/40'
         },
         {
-            key: 'bedrock',
-            label: 'Proyección AWS Bedrock',
-            value: formatCurrency(summary.bedrock_projected_cost_usd),
-            hint: `Cobertura ${formatPercent(summary.coverage_percent)} del gasto`,
+            key: 'projected',
+            label: `Proyección ${providerFullLabels[provider]}`,
+            value: formatCurrency(projectedCost),
+            hint: `Cobertura ${formatPercent(providerSummary.coverage_percent)} del gasto`,
             icon: Layers,
             tone: 'text-violet-600 dark:text-violet-400',
             surface: 'bg-violet-50 dark:bg-violet-950/40'
@@ -36,10 +42,10 @@ export const AzureFoundrySummaryCards = ({ data }: AzureFoundrySummaryCardsProps
         {
             key: 'delta',
             label: 'Diferencia estimada',
-            value: formatCurrency(summary.delta_usd),
-            hint: formatSignedPercent(summary.delta_percent),
+            value: formatCurrency(providerSummary.delta_usd),
+            hint: formatSignedPercent(providerSummary.delta_percent),
             icon: TrendingDown,
-            tone: deltaClass(summary.delta_usd),
+            tone: deltaClass(providerSummary.delta_usd),
             surface: 'bg-slate-50 dark:bg-slate-900/40'
         },
         {
@@ -54,17 +60,17 @@ export const AzureFoundrySummaryCards = ({ data }: AzureFoundrySummaryCardsProps
         {
             key: 'unmapped',
             label: 'Modelos sin equivalencia',
-            value: formatInteger(summary.models_unmapped),
-            hint: summary.models_unmapped > 0 ? 'Valorizados a costo Azure' : 'Todos con equivalente',
+            value: formatInteger(providerSummary.models_unmapped),
+            hint: providerSummary.models_unmapped > 0 ? 'Valorizados a costo Azure' : 'Todos con equivalente',
             icon: ShieldCheck,
-            tone: summary.models_unmapped > 0
+            tone: providerSummary.models_unmapped > 0
                 ? 'text-amber-600 dark:text-amber-400'
                 : 'text-emerald-600 dark:text-emerald-400',
-            surface: summary.models_unmapped > 0
+            surface: providerSummary.models_unmapped > 0
                 ? 'bg-amber-50 dark:bg-amber-950/40'
                 : 'bg-emerald-50 dark:bg-emerald-950/40'
         }
-    ]), [summary]);
+    ]), [summary, providerSummary, projectedCost, provider]);
 
     return (
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-5">

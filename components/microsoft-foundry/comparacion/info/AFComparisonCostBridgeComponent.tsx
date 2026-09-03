@@ -4,27 +4,28 @@ import { useMemo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import { ArrowDown } from 'lucide-react';
-import { AzureFoundryCostBridgePoint, AzureFoundryModel } from '@/interfaces/foundry-cost-optimization/azureFoundryInterfaces';
-import { deltaClass, formatCurrency, formatSignedPercent } from '@/lib/azureFoundryFormatters';
+import { AzureFoundryCostBridgePoint, AzureFoundryModel, AzureFoundryProviderKey } from '@/interfaces/foundry-cost-optimization/azureFoundryInterfaces';
+import { deltaClass, formatCurrency, formatSignedPercent, providerFullLabels } from '@/lib/azureFoundryFormatters';
 
 interface AzureFoundryCostBridgeComponentProps {
     data: AzureFoundryModel[];
+    provider: AzureFoundryProviderKey;
 }
 
 const MIN_SPAN = 10;
 
-export const AzureFoundryCostBridgeComponent = ({ data }: AzureFoundryCostBridgeComponentProps) => {
+export const AzureFoundryCostBridgeComponent = ({ data, provider }: AzureFoundryCostBridgeComponentProps) => {
     const points = useMemo<AzureFoundryCostBridgePoint[]>(() => {
         return (data || [])
             .map((model) => {
-                const recommended = model.candidates.find((candidate) => candidate.is_recommended);
+                const recommended = model[provider].candidates.find((candidate) => candidate.is_recommended);
                 return {
                     model: model.azure_model_name,
                     azure_cost_usd: model.azure_cost_usd,
-                    bedrock_cost_usd: recommended ? recommended.projected_cost_usd : model.azure_cost_usd,
+                    projected_cost_usd: recommended ? recommended.projected_cost_usd : model.azure_cost_usd,
                     delta_usd: recommended ? recommended.delta_usd : 0,
                     delta_percent: recommended ? recommended.delta_percent : 0,
-                    recommended_model: recommended ? recommended.bedrock_model_name : '',
+                    recommended_model: recommended ? recommended.model_name : '',
                     has_recommendation: !!recommended
                 };
             })
@@ -32,19 +33,19 @@ export const AzureFoundryCostBridgeComponent = ({ data }: AzureFoundryCostBridge
                 if (a.has_recommendation !== b.has_recommendation) return a.has_recommendation ? -1 : 1;
                 return a.delta_percent - b.delta_percent;
             });
-    }, [data]);
+    }, [data, provider]);
 
     const covered = useMemo(() => points.filter((point) => point.has_recommendation), [points]);
     const uncovered = useMemo(() => points.filter((point) => !point.has_recommendation), [points]);
 
     const totals = useMemo(() => {
         const azureTotal = points.reduce((sum, point) => sum + point.azure_cost_usd, 0);
-        const bedrockTotal = covered.reduce((sum, point) => sum + point.bedrock_cost_usd, 0);
-        const deltaUsd = bedrockTotal - covered.reduce((sum, point) => sum + point.azure_cost_usd, 0);
+        const projectedTotal = covered.reduce((sum, point) => sum + point.projected_cost_usd, 0);
+        const deltaUsd = projectedTotal - covered.reduce((sum, point) => sum + point.azure_cost_usd, 0);
         const coveredAzureTotal = covered.reduce((sum, point) => sum + point.azure_cost_usd, 0);
         const deltaPercent = coveredAzureTotal > 0 ? (deltaUsd / coveredAzureTotal) * 100 : 0;
-        const bedrockProjected = points.reduce((sum, point) => sum + point.bedrock_cost_usd, 0);
-        return { azureTotal, bedrockTotal, deltaUsd, deltaPercent, bedrockProjected };
+        const totalProjected = points.reduce((sum, point) => sum + point.projected_cost_usd, 0);
+        return { azureTotal, projectedTotal, deltaUsd, deltaPercent, totalProjected };
     }, [points, covered]);
 
     const scale = useMemo(() => {
@@ -78,10 +79,10 @@ export const AzureFoundryCostBridgeComponent = ({ data }: AzureFoundryCostBridge
                             <div className="flex flex-col gap-0.5">
                                 <span className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
                                     <span className="h-2 w-2 rounded-sm bg-violet-600 dark:bg-violet-400" />
-                                    Proyección Bedrock
+                                    Proyección {providerFullLabels[provider]}
                                 </span>
                                 <span className="text-2xl font-bold tabular-nums text-slate-800 dark:text-slate-100">
-                                    {formatCurrency(totals.bedrockProjected)}
+                                    {formatCurrency(totals.totalProjected)}
                                 </span>
                             </div>
                             <span className={cn(
@@ -95,7 +96,7 @@ export const AzureFoundryCostBridgeComponent = ({ data }: AzureFoundryCostBridge
                             {uncovered.length > 0 && (
                                 <p className="border-t border-slate-100 pt-2.5 text-[11px] leading-relaxed text-muted-foreground dark:border-slate-800">
                                     Incluye solo los {covered.length} modelo{covered.length === 1 ? '' : 's'} con candidato recomendado.{' '}
-                                    {uncovered.map((point) => point.model).join(', ')} queda{uncovered.length === 1 ? '' : 'n'} fuera del total Bedrock:
+                                    {uncovered.map((point) => point.model).join(', ')} queda{uncovered.length === 1 ? '' : 'n'} fuera del total {providerFullLabels[provider]}:
                                     ningún candidato superó el umbral de equivalencia.
                                 </p>
                             )}

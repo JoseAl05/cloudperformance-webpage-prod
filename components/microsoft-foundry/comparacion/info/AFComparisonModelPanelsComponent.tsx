@@ -7,7 +7,8 @@ import { AlertTriangle, Boxes, Calendar, Server, Sparkles } from 'lucide-react';
 import {
     AzureFoundryDimensionLadderRow,
     AzureFoundryModel,
-    AzureFoundryModelPanel
+    AzureFoundryModelPanel,
+    AzureFoundryProviderKey
 } from '@/interfaces/foundry-cost-optimization/azureFoundryInterfaces';
 import {
     confidenceClasses,
@@ -18,14 +19,17 @@ import {
     formatInteger,
     formatPercent,
     formatPricePerMillion,
-    formatSignedPercent
+    formatSignedPercent,
+    providerFullLabels,
+    providerShortLabels
 } from '@/lib/azureFoundryFormatters';
 
 interface AzureFoundryModelPanelsComponentProps {
     data: AzureFoundryModel[];
+    provider: AzureFoundryProviderKey;
 }
 
-const buildLadder = (model: AzureFoundryModel, recommended: AzureFoundryModel['candidates'][number] | undefined): AzureFoundryDimensionLadderRow[] => {
+const buildLadder = (model: AzureFoundryModel, recommended: AzureFoundryModel['bedrock']['candidates'][number] | undefined): AzureFoundryDimensionLadderRow[] => {
     return [...model.usage]
         .sort((a, b) => b.cost_usd - a.cost_usd)
         .map((usage) => {
@@ -37,25 +41,25 @@ const buildLadder = (model: AzureFoundryModel, recommended: AzureFoundryModel['c
                 token_share: model.tokens_total > 0 ? (usage.tokens / model.tokens_total) * 100 : 0,
                 azure_price_per_1m_usd: usage.price_per_1m_usd,
                 azure_cost_usd: usage.cost_usd,
-                bedrock_price_per_1m_usd: candidateDimension ? candidateDimension.bedrock_price_per_1m_usd : null,
-                bedrock_cost_usd: candidateDimension ? candidateDimension.bedrock_cost_usd : null,
+                candidate_price_per_1m_usd: candidateDimension ? candidateDimension.price_per_1m_usd : null,
+                candidate_cost_usd: candidateDimension ? candidateDimension.cost_usd : null,
                 delta_usd: candidateDimension ? candidateDimension.delta_usd : null,
                 dimension_fallback: candidateDimension ? candidateDimension.dimension_fallback : false
             };
         });
 };
 
-export const AzureFoundryModelPanelsComponent = ({ data }: AzureFoundryModelPanelsComponentProps) => {
+export const AzureFoundryModelPanelsComponent = ({ data, provider }: AzureFoundryModelPanelsComponentProps) => {
     const panels = useMemo<AzureFoundryModelPanel[]>(() => {
         return (data || []).map((model) => {
-            const recommended = model.candidates.find((candidate) => candidate.is_recommended);
+            const recommended = model[provider].candidates.find((candidate) => candidate.is_recommended);
             return {
                 azure_model_name: model.azure_model_name,
                 azure_model_version: model.azure_model_version,
                 model_class_label: model.model_class_label,
                 deployment_type: model.deployment_type || '—',
                 azure_location: model.azure_location || '—',
-                aws_region: model.aws_region,
+                candidate_region: model[provider].region || '—',
                 lifecycle_status: model.lifecycle_status || '—',
                 deprecation_label: formatDate(model.deprecation ? model.deprecation.inference : null),
                 azure_cost_usd: model.azure_cost_usd,
@@ -63,8 +67,8 @@ export const AzureFoundryModelPanelsComponent = ({ data }: AzureFoundryModelPane
                 blended_price_per_1m_usd: model.tokens_total > 0 ? (model.azure_cost_usd / model.tokens_total) * 1000000 : 0,
                 deployments_total: model.deployments_total,
                 deployments_idle: model.deployments_idle,
-                candidates_total: model.candidates.length,
-                recommended_model: recommended ? recommended.bedrock_model_name : '',
+                candidates_total: model[provider].candidates.length,
+                recommended_model: recommended ? recommended.model_name : '',
                 recommended_provider: recommended ? (recommended.provider || '—') : '',
                 recommended_confidence: recommended ? recommended.confidence : '',
                 recommended_cost_usd: recommended ? recommended.projected_cost_usd : null,
@@ -75,7 +79,7 @@ export const AzureFoundryModelPanelsComponent = ({ data }: AzureFoundryModelPane
                 ladder: buildLadder(model, recommended)
             };
         });
-    }, [data]);
+    }, [data, provider]);
 
     if (panels.length === 0) {
         return (
@@ -96,7 +100,7 @@ export const AzureFoundryModelPanelsComponent = ({ data }: AzureFoundryModelPane
                 </span>
                 <span className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
                     <span className="h-2.5 w-2.5 rounded-sm bg-violet-600 dark:bg-violet-400" />
-                    AWS Bedrock (recomendado)
+                    {providerFullLabels[provider]} (recomendado)
                 </span>
             </div>
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
@@ -119,7 +123,7 @@ export const AzureFoundryModelPanelsComponent = ({ data }: AzureFoundryModelPane
                                             v{panel.azure_model_version} · {panel.model_class_label} · {panel.deployment_type}
                                         </span>
                                         <span className="block font-mono text-[10px] text-muted-foreground">
-                                            {panel.azure_location} → {panel.aws_region}
+                                            {panel.azure_location} → {panel.candidate_region}
                                         </span>
                                     </div>
                                 </div>
@@ -149,7 +153,7 @@ export const AzureFoundryModelPanelsComponent = ({ data }: AzureFoundryModelPane
                                     </span>
                                 </div>
                                 <div className="grid grid-cols-[42px_1fr_auto] items-center gap-2">
-                                    <span className="text-[10px] font-semibold text-muted-foreground">Bedrock</span>
+                                    <span className="text-[10px] font-semibold text-muted-foreground">{providerShortLabels[provider]}</span>
                                     <div className="h-3.5 rounded bg-slate-100 dark:bg-slate-800">
                                         {hasRecommendation && (
                                             <div
@@ -192,7 +196,7 @@ export const AzureFoundryModelPanelsComponent = ({ data }: AzureFoundryModelPane
                                                 Azure {formatPricePerMillion(row.azure_price_per_1m_usd)}
                                             </span>
                                             <span className="text-[10px] text-muted-foreground">
-                                                Bedrock {formatPricePerMillion(row.bedrock_price_per_1m_usd)}
+                                                {providerShortLabels[provider]} {formatPricePerMillion(row.candidate_price_per_1m_usd)}
                                             </span>
                                         </div>
                                         <div className="flex w-24 shrink-0 flex-col items-end text-right">

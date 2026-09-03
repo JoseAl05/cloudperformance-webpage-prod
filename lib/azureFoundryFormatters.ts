@@ -93,3 +93,13 @@ export const deltaClass = (value: number): string => {
     if (value > 0) return 'text-red-600 dark:text-red-400';
     return 'text-slate-600 dark:text-slate-400';
 };
+
+export const providerShortLabels: Record<'bedrock' | 'vertex', string> = {
+    bedrock: 'AWS',
+    vertex: 'GCP'
+};
+
+export const providerFullLabels: Record<'bedrock' | 'vertex', string> = {
+    bedrock: 'AWS Bedrock',
+    vertex: 'GCP Vertex'
+};

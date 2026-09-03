@@ -1,5 +1,7 @@
 export type AzureFoundryConfidence = 'HIGH' | 'MEDIUM' | 'LOW';
 
+export type AzureFoundryProviderKey = 'bedrock' | 'vertex';
+
 export interface AzureFoundryUsage {
     dimension: string;
     dimension_label: string;
@@ -43,23 +45,23 @@ export interface AzureFoundryCandidateDimension {
     tokens: number;
     azure_price_per_1m_usd: number | null;
     azure_cost_usd: number;
-    bedrock_price_per_1m_usd: number;
-    bedrock_cost_usd: number;
+    price_per_1m_usd: number | null;
+    cost_usd: number;
     delta_usd: number;
     price_source_dimension: string;
     dimension_fallback: boolean;
 }
 
 export interface AzureFoundryCandidate {
-    bedrock_model_id: string;
-    bedrock_model_name: string;
+    model_id: string;
+    model_name: string;
     provider: string | null;
-    region: string;
+    region: string | null;
     model_class: string;
     equivalence_class: string;
-    input_modalities: string[];
-    output_modalities: string[];
-    inference_types_supported: string[];
+    input_modalities: string[] | null;
+    output_modalities: string[] | null;
+    inference_types_supported: string[] | null;
     lifecycle_status: string | null;
     price_similarity: number;
     dimension_coverage: number;
@@ -74,10 +76,19 @@ export interface AzureFoundryCandidate {
     dimensions: AzureFoundryCandidateDimension[];
     dimension_fallback: boolean;
     missing_dimensions: string[];
-    unresolved_price_rows: number;
+    price_scope_sources: Record<string, string | null> | null;
+    unresolved_price_rows: number | null;
     rationale: string;
+    equivalent_models: string[];
+    equivalent_models_count: number;
     rank: number | null;
     is_recommended: boolean;
+}
+
+export interface AzureFoundryProviderCandidates {
+    region: string | null;
+    price_variant: string;
+    candidates: AzureFoundryCandidate[];
 }
 
 export interface AzureFoundryDeprecation {
@@ -114,19 +125,13 @@ export interface AzureFoundryModel {
     allocation_basis: string;
     azure_location: string | null;
     deployment_type: string | null;
-    aws_region: string;
-    price_variant: string;
-    candidates: AzureFoundryCandidate[];
+    bedrock: AzureFoundryProviderCandidates;
+    vertex: AzureFoundryProviderCandidates;
 }
 
 export interface AzureFoundrySummary {
     azure_cost_usd: number;
-    bedrock_projected_cost_usd: number;
-    delta_usd: number;
-    delta_percent: number;
-    coverage_percent: number;
     models_total: number;
-    models_unmapped: number;
     deployments_total: number;
     deployments_idle: number;
 }
@@ -138,19 +143,59 @@ export interface AzureFoundryMeterIssue {
     cost_usd: number;
 }
 
-export interface AzureFoundryCatalogBuild {
-    foundation_models: number;
-    usable_models: number;
-    joined_models: number;
-    unjoined_models: number;
-    unjoined_sample: string[];
+export interface AzureFoundryCatalogBuildRegion {
+    // Bedrock shape
+    foundation_models?: number;
+    usable_models?: number;
+    price_groups?: number;
+    joined_models?: number;
+    unjoined_models?: number;
+    unjoined_sample?: string[];
+    price_catalog_versions?: Record<string, number>;
+    // Vertex shape
+    price_rows?: number;
+    excluded_rows?: number;
+    unresolved_rows?: number;
+    model_groups?: number;
+    priced_models?: number;
+    price_catalog_sync_time?: string;
+}
+
+export interface AzureFoundryProviderDiagnostics {
+    unresolved_price_rows: number;
+    catalog_models: number;
+    catalog_classes: Record<string, number>;
+    catalog_build: Record<string, AzureFoundryCatalogBuildRegion>;
+}
+
+export interface AzureFoundryProviderSummaryBase {
+    azure_cost_usd: number;
+    delta_usd: number;
+    delta_percent: number;
+    coverage_percent: number;
+    models_total: number;
+    models_unmapped: number;
+}
+
+export interface AzureFoundryBedrockSummary extends AzureFoundryProviderSummaryBase {
+    bedrock_projected_cost_usd: number;
+}
+
+export interface AzureFoundryVertexSummary extends AzureFoundryProviderSummaryBase {
+    vertex_projected_cost_usd: number;
+}
+
+export interface AzureFoundryBedrockComparison {
+    summary: AzureFoundryBedrockSummary;
+    diagnostics: AzureFoundryProviderDiagnostics;
+}
+
+export interface AzureFoundryVertexComparison {
+    summary: AzureFoundryVertexSummary;
+    diagnostics: AzureFoundryProviderDiagnostics;
 }
 
 export interface AzureFoundryDiagnostics {
-    bedrock_unresolved_price_rows: number;
-    bedrock_catalog_models: number;
-    bedrock_catalog_classes: Record<string, number>;
-    bedrock_catalog_build: Record<string, AzureFoundryCatalogBuild>;
     billing_rows: number;
     accounts_matched: number;
 }
@@ -167,6 +212,8 @@ export interface AzureFoundryComparison {
     unmapped_meters: AzureFoundryMeterIssue[];
     unresolved_meters: AzureFoundryMeterIssue[];
     diagnostics: AzureFoundryDiagnostics;
+    bedrock: AzureFoundryBedrockComparison;
+    vertex: AzureFoundryVertexComparison;
 }
 
 export type AzureFoundryComparisonResponse = AzureFoundryComparison[];
@@ -174,7 +221,7 @@ export type AzureFoundryComparisonResponse = AzureFoundryComparison[];
 export interface AzureFoundryCostBridgePoint {
     model: string;
     azure_cost_usd: number;
-    bedrock_cost_usd: number;
+    projected_cost_usd: number;
     delta_usd: number;
     delta_percent: number;
     recommended_model: string;
@@ -197,7 +244,7 @@ export interface AzureFoundryTokenMixPoint {
 
 export interface AzureFoundryCandidateConfidenceRow {
     azure_model_name: string;
-    bedrock_model_name: string;
+    candidate_model_name: string;
     provider: string;
     region: string;
     equivalence_score: number;
@@ -215,8 +262,8 @@ export interface AzureFoundryDimensionLadderRow {
     token_share: number;
     azure_price_per_1m_usd: number | null;
     azure_cost_usd: number;
-    bedrock_price_per_1m_usd: number | null;
-    bedrock_cost_usd: number | null;
+    candidate_price_per_1m_usd: number | null;
+    candidate_cost_usd: number | null;
     delta_usd: number | null;
     dimension_fallback: boolean;
 }
@@ -227,7 +274,7 @@ export interface AzureFoundryModelPanel {
     model_class_label: string;
     deployment_type: string;
     azure_location: string;
-    aws_region: string;
+    candidate_region: string;
     lifecycle_status: string;
     deprecation_label: string;
     azure_cost_usd: number;
