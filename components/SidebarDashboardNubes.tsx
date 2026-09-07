@@ -213,6 +213,9 @@ const NAV: Record<Provider, NavItem[]> = {
             icon: Box,
             items: [
                 { label: 'Maquinas Virtuales', icon: Computer, href: '/azure/recursos-vm' },
+                { label: 'Nodos', icon: Computer, href: '/azure/recursos-nodos' },
+                { label: 'Base de Datos MySQL', icon: Database, href: '/azure/recursos-db-mysql' },
+                { label: 'Base de Datos PostgreSQL', icon: Database, href: '/azure/recursos-db-postgresql' },
                 { label: 'Traffic Managers', icon: Workflow, href: '/azure/recursos-traffic-manager' },
             ],
         },
