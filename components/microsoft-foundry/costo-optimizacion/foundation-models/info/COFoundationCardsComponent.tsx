@@ -576,7 +576,7 @@ export const AzureFoundryCardsComponent = ({
           "grid gap-4",
           sortedData.length === 1 && "grid-cols-1",
           sortedData.length === 2 && "grid-cols-1 md:grid-cols-2",
-          sortedData.length > 2 && "grid-cols-1 md:grid-cols-2 xl:grid-cols-3",
+          sortedData.length > 2 && "grid-cols-1 md:grid-cols-2 xl:grid-cols-2",
         )}
       >
         {sortedData.map((azureModel) => (
