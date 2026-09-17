@@ -128,7 +128,7 @@ export const SelectAIServiceComponent = () => {
             swapContextToken(clientName, connectionData.dbAzureName, connectionData.dbAwsName, defaultAcc.db)
         }
 
-        router.push(`/gcp?client=${clientName}`)
+        router.push(`/google-vertex?client=${clientName}`)
     }
 
     const stopProp = (e: React.MouseEvent) => {

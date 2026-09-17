@@ -6,7 +6,7 @@ import { ArrowDownUp, DollarSign, LayoutDashboard } from 'lucide-react'
 import { SidebarNav, resolveNav, type NavItem } from '@/components/SidebarNav'
 import type { Sidebar } from '@/components/ui/sidebar'
 
-type Service = 'amazon-bedrock' | 'microsoft-foundry'
+type Service = 'amazon-bedrock' | 'microsoft-foundry' | 'google-vertex'
 
 const NAV: Record<Service, NavItem[]> = {
     'amazon-bedrock': [
@@ -17,6 +17,11 @@ const NAV: Record<Service, NavItem[]> = {
         { label: 'Inicio', icon: LayoutDashboard, href: '/microsoft-foundry' },
         { label: 'Costo y Optimización', icon: DollarSign, href: '/microsoft-foundry/costo-optimizacion' },
         { label: 'Comparación', icon: ArrowDownUp, href: '/microsoft-foundry/comparacion' },
+    ],
+    'google-vertex': [
+        { label: 'Inicio', icon: LayoutDashboard, href: '/google-vertex' },
+        { label: 'Costo y Optimización', icon: DollarSign, href: '/google-vertex/costo-optimizacion' },
+        { label: 'Comparación', icon: ArrowDownUp, href: '/google-vertex/comparacion' },
     ]
 }
 

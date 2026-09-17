@@ -25,6 +25,33 @@ export interface ModelProfile {
     description?: string;
 }
 
+export interface ModelSimilarityDimension {
+    required: string[];
+    matched: string[];
+    missing: string[];
+    unknown: string[];
+    score: number | null;
+    source?: string;
+}
+
+export interface ModelPricingSimilarity extends ModelSimilarityDimension {
+    fallback_used?: string[];
+    ratios?: Record<string, number>;
+    price_similarity_pct?: number | null;
+    dimension_coverage_pct?: number | null;
+}
+
+export interface ModelSimilarity {
+    score: number | null;
+    level: "high" | "medium" | "low" | "insufficient_data";
+    basis: "reference_model_metadata" | "category_profile_and_capabilities" | "category_profile_capabilities_and_pricing";
+    evidence_coverage_pct: number;
+    weights?: Record<string, number>;
+    skills: ModelSimilarityDimension;
+    capabilities: ModelSimilarityDimension;
+    pricing?: ModelPricingSimilarity;
+    limitations: string[];
+}
 export interface PriceComparison {
     modelName: string;
     provider: string;
@@ -36,6 +63,7 @@ export interface PriceComparison {
     detailed_cost_breakdown?: Record<string, number>;
     detailed_base_rates?: Record<string, RateObject>;
     technical_parity_report?: TechnicalParityReport;
+    model_similarity?: ModelSimilarity | null;
     model_profile?: ModelProfile;
 }
 

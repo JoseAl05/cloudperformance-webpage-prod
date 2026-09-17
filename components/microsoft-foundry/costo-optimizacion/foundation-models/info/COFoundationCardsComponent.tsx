@@ -1,8 +1,15 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import {
   Collapsible,
@@ -40,6 +47,13 @@ interface DetailedRateUI {
   cost: string;
 }
 
+type ComparisonSortOption = "savings" | "confidence" | "balanced";
+
+const comparisonSortOptions: { value: ComparisonSortOption; label: string }[] = [
+  { value: "savings", label: "Mayor ahorro" },
+  { value: "confidence", label: "Mayor confiabilidad" },
+  { value: "balanced", label: "Confiabilidad + ahorro" },
+];
 const formatCost = (value: number | undefined | null) => {
   if (value == null || value === 0) return "US$0,00";
   if (value > 0 && value < 0.01) {
@@ -128,6 +142,86 @@ const renderMeterItem = (meter: MeterDetail, idx: number) => {
   );
 };
 
+const confidenceFormatter = new Intl.NumberFormat("es-CL", {
+  style: "percent",
+  minimumFractionDigits: 1,
+  maximumFractionDigits: 1,
+});
+const getConfidenceScore = (similarity: PriceComparison["model_similarity"]) => {
+  const score = similarity?.score;
+  return typeof score === "number" && Number.isFinite(score) ? score : -1;
+};
+
+const ModelConfidence = ({
+  similarity,
+  modelName,
+}: {
+  similarity: PriceComparison["model_similarity"];
+  modelName: string;
+}) => {
+  const score = similarity?.score;
+  const hasScore = typeof score === "number" && Number.isFinite(score)
+    && score >= 0 && score <= 100 && similarity?.level !== "insufficient_data";
+  const level = similarity?.level;
+  const levelLabel = level === "high" ? "Alta" : level === "medium" ? "Media" : level === "low" ? "Baja" : "";
+  const scoreLabel = hasScore ? confidenceFormatter.format(score / 100) : null;
+  const includesPricing = similarity?.basis === "category_profile_capabilities_and_pricing";
+  const categoryEstimate = includesPricing || similarity?.basis === "category_profile_and_capabilities";
+  const onlyCapabilities = similarity?.skills?.required?.length === 0;
+  const coverage = similarity?.evidence_coverage_pct;
+  const partialEvidence = typeof coverage === "number" && Number.isFinite(coverage)
+    && coverage >= 0 && coverage < 100;
+
+  return (
+    <div className="mt-3 space-y-1.5" title="Similitud estimada de habilidades, capacidades y pricing con el modelo actual; no representa una probabilidad de exito.">
+      <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1 text-[11px]">
+        <span className="font-medium text-muted-foreground">Confiabilidad del modelo</span>
+        <span className="font-semibold text-foreground">
+          {hasScore ? levelLabel : "Sin datos suficientes"}
+        </span>
+      </div>
+      {hasScore && (
+        <div className="flex items-center gap-3">
+          <div
+            role="meter"
+            aria-label={`Confiabilidad de ${modelName}`}
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-valuenow={score}
+            aria-valuetext={`${scoreLabel}, nivel ${levelLabel.toLowerCase()}; similitud con el modelo actual`}
+            className="h-2 min-w-0 flex-1 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800"
+          >
+            <div
+              className={cn(
+                "h-full rounded-full",
+                level === "high" ? "bg-emerald-600 dark:bg-emerald-500"
+                  : level === "medium" ? "bg-amber-600 dark:bg-amber-500"
+                  : "bg-rose-600 dark:bg-rose-500",
+              )}
+              style={{ width: `${score}%` }}
+            />
+          </div>
+          <span className="w-14 shrink-0 text-right text-xs font-semibold tabular-nums text-foreground">
+            {scoreLabel}
+          </span>
+        </div>
+      )}
+      {hasScore && categoryEstimate && (
+        <p className="text-[10px] leading-snug text-muted-foreground">
+          {includesPricing ? "Estimacion por categoria, perfil, capacidades y pricing del modelo." : "Estimacion por categoria, perfil y capacidades del modelo."}
+        </p>
+      )}
+      {hasScore && (onlyCapabilities || partialEvidence) && (
+        <p className="text-[10px] leading-snug text-muted-foreground">
+          {onlyCapabilities && "Basada solo en capacidades documentadas."}
+          {onlyCapabilities && partialEvidence && " "}
+          {partialEvidence && `Datos disponibles para el ${confidenceFormatter.format(coverage / 100)} de los requisitos.`}
+        </p>
+      )}
+    </div>
+  );
+};
+
 const AzureModelCard = ({
   azureModel,
 }: {
@@ -147,7 +241,7 @@ const AzureModelCard = ({
       provider: azureModel.provider,
       profile: azureModel.model_profile,
       
-      comparison: azureModel.price_comparison?.map((pc: PriceComparison) => {
+      comparison: azureModel.price_comparison?.map((pc: PriceComparison, index: number) => {
         const delta = pc.delta_pct_vs_billing;
         const hasDelta = typeof delta === "number";
         const missing = pc.missing_rates ?? [];
@@ -172,9 +266,15 @@ const AzureModelCard = ({
 
         const diffAmount = pc.estimated_cost - azureModel.total_billing_cost;
         const diffFormatted = formatCost(Math.abs(diffAmount));
+        const confidenceScore = getConfidenceScore(pc.model_similarity);
 
         return {
           modelName: pc.modelName,
+          modelSimilarity: pc.model_similarity,
+          sortIndex: index,
+          estimatedCost: pc.estimated_cost,
+          savingsAmount: azureModel.total_billing_cost - pc.estimated_cost,
+          confidenceScore,
           provider: pc.provider,
           cost: formatCost(pc.estimated_cost),
           deltaLabel: hasDelta && delta !== null ? percentFormatter.format(delta / 100) : null,
@@ -196,6 +296,39 @@ const AzureModelCard = ({
     [azureModel],
   );
 
+
+  const [comparisonSort, setComparisonSort] = useState<ComparisonSortOption>("savings");
+
+  const sortedComparison = useMemo(() => {
+    const comparison = formatted.comparison;
+    const maxSavings = Math.max(0, ...comparison.map((comp) => Math.max(comp.savingsAmount, 0)));
+
+    const savingsScore = (comp: (typeof comparison)[number]) => {
+      if (maxSavings <= 0) return 0;
+      return (Math.max(comp.savingsAmount, 0) / maxSavings) * 100;
+    };
+
+    const bySavings = (a: (typeof comparison)[number], b: (typeof comparison)[number]) =>
+      b.savingsAmount - a.savingsAmount;
+    const byConfidence = (a: (typeof comparison)[number], b: (typeof comparison)[number]) =>
+      b.confidenceScore - a.confidenceScore;
+    const byOriginalOrder = (a: (typeof comparison)[number], b: (typeof comparison)[number]) =>
+      a.sortIndex - b.sortIndex;
+
+    return [...comparison].sort((a, b) => {
+      if (comparisonSort === "confidence") {
+        return byConfidence(a, b) || bySavings(a, b) || byOriginalOrder(a, b);
+      }
+
+      if (comparisonSort === "balanced") {
+        const scoreA = a.confidenceScore < 0 ? -1 : (a.confidenceScore * 0.5) + (savingsScore(a) * 0.5);
+        const scoreB = b.confidenceScore < 0 ? -1 : (b.confidenceScore * 0.5) + (savingsScore(b) * 0.5);
+        return (scoreB - scoreA) || byConfidence(a, b) || bySavings(a, b) || byOriginalOrder(a, b);
+      }
+
+      return bySavings(a, b) || byConfidence(a, b) || byOriginalOrder(a, b);
+    });
+  }, [formatted.comparison, comparisonSort]);
   const inputMeters = azureModel.meter_details?.filter(m => m.metric_type.includes('input')) || [];
   const outputMeters = azureModel.meter_details?.filter(m => m.metric_type.includes('output')) || [];
 
@@ -372,13 +505,33 @@ const AzureModelCard = ({
                 </span>
               </div>
 
+
+              {formatted.comparison.length > 1 && (
+                <div className="mt-3 flex flex-col gap-1.5 rounded-md border bg-background/70 p-2.5 sm:flex-row sm:items-center sm:justify-between">
+                  <span className="text-[11px] font-medium text-muted-foreground">
+                    Ordenar modelos
+                  </span>
+                  <Select value={comparisonSort} onValueChange={(value) => setComparisonSort(value as ComparisonSortOption)}>
+                    <SelectTrigger className="h-8 w-full text-xs sm:w-[230px]">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {comparisonSortOptions.map((option) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
               {formatted.comparison.length === 0 ? (
                 <p className="mt-3 rounded-md border border-dashed px-3 py-3 text-center text-xs text-muted-foreground">
                   No hay modelos equivalentes para comparar.
                 </p>
               ) : (
                 <div className="mt-2.5 space-y-2">
-                  {formatted.comparison.map((comp) => (
+                  {sortedComparison.map((comp) => (
                     <div
                       key={`${comp.modelName}-${comp.provider}`}
                       className="rounded-md border bg-background px-3 py-2"
@@ -440,6 +593,11 @@ const AzureModelCard = ({
                         )}
                       </div>
                       
+                      <ModelConfidence
+                        similarity={comp.modelSimilarity}
+                        modelName={comp.modelName}
+                      />
+
                       <div className="mt-2.5 border-t border-muted/50 pt-2">
                         <p className="text-[10px] font-semibold text-muted-foreground mb-1.5 uppercase tracking-wide">
                           Desglose Simulado
