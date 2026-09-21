@@ -12,6 +12,13 @@ const preciseCurrencyFormatter = new Intl.NumberFormat('es-CL', {
     maximumFractionDigits: 4
 });
 
+const microCurrencyFormatter = new Intl.NumberFormat('es-CL', {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 8
+});
+
 const percentFormatter = new Intl.NumberFormat('es-CL', {
     minimumFractionDigits: 1,
     maximumFractionDigits: 1
@@ -36,6 +43,13 @@ const dateFormatter = new Intl.DateTimeFormat('es-CL', {
 export const formatCurrency = (value: number | null | undefined): string => {
     if (value === null || value === undefined || Number.isNaN(value)) return '—';
     if (value !== 0 && Math.abs(value) < 0.01) return preciseCurrencyFormatter.format(value);
+    return currencyFormatter.format(value);
+};
+
+// El costo de un solo prompt suele ser una fracción de centavo, donde formatCurrency redondea a 0.
+export const formatMicroCurrency = (value: number | null | undefined): string => {
+    if (value === null || value === undefined || Number.isNaN(value)) return '—';
+    if (value !== 0 && Math.abs(value) < 0.01) return microCurrencyFormatter.format(value);
     return currencyFormatter.format(value);
 };
 

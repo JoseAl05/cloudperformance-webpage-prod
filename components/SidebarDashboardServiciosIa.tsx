@@ -2,7 +2,7 @@
 
 import { useMemo } from 'react'
 import { usePathname } from 'next/navigation'
-import { ArrowDownUp, DollarSign, LayoutDashboard } from 'lucide-react'
+import { ArrowDownUp, DollarSign, LayoutDashboard, TrendingUp } from 'lucide-react'
 import { SidebarNav, resolveNav, type NavItem } from '@/components/SidebarNav'
 import type { Sidebar } from '@/components/ui/sidebar'
 
@@ -17,6 +17,7 @@ const NAV: Record<Service, NavItem[]> = {
         { label: 'Inicio', icon: LayoutDashboard, href: '/microsoft-foundry' },
         { label: 'Costo y Optimización', icon: DollarSign, href: '/microsoft-foundry/costo-optimizacion' },
         { label: 'Comparación', icon: ArrowDownUp, href: '/microsoft-foundry/comparacion' },
+        { label: 'Prompt Optimization', icon: TrendingUp, href: '/microsoft-foundry/prompt-opt' },
     ],
     'google-vertex': [
         { label: 'Inicio', icon: LayoutDashboard, href: '/google-vertex' },

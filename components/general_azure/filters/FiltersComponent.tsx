@@ -30,6 +30,7 @@ import { UnusedAppGwFilterComponent } from '@/components/general_azure/filters/U
 import { AppGwFilterComponent } from '@/components/general_azure/filters/AppGwFilterComponent';
 import { UnusedTrafficManagerFilter } from '@/components/general_azure/filters/UnusedTrafficManagerFilter';
 import { TrafficManagerFilterComponent } from '@/components/general_azure/filters/TrafficManagerFilterComponent';
+import { FoundryModelsFilterComponent } from '@/components/general_azure/filters/FoundryModelsFilterComponent';
 
 interface FiltersComponentProps {
     Component: (params: {
@@ -56,7 +57,8 @@ interface FiltersComponentProps {
         selectedOperation?: string;
         impact?: string | null;
         category?: string | null;
-        cloud?:string;
+        cloud?: string;
+        selectedFoundryModel?: string;
     }) => React.JSX.Element;
     dateFilter?: boolean;
     monthYearFilter?: boolean;
@@ -106,7 +108,9 @@ interface FiltersComponentProps {
     isUnusedTmFilterMultiselect?: boolean;
     tmFilter?: boolean;
     isTmFilterMultiselect?: boolean;
-    cloud?:string;
+    cloud?: string;
+    foundryModelFilter?: boolean;
+    foundryModel?: string;
 }
 
 export const FiltersComponent = ({
@@ -159,7 +163,9 @@ export const FiltersComponent = ({
     isUnusedTmFilterMultiselect = false,
     tmFilter = false,
     isTmFilterMultiselect = false,
-    cloud
+    cloud,
+    foundryModelFilter = false,
+    foundryModel = ''
 }: FiltersComponentProps) => {
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -203,6 +209,7 @@ export const FiltersComponent = ({
         const selectedAppGParam = searchParams.get('appgateway');
         const selectedUnusedTmParam = searchParams.get('unused_tm');
         const selectedTmParam = searchParams.get('tm_profile');
+        const selectedFoundryModel = searchParams.get('foundry_model');
 
         let startDate = startDateParam ? new Date(startDateParam) : yesterday;
         let endDate = endDateParam ? new Date(endDateParam) : new Date();
@@ -250,7 +257,8 @@ export const FiltersComponent = ({
             selectedUnusedAppGParam: selectedUnusedAppGParam || '',
             selectedAppGParam: selectedAppGParam || '',
             selectedUnusedTmParam: selectedUnusedTmParam || '',
-            selectedTmParam: selectedTmParam || ''
+            selectedTmParam: selectedTmParam || '',
+            selectedFoundryModelParam: selectedFoundryModel || ''
         };
     };
 
@@ -285,6 +293,7 @@ export const FiltersComponent = ({
     const [tempAppGw, setTempAppGw] = useState<string>(filters.selectedAppGParam);
     const [tempUnusedTm, setTempUnusedTm] = useState<string>(filters.selectedUnusedTmParam);
     const [tempTm, setTempTm] = useState<string>(filters.selectedTmParam);
+    const [tempFoundryModel, setTempFoundryModel] = useState<string>(filters.selectedFoundryModelParam);
 
     useEffect(() => {
         const newFilters = getInitialFilters();
@@ -319,6 +328,7 @@ export const FiltersComponent = ({
         setTempAppGw(newFilters.selectedAppGParam);
         setTempUnusedTm(newFilters.selectedUnusedTmParam);
         setTempTm(newFilters.selectedTmParam);
+        setTempFoundryModel(newFilters.selectedFoundryModelParam);
     }, [searchParams]);
 
     const onChange = (dates: [Date | null, Date | null]) => setTempRange(dates);
@@ -368,7 +378,8 @@ export const FiltersComponent = ({
             selectedUnusedAppG: tempUnusedAppGw,
             selectedAppGw: tempAppGw,
             selectedUnusedTm: tempUnusedTm,
-            selectedTm: tempTm
+            selectedTm: tempTm,
+            selectedFoundryModel: tempFoundryModel
         };
 
         setFilters(newFilters as unknown);
@@ -422,7 +433,10 @@ export const FiltersComponent = ({
             { flag: unusedAppGFilter, key: 'unused_appgateway', value: newFilters.selectedUnusedAppG },
             { flag: appGFilter, key: 'appgateway', value: newFilters.selectedAppGw },
             { flag: unusedTmFilter, key: 'unused_tm', value: newFilters.selectedUnusedTm },
-            { flag: tmFilter, key: 'tm_profile', value: newFilters.selectedTm }
+            { flag: tmFilter, key: 'tm_profile', value: newFilters.selectedTm },
+
+            // Foundry
+            { flag: foundryModelFilter, key: 'foundry_model', value: newFilters.selectedFoundryModel }
         ];
         filterConfigs.forEach(({ flag, key, value, ignoreValue }) => {
             if (flag && value !== null && value !== undefined && value !== '' && value !== ignoreValue) {
@@ -462,7 +476,8 @@ export const FiltersComponent = ({
             selectedUnusedAppG: '',
             selectedAppGw: '',
             selectedUnusedTm: '',
-            selectedTm: ''
+            selectedTm: '',
+            selectedFoundryModel: ''
         };
 
         setFilters(defaultFilters as unknown);
@@ -493,6 +508,7 @@ export const FiltersComponent = ({
         setTempAppGw(defaultFilters.selectedAppGw);
         setTempUnusedTm(defaultFilters.selectedUnusedTm);
         setTempTm(defaultFilters.selectedTm);
+        setTempFoundryModel(defaultFilters.selectedFoundryModel);
 
         router.push(window.location.pathname);
     };
@@ -635,6 +651,20 @@ export const FiltersComponent = ({
                                 />
                             </div>
                         )}
+                        {
+                            foundryModelFilter && (
+                                <div className='space-y-2'>
+                                    <label className='text-sm font-medium text-foreground flex items-center gap-2'>
+                                        <Layers className='h-4 w-4' />
+                                        Modelos
+                                    </label>
+                                    <FoundryModelsFilterComponent
+                                        foundryModel={tempFoundryModel}
+                                        setFoundryModel={setTempFoundryModel}
+                                    />
+                                </div>
+                            )
+                        }
                         {metricsFilter && (
                             <div className='space-y-2'>
                                 <label className='text-sm font-medium text-foreground flex items-center gap-2'>
@@ -993,6 +1023,7 @@ export const FiltersComponent = ({
                     selectedAppg={filters.selectedAppGParam}
                     selectedUnusedTm={filters.selectedUnusedTmParam}
                     selectedTm={filters.selectedTmParam}
+                    selectedFoundryModel={filters.selectedFoundryModelParam}
                     cloud={cloud}
                 />
             </Card>
