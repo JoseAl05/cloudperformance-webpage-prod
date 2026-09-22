@@ -2,9 +2,15 @@ export type PromptOptimizationViewMode = 'text' | 'ids';
 
 export type PromptOptimizationSide = 'original' | 'optimized';
 
+export type PromptOptimizationTarget = 'rate' | 'target_token';
+
 export interface PromptOptimizationRequest {
     model: string;
     prompt: string;
+    rate?: number;
+    target_token?: number;
+    use_context_level_filter: boolean;
+    use_token_level_filter: boolean;
 }
 
 export interface PromptOptimizationToken {

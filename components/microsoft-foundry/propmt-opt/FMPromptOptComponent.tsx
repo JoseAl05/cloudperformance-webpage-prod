@@ -1,29 +1,54 @@
 'use client'
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { MessageCard } from '@/components/azure/cards/MessageCards';
 import { LoaderComponent } from '@/components/general_azure/LoaderComponent';
 import { AlertCircle, RefreshCw } from 'lucide-react';
+import { formatInteger } from '@/lib/azureFoundryFormatters';
 import { FMPromptOptInputComponent } from '@/components/microsoft-foundry/propmt-opt/info/FMPromptOptInputComponent';
 import { FMPromptOptComparisonComponent } from '@/components/microsoft-foundry/propmt-opt/info/FMPromptOptComparisonComponent';
-import { PromptOptimizationResponse } from '@/interfaces/foundry-cost-optimization/promptOptimizationInterfaces';
+import { PROMPT_OPT_DEFAULT_RATE } from '@/components/microsoft-foundry/propmt-opt/info/FMPromptOptTargetComponent';
+import {
+    PromptOptimizationRequest,
+    PromptOptimizationResponse,
+    PromptOptimizationTarget
+} from '@/interfaces/foundry-cost-optimization/promptOptimizationInterfaces';
 
 const OPTIMIZE_PROMPT_URL = '/api/azure/bridge/azure/foundry/prompt_optimization/optimize_prompt';
 
-const DEFAULT_ERROR_MESSAGE = 'Ocurrió un problema al optimizar el prompt. Intentá nuevamente en unos segundos.';
+const DEFAULT_ERROR_MESSAGE = 'Ocurrió un problema al optimizar el prompt. Intenta nuevamente en unos segundos.';
+
+interface AppliedSettings {
+    model: string;
+    target: PromptOptimizationTarget;
+    rate: number;
+    maxTokens: number | null;
+    useContextLevelFilter: boolean;
+    useTokenLevelFilter: boolean;
+}
 
 export const FMPromptOptComponent = () => {
     const [prompt, setPrompt] = useState('');
     const [foundryModel, setFoundryModel] = useState('');
+    const [target, setTarget] = useState<PromptOptimizationTarget>('rate');
+    const [rate, setRate] = useState(PROMPT_OPT_DEFAULT_RATE);
+    const [maxTokens, setMaxTokens] = useState('');
+    const [useContextLevelFilter, setUseContextLevelFilter] = useState(true);
+    const [useTokenLevelFilter, setUseTokenLevelFilter] = useState(false);
     const [result, setResult] = useState<PromptOptimizationResponse | null>(null);
+    const [appliedSettings, setAppliedSettings] = useState<AppliedSettings | null>(null);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [isOptimizing, setIsOptimizing] = useState(false);
     const abortRef = useRef<AbortController | null>(null);
 
     useEffect(() => () => abortRef.current?.abort(), []);
 
+    const parsedMaxTokens = Number.parseInt(maxTokens, 10);
+    const hasValidMaxTokens = Number.isInteger(parsedMaxTokens) && parsedMaxTokens > 0;
+    const isTargetReady = target === 'rate' || hasValidMaxTokens;
+
     const optimizePrompt = useCallback(async () => {
-        if (!foundryModel || !prompt.trim()) return;
+        if (!foundryModel || !prompt.trim() || !isTargetReady) return;
 
         abortRef.current?.abort();
         const controller = new AbortController();
@@ -32,11 +57,21 @@ export const FMPromptOptComponent = () => {
         setIsOptimizing(true);
         setErrorMessage(null);
 
+        const body: PromptOptimizationRequest = {
+            model: foundryModel,
+            prompt,
+            use_context_level_filter: useContextLevelFilter,
+            use_token_level_filter: useTokenLevelFilter,
+            ...(target === 'rate'
+                ? { rate: rate / 100 }
+                : { target_token: parsedMaxTokens })
+        };
+
         try {
             const response = await fetch(OPTIMIZE_PROMPT_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ model: foundryModel, prompt }),
+                body: JSON.stringify(body),
                 signal: controller.signal
             });
 
@@ -48,9 +83,18 @@ export const FMPromptOptComponent = () => {
             }
 
             setResult(payload as PromptOptimizationResponse);
+            setAppliedSettings({
+                model: foundryModel,
+                target,
+                rate,
+                maxTokens: target === 'target_token' ? parsedMaxTokens : null,
+                useContextLevelFilter,
+                useTokenLevelFilter
+            });
         } catch (error) {
             if ((error as Error).name === 'AbortError') return;
             setResult(null);
+            setAppliedSettings(null);
             setErrorMessage((error as Error).message || DEFAULT_ERROR_MESSAGE);
         } finally {
             if (abortRef.current === controller) {
@@ -58,20 +102,61 @@ export const FMPromptOptComponent = () => {
                 setIsOptimizing(false);
             }
         }
-    }, [prompt, foundryModel]);
+    }, [
+        prompt,
+        foundryModel,
+        target,
+        rate,
+        parsedMaxTokens,
+        isTargetReady,
+        useContextLevelFilter,
+        useTokenLevelFilter
+    ]);
 
     const clearPrompt = useCallback(() => {
         abortRef.current?.abort();
         abortRef.current = null;
         setPrompt('');
         setResult(null);
+        setAppliedSettings(null);
         setErrorMessage(null);
         setIsOptimizing(false);
     }, []);
 
-    // El modelo se puede cambiar sin volver a optimizar, así que los conteos en pantalla
-    // pueden ser de otro modelo: se avisa en vez de dispararle otro run al usuario.
-    const isResultStale = Boolean(result && foundryModel && result.model !== foundryModel);
+    const isResultStale = useMemo(() => {
+        if (!result || !appliedSettings) return false;
+        if (appliedSettings.model !== foundryModel) return true;
+        if (appliedSettings.useContextLevelFilter !== useContextLevelFilter) return true;
+        if (appliedSettings.useTokenLevelFilter !== useTokenLevelFilter) return true;
+        if (appliedSettings.target !== target) return true;
+        if (target === 'rate') return appliedSettings.rate !== rate;
+        return appliedSettings.maxTokens !== (hasValidMaxTokens ? parsedMaxTokens : null);
+    }, [
+        result,
+        appliedSettings,
+        foundryModel,
+        target,
+        rate,
+        hasValidMaxTokens,
+        parsedMaxTokens,
+        useContextLevelFilter,
+        useTokenLevelFilter
+    ]);
+
+    const appliedSummary = useMemo(() => {
+        if (!appliedSettings) return '';
+        const targetSummary = appliedSettings.target === 'rate'
+            ? `${appliedSettings.rate}% objetivo`
+            : `${formatInteger(appliedSettings.maxTokens ?? 0)} tokens como máximo`;
+        const filtersSummary = appliedSettings.useContextLevelFilter && appliedSettings.useTokenLevelFilter
+            ? 'filtros de contexto y token'
+            : appliedSettings.useContextLevelFilter
+                ? 'solo filtro de contexto'
+                : appliedSettings.useTokenLevelFilter
+                    ? 'solo filtro de token'
+                    : 'sin filtros';
+        return `${appliedSettings.model} · ${targetSummary} · ${filtersSummary}`;
+    }, [appliedSettings]);
 
     return (
         <div className="flex w-full min-w-0 flex-col gap-5">
@@ -80,6 +165,17 @@ export const FMPromptOptComponent = () => {
                 setPrompt={setPrompt}
                 foundryModel={foundryModel}
                 setFoundryModel={setFoundryModel}
+                target={target}
+                setTarget={setTarget}
+                rate={rate}
+                setRate={setRate}
+                maxTokens={maxTokens}
+                setMaxTokens={setMaxTokens}
+                useContextLevelFilter={useContextLevelFilter}
+                setUseContextLevelFilter={setUseContextLevelFilter}
+                useTokenLevelFilter={useTokenLevelFilter}
+                setUseTokenLevelFilter={setUseTokenLevelFilter}
+                isTargetReady={isTargetReady}
                 onOptimize={optimizePrompt}
                 onClear={clearPrompt}
                 isOptimizing={isOptimizing}
@@ -101,8 +197,8 @@ export const FMPromptOptComponent = () => {
                     {isResultStale && (
                         <MessageCard
                             icon={RefreshCw}
-                            title="El resultado es de otro modelo"
-                            description={`Los conteos de abajo se calcularon con "${result.model}". Vuelve a optimizar para verlos con el modelo seleccionado.`}
+                            title="El resultado corresponde a otra configuración"
+                            description={`Los datos de abajo se calcularon con ${appliedSummary}. Vuelve a optimizar para aplicar la configuración actual.`}
                             tone="warn"
                         />
                     )}
