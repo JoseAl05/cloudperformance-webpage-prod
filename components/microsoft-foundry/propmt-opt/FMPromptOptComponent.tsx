@@ -34,7 +34,6 @@ export const FMPromptOptComponent = () => {
     const [rate, setRate] = useState(PROMPT_OPT_DEFAULT_RATE);
     const [maxTokens, setMaxTokens] = useState('');
     const [useContextLevelFilter, setUseContextLevelFilter] = useState(true);
-    const [useTokenLevelFilter, setUseTokenLevelFilter] = useState(false);
     const [result, setResult] = useState<PromptOptimizationResponse | null>(null);
     const [appliedSettings, setAppliedSettings] = useState<AppliedSettings | null>(null);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -46,6 +45,11 @@ export const FMPromptOptComponent = () => {
     const parsedMaxTokens = Number.parseInt(maxTokens, 10);
     const hasValidMaxTokens = Number.isInteger(parsedMaxTokens) && parsedMaxTokens > 0;
     const isTargetReady = target === 'rate' || hasValidMaxTokens;
+    const useTokenLevelFilter = !useContextLevelFilter;
+
+    const onUseTokenLevelFilterChange = useCallback((value: boolean) => {
+        setUseContextLevelFilter(!value);
+    }, []);
 
     const optimizePrompt = useCallback(async () => {
         if (!foundryModel || !prompt.trim() || !isTargetReady) return;
@@ -127,7 +131,6 @@ export const FMPromptOptComponent = () => {
         if (!result || !appliedSettings) return false;
         if (appliedSettings.model !== foundryModel) return true;
         if (appliedSettings.useContextLevelFilter !== useContextLevelFilter) return true;
-        if (appliedSettings.useTokenLevelFilter !== useTokenLevelFilter) return true;
         if (appliedSettings.target !== target) return true;
         if (target === 'rate') return appliedSettings.rate !== rate;
         return appliedSettings.maxTokens !== (hasValidMaxTokens ? parsedMaxTokens : null);
@@ -139,8 +142,7 @@ export const FMPromptOptComponent = () => {
         rate,
         hasValidMaxTokens,
         parsedMaxTokens,
-        useContextLevelFilter,
-        useTokenLevelFilter
+        useContextLevelFilter
     ]);
 
     const appliedSummary = useMemo(() => {
@@ -148,13 +150,9 @@ export const FMPromptOptComponent = () => {
         const targetSummary = appliedSettings.target === 'rate'
             ? `${appliedSettings.rate}% objetivo`
             : `${formatInteger(appliedSettings.maxTokens ?? 0)} tokens como máximo`;
-        const filtersSummary = appliedSettings.useContextLevelFilter && appliedSettings.useTokenLevelFilter
-            ? 'filtros de contexto y token'
-            : appliedSettings.useContextLevelFilter
-                ? 'solo filtro de contexto'
-                : appliedSettings.useTokenLevelFilter
-                    ? 'solo filtro de token'
-                    : 'sin filtros';
+        const filtersSummary = appliedSettings.useContextLevelFilter
+            ? 'filtro a nivel de contexto'
+            : 'filtro a nivel de token';
         return `${appliedSettings.model} · ${targetSummary} · ${filtersSummary}`;
     }, [appliedSettings]);
 
@@ -172,9 +170,9 @@ export const FMPromptOptComponent = () => {
                 maxTokens={maxTokens}
                 setMaxTokens={setMaxTokens}
                 useContextLevelFilter={useContextLevelFilter}
-                setUseContextLevelFilter={setUseContextLevelFilter}
+                onUseContextLevelFilterChange={setUseContextLevelFilter}
                 useTokenLevelFilter={useTokenLevelFilter}
-                setUseTokenLevelFilter={setUseTokenLevelFilter}
+                onUseTokenLevelFilterChange={onUseTokenLevelFilterChange}
                 isTargetReady={isTargetReady}
                 onOptimize={optimizePrompt}
                 onClear={clearPrompt}

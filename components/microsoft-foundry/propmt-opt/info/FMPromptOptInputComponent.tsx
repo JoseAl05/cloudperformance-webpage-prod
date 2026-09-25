@@ -24,9 +24,9 @@ interface FMPromptOptInputComponentProps {
     maxTokens: string;
     setMaxTokens: Dispatch<SetStateAction<string>>;
     useContextLevelFilter: boolean;
-    setUseContextLevelFilter: Dispatch<SetStateAction<boolean>>;
+    onUseContextLevelFilterChange: (value: boolean) => void;
     useTokenLevelFilter: boolean;
-    setUseTokenLevelFilter: Dispatch<SetStateAction<boolean>>;
+    onUseTokenLevelFilterChange: (value: boolean) => void;
     isTargetReady: boolean;
     onOptimize: () => void;
     onClear: () => void;
@@ -45,9 +45,9 @@ export const FMPromptOptInputComponent = ({
     maxTokens,
     setMaxTokens,
     useContextLevelFilter,
-    setUseContextLevelFilter,
+    onUseContextLevelFilterChange,
     useTokenLevelFilter,
-    setUseTokenLevelFilter,
+    onUseTokenLevelFilterChange,
     isTargetReady,
     onOptimize,
     onClear,
@@ -117,9 +117,9 @@ export const FMPromptOptInputComponent = ({
 
                 <FMPromptOptFiltersComponent
                     useContextLevelFilter={useContextLevelFilter}
-                    setUseContextLevelFilter={setUseContextLevelFilter}
+                    onUseContextLevelFilterChange={onUseContextLevelFilterChange}
                     useTokenLevelFilter={useTokenLevelFilter}
-                    setUseTokenLevelFilter={setUseTokenLevelFilter}
+                    onUseTokenLevelFilterChange={onUseTokenLevelFilterChange}
                     disabled={isOptimizing}
                 />
 
