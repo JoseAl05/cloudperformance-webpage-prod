@@ -13,6 +13,7 @@ interface UserToEdit {
     is_aws: boolean;
     is_azure: boolean;
     is_gcp: boolean;
+    is_openai: boolean;
 }
 
 interface EditUserModalProps {
@@ -42,6 +43,7 @@ export default function EditUserModal({ user, onClose, refreshUserList }: EditUs
                 is_aws: user.is_aws,
                 is_azure: user.is_azure,
                 is_gcp: user.is_gcp,
+                is_openai: user.is_openai,
             });
             setMessage('');
         }

@@ -34,6 +34,9 @@ export const SelectAIServiceComponent = () => {
         activeGcpAccountId,
         setActiveGcpAccountId,
 
+        activeOpenaiAccountId,
+        setActiveOpenaiAccountId,
+
         swapContextToken
     } = useFeatureAccess()
 
@@ -42,34 +45,40 @@ export const SelectAIServiceComponent = () => {
     const isAzure = connectionData.isAzureActive
     const isAws = connectionData.isAwsActive
     const isGcp = connectionData.isGcpActive
+    const isOpenai = connectionData.isOpenaiActive
 
-    const nothing = !isAzure && !isAws && !isGcp
-    const clientName = connectionData.client
+    const nothing = !isAzure && !isAws && !isGcp && !isOpenai
+    const clientName = connectionData.client || ''
 
     const azureAccounts = connectionData.azureAccountsList || []
     const awsAccounts = connectionData.awsAccountsList || []
     const gcpAccounts = connectionData.gcpAccountsList || []
+    const openaiAccounts = connectionData.openaiAccountsList || []
 
     const hasMultipleAzureAccounts = azureAccounts.length > 1
     const hasMultipleAwsAccounts = awsAccounts.length > 1
     const hasMultipleGcpAccounts = gcpAccounts.length > 1
+    const hasMultipleOpenaiAccounts = openaiAccounts.length > 1
 
     // Lógica para determinar si el usuario puede avanzar
     // NO tiene múltiples cuentas (es única) O SI tiene múltiples y ya seleccionó una.
     const isAzureReady = !hasMultipleAzureAccounts || !!activeAzureAccountId
     const isAwsReady = !hasMultipleAwsAccounts || !!activeAwsAccountId
     const isGcpReady = !hasMultipleGcpAccounts || !!activeGcpAccountId
+    const isOpenaiReady = !hasMultipleOpenaiAccounts || !!activeOpenaiAccountId
 
     const handleAccountChange = (
         newId: string,
-        cloud: 'azure' | 'aws' | 'gcp'
+        cloud: 'azure' | 'aws' | 'gcp' | 'openai'
     ) => {
         const targetAccounts =
             cloud === 'azure'
                 ? azureAccounts
                 : cloud === 'aws'
                     ? awsAccounts
-                    : gcpAccounts
+                    : cloud === 'gcp'
+                        ? gcpAccounts
+                        : openaiAccounts
 
         const selectedAccount = targetAccounts.find(acc => acc.id === newId)
         if (!selectedAccount) return
@@ -77,8 +86,9 @@ export const SelectAIServiceComponent = () => {
         if (cloud === 'azure') setActiveAzureAccountId(newId)
         if (cloud === 'aws') setActiveAwsAccountId(newId)
         if (cloud === 'gcp') setActiveGcpAccountId(newId)
+        if (cloud === 'openai') setActiveOpenaiAccountId(newId)
 
-        const client = connectionData.client
+        const client = connectionData.client || ''
 
         const newDbAzure =
             cloud === 'azure'
@@ -95,7 +105,12 @@ export const SelectAIServiceComponent = () => {
                 ? selectedAccount.db
                 : connectionData.dbGcpName
 
-        swapContextToken(client, newDbAzure, newDbAws, newDbGcp)
+        const newDbOpenai =
+            cloud === 'openai'
+                ? selectedAccount.db
+                : connectionData.dbOpenaiName
+
+        swapContextToken(client, newDbAzure, newDbAws, newDbGcp, newDbOpenai)
     }
 
     const handleEnterAzure = () => {
@@ -103,7 +118,7 @@ export const SelectAIServiceComponent = () => {
 
         if (!hasMultipleAzureAccounts && azureAccounts.length > 0) {
             const defaultAcc = azureAccounts[0]
-            swapContextToken(clientName, defaultAcc.db, connectionData.dbAwsName, connectionData.dbGcpName)
+            swapContextToken(clientName, defaultAcc.db, connectionData.dbAwsName, connectionData.dbGcpName, connectionData.dbOpenaiName)
         }
 
         router.push(`/microsoft-foundry?client=${clientName}`)
@@ -114,7 +129,7 @@ export const SelectAIServiceComponent = () => {
 
         if (!hasMultipleAwsAccounts && awsAccounts.length > 0) {
             const defaultAcc = awsAccounts[0]
-            swapContextToken(clientName, connectionData.dbAzureName, defaultAcc.db, connectionData.dbGcpName)
+            swapContextToken(clientName, connectionData.dbAzureName, defaultAcc.db, connectionData.dbGcpName, connectionData.dbOpenaiName)
         }
 
         router.push(`/amazon-bedrock?client=${clientName}`)
@@ -125,10 +140,21 @@ export const SelectAIServiceComponent = () => {
 
         if (!hasMultipleGcpAccounts && gcpAccounts.length > 0) {
             const defaultAcc = gcpAccounts[0]
-            swapContextToken(clientName, connectionData.dbAzureName, connectionData.dbAwsName, defaultAcc.db)
+            swapContextToken(clientName, connectionData.dbAzureName, connectionData.dbAwsName, defaultAcc.db, connectionData.dbOpenaiName)
         }
 
         router.push(`/google-vertex?client=${clientName}`)
+    }
+
+    const handleEnterOpenai = () => {
+        if (!isOpenaiReady) return
+
+        if (!hasMultipleOpenaiAccounts && openaiAccounts.length > 0) {
+            const defaultAcc = openaiAccounts[0]
+            swapContextToken(clientName, connectionData.dbAzureName, connectionData.dbAwsName, connectionData.dbGcpName, defaultAcc.db)
+        }
+
+        router.push(`/open-ia?client=${clientName}`)
     }
 
     const stopProp = (e: React.MouseEvent) => {
@@ -156,7 +182,7 @@ export const SelectAIServiceComponent = () => {
             <div
                 className={cn(
                     "grid gap-4",
-                    (isAzure && isAws) || isGcp
+                    (isAzure && isAws) || isGcp || isOpenai
                         ? "grid-cols-1 md:grid-cols-2"
                         : "grid-cols-1"
                 )}
@@ -327,6 +353,63 @@ export const SelectAIServiceComponent = () => {
                             </div>
 
                             {isGcpReady && (
+                                <ArrowRight className="h-4 w-4 opacity-70 group-hover:translate-x-1 transition-transform" />
+                            )}
+                        </div>
+                    </div>
+                )}
+
+                {/* ================= OPEN IA ================= */}
+                {isOpenai && (
+                    <div
+                        onClick={handleEnterOpenai}
+                        className={cn(
+                            "group relative overflow-hidden rounded-2xl border bg-card p-5 shadow-sm transition",
+                            isOpenaiReady
+                                ? "hover:shadow-md cursor-pointer border-border"
+                                : "border-gray-200 bg-gray-50/50 cursor-default",
+                            (hasMultipleOpenaiAccounts && isOpenaiReady) ? "border-slate-400" : ""
+                        )}
+                    >
+                        <div className={cn("absolute -left-10 -top-10 h-32 w-32 rounded-full blur-2xl transition-opacity", isOpenaiReady ? "bg-slate-500/10 opacity-100" : "opacity-0")} />
+
+                        <div className="flex items-center gap-4">
+                            <div className={cn("relative h-12 w-12 rounded-xl ring-1 bg-background grid place-items-center transition-all", isOpenaiReady ? "ring-border grayscale-0" : "ring-gray-200 grayscale")}>
+                                <Image alt="Open IA" src="/logo-openai.svg" width={26} height={26} />
+                            </div>
+
+                            <div className="flex-1 z-10">
+                                <h3 className={cn("text-lg font-semibold", !isOpenaiReady && "text-gray-500")}>Open IA</h3>
+
+                                {hasMultipleOpenaiAccounts && (
+                                    <div className="mt-1 flex items-center gap-2" onClick={stopProp}>
+                                        <span className="text-xs text-muted-foreground">Cuenta:</span>
+                                        <Select
+                                            value={activeOpenaiAccountId || ""}
+                                            onValueChange={(val) => handleAccountChange(val, 'openai')}
+                                        >
+                                            <SelectTrigger className={cn("h-7 w-[180px] text-xs font-bold transition-colors", activeOpenaiAccountId ? "text-slate-700 bg-white/50 border-slate-200" : "text-gray-500 border-dashed border-gray-400")}>
+                                                <SelectValue placeholder="Seleccione una cuenta..." />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {openaiAccounts.map(acc => (
+                                                    <SelectItem key={acc.id} value={acc.id} className="text-xs">
+                                                        {acc.alias}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                )}
+
+                                {!hasMultipleOpenaiAccounts && (
+                                    <p className="text-xs text-muted-foreground mt-1">
+                                        Costos, modelos, proyectos y comparación de consumo.
+                                    </p>
+                                )}
+                            </div>
+
+                            {isOpenaiReady && (
                                 <ArrowRight className="h-4 w-4 opacity-70 group-hover:translate-x-1 transition-transform" />
                             )}
                         </div>

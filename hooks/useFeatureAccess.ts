@@ -1,16 +1,16 @@
 import { useSession } from '@/hooks/useSession';
-import useSWR from 'swr'; 
-import { Empresa } from '@/types/db'; 
-import { useClientContext } from '@/components/context/ClientContext'; 
+import useSWR from 'swr';
+import { CloudAccount, Empresa, User } from '@/types/db';
+import { useClientContext } from '@/components/context/ClientContext';
 
 const fetcher = (url: string) => fetch(url, { credentials: 'include' }).then(res => res.json());
 
-const PLAN_ACCESS_CONFIG: Record<string, { 
-    aws: 'full_dashboard' | 'pdf_report' | 'none'; 
+const PLAN_ACCESS_CONFIG: Record<string, {
+    aws: 'full_dashboard' | 'pdf_report' | 'none';
     azure: 'full_dashboard' | 'pdf_report' | 'none';
     gcp: 'full_dashboard' | 'pdf_report' | 'none'
     presupuesto: boolean;
-    vistaAdvisor: boolean; 
+    vistaAdvisor: boolean;
 }> = {
     'starter (freemium)': {
         aws: 'pdf_report',
@@ -53,7 +53,7 @@ const PLAN_ACCESS_CONFIG: Record<string, {
 
 export const useFeatureAccess = () => {
     const { user: userLoggedIn, isLoading: loadingSession, refresh: refreshSession } = useSession();
-    const { 
+    const {
         selectedCompany,
         setSelectedCompany,
 
@@ -65,20 +65,23 @@ export const useFeatureAccess = () => {
 
         activeGcpAccountId,
         setActiveGcpAccountId,
-    } = useClientContext(); 
+
+        activeOpenaiAccountId,
+        setActiveOpenaiAccountId,
+    } = useClientContext();
 
     const isGlobalAdmin = userLoggedIn?.role === 'admin_global';
     const isCompanyAdmin = userLoggedIn?.role === 'admin_empresa';
-    
-    const shouldFetchCompanyData = isGlobalAdmin; 
+
+    const shouldFetchCompanyData = isGlobalAdmin;
     const { data: empresas, isLoading: loadingEmpresas } = useSWR<Empresa[]>(
-        shouldFetchCompanyData ? '/api/perfilamiento/empresas' : null, 
+        shouldFetchCompanyData ? '/api/perfilamiento/empresas' : null,
         fetcher,
         { revalidateOnFocus: false }
     );
     const companiesList = isGlobalAdmin ? (empresas || []) : [];
 
-    let activeCredentials;
+    let activeCredentials: Empresa | User | null;
 
     if (isGlobalAdmin && selectedCompany) {
         // Caso 1: Admin Global visualizando una empresa seleccionada
@@ -90,27 +93,28 @@ export const useFeatureAccess = () => {
         activeCredentials = null;
     }
 
-    //  LÓGICA MULTI-TENANT 
-    
-    const normalizeAccounts = (rawAccounts: unknown[] | undefined, legacyDb: string | null | undefined) => {
+    //  LÓGICA MULTI-TENANT
+
+    const normalizeAccounts = (rawAccounts: CloudAccount[] | undefined, legacyDb: string | null | undefined): CloudAccount[] => {
         let list = rawAccounts || [];
         if (list.length === 0 && legacyDb) {
             list = [{ id: 'default-legacy', alias: 'Cuenta Principal', db: legacyDb }];
         }
         return list;
     };
-    
+
     // Normalizar nubes
     const azureAccountsList = normalizeAccounts(activeCredentials?.azure_accounts, activeCredentials?.user_db_azure);
     const awsAccountsList = normalizeAccounts(activeCredentials?.aws_accounts, activeCredentials?.user_db_aws);
     const gcpAccountsList = normalizeAccounts(activeCredentials?.gcp_accounts, activeCredentials?.user_db_gcp);
+    const openaiAccountsList = normalizeAccounts(activeCredentials?.openai_accounts, activeCredentials?.user_db_openai);
 
     let currentDbAzure = null;
     if (azureAccountsList.length > 0) {
         const selectedAccount = azureAccountsList.find(acc => acc.id === activeAzureAccountId);
         currentDbAzure = selectedAccount ? selectedAccount.db : azureAccountsList[0].db;
     }
-    
+
     let currentDbAws = null;
     if (awsAccountsList.length > 0) {
         const selectedAccount = awsAccountsList.find(acc => acc.id === activeAwsAccountId);
@@ -123,45 +127,56 @@ export const useFeatureAccess = () => {
         currentDbGcp = selectedAccount ? selectedAccount.db : gcpAccountsList[0].db;
     }
 
+    let currentDbOpenai = null;
+    if (openaiAccountsList.length > 0) {
+        const selectedAccount = openaiAccountsList.find(acc => acc.id === activeOpenaiAccountId);
+        currentDbOpenai = selectedAccount ? selectedAccount.db : openaiAccountsList[0].db;
+    }
+
     const sourcePlanName = activeCredentials?.planName || (isGlobalAdmin ? 'Global Access' : undefined);
     const currentPlanNameKey = sourcePlanName?.toLowerCase() || '';
 
-    const planRestrictions = PLAN_ACCESS_CONFIG[currentPlanNameKey] || { 
-        aws: 'none', azure: 'none', presupuesto: false, vistaAdvisor: false 
+    const planRestrictions = PLAN_ACCESS_CONFIG[currentPlanNameKey] || {
+        aws: 'none', azure: 'none', presupuesto: false, vistaAdvisor: false
     };
-    
+
     const connectionData = {
-        client: activeCredentials?.name || activeCredentials?.client,
-        
+        client: activeCredentials ? ('name' in activeCredentials ? activeCredentials.name : activeCredentials.client) : undefined,
+
         isAwsActive: activeCredentials?.is_aws || false,
-        dbAwsName: currentDbAws, 
-        awsAccountsList, 
-        
+        dbAwsName: currentDbAws,
+        awsAccountsList,
+
         isAzureActive: activeCredentials?.is_azure || false,
-        dbAzureName: currentDbAzure, 
+        dbAzureName: currentDbAzure,
         azureAccountsList,
 
         isGcpActive: activeCredentials?.is_gcp || false,
         dbGcpName: currentDbGcp,
         gcpAccountsList,
+
+        isOpenaiActive: activeCredentials?.is_openai || false,
+        dbOpenaiName: currentDbOpenai,
+        openaiAccountsList,
     };
 
 
-    const swapContextToken = async (targetClientName: string, explicitAzureDb: string | null = null, explicitAwsDb: string | null = null, explicitGcpDb: string | null = null) => {
+    const swapContextToken = async (targetClientName: string, explicitAzureDb: string | null = null, explicitAwsDb: string | null = null, explicitGcpDb: string | null = null, explicitOpenaiDb: string | null = null) => {
         if (!targetClientName) return;
-   
+
         try {
-            const payload = { 
+            const payload = {
                 clientName: targetClientName,
-                user_db_azure: explicitAzureDb, 
+                user_db_azure: explicitAzureDb,
                 user_db_aws: explicitAwsDb,
-                user_db_gcp: explicitGcpDb,      
+                user_db_gcp: explicitGcpDb,
+                user_db_openai: explicitOpenaiDb,
             };
 
-            const response = await fetch('/api/auth/swap-client-context', { 
+            const response = await fetch('/api/auth/swap-client-context', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload), 
+                body: JSON.stringify(payload),
                 credentials: 'include',
             });
 
@@ -169,7 +184,7 @@ export const useFeatureAccess = () => {
                 const errorData = await response.json().catch(() => ({ message: 'Error desconocido.' }));
                 throw new Error(errorData.message || 'Error al cambiar contexto.');
             }
-            refreshSession(); 
+            refreshSession();
 
         } catch (error) {
             console.error("Fallo al cambiar el contexto:", error);
@@ -177,15 +192,16 @@ export const useFeatureAccess = () => {
    };
 
 
-    return { 
-        loading: loadingSession || (isGlobalAdmin && loadingEmpresas), 
-        connectionData, 
-        companiesList, 
+    return {
+        loading: loadingSession || (isGlobalAdmin && loadingEmpresas),
+        connectionData,
+        companiesList,
         swapContextToken,
         setSelectedCompany,
-        activeAzureAccountId, setActiveAzureAccountId, 
+        activeAzureAccountId, setActiveAzureAccountId,
         activeAwsAccountId, setActiveAwsAccountId,
         activeGcpAccountId, setActiveGcpAccountId,
+        activeOpenaiAccountId, setActiveOpenaiAccountId,
 
         canAccessFullDashboardAws: isGlobalAdmin || (planRestrictions.aws === 'full_dashboard'),
         canAccessFullDashboardAzure: isGlobalAdmin || (planRestrictions.azure === 'full_dashboard'),
@@ -195,9 +211,9 @@ export const useFeatureAccess = () => {
         canAccessPdfReportGcp: isGlobalAdmin || planRestrictions.gcp !== 'none',
         canAccessPresupuesto: isGlobalAdmin || planRestrictions.presupuesto,
         canAccessVistaAdvisor: isGlobalAdmin || planRestrictions.vistaAdvisor,
-        
-        currentPlanName: sourcePlanName || 'SIN PLAN DEFINIDO', 
+
+        currentPlanName: sourcePlanName || 'SIN PLAN DEFINIDO',
         isGlobalAdmin,
-        isCompanyAdmin: activeCredentials?.role === 'admin_empresa',
+        isCompanyAdmin: activeCredentials && 'role' in activeCredentials ? activeCredentials.role === 'admin_empresa' : false,
     };
 };

@@ -23,6 +23,7 @@ export default function EditLicenseModal({ empresa, onClose, refreshList }: Edit
     const [azureAccountsData, setAzureAccountsData] = useState<CloudAccountRow[]>([]);
     const [awsAccountsData, setAwsAccountsData] = useState<CloudAccountRow[]>([]);
     const [gcpAccountsData, setGcpAccountsData] = useState<CloudAccountRow[]>([]); // Nuevo estado GCP
+    const [openaiAccountsData, setOpenaiAccountsData] = useState<CloudAccountRow[]>([]);
 
     const [formData, setFormData] = useState({
         name: empresa.name,
@@ -41,6 +42,10 @@ export default function EditLicenseModal({ empresa, onClose, refreshList }: Edit
         is_gcp: empresa.is_gcp || false,
         user_db_gcp: empresa.user_db_gcp || '',
         is_gcp_multi_tenant: empresa.is_gcp_multi_tenant || false,
+        // Open IA
+        is_openai: empresa.is_openai || false,
+        user_db_openai: empresa.user_db_openai || '',
+        is_openai_multi_tenant: empresa.is_openai_multi_tenant || false,
     });
 
     const [loading, setLoading] = useState(false);
@@ -55,7 +60,7 @@ export default function EditLicenseModal({ empresa, onClose, refreshList }: Edit
                 planName: empresa.planName,
                 userLimit: empresa.userLimit,
                 currentUsers: empresa.currentUsers,
-                
+
                 is_aws: empresa.is_aws || false,
                 user_db_aws: empresa.user_db_aws || '',
                 is_aws_multi_tenant: empresa.is_aws_multi_tenant || false,
@@ -68,13 +73,18 @@ export default function EditLicenseModal({ empresa, onClose, refreshList }: Edit
                 is_gcp: empresa.is_gcp || false,
                 user_db_gcp: empresa.user_db_gcp || '',
                 is_gcp_multi_tenant: empresa.is_gcp_multi_tenant || false,
+
+                is_openai: empresa.is_openai || false,
+                user_db_openai: empresa.user_db_openai || '',
+                is_openai_multi_tenant: empresa.is_openai_multi_tenant || false,
             });
-            
+
             // Cargar las cuentas existentes (conservando sus IDs `clp-<id>`)
             setAzureAccountsData(toAccountRows(empresa.azure_accounts));
             setAwsAccountsData(toAccountRows(empresa.aws_accounts));
             setGcpAccountsData(toAccountRows(empresa.gcp_accounts)); // Cargar cuentas GCP
-            
+            setOpenaiAccountsData(toAccountRows(empresa.openai_accounts));
+
             setMessage('');
         }
     }, [empresa]);
@@ -118,6 +128,7 @@ export default function EditLicenseModal({ empresa, onClose, refreshList }: Edit
             if (name === 'is_azure_multi_tenant' && !checked) setAzureAccountsData([]);
             if (name === 'is_aws_multi_tenant' && !checked) setAwsAccountsData([]);
             if (name === 'is_gcp_multi_tenant' && !checked) setGcpAccountsData([]);
+            if (name === 'is_openai_multi_tenant' && !checked) setOpenaiAccountsData([]);
 
             return newState;
         });
@@ -128,14 +139,16 @@ export default function EditLicenseModal({ empresa, onClose, refreshList }: Edit
         // Lógica de selección de setter
         if (cloud === 'azure') setAzureAccountsData(prev => [...prev, newAccount]);
         else if (cloud === 'aws') setAwsAccountsData(prev => [...prev, newAccount]);
-        else setGcpAccountsData(prev => [...prev, newAccount]);
+        else if (cloud === 'gcp') setGcpAccountsData(prev => [...prev, newAccount]);
+        else setOpenaiAccountsData(prev => [...prev, newAccount]);
     }, []);
 
     const handleUpdateAccount = useCallback((cloud: CloudProvider, rowKey: string, field: 'alias' | 'db', value: string) => {
         let setter;
         if (cloud === 'azure') setter = setAzureAccountsData;
         else if (cloud === 'aws') setter = setAwsAccountsData;
-        else setter = setGcpAccountsData;
+        else if (cloud === 'gcp') setter = setGcpAccountsData;
+        else setter = setOpenaiAccountsData;
 
         setter(prev => prev.map(acc =>
             acc._key === rowKey ? { ...acc, [field]: value } : acc
@@ -146,7 +159,8 @@ export default function EditLicenseModal({ empresa, onClose, refreshList }: Edit
         let setter;
         if (cloud === 'azure') setter = setAzureAccountsData;
         else if (cloud === 'aws') setter = setAwsAccountsData;
-        else setter = setGcpAccountsData;
+        else if (cloud === 'gcp') setter = setGcpAccountsData;
+        else setter = setOpenaiAccountsData;
 
         setter(prev => prev.filter(acc => acc._key !== rowKey));
     }, []);
@@ -197,6 +211,16 @@ export default function EditLicenseModal({ empresa, onClose, refreshList }: Edit
             setLoading(false); return;
         }
 
+        // Validaciones Open IA
+        if (!formData.is_openai_multi_tenant && formData.is_openai && !formData.user_db_openai) {
+            setMessage('Error: El Nombre DB Open IA es requerido si el acceso Open IA está activado.');
+            setLoading(false); return;
+        }
+        if (formData.is_openai_multi_tenant && openaiAccountsData.length === 0) {
+            setMessage('Error: Si marca Multi-Tenant Open IA, debe agregar al menos una cuenta.');
+            setLoading(false); return;
+        }
+
         // Las cuentas SÓLO se envían en modo multi-tenant. En single-tenant el
         // backend elimina el array y deja `user_db_<cloud>` como conexión.
         const finalAzureAccounts = formData.is_azure && formData.is_azure_multi_tenant
@@ -211,10 +235,14 @@ export default function EditLicenseModal({ empresa, onClose, refreshList }: Edit
             ? toAccountsPayload(gcpAccountsData)
             : undefined;
 
+        const finalOpenaiAccounts = formData.is_openai && formData.is_openai_multi_tenant
+            ? toAccountsPayload(openaiAccountsData)
+            : undefined;
+
         const updatePayload = {
             planName: formData.planName,
             userLimit: formData.userLimit,
-            
+
             // AWS
             is_aws: formData.is_aws,
             user_db_aws: formData.is_aws && !formData.is_aws_multi_tenant ? formData.user_db_aws : null,
@@ -232,6 +260,12 @@ export default function EditLicenseModal({ empresa, onClose, refreshList }: Edit
             user_db_gcp: formData.is_gcp && !formData.is_gcp_multi_tenant ? formData.user_db_gcp : null,
             is_gcp_multi_tenant: formData.is_gcp_multi_tenant,
             gcp_accounts: finalGcpAccounts,
+
+            // Open IA
+            is_openai: formData.is_openai,
+            user_db_openai: formData.is_openai && !formData.is_openai_multi_tenant ? formData.user_db_openai : null,
+            is_openai_multi_tenant: formData.is_openai_multi_tenant,
+            openai_accounts: finalOpenaiAccounts,
         };
 
         try {
@@ -242,7 +276,7 @@ export default function EditLicenseModal({ empresa, onClose, refreshList }: Edit
                 credentials: 'include',
             });
 
-            let data: { message?: string } = {}; 
+            let data: { message?: string } = {};
 
             try {
                 if (response.headers.get('content-length') !== '0') {
@@ -284,10 +318,10 @@ export default function EditLicenseModal({ empresa, onClose, refreshList }: Edit
                             <Edit className="h-6 w-6" />
                             <h5 className="text-xl font-bold">Editar Licencia: {empresa.name}</h5>
                         </div>
-                        <button 
-                            type="button" 
-                            className="text-white opacity-90 hover:opacity-100 transition p-1" 
-                            onClick={onClose} 
+                        <button
+                            type="button"
+                            className="text-white opacity-90 hover:opacity-100 transition p-1"
+                            onClick={onClose}
                             disabled={loading}
                         >
                             <X className="h-6 w-6" />
@@ -344,31 +378,31 @@ export default function EditLicenseModal({ empresa, onClose, refreshList }: Edit
                                 <Cloud className="h-4 w-4" /> <span>Configuración de Conexiones Maestras</span>
                             </h6>
 
-                            {/* Grilla de Nubes: AWS - Azure - GCP */}
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                
+                            {/* Grilla de Nubes: AWS - Azure - GCP - Open IA */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+
                                 {/* AWS CONFIGURATION */}
                                 <div className="space-y-2 border p-3 rounded-lg bg-amber-50/20 border-amber-100">
                                     <div className="flex items-center space-x-4 mb-2">
-                                        <input 
-                                            type="checkbox" 
-                                            name="is_aws" 
-                                            id="is_aws" 
-                                            checked={formData.is_aws} 
-                                            onChange={handleChange} 
-                                            className="h-4 w-4 rounded border-gray-300 text-amber-600 focus:ring-amber-500" 
+                                        <input
+                                            type="checkbox"
+                                            name="is_aws"
+                                            id="is_aws"
+                                            checked={formData.is_aws}
+                                            onChange={handleChange}
+                                            className="h-4 w-4 rounded border-gray-300 text-amber-600 focus:ring-amber-500"
                                         />
                                         <label htmlFor="is_aws" className="text-sm font-medium">Acceso AWS</label>
-                                        
+
                                         {formData.is_aws && (
                                             <div className="flex items-center space-x-2">
-                                                <input 
-                                                    type="checkbox" 
-                                                    name="is_aws_multi_tenant" 
-                                                    id="is_aws_multi_tenant" 
-                                                    checked={formData.is_aws_multi_tenant} 
-                                                    onChange={handleChange} 
-                                                    className="h-4 w-4 rounded border-gray-300 text-amber-600 focus:ring-amber-500" 
+                                                <input
+                                                    type="checkbox"
+                                                    name="is_aws_multi_tenant"
+                                                    id="is_aws_multi_tenant"
+                                                    checked={formData.is_aws_multi_tenant}
+                                                    onChange={handleChange}
+                                                    className="h-4 w-4 rounded border-gray-300 text-amber-600 focus:ring-amber-500"
                                                 />
                                                 <label htmlFor="is_aws_multi_tenant" className="text-sm font-medium text-amber-700">
                                                     Multi-Tenant
@@ -376,32 +410,32 @@ export default function EditLicenseModal({ empresa, onClose, refreshList }: Edit
                                             </div>
                                         )}
                                     </div>
-                                    
+
                                     {formData.is_aws && !formData.is_aws_multi_tenant && (
                                         <div className="space-y-2 pt-1">
                                             <label htmlFor="user_db_aws" className="text-xs font-medium text-amber-700">
                                                 Nombre DB AWS (Maestra/Principal)
                                             </label>
-                                            <input 
-                                                type="text" 
-                                                name="user_db_aws" 
-                                                id="user_db_aws" 
-                                                value={formData.user_db_aws} 
-                                                onChange={handleChange} 
-                                                required={formData.is_aws} 
-                                                className="flex h-10 w-full rounded-md border border-amber-300 bg-white px-3 py-2 text-sm" 
-                                                placeholder="Ej: UC_Christus_Cloud_Performance_AWS" 
+                                            <input
+                                                type="text"
+                                                name="user_db_aws"
+                                                id="user_db_aws"
+                                                value={formData.user_db_aws}
+                                                onChange={handleChange}
+                                                required={formData.is_aws}
+                                                className="flex h-10 w-full rounded-md border border-amber-300 bg-white px-3 py-2 text-sm"
+                                                placeholder="Ej: UC_Christus_Cloud_Performance_AWS"
                                             />
                                         </div>
                                     )}
 
                                     {formData.is_aws && formData.is_aws_multi_tenant && (
-                                        <AccountListEditor 
-                                            cloud="aws" 
-                                            accounts={awsAccountsData} 
-                                            onAdd={handleAddAccount} 
-                                            onUpdate={handleUpdateAccount} 
-                                            onRemove={handleRemoveAccount} 
+                                        <AccountListEditor
+                                            cloud="aws"
+                                            accounts={awsAccountsData}
+                                            onAdd={handleAddAccount}
+                                            onUpdate={handleUpdateAccount}
+                                            onRemove={handleRemoveAccount}
                                         />
                                     )}
                                 </div>
@@ -409,25 +443,25 @@ export default function EditLicenseModal({ empresa, onClose, refreshList }: Edit
                                 {/* AZURE CONFIGURATION */}
                                 <div className="space-y-2 border p-3 rounded-lg bg-blue-50/20 border-blue-100">
                                     <div className="flex items-center space-x-4 mb-2">
-                                        <input 
-                                            type="checkbox" 
-                                            name="is_azure" 
-                                            id="is_azure" 
-                                            checked={formData.is_azure} 
-                                            onChange={handleChange} 
-                                            className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" 
+                                        <input
+                                            type="checkbox"
+                                            name="is_azure"
+                                            id="is_azure"
+                                            checked={formData.is_azure}
+                                            onChange={handleChange}
+                                            className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                                         />
                                         <label htmlFor="is_azure" className="text-sm font-medium">Acceso Azure</label>
 
                                         {formData.is_azure && (
                                             <div className="flex items-center space-x-2">
-                                                <input 
-                                                    type="checkbox" 
-                                                    name="is_azure_multi_tenant" 
-                                                    id="is_azure_multi_tenant" 
-                                                    checked={formData.is_azure_multi_tenant} 
-                                                    onChange={handleChange} 
-                                                    className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" 
+                                                <input
+                                                    type="checkbox"
+                                                    name="is_azure_multi_tenant"
+                                                    id="is_azure_multi_tenant"
+                                                    checked={formData.is_azure_multi_tenant}
+                                                    onChange={handleChange}
+                                                    className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                                                 />
                                                 <label htmlFor="is_azure_multi_tenant" className="text-sm font-medium text-blue-700">
                                                     Multi-Tenant
@@ -435,32 +469,32 @@ export default function EditLicenseModal({ empresa, onClose, refreshList }: Edit
                                             </div>
                                         )}
                                     </div>
-                                    
+
                                     {formData.is_azure && !formData.is_azure_multi_tenant && (
                                         <div className="space-y-2 pt-2">
                                             <label htmlFor="user_db_azure" className="text-xs font-medium text-blue-700">
                                                 Nombre DB Azure (Maestra/Principal)
                                             </label>
-                                            <input 
-                                                type="text" 
-                                                name="user_db_azure" 
-                                                id="user_db_azure" 
-                                                value={formData.user_db_azure} 
-                                                onChange={handleChange} 
-                                                required={formData.is_azure} 
-                                                className="flex h-10 w-full rounded-md border border-blue-300 bg-white px-3 py-2 text-sm" 
-                                                placeholder="Ej: Cloud_Performance_Azure" 
+                                            <input
+                                                type="text"
+                                                name="user_db_azure"
+                                                id="user_db_azure"
+                                                value={formData.user_db_azure}
+                                                onChange={handleChange}
+                                                required={formData.is_azure}
+                                                className="flex h-10 w-full rounded-md border border-blue-300 bg-white px-3 py-2 text-sm"
+                                                placeholder="Ej: Cloud_Performance_Azure"
                                             />
                                         </div>
                                     )}
 
                                     {formData.is_azure && formData.is_azure_multi_tenant && (
-                                        <AccountListEditor 
-                                            cloud="azure" 
-                                            accounts={azureAccountsData} 
-                                            onAdd={handleAddAccount} 
-                                            onUpdate={handleUpdateAccount} 
-                                            onRemove={handleRemoveAccount} 
+                                        <AccountListEditor
+                                            cloud="azure"
+                                            accounts={azureAccountsData}
+                                            onAdd={handleAddAccount}
+                                            onUpdate={handleUpdateAccount}
+                                            onRemove={handleRemoveAccount}
                                         />
                                     )}
                                 </div>
@@ -468,25 +502,25 @@ export default function EditLicenseModal({ empresa, onClose, refreshList }: Edit
                                 {/* GCP CONFIGURATION (NUEVO) */}
                                 <div className="space-y-2 border p-3 rounded-lg bg-emerald-50/20 border-emerald-100">
                                     <div className="flex items-center space-x-4 mb-2">
-                                        <input 
-                                            type="checkbox" 
-                                            name="is_gcp" 
-                                            id="is_gcp" 
-                                            checked={formData.is_gcp} 
-                                            onChange={handleChange} 
-                                            className="h-4 w-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500" 
+                                        <input
+                                            type="checkbox"
+                                            name="is_gcp"
+                                            id="is_gcp"
+                                            checked={formData.is_gcp}
+                                            onChange={handleChange}
+                                            className="h-4 w-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
                                         />
                                         <label htmlFor="is_gcp" className="text-sm font-medium">Acceso GCP</label>
 
                                         {formData.is_gcp && (
                                             <div className="flex items-center space-x-2">
-                                                <input 
-                                                    type="checkbox" 
-                                                    name="is_gcp_multi_tenant" 
-                                                    id="is_gcp_multi_tenant" 
-                                                    checked={formData.is_gcp_multi_tenant} 
-                                                    onChange={handleChange} 
-                                                    className="h-4 w-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500" 
+                                                <input
+                                                    type="checkbox"
+                                                    name="is_gcp_multi_tenant"
+                                                    id="is_gcp_multi_tenant"
+                                                    checked={formData.is_gcp_multi_tenant}
+                                                    onChange={handleChange}
+                                                    className="h-4 w-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
                                                 />
                                                 <label htmlFor="is_gcp_multi_tenant" className="text-sm font-medium text-emerald-700">
                                                     Multi-Tenant
@@ -494,32 +528,91 @@ export default function EditLicenseModal({ empresa, onClose, refreshList }: Edit
                                             </div>
                                         )}
                                     </div>
-                                    
+
                                     {formData.is_gcp && !formData.is_gcp_multi_tenant && (
                                         <div className="space-y-2 pt-2">
                                             <label htmlFor="user_db_gcp" className="text-xs font-medium text-emerald-700">
                                                 Nombre DB GCP (Maestra/Principal)
                                             </label>
-                                            <input 
-                                                type="text" 
-                                                name="user_db_gcp" 
-                                                id="user_db_gcp" 
-                                                value={formData.user_db_gcp} 
-                                                onChange={handleChange} 
-                                                required={formData.is_gcp} 
-                                                className="flex h-10 w-full rounded-md border border-emerald-300 bg-white px-3 py-2 text-sm" 
-                                                placeholder="Ej: Cloud_Performance_GCP" 
+                                            <input
+                                                type="text"
+                                                name="user_db_gcp"
+                                                id="user_db_gcp"
+                                                value={formData.user_db_gcp}
+                                                onChange={handleChange}
+                                                required={formData.is_gcp}
+                                                className="flex h-10 w-full rounded-md border border-emerald-300 bg-white px-3 py-2 text-sm"
+                                                placeholder="Ej: Cloud_Performance_GCP"
                                             />
                                         </div>
                                     )}
 
                                     {formData.is_gcp && formData.is_gcp_multi_tenant && (
-                                        <AccountListEditor 
-                                            cloud="gcp" 
-                                            accounts={gcpAccountsData} 
-                                            onAdd={handleAddAccount} 
-                                            onUpdate={handleUpdateAccount} 
-                                            onRemove={handleRemoveAccount} 
+                                        <AccountListEditor
+                                            cloud="gcp"
+                                            accounts={gcpAccountsData}
+                                            onAdd={handleAddAccount}
+                                            onUpdate={handleUpdateAccount}
+                                            onRemove={handleRemoveAccount}
+                                        />
+                                    )}
+                                </div>
+
+                                {/* OPEN IA CONFIGURATION */}
+                                <div className="space-y-2 border p-3 rounded-lg bg-slate-50/40 border-slate-200">
+                                    <div className="flex items-center space-x-4 mb-2">
+                                        <input
+                                            type="checkbox"
+                                            name="is_openai"
+                                            id="is_openai"
+                                            checked={formData.is_openai}
+                                            onChange={handleChange}
+                                            className="h-4 w-4 rounded border-gray-300 text-slate-700 focus:ring-slate-500"
+                                        />
+                                        <label htmlFor="is_openai" className="text-sm font-medium">Acceso Open IA</label>
+
+                                        {formData.is_openai && (
+                                            <div className="flex items-center space-x-2">
+                                                <input
+                                                    type="checkbox"
+                                                    name="is_openai_multi_tenant"
+                                                    id="is_openai_multi_tenant"
+                                                    checked={formData.is_openai_multi_tenant}
+                                                    onChange={handleChange}
+                                                    className="h-4 w-4 rounded border-gray-300 text-slate-700 focus:ring-slate-500"
+                                                />
+                                                <label htmlFor="is_openai_multi_tenant" className="text-sm font-medium text-slate-700">
+                                                    Multi-Tenant
+                                                </label>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {formData.is_openai && !formData.is_openai_multi_tenant && (
+                                        <div className="space-y-2 pt-2">
+                                            <label htmlFor="user_db_openai" className="text-xs font-medium text-slate-700">
+                                                Nombre DB Open IA (Maestra/Principal)
+                                            </label>
+                                            <input
+                                                type="text"
+                                                name="user_db_openai"
+                                                id="user_db_openai"
+                                                value={formData.user_db_openai}
+                                                onChange={handleChange}
+                                                required={formData.is_openai}
+                                                className="flex h-10 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm"
+                                                placeholder="Ej: Cloud_Performance_OpenAI"
+                                            />
+                                        </div>
+                                    )}
+
+                                    {formData.is_openai && formData.is_openai_multi_tenant && (
+                                        <AccountListEditor
+                                            cloud="openai"
+                                            accounts={openaiAccountsData}
+                                            onAdd={handleAddAccount}
+                                            onUpdate={handleUpdateAccount}
+                                            onRemove={handleRemoveAccount}
                                         />
                                     )}
                                 </div>
@@ -527,8 +620,8 @@ export default function EditLicenseModal({ empresa, onClose, refreshList }: Edit
 
                             {message && (
                                 <p className={`mt-3 p-2 rounded text-sm ${
-                                    message.startsWith('✅') || message.startsWith('Éxito') 
-                                        ? 'bg-green-100 text-green-700' 
+                                    message.startsWith('✅') || message.startsWith('Éxito')
+                                        ? 'bg-green-100 text-green-700'
                                         : 'bg-red-100 text-red-700'
                                 }`}>
                                     {message}
@@ -537,18 +630,18 @@ export default function EditLicenseModal({ empresa, onClose, refreshList }: Edit
                         </div>
 
                         <div className="flex justify-end space-x-3 p-4 border-t bg-gray-50 rounded-b-xl sticky bottom-0">
-                            <button 
-                                type="button" 
-                                onClick={onClose} 
+                            <button
+                                type="button"
+                                onClick={onClose}
                                 className="inline-flex items-center justify-center rounded-md text-sm font-medium h-10 px-4 py-2 bg-gray-200 text-gray-700 hover:bg-gray-300 transition"
                                 disabled={loading}
                             >
                                 Cancelar
                             </button>
-                            <button 
+                            <button
                                 type="button"
-                                onClick={handleSubmit} 
-                                className="inline-flex items-center justify-center rounded-md text-sm font-medium h-10 px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 transition" 
+                                onClick={handleSubmit}
+                                className="inline-flex items-center justify-center rounded-md text-sm font-medium h-10 px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 transition"
                                 disabled={loading}
                             >
                                 {loading ? 'Guardando...' : 'Guardar Cambios'}

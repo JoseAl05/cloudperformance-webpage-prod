@@ -11,6 +11,7 @@ interface EmpresaData {
     is_aws: boolean;
     is_azure: boolean;
     is_gcp: boolean; 
+    is_openai: boolean;
     planName: string;
 }
 
@@ -121,6 +122,7 @@ export default function LicenseTable() {
                                     empresa.is_aws && 'AWS',
                                     empresa.is_azure && 'Azure',
                                     empresa.is_gcp && 'GCP',
+                                    empresa.is_openai && 'Open IA',
                                 ].filter(Boolean).join(' | ');
 
 

@@ -14,7 +14,7 @@ export const MainProfileComponent = () => {
     const modules = useMemo(() => {
         const user = actualSession.user;
         const canAccessProfiling = !!user && (user.role === 'admin_global' || user.role === 'admin_empresa');
-        const hasMultitenant = !!user && (user.is_aws_multi_tenant || user.is_azure_multi_tenant);
+        const hasMultitenant = !!user && (user.is_aws_multi_tenant || user.is_azure_multi_tenant || user.is_gcp_multi_tenant || user.is_openai_multi_tenant);
 
         return [
             {

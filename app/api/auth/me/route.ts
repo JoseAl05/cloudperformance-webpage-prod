@@ -56,19 +56,23 @@ export async function GET() {
       is_aws: user.is_aws,
       is_azure: user.is_azure,
       is_gcp: user.is_gcp,
+      is_openai: user.is_openai || false,
 
       user_db_aws: user.user_db_aws,
       user_db_azure: user.user_db_azure,
       user_db_gcp: user.user_db_gcp,
+      user_db_openai: user.user_db_openai || null,
 
       is_aws_multi_tenant: user.is_aws_multi_tenant || false,
       is_azure_multi_tenant: user.is_azure_multi_tenant || false,
       is_gcp_multi_tenant: user.is_gcp_multi_tenant || false,
+      is_openai_multi_tenant: user.is_openai_multi_tenant || false,
 
       // Sólo existen en multi-tenant; en single-tenant manda `user_db_<cloud>`.
       azure_accounts: user.azure_accounts || [],
       aws_accounts: user.aws_accounts || [],
       gcp_accounts: user.gcp_accounts || [],
+      openai_accounts: user.openai_accounts || [],
 
       connectors: connector || []
     };

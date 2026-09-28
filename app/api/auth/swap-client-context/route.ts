@@ -3,7 +3,7 @@ import { cookies } from 'next/headers'
 import { AUTH_COOKIE } from '@/lib/cookies'
 import { verifyAuthToken, signAuthToken } from '@/lib/auth'
 import { findCompanyByName } from '@/lib/db-utils'
-import type { AuthUserPayload } from '@/types/db'
+import type { JWTPayload } from '@/types'
 
 export async function POST(request: Request) {
     const cookieStore = await cookies()
@@ -13,10 +13,10 @@ export async function POST(request: Request) {
         return NextResponse.json({ message: 'No autenticado.' }, { status: 401 })
     }
 
-    let originalPayload: AuthUserPayload | null = null
+    let originalPayload: JWTPayload | null = null
 
     try {
-        originalPayload = (await verifyAuthToken(token)) as AuthUserPayload
+        originalPayload = await verifyAuthToken(token)
         if (!originalPayload) throw new Error('Token inválido')
     } catch (err) {
         return NextResponse.json(
@@ -31,6 +31,7 @@ export async function POST(request: Request) {
         user_db_azure: explicitAzureDb,
         user_db_aws: explicitAwsDb,
         user_db_gcp: explicitGcpDb,
+        user_db_openai: explicitOpenaiDb,
     } = body
 
     if (!clientName) {
@@ -73,9 +74,12 @@ export async function POST(request: Request) {
     const finalGcpDb =
         explicitGcpDb || targetCompany.user_db_gcp || null
 
+    const finalOpenaiDb =
+        explicitOpenaiDb || targetCompany.user_db_openai || null
+
     // ------------------ NUEVO PAYLOAD ------------------
 
-    const newPayload: AuthUserPayload = {
+    const newPayload: JWTPayload = {
         ...originalPayload,
 
         client: targetCompany.name,
@@ -85,10 +89,12 @@ export async function POST(request: Request) {
         user_db_azure: finalAzureDb,
         user_db_aws: finalAwsDb,
         user_db_gcp: finalGcpDb,
+        user_db_openai: finalOpenaiDb,
 
         is_aws: targetCompany.is_aws,
         is_azure: targetCompany.is_azure,
         is_gcp: targetCompany.is_gcp,
+        is_openai: targetCompany.is_openai === true,
 
         // Los flags se toman SIEMPRE de la empresa destino: si se heredaran del
         // token anterior, un admin_global podría arrastrar un `multi_tenant`
@@ -96,6 +102,7 @@ export async function POST(request: Request) {
         is_aws_multi_tenant: targetCompany.is_aws_multi_tenant === true,
         is_azure_multi_tenant: targetCompany.is_azure_multi_tenant === true,
         is_gcp_multi_tenant: targetCompany.is_gcp_multi_tenant === true,
+        is_openai_multi_tenant: targetCompany.is_openai_multi_tenant === true,
 
         // Sólo hay cuentas en multi-tenant; en single-tenant manda `user_db_<cloud>`.
         aws_accounts:
@@ -109,6 +116,10 @@ export async function POST(request: Request) {
         gcp_accounts:
             targetCompany.is_gcp_multi_tenant === true
                 ? targetCompany.gcp_accounts || []
+                : [],
+        openai_accounts:
+            targetCompany.is_openai_multi_tenant === true
+                ? targetCompany.openai_accounts || []
                 : [],
 
         iat: Math.floor(Date.now() / 1000),

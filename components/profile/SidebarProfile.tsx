@@ -61,7 +61,7 @@ export const SidebarProfileComponent = ({
 
     const canAccessProfiling = user?.role === 'admin_global' || user?.role === 'admin_empresa'
     const canAccessOPLicencias = user?.role === 'admin_global'
-    const hasMultitenant = Boolean(user?.is_aws_multi_tenant || user?.is_azure_multi_tenant)
+    const hasMultitenant = Boolean(user?.is_aws_multi_tenant || user?.is_azure_multi_tenant || user?.is_gcp_multi_tenant || user?.is_openai_multi_tenant)
 
     const items = useMemo<NavItem[]>(
         () => [

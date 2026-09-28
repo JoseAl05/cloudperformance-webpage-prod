@@ -3,7 +3,7 @@ import { Plus, Trash2 } from 'lucide-react';
 import { CloudAccount } from '@/types/db';
 import { cn } from '@/lib/utils';
 
-export type CloudProvider = 'azure' | 'aws' | 'gcp';
+export type CloudProvider = 'azure' | 'aws' | 'gcp' | 'openai';
 
 /**
  * Fila del editor. `_key` es sólo para React y para los handlers locales:
@@ -69,6 +69,10 @@ const THEME: Record<CloudProvider, { field: string; accent: string }> = {
   gcp: {
     field: 'text-emerald-700 border-emerald-300',
     accent: 'text-emerald-600 hover:text-emerald-800',
+  },
+  openai: {
+    field: 'text-slate-700 border-slate-300',
+    accent: 'text-slate-600 hover:text-slate-800',
   },
 };
 

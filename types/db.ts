@@ -42,6 +42,12 @@ export interface Empresa {
   user_db_gcp: string | null;
   is_gcp_multi_tenant: boolean;
   gcp_accounts?: CloudAccount[];
+
+  /* -------- OPENAI -------- */
+  is_openai: boolean;
+  user_db_openai: string | null;
+  is_openai_multi_tenant: boolean;
+  openai_accounts?: CloudAccount[];
 }
 
 /**
@@ -79,10 +85,16 @@ export interface User {
   is_gcp_multi_tenant: boolean;
   gcp_accounts?: CloudAccount[];
 
+  /* -------- OPENAI -------- */
+  is_openai: boolean;
+  user_db_openai?: string | null;
+  is_openai_multi_tenant: boolean;
+  openai_accounts?: CloudAccount[];
+
   recoveryToken?: string;
   recoveryTokenExpires?: Date;
 
-  connectors?: []
+  connectors?: unknown[]
 }
 
 export interface AuthUserPayload {
@@ -110,6 +122,12 @@ export interface AuthUserPayload {
   is_gcp: boolean;
   is_gcp_multi_tenant?: boolean;
   gcp_accounts?: CloudAccount[];
+
+  /* -------- OPENAI -------- */
+  user_db_openai?: string | null;
+  is_openai?: boolean;
+  is_openai_multi_tenant?: boolean;
+  openai_accounts?: CloudAccount[];
 }
 
 export interface ClientConnector {

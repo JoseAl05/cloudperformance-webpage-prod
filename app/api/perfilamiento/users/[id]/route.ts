@@ -80,6 +80,8 @@ export async function PUT(req: NextRequest, { params }: Params) {
       'user_db_azure',
       'is_gcp',
       'user_db_gcp',
+      'is_openai',
+      'user_db_openai',
       'is_active', 
       'passwordHash', // Para que el campo de la contraseña hasheada sea incluido
     ];

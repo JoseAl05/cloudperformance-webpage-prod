@@ -6,7 +6,7 @@ import { ArrowDownUp, DollarSign, LayoutDashboard, TrendingUp } from 'lucide-rea
 import { SidebarNav, resolveNav, type NavItem } from '@/components/SidebarNav'
 import type { Sidebar } from '@/components/ui/sidebar'
 
-type Service = 'amazon-bedrock' | 'microsoft-foundry' | 'google-vertex'
+type Service = 'amazon-bedrock' | 'microsoft-foundry' | 'google-vertex' | 'open-ia'
 
 const NAV: Record<Service, NavItem[]> = {
     'amazon-bedrock': [
@@ -23,7 +23,11 @@ const NAV: Record<Service, NavItem[]> = {
         { label: 'Inicio', icon: LayoutDashboard, href: '/google-vertex' },
         { label: 'Costo y Optimización', icon: DollarSign, href: '/google-vertex/costo-optimizacion' },
         { label: 'Comparación', icon: ArrowDownUp, href: '/google-vertex/comparacion' },
-    ]
+    ],
+    'open-ia': [
+        { label: 'Inicio', icon: LayoutDashboard, href: '/open-ia' },
+        { label: 'Costo y Optimización', icon: DollarSign, href: '/open-ia/costo-optimizacion' },
+    ],
 }
 
 export const SidebarDashboardServiciosIaComponent = ({
