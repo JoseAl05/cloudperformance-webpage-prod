@@ -1,6 +1,7 @@
 'use client'
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
+import useSWRMutation from 'swr/mutation';
 import { MessageCard } from '@/components/azure/cards/MessageCards';
 import { LoaderComponent } from '@/components/general_azure/LoaderComponent';
 import { AlertCircle, RefreshCw } from 'lucide-react';
@@ -18,6 +19,26 @@ const OPTIMIZE_PROMPT_URL = '/api/azure/bridge/azure/foundry/prompt_optimization
 
 const DEFAULT_ERROR_MESSAGE = 'Ocurrió un problema al optimizar el prompt. Intenta nuevamente en unos segundos.';
 
+const optimizePromptFetcher = async (
+    url: string,
+    { arg }: { arg: PromptOptimizationRequest }
+): Promise<PromptOptimizationResponse> => {
+    const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(arg)
+    });
+
+    const payload = await response.json().catch(() => null);
+
+    if (!response.ok) {
+        const detail = (payload as { detail?: unknown } | null)?.detail;
+        throw new Error(typeof detail === 'string' ? detail : DEFAULT_ERROR_MESSAGE);
+    }
+
+    return payload as PromptOptimizationResponse;
+};
+
 interface AppliedSettings {
     model: string;
     target: PromptOptimizationTarget;
@@ -34,13 +55,20 @@ export const FMPromptOptComponent = () => {
     const [rate, setRate] = useState(PROMPT_OPT_DEFAULT_RATE);
     const [maxTokens, setMaxTokens] = useState('');
     const [useContextLevelFilter, setUseContextLevelFilter] = useState(true);
-    const [result, setResult] = useState<PromptOptimizationResponse | null>(null);
     const [appliedSettings, setAppliedSettings] = useState<AppliedSettings | null>(null);
-    const [errorMessage, setErrorMessage] = useState<string | null>(null);
-    const [isOptimizing, setIsOptimizing] = useState(false);
-    const abortRef = useRef<AbortController | null>(null);
 
-    useEffect(() => () => abortRef.current?.abort(), []);
+    const {
+        data: result,
+        error,
+        isMutating: isOptimizing,
+        trigger,
+        reset
+    } = useSWRMutation<PromptOptimizationResponse, Error, string, PromptOptimizationRequest>(
+        OPTIMIZE_PROMPT_URL,
+        optimizePromptFetcher
+    );
+
+    const errorMessage = error ? error.message || DEFAULT_ERROR_MESSAGE : null;
 
     const parsedMaxTokens = Number.parseInt(maxTokens, 10);
     const hasValidMaxTokens = Number.isInteger(parsedMaxTokens) && parsedMaxTokens > 0;
@@ -54,13 +82,6 @@ export const FMPromptOptComponent = () => {
     const optimizePrompt = useCallback(async () => {
         if (!foundryModel || !prompt.trim() || !isTargetReady) return;
 
-        abortRef.current?.abort();
-        const controller = new AbortController();
-        abortRef.current = controller;
-
-        setIsOptimizing(true);
-        setErrorMessage(null);
-
         const body: PromptOptimizationRequest = {
             model: foundryModel,
             prompt,
@@ -71,41 +92,18 @@ export const FMPromptOptComponent = () => {
                 : { target_token: parsedMaxTokens })
         };
 
-        try {
-            const response = await fetch(OPTIMIZE_PROMPT_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(body),
-                signal: controller.signal
-            });
+        const optimized = await trigger(body, { throwOnError: false });
 
-            const payload = await response.json().catch(() => null);
-
-            if (!response.ok) {
-                const detail = (payload as { detail?: unknown } | null)?.detail;
-                throw new Error(typeof detail === 'string' ? detail : DEFAULT_ERROR_MESSAGE);
-            }
-
-            setResult(payload as PromptOptimizationResponse);
-            setAppliedSettings({
+        setAppliedSettings(optimized
+            ? {
                 model: foundryModel,
                 target,
                 rate,
                 maxTokens: target === 'target_token' ? parsedMaxTokens : null,
                 useContextLevelFilter,
                 useTokenLevelFilter
-            });
-        } catch (error) {
-            if ((error as Error).name === 'AbortError') return;
-            setResult(null);
-            setAppliedSettings(null);
-            setErrorMessage((error as Error).message || DEFAULT_ERROR_MESSAGE);
-        } finally {
-            if (abortRef.current === controller) {
-                abortRef.current = null;
-                setIsOptimizing(false);
             }
-        }
+            : null);
     }, [
         prompt,
         foundryModel,
@@ -114,18 +112,15 @@ export const FMPromptOptComponent = () => {
         parsedMaxTokens,
         isTargetReady,
         useContextLevelFilter,
-        useTokenLevelFilter
+        useTokenLevelFilter,
+        trigger
     ]);
 
     const clearPrompt = useCallback(() => {
-        abortRef.current?.abort();
-        abortRef.current = null;
         setPrompt('');
-        setResult(null);
         setAppliedSettings(null);
-        setErrorMessage(null);
-        setIsOptimizing(false);
-    }, []);
+        reset();
+    }, [reset]);
 
     const isResultStale = useMemo(() => {
         if (!result || !appliedSettings) return false;

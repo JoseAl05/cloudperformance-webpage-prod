@@ -2,7 +2,7 @@
 import { FMPromptOptComponent } from '@/components/microsoft-foundry/propmt-opt/FMPromptOptComponent'
 import { Sparkles, TrendingUp } from 'lucide-react'
 
-export const MainViewFMPropmptOptComponent = () => {
+export const MainViewFMPromptOptComponent = () => {
 
     return (
         <div className='w-full min-w-0 space-y-4'>

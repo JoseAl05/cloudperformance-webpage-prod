@@ -35,6 +35,8 @@ export const FMPromptOptComparisonComponent = ({ data }: FMPromptOptComparisonCo
         );
     }
 
+    console.log(data)
+
     return (
         <div className="flex flex-col gap-5">
             <FMPromptOptCardsComponent data={data} />

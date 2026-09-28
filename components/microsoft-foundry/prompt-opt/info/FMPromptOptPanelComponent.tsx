@@ -97,11 +97,21 @@ export const FMPromptOptPanelComponent = ({
                     </div>
                 </div>
 
-                <FMPromptOptTokensComponent
-                    tokens={breakdown.tokens}
-                    viewMode={viewMode}
-                    emptyMessage={emptyMessage}
-                />
+                {
+                    breakdown.tokens.length === 0 ? (
+                        <FMPromptOptTokensComponent
+                            originalText={breakdown.text}
+                            viewMode="text"
+                            emptyMessage={emptyMessage}
+                        />
+                    ) : (
+                        <FMPromptOptTokensComponent
+                            tokens={breakdown.tokens}
+                            viewMode={viewMode}
+                            emptyMessage={emptyMessage}
+                        />
+                    )
+                }
             </CardContent>
         </Card>
     );

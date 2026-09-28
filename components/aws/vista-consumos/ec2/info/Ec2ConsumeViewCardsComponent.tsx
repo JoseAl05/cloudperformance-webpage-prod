@@ -176,11 +176,10 @@ export const Ec2ConsumeViewCardsComponent = ({
     if (!summary) return null;
 
     const sortedMetricDetail = efficiency.metrics_detail.sort((a, b) => (b.metric === "CPUUtilization") - (a.metric === "CPUUtilization"));
-
     return (
         <div className="space-y-6">
             {/* FILA 1: Eficiencia Global */}
-            {efficiency && (
+            {efficiency.global_efficiency && (
                 <StatCard
                     title="Eficiencia Global"
                     value={`${efficiency.global_efficiency}`}

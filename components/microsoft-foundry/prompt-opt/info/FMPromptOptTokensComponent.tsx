@@ -10,7 +10,8 @@ import {
 } from '@/interfaces/foundry-cost-optimization/promptOptimizationInterfaces';
 
 interface FMPromptOptTokensComponentProps {
-    tokens: PromptOptimizationToken[];
+    tokens?: PromptOptimizationToken[];
+    originalText?: string;
     viewMode: PromptOptimizationViewMode;
     emptyMessage: string;
 }
@@ -28,15 +29,22 @@ const TOKEN_PALETTE = [
 // así que se renderiza por tramos y el usuario decide cuánto más mostrar.
 const TOKENS_PER_PAGE = 3000;
 
-export const FMPromptOptTokensComponent = ({ tokens, viewMode, emptyMessage }: FMPromptOptTokensComponentProps) => {
+const CHARS_PER_PAGE = 4000;
+
+export const FMPromptOptTokensComponent = ({ tokens, viewMode, emptyMessage, originalText }: FMPromptOptTokensComponentProps) => {
     const [visibleCount, setVisibleCount] = useState(TOKENS_PER_PAGE);
+    const [visibleChars, setVisibleChars] = useState(CHARS_PER_PAGE);
 
     useEffect(() => {
         setVisibleCount(TOKENS_PER_PAGE);
     }, [tokens]);
 
+    useEffect(() => {
+        setVisibleChars(CHARS_PER_PAGE);
+    }, [originalText]);
+
     const visibleTokens = useMemo(
-        () => tokens.slice(0, visibleCount),
+        () => tokens ? tokens.slice(0, visibleCount) : [],
         [tokens, visibleCount]
     );
 
@@ -45,15 +53,54 @@ export const FMPromptOptTokensComponent = ({ tokens, viewMode, emptyMessage }: F
         [visibleTokens, viewMode]
     );
 
-    const hiddenCount = tokens.length - visibleTokens.length;
+    const hiddenCount = tokens ? tokens.length - visibleTokens.length : 0;
 
-    if (tokens.length === 0) {
+    const visibleText = useMemo(
+        () => originalText ? originalText.slice(0, visibleChars) : '',
+        [originalText, visibleChars]
+    );
+
+    const hiddenChars = originalText ? originalText.length - visibleText.length : 0;
+
+    const emptyState = (
+        <div className="flex min-h-[220px] items-center justify-center rounded-lg border border-slate-200 bg-slate-50 p-3 text-center text-[12px] text-muted-foreground dark:border-slate-800 dark:bg-slate-900/40">
+            {emptyMessage}
+        </div>
+    );
+
+    if (originalText !== undefined) {
+        if (!originalText) return emptyState;
+
         return (
-            <div className="flex min-h-[220px] items-center justify-center rounded-lg border border-dashed border-slate-200 p-4 text-center text-[12px] text-muted-foreground dark:border-slate-800">
-                {emptyMessage}
+            <div className="flex flex-col gap-2">
+                <div className="max-h-[420px] min-h-[220px] overflow-y-auto rounded-lg border border-slate-200 bg-slate-50 p-3 dark:border-slate-800 dark:bg-slate-900/40">
+                    <div className="whitespace-pre-wrap break-words font-mono text-[13px] leading-7 text-slate-700 dark:text-slate-200">
+                        {visibleText}
+                        {hiddenChars > 0 && <span className="text-muted-foreground">&hellip;</span>}
+                    </div>
+                </div>
+
+                {hiddenChars > 0 && (
+                    <div className="flex flex-wrap items-center gap-3">
+                        <Button
+                            type="button"
+                            size="sm"
+                            variant="outline"
+                            className="h-7 px-3 text-[11px]"
+                            onClick={() => setVisibleChars((current) => current + CHARS_PER_PAGE)}
+                        >
+                            Mostrar {formatInteger(Math.min(hiddenChars, CHARS_PER_PAGE))} caracteres más
+                        </Button>
+                        <span className="text-[11px] text-muted-foreground">
+                            {formatInteger(hiddenChars)} caracteres ocultos de {formatInteger(originalText.length)}
+                        </span>
+                    </div>
+                )}
             </div>
         );
     }
+
+    if (!tokens || tokens.length === 0) return emptyState;
 
     return (
         <div className="flex flex-col gap-2">
