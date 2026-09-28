@@ -31,6 +31,8 @@ export interface TwoFactorCodeDoc {
 }
 
 export interface JWTPayload {
+  [key: string]: unknown;
+
   sub: string;
   username: string;
   client: string;
@@ -48,7 +50,12 @@ export interface JWTPayload {
   is_gcp: boolean;
   user_db_gcp: string | null;
 
+  // OpenAI
+  is_openai?: boolean;
+  user_db_openai?: string | null;
+
   is_aws_multi_tenant?: boolean;
   is_azure_multi_tenant?: boolean;
   is_gcp_multi_tenant?: boolean;
+  is_openai_multi_tenant?: boolean;
 }

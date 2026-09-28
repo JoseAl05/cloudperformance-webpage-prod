@@ -2,7 +2,8 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { getCollection } from '@/lib/mongodb';
 import { signAuthToken } from '@/lib/auth';
-import { get } from 'http';
+import { ObjectId } from 'mongodb';
+import type { Empresa, User } from '@/types/db';
 
 const VerifySchema = z.object({
   userId: z.string().min(1),
@@ -17,9 +18,9 @@ export async function POST(req: Request) {
 
   const { userId, code } = parsed.data;
 
-  const users = await getCollection('Users');
+  const users = await getCollection<User>('Users');
   const user = await users.findOne({
-    _id: { $eq: new (await import('mongodb')).ObjectId(userId) } as unknown,
+    _id: { $eq: new ObjectId(userId) },
   });
 
   if (!user)
@@ -44,7 +45,7 @@ export async function POST(req: Request) {
   // =======================================================
 
   // Obtener datos de cliente asociado a usuario
-  const clients = await getCollection('Empresas')
+  const clients = await getCollection<Empresa>('Empresas')
   const clientData = await clients.findOne({ name: user.client });
 
   if (!clientData) {
@@ -65,7 +66,7 @@ export async function POST(req: Request) {
     .toArray();
 
 
-  const codes = await getCollection('twofactor_codes');
+  const codes = await getCollection<{ userId: string; code: string; purpose: string; expiresAt: Date }>('twofactor_codes');
   const tf = await codes.findOne({ userId, code, purpose: 'login' });
   if (!tf)
     return NextResponse.json({ error: 'Código inválido' }, { status: 401 });
@@ -82,15 +83,18 @@ export async function POST(req: Request) {
     email: user.email,
     client: user.client,
     role: user.role,
-    user_db_aws: user.user_db_aws,
-    user_db_azure: user.user_db_azure,
-    user_db_gcp: user.user_db_gcp,
+    user_db_aws: user.user_db_aws || null,
+    user_db_azure: user.user_db_azure || null,
+    user_db_gcp: user.user_db_gcp || null,
+    user_db_openai: user.user_db_openai || null,
     is_aws: user.is_aws,
     is_azure: user.is_azure,
     is_gcp: user.is_gcp,
+    is_openai: clientData.is_openai === true,
     is_aws_multi_tenant: clientData.is_aws_multi_tenant === true,
     is_azure_multi_tenant: clientData.is_azure_multi_tenant === true,
     is_gcp_multi_tenant: clientData.is_gcp_multi_tenant === true,
+    is_openai_multi_tenant: clientData.is_openai_multi_tenant === true,
     // Sólo hay cuentas en multi-tenant; en single-tenant manda `user_db_<cloud>`.
     aws_accounts:
       clientData.is_aws_multi_tenant === true
@@ -104,11 +108,15 @@ export async function POST(req: Request) {
       clientData.is_gcp_multi_tenant === true
         ? clientData.gcp_accounts || []
         : [],
+    openai_accounts:
+      clientData.is_openai_multi_tenant === true
+        ? clientData.openai_accounts || []
+        : [],
     planName: user.planName,
     connectors: connectorData || []
   });
 
-  const sessions = await getCollection('sessions');
+  const sessions = await getCollection<{ userId: string; createdAt: Date; expiresAt: Date }>('sessions');
   const now = new Date();
   const expiresAt = new Date(now.getTime() + 24 * 60 * 60 * 1000);
   await sessions.insertOne({

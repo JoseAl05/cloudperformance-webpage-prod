@@ -13,12 +13,13 @@ import type { CloudAccount } from '@/types/db';
 //    a la colección `Users`.
 // =========================================================================
 
-export type CloudProvider = 'aws' | 'azure' | 'gcp';
+export type CloudProvider = 'aws' | 'azure' | 'gcp' | 'openai';
 
 export const CLOUD_PROVIDERS: readonly CloudProvider[] = [
   'aws',
   'azure',
   'gcp',
+  'openai',
 ] as const;
 
 /** Etiquetas para los mensajes de error, respetando la nomenclatura previa. */
@@ -36,6 +37,11 @@ export const CLOUD_LABELS: Record<
     label: 'GCP',
     account: 'proyecto GCP',
     accountPlural: 'proyectos GCP',
+  },
+  openai: {
+    label: 'Open IA',
+    account: 'cuenta Open IA',
+    accountPlural: 'cuentas Open IA',
   },
 };
 

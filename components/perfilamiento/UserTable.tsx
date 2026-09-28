@@ -25,6 +25,10 @@ interface UserData {
     is_gcp: boolean;
     user_db_gcp?: string;
 
+    // Open IA
+    is_openai: boolean;
+    user_db_openai?: string;
+
     is_active: boolean;
 }
 
