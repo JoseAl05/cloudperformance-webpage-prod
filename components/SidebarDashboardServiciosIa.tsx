@@ -12,6 +12,7 @@ const NAV: Record<Service, NavItem[]> = {
     'amazon-bedrock': [
         { label: 'Inicio', icon: LayoutDashboard, href: '/amazon-bedrock' },
         { label: 'Costo y Optimización', icon: DollarSign, href: '/amazon-bedrock/costo-optimizacion' },
+        { label: 'Prompt Optimization', icon: TrendingUp, href: '/amazon-bedrock/prompt-opt' },
     ],
     'microsoft-foundry': [
         { label: 'Inicio', icon: LayoutDashboard, href: '/microsoft-foundry' },

@@ -9,7 +9,7 @@ import { TagFilterComponent } from '@/components/general_aws/filters/TagsFilterC
 import { ServiceFilterComponent } from '@/components/general_aws/filters/ServiceFilterComponent';
 import { VariationServiceFilterComponent } from '@/components/general_aws/filters/VariationServiceFilterComponent';
 import { Card, CardContent } from '@/components/ui/card';
-import { Calendar, Filter, MapPin, Server, Tag, XCircle, Ban, Box, Activity, BarChart3 } from 'lucide-react';
+import { Calendar, Filter, MapPin, Server, Tag, XCircle, Ban, Box, Activity, BarChart3, Layers } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { InstancesFilterComponent } from '@/components/general_aws/filters/InstancesFilterComponent';
@@ -32,6 +32,7 @@ import { NatGatewaysFilterComponent } from '@/components/general_aws/filters/Nat
 import { UnusedLoadbalancersV2FilterComponent } from '@/components/general_aws/filters/UnusedLoadbalancersV2FilterComponent';
 import { LoadbalancersV2FilterComponent } from '@/components/general_aws/filters/LoadbalancersV2FilterComponent';
 import { UnusedRoute53FilterComponent } from '@/components/general_aws/filters/UnusedRoute53FilterComponent';
+import { BedrockModelsFilterComponent } from '@/components/general_aws/filters/BedrockModelsFilterComponent';
 
 interface FiltersComponentProps {
     Component: (params: {
@@ -57,6 +58,7 @@ interface FiltersComponentProps {
         eksAsgInstance?: string;
         cloud?: string;
         dbType?: string;
+        selectedBedrockModel?: string;
     }) => React.JSX.Element;
     dateFilter?: boolean;
     regionFilter?: boolean;
@@ -107,6 +109,7 @@ interface FiltersComponentProps {
     isElbV2Multiselect?: boolean;
     unusedR53Filter?: boolean;
     isUnusedR53Multiselect?: boolean;
+    bedrockModelFilter?: boolean;
 }
 
 export const FiltersComponent = ({
@@ -160,7 +163,8 @@ export const FiltersComponent = ({
     unusedR53Filter = false,
     isUnusedR53Multiselect = false,
     cloud,
-    dbType
+    dbType,
+    bedrockModelFilter = false
 }: FiltersComponentProps) => {
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -207,6 +211,7 @@ export const FiltersComponent = ({
         const unusedElbV2Param = searchParams.get('unusedElbV2');
         const elbV2Param = searchParams.get('elbV2');
         const unusedR53Param = searchParams.get('unusedR53');
+        const selectedBedrockModel = searchParams.get('bedrock_model');
 
         let startDate = startDateParam ? new Date(startDateParam) : yesterday;
         let endDate = endDateParam ? new Date(endDateParam) : new Date();
@@ -259,7 +264,8 @@ export const FiltersComponent = ({
             unusedNatGateway: unusedNatGatewayParam || '',
             unusedElbV2: unusedElbV2Param || '',
             elbV2: elbV2Param || '',
-            unusedR53: unusedR53Param || ''
+            unusedR53: unusedR53Param || '',
+            selectedBedrockModelParam: selectedBedrockModel || ''
         };
     };
 
@@ -301,6 +307,7 @@ export const FiltersComponent = ({
     const [tempUnusedElbV2, setTempUnusedElbV2] = useState(filters.unusedElbV2);
     const [tempElbV2, setTempElbV2] = useState(filters.elbV2);
     const [tempUnusedR53, setTempUnusedR53] = useState(filters.unusedR53);
+    const [tempBedrockModel, setTempBedrockModel] = useState(filters.selectedBedrockModelParam);
 
 
 
@@ -343,7 +350,7 @@ export const FiltersComponent = ({
         setTempUnusedElbV2(newFilters.unusedElbV2);
         setTempElbV2(newFilters.elbV2);
         setTempUnusedR53(newFilters.unusedR53);
-
+        setTempBedrockModel(newFilters.selectedBedrockModelParam);
     }, [searchParams]);
 
     const getRDSService = (): 'postgresql' | 'oracle' | 'mysql' | 'sqlserver' | 'mariadb' => {
@@ -420,7 +427,8 @@ export const FiltersComponent = ({
             unusedNatGateway: tempUnusedNatGateway,
             unusedElbV2: tempUnusedElbV2,
             elbV2: tempElbV2,
-            unusedR53: tempUnusedR53
+            unusedR53: tempUnusedR53,
+            selectedBedrockModel: tempBedrockModel
         };
 
         setFilters(newFilters as unknown);
@@ -478,7 +486,10 @@ export const FiltersComponent = ({
             { flag: unusedNatGatewaysFilter, key: 'unusedNatGateway', value: newFilters.unusedNatGateway },
             { flag: unusedElbV2Filter, key: 'unusedElbV2', value: newFilters.unusedElbV2 },
             { flag: elbV2Filter, key: 'elbV2', value: newFilters.elbV2 },
-            { flag: unusedR53Filter, key: 'unusedR53', value: newFilters.unusedR53 }
+            { flag: unusedR53Filter, key: 'unusedR53', value: newFilters.unusedR53 },
+
+            //Bedrock
+            { flag: bedrockModelFilter, key: 'bedrock_model', value: newFilters.selectedBedrockModel }
         ];
 
         filterConfigs.forEach(({ flag, key, value, ignoreValue }) => {
@@ -524,7 +535,8 @@ export const FiltersComponent = ({
             unusedNatGateway: '',
             unusedElbV2: '',
             elbV2: '',
-            unusedR53: ''
+            unusedR53: '',
+            selectedBedrockModel: ''
         };
 
         setFilters({ ...defaultFilters, instanceService: defaultFilters.instancesService });
@@ -562,6 +574,7 @@ export const FiltersComponent = ({
         setTempUnusedElbV2(defaultFilters.unusedElbV2);
         setTempElbV2(defaultFilters.elbV2);
         setTempUnusedR53(defaultFilters.unusedR53);
+        setTempBedrockModel(defaultFilters.selectedBedrockModel);
 
         router.push(window.location.pathname);
     };
@@ -700,7 +713,20 @@ export const FiltersComponent = ({
                                 />
                             </div>
                         )}
-
+                        {
+                            bedrockModelFilter && (
+                                <div className='space-y-2'>
+                                    <label className='text-sm font-medium text-foreground flex items-center gap-2'>
+                                        <Layers className='h-4 w-4' />
+                                        Modelos
+                                    </label>
+                                    <BedrockModelsFilterComponent
+                                        bedrockModel={tempBedrockModel}
+                                        setBedrockModel={setTempBedrockModel}
+                                    />
+                                </div>
+                            )
+                        }
                         {instancesFilter && (
                             <div className='space-y-2'>
                                 <label className='text-sm font-medium text-foreground flex items-center gap-2'>

@@ -6,14 +6,14 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { Check, Copy } from 'lucide-react';
 import { formatMicroCurrency, formatInteger } from '@/lib/azureFoundryFormatters';
-import { FMPromptOptTokensComponent } from '@/components/microsoft-foundry/prompt-opt/info/FMPromptOptTokensComponent';
+import { BMPromptOptTokensComponent } from '@/components/amazon-bedrock/prompt-opt/info/BMPromptOptTokensComponent';
 import {
     PromptOptimizationBreakdown,
     PromptOptimizationSide,
     PromptOptimizationViewMode
 } from '@/interfaces/foundry-cost-optimization/promptOptimizationInterfaces';
 
-interface FMPromptOptPanelComponentProps {
+interface BMPromptOptPanelComponentProps {
     side: PromptOptimizationSide;
     label: string;
     hint: string;
@@ -35,14 +35,14 @@ const sideStyles: Record<PromptOptimizationSide, { accent: string; surface: stri
     }
 };
 
-export const FMPromptOptPanelComponent = ({
+export const BMPromptOptPanelComponent = ({
     side,
     label,
     hint,
     breakdown,
     viewMode,
     emptyMessage
-}: FMPromptOptPanelComponentProps) => {
+}: BMPromptOptPanelComponentProps) => {
     const [copied, setCopied] = useState(false);
     const styles = sideStyles[side];
 
@@ -99,13 +99,13 @@ export const FMPromptOptPanelComponent = ({
 
                 {
                     breakdown.tokens.length === 0 ? (
-                        <FMPromptOptTokensComponent
+                        <BMPromptOptTokensComponent
                             originalText={breakdown.text}
                             viewMode="text"
                             emptyMessage={emptyMessage}
                         />
                     ) : (
-                        <FMPromptOptTokensComponent
+                        <BMPromptOptTokensComponent
                             tokens={breakdown.tokens}
                             viewMode={viewMode}
                             emptyMessage={emptyMessage}
