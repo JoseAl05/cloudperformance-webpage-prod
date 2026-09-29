@@ -6,9 +6,9 @@ import { MessageCard } from '@/components/azure/cards/MessageCards';
 import { LoaderComponent } from '@/components/general_azure/LoaderComponent';
 import { AlertCircle, RefreshCw } from 'lucide-react';
 import { formatInteger } from '@/lib/azureFoundryFormatters';
-import { FMPromptOptInputComponent } from '@/components/microsoft-foundry/propmt-opt/info/FMPromptOptInputComponent';
-import { FMPromptOptComparisonComponent } from '@/components/microsoft-foundry/propmt-opt/info/FMPromptOptComparisonComponent';
-import { PROMPT_OPT_DEFAULT_RATE } from '@/components/microsoft-foundry/propmt-opt/info/FMPromptOptTargetComponent';
+import { FMPromptOptInputComponent } from '@/components/microsoft-foundry/prompt-opt/info/FMPromptOptInputComponent';
+import { FMPromptOptComparisonComponent } from '@/components/microsoft-foundry/prompt-opt/info/FMPromptOptComparisonComponent';
+import { PROMPT_OPT_DEFAULT_RATE } from '@/components/microsoft-foundry/prompt-opt/info/FMPromptOptTargetComponent';
 import {
     PromptOptimizationRequest,
     PromptOptimizationResponse,

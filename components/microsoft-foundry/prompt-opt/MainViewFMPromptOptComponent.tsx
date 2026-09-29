@@ -1,5 +1,6 @@
 'use client'
-import { FMPromptOptComponent } from '@/components/microsoft-foundry/propmt-opt/FMPromptOptComponent'
+
+import { FMPromptOptComponent } from '@/components/microsoft-foundry/prompt-opt/FMPromptOptComponent'
 import { Sparkles, TrendingUp } from 'lucide-react'
 
 export const MainViewFMPromptOptComponent = () => {

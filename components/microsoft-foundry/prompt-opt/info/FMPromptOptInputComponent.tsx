@@ -8,8 +8,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Eraser, Layers, Loader2, Sparkles, Terminal } from 'lucide-react';
 import { formatInteger } from '@/lib/azureFoundryFormatters';
 import { FoundryModelsFilterComponent } from '@/components/general_azure/filters/FoundryModelsFilterComponent';
-import { FMPromptOptTargetComponent } from '@/components/microsoft-foundry/propmt-opt/info/FMPromptOptTargetComponent';
-import { FMPromptOptFiltersComponent } from '@/components/microsoft-foundry/propmt-opt/info/FMPromptOptFiltersComponent';
+import { FMPromptOptTargetComponent } from '@/components/microsoft-foundry/prompt-opt/info/FMPromptOptTargetComponent';
+import { FMPromptOptFiltersComponent } from '@/components/microsoft-foundry/prompt-opt/info/FMPromptOptFiltersComponent';
 import { PromptOptimizationTarget } from '@/interfaces/foundry-cost-optimization/promptOptimizationInterfaces';
 
 interface FMPromptOptInputComponentProps {

@@ -5,8 +5,8 @@ import { Button } from '@/components/ui/button';
 import { MessageCard } from '@/components/azure/cards/MessageCards';
 import { Info } from 'lucide-react';
 import { formatInteger } from '@/lib/azureFoundryFormatters';
-import { FMPromptOptCardsComponent } from '@/components/microsoft-foundry/propmt-opt/info/FMPromptOptCardsComponent';
-import { FMPromptOptPanelComponent } from '@/components/microsoft-foundry/propmt-opt/info/FMPromptOptPanelComponent';
+import { FMPromptOptCardsComponent } from '@/components/microsoft-foundry/prompt-opt/info/FMPromptOptCardsComponent';
+import { FMPromptOptPanelComponent } from '@/components/microsoft-foundry/prompt-opt/info/FMPromptOptPanelComponent';
 import {
     PromptOptimizationResponse,
     PromptOptimizationViewMode
