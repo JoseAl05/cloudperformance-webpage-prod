@@ -50,7 +50,7 @@ interface AppliedSettings {
 
 export const BMPromptOptComponent = () => {
     const [prompt, setPrompt] = useState('');
-    const [foundryModel, setFoundryModel] = useState('');
+    const [bedrockModel, setBedrockModel] = useState('');
     const [target, setTarget] = useState<PromptOptimizationTarget>('rate');
     const [rate, setRate] = useState(PROMPT_OPT_DEFAULT_RATE);
     const [maxTokens, setMaxTokens] = useState('');
@@ -80,10 +80,10 @@ export const BMPromptOptComponent = () => {
     }, []);
 
     const optimizePrompt = useCallback(async () => {
-        if (!foundryModel || !prompt.trim() || !isTargetReady) return;
+        if (!bedrockModel || !prompt.trim() || !isTargetReady) return;
 
         const body: PromptOptimizationRequest = {
-            model: foundryModel,
+            model: bedrockModel,
             prompt,
             use_context_level_filter: useContextLevelFilter,
             use_token_level_filter: useTokenLevelFilter,
@@ -96,7 +96,7 @@ export const BMPromptOptComponent = () => {
 
         setAppliedSettings(optimized
             ? {
-                model: foundryModel,
+                model: bedrockModel,
                 target,
                 rate,
                 maxTokens: target === 'target_token' ? parsedMaxTokens : null,
@@ -106,7 +106,7 @@ export const BMPromptOptComponent = () => {
             : null);
     }, [
         prompt,
-        foundryModel,
+        bedrockModel,
         target,
         rate,
         parsedMaxTokens,
@@ -124,7 +124,7 @@ export const BMPromptOptComponent = () => {
 
     const isResultStale = useMemo(() => {
         if (!result || !appliedSettings) return false;
-        if (appliedSettings.model !== foundryModel) return true;
+        if (appliedSettings.model !== bedrockModel) return true;
         if (appliedSettings.useContextLevelFilter !== useContextLevelFilter) return true;
         if (appliedSettings.target !== target) return true;
         if (target === 'rate') return appliedSettings.rate !== rate;
@@ -132,7 +132,7 @@ export const BMPromptOptComponent = () => {
     }, [
         result,
         appliedSettings,
-        foundryModel,
+        bedrockModel,
         target,
         rate,
         hasValidMaxTokens,
@@ -156,8 +156,8 @@ export const BMPromptOptComponent = () => {
             <BMPromptOptInputComponent
                 prompt={prompt}
                 setPrompt={setPrompt}
-                foundryModel={foundryModel}
-                setFoundryModel={setFoundryModel}
+                bedrockModel={bedrockModel}
+                setBedrockModel={setBedrockModel}
                 target={target}
                 setTarget={setTarget}
                 rate={rate}

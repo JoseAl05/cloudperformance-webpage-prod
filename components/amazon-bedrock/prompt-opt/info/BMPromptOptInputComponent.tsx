@@ -15,8 +15,8 @@ import { PromptOptimizationTarget } from '@/interfaces/foundry-cost-optimization
 interface BMPromptOptInputComponentProps {
     prompt: string;
     setPrompt: Dispatch<SetStateAction<string>>;
-    foundryModel: string;
-    setFoundryModel: Dispatch<SetStateAction<string>>;
+    bedrockModel: string;
+    setBedrockModel: Dispatch<SetStateAction<string>>;
     target: PromptOptimizationTarget;
     setTarget: Dispatch<SetStateAction<PromptOptimizationTarget>>;
     rate: number;
@@ -36,8 +36,8 @@ interface BMPromptOptInputComponentProps {
 export const BMPromptOptInputComponent = ({
     prompt,
     setPrompt,
-    foundryModel,
-    setFoundryModel,
+    bedrockModel,
+    setBedrockModel,
     target,
     setTarget,
     rate,
@@ -63,7 +63,7 @@ export const BMPromptOptInputComponent = ({
     }, [prompt]);
 
     const hasPrompt = prompt.trim().length > 0;
-    const canOptimize = hasPrompt && Boolean(foundryModel) && isTargetReady && !isOptimizing;
+    const canOptimize = hasPrompt && Boolean(bedrockModel) && isTargetReady && !isOptimizing;
 
     const onKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
         if ((event.ctrlKey || event.metaKey) && event.key === 'Enter' && canOptimize) {
@@ -96,8 +96,8 @@ export const BMPromptOptInputComponent = ({
                             Modelo
                         </Label>
                         <BedrockModelsFilterComponent
-                            bedrockModel={foundryModel}
-                            setBedrockModel={setFoundryModel}
+                            bedrockModel={bedrockModel}
+                            setBedrockModel={setBedrockModel}
                         />
                         <span className="text-[11px] text-muted-foreground">
                             La tokenización depende del modelo: el mismo prompt puede dar conteos distintos.
