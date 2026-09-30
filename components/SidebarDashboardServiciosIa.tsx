@@ -12,6 +12,7 @@ const NAV: Record<Service, NavItem[]> = {
     'amazon-bedrock': [
         { label: 'Inicio', icon: LayoutDashboard, href: '/amazon-bedrock' },
         { label: 'Costo y Optimización', icon: DollarSign, href: '/amazon-bedrock/costo-optimizacion' },
+        { label: 'Comparación', icon: ArrowDownUp, href: '/amazon-bedrock/comparacion' },
         { label: 'Prompt Optimization', icon: TrendingUp, href: '/amazon-bedrock/prompt-opt' },
     ],
     'microsoft-foundry': [
@@ -24,6 +25,7 @@ const NAV: Record<Service, NavItem[]> = {
         { label: 'Inicio', icon: LayoutDashboard, href: '/google-vertex' },
         { label: 'Costo y Optimización', icon: DollarSign, href: '/google-vertex/costo-optimizacion' },
         { label: 'Comparación', icon: ArrowDownUp, href: '/google-vertex/comparacion' },
+        { label: 'Prompt Optimization', icon: TrendingUp, href: '/google-vertex/prompt-opt' },
     ],
     'open-ia': [
         { label: 'Inicio', icon: LayoutDashboard, href: '/open-ia' },

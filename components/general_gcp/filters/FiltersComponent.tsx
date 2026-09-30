@@ -21,6 +21,7 @@ import { StorageClassFilterComponent } from './StorageClassFilterComponent';
 import { ServiceFilterComponent } from './ServiceFilterComponent';
 import { RecommenderCategoriesFilterComponent } from '@/components/general_gcp/filters/RecommenderCategoriesFilterComponent';
 import { RecommenderPriorityFilterComponent } from '@/components/general_gcp/filters/RecommenderPriorityFilterComponent';
+import { VertexModelsFilterComponent } from '@/components/general_gcp/filters/VertexModelsFilterComponent';
 
 
 interface FiltersComponentProps {
@@ -39,6 +40,7 @@ interface FiltersComponentProps {
         esquema?: string;
         filestoreTier?: string;
         cloud?: string;
+        selectedVertexModel?: string;
     }) => React.JSX.Element;
 
     // Flags de activación
@@ -69,6 +71,7 @@ interface FiltersComponentProps {
     isRecommenderCategoryMultiSelect?: boolean;
     isRecommenderPriorityMultiSelect?: boolean;
     cloud: string;
+    vertexModelFilter?: boolean;
 }
 
 export const FiltersComponent = ({
@@ -97,6 +100,7 @@ export const FiltersComponent = ({
     isRecommenderCategoryMultiSelect = false,
     isRecommenderPriorityMultiSelect = false,
     filestoreTierFilter = false,
+    vertexModelFilter = false,
     cloud
 }: FiltersComponentProps) => {
     const router = useRouter();
@@ -123,7 +127,7 @@ export const FiltersComponent = ({
         const storageClassParam = searchParams.get('storageClass');
         const categoryParam = searchParams.get('category');
         const priorityParam = searchParams.get('priority');
-
+        const vertexModelParam = searchParams.get('vertex_model');
 
         const startDate = startDateParam ? new Date(startDateParam) : yesterday;
         const endDate = endDateParam ? new Date(endDateParam) : new Date();
@@ -143,7 +147,8 @@ export const FiltersComponent = ({
             storageClass: storageClassParam || 'all',
             service: serviceParam || 'all',
             category: categoryParam || '',
-            priority: priorityParam || ''
+            priority: priorityParam || '',
+            vertexModel: vertexModelParam || ''
         };
     };
 
@@ -169,6 +174,7 @@ export const FiltersComponent = ({
 
     const [tempCategory, setTempCategory] = useState(filters.category);
     const [tempPriority, setTempPriority] = useState(filters.priority);
+    const [tempVertexModel, setTempVertexModel] = useState(filters.vertexModel || '');
 
 
 
@@ -189,6 +195,7 @@ export const FiltersComponent = ({
         setTempStorageClass(newFilters.storageClass || 'all');
         setTempCategory(newFilters.category);
         setTempPriority(newFilters.priority);
+        setTempVertexModel(newFilters.vertexModel || '');
     }, [searchParams]);
 
 
@@ -215,7 +222,8 @@ export const FiltersComponent = ({
             service: tempService,
             storageClass: tempStorageClass,
             category: tempCategory,
-            priority: tempPriority
+            priority: tempPriority,
+            vertexModel: tempVertexModel
         };
 
         setFilters(newFilters);
@@ -254,6 +262,9 @@ export const FiltersComponent = ({
         if (newFilters.service && newFilters.service !== 'all') {
             query.set('service', newFilters.service);
         }
+        if (newFilters.vertexModel) {
+            query.set('vertex_model', newFilters.vertexModel);
+        }
 
         router.push(`${window.location.pathname}?${query.toString()}`);
     };
@@ -274,7 +285,8 @@ export const FiltersComponent = ({
             storageClass: 'all',
             service: 'all',
             category: '',
-            priority: ''
+            priority: '',
+            vertexModel: ''
         };
 
         setFilters(defaultFilters);
@@ -292,6 +304,7 @@ export const FiltersComponent = ({
         setTempService('all');
         setTempCategory('');
         setTempPriority('');
+        setTempVertexModel('');
 
 
         router.push(window.location.pathname);
@@ -345,6 +358,19 @@ export const FiltersComponent = ({
                                 />
                             </div>
                         )}
+                        {
+                            vertexModelFilter && (
+                                <div className='space-y-2'>
+                                    <label className='text-sm font-medium text-foreground flex items-center gap-2'>
+                                        <LayoutGrid className='h-4 w-4' /> Modelos Vertex AI
+                                    </label>
+                                    <VertexModelsFilterComponent
+                                        setVertexModel={setTempVertexModel}
+                                        vertexModel={tempVertexModel}
+                                    />
+                                </div>
+                            )
+                        }
                         {
                             categoryFilter && (
                                 <div className='space-y-2'>
