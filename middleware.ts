@@ -6,7 +6,6 @@ const PROTECTED_PATHS = ['/aws', '/azure', '/perfil'] as const;
 
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
-
   const isProtected = PROTECTED_PATHS.some((p) => pathname.startsWith(p));
   if (!isProtected) return NextResponse.next();
 

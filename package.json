@@ -6,6 +6,7 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start -p 3005",
+    "start-prod": "next start -p 3000",
     "lint": "next lint",
     "knip": "knip"
   },

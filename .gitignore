@@ -33,3 +33,4 @@ unlighthouse.config.ts
 .unlighthouse
 .vscode/
 AZURE_FOUNDRY_BEDROCK_VIEW.md
+ecosystem.config.cjs

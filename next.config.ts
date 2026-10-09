@@ -5,7 +5,6 @@ const nextConfig: NextConfig = {
     ignoreBuildErrors: true,
   },
   output: 'standalone',
-
   // Configuración recomendada para Next.js 15
   serverExternalPackages: [
     'newrelic',
