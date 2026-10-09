@@ -9,10 +9,11 @@ export async function middleware(req: NextRequest) {
   const isProtected = PROTECTED_PATHS.some((p) => pathname.startsWith(p));
   if (!isProtected) return NextResponse.next();
 
+  const publicOrigin = process.env.PUBLIC_ORIGIN;
+
   const session = await getAuthFromRequest(req);
   if (!session) {
-    const url = req.nextUrl.clone();
-    url.pathname = '/login';
+    const url = new URL('/web/login', publicOrigin);
     url.searchParams.set('next', pathname);
     return NextResponse.redirect(url);
   }
@@ -34,14 +35,14 @@ export async function middleware(req: NextRequest) {
 
   // Bloquear AWS si: NO tiene permiso AWS Y NO es Admin Global
   if (pathname.startsWith('/aws') && !isAwsAllowed && !isGlobalAdmin) {
-    const url = req.nextUrl.clone();
+    const url = new URL('/web', publicOrigin);
     url.pathname = '/unauthorized';
     return NextResponse.redirect(url);
   }
 
   // Bloquear Azure si: NO tiene permiso Azure Y NO es Admin Global
   if (pathname.startsWith('/azure') && !isAzureAllowed && !isGlobalAdmin) {
-    const url = req.nextUrl.clone();
+    const url = new URL('/web', publicOrigin);
     url.pathname = '/unauthorized';
     return NextResponse.redirect(url);
   }
