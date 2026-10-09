@@ -1,5 +1,6 @@
 'use client'
 
+import { fetcher } from '@/lib/fetcher';
 import { DetailedMetricsAnalysis } from '@/components/ai-finops-metrics/details/DetailedMetricsAnalysis';
 import { GeneralStatus } from '@/components/ai-finops-metrics/general-status/GeneralStatus';
 import { AnalyzedMetricsSummary } from '@/components/ai-finops-metrics/summary/AnalyzedMetricsSummary';
@@ -17,11 +18,6 @@ interface AiFinopsMetricsComponentProps {
     endDate: Date;
     cloud: string;
 }
-
-
-const fetcher = (url: string) =>
-    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
-        .then(r => r.json());
 
 const isNonEmptyArray = <T,>(v: unknown): v is T[] => Array.isArray(v) && v.length > 0
 

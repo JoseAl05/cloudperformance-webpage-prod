@@ -66,14 +66,11 @@ interface FiltersComponentProps {
     subscriptionFilter?: boolean;
     subscriptionIdFilter?: boolean;
     tagsFilter?: boolean;
-    tagsCollection?: string;
-    tagsColumnName?: string;
-    tagsRegionField?: string;
-    tagsSubscriptionField?: string;
+    tagsResourceType?: string;
     tagsLocalService?: string;
     isRegionMultiSelect?: boolean;
     metricsFilter?: boolean;
-    metricsCollection?: string;
+    metricsResourceType?: string;
     resourceTypeFilter?: boolean;
     instancesService?: string;
     instancesFilter?: boolean;
@@ -89,12 +86,9 @@ interface FiltersComponentProps {
     serviceFilter?: boolean;
     isServiceMultiselect?: boolean;
     resourceGroupFilter?: boolean;
-    resourceGroupCollection?: string;
-    resourceGroupSubscriptionField?: string;
+    resourceGroupResourceType?: string;
     instancesFilterV2?: boolean;
-    instancesV2Collection?: string;
-    instancesV2SubscriptionField?: string;
-    instancesV2InstanceField?: string;
+    instancesV2ResourceType?: string;
     deploymentOperationsFilter?: boolean;
     impactFilter?: boolean;
     categoryFilter?: boolean;
@@ -121,14 +115,11 @@ export const FiltersComponent = ({
     subscriptionFilter = false,
     subscriptionIdFilter = false,
     tagsFilter = false,
-    tagsCollection = '',
-    tagsColumnName = '',
-    tagsRegionField = '',
-    tagsSubscriptionField = '',
+    tagsResourceType = '',
     tagsLocalService = '',
     isRegionMultiSelect = false,
     metricsFilter = false,
-    metricsCollection = '',
+    metricsResourceType = '',
     resourceTypeFilter = false,
     instancesFilter = false,
     instancesService,
@@ -144,12 +135,9 @@ export const FiltersComponent = ({
     serviceFilter = false,
     isServiceMultiselect = false,
     resourceGroupFilter = false,
-    resourceGroupCollection = '',
-    resourceGroupSubscriptionField = '',
+    resourceGroupResourceType = '',
     instancesFilterV2 = false,
-    instancesV2Collection = '',
-    instancesV2SubscriptionField = '',
-    instancesV2InstanceField = '',
+    instancesV2ResourceType = '',
     deploymentOperationsFilter = false,
     impactFilter = false,
     categoryFilter = false,
@@ -619,10 +607,7 @@ export const FiltersComponent = ({
                                     endDate={tempRange[1] ?? filters.endDate}
                                     region={tempRegion}
                                     subscription={tempSubscription}
-                                    collection={tagsCollection}
-                                    tagColumnName={tagsColumnName}
-                                    regionField={tagsRegionField}
-                                    subscriptionField={tagsSubscriptionField}
+                                    resourceType={tagsResourceType}
                                     selectedKey={tempTagKey}
                                     selectedValue={tempTagValue}
                                     setSelectedKey={setTempTagKey}
@@ -642,8 +627,7 @@ export const FiltersComponent = ({
                                     endDate={tempRange[1] ?? filters.endDate}
                                     region={tempRegion}
                                     subscription={tempSubscription}
-                                    collection={resourceGroupCollection}
-                                    subscriptionField={resourceGroupSubscriptionField}
+                                    resourceType={resourceGroupResourceType}
                                     selectedTagKey={tempTagKey}
                                     selectedTagValue={tempTagValue}
                                     selectedResourceGroup={tempResourceGroup}
@@ -674,7 +658,7 @@ export const FiltersComponent = ({
                                 <MetricsFilterComponent
                                     startDate={tempRange[0] ?? filters.startDate}
                                     endDate={tempRange[1] ?? filters.endDate}
-                                    collection={metricsCollection}
+                                    resourceType={metricsResourceType}
                                     metric={tempMetric}
                                     setMetric={setTempMetric}
                                 />
@@ -789,9 +773,7 @@ export const FiltersComponent = ({
                                     endDate={tempRange[1] ?? filters.endDate}
                                     region={tempRegion}
                                     subscription={tempSubscription}
-                                    collection={instancesV2Collection}
-                                    subscriptionField={instancesV2SubscriptionField}
-                                    instanceField={instancesV2InstanceField}
+                                    resourceType={instancesV2ResourceType}
                                     selectedTagKey={tempTagKey}
                                     selectedTagValue={tempTagValue}
                                     selectedResourceGroup={tempResourceGroup}

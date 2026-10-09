@@ -24,18 +24,24 @@ interface ConsumoHorarioCardsComponentProps {
     data: WorkingNonWorkingHoursUsageSummary[];
 }
 
+// 'B/s' = tasa (red); 'B' = cantidad de bytes (memoria / almacenamiento libre).
+const BYTE_UNITS: Record<string, string[]> = {
+    'B/s': ['B/s', 'KB/s', 'MB/s', 'GB/s', 'TB/s'],
+    'B': ['B', 'KB', 'MB', 'GB', 'TB'],
+};
+
 const formatDynamicUnit = (value: number, baseUnit: string) => {
-    if (baseUnit !== 'B/s') {
+    const sizes = BYTE_UNITS[baseUnit];
+    if (!sizes) {
         return {
             value: value.toFixed(1),
             unit: baseUnit
         };
     }
 
-    if (value === 0) return { value: "0", unit: "B/s" };
+    if (value <= 0) return { value: value.toFixed(1), unit: sizes[0] };
 
     const k = 1024;
-    const sizes = ['B/s', 'KB/s', 'MB/s', 'GB/s', 'TB/s'];
 
     const i = Math.floor(Math.log(value) / Math.log(k));
 
@@ -53,14 +59,14 @@ const getMetricConfig = (metricName: string) => {
     const lowerName = metricName.toLowerCase();
 
     if (lowerName.includes('cpuutilization')) return { icon: Cpu, unit: '%' };
-    if (lowerName.includes('freeablememory')) return { icon: MemoryStick, unit: 'B/s' };
+    if (lowerName.includes('freeablememory')) return { icon: MemoryStick, unit: 'B' };
     if (lowerName.includes('credit')) return { icon: Cpu, unit: 'Créditos' };
     if (lowerName.includes('iops')) return { icon: HardDrive, unit: 'IOPS' };
 
     if (lowerName.includes('networkin') || lowerName.includes('networkout')) return { icon: Activity, unit: 'B/s' };
 
     if (lowerName.includes('gb')) return { icon: HardDrive, unit: 'GB' };
-    if (lowerName.includes('freestorage')) return { icon: HardDrive, unit: 'B/s' };
+    if (lowerName.includes('freestorage')) return { icon: HardDrive, unit: 'B' };
 
     if (lowerName.includes('memory') || lowerName.includes('ram')) return { icon: Server, unit: '%' };
     if (lowerName.includes('transactions')) return { icon: Activity, unit: 'Transacciones' };

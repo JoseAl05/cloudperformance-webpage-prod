@@ -129,10 +129,11 @@ export const MultiCloudFiltersComponent = ({
         router.push(window.location.pathname, { scroll: false });
     };
 
-    const getDbParams = (cloud: CloudProvider): string => {
+    // Sólo se envían IDs de cuenta: el back end resuelve las BD desde el token.
+    const getAccountIdParams = (cloud: CloudProvider): string => {
         const selectedIds = selectedTenants[cloud] || [];
         const accounts = accountsList[cloud] || [];
-        return selectedIds.map(id => accounts.find(acc => acc.id === id)?.db).filter(Boolean).join(',');
+        return selectedIds.filter(id => accounts.some(acc => acc.id === id)).map(encodeURIComponent).join(',');
     };
 
     return (
@@ -162,25 +163,25 @@ export const MultiCloudFiltersComponent = ({
                                 <Tags className='h-4 w-4 text-gray-400' /> Tags
                             </label>
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                {selectedClouds.includes('azure') && getDbParams('azure') && (
+                                {selectedClouds.includes('azure') && getAccountIdParams('azure') && (
                                     <MultiCloudTagFilter 
-                                        provider="azure" dbs={getDbParams('azure')} 
+                                        provider="azure" accountIds={getAccountIdParams('azure')} 
                                         startDate={filters.startDate} endDate={filters.endDate}
                                         selectedKey={tempAzTag.key} selectedValue={tempAzTag.val}
                                         onChange={(k, v) => setTempAzTag({ key: k, val: v })}
                                     />
                                 )}
-                                {selectedClouds.includes('aws') && getDbParams('aws') && (
+                                {selectedClouds.includes('aws') && getAccountIdParams('aws') && (
                                     <MultiCloudTagFilter 
-                                        provider="aws" dbs={getDbParams('aws')} 
+                                        provider="aws" accountIds={getAccountIdParams('aws')} 
                                         startDate={filters.startDate} endDate={filters.endDate}
                                         selectedKey={tempAwsTag.key} selectedValue={tempAwsTag.val}
                                         onChange={(k, v) => setTempAwsTag({ key: k, val: v })}
                                     />
                                 )}
-                                {selectedClouds.includes('gcp') && getDbParams('gcp') && (
+                                {selectedClouds.includes('gcp') && getAccountIdParams('gcp') && (
                                     <MultiCloudTagFilter 
-                                        provider="gcp" dbs={getDbParams('gcp')} 
+                                        provider="gcp" accountIds={getAccountIdParams('gcp')} 
                                         startDate={filters.startDate} endDate={filters.endDate}
                                         selectedKey={tempGcpTag.key} selectedValue={tempGcpTag.val}
                                         onChange={(k, v) => setTempGcpTag({ key: k, val: v })}

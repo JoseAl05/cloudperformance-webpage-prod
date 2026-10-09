@@ -1,10 +1,9 @@
 "use client";
 
+import { fetcher } from '@/lib/fetcher';
 import React, { useState, useEffect } from "react";
 import useSWR from "swr";
 import { Plus, Calendar, DollarSign, TrendingUp, Building2, X, Eye, EyeOff } from "lucide-react";
-
-const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
 interface CentroCosto {
   id_centro_costo: number;

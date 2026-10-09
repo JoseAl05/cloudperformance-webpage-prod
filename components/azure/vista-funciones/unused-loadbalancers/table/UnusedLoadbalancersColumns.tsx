@@ -5,20 +5,10 @@ import { DynamicColumn } from '@/components/data-table/columns';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
-import { Copy, Eye, Layers, ListTree } from 'lucide-react';
+import { CopyButton } from '@/components/shared/CopyButton';
+import { Eye, Layers, ListTree } from 'lucide-react';
 import { useState } from 'react';
 import { UnusedLb, UnusedLbDetail } from '@/interfaces/vista-unused-resources/unusedLbInterfaces';
-
-const CopyBtn = ({ text }: { text: string }) => (
-    <Button
-        variant="ghost"
-        size="sm"
-        className="h-7 px-2"
-        onClick={() => navigator.clipboard.writeText(text)}
-    >
-        <Copy className="h-3.5 w-3.5" />
-    </Button>
-)
 
 const DetailsDialog = ({ details }: { details: UnusedLbDetail[] }) => {
     const [open, setOpen] = useState(false);
@@ -89,7 +79,7 @@ const DetailsDialog = ({ details }: { details: UnusedLbDetail[] }) => {
                                                 <div key={idx} className="rounded-md border p-3 space-y-1 bg-muted/30">
                                                     <div className="flex justify-between items-center">
                                                         <span className="font-medium text-sm">{b.name}</span>
-                                                        <CopyBtn text={b.id} />
+                                                        <CopyButton text={b.id} />
                                                     </div>
                                                     <code className="text-xs break-all">{b.id}</code>
                                                 </div>
@@ -109,7 +99,7 @@ const DetailsDialog = ({ details }: { details: UnusedLbDetail[] }) => {
                                             {d.load_balancing_rules.map((r, idx) => (
                                                 <div key={idx} className="rounded-md border p-3 bg-muted/30 flex justify-between items-center">
                                                     <code className="text-xs break-all">{r.id}</code>
-                                                    <CopyBtn text={r.id} />
+                                                    <CopyButton text={r.id} />
                                                 </div>
                                             ))}
                                         </div>
@@ -124,7 +114,7 @@ const DetailsDialog = ({ details }: { details: UnusedLbDetail[] }) => {
                                             {d.inbound_nat_rules.map((r, idx) => (
                                                 <div key={idx} className="rounded-md border p-3 bg-muted/30 flex justify-between items-center">
                                                     <code className="text-xs break-all">{r.id}</code>
-                                                    <CopyBtn text={r.id} />
+                                                    <CopyButton text={r.id} />
                                                 </div>
                                             ))}
                                         </div>
@@ -140,7 +130,7 @@ const DetailsDialog = ({ details }: { details: UnusedLbDetail[] }) => {
                                             {d.inbound_nat_pools.map((p, idx) => (
                                                 <div key={idx} className="rounded-md border p-3 bg-muted/30 flex justify-between items-center">
                                                     <code className="text-xs break-all">{p.id}</code>
-                                                    <CopyBtn text={p.id} />
+                                                    <CopyButton text={p.id} />
                                                 </div>
                                             ))}
                                         </div>

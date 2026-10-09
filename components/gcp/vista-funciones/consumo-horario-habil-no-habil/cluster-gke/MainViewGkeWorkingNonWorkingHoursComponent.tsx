@@ -30,8 +30,7 @@ export const MainViewGkeWorkingNonWorkingHoursComponent = () => {
                     resourceFilter
                     isResourceMultiSelect
                     resourceService='clusters-gke'
-                    tagCollection='gcp_container_clusters'
-                    tagColumn='resourceLabels'
+                    tagResourceType='gke_clusters'
                     tagsFilter
                 />
             </div>

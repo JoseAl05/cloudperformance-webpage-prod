@@ -32,8 +32,7 @@ export const MainViewDiscosPersistentesComponent = () => {
           isResourceMultiSelect
           resourceService="disks"
           tagsFilter={true}
-          tagCollection="gcp_compute_disks"
-          tagColumn="labels"
+          tagResourceType="compute_disks"
         />
       </div>
     </div>

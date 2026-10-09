@@ -1,5 +1,6 @@
 'use client'
 
+import { fetcher } from '@/lib/fetcher';
 import { MessageCard } from '@/components/aws/cards/MessageCards';
 import { LoaderComponent } from '@/components/general_gcp/LoaderComponent';
 import { AlertCircle, ChartBar, DollarSign, Info } from 'lucide-react';
@@ -17,7 +18,6 @@ interface AzureMysqlResourceComponentProps {
     subscription?: string;
 }
 
-const fetcher = (url: string) => fetch(url).then(r => r.json());
 const isNonEmptyArray = <T,>(v: unknown): v is T[] => Array.isArray(v) && v.length > 0;
 
 export const AzureMysqlResourceComponent = ({ startDate, endDate, selectedInstanceV2 }: AzureMysqlResourceComponentProps) => {

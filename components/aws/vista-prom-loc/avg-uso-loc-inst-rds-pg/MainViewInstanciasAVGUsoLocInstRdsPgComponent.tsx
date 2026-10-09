@@ -34,8 +34,7 @@ export const MainViewInstanciasAVGUsoLocInstRdsPgComponent = () => {
                     instancesService='rds-pg'
                     isInstanceMultiSelect
                     tagsFilter
-                    tagColumnName='TagList'
-                    collection='aws_rds_postgresql'
+                    resourceType='rds_postgresql'
 
                     isRegionMultiSelect
                     metricsRDSFilter

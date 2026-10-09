@@ -1,5 +1,6 @@
 'use client'
 
+import { fetcher as fetcherGet, fetchJson } from '@/lib/fetcher';
 import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import { LoaderComponent } from '@/components/general_aws/LoaderComponent';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -29,18 +30,13 @@ interface EksFilterComponentProps {
 }
 
 const fetcherPost = (url: string, tags: { Key: string; Value: string } | null = null) =>
-    fetch(url, {
+    fetchJson(url, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
         body: tags ? JSON.stringify([tags]) : null,
-    }).then(res => res.json());
-
-const fetcherGet = (url: string) =>
-    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
-        .then(r => r.json());
-
+    });
 
 export const EksFilterComponent = ({
     eks,

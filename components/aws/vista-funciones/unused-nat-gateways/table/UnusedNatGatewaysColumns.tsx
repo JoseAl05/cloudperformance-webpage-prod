@@ -1,5 +1,6 @@
 'use client'
 
+import { fetcher } from '@/lib/fetcher';
 import { Badge } from '@/components/ui/badge';
 import { DynamicColumn } from '@/components/general/data-table/columns';
 import { Button } from '@/components/ui/button';
@@ -17,8 +18,6 @@ export interface GlobalNatStats {
     avgGlobalConnections: number;
     totalGlobalBytes: number;
 }
-
-const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 const DetailsCell = ({ natGw, dateParams }: { natGw: UnusedNatGateways, dateParams: { from: string, to: string } }) => {
     const [isOpen, setIsOpen] = useState(false);

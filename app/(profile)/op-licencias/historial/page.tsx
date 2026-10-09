@@ -1,5 +1,6 @@
 'use client';
 
+import { fetchJson } from '@/lib/fetcher';
 import React, { useState, useEffect } from 'react';
 import { useSession } from '@/hooks/useSession';
 import { ArrowLeft, Loader2, Download, ShieldCheck } from 'lucide-react';
@@ -56,8 +57,7 @@ export default function HistorialPage() {
 
   useEffect(() => {
     if (!user) return;
-    fetch('/api/op-licencias/historial', { credentials: 'include' })
-      .then(r => r.json())
+    fetchJson('/api/op-licencias/historial', { credentials: 'include' })
       .then(data => setLicencias(data))
       .catch(() => setError('Error al cargar historial.'))
       .finally(() => setLoading(false));

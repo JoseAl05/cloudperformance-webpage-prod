@@ -16,6 +16,8 @@ export interface WorkingNonWorkingHoursUsageSummary {
 export interface WorkingNonWorkingHoursUsageSummaryByResource {
     resource_name: string;
     resource_id: string;
+    /** Región del recurso (solo la devuelve la API de AWS). */
+    region?: string;
     sync_time: string;
     metric_data: WorkingNonWorkingHoursUsageSummaryByResourceMetrics[];
     metric_activity_summary: WorkingNonWorkingHoursUsageSummaryByResourceActivitySummary[];

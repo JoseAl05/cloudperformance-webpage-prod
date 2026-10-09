@@ -16,6 +16,7 @@ import {
 import { Badge } from '@/components/ui/badge'
 import { ArrowUpRight, ArrowDownRight, Minus } from 'lucide-react'
 import { bytesToGB, formatCapacity } from '@/lib/bytesToMbs'
+import { titleCase } from '@/lib/format'
 
 interface StorageVariationCardsComponentProps {
     strgVariationData: StorageVariation[]

@@ -1,4 +1,5 @@
 'use client'
+import { fetcher as fetcherGet } from '@/lib/fetcher';
 import { Dispatch, SetStateAction, useState } from 'react'
 import { Check, ChevronsUpDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -17,18 +18,9 @@ interface SubscriptionsFilterComponentProps {
 //     fetch(url, {
 //         method: 'GET',
 //         headers: {
-//             'Authorization': `Bearer ${process.env.NEXT_PUBLIC_API_TOKEN}`,
 //             'Content-Type': 'application/json',
 //         },
 //     }).then(res => res.json());
-
-const fetcherGet = (url: string) =>
-  fetch(url, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json'
-    }
-  }).then(res => res.json())    
 
 export const SubscriptionsFilterComponent = ({
     subscription, setSubscription

@@ -1,5 +1,6 @@
 'use client'
 
+import { fetcher } from '@/lib/fetcher';
 import { Dispatch, SetStateAction, useMemo, useState } from 'react'
 import useSWR from 'swr'
 import { Check, ChevronsUpDown } from 'lucide-react'
@@ -30,9 +31,6 @@ interface ApiResponse {
   grupos_disponibles: string[]
   detalles: Record<string, string[]>
 }
-
-const fetcher = (url: string) =>
-  fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } }).then((r) => r.json())
 
 const getApiUrl = (service: string) => {
   const serviceMap: Record<string, string> = {

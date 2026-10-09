@@ -1,4 +1,5 @@
 'use client'
+import { formatCurrency } from '@/lib/format';
 
 import React, { useMemo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
@@ -211,7 +212,7 @@ export const ElbV2ConsumeCardsComponent = ({
                 />
                 <StatCard
                     title="Costo Total"
-                    value={`$ ${formatGeneric(costoTotal)}`}
+                    value={formatCurrency(costoTotal)}
                     unit="USD"
                     description="Costo total de todos los Load Balancers en el período."
                     icon={DollarSign}

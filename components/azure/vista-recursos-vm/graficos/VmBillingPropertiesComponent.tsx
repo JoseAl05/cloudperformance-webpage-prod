@@ -1,5 +1,6 @@
 'use client';
 
+import { fetcher } from '@/lib/fetcher';
 import { Card, CardContent } from '@/components/ui/card';
 import { 
   CreditCard, 
@@ -158,14 +159,6 @@ const VmBillingProperties = ({ data }: VmBillingPropertiesProps) => {
     </div>
   );
 };
-
-const fetcher = (url: string) =>
-  fetch(url, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json'
-    }
-  }).then(res => res.json());
 
 interface VmBillingPropertiesComponentProps {
   startDate: Date;

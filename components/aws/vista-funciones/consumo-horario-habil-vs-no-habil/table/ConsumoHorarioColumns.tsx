@@ -171,7 +171,7 @@ const GeneralTrendCell = ({ row }: { row: WorkingNonWorkingHoursUsageSummaryByRe
     return <Badge variant="secondary" className="text-[10px] flex w-fit items-center gap-1"><Scale className="w-3 h-3" /> Balanceado</Badge>;
 };
 
-const DetailsCell = ({ row }: { row: WorkingNonWorkingHoursUsageSummaryByResource }) => {
+const DetailsCell = ({ row, resourceType }: { row: WorkingNonWorkingHoursUsageSummaryByResource; resourceType: string }) => {
     const [isOpen, setIsOpen] = useState(false);
 
     const tabs: HistoryModalTab[] = [
@@ -184,7 +184,7 @@ const DetailsCell = ({ row }: { row: WorkingNonWorkingHoursUsageSummaryByResourc
             <Button variant="ghost" size="sm" className="h-8 w-8 p-0 hover:bg-slate-100 dark:hover:bg-slate-800" onClick={() => setIsOpen(true)}>
                 <Eye className="h-4 w-4 text-slate-500 dark:text-slate-400" />
             </Button>
-            <HistoryModal isOpen={isOpen} onClose={() => setIsOpen(false)} title={row.resource_name} region={row.resource_id} resourceType="Compute Engine" tabs={tabs} />
+            <HistoryModal isOpen={isOpen} onClose={() => setIsOpen(false)} title={row.resource_name} region={row.region ?? ''} resourceType={resourceType} tabs={tabs} />
         </>
     );
 };
@@ -206,7 +206,8 @@ const GetParameters = () => {
 
 export const getConsumoHorarioColumns = (
     uniqueMetrics: string[],
-    maxValues: Record<string, number>
+    maxValues: Record<string, number>,
+    resourceType: string = 'EC2'
 ): DynamicColumn<WorkingNonWorkingHoursUsageSummaryByResource>[] => {
 
     const metricColumns: DynamicColumn<WorkingNonWorkingHoursUsageSummaryByResource>[] = uniqueMetrics.map(metric => {
@@ -325,7 +326,7 @@ export const getConsumoHorarioColumns = (
         {
             id: "actions",
             header: " ",
-            cell: ({ row }) => <DetailsCell row={row.original} />,
+            cell: ({ row }) => <DetailsCell row={row.original} resourceType={resourceType} />,
             size: 150
         }
     ];

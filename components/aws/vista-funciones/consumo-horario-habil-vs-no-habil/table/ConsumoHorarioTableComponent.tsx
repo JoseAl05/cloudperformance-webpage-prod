@@ -10,6 +10,8 @@ import { getConsumoHorarioColumns } from '@/components/aws/vista-funciones/consu
 
 interface ConsumoHorarioTableComponentProps {
     data: WorkingNonWorkingHoursUsageSummaryByResource[];
+    /** Tipo de recurso que se muestra en el modal de detalle (p. ej. "EC2", "RDS"). */
+    resourceType?: string;
 }
 
 const TableLegend = () => (
@@ -31,7 +33,7 @@ const TableLegend = () => (
     </div>
 );
 
-export const ConsumoHorarioTableComponent = ({ data }: ConsumoHorarioTableComponentProps) => {
+export const ConsumoHorarioTableComponent = ({ data, resourceType = 'EC2' }: ConsumoHorarioTableComponentProps) => {
 
     const { maxValues, uniqueMetrics } = useMemo(() => {
         const computedMaxValues: Record<string, number> = {};
@@ -62,7 +64,7 @@ export const ConsumoHorarioTableComponent = ({ data }: ConsumoHorarioTableCompon
         };
     }, [data]);
 
-    const columns = createColumns(getConsumoHorarioColumns(uniqueMetrics, maxValues));
+    const columns = createColumns(getConsumoHorarioColumns(uniqueMetrics, maxValues, resourceType));
 
     if (!data || data.length === 0) {
         return (

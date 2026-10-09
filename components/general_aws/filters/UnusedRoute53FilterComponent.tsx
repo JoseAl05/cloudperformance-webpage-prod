@@ -1,4 +1,5 @@
 'use client'
+import { fetcher } from '@/lib/fetcher';
 import { Dispatch, SetStateAction, useMemo, useState } from 'react'
 import { Check, ChevronsUpDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -20,10 +21,6 @@ interface UnusedRoute53FilterComponentProps {
 type ApiR53 =
     | { hz_id: string; hz_name: string }
     | string
-
-const fetcher = (url: string) =>
-    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
-        .then(r => r.json());
 
 export const UnusedRoute53FilterComponent = ({
     startDate,

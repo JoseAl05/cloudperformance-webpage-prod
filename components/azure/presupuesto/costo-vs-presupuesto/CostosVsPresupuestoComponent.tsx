@@ -1,5 +1,6 @@
 "use client";
 
+import { fetcher } from '@/lib/fetcher';
 import { LoaderComponent } from "@/components/general_presupuesto/LoaderComponent";
 import { Card, CardContent } from "@/components/ui/card";
 import { ChartBar, Search, CircleDollarSignIcon, Tickets } from "lucide-react";
@@ -35,10 +36,6 @@ interface FacturacionAnual {
   total_cost: number;
   count: number;
 }
-
-const fetcher = (url: string) =>
-  fetch(url, { method: "GET", headers: { "Content-Type": "application/json" } })
-    .then((r) => r.json());
 
 export const CostosVsPresupuestoComponent = ({ cloud, anio }: CentroDeCostoComponentProps) => {
 

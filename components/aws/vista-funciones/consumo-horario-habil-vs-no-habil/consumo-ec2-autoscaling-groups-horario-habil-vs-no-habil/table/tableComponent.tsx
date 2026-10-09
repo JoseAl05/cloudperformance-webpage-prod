@@ -1,5 +1,6 @@
 "use client"
 
+import { fetcher } from '@/lib/fetcher';
 import useSWR from "swr"
 import { ColumnDef } from "@tanstack/react-table"
 import { DataTableGrouping } from "@/components/data-table/data-table-grouping"
@@ -14,10 +15,6 @@ type EC2MetricData = {
   Horario: "Habil" | "No habil"
   Value: number
 }
-
-const fetcher = (url: string) =>
-    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
-        .then(r => r.json());
 
 export const TableEC2AutoScalingMetrics = ({
   startDateFormatted,

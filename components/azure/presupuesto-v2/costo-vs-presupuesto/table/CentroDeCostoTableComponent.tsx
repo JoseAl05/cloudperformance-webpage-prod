@@ -1,5 +1,6 @@
 "use client";
 
+import { fetcher } from '@/lib/fetcher';
 import { useState, useMemo } from "react";
 import useSWR from "swr";
 import { CircleDollarSign, Pencil, Trash2, Search, ArrowUpDown, ArrowUp, ArrowDown, ChevronLeft, ChevronRight } from "lucide-react";
@@ -20,11 +21,9 @@ interface CentroDeCostoTableComponentProps {
 type SortField = keyof CentroCosto | null;
 type SortOrder = "asc" | "desc" | null;
 
-const fetcher = (url: string) =>
-  fetch(url, { method: "GET", headers: { "Content-Type": "application/json" } })
-    .then((r) => r.json());
+const CLOUD_LABELS: Record<string, string> = { aws: "AWS", azure: "Azure", gcp: "GCP" };
 
-export const CentroDeCostoTableComponent = ({ cloud = "gcp", onEdit, onDelete }: CentroDeCostoTableComponentProps) => {
+export const CentroDeCostoTableComponent = ({ cloud = "azure", onEdit, onDelete }: CentroDeCostoTableComponentProps) => {
   const { data, error, isLoading } = useSWR<CentroCosto[]>(
     cloud ? `/api/presupuesto/bridge/${cloud}/centro-costo` : null,
     fetcher,
@@ -96,7 +95,7 @@ export const CentroDeCostoTableComponent = ({ cloud = "gcp", onEdit, onDelete }:
   if (!Array.isArray(data) || data.length === 0) return (
     <div className="bg-gray-50 dark:bg-gray-800 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-2xl p-12 text-center">
       <CircleDollarSign className="w-16 h-16 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
-      <p className="text-gray-500 dark:text-gray-400 text-lg font-medium">No hay centros de costo disponibles en GCP</p>
+      <p className="text-gray-500 dark:text-gray-400 text-lg font-medium">No hay centros de costo disponibles en {CLOUD_LABELS[cloud] ?? cloud.toUpperCase()}</p>
     </div>
   );
 

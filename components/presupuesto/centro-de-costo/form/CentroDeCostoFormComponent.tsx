@@ -1,5 +1,6 @@
 "use client";
 
+import { fetcher } from '@/lib/fetcher';
 import React, { useState, useEffect } from "react";
 import useSWR from "swr";
 
@@ -19,19 +20,13 @@ interface CentroCostoFormProps {
   dateFrom?: string;
   dateTo?: string;
   region?: string;
-  regionField?: string;
   subscription?: string;
-  subscriptionField?: string;
-  collection?: string;
-  tagColumnName?: string;
 }
 
 interface TagResponse {
   Key: string;
   Values: string[];
 }
-
-const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 export const CentroDeCostoFormComponent: React.FC<CentroCostoFormProps> = ({
   onSubmit,
@@ -40,11 +35,7 @@ export const CentroDeCostoFormComponent: React.FC<CentroCostoFormProps> = ({
   dateFrom,
   dateTo,
   region = "all_regions",
-  regionField = "resource_location",
   subscription = "all_subscriptions",
-  subscriptionField = "subscription_name",
-  collection = "azure_consumption_billing_account_modern_usage_details",
-  tagColumnName = "tags",
 }) => {
   const [formData, setFormData] = useState<CentroCosto>({
     id_centro_costo: "",
@@ -71,7 +62,7 @@ export const CentroDeCostoFormComponent: React.FC<CentroCostoFormProps> = ({
   }, [dateFrom, dateTo]);
 
   // Llamada a la API para obtener tags
-  const apiUrl = `/api/azure/bridge/azure/get-all-tags?date_from=${dates.from}&date_to=${dates.to}&region=${region}&region_field=${regionField}&subscription=${subscription}&subscription_field=${subscriptionField}&collection=${collection}&tag_column_name=${tagColumnName}`;
+  const apiUrl = `/api/azure/bridge/azure/get-all-tags?date_from=${dates.from}&date_to=${dates.to}&region=${region}&subscription=${subscription}&resource_type=billing`;
   
   const { data: tagsData, error: tagsError, isLoading: tagsLoading } = useSWR<TagResponse[]>(
     apiUrl,

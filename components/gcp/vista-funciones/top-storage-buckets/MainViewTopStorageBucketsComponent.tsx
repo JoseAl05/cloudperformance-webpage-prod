@@ -33,8 +33,7 @@ export const MainViewTopStorageBucketsComponent = () => {
           regionFilter
           storageClassFilter
           tagsFilter
-          tagCollection="gcp_storage_buckets"
-          tagColumn="labels"
+          tagResourceType="storage_buckets"
         />
       </div>
     </div>

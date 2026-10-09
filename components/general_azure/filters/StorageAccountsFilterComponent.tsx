@@ -1,4 +1,5 @@
 'use client'
+import { fetchJson } from '@/lib/fetcher';
 import { Dispatch, SetStateAction, useEffect, useMemo, useState } from 'react'
 import { Check, ChevronsUpDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -21,13 +22,13 @@ interface StorageAccountsFilterComponentProps {
 }
 
 const fetcherPost = (url: string, tags: { Key: string; Value: string } | null = null) =>
-    fetch(url, {
+    fetchJson(url, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
         body: tags ? JSON.stringify([tags]) : null,
-    }).then(res => res.json());
+    });
 
 
 export const StorageAccountsFilterComponent = ({

@@ -1,5 +1,6 @@
 "use client"
 
+import { fetcher } from '@/lib/fetcher';
 import useSWR from "swr"
 import { ColumnDef } from "@tanstack/react-table"
 import { DataTableGrouping } from "@/components/data-table/data-table-grouping"
@@ -12,10 +13,6 @@ type EC2Instance = {
     servicename: string
     sync_time_instance?: { $date: string }
 }
-
-const fetcher = (url: string) =>
-    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
-        .then(r => r.json());
 
 export const Ec2TableComponent = ({
     startDateFormatted,

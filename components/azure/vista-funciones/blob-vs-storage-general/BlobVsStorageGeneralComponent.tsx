@@ -1,17 +1,14 @@
 'use client'
 
+import { fetcher } from '@/lib/fetcher';
 import { MessageCard } from '@/components/aws/cards/MessageCards';
 import { LoaderComponent } from '@/components/general_aws/LoaderComponent';
 import { AllStorageCapacity } from '@/interfaces/vista-blob-vs-storage/allStorageCapacityInterfaces';
 import useSWR from 'swr';
 import { BlobVsStorageCardsComponent } from '@/components/azure/vista-funciones/blob-vs-storage-general/info/BlobVsStorageCardsComponent';
 import { StorageVsGeneralCapacity } from '@/interfaces/vista-blob-vs-storage/strgVsGeneralInterfaces';
-import { ChartBar, Info } from 'lucide-react';
+import { AlertCircle, ChartBar, Info } from 'lucide-react';
 import { BlobVsStorageGeneralCapacityComponent } from '@/components/azure/vista-funciones/blob-vs-storage-general/graficos/BlobVsStorageGeneralCapacityComponent';
-
-const fetcher = (url: string) =>
-    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
-        .then(r => r.json());
 
 const isNonEmptyArray = <T,>(v: unknown): v is T[] => Array.isArray(v) && v.length > 0
 const isNullish = (v: unknown) => v === null || v === undefined

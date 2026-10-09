@@ -1,5 +1,6 @@
 'use client'
 
+import { fetcher } from '@/lib/fetcher';
 import { useState } from 'react'
 import useSWR from 'swr'
 import { Card, CardContent } from '@/components/ui/card'
@@ -54,8 +55,6 @@ interface TagsAnalysisProps {
   subscription: string
   region: string
 }
-
-const fetcher = (url: string) => fetch(url).then(res => res.json())
 
 export const TagsAnalysisComponentAzure = ({ startDate, endDate, subscription, region }: TagsAnalysisProps) => {
   // Estado para controlar el pop-up de detalles

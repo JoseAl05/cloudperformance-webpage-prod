@@ -1,5 +1,7 @@
 'use client'
+import { formatCurrency } from '@/lib/format';
 
+import { fetcher } from '@/lib/fetcher';
 import useSWR from 'swr';
 import { TrendingUp, DollarSign, Calendar, Table2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -29,14 +31,6 @@ interface FacturacionAzureData {
     cost_in_billing_currency: number;
     resource_location: string;
 }
-
-const fetcher = (url: string) =>
-  fetch(url, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json'
-    }
-  }).then(res => res.json())
 
 export const TendenciaFacturacionPagoPorUsoComponent = ({
     startDate,
@@ -121,7 +115,7 @@ export const TendenciaFacturacionPagoPorUsoComponent = ({
                             <div>
                                 <p className="text-sm font-medium text-muted-foreground">Costo Acumulado</p>
                                 <p className="text-2xl font-bold text-blue-600">
-                                    $ {metrics.total < 0.01 ? metrics.total.toPrecision(2) : metrics.total.toLocaleString('es-ES', { minimumFractionDigits: 2 })}
+                                    {formatCurrency(metrics.total)}
                                 </p>
                                 <p className="text-xs text-muted-foreground">Período seleccionado</p>
                             </div>

@@ -37,8 +37,7 @@ export const MainViewFilestoreWorkingHoursComponent = () => {
                     isResourceMultiSelect
                     resourceService='filestore'
                     tagsFilter
-                    tagCollection="gcp_filestore_instances"
-                    tagColumn="labels"
+                    tagResourceType="filestore_instances"
                     localService="Cloud Filestore" 
                 />
             </div>

@@ -1,4 +1,5 @@
 ﻿'use client'
+import { fetcher } from '@/lib/fetcher';
 
 import { GcpVertexCardsComponent } from './info/COGcpVertexCardsComponent'
 import { MessageCard } from '@/components/aws/cards/MessageCards'
@@ -14,10 +15,6 @@ interface GcpVertexComponentProps {
   regions: string
   resourceId?: string | null
 }
-
-const fetcher = (url: string) =>
-  fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
-    .then(r => r.json())
 
 const formatApiDate = (date?: Date) => date ? date.toISOString().replace('Z', '').slice(0, -4) : ''
 

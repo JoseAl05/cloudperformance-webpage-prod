@@ -3,7 +3,40 @@ import { cookies } from 'next/headers'
 import { AUTH_COOKIE } from '@/lib/cookies'
 import { verifyAuthToken, signAuthToken } from '@/lib/auth'
 import { findCompanyByName } from '@/lib/db-utils'
+import { createLogger } from '@/lib/logger'
+import type { CloudProvider } from '@/lib/cloudAccounts'
 import type { JWTPayload } from '@/types'
+import type { Empresa } from '@/types/db'
+
+const logger = createLogger('SwapClientContext')
+
+class AccountNotAllowedError extends Error {}
+
+/**
+ * Resuelve la BD de una nube SIEMPRE desde la empresa destino.
+ * El navegador sólo puede elegir una cuenta por su ID; nunca envía nombres de BD.
+ */
+function resolveCloudDb(
+    company: Empresa,
+    cloud: CloudProvider,
+    requestedAccountId: unknown
+): string | null {
+    const accounts =
+        company[`is_${cloud}_multi_tenant` as const] === true
+            ? company[`${cloud}_accounts` as const] || []
+            : []
+
+    // Single-tenant: la única BD posible es la de la empresa.
+    if (accounts.length === 0) return company[`user_db_${cloud}` as const] || null
+
+    if (typeof requestedAccountId === 'string' && requestedAccountId) {
+        const account = accounts.find((acc) => acc.id === requestedAccountId)
+        if (!account) throw new AccountNotAllowedError(cloud)
+        return account.db
+    }
+
+    return company[`user_db_${cloud}` as const] || accounts[0].db
+}
 
 export async function POST(request: Request) {
     const cookieStore = await cookies()
@@ -28,10 +61,10 @@ export async function POST(request: Request) {
     const body = await request.json()
     const {
         clientName,
-        user_db_azure: explicitAzureDb,
-        user_db_aws: explicitAwsDb,
-        user_db_gcp: explicitGcpDb,
-        user_db_openai: explicitOpenaiDb,
+        azure_account_id: azureAccountId,
+        aws_account_id: awsAccountId,
+        gcp_account_id: gcpAccountId,
+        openai_account_id: openaiAccountId,
     } = body
 
     if (!clientName) {
@@ -54,33 +87,53 @@ export async function POST(request: Request) {
         )
     }
 
-    const targetCompany = await findCompanyByName(clientName)
+    // Sólo admin_global elige la empresa; el resto queda en la de su propio token.
+    const targetCompanyName = isGlobalAdmin ? clientName : originalPayload.client
+    const targetCompany = await findCompanyByName(targetCompanyName)
 
     if (!targetCompany) {
         return NextResponse.json(
-            { message: `Empresa '${clientName}' no encontrada.` },
+            { message: `Empresa '${targetCompanyName}' no encontrada.` },
             { status: 404 }
         )
     }
 
     // ------------------ DB FINAL POR NUBE ------------------
 
-    const finalAzureDb =
-        explicitAzureDb || targetCompany.user_db_azure || null
+    let finalAzureDb: string | null
+    let finalAwsDb: string | null
+    let finalGcpDb: string | null
+    let finalOpenaiDb: string | null
 
-    const finalAwsDb =
-        explicitAwsDb || targetCompany.user_db_aws || null
-
-    const finalGcpDb =
-        explicitGcpDb || targetCompany.user_db_gcp || null
-
-    const finalOpenaiDb =
-        explicitOpenaiDb || targetCompany.user_db_openai || null
+    try {
+        finalAzureDb = resolveCloudDb(targetCompany, 'azure', azureAccountId)
+        finalAwsDb = resolveCloudDb(targetCompany, 'aws', awsAccountId)
+        finalGcpDb = resolveCloudDb(targetCompany, 'gcp', gcpAccountId)
+        finalOpenaiDb = resolveCloudDb(targetCompany, 'openai', openaiAccountId)
+    } catch (err) {
+        if (err instanceof AccountNotAllowedError) {
+            logger.warn('Swap rechazado: cuenta fuera de la empresa destino', {
+                actor: originalPayload.email,
+                role: originalPayload.role,
+                targetCompany: targetCompany.name,
+                cloud: err.message,
+            })
+            return NextResponse.json(
+                { message: 'La cuenta seleccionada no pertenece a la empresa.' },
+                { status: 403 }
+            )
+        }
+        throw err
+    }
 
     // ------------------ NUEVO PAYLOAD ------------------
 
+    // Los tokens antiguos traían `connectors`; ya no viajan en el JWT (se leen por empresa)
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { connectors: _legacyConnectors, ...payloadWithoutConnectors } = originalPayload
+
     const newPayload: JWTPayload = {
-        ...originalPayload,
+        ...payloadWithoutConnectors,
 
         client: targetCompany.name,
         role: originalPayload.role,
@@ -127,6 +180,19 @@ export async function POST(request: Request) {
     }
 
     await signAuthToken(newPayload)
+
+    logger.info('Contexto de cliente actualizado', {
+        actor: originalPayload.email,
+        role: originalPayload.role,
+        fromCompany: originalPayload.client,
+        toCompany: targetCompany.name,
+        accounts: {
+            aws: awsAccountId ?? null,
+            azure: azureAccountId ?? null,
+            gcp: gcpAccountId ?? null,
+            openai: openaiAccountId ?? null,
+        },
+    })
 
     return NextResponse.json(
         {

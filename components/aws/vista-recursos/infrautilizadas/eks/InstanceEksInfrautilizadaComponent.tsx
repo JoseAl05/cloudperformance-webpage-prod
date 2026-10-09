@@ -1,5 +1,6 @@
 "use client";
 
+import { fetcher } from '@/lib/fetcher';
 import useSWR from "swr";
 import { ChartBar, FileSpreadsheet } from "lucide-react";
 import { MainEc2ResourceInfraUsedViewMetricsSummaryComponent } from "@/components/aws/vista-recursos/infrautilizadas/eks/graficos/MainEc2ResourceInfraUsedViewMetricsSummaryComponent";
@@ -12,10 +13,6 @@ interface InstanceEc2CInfrautilizadaComponentProps {
   endDate?: Date;
   eksAsgInstance: string;
 }
-
-const fetcher = (url: string) =>
-  fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
-    .then(r => r.json());
 
 export const InstanceEksInfrautilizadaComponent = ({
   startDate,

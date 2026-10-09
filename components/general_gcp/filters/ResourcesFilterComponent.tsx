@@ -287,6 +287,7 @@
 // };
 
 'use client'
+import { fetcher as fetcherGet } from '@/lib/fetcher';
 import { Dispatch, SetStateAction, useEffect, useMemo, useState } from 'react'
 import { Check, ChevronsUpDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -330,9 +331,6 @@ interface ResourceItem {
 }
 
 // --- Helpers ---
-const fetcherGet = (url: string) =>
-    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
-        .then(r => r.json());
 
 // Función auxiliar para limpiar el switch gigante del componente principal
 const getUrlForService = (service: string, params: { startDate: string, endDate: string, projects: string, regions: string, tagKey: string, tagValue: string }) => {

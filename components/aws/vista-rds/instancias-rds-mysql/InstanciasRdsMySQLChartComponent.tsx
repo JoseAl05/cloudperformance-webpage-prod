@@ -1,5 +1,6 @@
 "use client";
 
+import { fetcher } from '@/lib/fetcher';
 import { useRef, useEffect } from "react";
 import useSWR from "swr";
 import * as echarts from "echarts";
@@ -78,9 +79,6 @@ const transformMetricsForChart = (
   // Los datos ya vienen en el formato correcto desde la API
   return metricsData.metrics_data as MetricPoint[];
 };
-const fetcher = (url: string) =>
-  fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
-    .then(r => r.json());
 
 export const InstanciasRdsMySQLChartComponent = ({
   startDate,

@@ -1,5 +1,6 @@
 "use client";
 
+import { fetcher } from '@/lib/fetcher';
 import { useRef, useEffect } from "react";
 import useSWR from "swr";
 import * as echarts from "echarts";
@@ -70,11 +71,6 @@ interface RdsMetricsData {
   metrics_data: MetricPoint[];
   calculated_summary?: Record<string, unknown>;
 }
-
-
-const fetcher = (url: string) =>
-    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
-        .then(r => r.json());
 
 export const InstanciasRdsPgChartComponent = ({
   startDate,

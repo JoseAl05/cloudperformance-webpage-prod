@@ -1,5 +1,6 @@
 'use client'
 
+import { fetcher } from '@/lib/fetcher';
 import useSWR from 'swr'
 import { useState, useRef, useEffect } from "react"
 import * as echarts from 'echarts'
@@ -66,14 +67,6 @@ interface ConsumoApiResponse {
   };
   instancias: Instancia[];
 }
-
-const fetcher = (url: string) =>
-  fetch(url, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json'
-    }
-  }).then(res => res.json())
 
 const isNullish = (v: unknown) => v === null || v === undefined
 

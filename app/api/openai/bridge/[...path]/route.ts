@@ -1,6 +1,7 @@
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 import { AUTH_COOKIE } from '@/lib/cookies';
+import { BRIDGE_ALLOWED_PREFIXES, isAllowedBridgePath } from '@/lib/bridgePaths';
 import { verifyAuthToken } from '@/lib/auth';
 
 const BASE = (process.env.API_OPENAI_URL || process.env.API_OPENIA_URL || '').replace(/\/+$/, '');
@@ -21,6 +22,9 @@ async function proxy(req: Request, ctx: { params: Promise<{ path?: string[] }> }
 
   const { path } = await ctx.params;
   const subpath = (path ?? []).join('/');
+  if (!isAllowedBridgePath(path ?? [], BRIDGE_ALLOWED_PREFIXES.openai)) {
+    return NextResponse.json({ error: 'Ruta no permitida' }, { status: 404 });
+  }
   const cookieStore = await cookies();
   const token = cookieStore.get(AUTH_COOKIE)?.value;
   if (!token) return NextResponse.json({ error: 'No autorizado' }, { status: 401 });

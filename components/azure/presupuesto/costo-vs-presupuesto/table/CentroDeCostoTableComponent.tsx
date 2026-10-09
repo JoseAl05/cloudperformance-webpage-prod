@@ -1,5 +1,6 @@
 "use client";
 
+import { fetcher } from '@/lib/fetcher';
 import { useState, useMemo } from "react";
 import useSWR from "swr";
 import { CircleDollarSign, Pencil, Trash2, Search, ArrowUpDown, ArrowUp, ArrowDown, ChevronLeft, ChevronRight } from "lucide-react";
@@ -19,10 +20,6 @@ interface CentroDeCostoTableComponentProps {
 
 type SortField = keyof CentroCosto | null;
 type SortOrder = "asc" | "desc" | null;
-
-const fetcher = (url: string) =>
-  fetch(url, { method: "GET", headers: { "Content-Type": "application/json" } })
-    .then((r) => r.json());
 
 export const CentroDeCostoTableComponent = ({ cloud, onEdit, onDelete }: CentroDeCostoTableComponentProps) => {
   const { data, error, isLoading } = useSWR<CentroCosto[]>(

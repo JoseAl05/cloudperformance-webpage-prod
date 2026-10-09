@@ -31,17 +31,11 @@ export const MainViewConsumoNodosComponent = () => {
                     isRegionMultiSelect
                     subscriptionIdFilter
                     tagsFilter
-                    tagsCollection='custom_vmss_uniform_k8s_nodes_metrics_logs'
-                    tagsColumnName='tags'
-                    tagsRegionField='location'
-                    tagsSubscriptionField='vm_id'
+                    tagsResourceType='k8s_nodes'
                     resourceGroupFilter
-                    resourceGroupCollection='custom_vmss_uniform_k8s_nodes_metrics_logs'
-                    resourceGroupSubscriptionField='vm_id'
+                    resourceGroupResourceType='k8s_nodes'
                     instancesFilterV2
-                    instancesV2Collection='custom_vmss_uniform_k8s_nodes_metrics_logs'
-                    instancesV2SubscriptionField='vm_id'
-                    instancesV2InstanceField='vm_name'
+                    instancesV2ResourceType='k8s_nodes'
 
                 />
             </div>

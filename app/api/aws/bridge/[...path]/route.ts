@@ -1,8 +1,9 @@
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 import { AUTH_COOKIE } from '@/lib/cookies';
+import { BRIDGE_ALLOWED_PREFIXES, isAllowedBridgePath } from '@/lib/bridgePaths';
 
-const BASE = (process.env.API_AWS_URL || '').replace(/\/+$/, '');
+const BASE = process.env.NODE_ENV === 'development' ? (process.env.API_AWS_URL_DEV || '').replace(/\/+$/, '') : (process.env.API_AWS_URL || '').replace(/\/+$/, '');
 
 const FORWARD_HEADER_ALLOWLIST = new Set([
   'accept',
@@ -22,6 +23,9 @@ async function proxy(
   }
   const { path } = await ctx.params;
   const subpath = (path ?? []).join('/');
+  if (!isAllowedBridgePath(path ?? [], BRIDGE_ALLOWED_PREFIXES.aws)) {
+    return NextResponse.json({ error: 'Ruta no permitida' }, { status: 404 });
+  }
 
   const cookieStore = await cookies();
   const token = cookieStore.get(AUTH_COOKIE)?.value;

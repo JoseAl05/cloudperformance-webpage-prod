@@ -5,8 +5,9 @@ import { useSearchParams } from 'next/navigation';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
+import { CopyButton } from '@/components/shared/CopyButton';
 import { useState } from 'react';
-import { AlertCircle, CheckCircle2, Copy, Eye, Puzzle } from 'lucide-react';
+import { AlertCircle, CheckCircle2, Eye, Puzzle } from 'lucide-react';
 import { UnusedVmssDiskDetails, UnusedVmssDisksData } from '@/interfaces/vista-unused-resources/unusedVmssInterface';
 import { UnusedVmExtensions, UnusedVmExtensionsData } from '@/interfaces/vista-unused-resources/unusedVmExtensionsInterfaces';
 
@@ -19,22 +20,6 @@ const DateParams = () => {
     return { startDateParam: startDateParam, endDateParam: endDateParam }
 }
 
-const CopyBtn = ({ text, label = 'Copiado' }: { text: string; label?: string }) => (
-    <Button
-        variant="ghost"
-        size="sm"
-        className="h-7 px-2"
-        onClick={() => {
-            navigator.clipboard.writeText(text)
-            toast.success(label)
-        }}
-        aria-label="Copiar"
-        title="Copiar"
-    >
-        <Copy className="h-3.5 w-3.5" />
-    </Button>
-)
-
 const ShortenedId = ({ id }: { id: string }) => {
     const parts = id.split("/")
     const resourceName = parts[parts.length - 1]
@@ -46,7 +31,7 @@ const ShortenedId = ({ id }: { id: string }) => {
                 <div className="text-sm font-medium truncate">{resourceName}</div>
                 <div className="text-xs text-muted-foreground">{resourceType}</div>
             </div>
-            <CopyBtn text={id} label="ID copiado" />
+            <CopyButton text={id} label="ID copiado" />
         </div>
     )
 }

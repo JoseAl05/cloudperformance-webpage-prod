@@ -1,5 +1,6 @@
 'use client'
 
+import { fetcher } from '@/lib/fetcher';
 import { Badge } from '@/components/ui/badge';
 import { DynamicColumn } from '@/components/general/data-table/columns';
 import { Button } from '@/components/ui/button';
@@ -20,8 +21,6 @@ export interface GlobalMetricsSummary {
     avg_active_flows: number;
     avg_consumed_lcus: number;
 }
-
-const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 const DetailsCell = ({ elb, dateParams, globalMetrics }: { elb: UnusedElbV2Details, dateParams: { from: string, to: string }, globalMetrics: GlobalMetricsSummary | undefined }) => {
     const [isOpen, setIsOpen] = useState(false);

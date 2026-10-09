@@ -1,5 +1,6 @@
 'use client'
 
+import { fetchJson } from '@/lib/fetcher';
 import { useMemo, useState, useEffect } from 'react';
 import { ColumnDef } from "@tanstack/react-table";
 import { DataTableGrouping } from '@/components/data-table/data-table-grouping';
@@ -79,8 +80,7 @@ export const TagsDataTableAzure = ({ data }: TagsDataTableProps) => {
 
         if (isCCModalOpen && costCenters.length === 0) {
             setIsLoadingCCs(true);
-            fetch('/api/azure/bridge/mantenedor-tags/azure/local/cost-centers')
-                .then(res => res.json())
+            fetchJson('/api/azure/bridge/mantenedor-tags/azure/local/cost-centers')
                 .then(responseData => {
                     if (isMounted && responseData.status === 'success' && responseData.data) {
                         setCostCenters(responseData.data);

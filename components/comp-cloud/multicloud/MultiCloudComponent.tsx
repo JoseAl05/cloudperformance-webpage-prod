@@ -1,5 +1,6 @@
 'use client';
 
+import { fetcher } from '@/lib/fetcher';
 import { useMemo } from 'react';
 import useSWR from 'swr';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -29,11 +30,6 @@ interface GlobalBillingMultiTenantDashboardProps extends AppliedMultiCloudFilter
     };
 }
 
-const fetcher = (url: string) => fetch(url, { 
-    method: 'GET', 
-    headers: { 'Content-Type': 'application/json' } 
-}).then(res => res.json());
-
 export const GlobalBillingMultiTenantDashboard = ({ 
     startDate, 
     endDate, 
@@ -49,18 +45,19 @@ export const GlobalBillingMultiTenantDashboard = ({
     
     const { user, isLoading: isLoadingSession } = useSession();
 
-    const getDbParams = (cloud: CloudProvider): string => {
+    // Sólo se envían IDs de cuenta: el back end resuelve las BD desde el token.
+    const getAccountIdParams = (cloud: CloudProvider): string => {
         const selectedIds = selectedTenants[cloud] || [];
         const accounts = accountsList[cloud] || [];
         return selectedIds
-            .map(id => accounts.find(acc => acc.id === id)?.db)
-            .filter((db): db is string => !!db)
+            .filter(id => accounts.some(acc => acc.id === id))
+            .map(encodeURIComponent)
             .join(',');
     };
 
-    const azureDbs = getDbParams('azure');
-    const awsDbs = getDbParams('aws');
-    const gcpDbs = getDbParams('gcp');
+    const azureAccountIds = getAccountIdParams('azure');
+    const awsAccountIds = getAccountIdParams('aws');
+    const gcpAccountIds = getAccountIdParams('gcp');
 
     const buildDateParams = () => {
         const params = new URLSearchParams();
@@ -86,14 +83,14 @@ export const GlobalBillingMultiTenantDashboard = ({
 
     const baseDateParams = buildDateParams();
 
-    const azureUrl = (user?.is_azure && selectedClouds.includes('azure') && azureDbs) 
-        ? `/api/azure/bridge/azure/facturacion/multitenant/pago-por-uso?${baseDateParams}&dbs=${azureDbs}${buildTagParams(azTagKey, azTagValue)}` : null;
+    const azureUrl = (user?.is_azure && selectedClouds.includes('azure') && azureAccountIds) 
+        ? `/api/azure/bridge/azure/facturacion/multitenant/pago-por-uso?${baseDateParams}&account_ids=${azureAccountIds}${buildTagParams(azTagKey, azTagValue)}` : null;
     
-    const awsUrl = (user?.is_aws && selectedClouds.includes('aws') && awsDbs) 
-        ? `/api/aws/bridge/facturacion/multitenant/tendencia-facturacion?${baseDateParams}&region=all&dbs=${awsDbs}${buildTagParams(awsTagKey, awsTagValue)}` : null;
+    const awsUrl = (user?.is_aws && selectedClouds.includes('aws') && awsAccountIds) 
+        ? `/api/aws/bridge/facturacion/multitenant/tendencia-facturacion?${baseDateParams}&region=all&account_ids=${awsAccountIds}${buildTagParams(awsTagKey, awsTagValue)}` : null;
     
-    const gcpUrl = (user?.is_gcp && selectedClouds.includes('gcp') && gcpDbs) 
-        ? `/api/gcp/bridge/gcp/facturacion/multitenant/tendencia_facturacion?${baseDateParams}&dbs=${gcpDbs}${buildTagParams(gcpTagKey, gcpTagValue)}` : null;
+    const gcpUrl = (user?.is_gcp && selectedClouds.includes('gcp') && gcpAccountIds) 
+        ? `/api/gcp/bridge/gcp/facturacion/multitenant/tendencia_facturacion?${baseDateParams}&account_ids=${gcpAccountIds}${buildTagParams(gcpTagKey, gcpTagValue)}` : null;
 
     const { data: azureData, isLoading: isLoadingAzure } = useSWR(azureUrl, fetcher);
     const { data: awsData, isLoading: isLoadingAws } = useSWR(awsUrl, fetcher);

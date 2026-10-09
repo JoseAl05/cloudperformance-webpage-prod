@@ -1,4 +1,5 @@
 'use client'
+import { fetcher as fetcherGet } from '@/lib/fetcher';
 import { Dispatch, SetStateAction, useState } from 'react'
 import { Check, ChevronsUpDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -11,23 +12,15 @@ import { LoaderComponent } from '@/components/general_azure/LoaderComponent'
 interface MetricsFilterComponentProps {
     startDate: Date
     endDate: Date
-    collection: string
+    resourceType: string
     metric: string
     setMetric: Dispatch<SetStateAction<string>>
 }
 
-const fetcherGet = (url: string) =>
-    fetch(url, {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-    }).then(res => res.json());
-
 export const MetricsFilterComponent = ({
     startDate,
     endDate,
-    collection,
+    resourceType,
     metric,
     setMetric
 }: MetricsFilterComponentProps) => {
@@ -36,7 +29,7 @@ export const MetricsFilterComponent = ({
     const startDateFormatted = startDate.toISOString().replace('Z', '').slice(0, -4);
     const endDateFormatted = endDate.toISOString().replace('Z', '').slice(0, -4);
 
-    const shouldFetch = !!collection;
+    const shouldFetch = !!resourceType;
     const url = shouldFetch
         ? `/api/azure/bridge/azure/get-all-metrics?date_from=${startDateFormatted}&date_to=${endDateFormatted}`
         : null;

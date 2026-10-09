@@ -49,6 +49,9 @@ export const PresupuestoMensualComponent = ({
   };
   const cloudType = cloudTypeMap[cloud] ?? cloud;
 
+  // Misma clave SWR que usa PresupuestoMensualTableComponent para listar los presupuestos.
+  const listKey = `/api/presupuesto/bridge/${cloudType}/presupuesto/anual`;
+
   // --- Estados
   const [editingItem, setEditingItem] = useState<PresupuestoMensual | null>(null);
   const [showForm, setShowForm] = useState(false);
@@ -100,7 +103,7 @@ export const PresupuestoMensualComponent = ({
 
       if (!res.ok) throw new Error(await res.text());
 
-      mutate(`/api/presupuesto/bridge/${cloudType}/presupuesto/mensual/all`);
+      mutate(listKey);
       handleCloseForm();
 
       setAlert({
@@ -136,7 +139,7 @@ export const PresupuestoMensualComponent = ({
       if (!res.ok) throw new Error("Error al eliminar el presupuesto mensual");
 
       // mutate(`/api/presupuesto/bridge/${cloudType}/presupuesto/mensual/all`);
-      mutate(`/api/presupuesto/bridge/${cloud}/presupuesto/anual`);
+      mutate(listKey);
       setConfirmDeleteId(null);
       setAlert({
         type: "success",

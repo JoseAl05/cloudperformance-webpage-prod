@@ -1,4 +1,5 @@
 'use client'
+import { formatCurrency } from '@/lib/format';
 
 import React, { useMemo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
@@ -169,7 +170,7 @@ export const RdsInfoConsumeViewCardsComponent = ({
                 />
                 <StatCard
                     title="Costo Total"
-                    value={`$${formatGeneric(costoTotal)}`}
+                    value={formatCurrency(costoTotal)}
                     unit="USD"
                     description="Costo total de todas las instancias en el período."
                     icon={DollarSign}

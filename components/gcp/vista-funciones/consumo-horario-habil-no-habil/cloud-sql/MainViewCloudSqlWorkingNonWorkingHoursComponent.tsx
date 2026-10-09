@@ -31,8 +31,7 @@ export const MainViewCloudSqlWorkingNonWorkingHoursComponent = ({ db_engine }: {
                     isResourceMultiSelect
                     resourceService={db_engine}
                     dbEngine={db_engine}
-                    tagCollection='gcp_sql_instances'
-                    tagColumn='settings.userLabels'
+                    tagResourceType='sql_instances'
                     tagsFilter
                     localService='Cloud SQL'
                 />

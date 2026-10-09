@@ -34,8 +34,7 @@ export const MainViewInstanciasAVGUsoLocInstRdsSQLServerComponent = () => {
                     instancesService='rds-sqlserver'
                     isInstanceMultiSelect
                     tagsFilter
-                    tagColumnName='TagList'
-                    collection='aws_rds_sqlserver'
+                    resourceType='rds_sqlserver'
 
                     isRegionMultiSelect
                     metricsRDSFilter

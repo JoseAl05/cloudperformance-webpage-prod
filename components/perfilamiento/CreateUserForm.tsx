@@ -1,3 +1,4 @@
+import { fetchJson } from '@/lib/fetcher';
 import React, { useState, FormEvent } from 'react';
 import { useSession } from '@/hooks/useSession';
 import { UserRole } from '@/types/db'; 
@@ -10,7 +11,8 @@ interface EmpresaOption {
     userLimit: number;
 }
 
-const fetcher = (url: string) => fetch(url, { credentials: 'include' }).then(res => res.json());
+const fetcher = (url: string) =>
+    fetchJson(url, { credentials: 'include' });
 
 
 const ASSIGNABLE_ROLES: UserRole[] = ['admin_empresa', 'usuario']; 

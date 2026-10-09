@@ -18,13 +18,11 @@ import { InstancesFilterComponent } from '@/components/general_aws/filters/Insta
 import { AsgFilterComponent } from '@/components/general_aws/filters/AsgFilterComponent';
 import { EksFilterComponent } from '@/components/general_aws/filters/EksFilterComponent';
 import { S3BucketFilter } from '@/components/general_aws/filters/S3FilterComponent';
-import { EbsFilterComponent } from '@/components/general_aws/filters/EbsFilterComponent';
 import { EventsTypeFilterComponent } from '@/components/general_aws/filters/EventsTypeFilterComponent';
 import { AdvisorCategoriesFilterComponent } from '@/components/general_aws/filters/AdvisorCategoriesFilterComponent';
 import { AdvisorStatusFilterComponent } from '@/components/general_aws/filters/AdvisorStatusFilterComponent';
 import { VariationMetricFilterComponent } from '@/components/general_aws/filters/VariationMetricFilterComponent';
 import { EC2MetricFilterComponent } from '@/components/general_aws/filters/Ec2MetricLabelFilterComponent';
-import { RDSMetricFilterComponent } from '@/components/general_aws/filters/RdsMetricFilterComponent';
 import { AutoScalingGroupFilterComponent } from '@/components/general_aws/filters/Ec2AutoscalingGroupsFilterComponent';
 import { MetricsFilterComponent } from '@/components/general_aws/filters/MetricsFilterComponent';
 import { MetricsRDSFilterComponent } from '@/components/general_aws/filters/MetricsRDSFilterComponent';
@@ -47,14 +45,12 @@ interface FiltersComponentProps {
     asgFilter?: boolean;
     eksFilter?: boolean;
     s3Filter?: boolean;
-    ebsFilter?: boolean;
     eventsTypesFilter?: boolean;
     advisorCategoriesFilter?: boolean;
     advisorStatusFilter?: boolean;
     autoScalingGroupFilter?: boolean;
     metricFilter?: boolean;
     metricsFilter?: boolean;
-    rdsFilter?: boolean;
     engine?: string;
     metricsRDSFilter?: boolean;
     isAdvisorCategoryMultiselect?: boolean;
@@ -66,13 +62,11 @@ interface FiltersComponentProps {
     isEksAsgInstanceMultiSelect?: boolean;
     isAsgInstanceMultiSelect?: boolean;
     isInstanceMultiSelect?: boolean;
-    isEbsMultiselect?: boolean;
     isViewUnused?: boolean;
     isViewResource?: boolean;
     tagsFilter?: boolean;
     serviceFilter?: boolean;
-    collection?: string | null;
-    tagColumnName?: string | null;
+    resourceType?: string | null;
     variationServiceFilter?: boolean;
     variationMetricFilter?: boolean;
     cloudFilter?: boolean;
@@ -92,20 +86,17 @@ export const FiltersComponent = ({
     asgFilter = false,
     eksFilter = false,
     s3Filter = false,
-    ebsFilter = false,
     eventsTypesFilter = false,
     advisorCategoriesFilter = false,
     advisorStatusFilter = false,
     autoScalingGroupFilter = false,
     metricFilter = false,
     metricsFilter = false,
-    rdsFilter = false,
     engine,
     metricsRDSFilter = false,
     isAdvisorCategoryMultiselect = false,
     isAdvisorStatusMultiselect = false,
     isEventsTypesMultiselect = false,
-    isEbsMultiselect = false,
     isInstanceMultiSelect = false,
     isAsgMultiSelect = false,
     isEksMultiSelect = false,
@@ -115,8 +106,7 @@ export const FiltersComponent = ({
     isViewResource = false,
     tagsFilter = false,
     serviceFilter = false,
-    collection = null,
-    tagColumnName = null,
+    resourceType = null,
     variationServiceFilter = false,
     variationMetricFilter = false,
     cloudFilter = false,
@@ -387,7 +377,6 @@ export const FiltersComponent = ({
         if (newFilters.variationMetric) query.set('variationMetric', newFilters.variationMetric);
         if (newFilters.metric) query.set('metric', newFilters.metric);
         if (newFilters.autoScalingGroup) query.set('autoScalingGroup', newFilters.autoScalingGroup);
-        if (rdsFilter && newFilters.engine) query.set('engine', newFilters.engine);
         if (newFilters.metrics) query.set('metrics', newFilters.metrics);
         if (newFilters.metricsRDS) query.set('metricsRDS', newFilters.metricsRDS);
         if (newFilters.cloud && newFilters.cloud !== 'all_clouds') query.set('cloud', newFilters.cloud);
@@ -704,8 +693,7 @@ export const FiltersComponent = ({
                                     startDate={tempStartDate}
                                     endDate={tempEndDate}
                                     region={tempRegion}
-                                    collection={collection as string}
-                                    tagColumnName={tagColumnName as string}
+                                    resourceType={resourceType as string}
                                     selectedKey={tempKey}
                                     selectedValue={tempValue}
                                     setSelectedKey={setTempKey}
@@ -826,23 +814,6 @@ export const FiltersComponent = ({
                             </div>
                         )}
 
-                        {ebsFilter && (
-                            <div className='space-y-2'>
-                                <label className='text-sm font-medium text-foreground flex items-center gap-2'>
-                                    <Server className='h-4 w-4' />
-                                    Volúmenes EBS
-                                </label>
-                                <EbsFilterComponent
-                                    ebs={tempEbs}
-                                    setEbs={setTempEbs}
-                                    startDate={tempStartDate}
-                                    endDate={tempEndDate}
-                                    region={tempRegion}
-                                    isEbsMultiselect={isEbsMultiselect}
-                                />
-                            </div>
-                        )}
-
                         {eventsTypesFilter && (
                             <div className='space-y-2'>
                                 <label className='text-sm font-medium text-foreground flex items-center gap-2'>
@@ -904,18 +875,6 @@ export const FiltersComponent = ({
                             </div>
                         )}
 
-                        {rdsFilter && engine && (
-                            <div className='space-y-2'>
-                                <label className='text-sm font-medium text-foreground flex items-center gap-2'>
-                                    <Activity className='h-4 w-4' /> Métrica RDS
-                                </label>
-                                <RDSMetricFilterComponent
-                                    selectedMetric={tempMetric}
-                                    setSelectedMetric={setTempMetric}
-                                    engine={engine}
-                                />
-                            </div>
-                        )}
                         {metricsFilter && (
                             <div className='space-y-2 ml-8'>
                                 <label className='text-sm font-medium text-foreground flex items-center gap-2'>

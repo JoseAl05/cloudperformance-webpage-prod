@@ -1,5 +1,6 @@
 'use client'
 
+import { fetcher } from '@/lib/fetcher';
 import { MessageCard } from '@/components/aws/cards/MessageCards';
 import { InstanceGroupChartComponent } from '@/components/gcp/vista-recursos/instance-groups/grafico/InstanceGroupChartComponent';
 import { InstanceGroupsInfoComponent } from '@/components/gcp/vista-recursos/instance-groups/info/InstanceGroupsInfoComponent';
@@ -16,10 +17,6 @@ interface InstanceGroupsComponentProps {
     endDate: Date
     resourceId: string
 }
-
-const fetcher = (url: string) =>
-    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
-        .then(r => r.json());
 
 const isNonEmptyArray = <T,>(v: unknown): v is T[] => Array.isArray(v) && v.length > 0
 

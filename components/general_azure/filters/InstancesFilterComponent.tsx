@@ -1,4 +1,5 @@
 'use client'
+import { fetcher } from '@/lib/fetcher';
 import { useState, Dispatch, SetStateAction, useEffect, useMemo } from 'react'
 import { Check, ChevronsUpDown } from "lucide-react"
 import { cn } from "@/lib/utils"
@@ -30,14 +31,6 @@ interface MeterInstanceItem {
     meter_category: string;
     instances: string[];
 }
-
-const fetcher = (url: string) =>
-    fetch(url, {
-        method: "GET",
-        headers: {
-            "Content-Type": "application/json"
-        }
-    }).then(res => res.json())
 
 export const InstancesFilterComponent = ({
     startDate,

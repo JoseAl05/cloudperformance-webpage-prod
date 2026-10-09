@@ -1,4 +1,5 @@
 'use client'
+import { fetcher } from '@/lib/fetcher';
 import { Dispatch, SetStateAction, useEffect, useState } from 'react'
 import { Check, ChevronsUpDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -19,10 +20,6 @@ interface EksAsgInstancesFilterComponentProps {
     isEksAsgInstanceMultiselect: boolean,
     isInstancesService?: string,
 }
-
-const fetcher = (url: string) =>
-    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
-        .then(r => r.json());
 
 export const EksAsgInstancesFilterComponent = ({
     eksAsg,

@@ -34,8 +34,7 @@ export const MainViewInstanciasAVGUsoLocInstEC2Component = () => {
                     instancesService='ec2'
                     isInstanceMultiSelect
                     tagsFilter
-                    tagColumnName='Tags'
-                    collection='aws_ec2_instances'
+                    resourceType='ec2'
 
                     isRegionMultiSelect
                     metricsFilter

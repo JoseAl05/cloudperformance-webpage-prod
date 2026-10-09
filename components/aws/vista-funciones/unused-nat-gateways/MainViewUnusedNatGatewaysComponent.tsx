@@ -29,8 +29,7 @@ export const MainViewUnusedNatGatewaysComponent = () => {
                     unusedNatGatewaysFilter
                     isUnusedNatGatewaysMultiselect
                     tagsFilter
-                    collection='aws_nat_gateways'
-                    tagColumnName='Tags'
+                    resourceType='nat_gateways'
                 />
             </div>
         </div>

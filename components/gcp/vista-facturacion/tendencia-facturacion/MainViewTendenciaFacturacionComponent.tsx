@@ -31,8 +31,7 @@ export const MainViewTendenciaFacturacionComponent = () => {
                     serviceFilter
                     isServiceMultiSelect
                     tagsFilter
-                    tagCollection="gcp_billing_export_detailed"
-                    tagColumn="labels"
+                    tagResourceType="billing"
                     projectsFilter
                     regionFilter
                 />

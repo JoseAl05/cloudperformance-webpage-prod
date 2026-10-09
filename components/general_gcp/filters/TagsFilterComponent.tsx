@@ -252,6 +252,7 @@
 //     )
 // }
 'use client'
+import { fetcher } from '@/lib/fetcher';
 import { useState, Dispatch, SetStateAction, useEffect, useMemo } from 'react'
 import { Check, ChevronsUpDown } from "lucide-react"
 import { cn } from "@/lib/utils"
@@ -267,12 +268,8 @@ interface TagFilterComponentProps {
     endDate: Date,
     regions: string,
     projects: string,
-    collection: string,
-    tagColumnName: string,
+    resourceType: string,
     localService: string,
-
-    regionField?: string,
-    projectField?: string,
 
     selectedKey?: string | null,
     selectedValue?: string | null,
@@ -287,24 +284,13 @@ interface GcpTagItem {
     Values: string[];
 }
 
-const fetcher = (url: string) =>
-    fetch(url, {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json'
-        }
-    }).then(res => res.json())
-
 export const TagsFilterComponent = ({
     startDate,
     endDate,
     regions,
     projects,
-    collection,
-    tagColumnName,
+    resourceType,
     localService,
-    regionField = 'location',
-    projectField = 'project_id',
     selectedKey,
     selectedValue,
     setSelectedKey,
@@ -321,7 +307,7 @@ export const TagsFilterComponent = ({
 
     const shouldFetch = !!projects
 
-    const url = `/api/gcp/bridge/gcp/general/get_all_tags?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${regions}&region_field=${regionField}&project=${projects}&project_field=${projectField}&collection=${collection}&tag_column_name=${tagColumnName}&local_service=${localService}`;
+    const url = `/api/gcp/bridge/gcp/general/get_all_tags?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${regions}&project=${projects}&resource_type=${resourceType}&local_service=${localService}`;
 
     const { data, error, isLoading } = useSWR(
         shouldFetch ? url : null,

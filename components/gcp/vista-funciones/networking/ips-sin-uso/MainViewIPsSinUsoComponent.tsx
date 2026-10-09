@@ -32,8 +32,7 @@ export const MainViewIPsSinUsoComponent = () => {
           projectFilter
           regionFilter
           tagsFilter
-          tagCollection="gcp_compute_addresses"
-          tagColumn="labels"
+          tagResourceType="compute_addresses"
         />
       </div>
     </div>

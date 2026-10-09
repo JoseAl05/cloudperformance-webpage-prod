@@ -1,5 +1,6 @@
 'use client'
 
+import { fetcher } from '@/lib/fetcher';
 import { useRef, useEffect, useState } from 'react';
 import * as echarts from 'echarts';
 import { TrendingUp, Activity, Info, AlertCircle } from 'lucide-react';
@@ -20,15 +21,6 @@ interface DeploymentData {
     date: string;
     unique_deployments: number;
 }
-
-
-const fetcher = (url: string) =>
-    fetch(url, {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json'
-        }
-    }).then(res => res.json());
 
 const isNonEmptyArray = <T,>(v: unknown): v is T[] => Array.isArray(v) && v.length > 0
 const isNullish = (v: unknown) => v === null || v === undefined

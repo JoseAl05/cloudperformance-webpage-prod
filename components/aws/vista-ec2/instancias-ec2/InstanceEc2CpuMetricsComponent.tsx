@@ -1,5 +1,6 @@
 'use client'
 
+import { fetcher } from '@/lib/fetcher';
 import useSWR from 'swr';
 import { Ec2ResourceViewUsageCpuComponent } from '@/components/aws/vista-ec2/instancias-ec2/graficos/Ec2ResourceViewUsageCpuComponent';
 import { Ec2ResourceViewUsageCreditsComponent } from '@/components/aws/vista-ec2/instancias-ec2/graficos/Ec2ResourceViewUsageCreditsComponent';
@@ -19,10 +20,6 @@ interface InstanceEc2CpuMetricsComponentProps {
     endDate: Date,
     instance: string
 }
-
-const fetcher = (url: string) =>
-    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
-        .then(r => r.json());
 
 const isNonEmptyArray = <T,>(v: unknown): v is T[] => Array.isArray(v) && v.length > 0
 const isNullish = (v: unknown) => v === null || v === undefined

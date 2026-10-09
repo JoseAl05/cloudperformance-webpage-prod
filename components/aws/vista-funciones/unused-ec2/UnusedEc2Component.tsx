@@ -1,5 +1,6 @@
 'use client'
 
+import { fetcher } from '@/lib/fetcher';
 import { MessageCard } from '@/components/aws/cards/MessageCards';
 import { UnusedEc2CardsComponent } from '@/components/aws/vista-funciones/unused-ec2/info/UnusedEc2CardsComponent';
 import { UnusedEc2TableComponent } from '@/components/aws/vista-funciones/unused-ec2/table/UnusedEc2TableComponent';
@@ -14,10 +15,6 @@ interface UnusedEc2ComponentProps {
     instance: string;
     region: string;
 }
-
-const fetcher = (url: string) =>
-    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
-        .then(r => r.json());
 
 const isNonEmptyArray = <T,>(v: unknown): v is T[] => Array.isArray(v) && v.length > 0
 

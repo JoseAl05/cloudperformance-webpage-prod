@@ -27,8 +27,7 @@ export const MainViewDeploymentsComponent = () => {
                     dateFilter
                     subscriptionIdFilter
                     resourceGroupFilter
-                    resourceGroupCollection='custom_activity_logs_deployments'
-                    resourceGroupSubscriptionField='subscription_id'
+                    resourceGroupResourceType='deployments'
                     deploymentOperationsFilter
                 />
             </div>

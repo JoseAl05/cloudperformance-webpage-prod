@@ -54,10 +54,6 @@ const normalize = (s: string) =>
         .normalize('NFD')
         .replace(/\p{Diacritic}/gu, '');
 
-const fetcher = (url: string) =>
-    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
-        .then(r => r.json());
-
 export const AdvisorViewInfoComponent = ({ data, startDate, endDate }: AdvisorViewInfoComponentProps) => {
 
     const safeData = useMemo(() => {

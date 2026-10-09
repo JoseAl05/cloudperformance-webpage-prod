@@ -202,13 +202,12 @@ export const CentroDeCostoComponent = () => {
 
     try {
       const params = new URLSearchParams({
-        collection: "azure_consumption_billing_account_modern_usage_details",
-        tag_column_name: "tags",
+        resource_type: "billing",
         cost_center_keys: importKeys,
       });
 
       const response = await fetch(
-        `/api/presupuesto/bridge/${cloudType}/azure/obtener-centro-costo?${params.toString()}`
+        `/api/presupuesto/bridge/${cloudType}/obtener-centro-costo?${params.toString()}`
       );
 
       if (!response.ok) {
@@ -250,7 +249,7 @@ export const CentroDeCostoComponent = () => {
     setIsImporting(true);
     try {
       const response = await fetch(
-        `/api/${cloudType}/azure/centro-costo/importar-masivo`,
+        `/api/presupuesto/bridge/${cloudType}/centro-costo/importar-masivo`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

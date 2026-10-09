@@ -32,7 +32,7 @@ export const MainViewIncrementoTopRecursosUsoComponent = () => {
         Component={IncrementoTopRecursosUsoChartComponent}
         dateFilter
         metricsFilter
-        metricsCollection='custom_db_metrics_logs'
+        metricsResourceType='db'
         resourceTypeFilter
         resourcesFilter  
       />

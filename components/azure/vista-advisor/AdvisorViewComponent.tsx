@@ -1,11 +1,11 @@
 'use client'
+import { fetcher } from '@/lib/fetcher';
 import useSWR from 'swr'
 import { LoaderComponent } from '@/components/general_aws/LoaderComponent'
 import { MessageCard } from '@/components/azure/cards/MessageCards'
 import { AlertCircle, AtomIcon, ChartBar, Info } from 'lucide-react'
 import { AdvisorViewPieChartComponent } from '@/components/azure/vista-advisor/grafico/AdvisorViewPieChartComponent'
 import { AdvisorViewInfoComponent } from '@/components/azure/vista-advisor/info/AdvisorViewInfoComponent'
-import { AIComponentAzure } from '@/components/azure/vista-advisor/ia-recommedations/AIComponentAzure'
 import { AiRecommendationReport } from '@/interfaces/ai-recommendations/aiRecommendations'
 import { AiRecommendationsComponent } from '@/components/AiRecommendationsComponent'
 
@@ -33,10 +33,6 @@ interface AzureAdvisorRecommendation {
 }
 
 type AzureAdvisorApiResponse = AzureAdvisorRecommendation[]
-
-const fetcher = (url: string) =>
-    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
-        .then(r => r.json());
 
 const isNonEmptyArray = <T,>(v: unknown): v is T[] => Array.isArray(v) && v.length > 0
 

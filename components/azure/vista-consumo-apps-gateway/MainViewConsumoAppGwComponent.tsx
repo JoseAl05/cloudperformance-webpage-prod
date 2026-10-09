@@ -33,14 +33,10 @@ export const MainViewConsumoAppGwComponent = () => {
                     isRegionMultiSelect
                     subscriptionIdFilter
                     tagsFilter
-                    tagsCollection='azure_app_gateways'
-                    tagsColumnName='tags'
-                    tagsRegionField='location'
-                    tagsSubscriptionField='subscription_id'
+                    tagsResourceType='app_gateways'
                     tagsLocalService='Application Gateway'
                     resourceGroupFilter
-                    resourceGroupCollection='azure_app_gateways'
-                    resourceGroupSubscriptionField='subscription_id'
+                    resourceGroupResourceType='app_gateways'
                     appGFilter
                     isAppGFilterMultiselect
                 />

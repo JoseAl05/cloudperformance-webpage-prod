@@ -1,18 +1,10 @@
 'use client'
+import { fetcher } from '@/lib/fetcher';
 import useSWR from 'swr'
 import { useEffect, useRef, useMemo } from "react"
 import * as echarts from "echarts"
 import { Card, CardContent } from '@/components/ui/card'
 import { TrendingUp, TrendingDown, Calendar, Activity, AlertTriangle } from "lucide-react"
-
-const fetcher = (url: string) =>
-  fetch(url, {
-    method: 'GET',
-    headers: {
-      'Authorization': `Bearer ${process.env.NEXT_PUBLIC_API_TOKEN}`,
-      'Content-Type': 'application/json'
-    }
-  }).then(res => res.json())
 
 interface IncrementoTopRecursosUsoChartProps {
   startDate: Date

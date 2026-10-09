@@ -1,5 +1,6 @@
 'use client'
 
+import { fetchJson } from '@/lib/fetcher';
 import { useMemo, useState, useEffect } from 'react';
 import { ColumnDef } from "@tanstack/react-table";
 import { DataTableGrouping } from '@/components/data-table/data-table-grouping';
@@ -80,8 +81,7 @@ export const TagsDataTable = ({ data }: TagsDataTableProps) => {
 
         if (isCCModalOpen && costCenters.length === 0) {
             setIsLoadingCCs(true);
-            fetch('/api/gcp/bridge/mantenedor-tags/gcp/local/cost-centers')
-                .then(res => res.json())
+            fetchJson('/api/gcp/bridge/mantenedor-tags/gcp/local/cost-centers')
                 .then(responseData => {
                     if (isMounted && responseData.status === 'success' && responseData.data) {
                         setCostCenters(responseData.data);

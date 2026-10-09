@@ -1,5 +1,6 @@
 'use client'
 
+import { fetcher } from '@/lib/fetcher';
 import { useState, useEffect } from 'react'
 import useSWR from 'swr'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
@@ -22,12 +23,6 @@ import { LoaderComponent } from '@/components/general_gcp/LoaderComponent'
 /* ======================
    Utils & Formatters
 ====================== */
-
-const fetcher = (url: string) =>
-  fetch(url, {
-    method: 'GET',
-    headers: { 'Content-Type': 'application/json' }
-  }).then(r => r.json())
 
 const formatCurrency = (amount: number) => {
   return new Intl.NumberFormat('en-US', {

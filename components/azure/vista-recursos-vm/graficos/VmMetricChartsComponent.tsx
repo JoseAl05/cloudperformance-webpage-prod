@@ -1,5 +1,6 @@
 'use client';
 
+import { fetcher } from '@/lib/fetcher';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import * as echarts from 'echarts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -295,14 +296,6 @@ const createSeries = (name: string, data: [string, number][], color: string, are
     }
   })
 });
-
-const fetcher = (url: string) =>
-  fetch(url, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json'
-    }
-  }).then(res => res.json());
 
 interface VmMetricProps {
   startDate: Date;

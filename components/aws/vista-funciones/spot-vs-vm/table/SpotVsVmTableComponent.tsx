@@ -1,5 +1,6 @@
 "use client"
 
+import { fetcher } from '@/lib/fetcher';
 import useSWR from "swr"
 import { ColumnDef } from "@tanstack/react-table"
 import { DataTableGrouping } from "@/components/data-table/data-table-grouping"
@@ -19,10 +20,6 @@ type SpotVsVmApiResponse = {
   total_instancias: number
   instancias: InstanceData[]
 }
-
-const fetcher = (url: string) =>
-    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
-        .then(r => r.json());
 
 export const TableComponentSpotVsVm = ({
   startDateFormatted,

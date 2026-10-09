@@ -1,4 +1,5 @@
 'use client'
+import { fetcher } from '@/lib/fetcher';
 import useSWR from 'swr'
 import { useEffect, useRef, useMemo } from "react"
 import * as echarts from "echarts"
@@ -6,10 +7,6 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Server, Cloud, Percent } from "lucide-react"
 import { TableComponentSpotVsVm } from "@/components/aws/vista-funciones/spot-vs-vm/table/SpotVsVmTableComponent"
 import { SpotVsVmChartComponent } from '@/components/aws/vista-funciones/spot-vs-vm/grafico/SpotVsVmChartComponent'
-
-const fetcher = (url: string) =>
-    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
-        .then(r => r.json());
 
 interface SpotVsVmProps {
   startDate: Date,

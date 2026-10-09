@@ -3,6 +3,7 @@ import { cookies } from 'next/headers';
 import { AUTH_COOKIE } from '@/lib/cookies';
 import { verifyAuthToken } from '@/lib/auth';
 import { getCollection } from '@/lib/mongodb';
+import { findCompanyConnectors } from '@/lib/connectors';
 import { ObjectId } from 'mongodb';
 import type { User } from '@/types/db';
 
@@ -31,15 +32,8 @@ export async function GET() {
       return NextResponse.json({ user: null }, { status: 404 });
     }
 
-    const userClient = payload.client;
-    console.log(userClient)
-
-    const connectorCollection = await getCollection('cloudperformance_external_connectors');
-
-    const connector = await connectorCollection
-      .find({ "created_by.client": userClient })
-      .project({ _id: 0, connector_type: 1, created_by: 1, config: 1, created_at: 1, updated_at: 1, status: 1 })
-      .toArray();
+    // Conectores de la empresa activa del token (cambia con el swap de admin_global)
+    const connector = await findCompanyConnectors(payload.client);
 
 
     const sessionUser: SessionUser = {

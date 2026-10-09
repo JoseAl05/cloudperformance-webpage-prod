@@ -1,4 +1,6 @@
 'use client'
+import { formatCurrency } from '@/lib/format';
+import { fetcher } from '@/lib/fetcher';
 import useSWR from 'swr';
 import { useState, useMemo } from 'react';
 import { TrendingUp, DollarSign, Info, TrendingDown, Table2 } from 'lucide-react';
@@ -41,14 +43,6 @@ export interface FacturacionData {
     cost_net_clp: number;
     cost_net_usd: number;
 }
-
-const fetcher = (url: string) =>
-    fetch(url, {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json'
-        }
-    }).then(res => res.json())
 
 export function parseScientific(num: string): string {
     if (!/\d+\.?\d*e[+-]*\d+/i.test(num)) {
@@ -197,22 +191,6 @@ export const TendenciaFacturacionComponent = ({ startDate, endDate, projects, re
         </Popover>
     );
 
-    const billingValue = (value: number) => {
-        let finalValue = '';
-        const absValue = Math.abs(value);
-
-        if (absValue < 0.01 && absValue > 0) {
-            finalValue = value.toPrecision(2);
-        } else {
-            if (currency === "original") {
-                finalValue = value.toPrecision(2)
-            } else if (currency === "usd") {
-                finalValue = value.toPrecision(2)
-            }
-        }
-        return parseScientific(finalValue)
-    }
-
     const isNegative = metrics.total < 0;
 
     const finOpsTitle = isNegative ? "Costo Neto (Saldo a Favor)" : "Costo Neto (Cargo)";
@@ -276,7 +254,7 @@ export const TendenciaFacturacionComponent = ({ startDate, endDate, projects, re
                             <div className="flex flex-col gap-1">
                                 <p className="text-sm font-medium text-muted-foreground">Costo Acumulado</p>
                                 <p className={`text-2xl font-bold ${amountColor}`}>
-                                    $ {billingValue(metrics.total)}
+                                    {formatCurrency(metrics.total, { currency: currency === 'usd' ? 'USD' : 'CLP' })}
                                 </p>
 
                                 <div className="mt-2 p-2 bg-muted/40 rounded text-xs text-muted-foreground border border-muted">

@@ -1,5 +1,6 @@
 'use client'
 
+import { fetcher } from '@/lib/fetcher';
 import React, { useMemo } from 'react';
 import useSWR from 'swr';
 import { TopStorageBucketsCardsComponent } from './info/TopStorageBucketsCardsComponent';
@@ -16,8 +17,6 @@ interface TopStorageBucketsComponentProps {
     tagKey?: string | null;
     tagValue?: string | null;
 }
-
-const fetcher = (url: string) => fetch(url).then(res => res.json());
 
 export const TopStorageBucketsComponent = ({
     startDate,

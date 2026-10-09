@@ -1,5 +1,6 @@
 'use client';
 
+import { fetcher } from '@/lib/fetcher';
 import { Dispatch, SetStateAction, useState } from 'react';
 import useSWR from 'swr';
 import { Check, ChevronsUpDown } from 'lucide-react';
@@ -24,10 +25,6 @@ interface S3BucketFilterProps {
   endDate: Date;
   region?: string;
 }
-
-const fetcher = (url: string) =>
-    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
-        .then(r => r.json());
 
 export const S3BucketFilter = ({
   selectedBuckets,

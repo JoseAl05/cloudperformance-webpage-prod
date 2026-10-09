@@ -1,16 +1,8 @@
 'use client'
+import { fetcher } from '@/lib/fetcher';
 import useSWR from 'swr'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Loader2 } from 'lucide-react'
-
-const fetcher = (url: string) =>
-  fetch(url, {
-    method: 'GET',
-    headers: {
-      'Authorization': `Bearer ${process.env.NEXT_PUBLIC_API_TOKEN}`,
-      'Content-Type': 'application/json'
-    }
-  }).then(res => res.json())
 
 interface ResourcesFilterComponentProps {
   startDate: Date

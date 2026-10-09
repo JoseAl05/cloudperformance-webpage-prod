@@ -1,5 +1,6 @@
 'use client'
 
+import { fetcher } from '@/lib/fetcher';
 import useSWR from 'swr'
 import { Card, CardContent } from '@/components/ui/card'
 import { AlertTriangle, Server, FolderTree, CreditCard } from 'lucide-react'
@@ -7,15 +8,6 @@ import { DataTableSingle } from '@/components/data-table/data-table-single'
 import { tableServicesColumns } from '@/components/azure/tables-azure/tablas-item-azure/table/tableServicesColumns'
 import { tableResourceGroupsColumns } from '@/components/azure/tables-azure/tablas-item-azure/table/tableResourceGroupsColumns'
 import { tableBillingAccountsColumns } from '@/components/azure/tables-azure/tablas-item-azure/table/tableBillingAccountsColumns'
-
-const fetcher = (url: string) =>
-  fetch(url, {
-    method: 'GET',
-    headers: {
-      'Authorization': `Bearer ${process.env.NEXT_PUBLIC_API_TOKEN}`,
-      'Content-Type': 'application/json'
-    }
-  }).then(res => res.json())
 
 export const TablasItemAzureComponent = () => {
   const apiUrl = '/api/azure/bridge/azure/tablas-item-azure'

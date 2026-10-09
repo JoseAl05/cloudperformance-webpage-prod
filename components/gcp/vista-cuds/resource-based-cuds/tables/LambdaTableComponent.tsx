@@ -1,5 +1,6 @@
 "use client"
 
+import { fetcher } from '@/lib/fetcher';
 import useSWR from "swr"
 import { ColumnDef } from "@tanstack/react-table"
 import { DataTableGrouping } from "@/components/data-table/data-table-grouping"
@@ -19,10 +20,6 @@ type LambdaFunction = {
     request_price: number
     estimated_cost_per_invocation: number
 }
-
-const fetcher = (url: string) =>
-    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
-        .then(r => r.json());
 
 export const LambdaTableComponent = ({
     startDateFormatted,

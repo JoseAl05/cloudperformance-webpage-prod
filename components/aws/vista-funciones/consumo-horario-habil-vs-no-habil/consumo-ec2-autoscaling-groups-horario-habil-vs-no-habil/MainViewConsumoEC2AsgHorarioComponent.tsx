@@ -36,8 +36,7 @@ export const ViewConsumoEC2AutoscalingGroupsHorario = () => {
         isInstanceMultiSelect
         instancesService='asg'
         tagsFilter
-        tagColumnName='Tags'
-        collection='aws_auto_scaling_groups'
+        resourceType='asg'
       />
     </div>
   )

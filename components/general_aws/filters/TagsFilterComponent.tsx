@@ -1,4 +1,5 @@
 'use client'
+import { fetcher } from '@/lib/fetcher';
 import { useState, Dispatch, SetStateAction, useEffect, useMemo } from 'react'
 import { Check, ChevronsUpDown } from "lucide-react"
 import { cn } from "@/lib/utils"
@@ -14,8 +15,7 @@ interface TagFilterComponentProps {
     startDate: Date,
     endDate: Date,
     region: string,
-    collection: string,
-    tagColumnName: string,
+    resourceType: string,
     localService?:string,
     selectedKey?: string | null,
     selectedValue?: string | null,
@@ -25,16 +25,11 @@ interface TagFilterComponentProps {
     onChange?: (next: { key: string | null; value: string | null }) => void
 }
 
-const fetcher = (url: string) =>
-    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
-        .then(r => r.json());
-
 export const TagFilterComponent = ({
     startDate,
     endDate,
     region,
-    collection,
-    tagColumnName,
+    resourceType,
     localService,
     selectedKey,
     selectedValue,
@@ -54,7 +49,7 @@ export const TagFilterComponent = ({
     const shouldFetch = !!region
     const { data, error, isLoading } = useSWR(
         shouldFetch
-            ? `/api/aws/bridge/get-all-tags?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&collection=${collection}&tag_column_name=${tagColumnName}&local_service=${localService}`
+            ? `/api/aws/bridge/get-all-tags?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&resource_type=${resourceType}&local_service=${localService}`
             : null,
         fetcher
     )

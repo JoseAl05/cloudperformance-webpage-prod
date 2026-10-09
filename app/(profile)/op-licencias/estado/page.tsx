@@ -1,5 +1,6 @@
 'use client';
 
+import { fetchJson } from '@/lib/fetcher';
 import React, { useState, useEffect } from 'react';
 import { useSession } from '@/hooks/useSession';
 import {
@@ -211,8 +212,7 @@ export default function EstadoPage() {
 
   useEffect(() => {
     if (!user) return;
-    fetch('/api/op-licencias/estado', { credentials: 'include' })
-      .then(r => r.json())
+    fetchJson('/api/op-licencias/estado', { credentials: 'include' })
       .then(data => setPartners(data))
       .catch(() => setError('Error al cargar estado de licencias.'))
       .finally(() => setLoading(false));

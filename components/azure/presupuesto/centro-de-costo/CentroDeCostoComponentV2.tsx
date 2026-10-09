@@ -462,8 +462,7 @@ export const CentroDeCostoComponentV2 = () => {
 
     try {
       const params = new URLSearchParams({
-        collection: "azure_consumption_billing_account_modern_usage_details",
-        tag_column_name: "tags",
+        resource_type: "billing",
         cost_center_keys: importKeys,
       });
 

@@ -1,4 +1,5 @@
 'use client'
+import { fetchJson } from '@/lib/fetcher';
 import { Dispatch, SetStateAction, useEffect, useState } from 'react'
 import { Check, ChevronsUpDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -20,18 +21,13 @@ interface NatGatewaysFilterComponentProps {
 }
 
 const fetcherPost = (url: string, tags: { Key: string; Value: string } | null = null) =>
-    fetch(url, {
+    fetchJson(url, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
         body: tags ? JSON.stringify([tags]) : null,
-    }).then(res => res.json());
-
-const fetcherGet = (url: string) =>
-    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
-        .then(r => r.json());
-
+    });
 
 export const NatGatewaysFilterComponent = ({
     startDate, endDate, natGateway, setNatGateway, region, selectedKey, selectedValue, isNatGatewayMultiselect

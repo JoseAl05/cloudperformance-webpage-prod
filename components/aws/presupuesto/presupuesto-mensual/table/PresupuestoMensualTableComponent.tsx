@@ -1,5 +1,6 @@
 "use client";
 
+import { fetcher } from '@/lib/fetcher';
 import { useState, useMemo } from "react";
 import useSWR from "swr";
 import {
@@ -66,9 +67,6 @@ const MES_LETRAS = [
   "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
   "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
 ];
-
-const fetcher = (url: string) =>
-  fetch(url, { method: "GET", headers: { "Content-Type": "application/json" } }).then((r) => r.json());
 
 export const PresupuestoMensualTableComponent = ({
   cloud,

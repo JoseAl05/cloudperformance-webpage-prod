@@ -28,16 +28,16 @@ export const MainViewClusterGkeConsumeComponent = () => {
 
             <div className="w-full min-w-0">
                 <FiltersComponent
+                    cloud="gcp"
                     Component={ClusterGkeConsumeComponent}
                     dateFilter
-                    projectFilter
+                    projectsFilter
                     regionFilter
                     tagsFilter
                     resourceFilter
                     isResourceMultiSelect
                     resourceService='clusters-gke'
-                    tagCollection="gcp_compute_instances"
-                    tagColumn="labels"
+                    tagResourceType="compute_instances"
                     localService="Compute Engine"
                 />
             </div>

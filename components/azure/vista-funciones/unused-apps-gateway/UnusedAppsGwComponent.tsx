@@ -1,5 +1,6 @@
 'use client'
 
+import { fetcher } from '@/lib/fetcher';
 import { MessageCard } from '@/components/aws/cards/MessageCards';
 import { UnusedAppsGwCardsComponent } from '@/components/azure/vista-funciones/unused-apps-gateway/info/UnusedAppsGwCardsComponent';
 import { UnusedAppsGwTable } from '@/components/azure/vista-funciones/unused-apps-gateway/table/UnusedAppsGwTable';
@@ -15,10 +16,6 @@ interface UnusedAppsGwComponentProps {
     subscription: string;
     region: string;
 }
-
-const fetcher = (url: string) =>
-    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
-        .then(r => r.json());
 
 const isNonEmptyArray = <T,>(v: unknown): v is T[] => Array.isArray(v) && v.length > 0
 

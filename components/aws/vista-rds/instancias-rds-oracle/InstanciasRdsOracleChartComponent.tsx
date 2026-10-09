@@ -1,5 +1,6 @@
 "use client";
 
+import { fetcher } from '@/lib/fetcher';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useRef, useEffect } from "react";
 import useSWR from "swr";
@@ -78,10 +79,6 @@ const transformMetricsForChart = (
   if (!metricsData?.metrics_data) return [];
   return metricsData.metrics_data as MetricPoint[];
 };
-
-const fetcher = (url: string) =>
-  fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
-    .then(r => r.json());
 
 export const InstanciasRdsOracleChartComponent = ({
   startDate,

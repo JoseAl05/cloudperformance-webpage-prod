@@ -1,5 +1,6 @@
 'use client'
 
+import { fetcher } from '@/lib/fetcher';
 import { MessageCard } from '@/components/aws/cards/MessageCards';
 import { UnusedRoute53CardsComponent } from '@/components/aws/vista-funciones/unused-r53/info/UnusedRoute53CardsComponent';
 import { UnusedRoute53Table } from '@/components/aws/vista-funciones/unused-r53/table/UnusedRoute53Table';
@@ -14,10 +15,6 @@ interface UnusedRoute53ComponentProps {
     region: string;
     unusedR53: string;
 }
-
-const fetcher = (url: string) =>
-    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
-        .then(r => r.json());
 
 const isNonEmptyArray = <T,>(v: unknown): v is T[] => Array.isArray(v) && v.length > 0
 const isNullish = (v: unknown) => v === null || v === undefined

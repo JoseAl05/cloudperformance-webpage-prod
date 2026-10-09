@@ -1,5 +1,6 @@
 'use client';
 
+import { fetcher } from '@/lib/fetcher';
 import useSWR from 'swr';
 import { useMemo } from 'react';
 import { AVGUsoLocInstRdsMariaDBViewUsoPorRegionComponent } from '@/components/aws/vista-prom-loc/avg-uso-loc-inst-rds-mariadb/graficos/AVGUsoLocInstRdsMariaDBViewUsoPorRegionComponent';
@@ -78,10 +79,6 @@ interface ProcessedHeatmapData {
   region: string;
   metrics: { [key: string]: MetricValues };
 }
-
-const fetcher = (url: string) =>
-  fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
-    .then(r => r.json());
 
 export const AVGUsoLocInstRdsMariaDBChartComponent = ({
   startDate,

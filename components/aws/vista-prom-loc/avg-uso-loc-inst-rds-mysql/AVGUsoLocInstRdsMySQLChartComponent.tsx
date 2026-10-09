@@ -1,5 +1,6 @@
 'use client';
 
+import { fetcher } from '@/lib/fetcher';
 import useSWR from 'swr';
 import { useMemo } from 'react';
 import { AVGUsoLocInstRdsMySQLViewUsoPorRegionComponent } from '@/components/aws/vista-prom-loc/avg-uso-loc-inst-rds-mysql/graficos/AVGUsoLocInstRdsMySQLViewUsoPorRegionComponent';
@@ -78,10 +79,6 @@ interface ProcessedHeatmapData {
   region: string;
   metrics: { [key: string]: MetricValues };
 }
-
-const fetcher = (url: string) =>
-  fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
-    .then(r => r.json());
 
 export const AVGUsoLocInstRdsMySQLChartComponent = ({
   startDate,

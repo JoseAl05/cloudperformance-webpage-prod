@@ -1,8 +1,9 @@
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 import { AUTH_COOKIE } from '@/lib/cookies';
+import { BRIDGE_ALLOWED_PREFIXES, isAllowedBridgePath } from '@/lib/bridgePaths';
 
-const BASE = (process.env.API_PRESUPUESTO || '').replace(/\/+$/, '');
+const BASE = process.env.NODE_ENV === 'development' ? (process.env.API_PRESUPUESTO_DEV || '').replace(/\/+$/, '') : (process.env.API_PRESUPUESTO || '').replace(/\/+$/, '');
 const FORWARD_HEADER_ALLOWLIST = new Set([
   'accept',
   'content-type',
@@ -24,6 +25,9 @@ async function proxy(
   const params = await ctx.params;
   const pathArray = params.path ?? [];
   const subpath = pathArray.join('/');
+  if (!isAllowedBridgePath(pathArray, BRIDGE_ALLOWED_PREFIXES.presupuesto)) {
+    return NextResponse.json({ error: 'Ruta no permitida' }, { status: 404 });
+  }
 
   const cookieStore = await cookies();
   const token = cookieStore.get(AUTH_COOKIE)?.value;

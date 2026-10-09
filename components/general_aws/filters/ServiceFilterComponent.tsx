@@ -1,4 +1,5 @@
 'use client';
+import { fetcher } from '@/lib/fetcher';
 import { Dispatch, SetStateAction, useState } from 'react';
 import useSWR from 'swr';
 import { Check, ChevronsUpDown } from 'lucide-react';
@@ -15,10 +16,6 @@ interface ServiceFilterComponentProps {
 interface ServiceData {
   SERVICE: string;
 }
-
-const fetcher = (url: string) =>
-  fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
-    .then(r => r.json());
 
 export const ServiceFilterComponent = ({ selectedServices, setSelectedServices }: ServiceFilterComponentProps) => {
   const [open, setOpen] = useState(false);

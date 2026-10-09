@@ -1,3 +1,4 @@
+import { fetchJson } from '@/lib/fetcher';
 import React, { useState } from 'react';
 import useSWR from 'swr';
 import { Trash2, Edit, X } from 'lucide-react';
@@ -15,7 +16,8 @@ interface EmpresaData {
     planName: string;
 }
 
-const fetcher = (url: string) => fetch(url, { credentials: 'include' }).then(res => res.json());
+const fetcher = (url: string) =>
+    fetchJson(url, { credentials: 'include' });
 
 const ToastNotification = ({ message, type, onClose }) => {
     const bgColor = type === 'success' ? 'bg-green-600' : 'bg-red-600';

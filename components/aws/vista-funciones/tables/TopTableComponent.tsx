@@ -1,5 +1,6 @@
 "use client"
 
+import { fetcher } from '@/lib/fetcher';
 import useSWR from "swr"
 import { ColumnDef } from "@tanstack/react-table"
 import { DataTableSingle } from "@/components/data-table/data-table-single"
@@ -13,10 +14,6 @@ type TableDataTop = {
   costo_neto: number | string
   costo_bruto: number | string
 }
-
-const fetcher = (url: string) =>
-    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
-        .then(r => r.json());
 
 export const TableComponentTop = ({
   startDateFormatted,

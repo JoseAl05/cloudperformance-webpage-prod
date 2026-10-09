@@ -1,5 +1,6 @@
 'use client'
 
+import { fetcher } from '@/lib/fetcher';
 import { MessageCard } from '@/components/azure/cards/MessageCards';
 import { LoaderComponent } from '@/components/general_azure/LoaderComponent';
 import { AzureFoundryComparisonView } from '@/components/microsoft-foundry/comparacion/info/AFComparisonViewComponent';
@@ -11,10 +12,6 @@ interface AzureFoundryComparisonComponent {
     endDate?: Date
     selectedInstance?: string | null
 }
-
-const fetcher = (url: string) =>
-    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
-        .then(r => r.json());
 
 export const AzureFoundryComparisonComponent = ({ startDate, endDate, selectedInstance }: AzureFoundryComparisonComponent) => {
 

@@ -34,8 +34,7 @@ export const MainViewInstanciasAVGUsoLocInstRdsMySQLComponent = () => {
                     instancesService='rds-mysql'
                     isInstanceMultiSelect
                     tagsFilter
-                    tagColumnName='TagList'
-                    collection='aws_rds_mysql'
+                    resourceType='rds_mysql'
                     
                     isRegionMultiSelect
                     metricsRDSFilter

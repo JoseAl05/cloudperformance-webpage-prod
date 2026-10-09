@@ -1,5 +1,6 @@
 'use client';
 
+import { fetcher } from '@/lib/fetcher';
 import React, { useMemo } from 'react';
 import useSWR from 'swr';
 import { TopFilestoreSubUtilizadoCardsComponent } from './info/TopFilestoreSubUtilizadoCardsComponent';
@@ -16,8 +17,6 @@ interface TopFilestoreSubUtilizadoComponentProps {
     tagKey?: string | null;
     tagValue?: string | null;
 }
-
-const fetcher = (url: string) => fetch(url).then(res => res.json());
 
 export const TopFilestoreSubUtilizadoComponent = ({
     startDate,

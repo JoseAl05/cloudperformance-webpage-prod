@@ -1,4 +1,5 @@
 'use client'
+import { fetcher } from '@/lib/fetcher';
 import useSWR from 'swr'
 import { useRef, useState } from "react"
 import * as echarts from "echarts"
@@ -13,10 +14,6 @@ import {
   SelectValue
 } from "@/components/ui/select"
 import { TopFacturacionChartComponent } from '@/components/aws/vista-funciones/top-facturaciones/grafico/TopFacturacionChartComponent'
-
-const fetcher = (url: string) =>
-  fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
-    .then(r => r.json());
 
 interface TopDolaresInstanceTypeProps {
   startDate: Date,

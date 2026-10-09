@@ -144,6 +144,7 @@
 // }
 
 'use client'
+import { fetcher } from '@/lib/fetcher';
 
 import { MessageCard } from '@/components/aws/cards/MessageCards';
 import { ConsumoHorarioChartComponent } from '@/components/aws/vista-funciones/consumo-horario-habil-vs-no-habil/grafico/ConsumoHorarioChartComponent';
@@ -162,10 +163,6 @@ interface ConsumoEC2HorarioComponentProps {
   instance: string
   region: string,
 }
-
-const fetcher = (url: string) =>
-  fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
-    .then(r => r.json());
 
 const isNonEmptyArray = <T,>(v: unknown): v is T[] => Array.isArray(v) && v.length > 0
 
@@ -273,6 +270,7 @@ export const ConsumoEC2HorarioComponent = ({ startDate, endDate, region, instanc
         </div>
         <ConsumoHorarioTableComponent
           data={workingNonWorkingUsageSummaryByResourceData}
+          resourceType="EC2"
         />
       </div>
     </>

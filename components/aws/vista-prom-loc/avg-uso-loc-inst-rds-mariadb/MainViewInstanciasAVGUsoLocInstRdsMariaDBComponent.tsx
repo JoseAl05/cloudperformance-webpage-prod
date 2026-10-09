@@ -34,8 +34,7 @@ export const MainViewInstanciasAVGUsoLocInstRdsMariaDBComponent = () => {
                     instancesService='rds-mariadb'
                     isInstanceMultiSelect
                     tagsFilter
-                    tagColumnName='TagList'
-                    collection='aws_rds_mariadb'
+                    resourceType='rds_mariadb'
                     
                     isRegionMultiSelect
                     metricsRDSFilter

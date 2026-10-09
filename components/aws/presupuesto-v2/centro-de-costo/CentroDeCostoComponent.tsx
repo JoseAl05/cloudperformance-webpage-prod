@@ -40,6 +40,8 @@ interface CloudTag {
 
 export const CentroDeCostoComponent = () => {
   const cloudType = "aws";
+  // La importación de centros de costo desde la nube sólo tiene back end para Azure.
+  const canImportFromCloud = false;
 
   // --- Estados Originales ---
   const [editingCentro, setEditingCentro] = useState<CentroCosto | null>(null);
@@ -202,8 +204,7 @@ export const CentroDeCostoComponent = () => {
 
     try {
       const params = new URLSearchParams({
-        collection: "azure_consumption_billing_account_modern_usage_details",
-        tag_column_name: "tags",
+        resource_type: "billing",
         cost_center_keys: importKeys,
       });
 
@@ -298,14 +299,16 @@ export const CentroDeCostoComponent = () => {
             </div>
 
             <div className="flex items-center gap-3">
-              <Button
-                onClick={handleOpenImport}
-                variant="outline"
-                className="flex items-center gap-2 border-blue-600 text-blue-600 hover:bg-blue-50 dark:border-blue-400 dark:text-blue-400 dark:hover:bg-blue-950"
-              >
-                <CloudDownload className="w-4 h-4" />
-                Importar desde la nube
-              </Button>
+              {canImportFromCloud && (
+                <Button
+                  onClick={handleOpenImport}
+                  variant="outline"
+                  className="flex items-center gap-2 border-blue-600 text-blue-600 hover:bg-blue-50 dark:border-blue-400 dark:text-blue-400 dark:hover:bg-blue-950"
+                >
+                  <CloudDownload className="w-4 h-4" />
+                  Importar desde la nube
+                </Button>
+              )}
 
               <Button
                 onClick={() => {

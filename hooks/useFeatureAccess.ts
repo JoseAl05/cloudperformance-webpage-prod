@@ -1,9 +1,11 @@
+import { fetchJson } from '@/lib/fetcher';
 import { useSession } from '@/hooks/useSession';
 import useSWR from 'swr';
 import { CloudAccount, Empresa, User } from '@/types/db';
 import { useClientContext } from '@/components/context/ClientContext';
 
-const fetcher = (url: string) => fetch(url, { credentials: 'include' }).then(res => res.json());
+const fetcher = (url: string) =>
+    fetchJson(url, { credentials: 'include' });
 
 const PLAN_ACCESS_CONFIG: Record<string, {
     aws: 'full_dashboard' | 'pdf_report' | 'none';
@@ -160,6 +162,9 @@ export const useFeatureAccess = () => {
         openaiAccountsList,
     };
 
+    // El servidor sólo acepta IDs de cuenta y resuelve la BD desde la empresa destino.
+    const findAccountId = (accounts: CloudAccount[], db: string | null): string | null =>
+        db ? accounts.find(acc => acc.db === db)?.id ?? null : null;
 
     const swapContextToken = async (targetClientName: string, explicitAzureDb: string | null = null, explicitAwsDb: string | null = null, explicitGcpDb: string | null = null, explicitOpenaiDb: string | null = null) => {
         if (!targetClientName) return;
@@ -167,10 +172,10 @@ export const useFeatureAccess = () => {
         try {
             const payload = {
                 clientName: targetClientName,
-                user_db_azure: explicitAzureDb,
-                user_db_aws: explicitAwsDb,
-                user_db_gcp: explicitGcpDb,
-                user_db_openai: explicitOpenaiDb,
+                azure_account_id: findAccountId(azureAccountsList, explicitAzureDb),
+                aws_account_id: findAccountId(awsAccountsList, explicitAwsDb),
+                gcp_account_id: findAccountId(gcpAccountsList, explicitGcpDb),
+                openai_account_id: findAccountId(openaiAccountsList, explicitOpenaiDb),
             };
 
             const response = await fetch('/api/auth/swap-client-context', {

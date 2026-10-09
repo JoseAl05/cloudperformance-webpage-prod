@@ -27,13 +27,13 @@ export const MainViewZonasDNSComponent = () => {
 
       <div className="w-full min-w-0">
         <FiltersComponent
+          cloud="gcp"
           Component={ZonasDNSComponent}
           dateFilter
-          projectFilter
+          projectsFilter
           estadoUsoFilter
           tagsFilter
-          tagCollection="gcp_dns_managed_zones"
-          tagColumn="labels"
+          tagResourceType="dns_managed_zones"
           localService="Cloud DNS"          
         />
       </div>

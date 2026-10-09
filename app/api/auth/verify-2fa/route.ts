@@ -58,13 +58,6 @@ export async function POST(req: Request) {
     );
   }
 
-  // Obtener datos de conectores asociados al cliente
-  const connectors = await getCollection('cloudperformance_external_connectors');
-  const connectorData = await connectors
-    .find({ "created_by.email": user.email, "created_by.username": user.username })
-    .project({ _id: 0, connector_type: 1, created_by: 1, config: 1, created_at: 1, updated_at: 1, status: 1, encrypted_credentials: 1 })
-    .toArray();
-
 
   const codes = await getCollection<{ userId: string; code: string; purpose: string; expiresAt: Date }>('twofactor_codes');
   const tf = await codes.findOne({ userId, code, purpose: 'login' });
@@ -113,7 +106,7 @@ export async function POST(req: Request) {
         ? clientData.openai_accounts || []
         : [],
     planName: user.planName,
-    connectors: connectorData || []
+    // Los conectores NO viajan en el token: se leen por empresa (ver lib/connectors.ts)
   });
 
   const sessions = await getCollection<{ userId: string; createdAt: Date; expiresAt: Date }>('sessions');

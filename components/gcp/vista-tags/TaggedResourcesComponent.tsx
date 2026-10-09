@@ -1,5 +1,6 @@
 'use client'
 
+import { fetcher } from '@/lib/fetcher';
 import useSWR from 'swr'
 import { Card, CardContent } from '@/components/ui/card'
 import {
@@ -20,14 +21,6 @@ import { LoaderComponent } from '@/components/general_gcp/LoaderComponent'
 import { MessageCard } from '@/components/aws/cards/MessageCards'
 import { TagsDataTable } from './table/TagsDataTable'
 import { useState } from 'react'
-
-const fetcher = (url: string) =>
-    fetch(url, {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json'
-        }
-    }).then(res => res.json())
 
 export interface ResourceItem {
   resource: string

@@ -38,9 +38,7 @@ export async function POST(req: Request) {
             }
         );
 
-        //Enviar Correo
-        const resetUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/auth/reset-password?token=${resetToken}`;
-        
+        //Enviar Correo (el enlace lo construye lib/email.ts)
         await sendRecoveryEmail(user.email, resetToken);
         
         return NextResponse.json({ message: 'Si el correo existe, recibirás las instrucciones.' }, { status: 200 });

@@ -30,8 +30,7 @@ export const MainViewConsumeAsgComponent = () => {
                     isAsgMultiSelect
                     isAsgInstanceMultiSelect
                     tagsFilter
-                    collection='aws_auto_scaling_groups'
-                    tagColumnName='Tags'
+                    resourceType='asg'
                     localService='Amazon Elastic Compute Cloud - Compute'
                 />
             </div>

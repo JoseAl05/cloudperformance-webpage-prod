@@ -8,39 +8,33 @@ interface MainViewConsumeRdsComponentProps {
 
 export const MainViewConsumeRdsComponent = ({ rdsType }: MainViewConsumeRdsComponentProps) => {
     let instancesService = '';
-    let collection = '';
-    let tagColumnName = '';
+    let resourceType = '';
     let componentTitle = '';
 
     switch (rdsType) {
         case 'postgresql':
             instancesService = 'rds-pg';
-            collection = 'aws_rds_postgresql';
-            tagColumnName = 'TagList';
+            resourceType = 'rds_postgresql';
             componentTitle = 'Consumo/No Consumo Instancias RDS Postgresql';
             break;
         case 'mysql':
             instancesService = 'rds-mysql';
-            collection = 'aws_rds_mysql';
-            tagColumnName = 'TagList';
+            resourceType = 'rds_mysql';
             componentTitle = 'Consumo/No Consumo Instancias RDS Mysql';
             break;
         case 'oracle':
             instancesService = 'rds-oracle';
-            collection = 'aws_rds_oracle';
-            tagColumnName = 'TagList';
+            resourceType = 'rds_oracle';
             componentTitle = 'Consumo/No Consumo Instancias RDS Oracle';
             break;
         case 'sqlserver':
             instancesService = 'rds-sqlserver';
-            collection = 'aws_rds_sqlserver';
-            tagColumnName = 'TagList';
+            resourceType = 'rds_sqlserver';
             componentTitle = 'Consumo/No Consumo Instancias RDS SQL Server';
             break;
         case 'mariadb':
             instancesService = 'rds-mariadb';
-            collection = 'aws_rds_mariadb';
-            tagColumnName = 'TagList';
+            resourceType = 'rds_mariadb';
             componentTitle = 'Consumo/No Consumo Instancias RDS MariaDB';
             break;
         default:
@@ -74,8 +68,7 @@ export const MainViewConsumeRdsComponent = ({ rdsType }: MainViewConsumeRdsCompo
                     instancesService={instancesService}
                     isInstanceMultiSelect
                     tagsFilter
-                    collection={collection}
-                    tagColumnName={tagColumnName}
+                    resourceType={resourceType}
                     localService='Amazon Relational Database Service'
                 />
             </div>

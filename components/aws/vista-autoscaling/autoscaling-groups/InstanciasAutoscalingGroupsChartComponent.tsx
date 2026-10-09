@@ -1,5 +1,6 @@
 "use client";
 
+import { fetcher } from '@/lib/fetcher';
 import useSWR from "swr";
 import { BarChart3 } from 'lucide-react';
 import { AutoscalingGroupsResourceViewInfoComponent } from "@/components/aws/vista-autoscaling/autoscaling-groups/info/AutoscalingGroupsResourceViewInfoComponent";
@@ -27,10 +28,6 @@ interface AutoscalingGroupData {
   Size_Range_Formatted: string;
   Total_Tags_ASG: number;
 }
-
-const fetcher = (url: string) =>
-  fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
-    .then(r => r.json());
 
 export const InstanciasAutoscalingGroupsChartComponent = (props: unknown) => {
   const { startDate, endDate, region, instance, selectedKey, selectedValue } = props;

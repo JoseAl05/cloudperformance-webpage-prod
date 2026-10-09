@@ -1,4 +1,5 @@
 'use client'
+import { fetcher as fetcherGet } from '@/lib/fetcher';
 import { Dispatch, SetStateAction, useState } from 'react'
 import { Check, ChevronsUpDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -12,14 +13,6 @@ interface CategoryFilterComponentProps {
     category: string | null
     setCategory: Dispatch<SetStateAction<string | null>>
 }
-
-const fetcherGet = (url: string) =>
-    fetch(url, {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-    }).then(res => res.json());
 
 export const CategoryFilterComponent = ({
     category,

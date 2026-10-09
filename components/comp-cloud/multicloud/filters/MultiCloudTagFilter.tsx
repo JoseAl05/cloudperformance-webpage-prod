@@ -1,5 +1,6 @@
 'use client'
 
+import { fetcher } from '@/lib/fetcher';
 import { useState, useEffect, useMemo } from 'react'
 import { Check, ChevronsUpDown, Loader2} from "lucide-react"
 import { cn } from "@/lib/utils"
@@ -13,7 +14,7 @@ import Image from 'next/image'
 
 interface MultiCloudTagFilterProps {
     provider: 'azure' | 'aws' | 'gcp';
-    dbs: string;
+    accountIds: string;
     startDate: Date;
     endDate: Date;
     selectedKey?: string | null;
@@ -26,17 +27,9 @@ interface TagItem {
     Values: string[];
 }
 
-const fetcher = (url: string) =>
-    fetch(url, {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json'
-        }
-    }).then(res => res.json())
-
 export const MultiCloudTagFilter = ({
     provider,
-    dbs,
+    accountIds,
     startDate,
     endDate,
     selectedKey,
@@ -51,20 +44,20 @@ export const MultiCloudTagFilter = ({
     const startDateFormatted = startDate ? startDate.toISOString().replace('Z', '').slice(0, -4) : ''
     const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : ''
 
-    const shouldFetch = !!dbs
+    const shouldFetch = !!accountIds
 
     // URL dinámica según el proveedor
     const getUrl = () => {
         if (!shouldFetch) return null;
         
         if (provider === 'azure') {
-            return `/api/azure/bridge/azure/multitenant/get-all-tags?dbs=${dbs}&date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=all_regions&region_field=resource_location&subscription=all&subscription_field=subscription_name&collection=azure_consumption_billing_account_modern_usage_details&tag_column_name=tags`;
+            return `/api/azure/bridge/azure/multitenant/get-all-tags?account_ids=${accountIds}&date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=all_regions&subscription=all&resource_type=billing`;
         }
         if (provider === 'aws') {
-            return `/api/aws/bridge/multitenant/get-all-tags?dbs=${dbs}&date_from=${startDateFormatted}&date_to=${endDateFormatted}&collection=aws_resources&tag_column_name=Tags`;
+            return `/api/aws/bridge/multitenant/get-all-tags?account_ids=${accountIds}&date_from=${startDateFormatted}&date_to=${endDateFormatted}&resource_type=resources`;
         }
         if (provider === 'gcp') {
-            return `/api/gcp/bridge/gcp/general/multitenant/get_all_tags?dbs=${dbs}&date_from=${startDateFormatted}&date_to=${endDateFormatted}&collection=gcp_billing_export_detailed&tag_column_name=labels`;
+            return `/api/gcp/bridge/gcp/general/multitenant/get_all_tags?account_ids=${accountIds}&date_from=${startDateFormatted}&date_to=${endDateFormatted}&resource_type=billing`;
         }   
         return null;
     };

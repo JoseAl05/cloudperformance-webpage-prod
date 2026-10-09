@@ -1,4 +1,5 @@
 'use client'
+import { formatCurrency } from '@/lib/format';
 
 import React, { useMemo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
@@ -104,9 +105,10 @@ const getMetricConfig = (metricName: string) => {
     return { icon: Activity, color: 'slate', label: metricName.replace(/_/g, ' ') };
 };
 
-const getEfficiencyColor = (score: number): string => {
-    if (score === "Infrautilizado") return "red";
-    if (score === "Uso Bajo") return "amber";
+// La API de AWS devuelve la etiqueta (`global_efficiency`), no un puntaje numérico.
+const getEfficiencyColor = (label: string): string => {
+    if (label === "Infrautilizado") return "red";
+    if (label === "Bajo Uso" || label === "Uso Bajo") return "amber";
     return "green";
 };
 
@@ -175,7 +177,7 @@ export const NatGatewaysConsumeCardsComponent = ({
                     value={`${efficiency.global_efficiency}`}
                     description={efficiency.metrics_detail.length !== 0 ? `Promedio ponderado de eficiencia de cantidad de datos de red enviados a VPC basado en ${efficiency.metrics_detail[0].samples} muestras. ` : 'No hay métricas de eficiencia disponibles.'}
                     icon={Zap}
-                    colorClass={getEfficiencyColor(efficiency.global_efficiency_score)}
+                    colorClass={getEfficiencyColor(efficiency.global_efficiency)}
                     large
                 />
             )}
@@ -206,7 +208,7 @@ export const NatGatewaysConsumeCardsComponent = ({
                 />
                 <StatCard
                     title="Costo Total"
-                    value={`$ ${formatGeneric(costoTotal)}`}
+                    value={formatCurrency(costoTotal)}
                     unit="USD"
                     description="Costo total de todos los Nat Gateways en el período."
                     icon={DollarSign}

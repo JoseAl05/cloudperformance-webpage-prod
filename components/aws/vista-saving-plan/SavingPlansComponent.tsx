@@ -1,4 +1,5 @@
 'use client'
+import { fetcher } from '@/lib/fetcher';
 import { useState, useEffect, useMemo } from 'react'
 import useSWR from 'swr'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -74,10 +75,6 @@ interface SavingPlansComponentProps {
   startDate: Date | string
   endDate: Date | string
 }
-
-const fetcher = (url: string) =>
-  fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
-    .then(r => r.json())
 
 const formatUSD = (value: number) =>
   new Intl.NumberFormat("en-US", {

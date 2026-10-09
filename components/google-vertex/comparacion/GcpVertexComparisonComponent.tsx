@@ -1,5 +1,6 @@
 'use client'
 
+import { fetcher } from '@/lib/fetcher';
 import { MessageCard } from '@/components/aws/cards/MessageCards';
 import { LoaderComponent } from '@/components/general_aws/LoaderComponent';
 import { GcpVertexComparisonView } from '@/components/google-vertex/comparacion/info/GcpVertexComparisonViewComponent';
@@ -14,10 +15,6 @@ interface GcpVertexComparisonComponentProps {
     regions: string
     resourceId?: string | null
 }
-
-const fetcher = (url: string) =>
-    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
-        .then(r => r.json());
 
 const formatApiDate = (date?: Date) => date ? date.toISOString().replace('Z', '').slice(0, -4) : '';
 

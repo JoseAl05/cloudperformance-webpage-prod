@@ -36,8 +36,7 @@ export const ViewConsumoEC2NodesEKSHorario = () => {
         instancesService='eks'
         isInstanceMultiSelect
         tagsFilter
-        tagColumnName='tags'
-        collection='aws_eks_clusters_details'
+        resourceType='eks'
       />
     </div>
   )

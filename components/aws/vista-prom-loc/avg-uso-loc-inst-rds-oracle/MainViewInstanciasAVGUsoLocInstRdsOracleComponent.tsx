@@ -34,8 +34,7 @@ export const MainViewInstanciasAVGUsoLocInstRdsOracleComponent = () => {
                     instancesService='rds-oracle'
                     isInstanceMultiSelect
                     tagsFilter
-                    tagColumnName='TagList'
-                    collection='aws_rds_oracle'
+                    resourceType='rds_oracle'
 
                     isRegionMultiSelect
                     metricsRDSFilter

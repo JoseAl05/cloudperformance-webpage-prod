@@ -1,5 +1,6 @@
 'use client'
 
+import { fetcher } from '@/lib/fetcher';
 import { MessageCard } from '@/components/aws/cards/MessageCards';
 import { LoaderComponent } from '@/components/general_gcp/LoaderComponent';
 import { AlertCircle, Clock, Info } from 'lucide-react';
@@ -21,7 +22,6 @@ interface AzureDbWorkingNonWorkingHoursProps {
     selectedInstanceV2: string;
 }
 
-const fetcher = (url: string) => fetch(url).then(res => res.json());
 const isNonEmptyArray = <T,>(v: unknown): v is T[] => Array.isArray(v) && v.length > 0;
 
 export const AzureDbWorkingNonWorkingHoursComponent = ({ 

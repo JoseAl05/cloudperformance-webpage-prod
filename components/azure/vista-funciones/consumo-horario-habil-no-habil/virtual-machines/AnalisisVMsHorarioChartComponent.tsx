@@ -1,4 +1,5 @@
 'use client'
+import { fetcher } from '@/lib/fetcher';
 import useSWR from 'swr'
 import { useEffect, useRef, useMemo, useState } from "react"
 import * as echarts from "echarts"
@@ -7,15 +8,6 @@ import { Clock, TrendingDown, AlertTriangle, FileSpreadsheet, X } from "lucide-r
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { TableDetalleHorarioComponent } from '@/components/azure/vista-funciones/consumo-horario-habil-no-habil/table/TableDetalleHorarioComponent'
-
-const fetcher = (url: string) =>
-  fetch(url, {
-    method: 'GET',
-    headers: {
-      'Authorization': `Bearer ${process.env.NEXT_PUBLIC_API_TOKEN}`,
-      'Content-Type': 'application/json'
-    }
-  }).then(res => res.json())
 
 interface AnalisisVMsHorarioChartProps {
   startDate: Date

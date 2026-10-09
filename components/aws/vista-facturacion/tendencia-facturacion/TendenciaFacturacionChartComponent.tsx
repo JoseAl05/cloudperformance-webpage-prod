@@ -1,4 +1,6 @@
 'use client'
+import { formatCurrency } from '@/lib/format';
+import { fetcher } from '@/lib/fetcher';
 import useSWR from 'swr';
 import { useState, useMemo } from 'react';
 import { TrendingUp, DollarSign, Calendar, Info, Tag, LucideIcon, Table2 } from 'lucide-react';
@@ -38,10 +40,6 @@ interface FacturacionData {
     RESOURCE_ID: string | null;
     sync_time: { $date: string };
 }
-
-const fetcher = (url: string) =>
-    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
-        .then(r => r.json());
 
 export const TendenciaFacturacionChartComponent = ({ startDate, endDate, services, region, selectedKey, selectedValue }: TendenciaFacturacionProps) => {
     const [topN, setTopN] = useState<string>("all");
@@ -198,7 +196,7 @@ export const TendenciaFacturacionChartComponent = ({ startDate, endDate, service
                             <div>
                                 <p className="text-sm font-medium text-muted-foreground">Costo Acumulado</p>
                                 <p className="text-2xl font-bold text-green-600">
-                                    $ {metrics.total < 0.01 ? metrics.total.toPrecision(2) : metrics.total.toLocaleString('es-ES', { minimumFractionDigits: 2 })}
+                                    {formatCurrency(metrics.total)}
                                 </p>
                                 <p className="text-xs text-muted-foreground">En los servicios visibles</p>
                             </div>

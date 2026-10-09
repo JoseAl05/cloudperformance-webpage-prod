@@ -30,8 +30,7 @@ export const MainViewCeWorkingNonWorkingHoursComponent = () => {
                     resourceFilter
                     isResourceMultiSelect
                     resourceService='instances'
-                    tagCollection='gcp_compute_instances'
-                    tagColumn='labels'
+                    tagResourceType='compute_instances'
                     tagsFilter
                     localService='Compute Engine'
                 />

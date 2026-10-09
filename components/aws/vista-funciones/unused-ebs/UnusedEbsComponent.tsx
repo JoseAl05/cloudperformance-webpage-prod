@@ -1,5 +1,6 @@
 'use client'
 
+import { fetcher } from '@/lib/fetcher';
 import { MessageCard } from '@/components/aws/cards/MessageCards';
 import { UnusedEbsCardsComponent } from '@/components/aws/vista-funciones/unused-ebs/info/UnusedEbsCardsComponent';
 import { UnusedEbsTableComponent } from '@/components/aws/vista-funciones/unused-ebs/table/UnusedEbsTableComponent';
@@ -14,10 +15,6 @@ interface UnusedEbsComponentProps {
     instance: string;
     region: string;
 }
-
-const fetcher = (url: string) =>
-    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
-        .then(r => r.json());
 
 const isNonEmptyArray = <T,>(v: unknown): v is T[] => Array.isArray(v) && v.length > 0
 

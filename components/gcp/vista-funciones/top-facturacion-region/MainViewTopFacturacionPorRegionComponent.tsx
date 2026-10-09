@@ -1,5 +1,6 @@
 'use client'
 
+import { fetcher } from '@/lib/fetcher';
 import useSWR from 'swr'
 import { useRef, useState, useMemo } from "react"
 import * as echarts from "echarts"
@@ -46,11 +47,6 @@ type GCPFacturacionRow = {
 /* =======================
    Fetcher
 ======================= */
-const fetcher = (url: string) =>
-    fetch(url, {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' }
-    }).then(r => r.json())
 
 interface TopDolaresRegionComponentProps {
     startDate: Date

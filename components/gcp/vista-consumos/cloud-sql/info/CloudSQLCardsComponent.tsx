@@ -1,4 +1,5 @@
 'use client'
+import { formatCurrency } from '@/lib/format';
 
 import React, { useMemo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
@@ -203,7 +204,7 @@ export const CloudSQLCardsComponent = ({
                 />
                 <StatCard
                     title="Costo Total"
-                    value={`$${summary.costo_total_usd.toFixed(2)}`}
+                    value={formatCurrency(summary.costo_total_usd)}
                     unit="USD/mes"
                     description={costoDescripcion}
                     icon={DollarSign}

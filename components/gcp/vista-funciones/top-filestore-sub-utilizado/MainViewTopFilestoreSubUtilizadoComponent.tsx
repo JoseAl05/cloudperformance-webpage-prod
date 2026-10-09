@@ -35,8 +35,7 @@ export const MainViewTopFilestoreSubUtilizadoComponent = () => {
                 regionFilter
                 filestoreTierFilter
                 tagsFilter
-                tagCollection="gcp_filestore_instances"
-                tagColumn="labels"
+                tagResourceType="filestore_instances"
             />
         </>
     );

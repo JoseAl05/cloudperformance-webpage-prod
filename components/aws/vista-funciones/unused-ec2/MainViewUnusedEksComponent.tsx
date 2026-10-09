@@ -33,8 +33,7 @@ export const MainViewUnusedEksComponent = () => {
                     instancesService="eks"
                     isInstanceMultiSelect
                     tagsFilter
-                    tagColumnName='tags'
-                    collection='aws_eks_clusters_details'
+                    resourceType='eks'
                 />
             </div>
         </div>

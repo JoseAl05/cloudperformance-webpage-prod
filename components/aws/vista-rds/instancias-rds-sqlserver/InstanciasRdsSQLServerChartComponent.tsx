@@ -1,5 +1,6 @@
 "use client";
 
+import { fetcher } from '@/lib/fetcher';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useRef, useEffect } from "react";
 import useSWR from "swr";
@@ -79,10 +80,6 @@ const transformMetricsForChart = (
   // Los datos ya vienen en el formato correcto desde la API
   return metricsData.metrics_data as MetricPoint[];
 };
-
-const fetcher = (url: string) =>
-  fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
-    .then(r => r.json());
 
 export const InstanciasRdsSQLServerChartComponent = ({
   startDate,

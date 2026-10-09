@@ -1,5 +1,6 @@
 'use client'
 
+import { fetcher } from '@/lib/fetcher';
 import { MessageCard } from '@/components/aws/cards/MessageCards';
 import { UnusedCeCardsComponent } from '@/components/gcp/vista-recursos/sin-uso/compute-engine/info/UnusedCeCardsComponent';
 import { UnusedCeTableComponent } from '@/components/gcp/vista-recursos/sin-uso/compute-engine/table/UnusedCeTableComponent';
@@ -15,10 +16,6 @@ interface UnusedGkeComponentProps {
     regions: string;
     projects: string;
 }
-
-const fetcher = (url: string) =>
-    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
-        .then(r => r.json());
 
 const isNonEmptyArray = <T,>(v: unknown): v is T[] => Array.isArray(v) && v.length > 0
 
@@ -84,7 +81,7 @@ export const UnusedGkeComponent = ({ startDate, endDate, regions, projects, reso
                 <MessageCard
                     icon={Info}
                     title="Sin datos para mostrar"
-                    description="No encontramos instancias EC2 infrautilizadas en el rango seleccionado."
+                    description="No encontramos clusters GKE sin uso en el rango seleccionado."
                     tone="warn"
                 />
             </div>

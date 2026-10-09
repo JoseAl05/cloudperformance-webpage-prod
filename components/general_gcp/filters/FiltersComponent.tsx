@@ -53,14 +53,13 @@ interface FiltersComponentProps {
     databaseTypeFilter?: boolean;
     estadoUsoFilter?: boolean;
     filestoreTierFilter?: boolean;
-    showEsquemaFilter?: boolean;
+    esquemaFilter?: boolean;
     serviceFilter?: boolean;
     isServiceMultiSelect?: boolean;
 
     // Config extra
     resourceService?: string;
-    tagCollection?: string; // NUEVO: Colección de Mongo para buscar tags (ej: gcp_compute_disks)
-    tagColumn?: string;     // NUEVO: Nombre columna (default: labels)
+    tagResourceType?: string; // Tipo de recurso lógico para buscar tags (ej: compute_disks); obligatorio si tagsFilter es true
     localService?: string;  // NUEVO: Nombre del servicio para filtrar tags (ej: Compute Engine, Cloud SQL, etc)    
     dbEngine?: string;
     storageClassFilter?: boolean;
@@ -83,8 +82,7 @@ export const FiltersComponent = ({
     tagsFilter = false, // Por defecto apagado
     resourceService = '',
     isResourceMultiSelect = false,
-    tagCollection = '',  // Obligatorio si tagsFilter es true
-    tagColumn = 'labels',
+    tagResourceType = '',
     localService = '',
     databaseTypeFilter = false,
     estadoUsoFilter = false,
@@ -411,8 +409,7 @@ export const FiltersComponent = ({
                                     endDate={tempEndDate}
                                     projects={tempProjects}
                                     regions={tempRegions}
-                                    collection={tagCollection}
-                                    tagColumnName={tagColumn}
+                                    resourceType={tagResourceType}
                                     localService={localService}
                                     selectedKey={tempTagKey}
                                     setSelectedKey={setTempTagKey}
@@ -535,6 +532,7 @@ export const FiltersComponent = ({
                     tagValue={filters.tagValue}
                     databaseType={filters.databaseType}
                     estadoUso={filters.estadoUso}
+                    esquema={filters.esquema}
                     dbEngine={dbEngine}
                     service={filters.service}
                     category={filters.category}

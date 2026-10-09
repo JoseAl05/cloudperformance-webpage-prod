@@ -1,5 +1,6 @@
 'use client'
 
+import { fetcher } from '@/lib/fetcher';
 import React from 'react';
 import useSWR from 'swr';
 import { DiscosPersistentesCardsComponent } from './info/DiscosPersistentesCardsComponent'; 
@@ -16,8 +17,6 @@ interface DiscosComponentProps {
     tagKey?: string | null;
     tagValue?: string | null;
 }
-
-const fetcher = (url: string) => fetch(url).then(res => res.json());
 
 export const DiscosPersistentesComponent = ({ 
     startDate, 

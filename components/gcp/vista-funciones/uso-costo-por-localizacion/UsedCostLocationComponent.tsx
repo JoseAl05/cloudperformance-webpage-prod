@@ -1,5 +1,6 @@
 'use client'
 
+import { fetcher } from '@/lib/fetcher';
 import useSWR from 'swr'
 import { useMemo } from 'react'
 import { LoaderComponent } from '@/components/general_gcp/LoaderComponent'
@@ -48,10 +49,6 @@ interface ApiResponse {
 }
 
 /* ================== FETCHER ================== */
-
-const fetcher = (url: string) =>
-  fetch(url, { headers: { 'Content-Type': 'application/json' } })
-    .then(r => r.json())
 
 /* ================== COMPONENTE ================== */
 
