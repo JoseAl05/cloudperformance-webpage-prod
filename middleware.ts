@@ -13,7 +13,7 @@ export async function middleware(req: NextRequest) {
 
   const session = await getAuthFromRequest(req);
   if (!session) {
-    const url = new URL('/web/login', publicOrigin);
+    const url = new URL('/login', publicOrigin);
     url.searchParams.set('next', pathname);
     return NextResponse.redirect(url);
   }
@@ -35,14 +35,14 @@ export async function middleware(req: NextRequest) {
 
   // Bloquear AWS si: NO tiene permiso AWS Y NO es Admin Global
   if (pathname.startsWith('/aws') && !isAwsAllowed && !isGlobalAdmin) {
-    const url = new URL('/web', publicOrigin);
+    const url = new URL('/', publicOrigin);
     url.pathname = '/unauthorized';
     return NextResponse.redirect(url);
   }
 
   // Bloquear Azure si: NO tiene permiso Azure Y NO es Admin Global
   if (pathname.startsWith('/azure') && !isAzureAllowed && !isGlobalAdmin) {
-    const url = new URL('/web', publicOrigin);
+    const url = new URL('/', publicOrigin);
     url.pathname = '/unauthorized';
     return NextResponse.redirect(url);
   }
