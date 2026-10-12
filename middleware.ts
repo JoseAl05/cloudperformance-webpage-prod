@@ -9,7 +9,7 @@ export async function middleware(req: NextRequest) {
   const isProtected = PROTECTED_PATHS.some((p) => pathname.startsWith(p));
   if (!isProtected) return NextResponse.next();
 
-  const publicOrigin = process.env.PUBLIC_ORIGIN;
+  const publicOrigin = process.env.IS_VERCEL ? process.env.PUBLIC_ORIGIN_VERCEL : process.env.PUBLIC_ORIGIN_LOCAL;
 
   const session = await getAuthFromRequest(req);
   if (!session) {
