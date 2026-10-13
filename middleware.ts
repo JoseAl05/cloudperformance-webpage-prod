@@ -2,7 +2,7 @@ import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 import { getAuthFromRequest } from '@/lib/auth';
 
-const PROTECTED_PATHS = ['/aws', '/azure', '/perfil'] as const;
+const PROTECTED_PATHS = ['/cloud-aws', '/cloud-azure','/cloud-gcp', '/perfil'] as const;
 
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
@@ -55,7 +55,7 @@ export async function middleware(req: NextRequest) {
 
   // VERIFICAR ACCESO A AWS
   const isAwsPath =
-    pathname === '/aws' || pathname.startsWith('/aws/');
+    pathname === '/cloud-aws' || pathname.startsWith('/cloud-aws/');
 
   if (isAwsPath && !isAwsAllowed && !isGlobalAdmin) {
     return NextResponse.redirect(
@@ -65,9 +65,19 @@ export async function middleware(req: NextRequest) {
 
   // VERIFICAR ACCESO A AZURE
   const isAzurePath =
-    pathname === '/azure' || pathname.startsWith('/azure/');
+    pathname === '/cloud-azure' || pathname.startsWith('/cloud-azure/');
 
   if (isAzurePath && !isAzureAllowed && !isGlobalAdmin) {
+    return NextResponse.redirect(
+      new URL('/unauthorized', publicOrigin)
+    );
+  }
+
+  // VERIFICAR ACCESO A GCP
+  const isGcpPath =
+    pathname === '/cloud-gcp' || pathname.startsWith('/cloud-gcp/');
+
+  if (isGcpPath && !isGlobalAdmin) {
     return NextResponse.redirect(
       new URL('/unauthorized', publicOrigin)
     );
@@ -79,8 +89,9 @@ export async function middleware(req: NextRequest) {
 
 export const config = {
   matcher: [
-    '/aws/:path*',
-    '/azure/:path*',
+    '/cloud-aws/:path*',
+    '/cloud-azure/:path*',
+    '/cloud-gcp/:path*',
     '/perfil/:path*',
   ],
 };
