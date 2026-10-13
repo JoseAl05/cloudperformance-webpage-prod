@@ -6,50 +6,73 @@ const PROTECTED_PATHS = ['/aws', '/azure', '/perfil'] as const;
 
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
-  const isProtected = PROTECTED_PATHS.some((p) => pathname.startsWith(p));
-  if (!isProtected) return NextResponse.next();
 
-  const publicOrigin = process.env.IS_VERCEL ? process.env.PUBLIC_ORIGIN_VERCEL : process.env.PUBLIC_ORIGIN_LOCAL;
+  // VERIFICAR SI LA RUTA ESTÁ PROTEGIDA
+  const isProtected = PROTECTED_PATHS.some(
+    (path) => pathname === path || pathname.startsWith(`${path}/`)
+  );
 
+  if (!isProtected) {
+    return NextResponse.next();
+  }
+
+  // OBTENER LA SESIÓN DEL USUARIO
   const session = await getAuthFromRequest(req);
+
+  // REDIRIGIR AL LOGIN SI NO EXISTE UNA SESIÓN
   if (!session) {
-    const url = new URL('/login', publicOrigin);
+    const url = new URL('/login', req.url);
+
+    // Guardar la ruta original para regresar después del login
     url.searchParams.set('next', pathname);
+
     return NextResponse.redirect(url);
   }
 
-  // OBTENER EL ROL DEL USUARIO
+  // OBTENER EL ROL Y LOS PERMISOS DEL USUARIO
   const userRole = (
-    session as unknown as { role?: string }
+    session as { role?: string }
   ).role;
 
-  const isAwsAllowed = !!(
-    session as unknown as { is_aws?: boolean | string | number }
-  ).is_aws;
-  const isAzureAllowed = !!(
-    session as unknown as { is_azure?: boolean | string | number }
-  ).is_azure;
+  const isAwsAllowed = Boolean(
+    (session as { is_aws?: boolean | string | number }).is_aws
+  );
 
-  // APLICAR LA EXCEPCIÓN: Si es 'admin_global', NO bloquear.
+  const isAzureAllowed = Boolean(
+    (session as { is_azure?: boolean | string | number }).is_azure
+  );
+
+  // LOS ADMINISTRADORES GLOBALES TIENEN ACCESO A TODO
   const isGlobalAdmin = userRole === 'admin_global';
 
-  // Bloquear AWS si: NO tiene permiso AWS Y NO es Admin Global
-  if (pathname.startsWith('/aws') && !isAwsAllowed && !isGlobalAdmin) {
-    const url = new URL('/', publicOrigin);
-    url.pathname = '/unauthorized';
-    return NextResponse.redirect(url);
+  // VERIFICAR ACCESO A AWS
+  const isAwsPath =
+    pathname === '/aws' || pathname.startsWith('/aws/');
+
+  if (isAwsPath && !isAwsAllowed && !isGlobalAdmin) {
+    return NextResponse.redirect(
+      new URL('/unauthorized', req.url)
+    );
   }
 
-  // Bloquear Azure si: NO tiene permiso Azure Y NO es Admin Global
-  if (pathname.startsWith('/azure') && !isAzureAllowed && !isGlobalAdmin) {
-    const url = new URL('/', publicOrigin);
-    url.pathname = '/unauthorized';
-    return NextResponse.redirect(url);
+  // VERIFICAR ACCESO A AZURE
+  const isAzurePath =
+    pathname === '/azure' || pathname.startsWith('/azure/');
+
+  if (isAzurePath && !isAzureAllowed && !isGlobalAdmin) {
+    return NextResponse.redirect(
+      new URL('/unauthorized', req.url)
+    );
   }
 
+  // PERMITIR EL ACCESO
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ['/aws/:path*', '/azure/:path*', '/perfil'],
+  matcher: [
+    '/aws/:path*',
+    '/azure/:path*',
+    '/perfil/:path*',
+  ],
 };
