@@ -16,14 +16,22 @@ export async function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
+  // OBTENER EL DOMINIO PÚBLICO SEGÚN EL ENTORNO
+  const publicOrigin =
+    process.env.IS_VERCEL === 'true'
+      ? process.env.PUBLIC_ORIGIN_VERCEL
+      : process.env.PUBLIC_ORIGIN_LOCAL;
+
+  if (!publicOrigin) {
+    throw new Error('PUBLIC_ORIGIN no está configurado');
+  }
+
   // OBTENER LA SESIÓN DEL USUARIO
   const session = await getAuthFromRequest(req);
 
   // REDIRIGIR AL LOGIN SI NO EXISTE UNA SESIÓN
   if (!session) {
-    const url = new URL('/login', req.url);
-
-    // Guardar la ruta original para regresar después del login
+    const url = new URL('/login', publicOrigin);
     url.searchParams.set('next', pathname);
 
     return NextResponse.redirect(url);
@@ -51,7 +59,7 @@ export async function middleware(req: NextRequest) {
 
   if (isAwsPath && !isAwsAllowed && !isGlobalAdmin) {
     return NextResponse.redirect(
-      new URL('/unauthorized', req.url)
+      new URL('/unauthorized', publicOrigin)
     );
   }
 
@@ -61,7 +69,7 @@ export async function middleware(req: NextRequest) {
 
   if (isAzurePath && !isAzureAllowed && !isGlobalAdmin) {
     return NextResponse.redirect(
-      new URL('/unauthorized', req.url)
+      new URL('/unauthorized', publicOrigin)
     );
   }
 
