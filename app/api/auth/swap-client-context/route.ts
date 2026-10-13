@@ -126,7 +126,24 @@ export async function POST(request: Request) {
         exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24,
     }
 
-    await signAuthToken(newPayload)
+    const signedToken = await signAuthToken(newPayload);
+
+    console.log('[SWAP] Cliente:', targetCompany.name);
+    console.log('[SWAP] AWS accounts:', newPayload.aws_accounts?.length);
+    console.log('[SWAP] Azure accounts:', newPayload.azure_accounts?.length);
+    console.log('[SWAP] GCP accounts:', newPayload.gcp_accounts?.length);
+
+    console.log(
+        '[SWAP] Payload bytes:',
+        Buffer.byteLength(JSON.stringify(newPayload), 'utf8')
+    );
+
+    if (typeof signedToken === 'string') {
+        console.log(
+            '[SWAP] JWT bytes:',
+            Buffer.byteLength(signedToken, 'utf8')
+        );
+    }
 
     return NextResponse.json(
         {
