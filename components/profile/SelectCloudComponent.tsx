@@ -108,7 +108,7 @@ export const SelectCloudComponent = () => {
              swapContextToken(clientName, defaultAcc.db, connectionData.dbAwsName, connectionData.dbGcpName)
         }
         
-        router.push(`/azure?client=${clientName}`)
+        router.push(`/cloud-azure?client=${clientName}`)
     }
 
     const handleEnterAws = () => {
@@ -119,7 +119,7 @@ export const SelectCloudComponent = () => {
              swapContextToken(clientName, connectionData.dbAzureName, defaultAcc.db, connectionData.dbGcpName)
         }
 
-        router.push(`/aws?client=${clientName}`)
+        router.push(`/cloud-aws?client=${clientName}`)
     }
 
     const handleEnterGcp = () => {
@@ -130,7 +130,7 @@ export const SelectCloudComponent = () => {
              swapContextToken(clientName, connectionData.dbAzureName, connectionData.dbAwsName, defaultAcc.db)
         }
 
-        router.push(`/gcp?client=${clientName}`)
+        router.push(`/cloud-gcp?client=${clientName}`)
     }
 
     const stopProp = (e: React.MouseEvent) => {
