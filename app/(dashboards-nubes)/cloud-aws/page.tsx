@@ -1,4 +1,4 @@
-// app/gcp/page.tsx
+// app/aws/page.tsx
 import Link from "next/link"
 import Image from "next/image"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import {
-    FileChartColumn,
+    FileHeartIcon as FileChartColumn,
     Server,
     Zap,
     HandCoins,
@@ -18,25 +18,30 @@ import {
     LineChart,
     Gauge,
     CalendarClock,
+    Monitor,
+    Layers,
+    ShoppingCart,
+    Receipt,
     Stars,
     TrendingUp,
+    Boxes,
+    MapPin,
     HardDrive,
-    Container, // Nuevo icono para GKE/contenedores
 } from "lucide-react"
 
-export default function DashboardGCPPage() {
+export default function DashboardAwsPage() {
     return (
         <div className="space-y-8">
             <section className="rounded-2xl border p-6 bg-gradient-to-br from-slate-50 to-white md:p-8 dark:from-slate-900 dark:to-slate-950">
                 <div className="flex items-start justify-between gap-4">
                     <div className="flex items-start gap-3">
                         <div className="relative h-18 w-18 md:h-20 md:w-20">
-                            <Image src="/gcp.svg" alt="GCP" fill className="object-contain" priority />
+                            <Image src="/aws3.svg" alt="AWS" fill className="object-contain" priority />
                         </div>
                         <div>
-                            <h1 className="text-2xl md:text-3xl font-semibold tracking-tight">Dashboard GCP</h1>
+                            <h1 className="text-2xl md:text-3xl font-semibold tracking-tight">Dashboard AWS</h1>
                             <p className="text-sm text-muted-foreground mt-2 max-w-2xl">
-                                Recorre las secciones y funciones de Cloud Performance para Google Cloud.
+                                Recorre las secciones y funciones de Cloud Performance!.
                             </p>
                         </div>
                     </div>
@@ -50,7 +55,7 @@ export default function DashboardGCPPage() {
                             <Stars className="h-6 w-6 text-primary" /> Módulos Recomendados
                         </h2>
                         <p className="text-sm text-muted-foreground">
-                            Módulos recomendados para el análisis de consumo y búsqueda de oportunidades de ahorro en GCP.
+                            Modulos recomendados para el analisis de consumo y buscar posibilidades de ahorro.
                         </p>
 
                         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 w-full mt-4">
@@ -61,7 +66,7 @@ export default function DashboardGCPPage() {
                                             <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/30">
                                                 <LineChart className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                                             </div>
-                                            Facturación GCP
+                                            Tendencia de Facturación
                                         </CardTitle>
                                         <div className="flex flex-wrap gap-2">
                                             <Badge className="bg-gradient-to-r from-green-600 to-emerald-600 text-white shadow-md px-3 py-1">
@@ -70,13 +75,13 @@ export default function DashboardGCPPage() {
                                         </div>
                                     </div>
                                     <CardDescription className="text-base">
-                                        Visualiza y analiza la evolución de tus costos en Google Cloud.
+                                        Visualiza y analiza la evolución de tus costos en AWS a lo largo del tiempo.
                                     </CardDescription>
                                 </CardHeader>
                                 <CardContent className="space-y-3">
                                     <div className="text-xs uppercase tracking-wider text-primary font-semibold">Acciones Rápidas</div>
                                     <div className="flex flex-col gap-2 rounded-xl border-2 border-primary/30 bg-gradient-to-br from-primary/5 to-primary/10 p-4 dark:from-primary/10 dark:to-primary/20">
-                                        <Link href="/gcp/facturacion/tendencia-facturacion">
+                                        <Link href="/cloud-aws/facturacion/tendencia-facturacion">
                                             <Button
                                                 size="default"
                                                 variant="default"
@@ -95,7 +100,7 @@ export default function DashboardGCPPage() {
                                             <div className="p-2 rounded-lg bg-purple-100 dark:bg-purple-900/30">
                                                 <Pyramid className="h-5 w-5 text-purple-600 dark:text-purple-400" />
                                             </div>
-                                            Recommender
+                                            Recomendaciones
                                         </CardTitle>
                                         <div className="flex flex-wrap gap-2">
                                             <Badge className="bg-gradient-to-r from-green-600 to-emerald-600 text-white shadow-md px-3 py-1">
@@ -107,13 +112,13 @@ export default function DashboardGCPPage() {
                                         </div>
                                     </div>
                                     <CardDescription className="text-base">
-                                        Consejos potenciados por Active Assist para optimizar costos y seguridad.
+                                        Consejos potenciados por IA de tu AWS Advisor para optimizar costos y rendimiento.
                                     </CardDescription>
                                 </CardHeader>
                                 <CardContent className="space-y-3">
                                     <div className="text-xs uppercase tracking-wider text-primary font-semibold">Acciones Rápidas</div>
                                     <div className="flex flex-col gap-2 rounded-xl border-2 border-primary/30 bg-gradient-to-br from-primary/5 to-primary/10 p-4 dark:from-primary/10 dark:to-primary/20">
-                                        <Link href="/gcp/recommender">
+                                        <Link href="/cloud-aws/advisor">
                                             <Button
                                                 size="default"
                                                 variant="default"
@@ -141,33 +146,33 @@ export default function DashboardGCPPage() {
                                         </div>
                                     </div>
                                     <CardDescription className="text-base">
-                                        Maximiza tus ahorros con CUDs (Committed Use Discounts) y análisis de Spot VMs.
+                                        Maximiza tus ahorros con Saving Plans y comparativas de costos.
                                     </CardDescription>
                                 </CardHeader>
                                 <CardContent className="space-y-3">
                                     <div className="text-xs uppercase tracking-wider text-primary font-semibold">Acciones Rápidas</div>
                                     <div className="grid md:grid-cols-2 gap-4">
                                         <div className="flex flex-col gap-2 rounded-xl border-2 border-primary/30 bg-gradient-to-br from-primary/5 to-primary/10 p-4 dark:from-primary/10 dark:to-primary/20">
-                                            <div className="text-xs font-semibold text-primary mb-1">Descuentos por Uso</div>
-                                            <Link href="/gcp/cuds/spend-based-cuds">
+                                            <div className="text-xs font-semibold text-primary mb-1">Saving Plans</div>
+                                            <Link href="/cloud-aws/saving-plan">
                                                 <Button
                                                     size="default"
                                                     variant="default"
                                                     className="w-full gap-2 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
                                                 >
-                                                    <HandCoins className="h-4 w-4" /> CUDs Analysis
+                                                    <HandCoins className="h-4 w-4" /> Cobertura (Saving Plans)
                                                 </Button>
                                             </Link>
                                         </div>
                                         <div className="flex flex-col gap-2 rounded-xl border-2 border-primary/30 bg-gradient-to-br from-primary/5 to-primary/10 p-4 dark:from-primary/10 dark:to-primary/20">
                                             <div className="text-xs font-semibold text-primary mb-1">Comparativa de Costos</div>
-                                            <Link href="/gcp/funciones/spot-vs-standard-vm">
+                                            <Link href="/cloud-aws/funciones/spot-vs-vm">
                                                 <Button
                                                     size="default"
                                                     variant="default"
                                                     className="w-full gap-2 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
                                                 >
-                                                    <Zap className="h-4 w-4" /> Spot vs Standard VMs
+                                                    <Zap className="h-4 w-4" /> Spot vs VM
                                                 </Button>
                                             </Link>
                                         </div>
@@ -181,40 +186,45 @@ export default function DashboardGCPPage() {
                                             <div className="p-2 rounded-lg bg-emerald-100 dark:bg-emerald-900/30">
                                                 <HardDrive className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
                                             </div>
-                                            Cloud Storage & Discos
+                                            Storage
                                         </CardTitle>
+                                        <div className="flex flex-wrap gap-2">
+                                            <Badge className="bg-gradient-to-r from-green-600 to-emerald-600 text-white shadow-md px-3 py-1">
+                                                ⭐ Recomendado
+                                            </Badge>
+                                        </div>
                                     </div>
                                     <CardDescription className="text-base">
-                                        Identifica recursos de storage, clases de almacenamiento y discos persistentes huérfanos.
+                                        Identifica recursos de storage e identifica y soluciona sobre o infra utilización de tus servicios de Storage.
                                     </CardDescription>
                                 </CardHeader>
                                 <CardContent className="space-y-3">
                                     <div className="text-xs uppercase tracking-wider text-primary font-semibold">Acciones Rápidas</div>
                                     <div className="grid md:grid-cols-2 gap-4">
                                         <div className="flex flex-col gap-2 rounded-xl border-2 border-primary/30 bg-gradient-to-br from-primary/5 to-primary/10 p-4 dark:from-primary/10 dark:to-primary/20">
-                                            <div className="text-xs font-semibold text-primary mb-1">Análisis de Storage</div>
-                                            <Link href="/gcp/funciones/top-cloud-storage-buckets">
+                                            <div className="text-xs font-semibold text-primary mb-1">TOP S3 Buckets</div>
+                                            <Link href="/cloud-aws/funciones/top-s3-buckets">
                                                 <Button
                                                     size="default"
                                                     variant="default"
                                                     className="w-full gap-2 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
                                                 >
-                                                    <Box className="h-4 w-4" /> Storage Classes
+                                                    <HandCoins className="h-4 w-4" /> TOP S3 Buckets
                                                 </Button>
                                             </Link>
                                         </div>
-                                        {/* <div className="flex flex-col gap-2 rounded-xl border-2 border-primary/30 bg-gradient-to-br from-primary/5 to-primary/10 p-4 dark:from-primary/10 dark:to-primary/20">
-                                            <div className="text-xs font-semibold text-primary mb-1">Discos Huérfanos</div>
-                                            <Link href="/gcp/funciones/unused-resources/persistent-disks">
+                                        <div className="flex flex-col gap-2 rounded-xl border-2 border-primary/30 bg-gradient-to-br from-primary/5 to-primary/10 p-4 dark:from-primary/10 dark:to-primary/20">
+                                            <div className="text-xs font-semibold text-primary mb-1">EBS No utilizados</div>
+                                            <Link href="/cloud-aws/funciones/ebs-no-utilizados">
                                                 <Button
                                                     size="default"
                                                     variant="default"
                                                     className="w-full gap-2 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
                                                 >
-                                                    <HardDrive className="h-4 w-4" /> Discos no utilizados
+                                                    <Zap className="h-4 w-4" /> EBS No utilizados
                                                 </Button>
                                             </Link>
-                                        </div> */}
+                                        </div>
                                     </div>
                                 </CardContent>
                             </Card>
@@ -225,9 +235,9 @@ export default function DashboardGCPPage() {
 
             <div className="space-y-4">
                 <section className="rounded-2xl border p-6 bg-gradient-to-br from-slate-50 to-white md:p-8 dark:from-slate-900 dark:to-slate-950">
-                    <h2 className="text-2xl md:text-3xl font-semibold tracking-tight">Todos los Módulos GCP</h2>
+                    <h2 className="text-2xl md:text-3xl font-semibold tracking-tight">Todos los Módulos</h2>
                     <p className="text-sm text-muted-foreground mt-2">
-                        Explora todas las funciones y recursos disponibles en tu dashboard Google Cloud.
+                        Explora todas las funciones y recursos disponibles en tu dashboard AWS.
                     </p>
                 </section>
 
@@ -237,43 +247,42 @@ export default function DashboardGCPPage() {
                             <CardTitle className="text-base flex items-center gap-2">
                                 <FileChartColumn className="h-4 w-4" /> Costos & Actividad
                             </CardTitle>
-                            <CardDescription>Explora facturación, cuotas y salud del servicio</CardDescription>
+                            <CardDescription>Explora costos, cuotas de servicio, eventos y consejos</CardDescription>
                         </CardHeader>
                         <CardContent className="flex flex-wrap gap-2">
-                            <Link href="/gcp/facturacion/tendencia-facturacion">
+                            <Link href="/cloud-aws/facturacion/tendencia-facturacion">
                                 <Button size="sm" variant="outline" className="gap-2 cursor-pointer bg-transparent">
-                                    <LineChart className="h-4 w-4" /> Tendencia de Facturación
+                                    <LineChart className="h-4 w-4" /> Tendencia de Facturación (Costos)
                                 </Button>
                             </Link>
-                            <Link href="/gcp/quotas">
+                            <Link href="/cloud-aws/quotas">
                                 <Button size="sm" variant="outline" className="gap-2 cursor-pointer bg-transparent">
-                                    <Gauge className="h-4 w-4" /> Cuotas (Quotas)
+                                    <Gauge className="h-4 w-4" /> Cuotas de Servicio (Quotas)
                                 </Button>
                             </Link>
-                            {/* <Link href="/gcp/deployments">
+                            <Link href="/cloud-aws/eventos">
                                 <Button size="sm" variant="outline" className="gap-2 cursor-pointer bg-transparent">
-                                    <CalendarClock className="h-4 w-4" /> Deployments (Cloud Build)
-                                </Button>
-                            </Link> */}
-                            <Link href="/gcp/recommender">
-                                <Button size="sm" variant="outline" className="gap-2 cursor-pointer bg-transparent">
-                                    <Pyramid className="h-4 w-4" /> Recommender (Advisor)
+                                    <CalendarClock className="h-4 w-4" /> Eventos y Actividad (Events)
                                 </Button>
                             </Link>
-                            <Link href="/gcp/cuds/spend-based-cuds">
+                            <Link href="/cloud-aws/advisor">
                                 <Button size="sm" variant="outline" className="gap-2 cursor-pointer bg-transparent">
-                                    <HandCoins className="h-4 w-4" /> CUDs
+                                    <Pyramid className="h-4 w-4" /> Recomendaciones (Advisor)
+                                </Button>
+                            </Link>
+                            <Link href="/cloud-aws/saving-plan">
+                                <Button size="sm" variant="outline" className="gap-2 cursor-pointer bg-transparent">
+                                    <HandCoins className="h-4 w-4" /> Cobertura (Saving Plans)
                                 </Button>
                             </Link>
                         </CardContent>
                     </Card>
-
                     <Card className="hover:shadow-md transition">
                         <CardHeader>
                             <CardTitle className="text-base flex items-center gap-2">
                                 <Zap className="h-4 w-4" /> Funciones de Análisis
                             </CardTitle>
-                            <CardDescription>Comparativas y top de consumo</CardDescription>
+                            <CardDescription>Comparativas de costos y patrones de consumo</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-3">
                             <div>
@@ -281,12 +290,50 @@ export default function DashboardGCPPage() {
                                     Top de Facturación
                                 </div>
                                 <div className="flex flex-wrap gap-2">
-                                    <Link href="/gcp/funciones/top-facturacion-region">
+                                    <Link href="/cloud-aws/funciones/top-dolares-region">
                                         <Button size="sm" variant="outline" className="gap-2 cursor-pointer bg-transparent">
                                             <Globe2 className="h-4 w-4" /> Por Región
                                         </Button>
                                     </Link>
+                                    <Link href="/cloud-aws/funciones/top-dolares-so">
+                                        <Button size="sm" variant="outline" className="gap-2 cursor-pointer bg-transparent">
+                                            <Monitor className="h-4 w-4" /> Por Sistema Operativo
+                                        </Button>
+                                    </Link>
+                                    <Link href="/cloud-aws/funciones/top-dolares-por-tipo-de-instancia">
+                                        <Button size="sm" variant="outline" className="gap-2 cursor-pointer bg-transparent">
+                                            <Server className="h-4 w-4" /> Por Tipo de Instancia
+                                        </Button>
+                                    </Link>
+                                    <Link href="/cloud-aws/funciones/top-dolares-por-familia-de-instancia">
+                                        <Button size="sm" variant="outline" className="gap-2 cursor-pointer bg-transparent">
+                                            <Layers className="h-4 w-4" /> Por Familia de Instancia
+                                        </Button>
+                                    </Link>
+                                    <Link href="/cloud-aws/funciones/top-dolares-por-tipo-de-compra">
+                                        <Button size="sm" variant="outline" className="gap-2 cursor-pointer bg-transparent">
+                                            <ShoppingCart className="h-4 w-4" /> Por Tipo de Compra
+                                        </Button>
+                                    </Link>
+                                    <Link href="/cloud-aws/funciones/top-dolares-por-tipo-de-cobro">
+                                        <Button size="sm" variant="outline" className="gap-2 cursor-pointer bg-transparent">
+                                            <Receipt className="h-4 w-4" /> Por Tipo de Cobro
+                                        </Button>
+                                    </Link>
+                                    <Link href="/cloud-aws/funciones/top-dolares-por-id-recurso">
+                                        <Button size="sm" variant="outline" className="gap-2 cursor-pointer bg-transparent">
+                                            <Boxes className="h-4 w-4" /> Por Recurso
+                                        </Button>
+                                    </Link>
+                                    <Link href="/cloud-aws/funciones/top-recursos">
+                                        <Button size="sm" variant="outline" className="gap-2 cursor-pointer bg-transparent">
+                                            <Stars className="h-4 w-4" /> Top Recursos
+                                        </Button>
+                                    </Link>
                                 </div>
+                                <p className="mt-2 text-xs text-muted-foreground">
+                                    Descubre qué regiones, familias o compras impulsan tu gasto.
+                                </p>
                             </div>
 
                             <Separator />
@@ -296,58 +343,107 @@ export default function DashboardGCPPage() {
                                     Consumo: hábil vs no hábil
                                 </div>
                                 <div className="flex flex-wrap gap-2">
-                                    <Link href="/gcp/funciones/uso-horario-habil-no-habil/compute-engines">
+                                    <Link href="/cloud-aws/funciones/consumo-ec2-horario-habil-vs-no-habil">
                                         <Button size="sm" variant="outline" className="gap-2 cursor-pointer bg-transparent">
-                                            <Clock className="h-4 w-4" /> Compute Engine
+                                            <Clock className="h-4 w-4" /> EC2
                                         </Button>
                                     </Link>
-                                    <Link href="/gcp/funciones/uso-horario-habil-no-habil/instance-group">
+                                    <Link href="/cloud-aws/funciones/consumo-ec2-autoscaling-groups-horario-habil-vs-no-habil">
                                         <Button size="sm" variant="outline" className="gap-2 cursor-pointer bg-transparent">
-                                            <Container className="h-4 w-4" /> Instance Groups
+                                            <TrendingUp className="h-4 w-4" /> ASG
                                         </Button>
                                     </Link>
-                                    <Link href="/gcp/funciones/uso-horario-habil-no-habil/cloud-sql/postgresql">
+                                    <Link href="/cloud-aws/funciones/consumo-ec2-nodos-eks-horario-habil-vs-no-habil">
                                         <Button size="sm" variant="outline" className="gap-2 cursor-pointer bg-transparent">
-                                            <Database className="h-4 w-4" /> Cloud SQL Postgresql
+                                            <Boxes className="h-4 w-4" /> EKS
                                         </Button>
                                     </Link>
-                                    <Link href="/gcp/funciones/uso-horario-habil-no-habil/cloud-sql/mysql">
+                                    <Link href="/cloud-aws/funciones/consumo-rds-postgresql-horario-habil-vs-no-habil">
                                         <Button size="sm" variant="outline" className="gap-2 cursor-pointer bg-transparent">
-                                            <Database className="h-4 w-4" /> Cloud SQL Mysql
+                                            <Database className="h-4 w-4" /> RDS PostgreSQL
                                         </Button>
                                     </Link>
-                                    <Link href="/gcp/funciones/uso-horario-habil-no-habil/cloud-sql/sqlserver">
+                                    <Link href="/cloud-aws/funciones/consumo-rds-mysql-horario-habil-vs-no-habil">
                                         <Button size="sm" variant="outline" className="gap-2 cursor-pointer bg-transparent">
-                                            <Database className="h-4 w-4" /> Cloud SQL SQL Server
+                                            <Database className="h-4 w-4" /> RDS MySQL
                                         </Button>
                                     </Link>
-                                    <Link href="/gcp/funciones/uso-horario-habil-no-habil/cluster-gke">
+                                    <Link href="/cloud-aws/funciones/consumo-rds-sql-horario-habil-vs-no-habil">
                                         <Button size="sm" variant="outline" className="gap-2 cursor-pointer bg-transparent">
-                                            <Container className="h-4 w-4" /> GKE Clusters
+                                            <Database className="h-4 w-4" /> RDS SQL Server
                                         </Button>
                                     </Link>
-                                    <Link href="/gcp/funciones/uso-horario-habil-no-habil/filestore">
+                                    <Link href="/cloud-aws/funciones/consumo-rds-oracle-horario-habil-vs-no-habil">
                                         <Button size="sm" variant="outline" className="gap-2 cursor-pointer bg-transparent">
-                                            <Container className="h-4 w-4" /> Cloud Filestore
+                                            <Database className="h-4 w-4" /> RDS Oracle
+                                        </Button>
+                                    </Link>
+                                    <Link href="/cloud-aws/funciones/consumo-rds-mariadb-horario-habil-vs-no-habil">
+                                        <Button size="sm" variant="outline" className="gap-2 cursor-pointer bg-transparent">
+                                            <Database className="h-4 w-4" /> RDS MariaDB
                                         </Button>
                                     </Link>
                                 </div>
+                                <p className="mt-2 text-xs text-muted-foreground">
+                                    Compara comportamiento de carga entre horario hábil y no hábil.
+                                </p>
+                                <div className="text-[11px] uppercase tracking-wider text-muted-foreground my-3">
+                                    Consumo: por región
+                                </div>
+                                <Link href="/cloud-aws/funciones/avg-uso-loc-inst-ec2">
+                                    <Button
+                                        size="sm"
+                                        variant="outline"
+                                        className="justify-start gap-2 cursor-pointer w-full bg-transparent"
+                                    >
+                                        <MapPin className="h-4 w-4" /> Uso por Localización (EC2)
+                                    </Button>
+                                </Link>
+                                <p className="mt-2 text-xs text-muted-foreground">
+                                    Compara comportamiento de servicios en distintas regiones.
+                                </p>
                             </div>
 
                             <Separator />
 
                             <div>
                                 <div className="text-[11px] uppercase tracking-wider text-muted-foreground mb-1">
-                                    Posibilidad de ahorro
+                                    Storage
                                 </div>
                                 <div className="grid gap-2 sm:grid-cols-2">
-                                    <Link href="/gcp/funciones/spot-vs-standard-vm">
+                                    <Link href="/cloud-aws/funciones/top-s3-buckets">
                                         <Button
                                             size="sm"
                                             variant="outline"
                                             className="justify-start gap-2 cursor-pointer w-full bg-transparent"
                                         >
-                                            <Zap className="h-4 w-4" /> Comparativa Spot vs Standard
+                                            <Box className="h-4 w-4" /> Top S3 Buckets
+                                        </Button>
+                                    </Link>
+                                    <Link href="/cloud-aws/funciones/ebs-no-utilizados">
+                                        <Button
+                                            size="sm"
+                                            variant="outline"
+                                            className="justify-start gap-2 cursor-pointer w-full bg-transparent"
+                                        >
+                                            <HardDrive className="h-4 w-4" /> EBS no utilizados
+                                        </Button>
+                                    </Link>
+                                </div>
+                            </div>
+                            <Separator />
+                            <div>
+                                <div className="text-[11px] uppercase tracking-wider text-muted-foreground mb-1">
+                                    Posibilidad de ahorro
+                                </div>
+                                <div className="grid gap-2 sm:grid-cols-2">
+                                    <Link href="/cloud-aws/funciones/spot-vs-vm">
+                                        <Button
+                                            size="sm"
+                                            variant="outline"
+                                            className="justify-start gap-2 cursor-pointer w-full bg-transparent"
+                                        >
+                                            <Zap className="h-4 w-4" /> Comparativa Spot vs VM
                                         </Button>
                                     </Link>
                                 </div>
@@ -362,61 +458,70 @@ export default function DashboardGCPPage() {
                             <CardTitle className="text-base flex items-center gap-2">
                                 <Server className="h-4 w-4" /> Recursos por Tipo
                             </CardTitle>
-                            <CardDescription>Inventario y detalle por categoría GCP</CardDescription>
+                            <CardDescription>Inventario y detalle por categoría</CardDescription>
                         </CardHeader>
 
                         <CardContent className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                            <Link href="/gcp/recursos/compute-engine" className="group">
+                            <Link href="/cloud-aws/recursos/instancias-ec2" className="group">
                                 <div className="rounded-xl border p-3 hover:bg-muted transition">
                                     <div className="flex items-center gap-2 font-medium text-sm">
-                                        <Server className="h-4 w-4" /> Compute Engine (VMs)
+                                        <Server className="h-4 w-4" /> Instancias EC2
                                     </div>
-                                    <div className="text-xs text-muted-foreground">Instancias y métricas</div>
+                                    <div className="text-xs text-muted-foreground">Instancias, historial y métricas</div>
                                 </div>
                             </Link>
 
-                            <Link href="/gcp/recursos/instance-groups" className="group">
+                            <Link href="/cloud-aws/recursos/autoscaling-groups" className="group">
                                 <div className="rounded-xl border p-3 hover:bg-muted transition">
                                     <div className="flex items-center gap-2 font-medium text-sm">
-                                        <TrendingUp className="h-4 w-4" /> Instance Groups (MIGs)
+                                        <TrendingUp className="h-4 w-4" /> Auto Scaling Groups
                                     </div>
-                                    <div className="text-xs text-muted-foreground">Grupos de escalado</div>
+                                    <div className="text-xs text-muted-foreground">Instancias, templates, historial y métricas</div>
                                 </div>
                             </Link>
 
-                            <Link href="/gcp/recursos/cloudsql/postgresql" className="group">
+                            <Link href="/cloud-aws/recursos/instancias-rds-pg" className="group">
                                 <div className="rounded-xl border p-3 hover:bg-muted transition">
                                     <div className="flex items-center gap-2 font-medium text-sm">
-                                        <Database className="h-4 w-4" /> Cloud SQL (PostgreSQL)
+                                        <Database className="h-4 w-4" /> RDS PostgreSQL
                                     </div>
-                                    <div className="text-xs text-muted-foreground">Base de datos relacionales</div>
+                                    <div className="text-xs text-muted-foreground">Instancias, historial y métricas</div>
                                 </div>
                             </Link>
 
-                            <Link href="/gcp/recursos/cloudsql/mysql" className="group">
+                            <Link href="/cloud-aws/recursos/instancias-rds-mysql" className="group">
                                 <div className="rounded-xl border p-3 hover:bg-muted transition">
                                     <div className="flex items-center gap-2 font-medium text-sm">
-                                        <Database className="h-4 w-4" /> Cloud SQL (MySQL)
+                                        <Database className="h-4 w-4" /> RDS MySQL
                                     </div>
-                                    <div className="text-xs text-muted-foreground">Base de datos relacionales</div>
+                                    <div className="text-xs text-muted-foreground">Instancias, historial y métricas</div>
                                 </div>
                             </Link>
 
-                            <Link href="/gcp/recursos/cloudsql/sqlserver" className="group">
+                            <Link href="/cloud-aws/recursos/instancias-rds-sqlserver" className="group">
                                 <div className="rounded-xl border p-3 hover:bg-muted transition">
                                     <div className="flex items-center gap-2 font-medium text-sm">
-                                        <Database className="h-4 w-4" /> Cloud SQL (SQL Server)
+                                        <Database className="h-4 w-4" /> RDS SQL Server
                                     </div>
-                                    <div className="text-xs text-muted-foreground">Base de datos relacionales</div>
+                                    <div className="text-xs text-muted-foreground">Instancias, historial y métricas</div>
                                 </div>
                             </Link>
 
-                            <Link href="/gcp/recursos/clusters-gke" className="group">
+                            <Link href="/cloud-aws/recursos/instancias-rds-oracle" className="group">
                                 <div className="rounded-xl border p-3 hover:bg-muted transition">
                                     <div className="flex items-center gap-2 font-medium text-sm">
-                                        <Server className="h-4 w-4" /> Clusters GKE (Nodos)
+                                        <Database className="h-4 w-4" /> RDS Oracle
                                     </div>
-                                    <div className="text-xs text-muted-foreground">Nodos y métricas</div>
+                                    <div className="text-xs text-muted-foreground">Instancias, historial y métricas</div>
+                                </div>
+                            </Link>
+
+                            <Link href="/cloud-aws/recursos/instancias-rds-mariadb" className="group">
+                                <div className="rounded-xl border p-3 hover:bg-muted transition">
+                                    <div className="flex items-center gap-2 font-medium text-sm">
+                                        <Database className="h-4 w-4" /> RDS MariaDB
+                                    </div>
+                                    <div className="text-xs text-muted-foreground">Instancias, historial y métricas</div>
                                 </div>
                             </Link>
                         </CardContent>

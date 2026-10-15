@@ -1,0 +1,57 @@
+name: Deploy CloudPerformance Web
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cloudperformance-webpage-vm
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy to Rocky Linux VM
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Configure SSH
+        shell: bash
+        env:
+          VM_SSH_PRIVATE_KEY: ${{ secrets.VM_SSH_PRIVATE_KEY }}
+          VM_KNOWN_HOSTS: ${{ secrets.VM_KNOWN_HOSTS }}
+        run: |
+          set -euo pipefail
+
+          install -d -m 700 "$HOME/.ssh"
+
+          printf '%s\n' "$VM_SSH_PRIVATE_KEY" > "$HOME/.ssh/id_cloudperformance_deploy"
+
+          printf '%s\n' "$VM_KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
+
+          chmod 600 "$HOME/.ssh/id_cloudperformance_deploy" "$HOME/.ssh/known_hosts"
+
+      - name: Deploy selected commit
+        shell: bash
+        env:
+          VM_HOST: cloudperformance-desarrollo.eastus2.cloudapp.azure.com
+          VM_USER: deploy_webpage
+          VM_PORT: '22'
+          DEPLOY_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+
+          ssh \
+            -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes \
+            -o IdentitiesOnly=yes \
+            -o ConnectTimeout=15 \
+            -i "$HOME/.ssh/id_cloudperformance_deploy" \
+            -p "$VM_PORT" \
+            "$VM_USER@$VM_HOST" \
+            "deploy $DEPLOY_SHA"
