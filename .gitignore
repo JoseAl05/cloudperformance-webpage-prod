@@ -37,4 +37,4 @@ AZURE_FOUNDRY_BEDROCK_VIEW.md
 ecosystem.config.cjs
 tsc-baseline.json
 scripts/check-tsc-baseline.mjs
-docs/*.md
+/docs/*.md
