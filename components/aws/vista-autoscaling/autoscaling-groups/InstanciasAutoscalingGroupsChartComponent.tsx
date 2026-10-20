@@ -34,7 +34,6 @@ export const InstanciasAutoscalingGroupsChartComponent = (props: unknown) => {
 
 
 
-  // Construir URL usando la estructura correcta que espera tu API
   const startDateFormatted = startDate.toISOString().replace('Z', '').slice(0, -4);
   const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : '';
 
@@ -52,13 +51,11 @@ export const InstanciasAutoscalingGroupsChartComponent = (props: unknown) => {
     apiUrl += `&auto_scaling_group_name=${instance}`;
   }
 
-  // TODOS LOS HOOKS JUNTOS AL PRINCIPIO
   const { data: infoList, error: infoError, isLoading: infoLoading } = useSWR<AutoscalingGroupData[]>(
     startDate && endDate ? apiUrl : null,
     fetcher
   );
 
-  // API para instancias del autoscaling group
   const instancesApiUrl = `/api/aws/bridge/autoscaling/autoscaling_groups_instances?date_from=${startDateFormatted}&date_to=${endDateFormatted}&auto_scaling_group_name=${instance}`;
 
   const { data: instancesData, error: instancesError, isLoading: instancesLoading } = useSWR<unknown[]>(
@@ -66,7 +63,6 @@ export const InstanciasAutoscalingGroupsChartComponent = (props: unknown) => {
     fetcher
   );
 
-  // API para métricas del autoscaling group
   const metricsApiUrl = `/api/aws/bridge/autoscaling/autoscaling_groups_metrics?date_from=${startDateFormatted}&date_to=${endDateFormatted}&resource=${instance}`;
 
   const { data: metricsData, error: metricsError, isLoading: metricsLoading } = useSWR<unknown[]>(
@@ -74,7 +70,6 @@ export const InstanciasAutoscalingGroupsChartComponent = (props: unknown) => {
     fetcher
   );
 
-  // API para eventos del autoscaling group (usando instance por ahora)
   const eventsApiUrl = `/api/aws/bridge/autoscaling/autoscaling_groups_events?date_from=${startDateFormatted}&date_to=${endDateFormatted}&resource=${instance}`;
 
   const { data: eventsData, error: eventsError, isLoading: eventsLoading } = useSWR<unknown>(
@@ -82,7 +77,6 @@ export const InstanciasAutoscalingGroupsChartComponent = (props: unknown) => {
     fetcher
   );
 
-  // DESPUÉS de todos los hooks, hacer el filtrado
   const autoscalingGroupData = (infoList || []).filter((item: AutoscalingGroupData) =>
     item?.AutoScalingGroupName === instance
   );
@@ -136,7 +130,6 @@ export const InstanciasAutoscalingGroupsChartComponent = (props: unknown) => {
         </div>
       </div>
       <div className='my-5'>
-        {/* Tabla de Instancias del Autoscaling Group */}
         <AutoscalingGroupsResourceViewInstanciasComponent
           data={instancesData}
           startDate={startDate}
@@ -146,7 +139,6 @@ export const InstanciasAutoscalingGroupsChartComponent = (props: unknown) => {
         />
       </div>
       <div className='my-5'>
-        {/* Gráfico de Estados de Instancias */}
         <Card className="w-full">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -165,7 +157,6 @@ export const InstanciasAutoscalingGroupsChartComponent = (props: unknown) => {
       </div>
       <div className='my-5'>
 
-        {/* Gráfico de Instancias vs Max/Min */}
         <Card className="w-full">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -182,7 +173,6 @@ export const InstanciasAutoscalingGroupsChartComponent = (props: unknown) => {
         </Card>
       </div>
 
-      {/* Tabla de Eventos del Autoscaling Group */}
       <AutoscalingGroupsEventsTableComponent
         data={eventsData}
         startDate={startDate}

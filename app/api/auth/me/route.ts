@@ -5,10 +5,17 @@ import { verifyAuthToken } from '@/lib/auth';
 import { getCollection } from '@/lib/mongodb';
 import { findCompanyConnectors } from '@/lib/connectors';
 import { ObjectId } from 'mongodb';
-import type { User } from '@/types/db';
+import type { CloudAccount, User } from '@/types/db';
 
-// `User` ya declara planName, los flags multi-tenant y `<cloud>_accounts`.
 type SessionUser = Omit<User, 'passwordHash'>;
+
+const dbOf = (value: unknown): string | null => (typeof value === 'string' && value ? value : null);
+
+const accountsOf = (value: unknown): CloudAccount[] =>
+  Array.isArray(value)
+    ? value.filter((acc): acc is CloudAccount =>
+        typeof acc === 'object' && acc !== null && typeof (acc as CloudAccount).id === 'string')
+    : [];
 
 export async function GET() {
   const cookieStore = await cookies();
@@ -32,7 +39,6 @@ export async function GET() {
       return NextResponse.json({ user: null }, { status: 404 });
     }
 
-    // Conectores de la empresa activa del token (cambia con el swap de admin_global)
     const connector = await findCompanyConnectors(payload.client);
 
 
@@ -41,32 +47,32 @@ export async function GET() {
       email: user.email,
       username: user.username,
       client: user.client,
+      active_client: typeof payload.client === 'string' ? payload.client : user.client,
       role: user.role,
-      planName: user.planName,
+      planName: typeof payload.planName === 'string' ? payload.planName : user.planName,
       is_active: user.is_active,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
 
-      is_aws: user.is_aws,
-      is_azure: user.is_azure,
-      is_gcp: user.is_gcp,
-      is_openai: user.is_openai || false,
+      is_aws: payload.is_aws === true,
+      is_azure: payload.is_azure === true,
+      is_gcp: payload.is_gcp === true,
+      is_openai: payload.is_openai === true,
 
-      user_db_aws: user.user_db_aws,
-      user_db_azure: user.user_db_azure,
-      user_db_gcp: user.user_db_gcp,
-      user_db_openai: user.user_db_openai || null,
+      user_db_aws: dbOf(payload.user_db_aws),
+      user_db_azure: dbOf(payload.user_db_azure),
+      user_db_gcp: dbOf(payload.user_db_gcp),
+      user_db_openai: dbOf(payload.user_db_openai),
 
-      is_aws_multi_tenant: user.is_aws_multi_tenant || false,
-      is_azure_multi_tenant: user.is_azure_multi_tenant || false,
-      is_gcp_multi_tenant: user.is_gcp_multi_tenant || false,
-      is_openai_multi_tenant: user.is_openai_multi_tenant || false,
+      is_aws_multi_tenant: payload.is_aws_multi_tenant === true,
+      is_azure_multi_tenant: payload.is_azure_multi_tenant === true,
+      is_gcp_multi_tenant: payload.is_gcp_multi_tenant === true,
+      is_openai_multi_tenant: payload.is_openai_multi_tenant === true,
 
-      // Sólo existen en multi-tenant; en single-tenant manda `user_db_<cloud>`.
-      azure_accounts: user.azure_accounts || [],
-      aws_accounts: user.aws_accounts || [],
-      gcp_accounts: user.gcp_accounts || [],
-      openai_accounts: user.openai_accounts || [],
+      azure_accounts: accountsOf(payload.azure_accounts),
+      aws_accounts: accountsOf(payload.aws_accounts),
+      gcp_accounts: accountsOf(payload.gcp_accounts),
+      openai_accounts: accountsOf(payload.openai_accounts),
 
       connectors: connector || []
     };

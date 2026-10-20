@@ -11,7 +11,6 @@ interface Ec2InstancesConsumeComponentProps {
     region: string
 }
 
-/** Consumo EC2: adapta los filtros de la vista al contrato canónico (/api/aws/consumption/ec2/*). */
 export const Ec2InstancesConsumeComponent = ({ startDate, endDate, instance, region }: Ec2InstancesConsumeComponentProps) => {
     return (
         <ConsumptionView

@@ -77,19 +77,20 @@ export const InstancesFilterComponent = ({
 
     const shouldFetch = !!subscription && !!region
 
-    const { data: fetchedData, error, isLoading } = useSWR(
+    const { data: fetchedData, error, isLoading } = useSWR<unknown[]>(
         shouldFetch ? buildUrl() : null,
         fetcher
     )
 
-    const data = useMemo(() => {
+    const data = useMemo((): MeterInstanceItem[] | undefined => {
         if (instancesService === 'azure-foundry-accounts' && Array.isArray(fetchedData)) {
             return [{
                 meter_category: "Cuentas Azure AI",
-                instances: fetchedData.map((item: unknown) => (item as { instance_name?: string }).instance_name || item)
+                instances: fetchedData.map((item) =>
+                    typeof item === 'string' ? item : String((item as { instance_name?: string }).instance_name ?? '')),
             }];
         }
-        return fetchedData;
+        return fetchedData as MeterInstanceItem[] | undefined;
     }, [fetchedData, instancesService]);
 
     useEffect(() => {

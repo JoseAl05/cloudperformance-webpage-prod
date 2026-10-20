@@ -1,6 +1,7 @@
 'use client'
 
 import { useMemo, useState } from 'react';
+import type { CellContext } from '@tanstack/react-table';
 import { Eye, Server } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -9,12 +10,13 @@ import { createColumns, DynamicColumn } from '@/components/data-table/columns';
 import { DataTableGrouping } from '@/components/data-table/data-table-grouping';
 import { ConsumptionDetailModal, renderField } from '@/components/shared/consumption/ConsumptionDetailModal';
 import { formatCurrency } from '@/lib/format';
-import { formatDateTime, getResourceValue } from '@/lib/consumption';
+import { formatDateTime, getResourceValue, toNumberOrNull } from '@/lib/consumption';
 import type { ConsumptionResource } from '@/interfaces/consumption';
 import type { ConsumptionViewConfig, MetricColumnDef } from '@/components/shared/consumption/types';
 
-// Fila de la tabla: el recurso + valores planos para ordenar/filtrar
 type Row = ConsumptionResource & Record<string, unknown>;
+
+const rowOf = (info: unknown): Row => (info as CellContext<Row, unknown>).row.original;
 
 const BarCell = ({ value, max, column, row }: { value: number | null; max: number; column: MetricColumnDef; row: Row }) => {
     const pct = value !== null && max > 0 ? Math.min((value / max) * 100, 100) : 0;
@@ -70,83 +72,90 @@ export const ConsumptionTable = ({ resources, config }: { resources: Consumption
     }), [resources, config.tableColumns]);
 
     const maxima = useMemo(() => config.tableColumns.map((_, i) =>
-        Math.max(0, ...rows.map((row) => Number(row[`__col${i}`] ?? 0)))), [rows, config.tableColumns]);
+        Math.max(0, ...rows.map((row) => toNumberOrNull(row[`__col${i}`]) ?? 0))), [rows, config.tableColumns]);
 
     const columns = useMemo(() => {
         const cols: DynamicColumn<Row>[] = [
             {
                 header: 'Recurso',
                 accessorKey: 'resource_name',
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                cell: ({ row }: any) => (
-                    <div className="flex items-center gap-2">
-                        <div className="p-1.5 bg-slate-50 dark:bg-slate-900 rounded border border-slate-100 dark:border-slate-800">
-                            <Server className="h-3.5 w-3.5 text-slate-500" />
+                cell: (info: unknown) => {
+                    const row = rowOf(info);
+                    return (
+                        <div className="flex items-center gap-2">
+                            <div className="p-1.5 bg-slate-50 dark:bg-slate-900 rounded border border-slate-100 dark:border-slate-800">
+                                <Server className="h-3.5 w-3.5 text-slate-500" />
+                            </div>
+                            <div className="flex flex-col min-w-0">
+                                <span className="font-semibold text-sm truncate max-w-[200px]" title={row.resource_name}>{row.resource_name}</span>
+                                {row.resource_id !== row.resource_name && (
+                                    <span className="text-[10px] text-muted-foreground font-mono truncate max-w-[200px]" title={row.resource_id}>{row.resource_id}</span>
+                                )}
+                            </div>
                         </div>
-                        <div className="flex flex-col min-w-0">
-                            <span className="font-semibold text-sm truncate max-w-[200px]" title={row.original.resource_name}>{row.original.resource_name}</span>
-                            {row.original.resource_id !== row.original.resource_name && (
-                                <span className="text-[10px] text-muted-foreground font-mono truncate max-w-[200px]" title={row.original.resource_id}>{row.original.resource_id}</span>
-                            )}
-                        </div>
-                    </div>
-                ),
+                    );
+                },
                 size: 240,
             },
             {
                 header: 'Estado',
                 accessorKey: 'status',
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                cell: (info: any) => info.getValue() ? <Badge variant="outline" className="text-[10px]">{String(info.getValue())}</Badge> : '—',
+                cell: (info: unknown) => {
+                    const status = rowOf(info).status;
+                    return status ? <Badge variant="outline" className="text-[10px]">{status}</Badge> : '—';
+                },
                 size: 120,
             },
             {
                 header: 'Ubicación',
                 accessorKey: 'region',
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                cell: ({ row }: any) => (
-                    <div className="flex flex-col text-xs text-muted-foreground">
-                        <span>{row.original.region ?? '—'}</span>
-                        <span className="text-[10px] opacity-70">{row.original.resource_type ?? ''}</span>
-                    </div>
-                ),
+                cell: (info: unknown) => {
+                    const row = rowOf(info);
+                    return (
+                        <div className="flex flex-col text-xs text-muted-foreground">
+                            <span>{row.region ?? '—'}</span>
+                            <span className="text-[10px] opacity-70">{row.resource_type ?? ''}</span>
+                        </div>
+                    );
+                },
                 size: 140,
             },
             ...config.tableColumns.map((col, i): DynamicColumn<Row> => ({
                 header: col.label,
                 accessorKey: `__col${i}`,
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                cell: ({ row }: any) => <BarCell value={row.original[`__col${i}`]} max={maxima[i]} column={col} row={row.original} />,
+                cell: (info: unknown) => {
+                    const row = rowOf(info);
+                    return <BarCell value={toNumberOrNull(row[`__col${i}`])} max={maxima[i]} column={col} row={row} />;
+                },
                 size: 180,
             })),
             {
                 header: 'Clasificación',
                 accessorKey: 'is_idle',
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                cell: ({ row }: any) => <ClassificationCell row={row.original} />,
+                cell: (info: unknown) => <ClassificationCell row={rowOf(info)} />,
                 size: 150,
             },
             {
                 header: 'Costo',
                 accessorKey: '__cost',
                 desc: true,
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                cell: ({ row }: any) => row.original.cost !== null
-                    ? <span className="text-xs font-bold">{formatCurrency(row.original.cost, { currency: row.original.currency ?? 'USD' })}</span>
-                    : <span className="text-xs text-muted-foreground">—</span>,
+                cell: (info: unknown) => {
+                    const row = rowOf(info);
+                    return row.cost !== null
+                        ? <span className="text-xs font-bold">{formatCurrency(row.cost, { currency: row.currency ?? 'USD' })}</span>
+                        : <span className="text-xs text-muted-foreground">—</span>;
+                },
                 size: 130,
             },
             {
                 header: 'Sync Time',
                 accessorKey: 'sync_time',
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                cell: (info: any) => <span className="text-xs">{formatDateTime(info.getValue() as string | null)}</span>,
+                cell: (info: unknown) => <span className="text-xs">{formatDateTime(rowOf(info).sync_time)}</span>,
                 size: 150,
             },
             {
                 header: 'Detalle',
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                cell: ({ row }: any) => <DetailsCell row={row.original} config={config} />,
+                cell: (info: unknown) => <DetailsCell row={rowOf(info)} config={config} />,
                 size: 90,
             },
         ];

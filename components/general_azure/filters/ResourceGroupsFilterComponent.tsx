@@ -57,7 +57,6 @@ export const ResourceGroupFilterComponent = ({
     return `/api/azure/bridge/azure/get-resource-groups?${params.toString()}`
   }
 
-  // Solo hacer fetch si hay región y suscripción específicas seleccionadas
   const shouldFetch = !!subscription && !!region
 
   const { data, error, isLoading } = useSWR(
@@ -66,7 +65,6 @@ export const ResourceGroupFilterComponent = ({
   )
 
   useEffect(() => { setIsMounted(true) }, [])
-  // Resetear el resource group seleccionado cuando cambian región o suscripción
   useEffect(() => {
     if (!shouldFetch && selectedResourceGroup && selectedResourceGroup !== 'all_resource_groups') {
       setSelectedResourceGroup('all_resource_groups')
@@ -76,7 +74,6 @@ export const ResourceGroupFilterComponent = ({
 
   if (!isMounted) return null
 
-  // Si no se puede hacer fetch, mostrar mensaje informativo
   if (!shouldFetch) {
     return (
       <Button

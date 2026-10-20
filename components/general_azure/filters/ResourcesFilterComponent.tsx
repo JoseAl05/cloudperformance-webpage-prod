@@ -25,7 +25,6 @@ export const ResourcesFilterComponent = ({
   const startDateFormatted = startDate?.toISOString().replace('Z', '').slice(0, -4) || ''
   const endDateFormatted = endDate?.toISOString().replace('Z', '').slice(0, -4) || ''
 
-  // Construir URL con filtros opcionales
   const buildApiUrl = () => {
     if (!startDate || !endDate) return null
 
@@ -47,7 +46,7 @@ export const ResourcesFilterComponent = ({
 
   const apiUrl = buildApiUrl()
 
-  const { data: resources, error, isLoading } = useSWR(
+  const { data: resources, error, isLoading } = useSWR<string[]>(
     apiUrl,
     fetcher,
     {

@@ -1,4 +1,3 @@
-// components/aws/vista-facturacion/tendencia-facturacion/MainViewTendenciaFacturacionComponent.tsx
 import { FiltersComponent } from '@/components/general_azure/filters/FiltersComponent'
 import { AzureVmMetricsComponent } from '@/components/azure/vista-consumo-vm/ConsumoVmComponent'
 import { ChartLine } from 'lucide-react'

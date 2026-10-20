@@ -30,12 +30,12 @@ export const DeploymentsComponent = ({ startDate, endDate, selectedOperation,sel
     const startDateFormatted = startDate.toISOString().split('.')[0];
     const endDateFormatted = endDate.toISOString().split('.')[0];
 
-    const deployments = useSWR(
+    const deployments = useSWR<unknown[]>(
         selectedOperation ? `/api/azure/bridge/azure/deployments/deployments?date_from=${startDateFormatted}&date_to=${endDateFormatted}&resource_groups=${selectedResourceGroup}&operation_name=${selectedOperation}` : null,
         fetcher,
     );
 
-    const deploymentsDetails = useSWR(
+    const deploymentsDetails = useSWR<unknown[]>(
         selectedOperation ? `/api/azure/bridge/azure/deployments/deployments-detalles?date_from=${startDateFormatted}&date_to=${endDateFormatted}&resource_groups=${selectedResourceGroup}&operation_name=${selectedOperation}` : null,
         fetcher
     );

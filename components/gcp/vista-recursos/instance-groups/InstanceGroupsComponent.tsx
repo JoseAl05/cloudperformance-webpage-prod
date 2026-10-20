@@ -44,11 +44,6 @@ export const InstanceGroupsComponent = ({
         fetcher
     )
 
-    // const cEBilling = useSWR(
-    //     resourceId ? `/api/gcp/bridge/gcp/instancias_compute_engine/gcp-compute-instances_billing?date_from=${startDateFormatted}&date_to=${endDateFormatted}&instance=${resourceId}` : null,
-    //     fetcher
-    // )
-
     const anyLoading =
         iGInfo.isLoading ||
         iGMetrics.isLoading ||

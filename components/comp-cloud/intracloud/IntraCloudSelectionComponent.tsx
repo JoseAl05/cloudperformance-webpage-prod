@@ -35,22 +35,6 @@ export const IntraCloudSelectionComponent = () => {
 
     if (isLoading) return <LoaderComponent size='small' />
 
-    // if (reqPayload) {
-    //     return (
-    //         <div className="animate-in fade-in zoom-in-95 duration-500">
-    //             <Button
-    //                 variant="outline"
-    //                 size="sm"
-    //                 onClick={handleBackToConfig}
-    //                 className="mb-6 gap-2 text-gray-600"
-    //             >
-    //                 <RotateCcw size={14} />
-    //                 Volver a la configuración
-    //             </Button>
-    //             <MainViewIntraCloudBillingComponent payload={reqPayload} />
-    //         </div>
-    //     );
-    // }
     if (reqPayload) {
         return (
             <div className="animate-in fade-in zoom-in-95 duration-500">

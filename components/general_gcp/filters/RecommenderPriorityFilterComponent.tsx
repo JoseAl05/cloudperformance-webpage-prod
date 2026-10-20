@@ -74,17 +74,17 @@ export const RecommenderPriorityFilterComponent = ({
                     <CommandList>
                         <CommandEmpty>No se encontró prioridad.</CommandEmpty>
                         <CommandGroup className="max-h-[250px] overflow-y-auto">
-                            {gcp_recommender_priorities.map((priority) => (
+                            {gcp_recommender_priorities.map((option) => (
                                 <CommandItem
-                                    key={priority.value}
-                                    value={priority.value}
+                                    key={option.value}
+                                    value={option.value}
                                     onSelect={(currentValue) => {
                                         setPriority(currentValue);
                                         setOpen(false);
                                     }}
                                 >
-                                    <Check className={cn('mr-2 h-4 w-4', priority === priority.value ? 'opacity-100' : 'opacity-0')} />
-                                    {priority.label}
+                                    <Check className={cn('mr-2 h-4 w-4', priority === option.value ? 'opacity-100' : 'opacity-0')} />
+                                    {option.label}
                                 </CommandItem>
                             ))}
                         </CommandGroup>

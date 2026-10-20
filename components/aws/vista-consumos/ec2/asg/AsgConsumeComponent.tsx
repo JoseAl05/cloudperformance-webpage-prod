@@ -11,7 +11,6 @@ interface AsgConsumeComponentProps {
     region: string
 }
 
-/** Consumo EC2 de Auto Scaling Groups: adapta los filtros de la vista al contrato canónico (/api/aws/consumption/asg/*). */
 export const AsgConsumeComponent = ({ startDate, endDate, instance, region }: AsgConsumeComponentProps) => {
     return (
         <ConsumptionView

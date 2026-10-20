@@ -25,10 +25,6 @@ const describeError = (error: unknown, fallback: string) => {
     return fallback;
 };
 
-/**
- * Estados estándar de una vista: cargando → error → sin datos → contenido.
- * Pensado para usarse con `useSWR(url, fetcher)` de `@/lib/fetcher`, que expone `error` en respuestas no-2xx.
- */
 export const DataStateComponent = ({
     isLoading = false,
     error,

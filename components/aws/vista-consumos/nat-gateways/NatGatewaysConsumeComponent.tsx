@@ -11,7 +11,6 @@ interface NatGatewaysConsumeComponentProps {
     region: string
 }
 
-/** Consumo NAT Gateways: adapta los filtros de la vista al contrato canónico (/api/aws/consumption/nat-gateways/*). */
 export const NatGatewaysConsumeComponent = ({ startDate, endDate, instance, region }: NatGatewaysConsumeComponentProps) => {
     return (
         <ConsumptionView

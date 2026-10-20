@@ -5,14 +5,16 @@ import { useTheme } from 'next-themes';
 import { Info } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { createChartOption, deepMerge, makeBaseOptions, useECharts } from '@/lib/echartsGlobalConfig';
-import { compactNumber, formatValue, getMetricDefinition } from '@/lib/consumption';
+import { compactNumber, formatValue, getMetricDefinition, metricKey } from '@/lib/consumption';
+import type { MetricDefinition } from '@/lib/consumption';
 import type { MetricPoint } from '@/interfaces/consumption';
 
-const MetricChart = ({ metric, points }: { metric: string; points: MetricPoint[] }) => {
+type ChartPoint = Pick<MetricPoint, 'timestamp' | 'metric' | 'avg_value' | 'max_value' | 'min_value'>;
+
+const MetricChart = ({ points, definition }: { points: ChartPoint[]; definition: MetricDefinition }) => {
     const { theme, resolvedTheme } = useTheme();
     const isDark = (resolvedTheme || theme) === 'dark';
     const chartRef = useRef<HTMLDivElement>(null);
-    const definition = getMetricDefinition(metric);
 
     const option = useMemo(() => {
         const sorted = [...points].sort((a, b) => a.timestamp.localeCompare(b.timestamp));
@@ -82,10 +84,14 @@ const MetricChart = ({ metric, points }: { metric: string; points: MetricPoint[]
     );
 };
 
-/** Un gráfico por métrica (las series llegan mezcladas y se agrupan por `metric`). */
-export const ConsumptionCharts = ({ data }: { data: MetricPoint[] }) => {
+interface ConsumptionChartsProps {
+    data: ChartPoint[];
+    metricOverrides?: Record<string, MetricDefinition>;
+}
+
+export const ConsumptionCharts = ({ data, metricOverrides }: ConsumptionChartsProps) => {
     const grouped = useMemo(() => {
-        const groups: Record<string, MetricPoint[]> = {};
+        const groups: Record<string, ChartPoint[]> = {};
         data.forEach((point) => {
             (groups[point.metric] ??= []).push(point);
         });
@@ -98,7 +104,11 @@ export const ConsumptionCharts = ({ data }: { data: MetricPoint[] }) => {
     return (
         <div className="flex flex-col gap-6 w-full min-w-0">
             {metrics.map((metric) => (
-                <MetricChart key={metric} metric={metric} points={grouped[metric]} />
+                <MetricChart
+                    key={metric}
+                    points={grouped[metric]}
+                    definition={metricOverrides?.[metricKey(metric)] ?? getMetricDefinition(metric)}
+                />
             ))}
         </div>
     );

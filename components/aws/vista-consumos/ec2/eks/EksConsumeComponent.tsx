@@ -11,7 +11,6 @@ interface EksConsumeComponentProps {
     region: string
 }
 
-/** Consumo nodos EKS: adapta los filtros de la vista al contrato canónico (/api/aws/consumption/eks/*). */
 export const EksConsumeComponent = ({ startDate, endDate, eksAsgInstance, region }: EksConsumeComponentProps) => {
     return (
         <ConsumptionView

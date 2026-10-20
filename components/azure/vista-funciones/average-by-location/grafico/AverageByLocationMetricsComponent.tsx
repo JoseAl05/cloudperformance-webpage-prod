@@ -129,7 +129,6 @@ const MetricCellDialog = ({
             <span className="font-medium">{formatMetricValue(metric, datum.avg_value)}</span>
           </div>
 
-          {/* --- NUEVO: max y min observados --- */}
           {(datum.max_value != null || datum.min_value != null) && (
             <div className="flex items-center justify-between">
               <span className="text-muted-foreground text-sm">Máx observado</span>

@@ -41,7 +41,6 @@ interface CloudTag {
 export const CentroDeCostoComponent = () => {
   const cloudType = "azure";
 
-  // --- Estados Originales ---
   const [editingCentro, setEditingCentro] = useState<CentroCosto | null>(null);
   const [showForm, setShowForm] = useState<boolean>(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState<boolean>(false);
@@ -62,7 +61,6 @@ export const CentroDeCostoComponent = () => {
   const [cloudTags, setCloudTags] = useState<CloudTag[]>([]);
 
   const handleEdit = (centro: CentroCosto) => {
-    // 1. Alineado con la eliminación de tags de los componentes hijos
     const sanitizedCentro: CentroCosto = {
       ...centro,
       responsable_centro: centro.responsable_centro ?? "",
@@ -104,10 +102,9 @@ export const CentroDeCostoComponent = () => {
             errorMsg = extracted.map((e: { msg: string }) => e.msg).join(", ");
           } else if (typeof extracted === "string") {
             if (extracted.startsWith('{') && extracted.includes('detail')) {
-              // 2. Omitiendo variable de catch no utilizada
               try {
                 extracted = JSON.parse(extracted).detail;
-              } catch { /* Ignorar si no es JSON válido */ }
+              } catch { }
             }
             errorMsg = extracted;
           } else if (extracted) {
@@ -132,13 +129,11 @@ export const CentroDeCostoComponent = () => {
     } catch (err: unknown) {
       let cleanMessage = err instanceof Error ? err.message : "Error al guardar el centro de costo";
       
-      // 2. Omitiendo variable de catch no utilizada
       try {
         if (cleanMessage.startsWith('{') && cleanMessage.includes('detail')) {
           cleanMessage = JSON.parse(cleanMessage).detail || cleanMessage;
         }
       } catch {
-        // Si falla el parseo, se queda el mensaje original
       }
 
       setErrorMessage(cleanMessage);
@@ -182,7 +177,6 @@ export const CentroDeCostoComponent = () => {
     setCentroToDelete(null);
   };
 
-  // --- Acciones de Importación (Buscando en la Nube) ---
   const handleOpenImport = () => {
     setShowImportDialog(true);
     setHasScanned(false);
@@ -482,7 +476,6 @@ export const CentroDeCostoComponent = () => {
           </DialogContent>
         </Dialog>
 
-        {/* Alertas y Confirmaciones */}
         <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
           <AlertDialogContent className="bg-white dark:bg-gray-800">
             <AlertDialogHeader>

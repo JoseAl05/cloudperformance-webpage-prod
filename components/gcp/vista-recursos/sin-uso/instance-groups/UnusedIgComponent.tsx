@@ -1,114 +1,31 @@
 'use client'
 
-import { fetcher } from '@/lib/fetcher';
-import { MessageCard } from '@/components/aws/cards/MessageCards';
-import { UnusedCeCardsComponent } from '@/components/gcp/vista-recursos/sin-uso/compute-engine/info/UnusedCeCardsComponent';
-import { UnusedCeTableComponent } from '@/components/gcp/vista-recursos/sin-uso/compute-engine/table/UnusedCeTableComponent';
-import { LoaderComponent } from '@/components/general_gcp/LoaderComponent';
-import { UnusedCeCardsMetricSummary, UnusedCeTableData } from '@/interfaces/vista-unused-resources/unusedComputeEngineInterfaces';
-import { AlertCircle, Clock, Info } from 'lucide-react';
-import useSWR from 'swr';
+import { UnusedView } from '@/components/shared/unused/UnusedView';
+import { GCP_INSTANCE_GROUPS_UNUSED } from '@/components/shared/unused/unusedConfigs';
+import { toApiDate } from '@/lib/consumption';
 
 interface UnusedIgComponentProps {
     startDate: Date;
-    endDate: Date;
-    resourceId: string;
+    endDate?: Date;
+    resourceId?: string;
     regions: string;
     projects: string;
 }
 
-const isNonEmptyArray = <T,>(v: unknown): v is T[] => Array.isArray(v) && v.length > 0
+const isSet = (value: string | null | undefined, allValue: string): value is string =>
+    !!value && value !== allValue && value !== 'null';
 
-export const UnusedIgComponent = ({ startDate, endDate, regions, projects, resourceId }: UnusedIgComponentProps) => {
-
-    const startDateFormatted = startDate.toISOString().replace('Z', '').slice(0, -4);
-    const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : '';
-
-    const allUnusedIgCeTable = useSWR(
-        resourceId ? `/api/gcp/bridge/gcp/recursos_sin_uso/get_ig_ce_table_data?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${regions}&resource=${resourceId}&project_id=${projects}` : null,
-        fetcher
-    )
-    const allUnusedIgCeCards = useSWR(
-        resourceId ? `/api/gcp/bridge/gcp/recursos_sin_uso/cards_instance_groups_instances_metrics_summary?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${regions}&resource=${resourceId}&project_id=${projects}` : null,
-        fetcher
-    )
-
-    const unusedCeTableData: UnusedCeTableData[] | null =
-        isNonEmptyArray<UnusedCeTableData>(allUnusedIgCeTable.data) ? allUnusedIgCeTable.data : null;
-
-    const unusedCeCardsData: UnusedCeCardsMetricSummary[] | null =
-        isNonEmptyArray<UnusedCeCardsMetricSummary>(allUnusedIgCeCards.data) ? allUnusedIgCeCards.data : null;
-
-    const hasUnusedData = !!unusedCeTableData || !!unusedCeCardsData;
-
-    const anyLoading =
-        allUnusedIgCeCards.isLoading ||
-        allUnusedIgCeTable.isLoading
-
-
-    const anyError =
-        !!allUnusedIgCeCards.error ||
-        !!allUnusedIgCeTable.error
-
-    if (!resourceId) {
-        return (
-            <div className="max-w-7xl mx-auto px-6 py-8">
-                <div className="text-center text-gray-500 text-lg font-medium">No se ha seleccionado ningúna instancia.</div>
-            </div>
-        )
-    }
-
-    if (anyLoading) {
-        return <LoaderComponent />
-    }
-
-    if (anyError) {
-        return (
-            <div className="w-full min-w-0 px-4 py-10 flex flex-col items-center gap-4">
-                <MessageCard
-                    icon={AlertCircle}
-                    title="Error al cargar datos"
-                    description="Ocurrió un problema al obtener la información desde la API. Intenta nuevamente o ajusta el rango de fechas."
-                    tone="error"
-                />
-            </div>
-        )
-    }
-
-    if (!hasUnusedData) {
-        return (
-            <div className="w-full min-w-0 px-4 py-6">
-                <MessageCard
-                    icon={Info}
-                    title="Sin datos para mostrar"
-                    description="No encontramos Instance Groups sin uso en el rango seleccionado."
-                    tone="warn"
-                />
-            </div>
-        )
-    }
-    const instanceCount = unusedCeTableData?.length;
-    const totalUsdUnusedInstances = unusedCeTableData.reduce((acc, curr) => acc + curr.billing.total_cost_usd, 0)
-
-    return (
-        <>
-            <div className='w-full min-w-0 px-4 py-6'>
-                <div className="flex-1 space-y-6 min-w-0 overflow-hidden">
-                    <UnusedCeCardsComponent
-                        data={unusedCeCardsData}
-                        instanceCount={instanceCount}
-                        totalUsdUnusedInstances={totalUsdUnusedInstances}
-                    />
-                </div>
-
-                <div className="flex items-center gap-3 my-10">
-                    <Clock className="h-8 w-8 text-blue-500" />
-                    <h1 className="text-3xl font-bold text-foreground">Detalle instancias de Instance Groups infrautilizadas</h1>
-                </div>
-                <UnusedCeTableComponent
-                    data={unusedCeTableData}
-                />
-            </div>
-        </>
-    )
-}
+export const UnusedIgComponent = ({ startDate, endDate, resourceId, regions, projects }: UnusedIgComponentProps) => (
+    <UnusedView
+        config={GCP_INSTANCE_GROUPS_UNUSED}
+        enabled={!!resourceId}
+        disabledText="No se ha seleccionado ningún Instance Group."
+        params={{
+            date_from: toApiDate(startDate),
+            date_to: endDate ? toApiDate(endDate) : undefined,
+            region: isSet(regions, 'all_regions') ? regions : 'all_regions',
+            project_id: isSet(projects, 'all_projects') ? projects : undefined,
+            resource: resourceId,
+        }}
+    />
+);

@@ -1,4 +1,3 @@
-// app/azure/page.tsx
 import Link from "next/link"
 import Image from "next/image"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
@@ -76,7 +75,7 @@ export default function DashboardAzurePage() {
                                 <CardContent className="space-y-3">
                                     <div className="text-xs uppercase tracking-wider text-primary font-semibold">Acciones Rápidas</div>
                                     <div className="flex flex-col gap-2 rounded-xl border-2 border-primary/30 bg-gradient-to-br from-primary/5 to-primary/10 p-4 dark:from-primary/10 dark:to-primary/20">
-                                        <Link href="/cloud-azure/advisor">
+                                        <Link href="/cloud-azure/recomendaciones">
                                             <Button
                                                 size="default"
                                                 variant="default"
@@ -111,7 +110,6 @@ export default function DashboardAzurePage() {
                                     <div className="text-xs uppercase tracking-wider text-primary font-semibold">Acciones Rápidas</div>
                                     <div className="grid md:grid-cols-2 gap-4">
                                         <div className="flex flex-col gap-2 rounded-xl border-2 border-primary/30 bg-gradient-to-br from-primary/5 to-primary/10 p-4 dark:from-primary/10 dark:to-primary/20">
-                                            {/* <div className="text-xs font-semibold text-primary mb-1">Tendencia de Costos</div> */}
                                             <Link href="/cloud-azure/facturacion/tendencia-pago-por-uso">
                                                 <Button
                                                     size="default"
@@ -123,8 +121,7 @@ export default function DashboardAzurePage() {
                                             </Link>
                                         </div>
                                         <div className="flex flex-col gap-2 rounded-xl border-2 border-primary/30 bg-gradient-to-br from-primary/5 to-primary/10 p-4 dark:from-primary/10 dark:to-primary/20">
-                                            {/* <div className="text-xs font-semibold text-primary mb-1">Saving Plans</div> */}
-                                            <Link href="/cloud-azure/saving-plan">
+                                            <Link href="/cloud-azure/compromisos/saving-plans">
                                                 <Button
                                                     size="default"
                                                     variant="default"
@@ -252,12 +249,12 @@ export default function DashboardAzurePage() {
                                     <CalendarClock className="h-4 w-4" /> Despliegues (Deployments)
                                 </Button>
                             </Link>
-                            <Link href="/cloud-azure/advisor">
+                            <Link href="/cloud-azure/recomendaciones">
                                 <Button size="sm" variant="outline" className="gap-2 bg-transparent cursor-pointer">
                                     <Pyramid className="h-4 w-4" /> Recomendaciones (Advisor)
                                 </Button>
                             </Link>
-                            <Link href="/cloud-azure/saving-plan">
+                            <Link href="/cloud-azure/compromisos/saving-plans">
                                 <Button size="sm" variant="outline" className="gap-2 bg-transparent cursor-pointer">
                                     <HandCoins className="h-4 w-4" /> Cobertura (Saving Plans)
                                 </Button>

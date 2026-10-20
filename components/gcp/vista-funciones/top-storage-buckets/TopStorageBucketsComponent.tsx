@@ -1,4 +1,5 @@
 'use client'
+import type { ComponentProps } from 'react';
 
 import { fetcher } from '@/lib/fetcher';
 import React, { useMemo } from 'react';
@@ -7,6 +8,18 @@ import { TopStorageBucketsCardsComponent } from './info/TopStorageBucketsCardsCo
 import { TopStorageBucketsChart } from './graficos/TopStorageBucketsChart';
 import { TrendStorageLineChart } from './graficos/TrendStorageLineChart';
 import { BucketsHistoricalTable } from './table/BucketsHistoricalTable';
+
+type StorageBucket = NonNullable<ComponentProps<typeof BucketsHistoricalTable>['data']>[number] & NonNullable<ComponentProps<typeof TopStorageBucketsChart>['data']>[number];
+interface TopStorageBucketsResponse {
+    resumen?: ComponentProps<typeof TopStorageBucketsCardsComponent>['summary'];
+    buckets?: StorageBucket[];
+}
+
+const bucketDate = (bucket: StorageBucket): string => {
+    const raw: unknown = bucket.sync_time;
+    if (raw && typeof raw === 'object' && '$date' in raw) return String((raw as { $date: string }).$date);
+    return typeof raw === 'string' ? raw : '';
+};
 
 interface TopStorageBucketsComponentProps {
     startDate: Date;
@@ -28,7 +41,6 @@ export const TopStorageBucketsComponent = ({
     tagValue
 }: TopStorageBucketsComponentProps) => {
 
-    // Construcción de URL
     let url = `/api/gcp/bridge/gcp/funcion/cloud_storage_buckets?`;
 
     if (startDate) url += `date_from=${startDate.toISOString().slice(0, 19)}&`;
@@ -45,18 +57,17 @@ export const TopStorageBucketsComponent = ({
 
     const shouldFetch = !!projects;
 
-    const { data, error, isLoading } = useSWR(shouldFetch ? url : null, fetcher, {
+    const { data, error, isLoading } = useSWR<TopStorageBucketsResponse>(shouldFetch ? url : null, fetcher, {
         revalidateOnFocus: false,
     });
 
-    // Preparar datos para gráficos de tendencia
     const metricsTimeSeries = useMemo(() => {
         if (!data?.buckets) return [];
 
         const grouped: Record<string, { date: string; object_count: number; total_size_gb: number }> = {};
 
-        data.buckets.forEach((bucket: unknown) => {
-            const date = bucket.sync_time?.$date || bucket.sync_time;
+        data.buckets.forEach((bucket) => {
+            const date = bucketDate(bucket);
             if (!date) return;
 
             if (!grouped[date]) {
@@ -68,7 +79,7 @@ export const TopStorageBucketsComponent = ({
             }
 
             grouped[date].object_count += bucket.object_count || 0;
-            grouped[date].total_size_gb += bucket.tamano_gb ?? bucket.size_gb ?? 0;
+            grouped[date].total_size_gb += bucket.tamano_gb ?? (bucket as { size_gb?: number }).size_gb ?? 0;
         });
 
         return Object.values(grouped).sort(
@@ -76,27 +87,23 @@ export const TopStorageBucketsComponent = ({
         );
     }, [data]);
 
-    //DATOS PARA LOS TOP
     const bucketsForTop = useMemo(() => {
         if (!data?.buckets || data.buckets.length === 0) return [];
 
-        // Obtener timestamp más reciente real
         const latestTimestamp = Math.max(
             ...data.buckets
-                .map((b: unknown) => new Date(b.sync_time?.$date || b.sync_time).getTime())
+                .map((b) => new Date(bucketDate(b)).getTime())
                 .filter((t: number) => !isNaN(t))
         );
 
         if (!latestTimestamp) return [];
 
-        // Nos quedamos SOLO con buckets de ese último snapshot exacto
-        return data.buckets.filter((b: unknown) => {
-            const t = new Date(b.sync_time?.$date || b.sync_time).getTime();
+        return data.buckets.filter((b) => {
+            const t = new Date(bucketDate(b)).getTime();
             return t === latestTimestamp;
         });
     }, [data]);
 
-    // Estado: Sin proyecto seleccionado
     if (!projects) {
         return (
             <div className="max-w-7xl mx-auto px-6 py-8">
@@ -107,7 +114,6 @@ export const TopStorageBucketsComponent = ({
         );
     }
 
-    // Estado: Cargando
     if (isLoading) {
         return (
             <div className="text-center py-8">
@@ -117,7 +123,6 @@ export const TopStorageBucketsComponent = ({
         );
     }
 
-    // Estado: Error
     if (error) {
         return (
             <div className="text-red-500 p-4 bg-red-50 rounded-lg border border-red-200">
@@ -127,7 +132,6 @@ export const TopStorageBucketsComponent = ({
         );
     }
 
-    // Estado: Sin datos
     if (!data || !data.buckets || data.buckets.length === 0) {
         return (
             <div className="text-center text-gray-500 py-8">
@@ -138,14 +142,12 @@ export const TopStorageBucketsComponent = ({
 
     return (
         <div className="space-y-6 mt-6 px-4">
-            {/* Cards */}
             <TopStorageBucketsCardsComponent
                 summary={data?.resumen}
                 buckets={data?.buckets || []}
                 isLoading={isLoading}
             />
 
-            {/* 2 Gráficos TOP */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <TopStorageBucketsChart
                     data={bucketsForTop}
@@ -157,7 +159,6 @@ export const TopStorageBucketsComponent = ({
                 />
             </div>
 
-            {/* Gráficos de Tendencia */}
             <div className="grid grid-cols-1 gap-6">
                 <TrendStorageLineChart
                     data={metricsTimeSeries}
@@ -174,7 +175,6 @@ export const TopStorageBucketsComponent = ({
                 />
             </div>
 
-            {/* TODO: Tabla */}
             <BucketsHistoricalTable
                 data={data.buckets}
                 startDate={startDate.toISOString().split('T')[0]}

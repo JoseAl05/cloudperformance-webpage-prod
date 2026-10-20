@@ -52,7 +52,6 @@ const VmBillingProperties = ({ data }: VmBillingPropertiesProps) => {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-      {/* Tipo de Cargo */}
       <Card className="border-l-4 border-l-blue-500">
         <CardContent className="p-4">
           <div className="flex items-center justify-between">
@@ -67,7 +66,6 @@ const VmBillingProperties = ({ data }: VmBillingPropertiesProps) => {
         </CardContent>
       </Card>
 
-      {/* Proveedor */}
       <Card className="border-l-4 border-l-purple-500">
         <CardContent className="p-4">
           <div className="flex items-center justify-between">
@@ -82,7 +80,6 @@ const VmBillingProperties = ({ data }: VmBillingPropertiesProps) => {
         </CardContent>
       </Card>
 
-      {/* Servicio Consumido */}
       <Card className="border-l-4 border-l-green-500">
         <CardContent className="p-4">
           <div className="flex items-center justify-between">
@@ -97,7 +94,6 @@ const VmBillingProperties = ({ data }: VmBillingPropertiesProps) => {
         </CardContent>
       </Card>
 
-      {/* Centro de Costos */}
       <Card className="border-l-4 border-l-red-500">
         <CardContent className="p-4">
           <div className="flex items-center justify-between">
@@ -112,7 +108,6 @@ const VmBillingProperties = ({ data }: VmBillingPropertiesProps) => {
         </CardContent>
       </Card>
 
-      {/* Identificador de Producto - Ancho completo o 2 columnas */}
       <Card className="border-l-4 border-l-orange-500 md:col-span-2">
         <CardContent className="p-4">
           <div className="flex items-center justify-between">
@@ -127,7 +122,6 @@ const VmBillingProperties = ({ data }: VmBillingPropertiesProps) => {
         </CardContent>
       </Card>
 
-      {/* Ubicación del Recurso */}
       <Card className="border-l-4 border-l-cyan-500">
         <CardContent className="p-4">
           <div className="flex items-center justify-between">
@@ -142,7 +136,6 @@ const VmBillingProperties = ({ data }: VmBillingPropertiesProps) => {
         </CardContent>
       </Card>
 
-      {/* Nombre del Recurso */}
       <Card className="border-l-4 border-l-indigo-500">
         <CardContent className="p-4">
           <div className="flex items-center justify-between">
@@ -174,7 +167,7 @@ const VmBillingPropertiesComponent = ({
   const startDateFormatted = startDate.toISOString().replace('Z', '').slice(0, -4)
   const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : ''
 
-  const { data, error, isLoading } = useSWR(
+  const { data, error, isLoading } = useSWR<BillingPropertiesData>(
     `/api/azure/bridge/azure/recursos/vm/facturacion/propiedades?date_from=${startDateFormatted}&date_to=${endDateFormatted}&instance_name=${instanceName}`,
     fetcher,
     { revalidateOnFocus: false }
@@ -183,7 +176,7 @@ const VmBillingPropertiesComponent = ({
   if (isLoading) return <LoaderComponent />;
   if (error) return <div className="text-red-500 p-4">Error al cargar propiedades de facturación</div>;
 
-  return <VmBillingProperties data={data} />;
+  return <VmBillingProperties data={data ?? null} />;
 };
 
 export { VmBillingPropertiesComponent };

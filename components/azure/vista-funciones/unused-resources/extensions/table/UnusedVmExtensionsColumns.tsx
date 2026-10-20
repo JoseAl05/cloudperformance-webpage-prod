@@ -10,12 +10,13 @@ import { useState } from 'react';
 import { AlertCircle, CheckCircle2, Eye, Puzzle } from 'lucide-react';
 import { UnusedVmssDiskDetails, UnusedVmssDisksData } from '@/interfaces/vista-unused-resources/unusedVmssInterface';
 import { UnusedVmExtensions, UnusedVmExtensionsData } from '@/interfaces/vista-unused-resources/unusedVmExtensionsInterfaces';
+import { readFilterParam } from '@/lib/filters';
 
 const DateParams = () => {
     const searchParams = useSearchParams();
 
-    const startDateParam = searchParams.get('startDate');
-    const endDateParam = searchParams.get('endDate');
+    const startDateParam = readFilterParam(searchParams, 'dateFrom');
+    const endDateParam = readFilterParam(searchParams, 'dateTo');
 
     return { startDateParam: startDateParam, endDateParam: endDateParam }
 }
@@ -146,7 +147,6 @@ const ExtensionsCell = ({ details }: { details?: UnusedVmExtensionsData[] }) => 
                                                         <h1 className="text-sm font-medium">ID Recurso</h1>
                                                         <span className="pt-2 border-t w-[25rem] text-nowrap overflow-x-scroll">
                                                             {n.id}
-                                                            {/* <ShortenedId id={n.id} /> */}
                                                         </span>
                                                     </div>
                                                 )}

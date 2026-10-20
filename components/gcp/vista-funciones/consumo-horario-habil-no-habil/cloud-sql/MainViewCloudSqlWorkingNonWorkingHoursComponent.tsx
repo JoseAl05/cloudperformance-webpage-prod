@@ -24,6 +24,7 @@ export const MainViewCloudSqlWorkingNonWorkingHoursComponent = ({ db_engine }: {
             <div className='w-full min-w-0'>
                 <FiltersComponent
                     Component={CloudSqlWorkingNonWorkingHoursComponent}
+                    cloud='gcp'
                     dateFilter
                     projectsFilter
                     regionFilter

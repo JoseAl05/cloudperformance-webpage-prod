@@ -7,7 +7,7 @@ import { CalendarClock, CalendarDays, TrendingDown, TrendingUp, TrendingUpDown }
 
 interface VariacionTendenciaUsoDeRecursosCardsComponentProps {
     prev_range?: RangeBlock;
-    unit: 'créditos' | '%' | 'Bytes' | 'Objetos' | 'segundos' | 'Ops E/S' | 'Conexiones' | 'IOPS' | '';
+    unit: 'créditos' | '%' | 'GB' | 'Bytes' | 'Objetos' | 'segundos' | 'Ops E/S' | 'Conexiones' | 'IOPS' | '';
     chartyAxisLabel?: string;
     metric?: string;
     actual_range?: RangeBlock;

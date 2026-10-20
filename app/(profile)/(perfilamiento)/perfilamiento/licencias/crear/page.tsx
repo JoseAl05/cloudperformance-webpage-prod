@@ -9,7 +9,6 @@ export default function CrearLicenciaPage() {
     
     if (isLoading) return <p className="m-4">Cargando sesión...</p>;
 
-    //CONTROL DE ACCESO ESTRICTO: Solo Admin Global
     if (!user || user.role !== 'admin_global') {
         return (
             <div className="alert alert-danger p-4 m-4">

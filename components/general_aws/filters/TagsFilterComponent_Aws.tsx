@@ -47,7 +47,7 @@ export const TagFilterComponent = ({
     const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : ''
 
     const shouldFetch = !!region
-    const { data, error, isLoading } = useSWR(
+    const { data, error, isLoading } = useSWR<unknown[]>(
         shouldFetch
             ? `/api/aws/bridge/get-all-tags?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&resource_type=${resourceType}&local_service=${localService}`
             : null,

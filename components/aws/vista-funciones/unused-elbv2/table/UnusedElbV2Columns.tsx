@@ -2,7 +2,7 @@
 
 import { fetcher } from '@/lib/fetcher';
 import { Badge } from '@/components/ui/badge';
-import { DynamicColumn } from '@/components/general/data-table/columns';
+import { DynamicColumn } from '@/components/data-table/columns';
 import { Button } from '@/components/ui/button';
 import { Eye } from 'lucide-react';
 import { useState } from 'react';
@@ -13,6 +13,7 @@ import useSWR from 'swr';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { formatMetric } from '@/lib/metricUtils';
+import { readFilterParam } from '@/lib/filters';
 
 export interface GlobalMetricsSummary {
     avg_requests: number;
@@ -57,20 +58,17 @@ const DetailsCell = ({ elb, dateParams, globalMetrics }: { elb: UnusedElbV2Detai
 const GetParameters = () => {
     const searchParams = useSearchParams();
     return {
-        startDateParam: searchParams.get('startDate'),
-        endDateParam: searchParams.get('endDate'),
-        keyParam: searchParams.get('selectedKey'),
-        valueParam: searchParams.get('selectedValue'),
-        regionParam: searchParams.get('region')
+        startDateParam: readFilterParam(searchParams, 'dateFrom'),
+        endDateParam: readFilterParam(searchParams, 'dateTo'),
+        keyParam: readFilterParam(searchParams, 'tagKey'),
+        valueParam: readFilterParam(searchParams, 'tagValue'),
+        regionParam: readFilterParam(searchParams, 'regions')
     }
 }
 
 const MetricCell = ({ value, globalValue, label, unit }: { value: number, globalValue: number, label: string, unit?: string }) => {
-    // Si el valor local es mayor al global, la barra se llena al 100% (usando value como max)
-    // Si es menor, se usa globalValue como max.
     const maxVal = globalValue > 0 ? (value > globalValue ? value : globalValue) : (value > 0 ? value : 1);
 
-    // Si supera el promedio, pintamos naranja, si no, azul.
     const isAboveAvg = value > globalValue;
     const progressColorClass = isAboveAvg
         ? '[&::-webkit-progress-value]:bg-orange-500 [&::-moz-progress-bar]:bg-orange-500'
@@ -117,7 +115,7 @@ export const getUnusedElbV2Columns = (
                 return (
                     <div className="flex flex-col max-w-[200px]">
                         <Link
-                            href={{ pathname: '/aws/consumos/loadbalancers', query: { startDate: params.startDateParam, endDate: params.endDateParam, unusedElbV2: val, region: params.regionParam, selectedKey: params.keyParam, selectedValue: params.valueParam } }}
+                            href={{ pathname: '/cloud-aws/consumos/loadbalancers', query: { startDate: params.startDateParam, endDate: params.endDateParam, unusedElbV2: val, region: params.regionParam, selectedKey: params.keyParam, selectedValue: params.valueParam } }}
                             rel="noopener noreferrer"
                             target="_blank"
                         >
@@ -138,7 +136,6 @@ export const getUnusedElbV2Columns = (
             header: "Tráfico (Avg)",
             id: "traffic_metric",
             cell: ({ row }) => {
-                // USAMOS EL PROMEDIO DEL RANGO (metrics_summary en raíz), NO EL HISTÓRICO
                 const resourceMetrics = row.original.metrics_summary;
 
                 if (!resourceMetrics || !globalMetrics) return <span className="text-muted-foreground text-xs">-</span>;

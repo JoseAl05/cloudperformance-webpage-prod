@@ -9,8 +9,6 @@ import Link from 'next/link';
 import { DataTableSingle } from '@/components/data-table/data-table-single';
 import { createColumns } from '@/components/data-table/columns';
 
-// ── Tipos actualizados al modelo v2 (compute_units) ──────────────────────────
-
 interface ComputeUnit {
   cloud: 'aws' | 'azure' | 'gcp';
   db: string;
@@ -35,8 +33,6 @@ interface LicenciaHistorial {
   version: string;
 }
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
-
 function cloudLabel(cloud: string) {
   const map: Record<string, string> = { aws: 'AWS', azure: 'Azure', gcp: 'GCP' };
   return map[cloud] || cloud.toUpperCase();
@@ -47,8 +43,6 @@ function formatFecha(fecha: string | null) {
   return new Date(fecha).toLocaleDateString('es-CL');
 }
 
-// ── Página ────────────────────────────────────────────────────────────────────
-
 export default function HistorialPage() {
   const { user, isLoading } = useSession();
   const [licencias, setLicencias] = useState<LicenciaHistorial[]>([]);
@@ -57,7 +51,7 @@ export default function HistorialPage() {
 
   useEffect(() => {
     if (!user) return;
-    fetchJson('/api/op-licencias/historial', { credentials: 'include' })
+    fetchJson<LicenciaHistorial[]>('/api/op-licencias/historial', { credentials: 'include' })
       .then(data => setLicencias(data))
       .catch(() => setError('Error al cargar historial.'))
       .finally(() => setLoading(false));
@@ -90,7 +84,6 @@ export default function HistorialPage() {
   return (
     <section className="px-4 py-8 space-y-6">
 
-      {/* Header */}
       <div className="flex items-center gap-3">
         <Link href="/op-licencias" className="text-muted-foreground hover:text-foreground transition">
           <ArrowLeft className="h-5 w-5" />
@@ -109,7 +102,6 @@ export default function HistorialPage() {
         </div>
       )}
 
-      {/* Empty state */}
       {licencias.length === 0 && (
         <div className="rounded-2xl border border-dashed p-12 text-center text-muted-foreground">
           <ShieldCheck className="h-10 w-10 mx-auto mb-3 opacity-30" />
@@ -117,7 +109,6 @@ export default function HistorialPage() {
         </div>
       )}
 
-      {/* Cards por licencia */}
       {licencias.map(lic => (
         <Card key={lic._id} className="shadow-sm">
           <CardHeader className="pb-3">

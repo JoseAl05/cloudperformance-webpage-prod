@@ -49,7 +49,6 @@ export interface ApiResponseWrapper {
 interface TagsAnalysisComponentProps {
   startDate: Date
   endDate: Date
-  //service: string
 }
 
 export const TagsAnalysisComponent = ({ startDate, endDate }: TagsAnalysisComponentProps) => {
@@ -254,7 +253,7 @@ export const TagsAnalysisComponent = ({ startDate, endDate }: TagsAnalysisCompon
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4" onClick={() => setShowDetailsModal(false)}>
           <div 
             className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden transform transition-all"
-            onClick={(e) => e.stopPropagation()} // Evita que el click dentro cierre el modal
+            onClick={(e) => e.stopPropagation()}
           >
             <div className="p-5 border-b flex justify-between items-center bg-slate-50">
               <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">
@@ -272,7 +271,6 @@ export const TagsAnalysisComponent = ({ startDate, endDate }: TagsAnalysisCompon
               </p>
 
               <div className="space-y-3">
-                {/* Etiquetado en Nube */}
                 <div className="flex items-center justify-between p-3 border rounded-lg bg-blue-50/30 border-blue-100">
                   <div className="flex items-center gap-3">
                     <div className="p-2 bg-blue-100 text-[#0078D4] rounded-md"><Cloud className="h-5 w-5" /></div>
@@ -287,7 +285,6 @@ export const TagsAnalysisComponent = ({ startDate, endDate }: TagsAnalysisCompon
                   </div>
                 </div>
 
-                {/* Etiquetado Local */}
                 <div className="flex items-center justify-between p-3 border rounded-lg bg-purple-50/30 border-purple-100">
                   <div className="flex items-center gap-3">
                     <div className="p-2 bg-purple-100 text-purple-600 rounded-md"><Laptop className="h-5 w-5" /></div>
@@ -302,7 +299,6 @@ export const TagsAnalysisComponent = ({ startDate, endDate }: TagsAnalysisCompon
                   </div>
                 </div>
 
-                {/* Mixto */}
                 <div className="flex items-center justify-between p-3 border rounded-lg bg-emerald-50/30 border-emerald-100">
                   <div className="flex items-center gap-3">
                     <div className="p-2 bg-emerald-100 text-emerald-600 rounded-md"><Layers className="h-5 w-5" /></div>

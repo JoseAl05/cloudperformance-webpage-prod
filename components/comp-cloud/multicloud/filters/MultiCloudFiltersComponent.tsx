@@ -129,7 +129,6 @@ export const MultiCloudFiltersComponent = ({
         router.push(window.location.pathname, { scroll: false });
     };
 
-    // Sólo se envían IDs de cuenta: el back end resuelve las BD desde el token.
     const getAccountIdParams = (cloud: CloudProvider): string => {
         const selectedIds = selectedTenants[cloud] || [];
         const accounts = accountsList[cloud] || [];

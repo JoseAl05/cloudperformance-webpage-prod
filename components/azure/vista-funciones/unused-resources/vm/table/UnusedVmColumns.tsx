@@ -9,12 +9,13 @@ import { Button } from '@/components/ui/button';
 import { CopyButton } from '@/components/shared/CopyButton';
 import { useState } from 'react';
 import { AlertCircle, CheckCircle2, Eye, Globe, HardDrive, Network } from 'lucide-react';
+import { readFilterParam } from '@/lib/filters';
 
 const DateParams = () => {
     const searchParams = useSearchParams();
 
-    const startDateParam = searchParams.get('startDate');
-    const endDateParam = searchParams.get('endDate');
+    const startDateParam = readFilterParam(searchParams, 'dateFrom');
+    const endDateParam = readFilterParam(searchParams, 'dateTo');
 
     return { startDateParam: startDateParam, endDateParam: endDateParam }
 }
@@ -204,7 +205,6 @@ const InterfacesCell = ({ details }: { details?: UnusedVmInterfaceDetails }) => 
                                             key={n.id ?? i}
                                             className="rounded-lg border bg-card p-4 space-y-4 hover:shadow-sm transition-shadow"
                                         >
-                                            {/* NIC Header */}
                                             <div className="space-y-3">
                                                 <div className="flex items-start justify-between gap-3">
                                                     <div className="flex-1 min-w-0">
@@ -239,7 +239,6 @@ const InterfacesCell = ({ details }: { details?: UnusedVmInterfaceDetails }) => 
                                                 )}
                                             </div>
 
-                                            {/* IP Configurations */}
                                             {(n.ip_configurations ?? []).length > 0 && (
                                                 <div className="space-y-2">
                                                     <h5 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
@@ -419,7 +418,6 @@ export const UnusedVmColumns: DynamicColumn<UnusedVm>[] = [
         ),
         size: 170,
     },
-    // --- NUEVO: columnas de métricas FinOps ---
     {
         id: "cpu_promedio",
         header: "CPU Prom %",

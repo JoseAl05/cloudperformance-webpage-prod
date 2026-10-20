@@ -19,7 +19,6 @@ export const ReservationsBarChartComponent = ({ data }: ReservationsBarChartProp
 
     const chartRef = useRef<HTMLDivElement>(null);
 
-    // Calculamos si hay dinero perdido en general
     const totalWaste = useMemo(() => {
         if (!data) return 0;
         return data.reduce((acc, curr) => acc + curr.dinero_perdido_usd, 0);
@@ -146,7 +145,6 @@ export const ReservationsBarChartComponent = ({ data }: ReservationsBarChartProp
 
     if (!data || data.length === 0) return null;
 
-    // EL FIX: Si el total desperdiciado es 0, mostramos un mensaje de éxito
     if (totalWaste === 0) {
         return (
             <div className="flex flex-col gap-4 bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border">

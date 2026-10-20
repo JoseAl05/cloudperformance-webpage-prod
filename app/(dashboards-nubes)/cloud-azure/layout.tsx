@@ -22,7 +22,6 @@ export default function AzureLayout({ children }: AzureLayoutProps) {
             pdfFallbackPlanName="Starter (Freemium)"
         >
             <div className="flex flex-col min-h-screen">
-                {/* Contenido principal del Dashboard */}
                 <div className="flex-1">
                     {children}
                 </div>

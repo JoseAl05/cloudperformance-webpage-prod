@@ -54,7 +54,7 @@ export const TagsFilterComponent = ({
 
     const shouldFetch = !!subscription && !!region
 
-    const { data, error, isLoading } = useSWR(
+    const { data, error, isLoading } = useSWR<AzureTagItem[]>(
         shouldFetch
             ? `/api/azure/bridge/azure/get-all-tags?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&subscription=${subscription}&resource_type=${resourceType}&local_service=${localService}`
             : null,

@@ -14,7 +14,6 @@ interface FilestoreConsumeComponentProps {
     tagValue?: string | null;
 }
 
-/** Consumo Filestore: adapta los filtros de la vista al contrato canónico (/api/gcp/consumption/filestore/*). */
 export const FilestoreConsumeComponent = ({ startDate, endDate, projects, regions, resourceId, tagKey, tagValue }: FilestoreConsumeComponentProps) => {
     const hasTag = !!tagKey && tagKey !== 'allKeys';
     return (

@@ -1,4 +1,3 @@
-// app/aws/page.tsx
 import Link from "next/link"
 import Image from "next/image"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
@@ -118,7 +117,7 @@ export default function DashboardAwsPage() {
                                 <CardContent className="space-y-3">
                                     <div className="text-xs uppercase tracking-wider text-primary font-semibold">Acciones Rápidas</div>
                                     <div className="flex flex-col gap-2 rounded-xl border-2 border-primary/30 bg-gradient-to-br from-primary/5 to-primary/10 p-4 dark:from-primary/10 dark:to-primary/20">
-                                        <Link href="/cloud-aws/advisor">
+                                        <Link href="/cloud-aws/recomendaciones">
                                             <Button
                                                 size="default"
                                                 variant="default"
@@ -154,7 +153,7 @@ export default function DashboardAwsPage() {
                                     <div className="grid md:grid-cols-2 gap-4">
                                         <div className="flex flex-col gap-2 rounded-xl border-2 border-primary/30 bg-gradient-to-br from-primary/5 to-primary/10 p-4 dark:from-primary/10 dark:to-primary/20">
                                             <div className="text-xs font-semibold text-primary mb-1">Saving Plans</div>
-                                            <Link href="/cloud-aws/saving-plan">
+                                            <Link href="/cloud-aws/compromisos/saving-plans">
                                                 <Button
                                                     size="default"
                                                     variant="default"
@@ -265,12 +264,12 @@ export default function DashboardAwsPage() {
                                     <CalendarClock className="h-4 w-4" /> Eventos y Actividad (Events)
                                 </Button>
                             </Link>
-                            <Link href="/cloud-aws/advisor">
+                            <Link href="/cloud-aws/recomendaciones">
                                 <Button size="sm" variant="outline" className="gap-2 cursor-pointer bg-transparent">
                                     <Pyramid className="h-4 w-4" /> Recomendaciones (Advisor)
                                 </Button>
                             </Link>
-                            <Link href="/cloud-aws/saving-plan">
+                            <Link href="/cloud-aws/compromisos/saving-plans">
                                 <Button size="sm" variant="outline" className="gap-2 cursor-pointer bg-transparent">
                                     <HandCoins className="h-4 w-4" /> Cobertura (Saving Plans)
                                 </Button>

@@ -8,6 +8,7 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import useSWR from 'swr'
 import { LoaderComponent } from '@/components/general_azure/LoaderComponent'
+import type { UnusedCandidate } from '@/interfaces/unused'
 
 interface UnusedVmFilterComponentProps {
     startDate: Date;
@@ -18,10 +19,6 @@ interface UnusedVmFilterComponentProps {
     setUnusedVm: Dispatch<SetStateAction<string>>;
     isUnusedVmFilterMultiselect: boolean;
 }
-
-type ApiUnusedVm =
-    | { vm_id_lowercase: string; vm_name: string }
-    | string
 
 export const UnusedVmFilterComponent = ({
     startDate,
@@ -36,19 +33,12 @@ export const UnusedVmFilterComponent = ({
     const startDateFormatted = startDate ? startDate.toISOString().replace('Z', '').slice(0, -4) : '';
     const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : '';
 
-    const url = `/api/azure/bridge/azure/vms/all_unused_vms?date_from=${startDateFormatted}&date_to=${endDateFormatted}&subscription=${subscription}&location=${region}`
-    const { data, error, isLoading } = useSWR<ApiUnusedVm[]>(url, fetcher)
+    const url = `/api/azure/bridge/azure/unused/vm/candidates?date_from=${startDateFormatted}&date_to=${endDateFormatted}&subscription_id=${subscription && subscription !== 'all_subscriptions' ? subscription : 'all'}&location=${region}`
+    const { data, error, isLoading } = useSWR<UnusedCandidate[]>(url, fetcher)
 
     const unusedVms = useMemo(() => {
         if (!Array.isArray(data)) return [] as { id: string; name: string }[]
-        if (data.length === 0) return []
-        if (typeof data[0] === 'string') {
-            return (data as string[]).map((id) => ({ id, name: id }))
-        }
-        return (data as { vm_id_lowercase: string; vm_name: string }[]).map((s) => ({
-            id: s.vm_id_lowercase,
-            name: s.vm_name,
-        }))
+        return data.map((s) => ({ id: s.resource_id, name: s.resource_name }))
     }, [data])
 
     const noUnusedVms = unusedVms.length === 0

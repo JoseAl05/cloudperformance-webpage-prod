@@ -1,8 +1,9 @@
 'use client'
+import { AsociatedResourcesNatGw } from '@/interfaces/vista-unused-resources/asociatedNatGwResourcesInterfaces';
 
 import { fetcher } from '@/lib/fetcher';
 import { Badge } from '@/components/ui/badge';
-import { DynamicColumn } from '@/components/general/data-table/columns';
+import { DynamicColumn } from '@/components/data-table/columns';
 import { Button } from '@/components/ui/button';
 import { Eye } from 'lucide-react';
 import { useState } from 'react';
@@ -12,8 +13,8 @@ import useSWR from 'swr';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { bytesToMB } from '@/lib/bytesToMbs';
+import { readFilterParam } from '@/lib/filters';
 
-// --- NUEVA INTERFAZ EXPORTADA ---
 export interface GlobalNatStats {
     avgGlobalConnections: number;
     totalGlobalBytes: number;
@@ -22,7 +23,7 @@ export interface GlobalNatStats {
 const DetailsCell = ({ natGw, dateParams }: { natGw: UnusedNatGateways, dateParams: { from: string, to: string } }) => {
     const [isOpen, setIsOpen] = useState(false);
 
-    const { data: asociatedData, isLoading } = useSWR(
+    const { data: asociatedData, isLoading } = useSWR<AsociatedResourcesNatGw>(
         isOpen ? `/api/aws/bridge/nat_gateways/get_associated_resources?nat_gw_id=${natGw.nat_gw_id}&date_from=${dateParams.from}&date_to=${dateParams.to}` : null,
         fetcher
     );
@@ -41,7 +42,7 @@ const DetailsCell = ({ natGw, dateParams }: { natGw: UnusedNatGateways, datePara
 
             <UnusedNatGatewaysInsightModal
                 natGw={natGw}
-                asociatedResources={asociatedData}
+                asociatedResources={asociatedData ?? null}
                 isLoading={isLoading}
                 isOpen={isOpen}
                 onClose={() => setIsOpen(false)}
@@ -52,11 +53,11 @@ const DetailsCell = ({ natGw, dateParams }: { natGw: UnusedNatGateways, datePara
 
 const GetParameters = () => {
     const searchParams = useSearchParams();
-    const startDateParam = searchParams.get('startDate');
-    const endDateParam = searchParams.get('endDate');
-    const keyParam = searchParams.get('selectedKey');
-    const valueParam = searchParams.get('selectedValue');
-    const regionParam = searchParams.get('region');
+    const startDateParam = readFilterParam(searchParams, 'dateFrom');
+    const endDateParam = readFilterParam(searchParams, 'dateTo');
+    const keyParam = readFilterParam(searchParams, 'tagKey');
+    const valueParam = readFilterParam(searchParams, 'tagValue');
+    const regionParam = readFilterParam(searchParams, 'regions');
 
     return {
         startDateParam,
@@ -67,11 +68,10 @@ const GetParameters = () => {
     }
 }
 
-// --- FUNCIÓN ACTUALIZADA CON globalStats ---
 export const getUnusedNatGwColumns = (
     dateFrom: string,
     dateTo: string,
-    globalStats: GlobalNatStats // Recibimos las estadísticas globales aquí
+    globalStats: GlobalNatStats
 ): DynamicColumn<UnusedNatGateways>[] => [
         {
             header: "Nombre / ID",
@@ -82,7 +82,7 @@ export const getUnusedNatGwColumns = (
                 return (
                     <div>
                         <Link
-                            href={{ pathname: '/aws/consumos/nat_gateways', query: { startDate: startDateParam, endDate: endDateParam, natGateway: val, region: regionParam, selectedKey: keyParam, selectedValue: valueParam } }}
+                            href={{ pathname: '/cloud-aws/consumos/nat_gateways', query: { startDate: startDateParam, endDate: endDateParam, natGateway: val, region: regionParam, selectedKey: keyParam, selectedValue: valueParam } }}
                             rel="noopener noreferrer"
                             target="_blank"
                         >
@@ -99,7 +99,6 @@ export const getUnusedNatGwColumns = (
                 <Badge variant="outline">{info.getValue() as string}</Badge>
             )
         },
-        // --- NUEVA COLUMNA: Conexiones ---
         {
             header: "Conexiones (vs Global)",
             accessorKey: "diagnosis.metrics_summary.avg_active_connections",
@@ -107,7 +106,6 @@ export const getUnusedNatGwColumns = (
                 const val = info.getValue() as number;
                 const globalAvg = globalStats.avgGlobalConnections;
 
-                // Calculamos el porcentaje relativo al promedio
                 const percentage = globalAvg > 0 ? (val / globalAvg) * 100 : 0;
                 const isAboveAverage = val > globalAvg;
 
@@ -127,7 +125,6 @@ export const getUnusedNatGwColumns = (
                 );
             }
         },
-        // --- NUEVA COLUMNA: Tráfico ---
         {
             header: "Tráfico (vs Total)",
             accessorKey: "diagnosis.metrics_summary.total_bytes_out",
@@ -136,7 +133,6 @@ export const getUnusedNatGwColumns = (
                 const totalGlobal = globalStats.totalGlobalBytes;
                 const valMB = bytesToMB(val);
 
-                // Calculamos cuánto aporta este recurso al total global
                 const contributionPercentage = totalGlobal > 0 ? (val / totalGlobal) * 100 : 0;
 
                 return (

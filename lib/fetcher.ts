@@ -1,10 +1,3 @@
-/**
- * Fetcher común para SWR y llamadas a los bridges.
- *
- * A diferencia de `fetch(url).then(r => r.json())`, lanza un `FetchError` cuando la respuesta
- * no es 2xx. Así SWR expone `error` (y la vista puede mostrar "Error al cargar datos") en vez
- * de tratar un body `{ detail: "..." }` de un 4xx/5xx como si fueran datos.
- */
 export class FetchError extends Error {
   status: number;
   detail: unknown;
@@ -29,21 +22,39 @@ const readErrorDetail = async (res: Response): Promise<unknown> => {
   }
 };
 
-/** Igual que `fetch(input, init)` + `.json()`, pero lanza `FetchError` si `!res.ok`. */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function fetchJson<T = any>(input: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(input, init);
-  if (!res.ok) {
-    throw new FetchError(res.status, await readErrorDetail(res), input);
+export const FETCH_TIMEOUT_MS = 130_000;
+
+const TIMEOUT_MESSAGE =
+  'La consulta tardó demasiado y se canceló. Intenta con un rango de fechas más corto o con menos filtros.';
+
+export const isTimeoutError = (error: unknown): error is FetchError =>
+  error instanceof FetchError && error.status === 504;
+
+export async function fetchJson<T = unknown>(input: string, init?: RequestInit): Promise<T> {
+  const controller = new AbortController();
+  let timedOut = false;
+  const timer = setTimeout(() => {
+    timedOut = true;
+    controller.abort();
+  }, FETCH_TIMEOUT_MS);
+  const callerSignal = init?.signal;
+  const onCallerAbort = () => controller.abort();
+  callerSignal?.addEventListener('abort', onCallerAbort, { once: true });
+
+  try {
+    const res = await fetch(input, { ...init, signal: controller.signal });
+    if (!res.ok) {
+      throw new FetchError(res.status, await readErrorDetail(res), input);
+    }
+    return await res.json();
+  } catch (error) {
+    if (timedOut) throw new FetchError(504, TIMEOUT_MESSAGE, input);
+    throw error;
+  } finally {
+    clearTimeout(timer);
+    callerSignal?.removeEventListener('abort', onCallerAbort);
   }
-  return res.json();
 }
 
-/**
- * Fetcher GET estándar para `useSWR(url, fetcher)`.
- * Devuelve `any` (igual que el `res.json()` de los fetchers locales que reemplaza) para que
- * cada vista siga tipando su `data` como lo hacía.
- */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const fetcher = (url: string): Promise<any> =>
-  fetchJson(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } });
+export const fetcher = <T = unknown>(url: string): Promise<T> =>
+  fetchJson<T>(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } });

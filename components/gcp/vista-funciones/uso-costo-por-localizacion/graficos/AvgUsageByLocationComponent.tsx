@@ -17,8 +17,6 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Info, PowerOff } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
-/* ================= TIPOS ================= */
-
 interface MetricaPromedio {
   promedio: number
   minimo: number
@@ -38,8 +36,6 @@ interface Props {
   isLoading: boolean
   error: unknown
 }
-
-/* ================= HELPERS ================= */
 
 const byAlpha = (a: string, b: string) =>
   a.localeCompare(b, 'es', { sensitivity: 'base' })
@@ -67,8 +63,6 @@ const formatValue = (metric: string, value: number) => {
 }
 
 const isUnused = (v?: number) => typeof v === 'number' && v === 0
-
-/* ================= CELDA CON DIALOG ================= */
 
 const MetricCellDialog = ({
   region,
@@ -148,8 +142,6 @@ const MetricCellDialog = ({
     </Dialog>
   )
 }
-
-/* ================= TABLA PRINCIPAL ================= */
 
 export const AvgUsageByLocationComponent = ({ data, isLoading, error }: Props) => {
   const metrics = useMemo(() => {

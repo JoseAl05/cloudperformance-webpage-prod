@@ -30,7 +30,6 @@ export const CategoryFilterComponent = ({
     const categories: string[] = Array.isArray(data?.categories) ? data.categories : []
     const noCategories = categories.length === 0
     
-    // Agregar "Ver todos" al inicio
     const categoriesWithAll = noCategories ? [] : ['Ver todos', ...categories]
 
     const getDisplayText = () => {
@@ -69,7 +68,6 @@ export const CategoryFilterComponent = ({
                                     key={cat}
                                     value={cat}
                                     onSelect={() => {
-                                        // Si selecciona "Ver todos", pasa string vacío
                                         setCategory(cat === 'Ver todos' ? '' : cat);
                                         setOpen(false);
                                     }}

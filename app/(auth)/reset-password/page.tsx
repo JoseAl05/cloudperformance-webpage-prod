@@ -27,7 +27,6 @@ function ResetPasswordForm() {
         number: false,
     });
 
-    // VALIDAR TOKEN ANTES DE MOSTRAR FORMULARIO
     useEffect(() => {
         if (!token) {
             setTokenValidated(false);
@@ -132,7 +131,6 @@ function ResetPasswordForm() {
         );
     }
 
-    // Token expirado
     if (!tokenValidated) {
         return (
             <div className="text-center space-y-4">
@@ -171,7 +169,6 @@ function ResetPasswordForm() {
 
             <form onSubmit={handleSubmit} className="space-y-6">
                 
-                {/* Campo contraseña */}
                 <div className="space-y-2">
                     <label htmlFor="pass" className="text-sm font-medium text-gray-700">Nueva Contraseña</label>
                     <div className="relative">
@@ -188,7 +185,6 @@ function ResetPasswordForm() {
                                 setPassword(value);
                                 setStrength(evaluateStrength(value));
 
-                                // Actualizar requisitos
                                 setRequirements({
                                     length: value.length >= 8,
                                     uppercase: /[A-Z]/.test(value),
@@ -208,7 +204,6 @@ function ResetPasswordForm() {
                         </button>
                     </div>
 
-                    {/* REQUISITOS */}
                     {password && (
                         <div className="mt-3 bg-gray-50 p-3 rounded-md border border-gray-200">
                             <p className="text-xs font-medium text-gray-700 mb-2">Requisitos de la contraseña:</p>
@@ -245,7 +240,6 @@ function ResetPasswordForm() {
                         </div>
                     )}
 
-                    {/* FUERZA */}
                     {password && (
                         <div className="mt-2">
                             <div className={`h-2 rounded-full transition-all 
@@ -263,7 +257,6 @@ function ResetPasswordForm() {
                     )}
                 </div>
 
-                {/* Confirmar contraseña */}
                 <div className="space-y-2">
                     <label htmlFor="confirmPass" className="text-sm font-medium text-gray-700">Confirmar Contraseña</label>
                     <div className="relative">

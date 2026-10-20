@@ -108,26 +108,7 @@ export const BlobVsStorageGeneralComponent = ({ selectedStrgAccount, region, sub
                     <BlobVsStorageGeneralCapacityComponent
                         data={strgVsGeneralData}
                     />
-                    {/* {
-                        hasMetricsData && (
-                            <>
-                                <Ec2ResourceViewUsageCreditsComponent
-                                    data={metricsData}
-                                />
-                                <Ec2ResourceViewUsageCpuComponent
-                                    data={metricsData}
-                                />
-                                <Ec2ResourceViewUsageNetworkComponent
-                                    data={metricsData}
-                                />
-                            </>
-                        )
-                    } */}
                 </div>
-                {/* <div className="flex items-center gap-3 my-10">
-                    <Clock className="h-8 w-8 text-blue-500" />
-                    <h1 className="text-3xl font-bold text-foreground">Detalle Volúmenes no utilizados</h1>
-                </div> */}
             </div>
         </>
     )

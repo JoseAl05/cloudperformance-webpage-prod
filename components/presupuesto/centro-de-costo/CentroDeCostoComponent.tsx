@@ -36,7 +36,6 @@ export const CentroDeCostoComponent = ({ cloud }: CentroDeCostoComponentProps) =
   };
   const cloudType = cloud ? cloudTypeMap[cloud] ?? undefined : undefined;
 
-  // --- Estados
   const [editingCentro, setEditingCentro] = useState<CentroCosto | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -62,7 +61,6 @@ export const CentroDeCostoComponent = ({ cloud }: CentroDeCostoComponentProps) =
     );
   }
 
-  // --- Acciones
   const handleEdit = (centro: CentroCosto) => {
     setEditingCentro(centro);
     setShowForm(true);
@@ -92,7 +90,6 @@ export const CentroDeCostoComponent = ({ cloud }: CentroDeCostoComponentProps) =
       mutate(`/api/presupuesto/bridge/${cloudType}/centro-costo`);
       handleFormClose();
       
-      // Mostrar mensaje de éxito
       setSuccessMessage(isEditing 
         ? "Centro de costo actualizado exitosamente" 
         : "Centro de costo creado exitosamente"
@@ -125,7 +122,6 @@ export const CentroDeCostoComponent = ({ cloud }: CentroDeCostoComponentProps) =
       setDeleteDialogOpen(false);
       setCentroToDelete(null);
       
-      // Mostrar mensaje de éxito
       setSuccessMessage("Centro de costo eliminado exitosamente");
       setSuccessDialogOpen(true);
     } catch (err) {
@@ -142,7 +138,6 @@ export const CentroDeCostoComponent = ({ cloud }: CentroDeCostoComponentProps) =
     setCentroToDelete(null);
   };
 
-  // --- Render
   return (
     <SessionGate>
       <div className="w-full min-w-0 space-y-6 p-6">
@@ -156,9 +151,6 @@ export const CentroDeCostoComponent = ({ cloud }: CentroDeCostoComponentProps) =
                 <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
                   Centros de costo {cloud}
                 </h1>
-                {/* <p className="text-gray-500 dark:text-gray-400">
-                  Administración de centros de costo 🏷️
-                </p> */}
               </div>
             </div>
             <Button
@@ -179,7 +171,6 @@ export const CentroDeCostoComponent = ({ cloud }: CentroDeCostoComponentProps) =
           onDelete={handleDeleteClick}
         />
 
-        {/* --- MODAL FORMULARIO --- */}
         <Dialog open={showForm} onOpenChange={setShowForm}>
           <DialogContent className="max-w-3xl">
             <DialogHeader>
@@ -199,7 +190,6 @@ export const CentroDeCostoComponent = ({ cloud }: CentroDeCostoComponentProps) =
           </DialogContent>
         </Dialog>
 
-        {/* --- DIALOG CONFIRMACIÓN DE ELIMINACIÓN --- */}
         <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
           <AlertDialogContent className="bg-white dark:bg-gray-800">
             <AlertDialogHeader>
@@ -234,7 +224,6 @@ export const CentroDeCostoComponent = ({ cloud }: CentroDeCostoComponentProps) =
           </AlertDialogContent>
         </AlertDialog>
 
-        {/* --- DIALOG ERROR --- */}
         <AlertDialog open={errorDialogOpen} onOpenChange={setErrorDialogOpen}>
           <AlertDialogContent className="bg-white dark:bg-gray-800">
             <AlertDialogHeader>
@@ -263,7 +252,6 @@ export const CentroDeCostoComponent = ({ cloud }: CentroDeCostoComponentProps) =
           </AlertDialogContent>
         </AlertDialog>
 
-        {/* --- DIALOG ÉXITO --- */}
         <AlertDialog open={successDialogOpen} onOpenChange={setSuccessDialogOpen}>
           <AlertDialogContent className="bg-white dark:bg-gray-800">
             <AlertDialogHeader>

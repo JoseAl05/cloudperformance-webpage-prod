@@ -8,6 +8,7 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import useSWR from 'swr'
 import { LoaderComponent } from '@/components/general_azure/LoaderComponent'
+import type { UnusedCandidate } from '@/interfaces/unused'
 
 interface UnusedLoadbalancerFilterComponentProps {
     startDate: Date;
@@ -18,10 +19,6 @@ interface UnusedLoadbalancerFilterComponentProps {
     setUnusedLb: Dispatch<SetStateAction<string>>;
     isUnusedLoadbalancerFilterMultiselect: boolean;
 }
-
-type ApiUnusedLb =
-    | { lb_id_lowercase: string; lb_name: string }
-    | string
 
 export const UnusedLoadbalancerFilterComponent = ({
     startDate,
@@ -36,19 +33,12 @@ export const UnusedLoadbalancerFilterComponent = ({
     const startDateFormatted = startDate ? startDate.toISOString().replace('Z', '').slice(0, -4) : '';
     const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : '';
 
-    const url = `/api/azure/bridge/azure/loadbalancers/all_unused_loadbalancers?date_from=${startDateFormatted}&date_to=${endDateFormatted}&subscription_id=${subscription}&location=${region}`
-    const { data, error, isLoading } = useSWR<ApiUnusedLb[]>(url, fetcher)
+    const url = `/api/azure/bridge/azure/unused/load-balancers/candidates?date_from=${startDateFormatted}&date_to=${endDateFormatted}&subscription_id=${subscription && subscription !== 'all_subscriptions' ? subscription : 'all'}&location=${region}`
+    const { data, error, isLoading } = useSWR<UnusedCandidate[]>(url, fetcher)
 
     const unusedLbs = useMemo(() => {
         if (!Array.isArray(data)) return [] as { id: string; name: string }[]
-        if (data.length === 0) return []
-        if (typeof data[0] === 'string') {
-            return (data as string[]).map((id) => ({ id, name: id }))
-        }
-        return (data as { lb_id_lowercase: string; lb_name: string }[]).map((s) => ({
-            id: s.lb_id_lowercase,
-            name: s.lb_name,
-        }))
+        return data.map((s) => ({ id: s.resource_id, name: s.resource_name }))
     }, [data])
 
     const noUnusedLbs = unusedLbs.length === 0

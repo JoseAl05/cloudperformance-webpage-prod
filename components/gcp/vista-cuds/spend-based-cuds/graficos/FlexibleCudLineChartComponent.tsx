@@ -7,7 +7,6 @@ import { Download } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { useEffect, useMemo, useRef } from 'react';
 
-// Tipos de datos que provienen de la API
 export interface ChartTrend {
     date: string;
     commitment_fee_usd: number;
@@ -51,7 +50,6 @@ export const FlexibleCudLineChartComponent = ({ data }: FlexibleCudLineChartComp
 
         const dates = data.map(d => d.date);
         
-        // Series para ECharts
         const series = [
             {
                 name: 'Costo Fijo del CUD',
@@ -79,7 +77,6 @@ export const FlexibleCudLineChartComponent = ({ data }: FlexibleCudLineChartComp
                     showSymbol: true,
                     emphasis: { focus: 'series' }
                 },
-                // CORRECCIÓN: Se envían tal cual vienen de la API (positivos)
                 data: data.map(d => Math.abs(d.savings_generated_usd)) 
             }
         ];
@@ -199,13 +196,12 @@ export const FlexibleCudLineChartComponent = ({ data }: FlexibleCudLineChartComp
                     axisLine: { show: false },
                     axisTick: { show: false },
                     axisLabel: {
-                        // CORRECCIÓN: Ya no usamos Math.abs para no "engañar" al eje
                         formatter: (value: number) => '$' + value.toLocaleString(),
                         color: '#666',
                         fontSize: 10,
                     },
                     splitLine: { lineStyle: { color: '#f5f5f5', type: 'dashed' } },
-                    min: 0 // Forzamos a que el gráfico empiece en 0 y suba
+                    min: 0
                 },
                 grid: { left: 60, right: 60, top: 80, bottom: 80, containLabel: true },
             },

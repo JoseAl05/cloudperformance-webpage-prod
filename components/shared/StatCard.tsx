@@ -22,12 +22,10 @@ interface StatCardProps {
     description?: string;
     subtitle?: string;
     color?: StatCardColor;
-    /** Muestra un aviso en vez de la descripción. */
     warning?: { title: string; text: string };
     large?: boolean;
 }
 
-/** Tarjeta de KPI compartida por las vistas de las tres nubes. */
 export const StatCard = ({ title, value, unit, icon: Icon, description, subtitle, color = 'blue', warning, large = false }: StatCardProps) => {
     const style = COLOR_STYLES[color];
     return (

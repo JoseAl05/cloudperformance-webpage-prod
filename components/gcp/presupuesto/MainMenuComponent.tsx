@@ -45,7 +45,7 @@ const MainMenuComponent: React.FC = () => {
             <div
               key={mod.path}
               className="bg-white shadow-md p-4 rounded-lg border cursor-pointer hover:shadow-xl transition"
-              onClick={() => router.push(mod.path)} // Navegación usando Next.js
+              onClick={() => router.push(mod.path)}
             >
               <h2 className="text-xl font-semibold mb-2">{mod.title}</h2>
               <p className="text-sm text-gray-600">{mod.description}</p>

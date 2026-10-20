@@ -18,7 +18,6 @@ interface AzureNodeMetricsComponentProps {
 const isSet = (value: string | null | undefined, allValue: string): value is string =>
     !!value && value !== allValue && value !== 'null';
 
-/** Consumo Nodos AKS: adapta los filtros de la vista al contrato canónico (/api/azure/consumption/nodes/*). */
 export const AzureNodeMetricsComponent = ({
     startDate,
     endDate,

@@ -2,10 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getCollection } from '@/lib/mongodb';
 import { authorizeRequest } from '@/lib/authUtils';
 
-// ── GET — Buscar empresa en padrón SII ────────────────────────────────────────
-// ?rut=76021154-0  → búsqueda exacta por RUT
-// ?q=bracace       → búsqueda por nombre, devuelve top 10
-
 export async function GET(req: NextRequest) {
   const auth = await authorizeRequest(req, ['admin_global']);
   if (!auth.authorized) {
@@ -26,7 +22,6 @@ export async function GET(req: NextRequest) {
 
     const col = await getCollection('empresas_sii');
 
-    // ── Búsqueda exacta por RUT ───────────────────────────────────────────────
     if (rut) {
       const empresa = await col.findOne({ rut });
       if (!empresa) {
@@ -41,7 +36,6 @@ export async function GET(req: NextRequest) {
       });
     }
 
-    // ── Búsqueda por nombre — top 10 ──────────────────────────────────────────
     if (q) {
       if (q.length < 3) {
         return NextResponse.json(

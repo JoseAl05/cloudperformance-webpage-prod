@@ -20,8 +20,6 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 
-// === Fetcher para SWR ===
-
 interface AutoScalingGroupFilterProps {
   selectedGroup: string;
   setSelectedGroup: Dispatch<SetStateAction<string>>;
@@ -42,7 +40,6 @@ export const AutoScalingGroupFilterComponent = ({
     ? endDate.toISOString().replace('Z', '').slice(0, -4)
     : '';
 
-  // Llamada a la API de AutoScaling Groups (string[])
   const { data, error } = useSWR<string[]>(
     `/api/aws/bridge/aws/ec2/autoscaling/groups?date_from=${startDateFormatted}&date_to=${endDateFormatted}`,
     fetcher

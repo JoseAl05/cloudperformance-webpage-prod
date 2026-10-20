@@ -1,4 +1,7 @@
 'use client'
+import type { BillingAccountData } from '@/components/azure/tables-azure/tablas-item-azure/table/tableBillingAccountsColumns';
+import type { ResourceGroupData } from '@/components/azure/tables-azure/tablas-item-azure/table/tableResourceGroupsColumns';
+import type { ServiceData } from '@/components/azure/tables-azure/tablas-item-azure/table/tableServicesColumns';
 
 import { fetcher } from '@/lib/fetcher';
 import useSWR from 'swr'
@@ -9,10 +12,16 @@ import { tableServicesColumns } from '@/components/azure/tables-azure/tablas-ite
 import { tableResourceGroupsColumns } from '@/components/azure/tables-azure/tablas-item-azure/table/tableResourceGroupsColumns'
 import { tableBillingAccountsColumns } from '@/components/azure/tables-azure/tablas-item-azure/table/tableBillingAccountsColumns'
 
+interface TablasItemAzureResponse {
+  'items-azure'?: ServiceData[]
+  'resource-groups'?: ResourceGroupData[]
+  'billing-accounts'?: BillingAccountData[]
+}
+
 export const TablasItemAzureComponent = () => {
   const apiUrl = '/api/azure/bridge/azure/tablas-item-azure'
 
-  const { data, error, isLoading } = useSWR(apiUrl, fetcher, {
+  const { data, error, isLoading } = useSWR<TablasItemAzureResponse>(apiUrl, fetcher, {
     revalidateOnFocus: false,
     dedupingInterval: 2000
   })
@@ -76,7 +85,6 @@ export const TablasItemAzureComponent = () => {
 
   return (
     <div className="space-y-8 px-4">
-      {/* Tabla 1: Lista de Servicios Registrados */}
       {servicesData.length > 0 && (
         <div className="space-y-4">
           <div className="flex items-center gap-3">
@@ -105,7 +113,6 @@ export const TablasItemAzureComponent = () => {
         </div>
       )}
 
-      {/* Tabla 2: Lista de Grupos de Recursos */}
       {resourceGroupsData.length > 0 && (
         <div className="space-y-4">
           <div className="flex items-center gap-3">
@@ -134,7 +141,6 @@ export const TablasItemAzureComponent = () => {
         </div>
       )}
 
-      {/* Tabla 3: Lista de Cuentas de Facturación */}
       {billingAccountsData.length > 0 && (
         <div className="space-y-4">
           <div className="flex items-center gap-3">

@@ -55,7 +55,6 @@ export const EksAsgFilterComponent = ({
 
 
     useEffect(() => {
-        // Solo actuar cuando terminó la carga y no hubo error
         if (!isLoading && !error && Array.isArray(data) && data.length === 0) {
             setEksAsg('');
             setEksAsgInstance('');
@@ -155,17 +154,6 @@ export const EksAsgFilterComponent = ({
                 isEksAsgInstanceMultiselect={isEksAsgInstanceMultiselect}
                 isInstancesService={isInstancesService}
             />
-            {/* Instancias de ASG (solo si hay ASG disponible y seleccionado) */}
-            {/* <AsgInstancesFilterComponent
-                asg={asg}
-                asgInstance={asgInstance}
-                setAsgInstance={setAsgInstance}
-                startDate={startDateFormatted}
-                endDate={endDateFormatted}
-                region={region}
-                isInstanceMultiSelect={isAsgInstanceMultiselect}
-                isInstancesService={isInstancesService}
-            /> */}
         </div>
     )
 };

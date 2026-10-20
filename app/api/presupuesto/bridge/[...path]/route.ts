@@ -1,94 +1,19 @@
-import { cookies } from 'next/headers';
-import { NextResponse } from 'next/server';
-import { AUTH_COOKIE } from '@/lib/cookies';
-import { BRIDGE_ALLOWED_PREFIXES, isAllowedBridgePath } from '@/lib/bridgePaths';
+import { bridgeBaseUrl, createBridge } from '@/lib/bridge';
+import { BRIDGE_ALLOWED_PREFIXES } from '@/lib/bridgePaths';
 
-const BASE = process.env.NODE_ENV === 'development' ? (process.env.API_PRESUPUESTO_DEV || '').replace(/\/+$/, '') : (process.env.API_PRESUPUESTO || '').replace(/\/+$/, '');
-const FORWARD_HEADER_ALLOWLIST = new Set([
-  'accept',
-  'content-type',
-  'if-none-match',
-  'if-modified-since',
-  'x-request-id',
-  'x-trace-id',
-]);
+const proxy = createBridge({
+  service: 'presupuestos',
+  baseUrl: bridgeBaseUrl('API_PRESUPUESTO', 'API_PRESUPUESTO_DEV'),
+  envName: 'API_PRESUPUESTO',
+  allowedPrefixes: BRIDGE_ALLOWED_PREFIXES.presupuesto,
+  bufferBody: true,
+});
 
-async function proxy(
-  req: Request,
-  ctx: { params: Promise<{ path?: string[] }> } // params ahora es Promise
-) {
-  if (!BASE) {
-    return NextResponse.json({ error: 'Misconfig: API_URL' }, { status: 500 });
-  }
-
-  // ✅ await en params
-  const params = await ctx.params;
-  const pathArray = params.path ?? [];
-  const subpath = pathArray.join('/');
-  if (!isAllowedBridgePath(pathArray, BRIDGE_ALLOWED_PREFIXES.presupuesto)) {
-    return NextResponse.json({ error: 'Ruta no permitida' }, { status: 404 });
-  }
-
-  const cookieStore = await cookies();
-  const token = cookieStore.get(AUTH_COOKIE)?.value;
-
-  if (!token) {
-    return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
-  }
-
-
-  const incomingUrl = new URL(req.url);
-  const targetUrl = `${BASE}/${subpath}${incomingUrl.search}`;
-
-  const headers = new Headers();
-  headers.set('Authorization', `Bearer ${token}`);
-  for (const [k, v] of req.headers) {
-    if (FORWARD_HEADER_ALLOWLIST.has(k.toLowerCase())) {
-      headers.set(k, v);
-    }
-  }
-
-  let body: BodyInit | undefined;
-  if (req.method !== 'GET' && req.method !== 'HEAD') {
-    body = await req.text();
-  }
-
-  try {
-    const upstream = await fetch(targetUrl, { method: req.method, headers, body });
-
-    const resHeaders = new Headers();
-    const ct = upstream.headers.get('content-type');
-    if (ct) resHeaders.set('content-type', ct);
-    const cc = upstream.headers.get('cache-control');
-    if (cc) resHeaders.set('cache-control', cc);
-
-    return new Response(upstream.body, {
-      status: upstream.status,
-      statusText: upstream.statusText,
-      headers: resHeaders,
-    });
-  } catch (err) {
-    console.error('Error en proxy:', err);
-    return NextResponse.json({ error: 'Error de conexión con el backend' }, { status: 500 });
-  }
-}
-
-// 🔹 Métodos HTTP
-export async function GET(req: Request, ctx: { params: Promise<{ path?: string[] }> }) {
-  return proxy(req, ctx);
-}
-export async function POST(req: Request, ctx: { params: Promise<{ path?: string[] }> }) {
-  return proxy(req, ctx);
-}
-export async function PUT(req: Request, ctx: { params: Promise<{ path?: string[] }> }) {
-  return proxy(req, ctx);
-}
-export async function PATCH(req: Request, ctx: { params: Promise<{ path?: string[] }> }) {
-  return proxy(req, ctx);
-}
-export async function DELETE(req: Request, ctx: { params: Promise<{ path?: string[] }> }) {
-  return proxy(req, ctx);
-}
-export async function OPTIONS(req: Request, ctx: { params: Promise<{ path?: string[] }> }) {
-  return proxy(req, ctx);
-}
+export {
+  proxy as GET,
+  proxy as POST,
+  proxy as PUT,
+  proxy as PATCH,
+  proxy as DELETE,
+  proxy as OPTIONS,
+};

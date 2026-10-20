@@ -44,7 +44,6 @@ export const VariationResourcesFilterComponent = ({
     let fetcher: ((url: string) => Promise<unknown>) | null = null;
     switch (service) {
         case 'InstanciasEc2':
-            // /api/vm/all-instances-ec2
             fetcher = fetcherPost
             url = shouldFetch ? `/api/aws/bridge/vm/all-instances-ec2?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`
                 : null;
@@ -86,7 +85,6 @@ export const VariationResourcesFilterComponent = ({
             break;
         case 'S3Buckets':
             fetcher = fetcherGet
-            // url = shouldFetch ? `balblalbal`
             url = shouldFetch ? `/api/aws/bridge/s3/s3_buckets/list?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`
                 : null;
             break;
@@ -100,11 +98,6 @@ export const VariationResourcesFilterComponent = ({
             url = shouldFetch ? `/api/aws/bridge/ebs/all_ebs?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`
                 : null;
             break;
-        // default:
-        //     fetcher = fetcherPost
-        //     url = shouldFetch ? `no result` 
-        //     : null;
-        //     break;
     }
 
     const { data, error, isLoading } = useSWR<string[]>(url, fetcher);

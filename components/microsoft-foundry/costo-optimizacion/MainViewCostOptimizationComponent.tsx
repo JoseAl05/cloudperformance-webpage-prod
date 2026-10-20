@@ -8,28 +8,6 @@ import Link from 'next/link'
 export const MainViewCostOptimizationFoundryComponent = () => {
 
     const modules = [
-        // {
-        //     key: 'inference-profiles',
-        //     title: 'Inference Profiles',
-        //     // description: 'Visualiza y analiza los dashboards de costos de tus nubes.',
-        //     href: '/microsoft-foundry/costo-optimizacion/inference-profiles',
-        //     icon: User,
-        //     iconWrapClass: 'bg-blue-100 dark:bg-blue-900/30',
-        //     iconClass: 'text-blue-600 dark:text-blue-400',
-        //     glowClass: 'bg-blue-400/40',
-        //     visible: true,
-        // },
-        // {
-        //     key: 'custom-models',
-        //     title: 'Modelos Custom',
-        //     // description: 'Explora los dashboards de los principales servicios de IA de tus nubes.',
-        //     href: '/microsoft-foundry/costo-optimizacion/custom-models',
-        //     icon: Map,
-        //     iconWrapClass: 'bg-violet-100 dark:bg-violet-900/30',
-        //     iconClass: 'text-violet-600 dark:text-violet-400',
-        //     glowClass: 'bg-violet-400/40',
-        //     visible: true,
-        // },
         {
             key: 'foundation-models',
             title: 'Modelos Foundry',

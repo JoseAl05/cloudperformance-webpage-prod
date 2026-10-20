@@ -27,7 +27,6 @@ export const AzureMysqlResourceComponent = ({ startDate, endDate, selectedInstan
     
     const shouldFetch = selectedInstanceV2 && selectedInstanceV2 !== 'all_instances';
 
-    // Rutas apuntando al nuevo backend de MySQL
     const mysqlInfo = useSWR(
         shouldFetch ? `/api/azure/bridge/azure/recursos/db/azure-mysql-info?date_from=${startDateFormatted}&date_to=${endDateFormatted}&instance=${selectedInstanceV2}` : null,
         fetcher

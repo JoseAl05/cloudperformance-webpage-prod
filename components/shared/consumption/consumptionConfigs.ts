@@ -1,10 +1,5 @@
 import type { ConsumptionViewConfig, MetricColumnDef, MetricGroupDef } from '@/components/shared/consumption/types';
 
-/**
- * Configuración por recurso de la vista compartida de Consumo / Eficiencia.
- * Las rutas apuntan al contrato canónico (`metrics.*` = métricas numéricas, `details.*` = atributos del proveedor).
- */
-
 const INSTANCE_LABELS = { total: 'Total Instancias', unit: 'VMs', idle: 'Instancias Idle', underutilized: 'Infrautilizadas' };
 const DB_LABELS = { total: 'Total Bases de Datos', unit: 'instancias', idle: 'Bases Idle', underutilized: 'Infrautilizadas' };
 
@@ -33,10 +28,6 @@ const CPU_GROUP: MetricGroupDef = {
         { label: 'Mínimo', path: 'metrics.min_cpu_utilization', format: 'percent' },
     ],
 };
-
-// ---------------------------------------------------------------------------
-// AWS — EC2 / Auto Scaling / Nodos EKS (mismo modelo de datos)
-// ---------------------------------------------------------------------------
 
 const awsCompute = (resource: string, serviceName: string, resourceTypeLabel: string): ConsumptionViewConfig => ({
     cloud: 'aws',
@@ -236,10 +227,6 @@ export const AWS_ELB: ConsumptionViewConfig = {
     recommendations: NETWORK_RECOMMENDATIONS,
     emptyText: 'No encontramos métricas ni información de Load Balancers en el rango seleccionado.',
 };
-
-// ---------------------------------------------------------------------------
-// Azure / GCP — instancias de cómputo (mismo modelo de datos)
-// ---------------------------------------------------------------------------
 
 const COMPUTE_TABLE: MetricColumnDef[] = [
     CPU_COLUMN,

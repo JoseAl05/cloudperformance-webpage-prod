@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/accordion'
 import { InstanceGroupsHistoricInfoComponent } from './InstanceGroupsHistoricInfoComponent';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { InstanceGroupInfo, HistoryData } from '@/interfaces/iGInterfaces';
+import { InstanceGroupInfo, HistoryData } from '@/interfaces/vista-instance-group/iGInterfaces';
 
 interface InstanceGroupsInfoComponentProps {
     data: InstanceGroupInfo[] | null

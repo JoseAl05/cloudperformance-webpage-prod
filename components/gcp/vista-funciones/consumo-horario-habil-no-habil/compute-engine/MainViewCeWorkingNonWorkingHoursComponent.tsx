@@ -24,6 +24,7 @@ export const MainViewCeWorkingNonWorkingHoursComponent = () => {
             <div className='w-full min-w-0'>
                 <FiltersComponent
                     Component={CeWorkingNonWorkingHoursComponent}
+                    cloud='gcp'
                     dateFilter
                     projectsFilter
                     regionFilter

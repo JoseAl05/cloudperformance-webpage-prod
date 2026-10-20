@@ -41,7 +41,7 @@ const getUptime = (createTime: Date) => {
     return `${days} días, ${hours} horas`;
 };
 
-export const RdsMysqlResourceViewHistoricInfoComponent = ({ instances }: RdsMysqlResourceViewHistoricInfoComponentProps) => {
+export const RdsMysqlResourceViewHistoricInfoComponent = ({ instances }: MysqlResourceViewHistoricInfoComponentProps) => {
     const statusColors = {
         available: 'bg-green-500/10 text-green-500 border-green-500/20',
         stopped: 'bg-red-500/10 text-red-500 border-red-500/20',
@@ -50,7 +50,6 @@ export const RdsMysqlResourceViewHistoricInfoComponent = ({ instances }: RdsMysq
         'backing-up': 'bg-orange-500/10 text-orange-500 border-orange-500/20',
     }
 
-    // Ordenar instancias por fecha de observación (más reciente primero)
     const sortedInstances = [...instances].sort((a, b) => 
         new Date(b.sync_time.$date).getTime() - new Date(a.sync_time.$date).getTime()
     );
@@ -139,7 +138,6 @@ export const RdsMysqlResourceViewHistoricInfoComponent = ({ instances }: RdsMysq
                                     </div>
                                 </div>
 
-                                {/* Tags accordion */}
                                 {instance.TagList_Key && instance.TagList_Key.length > 0 && (
                                     <Accordion type='single' collapsible className='w-full'>
                                         <AccordionItem value={`tags-${instance.DBInstanceIdentifier}-${index}`} className='border-none'>
@@ -172,7 +170,6 @@ export const RdsMysqlResourceViewHistoricInfoComponent = ({ instances }: RdsMysq
                                     </Accordion>
                                 )}
 
-                                {/* Subnets accordion */}
                                 <Accordion type='single' collapsible className='w-full'>
                                     <AccordionItem value={`subnets-${instance.DBInstanceIdentifier}-${index}`} className='border-none'>
                                         <AccordionTrigger className='hover:no-underline py-2 px-0 cursor-pointer'>

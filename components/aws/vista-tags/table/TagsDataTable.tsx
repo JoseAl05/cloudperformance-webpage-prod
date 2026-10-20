@@ -69,7 +69,7 @@ export const TagsDataTableAWS = ({ data }: TagsDataTableProps) => {
 
         if (isCCModalOpen && costCenters.length === 0) {
             setIsLoadingCCs(true);
-            fetchJson('/api/aws/bridge/mantenedor-tags/aws/local/cost-centers')
+            fetchJson<{ status?: string; data?: CostCenter[] }>('/api/aws/bridge/mantenedor-tags/aws/local/cost-centers')
                 .then(responseData => {
                     if (isMounted && responseData.status === 'success' && responseData.data) {
                         setCostCenters(responseData.data);
@@ -341,7 +341,6 @@ export const TagsDataTableAWS = ({ data }: TagsDataTableProps) => {
                 </CardContent>
             </Card>
 
-            {/* --- BARRA FLOTANTE DINÁMICA --- */}
             {selectedRowIds.length > 0 && (
                 <div className="fixed bottom-10 left-1/2 transform -translate-x-1/2 z-40 bg-white border border-gray-200 px-6 py-3 rounded-full flex items-center gap-6 shadow-[0_10px_40px_rgba(0,0,0,0.15)] animate-in slide-in-from-bottom-8 duration-300">
                     <span className="text-sm font-medium text-gray-700 flex items-center gap-2">

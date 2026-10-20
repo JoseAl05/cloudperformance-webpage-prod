@@ -81,7 +81,7 @@ export const TagsDataTable = ({ data }: TagsDataTableProps) => {
 
         if (isCCModalOpen && costCenters.length === 0) {
             setIsLoadingCCs(true);
-            fetchJson('/api/gcp/bridge/mantenedor-tags/gcp/local/cost-centers')
+            fetchJson<{ status?: string; data?: CostCenter[] }>('/api/gcp/bridge/mantenedor-tags/gcp/local/cost-centers')
                 .then(responseData => {
                     if (isMounted && responseData.status === 'success' && responseData.data) {
                         setCostCenters(responseData.data);

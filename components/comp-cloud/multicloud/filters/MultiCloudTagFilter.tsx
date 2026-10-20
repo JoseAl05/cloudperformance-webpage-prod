@@ -40,13 +40,11 @@ export const MultiCloudTagFilter = ({
     const [openValue, setOpenValue] = useState(false)
     const [isMounted, setIsMounted] = useState(false);
 
-    // Formateo de fechas
     const startDateFormatted = startDate ? startDate.toISOString().replace('Z', '').slice(0, -4) : ''
     const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : ''
 
     const shouldFetch = !!accountIds
 
-    // URL dinámica según el proveedor
     const getUrl = () => {
         if (!shouldFetch) return null;
         
@@ -62,12 +60,11 @@ export const MultiCloudTagFilter = ({
         return null;
     };
 
-    const { data, error, isLoading } = useSWR(
+    const { data, error, isLoading } = useSWR<TagItem[]>(
         getUrl(),
         fetcher
     )
 
-    // Lógica de transformación de datos
     const tagMap: Record<string, Set<string>> = {};
     if (Array.isArray(data)) {
         data.forEach((item: TagItem) => {
@@ -94,26 +91,18 @@ export const MultiCloudTagFilter = ({
     const isValidKey = !!(selectedKey && !noTags && (keys.includes(selectedKey) || selectedKey === 'allKeys'))
     const isValidValue = !!(selectedValue && isValidKey && (valuesForKey.includes(selectedValue) || selectedValue === 'allValues'))
 
-    // ----------------------------------------------------------------------
-    // 1. Efecto para asignar valores por DEFECTO ('allKeys' / 'allValues')
-    // ----------------------------------------------------------------------
     useEffect(() => {
         if (isLoading || !data || keys.length === 0) return;
 
-        // Si no hay key seleccionada, forzar 'allKeys'
         if (!selectedKey) {
             onChange('allKeys', 'allValues');
         }
-        // Si hay key pero no hay valor, forzar 'allValues'
         else if (!selectedValue) {
             onChange(selectedKey, 'allValues');
         }
 
     }, [data, isLoading, keys, selectedKey, selectedValue, onChange]);
 
-    // ----------------------------------------------------------------------
-    // 2. Efecto de Limpieza / Validación si los datos cambian
-    // ----------------------------------------------------------------------
     useEffect(() => {
         if (!data || isLoading) return
 
@@ -124,11 +113,9 @@ export const MultiCloudTagFilter = ({
             return
         }
 
-        // Si la key seleccionada ya no existe en los nuevos datos (y no es 'allKeys'), resetear a default
         if (selectedKey && selectedKey !== 'allKeys' && !keys.includes(selectedKey)) {
             onChange('allKeys', 'allValues');
         }
-        // Si el valor seleccionado ya no existe para la key actual (y no es 'allValues'), resetear valor
         else if (selectedValue && selectedValue !== 'allValues' && selectedKey && selectedKey !== 'allKeys' && !valuesForKey.includes(selectedValue)) {
             onChange(selectedKey, 'allValues');
         }
@@ -154,7 +141,6 @@ export const MultiCloudTagFilter = ({
             
             {error && <div className="text-xs text-red-500 py-1">Error cargando etiquetas.</div>}
 
-            {/* Combo 1: KEY */}
             <Popover open={openKey} onOpenChange={setOpenKey}>
                 <PopoverTrigger asChild>
                     <Button variant="outline" role="combobox" aria-expanded={openKey} className="w-full justify-between bg-transparent disabled:opacity-50" disabled={noTags || isLoading}>
@@ -205,7 +191,6 @@ export const MultiCloudTagFilter = ({
                 </PopoverContent>
             </Popover>
 
-            {/* Combo 2: VALUE */}
             {isValidKey && selectedKey !== 'allKeys' && (
                 <Popover open={openValue} onOpenChange={setOpenValue}>
                     <PopoverTrigger asChild>

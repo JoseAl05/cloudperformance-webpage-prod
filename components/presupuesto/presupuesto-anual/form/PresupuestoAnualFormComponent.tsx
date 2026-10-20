@@ -65,7 +65,6 @@ export const PresupuestoAnualFormComponent: React.FC<PresupuestoAnualFormProps> 
   const [showMensualForm, setShowMensualForm] = useState(false);
   const [selectedMonth, setSelectedMonth] = useState<number | "">("");
 
-  // Fetch centros de costo
   const { data: centrosCosto, isLoading: loadingCentros } = useSWR<CentroCosto[]>(
     cloud ? `/api/presupuesto/bridge/${cloud}/centro-costo` : null,
     fetcher
@@ -74,7 +73,6 @@ export const PresupuestoAnualFormComponent: React.FC<PresupuestoAnualFormProps> 
   useEffect(() => {
     if (initialData) {
       setFormData(initialData);
-      // Si tiene meses, mostrar el formulario mensual
       setShowMensualForm(!!initialData.presupuestos_mensuales && initialData.presupuestos_mensuales.length > 0);
     } else {
       setFormData({
@@ -98,30 +96,25 @@ export const PresupuestoAnualFormComponent: React.FC<PresupuestoAnualFormProps> 
   };
 
   const toggleMensualForm = () => {
-    // Solo cambiar la visibilidad, NO modificar los datos
     setShowMensualForm(!showMensualForm);
     
-    // Si no hay meses y estamos mostrando el form, inicializar con array vacío
     if (!showMensualForm && !formData.presupuestos_mensuales) {
       setFormData((prev) => ({ ...prev, presupuestos_mensuales: [] }));
     }
   };
 
-  // Obtener meses ya agregados
   const getMesesAgregados = (): number[] => {
     if (!formData.presupuestos_mensuales) return [];
     return formData.presupuestos_mensuales.map(m => m.mes);
   };
 
-  // Obtener meses disponibles para agregar
   const getMesesDisponibles = (): number[] => {
     const agregados = getMesesAgregados();
     return Array.from({ length: 12 }, (_, i) => i + 1).filter(mes => !agregados.includes(mes));
   };
 
-  // Agregar nuevo mes
   const agregarMes = () => {
-    if (!selectedMonth || selectedMonth === "") return;
+    if (!selectedMonth) return;
     
     const anio = typeof formData.anio === 'string' ? parseInt(formData.anio) : formData.anio;
     const nuevoMes: PresupuestoMensualPostPut = {
@@ -137,9 +130,7 @@ export const PresupuestoAnualFormComponent: React.FC<PresupuestoAnualFormProps> 
     setSelectedMonth("");
   };
 
-  // Eliminar mes (solo en modo creación)
   const eliminarMes = (index: number) => {
-    // No permitir eliminar en modo edición
     if (initialData) return;
     
     if (!formData.presupuestos_mensuales) return;
@@ -147,7 +138,6 @@ export const PresupuestoAnualFormComponent: React.FC<PresupuestoAnualFormProps> 
     setFormData((prev) => ({ ...prev, presupuestos_mensuales: nuevosMeses.length > 0 ? nuevosMeses : [] }));
   };
 
-  // Verificar si estamos en modo edición
   const isEditMode = !!initialData;
 
   const handleMensualChange = (index: number, field: keyof PresupuestoMensualPostPut, value: string) => {
@@ -187,9 +177,7 @@ export const PresupuestoAnualFormComponent: React.FC<PresupuestoAnualFormProps> 
         onSubmit={handleSubmit}
       >
         <div className="space-y-6">
-          {/* Campos principales */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Centro de Costo */}
             <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">
                 Centro de Costo <span className="text-red-500">*</span>
@@ -221,7 +209,6 @@ export const PresupuestoAnualFormComponent: React.FC<PresupuestoAnualFormProps> 
               </div>
             </div>
 
-            {/* Año */}
             <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">
                 Año <span className="text-red-500">*</span>
@@ -243,7 +230,6 @@ export const PresupuestoAnualFormComponent: React.FC<PresupuestoAnualFormProps> 
               </div>
             </div>
 
-            {/* Monto Anual */}
             <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">
                 Monto Anual <span className="text-red-500">*</span>
@@ -264,7 +250,6 @@ export const PresupuestoAnualFormComponent: React.FC<PresupuestoAnualFormProps> 
             </div>
           </div>
 
-          {/* Toggle Desglose Mensual */}
           <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
             <button
               type="button"
@@ -285,7 +270,6 @@ export const PresupuestoAnualFormComponent: React.FC<PresupuestoAnualFormProps> 
             </button>
           </div>
 
-          {/* Formulario de desglose mensual */}
           {showMensualForm && (
             <div className="space-y-4">
               <div className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-6">
@@ -296,7 +280,6 @@ export const PresupuestoAnualFormComponent: React.FC<PresupuestoAnualFormProps> 
                   </h4>
                 </div>
                 
-                {/* Selector para agregar meses */}
                 {mesesDisponibles.length > 0 && (
                   <div className="mb-6 p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
@@ -328,7 +311,6 @@ export const PresupuestoAnualFormComponent: React.FC<PresupuestoAnualFormProps> 
                   </div>
                 )}
 
-                {/* Información del total con porcentaje */}
                 {formData.presupuestos_mensuales && formData.presupuestos_mensuales.length > 0 && (
                   <div className="mb-6 p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm space-y-3">
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
@@ -350,7 +332,6 @@ export const PresupuestoAnualFormComponent: React.FC<PresupuestoAnualFormProps> 
                       </div>
                     </div>
                     
-                    {/* Barra de progreso de porcentaje asignado */}
                     <div className="space-y-2">
                       <div className="flex items-center justify-between">
                         <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -367,7 +348,6 @@ export const PresupuestoAnualFormComponent: React.FC<PresupuestoAnualFormProps> 
                         </span>
                       </div>
                       
-                      {/* Barra de progreso */}
                       <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3 overflow-hidden">
                         <div 
                           className={`h-full transition-all duration-500 ${
@@ -415,7 +395,6 @@ export const PresupuestoAnualFormComponent: React.FC<PresupuestoAnualFormProps> 
                   </div>
                 )}
 
-                {/* Grid de meses */}
                 {formData.presupuestos_mensuales && formData.presupuestos_mensuales.length > 0 ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
                     {formData.presupuestos_mensuales
@@ -437,7 +416,6 @@ export const PresupuestoAnualFormComponent: React.FC<PresupuestoAnualFormProps> 
                                 <span className="text-xs text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">
                                   Mes {mes.mes}
                                 </span>
-                                {/* Solo mostrar botón eliminar en modo creación */}
                                 {!isEditMode && (
                                   <button
                                     type="button"
@@ -511,7 +489,6 @@ export const PresupuestoAnualFormComponent: React.FC<PresupuestoAnualFormProps> 
             </div>
           )}
 
-          {/* Buttons */}
           <div className="flex flex-col sm:flex-row gap-3 pt-6 border-t border-gray-200 dark:border-gray-700">
             <button
               type="submit"

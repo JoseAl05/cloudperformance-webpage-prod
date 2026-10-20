@@ -13,7 +13,10 @@ import {
 } from "@/components/ui/select"
 import { Dispatch, SetStateAction } from 'react';
 
-type DimensionKey = keyof typeof DIMENSIONS_MAPPING;
+interface DimensionGroup {
+    label: string;
+    keys: string[];
+}
 
 interface IntraCloudBillingDimSelectionComponentProps {
     dimension: string;
@@ -23,8 +26,8 @@ interface IntraCloudBillingDimSelectionComponentProps {
 
 export const IntraCloudBillingDimSelectionComponent = ({ dimension, setDimension, payload }: IntraCloudBillingDimSelectionComponentProps) => {
 
-    let DIMENSIONS_MAPPING = {}
-    let GROUPS = []
+    let DIMENSIONS_MAPPING: Record<string, string> = {}
+    let GROUPS: DimensionGroup[] = []
     if (payload.cloud_provider === 'Azure') {
         DIMENSIONS_MAPPING = {
             "product": "Servicio Contratado",
@@ -46,19 +49,19 @@ export const IntraCloudBillingDimSelectionComponent = ({ dimension, setDimension
         GROUPS = [
             {
                 label: "Infraestructura",
-                keys: ["product", "consumed_service", "resource_location", "resource_group", "service_family"] as DimensionKey[]
+                keys: ["product", "consumed_service", "resource_location", "resource_group", "service_family"]
             },
             {
                 label: "Detalle de Consumo",
-                keys: ["meter_category", "meter_sub_category", "meter_name", "unit_of_measure"] as DimensionKey[]
+                keys: ["meter_category", "meter_sub_category", "meter_name", "unit_of_measure"]
             },
             {
                 label: "Financiero",
-                keys: ["pricing_model", "charge_type", "billing_profile_name"] as DimensionKey[]
+                keys: ["pricing_model", "charge_type", "billing_profile_name"]
             },
             {
                 label: "Organización",
-                keys: ["customer_name", "cost_center"] as DimensionKey[]
+                keys: ["customer_name", "cost_center"]
             }
         ];
     } else if (payload.cloud_provider === 'AWS') {
@@ -90,19 +93,19 @@ export const IntraCloudBillingDimSelectionComponent = ({ dimension, setDimension
         GROUPS = [
             {
                 label: "General y Ubicación",
-                keys: ["SERVICE", "LINKED_ACCOUNT", "REGION", "AZ"] as AwsDimensionKey[]
+                keys: ["SERVICE", "LINKED_ACCOUNT", "REGION", "AZ"]
             },
             {
                 label: "Detalle Técnico",
-                keys: ["USAGE_TYPE", "OPERATION", "INSTANCE_TYPE", "INSTANCE_TYPE_FAMILY", "PLATFORM", "DATABASE_ENGINE"] as AwsDimensionKey[]
+                keys: ["USAGE_TYPE", "OPERATION", "INSTANCE_TYPE", "INSTANCE_TYPE_FAMILY", "PLATFORM", "DATABASE_ENGINE"]
             },
             {
                 label: "Facturación y Contratos",
-                keys: ["PURCHASE_TYPE", "RECORD_TYPE", "BILLING_ENTITY"] as AwsDimensionKey[]
+                keys: ["PURCHASE_TYPE", "RECORD_TYPE", "BILLING_ENTITY"]
             },
             {
                 label: "Ahorros y Reservas",
-                keys: ["SAVINGS_PLANS_TYPE", "RESERVATION_ID"] as AwsDimensionKey[]
+                keys: ["SAVINGS_PLANS_TYPE", "RESERVATION_ID"]
             }
         ];
     } else if (payload.cloud_provider === 'GCP') {
@@ -119,15 +122,15 @@ export const IntraCloudBillingDimSelectionComponent = ({ dimension, setDimension
         GROUPS = [
             {
                 label: "General y Ubicación",
-                keys: ["service_description", "location_region", "project_id"] as GcpDimensionKey[]
+                keys: ["service_description", "location_region", "project_id"]
             },
             {
                 label: "Detalle Técnico",
-                keys: ["sku_description", "usage_unit", "usage_billed_unit"] as GcpDimensionKey[]
+                keys: ["sku_description", "usage_unit", "usage_billed_unit"]
             },
             {
                 label: "Organización",
-                keys: ["project_name"] as GcpDimensionKey[]
+                keys: ["project_name"]
             }
         ];
     }

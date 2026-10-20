@@ -1,4 +1,5 @@
 "use client";
+import { Root } from '@/interfaces/vista-infrautilizadas/ec2ResourceInfraUsedViewInterface';
 
 import { fetcher } from '@/lib/fetcher';
 import useSWR from "swr";
@@ -27,7 +28,7 @@ export const InstanceEc2InfrautilizadaComponent = ({
     ? endDate.toISOString().replace("Z", "").slice(0, -4)
     : "";
 
-  const ec2InfrautilizadaInfo = useSWR(
+  const ec2InfrautilizadaInfo = useSWR<Root>(
     instance
       ? `/api/aws/bridge/aws/ec2/unused/unused?date_from=${startDateFormatted}&date_to=${endDateFormatted}&resource=${instance}`
       : null,
@@ -104,7 +105,6 @@ export const InstanceEc2InfrautilizadaComponent = ({
 
         <div className="flex  flex-col  gap-3 my-10">
           <div className="flex items-center gap-3 text-3xl font-bold text-foreground">
-            {/* <Clock className="h-8 w-8 text-blue-500" /> */}
             <FileSpreadsheet className="h-8 w-8 text-blue-500" />
             Detalle Instancias Infrautilizadas
           </div>

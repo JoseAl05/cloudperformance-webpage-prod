@@ -30,7 +30,6 @@ export const ImpactFilterComponent = ({
     const impacts: string[] = Array.isArray(data?.impacts) ? data.impacts : []
     const noImpacts = impacts.length === 0
     
-    // Agregar "Ver todos" al inicio
     const impactsWithAll = noImpacts ? [] : ['Ver todos', ...impacts]
 
     const getDisplayText = () => {
@@ -69,7 +68,6 @@ export const ImpactFilterComponent = ({
                                     key={imp}
                                     value={imp}
                                     onSelect={() => {
-                                        // Si selecciona "Ver todos", pasa string vacío
                                         setImpact(imp === 'Ver todos' ? '' : imp);
                                         setOpen(false);
                                     }}

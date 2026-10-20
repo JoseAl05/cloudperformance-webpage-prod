@@ -28,19 +28,16 @@ function SolicitudesContent() {
   const [expandedEmpresas, setExpandedEmpresas] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(false);
 
-  // Cargar datos del sessionStorage — el CSV parseado en la página anterior
   useEffect(() => {
     const raw = sessionStorage.getItem('op_csv_users');
     if (!raw) return;
     const users: CSVUser[] = JSON.parse(raw);
 
-    // Agrupar por empresa
     const grouped = new Map<string, EmpresaGroup>();
     users.forEach(u => {
       if (!grouped.has(u.empresa)) {
         grouped.set(u.empresa, { nombre: u.empresa, nuevos: [], existentes: [] });
       }
-      // Por ahora todos son nuevos hasta que tengamos la API
       grouped.get(u.empresa)!.nuevos.push(u);
     });
 
@@ -68,7 +65,6 @@ function SolicitudesContent() {
   return (
     <section className="mx-auto max-w-4xl px-4 py-8">
 
-      {/* Header */}
       <div className="flex items-center gap-3 mb-8">
         <Link href="/op-licencias/importar" className="text-muted-foreground hover:text-foreground transition">
           <ArrowLeft className="h-5 w-5" />
@@ -98,7 +94,6 @@ function SolicitudesContent() {
             return (
               <div key={empresa.nombre} className="rounded-2xl border bg-card shadow-sm overflow-hidden">
 
-                {/* Header empresa */}
                 <button
                   onClick={() => toggleEmpresa(empresa.nombre)}
                   className="w-full flex items-center justify-between p-4 hover:bg-muted/50 transition"
@@ -130,11 +125,9 @@ function SolicitudesContent() {
                   }
                 </button>
 
-                {/* Detalle expandido */}
                 {isExpanded && (
                   <div className="border-t divide-y divide-border">
 
-                    {/* Usuarios existentes */}
                     {empresa.existentes.length > 0 && (
                       <div className="p-4">
                         <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-3 flex items-center gap-2">
@@ -151,7 +144,6 @@ function SolicitudesContent() {
                       </div>
                     )}
 
-                    {/* Usuarios nuevos */}
                     {empresa.nuevos.length > 0 && (
                       <div className="p-4">
                         <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-3 flex items-center gap-2">
@@ -175,7 +167,6 @@ function SolicitudesContent() {
         </div>
       )}
 
-      {/* Botón continuar */}
       {empresaGroups.length > 0 && (
         <div className="flex justify-end mt-6">
           <Link

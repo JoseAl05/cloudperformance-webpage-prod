@@ -11,6 +11,10 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import useSWR from 'swr'
 import { LoaderComponent } from '@/components/general_aws/LoaderComponent'
 
+interface TaggedResource {
+    Tags?: { Key: string; Value: string }[] | null;
+}
+
 interface TagFilterComponentProps {
     startDate: Date,
     endDate: Date,
@@ -47,7 +51,7 @@ export const TagFilterComponent = ({
     const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : ''
 
     const shouldFetch = !!region
-    const { data, error, isLoading } = useSWR(
+    const { data, error, isLoading } = useSWR<unknown[]>(
         shouldFetch
             ? `/api/aws/bridge/get-all-tags?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&resource_type=${resourceType}&local_service=${localService}`
             : null,
@@ -60,7 +64,8 @@ export const TagFilterComponent = ({
 
     const tagMap: Record<string, Set<string>> = {};
     if (Array.isArray(data)) {
-        data.forEach((item: Item) => {
+        data.forEach((entry) => {
+            const item = entry as TaggedResource | null;
             if (!item || !Array.isArray(item.Tags)) return;
             item.Tags.forEach(({ Key, Value }) => {
                 if (!tagMap[Key]) {

@@ -27,9 +27,9 @@ interface AdvisorViewPieChartComponentProps {
 }
 
 const IMPACT_COLORS: Record<string, string> = {
-    'Alto': '#dc2626',      // Rojo
-    'Medio': '#eab308',     // Amarillo
-    'Bajo': '#3b82f6',      // Azul
+    'Alto': '#dc2626',
+    'Medio': '#eab308',
+    'Bajo': '#3b82f6',
 };
 
 export const AdvisorViewPieChartComponent = ({
@@ -39,11 +39,9 @@ export const AdvisorViewPieChartComponent = ({
     const chartInstance = useRef<echarts.ECharts | null>(null);
     const resizeObserverRef = useRef<ResizeObserver | null>(null);
 
-    // Tema (shadcn + next-themes)
     const { resolvedTheme } = useTheme();
     const isDark = resolvedTheme === 'dark';
 
-    // Evitar hydration mismatch
     const [mounted, setMounted] = useState(false);
     useEffect(() => setMounted(true), []);
 
@@ -54,7 +52,6 @@ export const AdvisorViewPieChartComponent = ({
             return { chartData: [], totalCount: 0 };
         }
 
-        // Tomar los valores del primer registro (todos tienen los mismos totales)
         const firstRecord = safeData[0];
         const highImpact = firstRecord?.high_impact ?? 0;
         const mediumImpact = firstRecord?.medium_impact ?? 0;
@@ -77,7 +74,7 @@ export const AdvisorViewPieChartComponent = ({
                 value: lowImpact,
                 itemStyle: { color: IMPACT_COLORS['Bajo'] },
             },
-        ].filter(item => item.value > 0); // Solo mostrar los que tienen valor
+        ].filter(item => item.value > 0);
 
         return { chartData, totalCount: total };
     }, [safeData]);
@@ -192,12 +189,10 @@ export const AdvisorViewPieChartComponent = ({
             ],
         };
 
-        // (Re)inicializar y setear opciones
         chartInstance.current?.dispose();
         chartInstance.current = echarts.init(chartRef.current, undefined, { renderer: 'canvas' });
         chartInstance.current.setOption(option, { notMerge: true, lazyUpdate: true, silent: false });
 
-        // Resize handling
         resizeObserverRef.current?.disconnect();
         resizeObserverRef.current = new ResizeObserver(() => handleResize());
         resizeObserverRef.current.observe(chartRef.current);

@@ -11,7 +11,6 @@ interface ElbV2ConsumeComponentProps {
     region: string
 }
 
-/** Consumo Load Balancers v2: adapta los filtros de la vista al contrato canónico (/api/aws/consumption/load-balancers/*). */
 export const ElbV2ConsumeComponent = ({ startDate, endDate, instance, region }: ElbV2ConsumeComponentProps) => {
     return (
         <ConsumptionView

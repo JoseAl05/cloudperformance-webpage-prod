@@ -1,16 +1,14 @@
 'use client'
 
 import { useEffect, useState, useMemo } from 'react';
-import { DatePicker } from 'react-datepicker';
-import 'react-datepicker/dist/react-datepicker.css';
 
 import { RegionFilterComponent } from '@/components/general_aws/filters/RegionFilterComponent';
 import { TagFilterComponent } from '@/components/general_aws/filters/TagsFilterComponent';
 import { ServiceFilterComponent } from '@/components/general_aws/filters/ServiceFilterComponent';
 import { VariationServiceFilterComponent } from '@/components/general_aws/filters/VariationServiceFilterComponent';
-import { Card, CardContent } from '@/components/ui/card';
-import { Calendar, Filter, MapPin, Server, Tag, XCircle, Ban, Box, Activity, BarChart3, Layers } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { MapPin, Server, Tag, Ban, Box, Activity, BarChart3, Layers } from 'lucide-react';
+import { BaseFiltersComponent } from '@/components/shared/filters/BaseFiltersComponent';
+import { buildCommonFilters, readFilterParam, setFilterDates, FILTER_PARAMS, type CommonFilters } from '@/lib/filters';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { InstancesFilterComponent } from '@/components/general_aws/filters/InstancesFilterComponent';
 import { AsgFilterComponent } from '@/components/general_aws/filters/AsgFilterComponent';
@@ -57,6 +55,7 @@ interface FiltersComponentProps {
         cloud?: string;
         dbType?: string;
         selectedBedrockModel?: string;
+        filters?: CommonFilters;
     }) => React.JSX.Element;
     dateFilter?: boolean;
     regionFilter?: boolean;
@@ -104,6 +103,7 @@ interface FiltersComponentProps {
     unusedR53Filter?: boolean;
     isUnusedR53Multiselect?: boolean;
     bedrockModelFilter?: boolean;
+    dbType?: string;
 }
 
 export const FiltersComponent = ({
@@ -170,19 +170,19 @@ export const FiltersComponent = ({
     };
 
     const getInitialFilters = () => {
-        const startDateParam = searchParams.get('startDate');
-        const endDateParam = searchParams.get('endDate');
+        const startDateParam = readFilterParam(searchParams, 'dateFrom');
+        const endDateParam = readFilterParam(searchParams, 'dateTo');
         const monthParam = searchParams.get('month');
         const yearParam = searchParams.get('year');
-        const instanceParam = searchParams.get('instance');
+        const instanceParam = readFilterParam(searchParams, 'resourceIds');
         const asgParam = searchParams.get('asg');
         const eksParam = searchParams.get('eks');
         const eksAsgParam = searchParams.get('eksAsg');
         const eksAsgInstanceParam = searchParams.get('eksAsgInstance');
         const asgInstanceParam = searchParams.get('asgInstance');
-        const regionParam = searchParams.get('region');
-        const selectedKeyParam = searchParams.get('selectedKey');
-        const selectedValueParam = searchParams.get('selectedValue');
+        const regionParam = readFilterParam(searchParams, 'regions');
+        const selectedKeyParam = readFilterParam(searchParams, 'tagKey');
+        const selectedValueParam = readFilterParam(searchParams, 'tagValue');
         const selectedServiceParam = searchParams.get('services');
         const s3BucketParam = searchParams.get('s3Bucket');
         const ebsParam = searchParams.get('ebs');
@@ -277,7 +277,7 @@ export const FiltersComponent = ({
     const [tempRegion, setTempRegion] = useState(filters.region);
     const [tempKey, setTempKey] = useState<string | null>(filters.selectedKey);
     const [tempValue, setTempValue] = useState<string | null>(filters.selectedValue);
-    const [tagsData, setTagsData] = useState<unknown[]>([]); // Se mantiene para compatibilidad con el componente de tags
+    const [tagsData, setTagsData] = useState<unknown[]>([]);
     const [tempService, setTempService] = useState(filters.service);
     const [tempS3Bucket, setTempS3Bucket] = useState(filters.s3Bucket);
     const [tempEbs, setTempEbs] = useState(filters.ebs);
@@ -424,8 +424,7 @@ export const FiltersComponent = ({
         setFilters(newFilters as unknown);
 
         const query = new URLSearchParams();
-        query.set('startDate', newFilters.startDate.toISOString());
-        query.set('endDate', newFilters.endDate.toISOString());
+        setFilterDates(query, newFilters.startDate, newFilters.endDate);
 
         if (variationServiceFilter) {
             if (newFilters.month) query.set('month', String(newFilters.month));
@@ -433,50 +432,41 @@ export const FiltersComponent = ({
         }
 
         const filterConfigs = [
-            // Estructura: { flag: boolean, key: string, value: any, ignoreValue?: string }
-            { flag: regionFilter, key: 'region', value: newFilters.region, ignoreValue: 'all_regions' },
-            { flag: instancesFilter || asgFilter, key: 'selectedKey', value: newFilters.selectedKey },
-            { flag: instancesFilter || asgFilter, key: 'selectedValue', value: newFilters.selectedValue },
+            { flag: regionFilter, key: FILTER_PARAMS.regions, value: newFilters.region, ignoreValue: 'all_regions' },
+            { flag: instancesFilter || asgFilter, key: FILTER_PARAMS.tagKey, value: newFilters.selectedKey },
+            { flag: instancesFilter || asgFilter, key: FILTER_PARAMS.tagValue, value: newFilters.selectedValue },
 
-            // Instances & ASG
             { flag: asgFilter, key: 'asg', value: newFilters.asg },
             { flag: asgFilter, key: 'asgInstance', value: newFilters.asgInstance },
-            { flag: instancesFilter && !newFilters.asg, key: 'instance', value: newFilters.instance },
+            { flag: instancesFilter && !newFilters.asg, key: FILTER_PARAMS.resourceIds, value: newFilters.instance },
             { flag: instancesFilter, key: 'instanceService', value: newFilters.instanceService },
             { flag: autoScalingGroupFilter, key: 'autoScalingGroup', value: newFilters.autoScalingGroup },
 
-            // EKS
             { flag: eksFilter, key: 'eks', value: newFilters.eks },
             { flag: eksFilter, key: 'eksAsg', value: newFilters.eksAsg },
             { flag: eksFilter, key: 'eksAsgInstance', value: newFilters.eksAsgInstance },
 
-            // Services & Variation
             { flag: serviceFilter, key: 'services', value: newFilters.service, ignoreValue: 'all_services' },
             { flag: variationServiceFilter, key: 'variationService', value: newFilters.variationService },
             { flag: variationMetricFilter, key: 'variationMetric', value: newFilters.variationMetric },
             { flag: variationResourceFilter, key: 'variationResource', value: newFilters.variationResource },
 
-            // Storage & Events
             { flag: s3Filter, key: 's3Bucket', value: newFilters.s3Bucket },
             { flag: eventsTypesFilter, key: 'eventsTypes', value: newFilters.eventsTypes },
 
-            // Advisor
             { flag: advisorCategoriesFilter, key: 'advisorCategory', value: newFilters.advisorCategory },
             { flag: advisorStatusFilter, key: 'advisorStatus', value: newFilters.advisorStatus },
 
-            // Metrics
             { flag: metricFilter, key: 'metric', value: newFilters.metric },
             { flag: metricsFilter, key: 'metrics', value: newFilters.metrics },
             { flag: metricsRDSFilter, key: 'metricsRDS', value: newFilters.metricsRDS },
 
-            //Network
             { flag: natGatewaysFilter, key: 'natGateway', value: newFilters.natGateway },
             { flag: unusedNatGatewaysFilter, key: 'unusedNatGateway', value: newFilters.unusedNatGateway },
             { flag: unusedElbV2Filter, key: 'unusedElbV2', value: newFilters.unusedElbV2 },
             { flag: elbV2Filter, key: 'elbV2', value: newFilters.elbV2 },
             { flag: unusedR53Filter, key: 'unusedR53', value: newFilters.unusedR53 },
 
-            //Bedrock
             { flag: bedrockModelFilter, key: 'bedrock_model', value: newFilters.selectedBedrockModel }
         ];
 
@@ -567,57 +557,69 @@ export const FiltersComponent = ({
         router.push(window.location.pathname);
     };
 
+    const handleMonthYearChange = (d: Date | null) => {
+        setTempMonthYearDate(d);
+        if (d) {
+            const m = d.getMonth() + 1;
+            const y = d.getFullYear();
+            setTempMonth(m);
+            setTempYear(y);
+            const [s, e] = monthYearToRange(y, m);
+            setTempRange([s, e]);
+        } else {
+            setTempMonth(null);
+            setTempYear(null);
+            setTempRange([null, null]);
+        }
+    };
+
     return (
-        <div className='space-y-6'>
-            <Card className="w-full min-w-0 overflow-hidden">
-                <CardContent className='space-y-6'>
-                    <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6'>
-                        {dateFilter && (
-                            <div className='space-y-2'>
-                                <label className='text-sm font-medium text-foreground flex items-center gap-2'>
-                                    <Calendar className='h-4 w-4' />
-                                    Período
-                                </label>
-
-                                {variationServiceFilter ? (
-                                    <DatePicker
-                                        selected={tempMonthYearDate}
-                                        onChange={(d: Date | null) => {
-                                            setTempMonthYearDate(d);
-                                            if (d) {
-                                                const m = d.getMonth() + 1;
-                                                const y = d.getFullYear();
-                                                setTempMonth(m);
-                                                setTempYear(y);
-                                                const [s, e] = monthYearToRange(y, m);
-                                                setTempRange([s, e]);
-                                            } else {
-                                                setTempMonth(null);
-                                                setTempYear(null);
-                                                setTempRange([null, null]);
-                                            }
-                                        }}
-                                        dateFormat="MMMM yyyy"
-                                        showMonthYearPicker
-                                        showMonthDropdown
-                                        showYearDropdown
-                                        dropdownMode="select"
-                                        placeholderText="Selecciona mes y año"
-                                        className='w-full px-3 py-2 border border-input bg-background text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent'
-                                    />
-                                ) : (
-                                    <DatePicker
-                                        selected={tempRange[0]}
-                                        onChange={onChange}
-                                        startDate={tempRange[0]}
-                                        endDate={tempRange[1]}
-                                        selectsRange
-                                        className='w-full px-3 py-2 border border-input bg-background text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent'
-                                    />
-                                )}
-                            </div>
-                        )}
-
+        <BaseFiltersComponent
+            dateRange={dateFilter && !variationServiceFilter ? { value: tempRange, onChange } : undefined}
+            monthYear={dateFilter && variationServiceFilter ? { value: tempMonthYearDate, onChange: handleMonthYearChange, label: 'Período' } : undefined}
+            onApply={applyFilters}
+            onClear={clearFilters}
+            view={
+                <Component
+                    startDate={filters.startDate}
+                    endDate={filters.endDate}
+                    instance={asgFilter ? (filters.asgInstance || filters.asg) : filters.instance}
+                    eksAsgInstance={filters.eksAsgInstance}
+                    instancesService={instancesService}
+                    region={filters.region}
+                    selectedKey={filters.selectedKey}
+                    selectedValue={filters.selectedValue}
+                    services={filters.service}
+                    buckets={filters.s3Bucket}
+                    ebs={filters.ebs}
+                    eventType={filters.eventsTypes}
+                    advisorCategory={filters.advisorCategory}
+                    advisorStatus={filters.advisorStatus}
+                    variationMetric={filters.variationMetric}
+                    variationService={filters.variationService}
+                    metric={filters.metric}
+                    metrics={metricsRDSFilter ? filters.metricsRDS : filters.metrics}
+                    variationResource={filters.variationResource}
+                    month={filters.month}
+                    year={filters.year}
+                    unusedNatGateway={filters.unusedNatGateway}
+                    natGateway={filters.natGateway}
+                    unusedElbV2={filters.unusedElbV2}
+                    elbV2={filters.elbV2}
+                    unusedR53={filters.unusedR53}
+                    cloud={cloud}
+                    dbType={dbType}
+                    filters={buildCommonFilters({
+                        dateFrom: filters.startDate,
+                        dateTo: filters.endDate,
+                        regions: filters.region,
+                        resourceIds: asgFilter ? (filters.asgInstance || filters.asg) : filters.instance,
+                        tagKey: filters.selectedKey,
+                        tagValue: filters.selectedValue,
+                    })}
+                />
+            }
+        >
                         {regionFilter && (
                             <div className='space-y-2'>
                                 <label className='text-sm font-medium text-foreground flex items-center gap-2'>
@@ -1001,51 +1003,6 @@ export const FiltersComponent = ({
                                 </div>
                             )
                         }
-                    </div>
-
-                    <div className='flex items-center gap-4'>
-                        <Button onClick={applyFilters} className='flex items-center gap-2 bg-blue-700 cursor-pointer hover:bg-blue-500 text-white'>
-                            <Filter />
-                            Aplicar Filtros
-                        </Button>
-                        <Button onClick={clearFilters} className='flex items-center gap-2 bg-gray-500 cursor-pointer hover:bg-gray-400 text-white'>
-                            <XCircle />
-                            Limpiar Filtros
-                        </Button>
-                    </div>
-                </CardContent>
-
-                <Component
-                    startDate={filters.startDate}
-                    endDate={filters.endDate}
-                    instance={asgFilter ? (filters.asgInstance || filters.asg) : filters.instance}
-                    eksAsgInstance={filters.eksAsgInstance}
-                    instancesService={instancesService}
-                    region={filters.region}
-                    selectedKey={filters.selectedKey}
-                    selectedValue={filters.selectedValue}
-                    services={filters.service}
-                    buckets={filters.s3Bucket}
-                    ebs={filters.ebs}
-                    eventType={filters.eventsTypes}
-                    advisorCategory={filters.advisorCategory}
-                    advisorStatus={filters.advisorStatus}
-                    variationMetric={filters.variationMetric}
-                    variationService={filters.variationService}
-                    metric={filters.metric}
-                    metrics={metricsRDSFilter ? filters.metricsRDS : filters.metrics}
-                    variationResource={filters.variationResource}
-                    month={filters.month}
-                    year={filters.year}
-                    unusedNatGateway={filters.unusedNatGateway}
-                    natGateway={filters.natGateway}
-                    unusedElbV2={filters.unusedElbV2}
-                    elbV2={filters.elbV2}
-                    unusedR53={filters.unusedR53}
-                    cloud={cloud}
-                    dbType={dbType}
-                />
-            </Card>
-        </div>
+        </BaseFiltersComponent>
     );
 };

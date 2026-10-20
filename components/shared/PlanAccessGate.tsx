@@ -46,23 +46,17 @@ export const PdfReportComponent = ({ planName, serviceName, accent = 'amber' }: 
 };
 
 interface PlanAccessGateProps {
-    /** Nombre visible del servicio (p. ej. "Google Cloud Platform"). */
     serviceName: string
     loading: boolean
     canAccessFullDashboard: boolean
     canAccessPdfReport: boolean
     planName?: string
-    /** Si es false, un plan con acceso solo a PDF recibe "Acceso Denegado" (servicios sin reporte PDF). */
     showPdfReport?: boolean
     pdfAccent?: Accent
     pdfFallbackPlanName?: string
     children: React.ReactNode
 }
 
-/**
- * Control de acceso por plan para el layout de una nube o servicio:
- * sin acceso → "Acceso Denegado"; acceso completo → `children`; solo PDF → pantalla del reporte PDF.
- */
 export const PlanAccessGate = ({
     serviceName,
     loading,
@@ -78,21 +72,17 @@ export const PlanAccessGate = ({
         return <p className="p-8 text-center text-gray-500">Cargando permisos de licencia...</p>;
     }
 
-    // 1. SIN ACCESO (ni siquiera al PDF)
     if (!canAccessPdfReport) {
         return <AccessDeniedComponent planName={planName || 'PLAN NO DISPONIBLE'} serviceName={serviceName} />;
     }
 
-    // 2. ACCESO COMPLETO
     if (canAccessFullDashboard) {
         return <>{children}</>;
     }
 
-    // 3. ACCESO LIMITADO: solo el reporte PDF
     if (showPdfReport) {
         return <PdfReportComponent planName={planName || pdfFallbackPlanName} serviceName={serviceName} accent={pdfAccent} />;
     }
 
-    // Fallback de seguridad
     return <AccessDeniedComponent planName={planName || 'ERROR'} serviceName={serviceName} />;
 };

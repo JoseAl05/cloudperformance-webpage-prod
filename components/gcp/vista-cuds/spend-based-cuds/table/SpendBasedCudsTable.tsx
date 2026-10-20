@@ -60,7 +60,7 @@ export const SpendBasedCudsTable = ({ data }: { data: TableDetail[] }) => {
         {
             accessorKey: "name",
             header: "Instancia Beneficiada",
-            size: 250, // Controlamos el ancho base
+            size: 250,
             cell: ({ row }) => (
                 <div className="flex items-center gap-3 min-w-[180px]">
                     <div className="p-2 bg-blue-50 text-blue-600 rounded-lg">
@@ -76,7 +76,6 @@ export const SpendBasedCudsTable = ({ data }: { data: TableDetail[] }) => {
         {
             accessorKey: "total_list_cost",
             header: () => <div className="text-right px-2">Costo OnDemand</div>,
-            // Forzamos un ancho pequeño para que no se estire
             cell: ({ getValue }) => (
                 <div className="text-right text-xs text-gray-400 line-through px-2 w-[100px] ml-auto">
                     {formatCurrency(getValue() as number)}
@@ -88,7 +87,7 @@ export const SpendBasedCudsTable = ({ data }: { data: TableDetail[] }) => {
             header: () => <div className="text-right px-2">Costo Neto</div>,
             cell: ({ getValue, row }) => {
                 const netPaid = getValue() as number;
-                const isFullyCovered = netPaid <= 0; // GCP a veces marca decimales ínfimos, el <= 0 es más seguro
+                const isFullyCovered = netPaid <= 0;
 
                 return (
                     <div className="flex flex-col items-end px-2 min-w-[140px] ml-auto">
@@ -130,7 +129,6 @@ export const SpendBasedCudsTable = ({ data }: { data: TableDetail[] }) => {
         {
             accessorKey: "components",
             header: "SKU Beneficiados",
-            // Esta columna puede ser más ancha para mostrar bien los SKUs
             cell: ({ row }) => (
                 <div className="flex flex-col gap-1.5 py-2 min-w-[260px] max-w-[320px]">
                     {row.original.components.map((c, i) => (
@@ -170,7 +168,6 @@ export const SpendBasedCudsTable = ({ data }: { data: TableDetail[] }) => {
                         </p>
                     </div>
                     
-                    {/* Indicador de Ahorro Total en estilo claro */}
                     <div className="flex flex-col items-end bg-gray-50 px-4 py-2 rounded-xl border border-gray-100">
                         <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Total Ahorrado</span>
                         <span className="text-lg font-bold text-emerald-600">

@@ -184,7 +184,7 @@ export const SavingPlansViewComponent = ({ startDate, endDate }: SavingPlansComp
     { keepPreviousData: false }
   )
 
-  const { data: ec2Intances, isLoading: loadingEc2, isValidating: validatingEc2 } = useSWR<Ec2InstancesPrices>(
+  const { data: ec2Instances, isLoading: loadingEc2, isValidating: validatingEc2 } = useSWR<Ec2InstancesPrices>(
     isComputePlan && startDateFormatted && endDateFormatted
       ? `/api/aws/bridge/saving-plans/ec2-instances-prices/?date_from=${startDateFormatted}&date_to=${endDateFormatted}`
       : null,
@@ -258,23 +258,16 @@ const getCoverageStatus = () => {
     costUsage.forEach((curr) => {
       const serviceName = curr.dimensions?.SERVICE || curr.SERVICE || ""
       
-      // 1. Lógica para la línea del Savings Plan
       if (serviceName.includes("Savings Plans")) {
-        // unblendedcost = Lo que pagas fijo a AWS (Tu compromiso)
         totalCompromiso += Number(curr.unblendedcost) || 0
-        // amortizedcost = El dinero que sobró y no se usó (Desperdicio)
         totalDesperdicio += Number(curr.amortizedcost) || 0
       } 
-      // 2. Lógica para el uso de Cómputo (EC2, etc.)
       else {
-        // amortizedcost = El cómputo que SÍ consumiste y fue cubierto por el plan
         totalUsoReal += Number(curr.amortizedcost) || 0
-        // unblendedcost = Gasto extra fuera del plan (te pasaste de tu límite)
         totalExcedente += Number(curr.unblendedcost) || 0
       }
     })
 
-    // Fallback de seguridad por si el array de costUsage viene incompleto
     if (totalCompromiso === 0) {
       const endTime = endObj ? endObj.getTime() : startObj.getTime()
       const diffTime = Math.abs(endTime - startObj.getTime())
@@ -283,10 +276,9 @@ const getCoverageStatus = () => {
       totalUsoReal = costUsage.reduce((acc, curr) => acc + (Number(curr.amortizedcost) || 0), 0)
     }
 
-    const toleranciaDesperdicio = totalCompromiso * 0.15; // 15% de margen para subutilización
-    const toleranciaExcedente = totalCompromiso * 0.05;   // 5% de margen para gasto On-Demand
+    const toleranciaDesperdicio = totalCompromiso * 0.15;
+    const toleranciaExcedente = totalCompromiso * 0.05;
 
-    // 3. Evaluamos el estado usando los umbrales relativos
     if (totalDesperdicio > toleranciaDesperdicio) { 
       return { 
         label: "Excesivo / Subutilizado", 
@@ -311,7 +303,6 @@ const getCoverageStatus = () => {
       }
     }
     
-    // Si el desperdicio y el excedente están dentro de los márgenes tolerados, es un plan perfecto
     return { 
       label: "Óptimo", 
       color: "text-green-600", 
@@ -320,7 +311,7 @@ const getCoverageStatus = () => {
       desc: "Excelente balance. Estás aprovechando casi todo tu compromiso manteniendo el gasto extra bajo control.",
       utilizado: totalUsoReal,
       compromiso: totalCompromiso,
-      desperdicio: totalDesperdicio // Mostramos el pequeño remanente (si lo hay) como información útil
+      desperdicio: totalDesperdicio
     }
   }
 
@@ -594,7 +585,7 @@ const getCoverageStatus = () => {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Instancias EC2</p>
-                      <p className="text-3xl font-bold text-cyan-600">{ec2Intances?.total_unique_instances ?? 0}</p>
+                      <p className="text-3xl font-bold text-cyan-600">{ec2Instances?.total_unique_instances ?? 0}</p>
                       <p className="text-xs text-muted-foreground mt-1">Instancias registradas en el plan</p>
                     </div>
                     <Server className="h-8 w-8 text-cyan-500" aria-label="Cantidad instancias EC2" />
@@ -606,7 +597,7 @@ const getCoverageStatus = () => {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Costo EC2</p>
-                      <p className="text-3xl font-bold text-cyan-600">{formatUSD(ec2Intances?.total_price_usd ?? 0)}/h</p>
+                      <p className="text-3xl font-bold text-cyan-600">{formatUSD(ec2Instances?.total_price_usd ?? 0)}/h</p>
                       <p className="text-xs text-muted-foreground mt-1">Gasto por hora cubierto</p>
                     </div>
                     <Server className="h-8 w-8 text-cyan-500" aria-label="Precio instancias EC2" />

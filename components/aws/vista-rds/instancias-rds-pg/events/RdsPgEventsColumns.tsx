@@ -144,7 +144,6 @@ const RdsPgEventDetailsModal = ({ event }: { event: RdsPgEvent }) => {
                             </div>
                         </div>
 
-                        {/* InformaciÃ³n especÃ­fica de RDS */}
                         {(event.DBInstanceIdentifier || event.Engine) && (
                             <div className='border-t pt-4'>
                                 <h4 className='text-sm font-medium mb-3 flex items-center gap-2'>

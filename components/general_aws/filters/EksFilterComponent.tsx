@@ -61,7 +61,6 @@ export const EksFilterComponent = ({
     const startDateFormatted = startDate.toISOString().replace('Z', '').slice(0, -4);
     const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : '';
 
-    // const url = `/api/aws/bridge/eks/all-eks_clusters?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`;
     let url = '';
     switch (isInstancesService) {
         case "infraUsed":
@@ -72,7 +71,6 @@ export const EksFilterComponent = ({
             break;
     }
 
-    // const url = `/api/aws/bridge/aws/eks/getClusterEksList?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`;
     const tagsBody = selectedKey !== 'allKeys' && selectedValue ? { Key: selectedKey, Value: selectedValue } : null;
 
 
@@ -81,7 +79,6 @@ export const EksFilterComponent = ({
     const { data, error, isLoading } = useSWR(shouldFetch ? [url, tagsBody] : null, ([u, t]) => apiMethod(u, t));
 
     useEffect(() => {
-        // Solo actuar cuando terminó la carga y no hubo error
         if (!isLoading && !error && Array.isArray(data) && data.length === 0) {
             setEks('');
             setEksAsg('');
@@ -184,17 +181,6 @@ export const EksFilterComponent = ({
                 isEksAsgInstanceMultiselect={isEksAsgInstanceMultiselect}
                 isInstancesService={isInstancesService}
             />
-            {/* Instancias de ASG (solo si hay ASG disponible y seleccionado) */}
-            {/* <AsgInstancesFilterComponent
-                asg={asg}
-                asgInstance={asgInstance}
-                setAsgInstance={setAsgInstance}
-                startDate={startDateFormatted}
-                endDate={endDateFormatted}
-                region={region}
-                isInstanceMultiSelect={isAsgInstanceMultiselect}
-                isInstancesService={isInstancesService}
-            /> */}
         </div>
     )
 }

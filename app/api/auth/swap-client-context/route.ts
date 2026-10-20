@@ -3,6 +3,7 @@ import { cookies } from 'next/headers'
 import { AUTH_COOKIE } from '@/lib/cookies'
 import { verifyAuthToken, signAuthToken } from '@/lib/auth'
 import { findCompanyByName } from '@/lib/db-utils'
+import { companyCloudClaims } from '@/lib/sessionPayload'
 import { createLogger } from '@/lib/logger'
 import type { CloudProvider } from '@/lib/cloudAccounts'
 import type { JWTPayload } from '@/types'
@@ -12,10 +13,6 @@ const logger = createLogger('SwapClientContext')
 
 class AccountNotAllowedError extends Error {}
 
-/**
- * Resuelve la BD de una nube SIEMPRE desde la empresa destino.
- * El navegador sólo puede elegir una cuenta por su ID; nunca envía nombres de BD.
- */
 function resolveCloudDb(
     company: Empresa,
     cloud: CloudProvider,
@@ -26,7 +23,6 @@ function resolveCloudDb(
             ? company[`${cloud}_accounts` as const] || []
             : []
 
-    // Single-tenant: la única BD posible es la de la empresa.
     if (accounts.length === 0) return company[`user_db_${cloud}` as const] || null
 
     if (typeof requestedAccountId === 'string' && requestedAccountId) {
@@ -87,7 +83,6 @@ export async function POST(request: Request) {
         )
     }
 
-    // Sólo admin_global elige la empresa; el resto queda en la de su propio token.
     const targetCompanyName = isGlobalAdmin ? clientName : originalPayload.client
     const targetCompany = await findCompanyByName(targetCompanyName)
 
@@ -97,8 +92,6 @@ export async function POST(request: Request) {
             { status: 404 }
         )
     }
-
-    // ------------------ DB FINAL POR NUBE ------------------
 
     let finalAzureDb: string | null
     let finalAwsDb: string | null
@@ -126,9 +119,6 @@ export async function POST(request: Request) {
         throw err
     }
 
-    // ------------------ NUEVO PAYLOAD ------------------
-
-    // Los tokens antiguos traían `connectors`; ya no viajan en el JWT (se leen por empresa)
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { connectors: _legacyConnectors, ...payloadWithoutConnectors } = originalPayload
 
@@ -139,41 +129,12 @@ export async function POST(request: Request) {
         role: originalPayload.role,
         planName: targetCompany.planName,
 
-        user_db_azure: finalAzureDb,
-        user_db_aws: finalAwsDb,
-        user_db_gcp: finalGcpDb,
-        user_db_openai: finalOpenaiDb,
-
-        is_aws: targetCompany.is_aws,
-        is_azure: targetCompany.is_azure,
-        is_gcp: targetCompany.is_gcp,
-        is_openai: targetCompany.is_openai === true,
-
-        // Los flags se toman SIEMPRE de la empresa destino: si se heredaran del
-        // token anterior, un admin_global podría arrastrar un `multi_tenant`
-        // de otra empresa y quedar con cuentas que no le corresponden.
-        is_aws_multi_tenant: targetCompany.is_aws_multi_tenant === true,
-        is_azure_multi_tenant: targetCompany.is_azure_multi_tenant === true,
-        is_gcp_multi_tenant: targetCompany.is_gcp_multi_tenant === true,
-        is_openai_multi_tenant: targetCompany.is_openai_multi_tenant === true,
-
-        // Sólo hay cuentas en multi-tenant; en single-tenant manda `user_db_<cloud>`.
-        aws_accounts:
-            targetCompany.is_aws_multi_tenant === true
-                ? targetCompany.aws_accounts || []
-                : [],
-        azure_accounts:
-            targetCompany.is_azure_multi_tenant === true
-                ? targetCompany.azure_accounts || []
-                : [],
-        gcp_accounts:
-            targetCompany.is_gcp_multi_tenant === true
-                ? targetCompany.gcp_accounts || []
-                : [],
-        openai_accounts:
-            targetCompany.is_openai_multi_tenant === true
-                ? targetCompany.openai_accounts || []
-                : [],
+        ...companyCloudClaims(targetCompany, {
+            azure: finalAzureDb,
+            aws: finalAwsDb,
+            gcp: finalGcpDb,
+            openai: finalOpenaiDb,
+        }),
 
         iat: Math.floor(Date.now() / 1000),
         exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24,
@@ -182,9 +143,10 @@ export async function POST(request: Request) {
     const signedToken = await signAuthToken(newPayload);
 
     console.log('[SWAP] Cliente:', targetCompany.name);
-    console.log('[SWAP] AWS accounts:', newPayload.aws_accounts?.length);
-    console.log('[SWAP] Azure accounts:', newPayload.azure_accounts?.length);
-    console.log('[SWAP] GCP accounts:', newPayload.gcp_accounts?.length);
+    const accountCount = (accounts: unknown) => (Array.isArray(accounts) ? accounts.length : undefined);
+    console.log('[SWAP] AWS accounts:', accountCount(newPayload.aws_accounts));
+    console.log('[SWAP] Azure accounts:', accountCount(newPayload.azure_accounts));
+    console.log('[SWAP] GCP accounts:', accountCount(newPayload.gcp_accounts));
 
     console.log(
         '[SWAP] Payload bytes:',

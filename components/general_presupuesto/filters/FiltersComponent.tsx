@@ -28,6 +28,7 @@ import { MetricsFilterComponent } from '@/components/general_aws/filters/Metrics
 import { MetricsRDSFilterComponent } from '@/components/general_aws/filters/MetricsRDSFilterComponent';
 import { AnioFilterComponent } from '@/components/general_presupuesto/filters/AnioFilterComponent';
 import { string } from 'zod';
+import { readFilterParam } from '@/lib/filters';
 interface FiltersComponentProps {
     Component: (params: {
         startDate: Date;
@@ -129,20 +130,20 @@ export const FiltersComponent = ({
     };
 
     const getInitialFilters = () => {
-        const startDateParam = searchParams.get('startDate');
-        const endDateParam = searchParams.get('endDate');
+        const startDateParam = readFilterParam(searchParams, 'dateFrom');
+        const endDateParam = readFilterParam(searchParams, 'dateTo');
         const monthParam = searchParams.get('month');
         const yearParam = searchParams.get('year');
 
-        const instanceParam = searchParams.get('instance');
+        const instanceParam = readFilterParam(searchParams, 'resourceIds');
         const asgParam = searchParams.get('asg');
         const eksParam = searchParams.get('eks');
         const eksAsgParam = searchParams.get('eksAsg');
         const eksAsgInstanceParam = searchParams.get('eksAsgInstance');
         const asgInstanceParam = searchParams.get('asgInstance');
-        const regionParam = searchParams.get('region');
-        const selectedKeyParam = searchParams.get('selectedKey');
-        const selectedValueParam = searchParams.get('selectedValue');
+        const regionParam = readFilterParam(searchParams, 'regions');
+        const selectedKeyParam = readFilterParam(searchParams, 'tagKey');
+        const selectedValueParam = readFilterParam(searchParams, 'tagValue');
         const selectedServiceParam = searchParams.get('services');
         const s3BucketParam = searchParams.get('s3Bucket');
         const ebsParam = searchParams.get('ebs');
@@ -930,7 +931,6 @@ export const FiltersComponent = ({
                     variationService={filters.variationService}
                     metric={filters.metric}
                     metrics={metricsRDSFilter ? filters.metricsRDS : filters.metrics}
-                    // cloud={filters.cloud}
                     anio={filters.anio}
                     cloud= {cloudFilterType}
                     centroDeCosto={filters.centroDeCosto}

@@ -13,11 +13,9 @@ interface UsedCostLocationComponentProps {
   startDate: Date
   endDate: Date
   regions: string
-  projects?: string | string[]   // 👈 ahora acepta ambos
+  projects?: string | string[]
   service?: string
 }
-
-/* ================== TIPOS API ================== */
 
 interface MetricaPromedio {
   promedio: number
@@ -47,10 +45,6 @@ interface ApiResponse {
   metricas_por_region: RegionMetricas[]
   costos_por_region: unknown[]
 }
-
-/* ================== FETCHER ================== */
-
-/* ================== COMPONENTE ================== */
 
 export const UsedCostLocationComponent = ({
   startDate,
@@ -124,7 +118,6 @@ export const UsedCostLocationComponent = ({
   return (
     <div className="w-full min-w-0 px-4 py-6 space-y-8">
 
-      {/* 🧠 TÍTULO DE LA VISTA */}
       <div className="flex items-center gap-3">
         <ChartBar className="h-8 w-8 text-blue-500" />
         <h1 className="text-3xl font-bold text-foreground">
@@ -132,20 +125,17 @@ export const UsedCostLocationComponent = ({
         </h1>
       </div>
 
-      {/* 🌍 1️⃣ RESUMEN GLOBAL (todas las regiones juntas) */}
       <UsageCostLocationSummaryCards
         resumen={apiData?.resumen}
         isLoading={isLoading}
       />
 
-      {/* 📊 2️⃣ MÉTRICAS PROMEDIO POR REGIÓN (tabla interactiva) */}
       <AvgUsageByLocationComponent
         data={apiData.metricas_por_region}
         isLoading={false}
         error={null}
       />
 
-      {/* 🧩 3️⃣ TARJETAS DETALLE POR CADA REGIÓN */}
       <AverageByLocationCardsGCPComponent
         data={apiData.metricas_por_region}
       />

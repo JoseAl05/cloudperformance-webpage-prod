@@ -143,7 +143,6 @@ export const AsgFilterComponent = ({
                 </PopoverContent>
             </Popover>
 
-            {/* Instancias de ASG (solo si hay ASG disponible y seleccionado) */}
             {
                 isViewResource ? (
                     <></>

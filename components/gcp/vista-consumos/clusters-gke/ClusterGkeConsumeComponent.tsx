@@ -14,7 +14,6 @@ interface ClusterGkeConsumeComponentProps {
     tagValue?: string | null;
 }
 
-/** Consumo Clusters GKE: adapta los filtros de la vista al contrato canónico (/api/gcp/consumption/gke/*). */
 export const ClusterGkeConsumeComponent = ({ startDate, endDate, projects, regions, resourceId, tagKey, tagValue }: ClusterGkeConsumeComponentProps) => {
     const hasTag = !!tagKey && tagKey !== 'allKeys';
     return (

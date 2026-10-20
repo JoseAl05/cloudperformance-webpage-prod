@@ -25,6 +25,7 @@ import { toast } from 'sonner'
 import { ColumnDef } from '@tanstack/react-table'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
+import { readFilterParam } from '@/lib/filters';
 
 export type AutoscalingGroupInstance = {
     sync_time: { $date: string }
@@ -168,8 +169,8 @@ const AutoscalingInstanceDetailsModal = ({ instance }: { instance: AutoscalingGr
 const DateParams = () => {
     const searchParams = useSearchParams();
 
-    const startDateParam = searchParams.get('startDate');
-    const endDateParam = searchParams.get('endDate');
+    const startDateParam = readFilterParam(searchParams, 'dateFrom');
+    const endDateParam = readFilterParam(searchParams, 'dateTo');
 
     return { startDateParam: startDateParam, endDateParam: endDateParam }
 }
@@ -186,7 +187,7 @@ export const autoscalingGroupInstanceColumns: ColumnDef<AutoscalingGroupInstance
                 <div className='font-medium'>
                     <Link
                         className='cursor-pointer'
-                        href={{ pathname: '/aws/recursos/instancias-ec2', query: { instance: value, startDate: startDate, endDate: endDate } }}
+                        href={{ pathname: '/cloud-aws/recursos/instancias-ec2', query: { instance: value, startDate: startDate, endDate: endDate } }}
                         rel="noopener noreferrer"
                         target="_blank"
                     >

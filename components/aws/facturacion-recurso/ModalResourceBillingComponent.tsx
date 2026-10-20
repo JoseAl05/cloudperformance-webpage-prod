@@ -7,8 +7,8 @@ import { Loader2 } from 'lucide-react'
 import { ResourceBillingWrapper } from '@/components/aws/facturacion-recurso/ResourceBillingWrapper'
 import { ResourceBillingStats } from '@/components/aws/facturacion-recurso/info/ResourceBillingStats'
 import { ResourceBillingChart } from '@/components/aws/facturacion-recurso/grafico/ResourceBillingChart'
+import { FILTER_PARAMS, readFilterParam, setFilterDates } from '@/lib/filters';
 
-// --- Tipos de respuesta del Backend ---
 interface BillingItem {
   start_date: string
   end_date: string
@@ -43,10 +43,9 @@ export const ModalResourceBillingComponent = ({
 }: ModalResourceBillingProps) => {
   const searchParams = useSearchParams()
 
-  // 1. Gestión de Fechas
   const { startDate, endDate, startDateStr, endDateStr } = useMemo(() => {
-    const startParam = searchParams.get('startDate')
-    const endParam = searchParams.get('endDate')
+    const startParam = readFilterParam(searchParams, 'dateFrom')
+    const endParam = readFilterParam(searchParams, 'dateTo')
 
     const now = new Date()
     const firstDay = new Date(now.getFullYear(), now.getMonth(), 1)
@@ -60,7 +59,6 @@ export const ModalResourceBillingComponent = ({
     return { startDate: sDate, endDate: eDate, startDateStr: sStr, endDateStr: eStr }
   }, [searchParams])
 
-  // 2. Fetch Data
   const shouldFetch = isOpen && resourceId
   const { data, isLoading, error } = useSWR<ResourceBillingResponse[]>(
     shouldFetch
@@ -69,21 +67,18 @@ export const ModalResourceBillingComponent = ({
     fetcher
   )
 
-  // 3. Generar URL para redirección completa
   const fullViewPath = useMemo(() => {
     const params = new URLSearchParams()
-    params.set('startDate', startDate.toISOString())
-    params.set('endDate', endDate.toISOString())
+    setFilterDates(params, startDate, endDate)
 
     if (resourceId) {
-      params.set('selectedKey', 'RESOURCE_ID')
-      params.set('selectedValue', resourceId)
+      params.set(FILTER_PARAMS.tagKey, 'RESOURCE_ID')
+      params.set(FILTER_PARAMS.tagValue, resourceId)
       params.set('services', 'all_services')
     }
     return `/dashboard/aws/top-dolares-recurso?${params.toString()}`
   }, [startDate, endDate, resourceId])
 
-  // --- Render Content ---
   const renderContent = () => {
     if (isLoading) {
       return (
@@ -113,10 +108,8 @@ export const ModalResourceBillingComponent = ({
 
     return (
       <div className="space-y-8 px-1">
-        {/* Componente de KPIs (Cards) */}
         <ResourceBillingStats data={data} />
 
-        {/* Componente de Gráfico ECharts */}
         <ResourceBillingChart data={data} />
 
         <div className="text-xs text-muted-foreground text-right italic">

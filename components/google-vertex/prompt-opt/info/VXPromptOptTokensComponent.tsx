@@ -25,8 +25,6 @@ const TOKEN_PALETTE = [
     'bg-teal-200/70 dark:bg-teal-500/30'
 ];
 
-// Un prompt grande puede superar los 100k tokens y pintar un span por token congela el navegador,
-// así que se renderiza por tramos y el usuario decide cuánto más mostrar.
 const TOKENS_PER_PAGE = 3000;
 
 const CHARS_PER_PAGE = 4000;

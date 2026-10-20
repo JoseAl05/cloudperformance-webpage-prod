@@ -81,7 +81,6 @@ export const S3BucketFilter = ({
       ? []
       : selectedBuckets.split(',').filter(Boolean);
 
-  // --- Render States ---
   if (isLoading) {
     return (
       <Button variant="outline" disabled className="w-[250px] justify-between">
@@ -118,7 +117,6 @@ export const S3BucketFilter = ({
           <CommandInput placeholder="Buscar bucket..." />
           <CommandEmpty>No se encontró el bucket.</CommandEmpty>
           <CommandGroup className="max-h-[200px] overflow-y-auto">
-            {/* Opción: Todos */}
             <CommandItem value="all" onSelect={() => handleBucketToggle('all')}>
               <Check
                 className={`mr-2 h-4 w-4 ${
@@ -128,7 +126,6 @@ export const S3BucketFilter = ({
               Todos los Buckets
             </CommandItem>
 
-            {/* Buckets individuales */}
             {bucketsList.map((bucket) => {
               const checked = selectedArray.includes(bucket);
               return (

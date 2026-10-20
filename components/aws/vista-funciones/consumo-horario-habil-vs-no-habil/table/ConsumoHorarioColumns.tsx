@@ -20,6 +20,7 @@ import { usePathname, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { ConsumoHorarioInfoView, ConsumoHorarioMetricsView } from '@/components/aws/vista-funciones/consumo-horario-habil-vs-no-habil/info/ConsumoHorarioInsightModalComponent';
 import { HistoryModal, HistoryModalTab } from '@/components/general_aws/modal/HistoryModal';
+import { readFilterParam } from '@/lib/filters';
 
 export const getMetricFormat = (metricName: string): 'percent' | 'bytes' | 'number' => {
     const lower = metricName.toLowerCase();
@@ -42,8 +43,6 @@ const findMetric = (metrics: WorkingNonWorkingHoursUsageSummaryByResourceMetrics
     );
 };
 
-// Esta función se mantiene para el uso en GeneralTrendCell, 
-// pero ya no se usa para determinar la visualización individual en DualMetricCell.
 const getMetricTrend = (row: WorkingNonWorkingHoursUsageSummaryByResource, metricName: string) => {
     const summary = row.metric_activity_summary.find(s => s.metric_name === metricName);
     if (!summary) return 'balanced';
@@ -68,22 +67,18 @@ const DualMetricCell = ({ row, metricName, maxVal, format }: DualMetricCellProps
     const pctWorking = base > 0 ? (workingVal / base) * 100 : 0;
     const pctNonWorking = base > 0 ? (nonWorkingVal / base) * 100 : 0;
 
-    // Función de formateo
     const formatValue = (val: number) => {
         if (format === 'cpuutilization') return `${val.toFixed(1)}%`;
         if (format === 'networkin' || format === 'networkout') return formatBytes(val);
         return formatGeneric(val);
     };
 
-    // 1. Obtenemos los valores visuales exactos
     const displayedWorkingValue = formatValue(workingVal);
     const displayedNonWorkingValue = formatValue(nonWorkingVal);
 
-    // 2. Calculamos la tendencia basándonos en lo que ve el usuario (post-redondeo)
     let visualTrend: 'business_hours' | 'non_business_hours' | 'balanced' = 'balanced';
 
     if (displayedWorkingValue !== displayedNonWorkingValue) {
-        // Solo si visualmente son distintos, miramos los datos crudos para ver quién gana
         if (workingVal > nonWorkingVal) {
             visualTrend = 'business_hours';
         } else if (nonWorkingVal > workingVal) {
@@ -124,7 +119,6 @@ const DualMetricCell = ({ row, metricName, maxVal, format }: DualMetricCellProps
                         </>
                     )
                 }
-                {/* Opcional: Espacio vacío o indicador de balanceado si son iguales */}
             </div>
 
             <div className={`flex flex-col gap-0.5 ${visualTrend === 'business_hours' ? 'opacity-100' : 'opacity-80'}`}>
@@ -192,9 +186,9 @@ const DetailsCell = ({ row, resourceType }: { row: WorkingNonWorkingHoursUsageSu
 const GetParameters = () => {
     const searchParams = useSearchParams();
     const pathname = usePathname();
-    const startDateParam = searchParams.get('startDate');
-    const endDateParam = searchParams.get('endDate');
-    const regionParam = searchParams.get('region');
+    const startDateParam = readFilterParam(searchParams, 'dateFrom');
+    const endDateParam = readFilterParam(searchParams, 'dateTo');
+    const regionParam = readFilterParam(searchParams, 'regions');
 
     return {
         startDateParam,
@@ -236,7 +230,7 @@ export const getConsumoHorarioColumns = (
                 const { startDateParam, endDateParam, regionParam, pathname } = GetParameters();
 
                 const isCloudSql = pathname.includes('cloud-sql');
-                const redirectBaseUrl = isCloudSql ? '/aws/recursos' : '/aws/recursos';
+                const redirectBaseUrl = isCloudSql ? '/cloud-aws/recursos' : '/cloud-aws/recursos';
                 const resourcePath = info.getValue();
 
                 let redirectUrl = '';

@@ -1,11 +1,3 @@
-/**
- * Contrato canónico de la familia "Consumo / Eficiencia" (espejo de `utils/consumption_schemas.py`,
- * idéntico en cloudperformance-api-aws, -azure y -gcp).
- *
- * Rutas: /api/{cloud}/consumption/{recurso}/{metrics|info|efficiency}
- * Fechas: siempre ISO 8601 UTC ("2026-09-22T07:00:03.184Z").
- */
-
 export type ConsumptionCloud = 'aws' | 'azure' | 'gcp';
 
 export interface MetricPoint {
@@ -56,7 +48,6 @@ export interface ConsumptionResource {
     resource_name: string;
     resource_type: string | null;
     region: string | null;
-    /** Cuenta (AWS) / suscripción (Azure) / proyecto (GCP) */
     scope: string | null;
     status: string | null;
     tags: Record<string, string>;
@@ -68,8 +59,7 @@ export interface ConsumptionResource {
     storage_inefficient: boolean | null;
     sync_time: string | null;
     metrics: Record<string, number | null>;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    details: Record<string, any>;
+    details: Record<string, unknown>;
     history: ResourceSnapshot[];
     series: Record<string, SeriesValue[]>;
 }
@@ -86,8 +76,7 @@ export interface ConsumptionSummary {
     potential_savings: number | null;
     sync_time: string | null;
     breakdowns: Record<string, Record<string, number>>;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    extra: Record<string, any>;
+    extra: Record<string, unknown>;
 }
 
 export interface ConsumptionInfoResponse {

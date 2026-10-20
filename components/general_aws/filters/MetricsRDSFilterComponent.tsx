@@ -18,12 +18,9 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { LoaderComponent } from '@/components/general_aws/LoaderComponent'
 
 interface MetricsRDSFilterComponentProps {
-  /** CSV URL-encoded con los grupos seleccionados. Ej: "CPU%20Utilization,Network%20In" */
   selectedMetrics: string
   setSelectedMetrics: Dispatch<SetStateAction<string>>
-  /** Motor RDS para construir el endpoint */
   rdsService: 'postgresql' | 'oracle' | 'mysql' | 'sqlserver' | 'mariadb'
-  /** Activa selección múltiple (default: true). En single-select se elige un solo grupo. */
   isMetricsMultiSelect?: boolean
 }
 
@@ -58,7 +55,6 @@ export const MetricsRDSFilterComponent = ({
   const groups = useMemo<string[]>(() => apiResponse?.grupos_disponibles ?? [], [apiResponse])
   const noneAvailable = !isLoading && !error && groups.length === 0
 
-  // Helpers CSV URL-encoded (idéntico a MetricsFilterComponent)
   const decodeCsv = (csv: string) =>
     csv
       .split(',')
@@ -96,7 +92,6 @@ export const MetricsRDSFilterComponent = ({
     if (val === 'all_metrics') {
       curr = ['all_metrics']
     } else {
-      // Si se elige una específica, se quita "all_metrics"
       curr = curr.filter((v) => v !== 'all_metrics')
       if (curr.includes(val)) curr = curr.filter((v) => v !== val)
       else curr.push(val)
@@ -117,7 +112,6 @@ export const MetricsRDSFilterComponent = ({
   }
 
   return !isMetricsMultiSelect ? (
-    // SINGLE SELECT
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button
@@ -151,7 +145,6 @@ export const MetricsRDSFilterComponent = ({
       </PopoverContent>
     </Popover>
   ) : (
-    // MULTI SELECT (con "Todas las Métricas")
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button

@@ -71,13 +71,11 @@ interface MetricPoint {
   MetricLabel: string;
 }
 
-// Función para transformar los datos de métricas al formato esperado por el gráfico
 const transformMetricsForChart = (
   metricsData: RdsMetricsData
 ): MetricPoint[] => {
   if (!metricsData?.metrics_data) return [];
 
-  // Los datos ya vienen en el formato correcto desde la API
   return metricsData.metrics_data as MetricPoint[];
 };
 
@@ -130,7 +128,6 @@ export const InstanciasRdsSQLServerChartComponent = ({
     isLoading: metricsLoading,
   } = useSWR<RdsMetricsData>(metricsUrl, fetcher);
 
-  // -------- Eventos de la instancia --------
   const shouldFetchEvents = !!(
     startDate &&
     endDate &&
@@ -147,7 +144,6 @@ export const InstanciasRdsSQLServerChartComponent = ({
     isLoading: eventsLoading,
   } = useSWR(eventsUrl, fetcher);
 
-  // ---------- eCharts para "Estado de Instancias" (vista general) ----------
   const processChartData = (rawData: RdsInstanceData[] = []) => {
     const statusCounts = rawData.reduce((acc, item) => {
       acc[item.DBInstanceStatus] = (acc[item.DBInstanceStatus] || 0) + 1;
@@ -197,7 +193,6 @@ export const InstanciasRdsSQLServerChartComponent = ({
     };
   }, [infoList]);
 
-  // -------- Loaders / errores --------
   if (infoLoading) {
     return (
       <div className="flex justify-center items-center p-12">
@@ -217,7 +212,6 @@ export const InstanciasRdsSQLServerChartComponent = ({
     );
   }
 
-  // Sin selección de instancia -> mensaje
   if (!instance || instance === "all_instances") {
     return (
       <div className="max-w-7xl mx-auto px-6 py-8">
@@ -228,7 +222,6 @@ export const InstanciasRdsSQLServerChartComponent = ({
     );
   }
 
-  // Datos de la instancia concreta
   const instanceData =
     infoList?.filter((item) => item.DBInstanceIdentifier === instance) || [];
 
@@ -242,7 +235,6 @@ export const InstanciasRdsSQLServerChartComponent = ({
     );
   }
 
-  // Carga/errores de métricas del summary
   if (metricsLoading) {
     return (
       <div className="flex justify-center items-center p-12">
@@ -265,12 +257,10 @@ export const InstanciasRdsSQLServerChartComponent = ({
   return (
     <div className="w-full min-w-0 px-4 py-6">
       <div className="flex flex-col xl:flex-row gap-8 min-w-0">
-        {/* Panel izquierdo - Información de la instancia */}
         <div className="w-full xl:max-w-sm min-w-0">
           <RdsSQLServerResourceViewInfoComponent data={instanceData} />
         </div>
 
-        {/* Panel derecho - Resumen de métricas */}
         <div className="flex-1 space-y-6 min-w-0 overflow-hidden">
           <MainRdsResourceViewMetricsSummaryComponentComponent
             data={metricsData ?? null}
@@ -279,7 +269,6 @@ export const InstanciasRdsSQLServerChartComponent = ({
         </div>
       </div>
 
-      {/* Sección placeholder para futuras métricas */}
       <div className="flex flex-col gap-5 mt-10">
         <div className="flex items-center gap-3 my-5">
           <ChartBar className="h-8 w-8 text-blue-500" />
@@ -311,7 +300,6 @@ export const InstanciasRdsSQLServerChartComponent = ({
               </CardContent>
             </Card>
 
-            {/* Gráfico 2: CPU Usage */}
             <Card className="w-full">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -328,7 +316,6 @@ export const InstanciasRdsSQLServerChartComponent = ({
               </CardContent>
             </Card>
 
-            {/* Gráfico 3: Database Connections */}
             <Card className="w-full">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -344,7 +331,6 @@ export const InstanciasRdsSQLServerChartComponent = ({
                 />
               </CardContent>
             </Card>
-            {/* Gráfico 4: Memory */}
             <Card className="w-full">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -360,7 +346,6 @@ export const InstanciasRdsSQLServerChartComponent = ({
                 />
               </CardContent>
             </Card>
-            {/* Gráfico 5: IOPS */}
             <Card className="w-full">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -376,7 +361,6 @@ export const InstanciasRdsSQLServerChartComponent = ({
                 />
               </CardContent>
             </Card>
-            {/* Gráfico 6: Storage */}
             <Card className="w-full">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -392,7 +376,6 @@ export const InstanciasRdsSQLServerChartComponent = ({
                 />
               </CardContent>
             </Card>
-            {/* Tabla de Eventos RDS SQL Server */}
             <RdsSQLServerEventsTableComponent
               data={eventsData}
               startDate={startDate}

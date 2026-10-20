@@ -20,12 +20,6 @@ export const MainViewComparisonComponent = () => {
                                 </h1>
                             </div>
                         </div>
-                        {/* <p className='max-w-[68ch] text-sm leading-relaxed text-muted-foreground'>
-                            Ningún modelo de OpenAI que usás en Foundry existe en Bedrock. Todo lo que sigue son{' '}
-                            <strong className='font-semibold text-slate-700 dark:text-slate-200'>equivalencias de clase</strong>
-                            {' '}&mdash; el candidato de otro proveedor con la mezcla de precios más parecida a tu consumo real,
-                            no el mismo modelo con otro nombre. Tratalo como una guía de dirección, no como una promesa de ahorro exacta.
-                        </p> */}
                     </div>
                 </div>
             </div>

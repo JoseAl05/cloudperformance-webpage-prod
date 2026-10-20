@@ -11,8 +11,8 @@ interface EmpresaOption {
     userLimit: number;
 }
 
-const fetcher = (url: string) =>
-    fetchJson(url, { credentials: 'include' });
+const fetcher = <T = unknown>(url: string) =>
+    fetchJson<T>(url, { credentials: 'include' });
 
 
 const ASSIGNABLE_ROLES: UserRole[] = ['admin_empresa', 'usuario']; 
@@ -28,7 +28,6 @@ export default function CreateUserForm({ refreshUserList }: CreateUserFormProps)
     const isGlobalAdmin = userLoggedIn?.role === 'admin_global';
     const isCompanyAdmin = userLoggedIn?.role === 'admin_empresa'; 
     
-    // 1. CARGA DE EMPRESAS REGISTRADAS (Solo si es Admin Global)
     const { data: empresas, isLoading: loadingEmpresas } = useSWR<EmpresaOption[]>(
         isGlobalAdmin ? '/api/perfilamiento/empresas' : null, 
         fetcher
@@ -64,23 +63,18 @@ export default function CreateUserForm({ refreshUserList }: CreateUserFormProps)
         setLoading(true);
         setMessage('');
 
-        // Validación: Global Admin debe haber seleccionado una empresa
         if (isGlobalAdmin && !formData.client) {
              setMessage('Error: Por favor, selecciona una empresa de la lista.');
              setLoading(false);
              return;
         }
         
-        // Validación básica
         if (!formData.email || !formData.password || !formData.username) {
              setMessage('Error: Por favor, complete todos los campos requeridos.');
              setLoading(false);
              return;
         }
         
-        // LÓGICA DE RESTRICCIÓN ADICIONAL:
-        // Si es Admin de Empresa, forzar el rol a 'usuario' en el envío,
-        // incluso si el frontend permite (o por si alguien manipula el select).
         const roleToSubmit: UserRole = isCompanyAdmin ? 'usuario' : formData.role;
 
 
@@ -104,7 +98,7 @@ export default function CreateUserForm({ refreshUserList }: CreateUserFormProps)
                     email: '', 
                     password: '', 
                     username: '',
-                    client: isGlobalAdmin ? formData.client : clientName // Mantener selección si es Global
+                    client: isGlobalAdmin ? formData.client : clientName
                 }));
                 refreshUserList(); 
                 refreshSession(); 
@@ -123,14 +117,11 @@ export default function CreateUserForm({ refreshUserList }: CreateUserFormProps)
         return null;
     }
 
-    // LÓGICA CLAVE: Filtrar los roles
     let rolesForSelect: UserRole[] = [];
 
     if (isGlobalAdmin) {
-        // Admin Global puede asignar todos los roles, incluyendo admin_global
         rolesForSelect = [...ASSIGNABLE_ROLES, 'admin_global'];
     } else if (isCompanyAdmin) {
-        // Admin de Empresa solo puede crear 'usuario'
         rolesForSelect = ['usuario'];
     }
 
@@ -189,9 +180,8 @@ export default function CreateUserForm({ refreshUserList }: CreateUserFormProps)
                             onChange={handleChange}
                             required
                             className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                            disabled={isCompanyAdmin} // Deshabilitar si es Admin de Empresa (el rol siempre será 'usuario')
+                            disabled={isCompanyAdmin}
                         >
-                            {/* Si es Admin de Empresa, solo se muestra 'USUARIO' */}
                             {rolesForSelect.map(r => (
                                 <option key={r} value={r}>{r.toUpperCase().replace('_', ' ')}</option>
                             ))}
@@ -216,7 +206,7 @@ export default function CreateUserForm({ refreshUserList }: CreateUserFormProps)
                                 value={formData.password} 
                                 onChange={handleChange} 
                                 required 
-                                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm pr-10" // Añadimos padding a la derecha
+                                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm pr-10"
                             />
                             <button 
                                 type="button" 
@@ -234,17 +224,6 @@ export default function CreateUserForm({ refreshUserList }: CreateUserFormProps)
                         <input type="text" name="username" id="username" value={formData.username} onChange={handleChange} required className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm" />
                     </div>
                     
-                    {/* CAMPO 6: PERMISOS (Checkboxes) */}
-                    {/* <div className="flex items-center space-x-4 pt-6">
-                        <div className="flex items-center space-x-2">
-                            <input type="checkbox" name="is_aws" id="is_aws" checked={formData.is_aws} onChange={handleChange} className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
-                            <label htmlFor="is_aws" className="text-sm font-medium">Acceso AWS</label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                            <input type="checkbox" name="is_azure" id="is_azure" checked={formData.is_azure} onChange={handleChange} className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
-                            <label htmlFor="is_azure" className="text-sm font-medium">Acceso Azure</label>
-                        </div>
-                    </div> */}
                 </div>
 
                 <div className="pt-4 border-t"> 

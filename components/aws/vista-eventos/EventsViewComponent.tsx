@@ -101,12 +101,9 @@ export const EventsViewComponent = ({ startDate, endDate, eventType, region }: E
                 <EventsViewEventCountComponent
                     data={eventsData}
                 />
-                {/* <Ec2ResourceConsumeViewUsageCreditsComponent data={creditsMetricsData} />
-                <Ec2ResourceConsumeViewUsageCpuComponent data={cpuMetricsData} /> */}
             </div>
             <div className="flex flex-col gap-5 mt-10">
                 <div className="flex items-center gap-3 my-5">
-                    {/* <Clock className="h-8 w-8 text-blue-500" /> */}
                     <h1 className="text-3xl font-bold text-foreground">Detalle Instancias</h1>
                 </div>
                 <EventsViewTableComponent
@@ -115,13 +112,6 @@ export const EventsViewComponent = ({ startDate, endDate, eventType, region }: E
                     endDate={endDateFormatted}
                     eventType={eventType}
                 />
-                {/* <Ec2ConsumeViewInstanceTable
-                    data={infoData}
-                    startDate={startDate}
-                    endDate={endDate}
-                    instance={instance}
-                    enableGrouping
-                /> */}
             </div>
         </div>
     )

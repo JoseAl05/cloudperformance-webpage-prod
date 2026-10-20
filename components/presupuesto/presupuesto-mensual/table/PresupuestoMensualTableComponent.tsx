@@ -79,7 +79,6 @@ export const PresupuestoMensualTableComponent = ({
     { revalidateOnFocus: true, revalidateOnReconnect: true, revalidateIfStale: true }
   );
 
-  // Fetch centros de costo
   const { data: centrosCosto } = useSWR<CentroCosto[]>(
     cloud ? `/api/presupuesto/bridge/${cloud}/centro-costo` : null,
     fetcher
@@ -92,7 +91,6 @@ export const PresupuestoMensualTableComponent = ({
   const [itemsPerPage, setItemsPerPage] = useState(10);
 
 
-  // Transformar datos anuales a lista plana con nombre del centro
   const presupuestos: PresupuestoAnualMensual[] = useMemo(() => {
     if (!Array.isArray(data)) return [];
     return data.flatMap((anual) =>
@@ -169,7 +167,6 @@ export const PresupuestoMensualTableComponent = ({
           return sortOrder === "asc" ? aVal - bVal : bVal - aVal;
         }
         
-        // Para strings numéricos (montos)
         if (["monto_mensual_asociado", "monto_real_mes", "monto_forecast_mes"].includes(sortField)) {
           const aNum = parseFloat(String(aVal));
           const bNum = parseFloat(String(bVal));
@@ -280,7 +277,6 @@ export const PresupuestoMensualTableComponent = ({
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700 overflow-hidden">
-      {/* Search Bar */}
       <div className="px-6 py-4 bg-gray-50 dark:bg-gray-900/50 border-b border-gray-200 dark:border-gray-700">
         <div className="flex items-center gap-4">
           <div className="relative flex-1">
@@ -317,7 +313,6 @@ export const PresupuestoMensualTableComponent = ({
         )}
       </div>
 
-      {/* Table Container */}
       <div className="overflow-x-auto" style={{ minHeight: '500px', maxHeight: '600px' }}>
         <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
           <thead className="bg-gray-50 dark:bg-gray-900/50 sticky top-0 z-10">
@@ -473,7 +468,6 @@ export const PresupuestoMensualTableComponent = ({
         </table>
       </div>
 
-      {/* Footer con Pagination */}
       <div className="bg-gray-50 dark:bg-gray-900/50 px-6 py-4 border-t border-gray-200 dark:border-gray-700">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-sm text-gray-600 dark:text-gray-400">

@@ -20,9 +20,7 @@ interface RdsInstancesConsumeComponentProps {
     instancesService?: string
 }
 
-/** Consumo RDS: adapta los filtros de la vista al contrato canónico (/api/aws/consumption/rds/*). */
 export const RdsInstancesConsumeComponent = ({ startDate, endDate, instance, region, instancesService }: RdsInstancesConsumeComponentProps) => {
-    // El backend valida db_type contra el motor RDS
     const dbType = instancesService ? RDS_DB_TYPES[instancesService] ?? '' : ''
     return (
         <ConsumptionView

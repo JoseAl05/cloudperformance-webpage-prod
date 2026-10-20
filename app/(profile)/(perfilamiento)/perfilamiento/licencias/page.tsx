@@ -10,7 +10,6 @@ export default function ListadoLicenciasPage() {
     
     if (isLoading) return <div className="text-center p-6 text-gray-500">Cargando datos de sesión...</div>;
 
-    // 1. CONTROL DE ACCESO ESTRICTO: Solo Admin Global
     if (!user || user.role !== 'admin_global') {
         return (
             <div className="alert alert-danger p-4 m-4">
@@ -26,7 +25,6 @@ export default function ListadoLicenciasPage() {
                 Vista global de todos los clientes, sus planes y el estado de uso de usuarios.
             </p>
 
-            {/* CORRECCIÓN: Link moderno sin <a> ni props legacyBehavior/passHref */}
             <Link 
                 href="/perfilamiento/licencias/crear" 
                 className="inline-flex items-center justify-center rounded-md text-sm font-medium h-10 px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 transition shadow-sm mb-5"
@@ -34,7 +32,6 @@ export default function ListadoLicenciasPage() {
                 + Crear Nueva Licencia/Empresa
             </Link>
 
-            {/* 2. TABLA DE LICENCIAS */}
             <LicenseTable />
         </div>
     );

@@ -20,8 +20,8 @@ interface NatGatewaysFilterComponentProps {
     isNatGatewayMultiselect: boolean
 }
 
-const fetcherPost = (url: string, tags: { Key: string; Value: string } | null = null) =>
-    fetchJson(url, {
+const fetcherPost = <T = unknown>(url: string, tags: { Key: string; Value: string } | null = null) =>
+    fetchJson<T>(url, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -41,7 +41,7 @@ export const NatGatewaysFilterComponent = ({
 
     const tagsBody = selectedKey !== 'allKeys' && selectedValue ? { Key: selectedKey, Value: selectedValue } : null;
 
-    const { data, error, isLoading } = useSWR<unknown[]>([url, tagsBody], ([u, t]) => fetcherPost(u, t));
+    const { data, error, isLoading } = useSWR<unknown[]>([url, tagsBody], ([u, t]) => fetcherPost<unknown[]>(u, t));
 
     useEffect(() => {
         if (!isLoading && !error) {

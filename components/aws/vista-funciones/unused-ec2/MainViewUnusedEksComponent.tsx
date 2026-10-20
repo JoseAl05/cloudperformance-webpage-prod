@@ -1,7 +1,6 @@
 import { FiltersComponent } from "@/components/general_aws/filters/FiltersComponent";
 import { Server } from "lucide-react";
-import { UnusedEc2Component } from '@/components/aws/vista-funciones/unused-ec2/UnusedEc2Component';
-import { UnusedAutoscalingComponent } from '@/components/aws/vista-funciones/unused-ec2/UnusedAutoscalingComponent';
+import { UnusedEksComponent } from '@/components/aws/vista-funciones/unused-ec2/UnusedEksComponent';
 
 
 export const MainViewUnusedEksComponent = () => {
@@ -25,7 +24,7 @@ export const MainViewUnusedEksComponent = () => {
             </div>
             <div className="w-full min-w-0">
                 <FiltersComponent
-                    Component={UnusedAutoscalingComponent}
+                    Component={UnusedEksComponent}
                     dateFilter
                     regionFilter
                     isRegionMultiSelect

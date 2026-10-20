@@ -18,7 +18,6 @@ interface AzureDbMetricsComponentProps {
 const isSet = (value: string | null | undefined, allValue: string): value is string =>
     !!value && value !== allValue && value !== 'null';
 
-/** Consumo Azure Database: adapta los filtros de la vista al contrato canónico (/api/azure/consumption/db/*). */
 export const AzureDbMetricsComponent = ({
     startDate,
     endDate,

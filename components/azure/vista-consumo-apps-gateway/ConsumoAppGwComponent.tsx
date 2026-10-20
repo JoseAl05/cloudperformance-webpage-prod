@@ -10,7 +10,6 @@ interface ConsumoAppGwComponentProps {
     selectedAppg: string;
 }
 
-/** Consumo Application Gateway: adapta los filtros de la vista al contrato canónico (/api/azure/consumption/app-gateways/*). */
 export const ConsumoAppGwComponent = ({ startDate, endDate, selectedAppg }: ConsumoAppGwComponentProps) => (
     <ConsumptionView
         config={AZURE_APP_GATEWAY}

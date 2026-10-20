@@ -67,9 +67,7 @@ export const AdvisorViewInfoComponent = ({ data, startDate, endDate }: AdvisorVi
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [modalImpactedValue, setModalImpactedValue] = useState<string | null>(null)
 
-    // Agrupar primero por problem, luego por category
     const groupedByCategory = useMemo(() => {
-        // Paso 1: Agrupar por problem
         const problemGroups = new Map<string, AzureAdvisorRecommendation[]>()
 
         for (const rec of safeData) {
@@ -80,7 +78,6 @@ export const AdvisorViewInfoComponent = ({ data, startDate, endDate }: AdvisorVi
             problemGroups.get(key)!.push(rec)
         }
 
-        // Paso 2: Crear recomendaciones agrupadas
         const recommendations: GroupedRecommendation[] = Array.from(problemGroups.entries()).map(([problem, recs]) => ({
             problem,
             impact: recs[0].impact,
@@ -93,7 +90,6 @@ export const AdvisorViewInfoComponent = ({ data, startDate, endDate }: AdvisorVi
             first_impacted_value: recs[0].impacted_value,
         }))
 
-        // Paso 3: Agrupar por categoría
         const categoryMap = new Map<string, GroupedRecommendation[]>()
 
         for (const rec of recommendations) {
@@ -103,7 +99,6 @@ export const AdvisorViewInfoComponent = ({ data, startDate, endDate }: AdvisorVi
             categoryMap.get(rec.category)!.push(rec)
         }
 
-        // Paso 4: Convertir a array y ordenar
         return Array.from(categoryMap.entries())
             .map(([category, recommendations]) => ({
                 category,
@@ -131,7 +126,6 @@ export const AdvisorViewInfoComponent = ({ data, startDate, endDate }: AdvisorVi
             .filter((g) => g.recommendations.length > 0)
     }, [groupedByCategory, query])
 
-    // Auto-select first recommendation
     useEffect(() => {
         if (!filteredGroups.length) {
             setSelectedProblem(null)
@@ -242,10 +236,8 @@ export const AdvisorViewInfoComponent = ({ data, startDate, endDate }: AdvisorVi
         setModalImpactedValue(null)
     }
 
-    // Obtener todos los recursos del grupo seleccionado
     const getSelectedGroupResources = () => {
         if (!selectedRec) return []
-        // Buscar en safeData todos los registros que tengan el mismo problem
         const recursos = safeData.filter(rec => rec.problem === selectedRec.problem)
         return recursos
     }
@@ -294,7 +286,6 @@ export const AdvisorViewInfoComponent = ({ data, startDate, endDate }: AdvisorVi
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 min-h-[60vh]">
-                {/* Panel Izquierdo - Categorías y Recomendaciones */}
                 <aside className="lg:col-span-5 xl:col-span-4 rounded-xl border bg-card">
                     <div className="p-3 border-b flex items-center justify-between">
                         <div className="text-sm text-muted-foreground">Resultados</div>
@@ -361,7 +352,6 @@ export const AdvisorViewInfoComponent = ({ data, startDate, endDate }: AdvisorVi
                     </div>
                 </aside>
 
-                {/* Panel Derecho - Detalle de Recomendación */}
                 <section className="lg:col-span-7 xl:col-span-8 rounded-xl border bg-card">
                     {!selectedRec ? (
                         <div className="h-full min-h-[50vh] grid place-items-center p-8 text-center">
@@ -380,7 +370,6 @@ export const AdvisorViewInfoComponent = ({ data, startDate, endDate }: AdvisorVi
                                 <h2 className="text-xl font-bold leading-tight">{selectedRec.problem}</h2>
                             </div>
                             <div className="p-4 overflow-y-auto space-y-4">
-                                {/* Información Principal */}
                                 <div className="grid sm:grid-cols-2 gap-3">
                                     <div className="rounded-lg border p-3">
                                         <div className="text-xs text-muted-foreground mb-1">Categoría</div>
@@ -400,7 +389,6 @@ export const AdvisorViewInfoComponent = ({ data, startDate, endDate }: AdvisorVi
                                     </div>
                                 </div>
 
-                                {/* Recursos Afectados */}
                                 <div className="rounded-lg border p-4">
                                     <div className="flex items-center justify-between mb-2">
                                         <div className="text-sm font-medium">Recursos Afectados</div>
@@ -414,14 +402,6 @@ export const AdvisorViewInfoComponent = ({ data, startDate, endDate }: AdvisorVi
                                         <ExternalLink className="h-4 w-4" />
                                     </button>
                                 </div>
-                                {/* 
-                                //Información Adicional
-                                <div className="rounded-lg border p-4 bg-muted/30">
-                                    <div className="text-xs text-muted-foreground mb-2">Impacted Value (ID)</div>
-                                    <div className="font-mono text-xs break-all bg-background p-2 rounded">
-                                        {selectedRec.first_impacted_value}
-                                    </div>
-                                </div>*/}
 
                             </div>
                         </div>
@@ -429,7 +409,6 @@ export const AdvisorViewInfoComponent = ({ data, startDate, endDate }: AdvisorVi
                 </section>
             </div>
 
-            {/* Modal de detalle */}
             {isModalOpen && modalImpactedValue && (
                 <DetailModal
                     resources={getSelectedGroupResources()}
@@ -440,7 +419,6 @@ export const AdvisorViewInfoComponent = ({ data, startDate, endDate }: AdvisorVi
     )
 }
 
-// Componente Modal de Detalle
 interface DetailModalProps {
     resources: AzureAdvisorRecommendation[]
     onClose: () => void
@@ -504,7 +482,6 @@ const DetailModal = ({ resources, onClose }: DetailModalProps) => {
                                         <div>
                                             <div className="text-xs text-muted-foreground mb-1">Suscripción</div>
                                             <div className="font-medium text-sm">
-                                                {/* Necesitaríamos agregar subscription al registro, por ahora mostramos placeholder */}
                                                 Azure subscription 1
                                             </div>
                                         </div>

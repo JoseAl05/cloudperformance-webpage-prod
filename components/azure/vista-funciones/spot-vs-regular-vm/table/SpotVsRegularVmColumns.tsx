@@ -3,12 +3,13 @@ import { Badge } from '@/components/ui/badge';
 import { DynamicColumn } from '@/components/data-table/columns';
 import { useSearchParams } from 'next/navigation';
 import { SpotVsRegularVmInstances } from '@/interfaces/vista-spot-vs-regular-vm/spotVsRegularVmInterfaces';
+import { readFilterParam } from '@/lib/filters';
 
 const DateParams = () => {
     const searchParams = useSearchParams();
 
-    const startDateParam = searchParams.get('startDate');
-    const endDateParam = searchParams.get('endDate');
+    const startDateParam = readFilterParam(searchParams, 'dateFrom');
+    const endDateParam = readFilterParam(searchParams, 'dateTo');
 
     return { startDateParam: startDateParam, endDateParam: endDateParam }
 }
@@ -38,15 +39,6 @@ export const SpotVsRegularVmColumns: DynamicColumn<SpotVsRegularVmInstances>[] =
                     <Badge variant="secondary" className="ml-3 font-mono text-sm transition-all hover:scale-[1.02]">
                         {value}
                     </Badge>
-                    {/* <Link
-                        href={{ pathname: '/aws/recursos/instancias-ec2', query: { instance: value, startDate: startDate, endDate: endDate } }}
-                        rel="noopener noreferrer"
-                        target="_blank"
-                    >
-                        <Badge variant="secondary" className="ml-3 font-mono text-sm transition-all hover:scale-[1.02]">
-                            {value}
-                        </Badge>
-                    </Link> */}
                 </div>
             );
         }

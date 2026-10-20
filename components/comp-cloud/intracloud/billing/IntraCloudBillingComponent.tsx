@@ -182,9 +182,6 @@ export const IntraCloudBillingComponent = ({
                     <IntraCloudBillingCardsComponent
                         data={acumulatedBilling.data}
                     />
-                    {/* <IntraCloudBillingCostUsdChartComponent
-                        data={acumulatedBilling.data}
-                    /> */}
                     <IntraCloudBillingCostUsdChartComponent
                         data={monthlyBilling.data}
                     />

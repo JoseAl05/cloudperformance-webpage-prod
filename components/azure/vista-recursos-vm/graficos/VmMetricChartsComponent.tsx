@@ -69,7 +69,6 @@ const VmMetricsChart = ({ data, title, metricUnit }: VmMetricsChartProps) => {
   const safeData = Array.isArray(data) ? data : [];
 
   const { totalData, usedData, unusedData, yMaxRounded } = useMemo(() => {
-    // Agrupar por timestamp y sumar los valores
     const grouped = safeData.reduce((acc, item) => {
       const timestamp = item.timestamp.$date;
       if (!acc[timestamp]) {
@@ -81,7 +80,6 @@ const VmMetricsChart = ({ data, title, metricUnit }: VmMetricsChartProps) => {
       return acc;
     }, {} as Record<string, { total: number; used: number; unused: number }>);
 
-    // Convertir a arrays y ordenar
     const sortedTimestamps = Object.keys(grouped).sort((a, b) =>
       new Date(a).getTime() - new Date(b).getTime()
     );
@@ -310,7 +308,7 @@ const VmMetricComponent = ({ startDate, endDate, vmName, metricName, title, unit
   const startDateFormatted = startDate.toISOString().replace('Z', '').slice(0, -4);
   const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : '';
 
-  const { data, error, isLoading } = useSWR(
+  const { data, error, isLoading } = useSWR<VmMetricsData[]>(
     `/api/azure/bridge/azure/recursos/vm/consumo-metricas?date_from=${startDateFormatted}&date_to=${endDateFormatted}&vm_id=${vmName}&metric_name=${metricName}`,
     fetcher,
     { revalidateOnFocus: false }
@@ -319,7 +317,7 @@ const VmMetricComponent = ({ startDate, endDate, vmName, metricName, title, unit
   if (isLoading) return <LoaderComponent />;
   if (error) return <div className="text-red-500 p-4">Error al cargar métricas</div>;
 
-  return <VmMetricsChart data={data} title={title} metricUnit={unit} />;
+  return <VmMetricsChart data={data ?? null} title={title} metricUnit={unit} />;
 };
 
 export const VmCpuUsageComponent = ({ startDate, endDate, vmName }: { startDate: Date; endDate: Date; vmName: string }) => (

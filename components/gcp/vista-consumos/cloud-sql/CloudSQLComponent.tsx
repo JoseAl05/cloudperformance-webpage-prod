@@ -14,7 +14,6 @@ interface CloudSQLComponentProps {
     tagValue?: string | null;
 }
 
-/** Consumo Cloud SQL: adapta los filtros de la vista al contrato canónico (/api/gcp/consumption/cloud-sql/*). */
 export const CloudSQLComponent = ({ startDate, endDate, projects, regions, databaseType, tagKey, tagValue }: CloudSQLComponentProps) => {
     const hasTag = !!tagKey && tagKey !== 'allKeys';
     return (

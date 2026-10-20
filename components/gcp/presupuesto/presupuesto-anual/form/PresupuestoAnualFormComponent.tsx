@@ -113,7 +113,7 @@ export const PresupuestoAnualFormComponent: React.FC<PresupuestoAnualFormProps> 
   };
 
   const agregarMes = () => {
-    if (!selectedMonth || selectedMonth === "") return;
+    if (!selectedMonth) return;
     
     const anio = typeof formData.anio === 'string' ? parseInt(formData.anio) : formData.anio;
     const nuevoMes: PresupuestoMensualPostPut = {
@@ -174,7 +174,6 @@ export const PresupuestoAnualFormComponent: React.FC<PresupuestoAnualFormProps> 
       <form onSubmit={handleSubmit}>
         <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Centro de Costo */}
             <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">
                 Centro de Costo <span className="text-red-500">*</span>
@@ -206,7 +205,6 @@ export const PresupuestoAnualFormComponent: React.FC<PresupuestoAnualFormProps> 
               </div>
             </div>
 
-            {/* Año */}
             <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">
                 Año <span className="text-red-500">*</span>

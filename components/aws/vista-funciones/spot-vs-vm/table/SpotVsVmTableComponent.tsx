@@ -35,7 +35,6 @@ export const TableComponentSpotVsVm = ({
     fetcher
   )
 
-  // 🔎 Flatten: cada fila será una instancia con su fecha asociada
   const flattenedData =
     data?.flatMap((item) =>
       item.instancias.map((instancia) => ({

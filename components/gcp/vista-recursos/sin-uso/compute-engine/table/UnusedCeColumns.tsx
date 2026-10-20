@@ -1,6 +1,6 @@
 'use client'
 
-import { DynamicColumn } from '@/components/general/data-table/columns';
+import { DynamicColumn } from '@/components/data-table/columns';
 import { Button } from '@/components/ui/button';
 import { Eye, Server } from 'lucide-react';
 import { useState } from 'react';
@@ -10,8 +10,8 @@ import { UnusedCeTableData, UnusedCeTableDataMetric } from '@/interfaces/vista-u
 import { UnusedCeAnalysisView, UnusedCeBillingView, UnusedCeHistoryView, UnusedCeResourcesView } from '@/components/gcp/vista-recursos/sin-uso/compute-engine/info/UnusedCeInsightModal';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import { readFilterParam } from '@/lib/filters';
 
-// Interfaz extendida para incluir los campos de ordenamiento calculados
 export interface FlattenedCeRow extends UnusedCeTableData {
     sort_cpu: number;
     sort_net_inout_pps: number;
@@ -21,7 +21,6 @@ export interface FlattenedCeRow extends UnusedCeTableData {
     sort_billing: number;
 }
 
-// Función auxiliar para combinar métricas (ej. Ingress + Egress) en un objeto visual
 const combineMetrics = (metrics: UnusedCeTableDataMetric[] | undefined, keys: string[], nameLabel: string): UnusedCeTableDataMetric | undefined => {
     if (!metrics) return undefined;
 
@@ -88,11 +87,6 @@ const DetailsCell = ({ row }: { row: UnusedCeTableData }) => {
             label: "Diagnóstico",
             content: <UnusedCeAnalysisView data={row} />
         },
-        // {
-        //     value: "billing",
-        //     label: "Facturación",
-        //     content: <UnusedCeBillingView data={row} />
-        // },
         {
             value: "resources",
             label: "Recursos",
@@ -127,10 +121,10 @@ const DetailsCell = ({ row }: { row: UnusedCeTableData }) => {
 
 const GetParameters = () => {
     const searchParams = useSearchParams();
-    const startDateParam = searchParams.get('startDate');
-    const endDateParam = searchParams.get('endDate');
-    const projectParam = searchParams.get('projects');
-    const regionParam = searchParams.get('regions');
+    const startDateParam = readFilterParam(searchParams, 'dateFrom');
+    const endDateParam = readFilterParam(searchParams, 'dateTo');
+    const projectParam = readFilterParam(searchParams, 'scopes');
+    const regionParam = readFilterParam(searchParams, 'regions');
 
     return {
         startDateParam,
@@ -153,7 +147,7 @@ export const getUnusedCeColumns = (totalGlobalCost: number): DynamicColumn<Flatt
                     </div>
                     <div className="flex flex-col overflow-hidden">
                         <Link
-                            href={{ pathname: '/gcp/recursos/compute-engine', query: { startDate: startDateParam, endDate: endDateParam, resourceId: row.original.instance_id, projects: projectParam, regions: regionParam } }}
+                            href={{ pathname: '/cloud-gcp/recursos/compute-engine', query: { startDate: startDateParam, endDate: endDateParam, resourceId: row.original.instance_id, projects: projectParam, regions: regionParam } }}
                             rel="noopener noreferrer"
                             target="_blank"
                         >

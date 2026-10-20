@@ -9,22 +9,6 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import useSWR from 'swr'
 import { LoaderComponent } from '@/components/general_aws/LoaderComponent'
 
-// interface VariationMetricFilterComponentProps {
-//     asg: string,
-//     asgInstance: string,
-//     setAsg: Dispatch<SetStateAction<string>>,
-//     setAsgInstance: Dispatch<SetStateAction<string>>,
-//     startDate: Date,
-//     endDate: Date,
-//     region: string,
-//     selectedKey: string,
-//     selectedValue: string,
-//     isAsgMultiSelect: boolean,
-//     isAsgInstanceMultiselect: boolean,
-//     isInstancesService?: string,
-//     isViewResource?: boolean
-// }
-
 interface VariationMetricFilterComponentProps {
     startDate: Date,
     endDate: Date,
@@ -81,7 +65,6 @@ export const VariationMetricFilterComponent = ({
     const { data, error, isLoading } = useSWR(shouldFetch ? [url] : null, ([u]) => fetcherGet(u));
 
     useEffect(() => {
-        // Solo actuar cuando terminó la carga y no hubo error
         if (!isLoading && !error && Array.isArray(data) && data.length === 0) {
             setSelectedMetric('');
         }
@@ -207,23 +190,6 @@ export const VariationMetricFilterComponent = ({
                 </PopoverContent>
             </Popover>
 
-            {/* Instancias de ASG (solo si hay ASG disponible y seleccionado) */}
-            {/* {
-                isViewResource ? (
-                    <></>
-                ) : (
-                    <AsgInstancesFilterComponent
-                        asg={asg}
-                        asgInstance={asgInstance}
-                        setAsgInstance={setAsgInstance}
-                        startDate={startDateFormatted}
-                        endDate={endDateFormatted}
-                        region={region}
-                        isInstanceMultiSelect={isAsgInstanceMultiselect}
-                        isInstancesService={isInstancesService}
-                    />
-                )
-            } */}
         </div>
     )
 };

@@ -39,10 +39,8 @@ export async function send2FACodeEmail(to: string, code: string) {
   return res.messageId;
 }
 
-// NUEVA FUNCIÓN PARA RECUPERACIÓN DE CONTRASEÑA 
 export async function sendRecoveryEmail(to: string, token: string): Promise<SentMessageInfo> {
     const appName = process.env.APP_NAME || 'Cloudperformance';
-    // APP_URL es la variable preferida; NEXT_PUBLIC_APP_URL se mantiene como respaldo.
     const appUrl = (process.env.APP_URL || process.env.NEXT_PUBLIC_APP_URL || '').replace(/\/+$/, '');
     const resetLink = `${appUrl}/reset-password?token=${token}`;
 

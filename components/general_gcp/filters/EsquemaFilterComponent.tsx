@@ -1,6 +1,5 @@
 import React from 'react';
 
-// Exportación nombrada (con 'export const') para que coincida con tus llaves en el maestro
 export const EsquemaFilterComponent = ({ 
     value, 
     onChange 
@@ -9,7 +8,6 @@ export const EsquemaFilterComponent = ({
     onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void 
 }) => {
     
-  // Solo devuelve el select puro. El label y el estado lo maneja FiltersComponent.tsx
   return (
     <select
       id="esquema-filter"

@@ -4,8 +4,6 @@ import { getCollection } from '@/lib/mongodb';
 import { ObjectId } from 'mongodb';
 import crypto from 'crypto';
 
-// ─── Tipos ────────────────────────────────────────────────────────────────────
-
 interface ComputeUnitInput {
   cloud: 'aws' | 'azure' | 'gcp';
   db: string;
@@ -27,18 +25,15 @@ interface GenerarLicenciaBody {
   solicitudes_ids?: string[];
 }
 
-// Resultado de un .lic generado
 interface LicGenerado {
   tipo: 'subscription' | 'perpetual';
-  nombre: string;       // nombre descriptivo para el archivo
-  cliente: string;      // a quién pertenece
+  nombre: string;
+  cliente: string;
   rut_cliente: string;
   lic_content: string;
   lic_hash: string;
   compute_units: object[];
 }
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function calcularUcFp(
   rutPartner: string,
@@ -93,12 +88,9 @@ function generarLicContent(payload: object, privateKey: string): { licContent: s
   return { licContent, licHash, sig };
 }
 
-// ─── Handler ──────────────────────────────────────────────────────────────────
-
 export async function POST(req: Request) {
   try {
 
-    // ── 1. Validar sesión y rol ───────────────────────────────────────────────
     const session = await getAuthFromRequest(req as never);
     if (!session) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
@@ -108,7 +100,6 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Acceso denegado' }, { status: 403 });
     }
 
-    // ── 2. Leer y validar body ────────────────────────────────────────────────
     const body: GenerarLicenciaBody = await req.json();
     const { partner, rut, solicitante, fingerprint, compute_units, solicitudes_ids } = body;
 
@@ -147,7 +138,6 @@ export async function POST(req: Request) {
       }
     }
 
-    // ── 3. Obtener clave privada ──────────────────────────────────────────────
     const privateKey = obtenerClavePrivada();
     if (!privateKey) {
       return NextResponse.json(
@@ -160,11 +150,9 @@ export async function POST(req: Request) {
     const licsGenerados: LicGenerado[] = [];
     const col = await getCollection('op_licencias');
 
-    // ── 4. Separar UCs por tipo ───────────────────────────────────────────────
     const ucsSubscription = compute_units.filter(uc => uc.type === 'subscription');
     const ucsPerpetual    = compute_units.filter(uc => uc.type === 'perpetual');
 
-    // Agrupar perpetuos por cliente (rut)
     const perpetuosPorCliente = new Map<string, ComputeUnitInput[]>();
     for (const uc of ucsPerpetual) {
       const key = uc.rut;
@@ -172,7 +160,6 @@ export async function POST(req: Request) {
       perpetuosPorCliente.get(key)!.push(uc);
     }
 
-    // ── 5. Generar .lic de suscripciones (si hay) ─────────────────────────────
     if (ucsSubscription.length > 0) {
       const ucConFp = ucsSubscription.map(uc => ({
         cloud:   uc.cloud,
@@ -205,12 +192,10 @@ export async function POST(req: Request) {
         createdAt: new Date(),
       });
       
-      //variables necesarias para construir nombre del archivo suscripción
       const fecha = generado_at.slice(0,10).replace(/-/g,'');
       const rutSlug = rut.replace(/[^0-9kK]/g,'');
       licsGenerados.push({
         tipo:        'subscription',
-        // suscripción
         nombre: `solicitud-s-${fecha}-${rutSlug}.lic`,
         cliente:     partner,
         rut_cliente: rut,
@@ -220,11 +205,9 @@ export async function POST(req: Request) {
       });
     }
 
-    // ── 6. Generar .lic por cada cliente perpetuo ─────────────────────────────
     for (const [rutCliente, ucs] of perpetuosPorCliente) {
       const primerUC     = ucs[0];
       const nombreCliente = primerUC.cliente;
-      // El fingerprint del perpetuo viene de la UC
       const fpCliente    = primerUC.fingerprint_cliente!;
 
       const ucConFp = ucs.map(uc => ({
@@ -240,10 +223,10 @@ export async function POST(req: Request) {
       }));
 
       const payload = {
-        partner:     nombreCliente,  // el cliente perpetuo es el "partner" de su propio .lic
+        partner:     nombreCliente,
         rut:         rutCliente,
         solicitante,
-        fingerprint: fpCliente,      // fingerprint del servidor del cliente
+        fingerprint: fpCliente,
         generated:   generado_at,
         version:     '2.0',
         compute_units: ucConFp,
@@ -264,12 +247,10 @@ export async function POST(req: Request) {
         lic_hash:     licHash,
         createdAt:    new Date(),
       });
-      //variables necesarias para construir nombre del archivo perpetuo
       const fecha = generado_at.slice(0,10).replace(/-/g,'');
       const rutClienteSlug = rutCliente.replace(/[^0-9kK]/g,'');      
       licsGenerados.push({
         tipo:        'perpetual',
-        // perpetuo
         nombre: `solicitud-p-${fecha}-${rutClienteSlug}.lic`,
         cliente:     nombreCliente,
         rut_cliente: rutCliente,
@@ -279,7 +260,6 @@ export async function POST(req: Request) {
       });
     }
 
-    // ── 7. Marcar solicitudes como procesadas ─────────────────────────────────
     if (solicitudes_ids && solicitudes_ids.length > 0) {
       const colSol = await getCollection('op_solicitudes');
       await colSol.updateMany(
@@ -295,10 +275,9 @@ export async function POST(req: Request) {
       );
     }
 
-    // ── 8. Responder ──────────────────────────────────────────────────────────
     return NextResponse.json({
       ok:             true,
-      lics:           licsGenerados,      // array de .lic generados
+      lics:           licsGenerados,
       total:          licsGenerados.length,
       partner,
       generado_at,

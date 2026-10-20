@@ -13,19 +13,15 @@ interface UserData {
     client: string;
     role: UserRole;
 
-    // AWS
     is_aws: boolean;
     user_db_aws?: string;
 
-    // Azure
     is_azure: boolean;
     user_db_azure?: string;
 
-    // GCP
     is_gcp: boolean;
     user_db_gcp?: string;
 
-    // Open IA
     is_openai: boolean;
     user_db_openai?: string;
 
@@ -81,7 +77,7 @@ export default function UserTable() {
     );
 
     const canPerformAction = useCallback((targetUser: UserData): { canEdit: boolean, canDelete: boolean } => {
-        const userIdLoggedIn = userLoggedIn?._id;
+        const userIdLoggedIn = userLoggedIn?._id ? String(userLoggedIn._id) : undefined;
         const targetRole = targetUser.role;
         const userRole = userLoggedIn?.role;
         const isGlobalAdmin = userRole === 'admin_global';
@@ -94,10 +90,9 @@ export default function UserTable() {
         };
     }, [userLoggedIn]);
 
-    // Bloquear/Habilitar
     const toggleStatus = useCallback(async (user: UserData) => {
 
-        if (user._id === userLoggedIn?._id) {
+        if (userLoggedIn?._id && user._id === String(userLoggedIn._id)) {
             alert('No puedes bloquear tu propia cuenta.');
             return;
         }
@@ -139,7 +134,6 @@ export default function UserTable() {
         }
     }, [userLoggedIn, refreshUsers]);
 
-    // Iniciar eliminación
     const initDelete = useCallback((user: UserData) => {
         setStatusMessage(null);
         setUserToDelete(user);

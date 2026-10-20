@@ -8,6 +8,7 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import useSWR from 'swr'
 import { LoaderComponent } from '@/components/general_aws/LoaderComponent'
+import type { UnusedCandidate } from '@/interfaces/unused'
 
 interface UnusedNatGatewaysFilterComponentProps {
     unusedNatGateway: string,
@@ -20,8 +21,8 @@ interface UnusedNatGatewaysFilterComponentProps {
     isUnusedNatGatewayMultiselect: boolean
 }
 
-const fetcherPost = (url: string, tags: { Key: string; Value: string } | null = null) =>
-    fetchJson(url, {
+const fetcherPost = <T = unknown>(url: string, tags: { Key: string; Value: string } | null = null) =>
+    fetchJson<T>(url, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -37,11 +38,11 @@ export const UnusedNatGatewaysFilterComponent = ({
     const startDateFormatted = startDate.toISOString().replace('Z', '').slice(0, -4);
     const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : '';
 
-    const url = region ? `/api/aws/bridge/nat_gateways/all_unused_nat_gateways?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}` : null;
+    const url = region ? `/api/aws/bridge/aws/unused/nat-gateways/candidates?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}` : null;
 
     const tagsBody = selectedKey !== 'allKeys' && selectedValue ? { Key: selectedKey, Value: selectedValue } : null;
 
-    const { data, error, isLoading } = useSWR<unknown[]>([url, tagsBody], ([u, t]) => fetcherPost(u, t));
+    const { data, error, isLoading } = useSWR<UnusedCandidate[]>([url, tagsBody], ([u, t]) => fetcherPost<UnusedCandidate[]>(u, t));
 
     useEffect(() => {
         if (!isLoading && !error) {
@@ -55,7 +56,7 @@ export const UnusedNatGatewaysFilterComponent = ({
     if (isLoading) return <LoaderComponent size='small' />
     if (error) return <div>Error al cargar datos</div>
 
-    const list: string[] = Array.isArray(data) ? data : []
+    const list: string[] = Array.isArray(data) ? data.map((c) => c.resource_id) : []
     const noUnusedNatGateways = list.length === 0
 
     const selectedUnusedGatewaysArray = unusedNatGateway ? unusedNatGateway.split(',').filter(Boolean) : [];

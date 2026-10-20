@@ -33,7 +33,6 @@ export const CentroDeCostoFilterComponent = ({
   const [open, setOpen] = useState(false)
 
   const url = `/api/presupuesto/bridge/${cloudType.toLowerCase()}/centro-costo`
-  //const url = `/api/presupuesto/bridge/aws/centro-costo`
 
   const shouldFetch = !!cloudType
   const { data, error, isLoading } = useSWR<CentroDeCosto[]>(shouldFetch ? url : null, fetcher)

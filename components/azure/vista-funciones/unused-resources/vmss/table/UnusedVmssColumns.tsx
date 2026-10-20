@@ -9,12 +9,13 @@ import { CopyButton } from '@/components/shared/CopyButton';
 import { useState } from 'react';
 import { AlertCircle, CheckCircle2, Eye, Globe, HardDrive, Network, X } from 'lucide-react';
 import { UnusedVmss, UnusedVmssDiskDetails, UnusedVmssDisksData, UnusedVmssInterfaceData, UnusedVmssInterfaceDetails } from '@/interfaces/vista-unused-resources/unusedVmssInterface';
+import { readFilterParam } from '@/lib/filters';
 
 const DateParams = () => {
     const searchParams = useSearchParams();
 
-    const startDateParam = searchParams.get('startDate');
-    const endDateParam = searchParams.get('endDate');
+    const startDateParam = readFilterParam(searchParams, 'dateFrom');
+    const endDateParam = readFilterParam(searchParams, 'dateTo');
 
     return { startDateParam: startDateParam, endDateParam: endDateParam }
 }
@@ -425,7 +426,6 @@ export const UnusedVmssColumns: DynamicColumn<UnusedVmss>[] = [
         ),
         size: 170,
     },
-    // --- NUEVO: columnas de métricas FinOps ---
     {
         id: "cpu_promedio",
         header: "CPU Prom %",

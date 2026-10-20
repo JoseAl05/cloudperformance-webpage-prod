@@ -1,11 +1,3 @@
-/**
- * Allowlist de los bridges `/api/<servicio>/bridge/[...path]`.
- *
- * Cada bridge sólo reenvía sub-paths cuyo primer segmento corresponda a un
- * grupo de rutas que existe en su back end (inventario de routers FastAPI).
- * Además se rechazan segmentos vacíos, `.`/`..` y separadores codificados,
- * para que el sub-path no pueda salir del prefijo base del servicio.
- */
 export const BRIDGE_ALLOWED_PREFIXES = {
   aws: [
     'advisor', 'autoscaling', 'aws', 'bedrock', 'db', 'ebs', 'eks', 'eventos',

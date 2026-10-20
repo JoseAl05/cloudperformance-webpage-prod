@@ -64,12 +64,10 @@ export const PresupuestoMensualFormComponent: React.FC<PresupuestoMensualFormPro
   const [centrosCosto, setCentrosCosto] = useState<CentroCosto[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Sincroniza los datos cuando se edita
   useEffect(() => {
     if (initialData) setFormData(initialData);
   }, [initialData]);
 
-  // Cargar presupuestos anuales y centros de costo
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -104,13 +102,11 @@ export const PresupuestoMensualFormComponent: React.FC<PresupuestoMensualFormPro
     onSubmit(formData);
   };
 
-  // Función para obtener el nombre del centro de costo
   const getNombreCentroCosto = (idCentroCosto: number): string => {
     const centro = centrosCosto.find(c => c.id_centro_costo === idCentroCosto);
     return centro ? centro.nombre_centro : "Centro desconocido";
   };
 
-  // Función para obtener los meses disponibles según el presupuesto anual seleccionado
   const getMesesDisponibles = (): number[] => {
     if (!formData.id_presupuesto_anual) return [];
     
@@ -119,17 +115,13 @@ export const PresupuestoMensualFormComponent: React.FC<PresupuestoMensualFormPro
     );
     
     if (!presupuestoSeleccionado || !presupuestoSeleccionado.presupuestos_mensuales) {
-      // Si no hay presupuestos mensuales, todos los meses están disponibles
       return [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
     }
     
-    // Obtener los meses que ya tienen presupuesto
     const mesesOcupados = presupuestoSeleccionado.presupuestos_mensuales.map(pm => pm.mes);
     
-    // Si estamos editando, incluir el mes actual en los disponibles
     const mesActual = initialData?.mes;
     
-    // Retornar todos los meses que no están ocupados (o el mes actual si estamos editando)
     return [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].filter(
       mes => !mesesOcupados.includes(mes) || mes === mesActual
     );
@@ -137,7 +129,6 @@ export const PresupuestoMensualFormComponent: React.FC<PresupuestoMensualFormPro
 
   const mesesDisponibles = getMesesDisponibles();
 
-  // Función para calcular la diferencia entre el monto anual y la suma de montos mensuales
   const calcularDiferenciaPresupuesto = () => {
     if (!formData.id_presupuesto_anual) return null;
     
@@ -149,7 +140,6 @@ export const PresupuestoMensualFormComponent: React.FC<PresupuestoMensualFormPro
     
     const montoAnual = parseFloat(presupuestoSeleccionado.monto_anual_asociado) || 0;
     
-    // Sumar todos los montos mensuales existentes
     let sumaMensuales = 0;
     if (presupuestoSeleccionado.presupuestos_mensuales) {
       sumaMensuales = presupuestoSeleccionado.presupuestos_mensuales.reduce(
@@ -158,12 +148,10 @@ export const PresupuestoMensualFormComponent: React.FC<PresupuestoMensualFormPro
       );
     }
     
-    // Si estamos creando (no editando), sumar el monto actual del formulario
     if (!initialData && formData.monto_mensual_asociado) {
       sumaMensuales += parseFloat(formData.monto_mensual_asociado) || 0;
     }
     
-    // Si estamos editando, restar el monto original y sumar el nuevo
     if (initialData && formData.monto_mensual_asociado) {
       const montoOriginal = parseFloat(String(initialData.monto_mensual_asociado)) || 0;
       const montoNuevo = parseFloat(formData.monto_mensual_asociado) || 0;
@@ -189,9 +177,7 @@ export const PresupuestoMensualFormComponent: React.FC<PresupuestoMensualFormPro
         className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700 overflow-hidden"
       >
         <div className="p-8">
-          {/* Campos del formulario */}
           <div className="space-y-6">
-            {/* Presupuesto Anual y Mes en la misma fila */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">
@@ -292,7 +278,6 @@ export const PresupuestoMensualFormComponent: React.FC<PresupuestoMensualFormPro
                 />
               </div>
 
-              {/* Mensaje de diferencia de presupuesto */}
               {infoPresupuesto && (
                 <div className={`p-4 rounded-lg border ${
                   infoPresupuesto.diferencia >= 0 
@@ -367,7 +352,6 @@ export const PresupuestoMensualFormComponent: React.FC<PresupuestoMensualFormPro
 
           </div>
 
-          {/* Buttons */}
           <div className="flex flex-col sm:flex-row gap-3 mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
             <button
               type="submit"

@@ -14,7 +14,6 @@ interface ComputeEngineConsumeComponentProps {
     tagValue?: string | null;
 }
 
-/** Consumo Compute Engine: adapta los filtros de la vista al contrato canónico (/api/gcp/consumption/compute-engine/*). */
 export const ComputeEngineConsumeComponent = ({ startDate, endDate, projects, regions, resourceId, tagKey, tagValue }: ComputeEngineConsumeComponentProps) => {
     const hasTag = !!tagKey && tagKey !== 'allKeys';
     return (

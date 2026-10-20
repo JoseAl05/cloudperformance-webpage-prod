@@ -62,7 +62,6 @@ export const InstancesFilterComponentV2 = ({
     return `/api/azure/bridge/azure/get-instances-custom?${params.toString()}`
   }
 
-  // Solo hacer fetch si hay región y suscripción específicas seleccionadas
   const shouldFetch = !!subscription && !!region
 
   const { data, error, isLoading } = useSWR(
@@ -72,7 +71,6 @@ export const InstancesFilterComponentV2 = ({
 
   useEffect(() => { setIsMounted(true) }, [])
 
-  // Resetear la instancia seleccionada cuando cambian los filtros principales
   useEffect(() => {
     if (!shouldFetch && selectedInstance && selectedInstance !== 'all_instances') {
       setSelectedInstance('all_instances')
@@ -82,7 +80,6 @@ export const InstancesFilterComponentV2 = ({
 
   if (!isMounted) return null
 
-  // Si no se puede hacer fetch, mostrar mensaje informativo
   if (!shouldFetch) {
     return (
       <Button 

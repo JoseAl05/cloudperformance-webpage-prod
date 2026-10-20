@@ -24,6 +24,7 @@ export const MainViewUnusedGkeComponent = () => {
             <div className='w-full min-w-0'>
                 <FiltersComponent
                     Component={UnusedGkeComponent}
+                    cloud='gcp'
                     dateFilter
                     projectsFilter
                     regionFilter

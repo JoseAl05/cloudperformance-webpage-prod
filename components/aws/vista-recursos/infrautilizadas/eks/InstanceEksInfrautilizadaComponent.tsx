@@ -1,4 +1,5 @@
 "use client";
+import { Root } from '@/interfaces/vista-infrautilizadas/ec2ResourceInfraUsedViewInterface';
 
 import { fetcher } from '@/lib/fetcher';
 import useSWR from "swr";
@@ -28,8 +29,7 @@ export const InstanceEksInfrautilizadaComponent = ({
     ? endDate.toISOString().replace("Z", "").slice(0, -4)
     : "";
 
-  // https://cloudperformance-desarrollo.eastus2.cloudapp.azure.com/api/aws/ec2/unused/unused?date_from=2025-08-01T00:00:00&date_to=2025-09-02T23:59:59&region=all&resource=i-08fc095993a5521be,i-084e4e667310b5e5b,i-0e2e4f97aaaaae90e
-  const ec2InfrautilizadaInfo = useSWR(
+  const ec2InfrautilizadaInfo = useSWR<Root>(
     eksAsgInstance
       ? `/api/aws/bridge/aws/ec2/unused/unused?date_from=${startDateFormatted}&date_to=${endDateFormatted}&resource=${eksAsgInstance}`
       : null,
@@ -83,7 +83,6 @@ export const InstanceEksInfrautilizadaComponent = ({
       <div className="w-full min-w-0 px-4 py-6">
         <div className="flex flex-col xl:flex-row gap-8 min-w-0">
           <div className="flex-1 space-y-6 min-w-0 overflow-hidden">
-            {/* <MainEc2ResourceInfraUsedViewMetricsSummaryComponent data={metricsData.ec2IntancesMetricsStatistics} /> */}
             <MainEc2ResourceInfraUsedViewMetricsSummaryComponent data={metricsData} />
           </div>
         </div>
@@ -102,7 +101,6 @@ export const InstanceEksInfrautilizadaComponent = ({
 
         <div className="flex  flex-col  gap-3 my-10">
           <div className="flex items-center gap-3 text-3xl font-bold text-foreground">
-            {/* <Clock className="h-8 w-8 text-blue-500" /> */}
             <FileSpreadsheet className="h-8 w-8 text-blue-500" />
             Detalle Instancias Infrautilizadas
           </div>
@@ -110,7 +108,7 @@ export const InstanceEksInfrautilizadaComponent = ({
             columns={Ec2ResourceInfraUsedViewColumns}
             data={metricsData.ec2Intances}
             filterColumn="InstanceId"
-            filterPlaceHolder="Buscar instancia...."
+            filterPlaceholder="Buscar instancia...."
             enableGrouping={false}
           />
         </div>

@@ -18,7 +18,6 @@ interface AzureVmMetricsComponentProps {
 const isSet = (value: string | null | undefined, allValue: string): value is string =>
     !!value && value !== allValue && value !== 'null';
 
-/** Consumo Virtual Machines: adapta los filtros de la vista al contrato canónico (/api/azure/consumption/vm/*). */
 export const AzureVmMetricsComponent = ({
     startDate,
     endDate,

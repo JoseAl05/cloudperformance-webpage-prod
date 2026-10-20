@@ -17,17 +17,11 @@ const fetchAll = (urls: string[]): Promise<MetricPoint[]> =>
 
 interface ConsumptionViewProps {
     config: ConsumptionViewConfig;
-    /** Parámetros de la API ya traducidos desde los filtros de la vista. */
     params: QueryParams;
-    /** Falso mientras falta un filtro obligatorio (instancia, suscripción, proyecto...). */
     enabled: boolean;
     disabledText: string;
 }
 
-/**
- * Vista estándar de Consumo / Eficiencia: tarjetas de resumen y eficiencia, un gráfico por métrica y la tabla de
- * recursos con su detalle. Igual para AWS, Azure y GCP; lo propio de cada recurso vive en `config`.
- */
 export const ConsumptionView = ({ config, params, enabled, disabledText }: ConsumptionViewProps) => {
     const { cloud, resource } = config;
 

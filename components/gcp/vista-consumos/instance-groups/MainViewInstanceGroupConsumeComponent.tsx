@@ -33,12 +33,9 @@ export const MainViewInstanceGroupConsumeComponent = () => {
                     dateFilter
                     projectsFilter
                     regionFilter
-                    // tagsFilter
                     resourceFilter
                     isResourceMultiSelect
                     resourceService='instance_groups'
-                    // tagCollection="gcp_compute_instances"
-                    // tagColumn="labels"
                 />
             </div>
         </div>

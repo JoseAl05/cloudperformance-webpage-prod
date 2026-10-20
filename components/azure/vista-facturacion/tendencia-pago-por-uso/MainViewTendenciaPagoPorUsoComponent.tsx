@@ -1,4 +1,3 @@
-// components/aws/vista-facturacion/tendencia-facturacion/MainViewTendenciaFacturacionComponent.tsx
 import { FiltersComponent } from '@/components/general_azure/filters/FiltersComponent'
 import { TendenciaFacturacionPagoPorUsoComponent } from '@/components/azure/vista-facturacion/tendencia-pago-por-uso/TendenciaFacturacionPagoPorUsoComponent'
 import { TrendingUp } from 'lucide-react'

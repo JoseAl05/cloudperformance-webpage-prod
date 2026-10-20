@@ -1,18 +1,5 @@
 import type { CloudAccount } from '@/types/db';
 
-// =========================================================================
-// AUTORIDAD ÚNICA DE CUENTAS CLOUD (`<cloud>_accounts`)
-//
-// Reglas del modelo:
-//  - `<cloud>_accounts` SOLO existe cuando la nube está habilitada Y es
-//    multi-tenant. En cualquier otro caso el campo NO debe existir en el
-//    documento y la conexión se resuelve por `user_db_<cloud>`.
-//  - El ID SIEMPRE lo genera el servidor con el formato `clp-<id>`.
-//    El cliente nunca inventa IDs: si envía uno desconocido, se descarta.
-//  - Los IDs de la empresa son la fuente de verdad y se propagan tal cual
-//    a la colección `Users`.
-// =========================================================================
-
 export type CloudProvider = 'aws' | 'azure' | 'gcp' | 'openai';
 
 export const CLOUD_PROVIDERS: readonly CloudProvider[] = [
@@ -22,7 +9,6 @@ export const CLOUD_PROVIDERS: readonly CloudProvider[] = [
   'openai',
 ] as const;
 
-/** Etiquetas para los mensajes de error, respetando la nomenclatura previa. */
 export const CLOUD_LABELS: Record<
   CloudProvider,
   { label: string; account: string; accountPlural: string }
@@ -47,10 +33,8 @@ export const CLOUD_LABELS: Record<
 
 export const ACCOUNT_ID_PREFIX = 'clp-';
 
-/** Acepta el formato actual (`clp-<uuid>`) y el heredado (`clp-<base36>`). */
 const ACCOUNT_ID_REGEX = /^clp-[A-Za-z0-9_-]+$/;
 
-/** Error de validación de cuentas: las rutas lo traducen a un HTTP 400. */
 export class CloudAccountsError extends Error {
   constructor(message: string) {
     super(message);
@@ -58,7 +42,6 @@ export class CloudAccountsError extends Error {
   }
 }
 
-/** Genera un ID único y estable con el formato `clp-<id>`. */
 export function generateAccountId(): string {
   return `${ACCOUNT_ID_PREFIX}${crypto.randomUUID()}`;
 }
@@ -71,19 +54,6 @@ function readString(value: unknown): string {
   return typeof value === 'string' ? value.trim() : '';
 }
 
-/**
- * Valida y normaliza el array de cuentas de una nube multi-tenant.
- *
- * Los IDs ya existentes en la empresa se conservan (para no romper las
- * referencias de los usuarios ya creados); cualquier otro caso — cuenta nueva,
- * ID con formato inválido o ID duplicado dentro del mismo envío — recibe un ID
- * nuevo generado por el servidor.
- *
- * @param cloud            Nube a la que pertenecen las cuentas.
- * @param rawAccounts      Array recibido en el body de la petición.
- * @param existingAccounts Cuentas actualmente persistidas en la empresa.
- * @throws {CloudAccountsError} si el array es inválido o está vacío.
- */
 export function normalizeCloudAccounts(
   cloud: CloudProvider,
   rawAccounts: unknown,
@@ -117,7 +87,6 @@ export function normalizeCloudAccounts(
       );
     }
 
-    // Se conserva el ID sólo si ya pertenecía a la empresa y no se repite.
     const candidateId = source.id;
     const canReuseId =
       isValidAccountId(candidateId) &&
@@ -131,11 +100,6 @@ export function normalizeCloudAccounts(
   });
 }
 
-/**
- * Copia las cuentas de la empresa hacia un usuario preservando los IDs.
- * Devuelve `undefined` cuando la empresa no tiene cuentas que propagar, para
- * que el campo simplemente no se escriba en el documento del usuario.
- */
 export function cloneAccountsForUser(
   accounts: CloudAccount[] | null | undefined,
 ): CloudAccount[] | undefined {

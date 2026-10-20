@@ -9,7 +9,6 @@ export default function CrearUsuarioPage() {
     
     if (isLoading) return <p className="m-4">Cargando sesión...</p>;
 
-    // CONTROL DE ACCESO: Admin Global o Admin Empresa
     if (!user || (user.role !== 'admin_global' && user.role !== 'admin_empresa')) {
         return <div className="alert alert-danger p-4 m-4">Acceso denegado.</div>;
     }

@@ -16,14 +16,7 @@ import {
     PopoverContent,
     PopoverTrigger,
 } from '@/components/ui/popover';
-// import { aws_regions } from '@/lib/aws_regions';
 import { aws_variacion_servicios } from '@/lib/aws_variacion_servicios'
-
-// interface RegionFilterComponentProps {
-//     selectedRegion: string;
-//     setSelectedRegion: Dispatch<SetStateAction<string>>;
-//     isRegionMultiSelect: boolean;
-// }
 
 interface VariationServiceFilterComponentProps {
     selectedService: string;
@@ -65,38 +58,6 @@ export const VariationServiceFilterComponent = ({
 
     const selectedserviceArray = selectedService ? selectedService.split(',').filter(Boolean) : [];
 
-    // return ( 
-    //     <Popover open={open} onOpenChange={setOpen}>
-    //         <PopoverTrigger asChild>
-    //             <Button variant="outline" role="combobox" aria-expanded={open} className="w-[250px] justify-between">
-    //                 {getDisplayText()}
-    //                 <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-    //             </Button>
-    //         </PopoverTrigger>
-    //         <PopoverContent className="w-[300px] p-0">
-    //             <Command>
-    //                 <CommandInput placeholder="Buscar región..." />
-    //                 <CommandEmpty>No se encontró el servicio.</CommandEmpty>
-    //                 <CommandGroup className="max-h-[200px] overflow-y-auto">
-    //                     <CommandItem value="all_services" onSelect={() => handleServiceToggle('all_services')}>
-    //                         <Check className={`mr-2 h-4 w-4 ${selectedService === 'all_services' ? 'opacity-100' : 'opacity-0'}`} />
-    //                         Todos los servicios
-    //                     </CommandItem>
-    //                     {aws_variacion_servicios
-    //                         .filter((r) => r.value !== 'all_services')
-    //                         .map((service) => (
-    //                             <CommandItem key={service.value} value={service.value} onSelect={() => handleServiceToggle(service.value)}>
-    //                                 <Check
-    //                                     className={`mr-2 h-4 w-4 ${selectedserviceArray.includes(service.value) ? 'opacity-100' : 'opacity-0'}`}
-    //                                 />
-    //                                 {service.label}
-    //                             </CommandItem>
-    //                         ))}
-    //                 </CommandGroup>
-    //             </Command>
-    //         </PopoverContent>
-    //     </Popover>
-    // );
 
     return (
             <Popover open={open} onOpenChange={setOpen}>

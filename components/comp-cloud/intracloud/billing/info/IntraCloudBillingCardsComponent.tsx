@@ -3,7 +3,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { IntraCloudBilling } from '@/interfaces/vista-intracloud/billing/intraCloudBillingInterfaces';
 import { formatMetric } from '@/lib/metricUtils';
 import { cn } from '@/lib/utils';
-import { Badge, Clock, DollarSign, LucideIcon } from 'lucide-react'; // Agregué LucideIcon al import
+import { Badge, Clock, DollarSign, LucideIcon } from 'lucide-react';
 import { useMemo } from 'react';
 
 interface IntraCloudBillingCardsComponentProps {
@@ -90,11 +90,9 @@ export const IntraCloudBillingCardsComponent = ({ data }: IntraCloudBillingCards
             let minTime = Infinity;
             let maxTime = -Infinity;
 
-            // Iteración única para sumar costos y encontrar rango de fechas
             billingData.forEach((item) => {
                 const cost = Number(item.cost_in_usd_sum) || 0;
                 const retail = Number(item.payg_cost_in_usd_sum) || 0;
-                // Asumimos que start_date viene en formato ISO string compatible
                 const time = new Date(item.start_date).getTime();
 
                 totalCost += cost;

@@ -5,7 +5,6 @@ import { useState, useMemo } from "react";
 import useSWR from "swr";
 import { Calendar, Pencil, Trash2, Search, ArrowUpDown, ArrowUp, ArrowDown, ChevronLeft, ChevronRight } from "lucide-react";
 
-// Tipos del schema
 interface PresupuestoMensual {
   id_presupuesto_mensual: number;
   mes: number;
@@ -101,7 +100,6 @@ export const PresupuestoAnualTableComponent = ({ cloud, onEdit, onDelete }: Pres
           return sortOrder === "asc" ? aVal - bVal : bVal - aVal;
         }
         
-        // Para strings numéricos como monto_anual_asociado
         if (sortField === "monto_anual_asociado") {
           const aNum = parseFloat(String(aVal));
           const bNum = parseFloat(String(bVal));
@@ -215,7 +213,6 @@ export const PresupuestoAnualTableComponent = ({ cloud, onEdit, onDelete }: Pres
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700 overflow-hidden">
-      {/* Search Bar */}
       <div className="px-6 py-4 bg-gray-50 dark:bg-gray-900/50 border-b border-gray-200 dark:border-gray-700">
         <div className="flex items-center gap-4">
           <div className="relative flex-1">
@@ -252,7 +249,6 @@ export const PresupuestoAnualTableComponent = ({ cloud, onEdit, onDelete }: Pres
         )}
       </div>
 
-      {/* Table Container */}
       <div className="overflow-x-auto" style={{ minHeight: '500px', maxHeight: '600px' }}>
         <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
           <thead className="bg-gray-50 dark:bg-gray-900/50 sticky top-0 z-10">
@@ -340,7 +336,6 @@ export const PresupuestoAnualTableComponent = ({ cloud, onEdit, onDelete }: Pres
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center gap-2">
-                      {/* <TrendingUp className="w-4 h-4 text-green-600 dark:text-green-400" /> */}
                       <span className="text-sm font-semibold text-green-600 dark:text-green-400">
                         {formatCurrency(presupuesto.monto_anual_asociado)}
                       </span>
@@ -352,12 +347,6 @@ export const PresupuestoAnualTableComponent = ({ cloud, onEdit, onDelete }: Pres
                         <span className="text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 px-2 py-1 rounded-full font-medium">
                           {presupuesto.presupuestos_mensuales.length} meses
                         </span>
-                        {/* <button
-                          onClick={() => onEdit && onEdit(presupuesto)}
-                          className="text-xs text-blue-600 dark:text-blue-400 hover:underline"
-                        >
-                          Ver detalle
-                        </button> */}
                       </div>
                     ) : (
                       <span className="text-xs text-gray-400 dark:text-gray-500">Sin desglose</span>
@@ -393,7 +382,6 @@ export const PresupuestoAnualTableComponent = ({ cloud, onEdit, onDelete }: Pres
         </table>
       </div>
 
-      {/* Footer con Pagination */}
       <div className="bg-gray-50 dark:bg-gray-900/50 px-6 py-4 border-t border-gray-200 dark:border-gray-700">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-sm text-gray-600 dark:text-gray-400">

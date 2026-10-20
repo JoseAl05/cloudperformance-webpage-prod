@@ -38,7 +38,6 @@ export const EksAsgInstancesFilterComponent = ({
     switch (isInstancesService) {
         case 'infraUsed':
             url = shouldFetch ? `/api/aws/bridge/aws/ec2/unused/autoscaling/getInstances?date_from=${startDate}&date_to=${endDate}&region=${region}&autoscaling_group=${encodeURIComponent(eksAsg)}`
-            // url = shouldFetch ? `/api/aws/bridge/autoscaling/all-asg-instances-ec2?date_from=${startDate}&date_to=${endDate}&region=${region}&autoscaling_group=${encodeURIComponent(asg)}`
             : null;
             break;
         default:
@@ -47,9 +46,6 @@ export const EksAsgInstancesFilterComponent = ({
                 : null;
             break;
     }
-    // const url = shouldFetch
-    //     ? `/api/aws/bridge/eks/all-eks-asg-instances-ec2?date_from=${startDate}&date_to=${endDate}&region=${region}&autoscaling_group=${encodeURIComponent(eksAsg)}`
-    //     : null
 
     const { data, error, isLoading } = useSWR<string[]>(url, fetcher);
     useEffect(() => {

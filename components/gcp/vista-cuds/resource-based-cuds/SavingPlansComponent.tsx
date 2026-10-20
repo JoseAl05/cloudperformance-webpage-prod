@@ -20,10 +20,6 @@ import {
 } from 'lucide-react'
 import { LoaderComponent } from '@/components/general_gcp/LoaderComponent'
 
-/* ======================
-   Utils & Formatters
-====================== */
-
 const formatCurrency = (amount: number) => {
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
@@ -31,10 +27,6 @@ const formatCurrency = (amount: number) => {
     minimumFractionDigits: 2
   }).format(amount)
 }
-
-/* ======================
-   Types
-====================== */
 
 interface CommitmentResource {
   type_: 'VCPU' | 'MEMORY'
@@ -65,10 +57,6 @@ interface Props {
   startDate: Date
   endDate: Date
 }
-
-/* ======================
-   Component
-====================== */
 
 export const GcpCommitmentsViewComponent = ({ startDate, endDate }: Props) => {
   const startDateFormatted = startDate.toISOString().replace('Z', '').slice(0, -4)
@@ -102,7 +90,6 @@ export const GcpCommitmentsViewComponent = ({ startDate, endDate }: Props) => {
     </div>
   )
 
-  // --- Lógica de Negocio ---
   const selected = commitments.find(c => c.commitment_id === selectedId) || commitments[0]
 
   const cost = selected?.billing_period_cost || 0
@@ -118,7 +105,6 @@ export const GcpCommitmentsViewComponent = ({ startDate, endDate }: Props) => {
   return (
     <div className="space-y-8 p-4 max-w-7xl mx-auto">
       
-      {/* 1. Header con Selector */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b pb-4">
          <div>
             <h2 className="text-2xl font-bold text-gray-900">Análisis de Planes de Ahorro</h2>
@@ -145,7 +131,6 @@ export const GcpCommitmentsViewComponent = ({ startDate, endDate }: Props) => {
          )}
       </div>
 
-      {/* 2. DIAGNÓSTICO INTELIGENTE (Nuevo) */}
       <div className={`p-4 rounded-xl border-l-4 flex items-start gap-4 shadow-sm ${
           isProfitable ? 'bg-green-50 border-green-500' : 'bg-orange-50 border-orange-500'
         }`}>
@@ -165,10 +150,8 @@ export const GcpCommitmentsViewComponent = ({ startDate, endDate }: Props) => {
           </div>
       </div>
 
-      {/* 3. TARJETAS DE INDICADORES (KPIs) */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
 
-        {/* Costo */}
         <Card className="border-l-4 border-l-blue-500 shadow-md hover:shadow-lg transition-shadow">
           <CardContent className="p-5">
             <div className="flex justify-between items-start mb-2">
@@ -182,7 +165,6 @@ export const GcpCommitmentsViewComponent = ({ startDate, endDate }: Props) => {
           </CardContent>
         </Card>
 
-        {/* Ahorro */}
         <Card className="border-l-4 border-l-emerald-500 shadow-md hover:shadow-lg transition-shadow">
           <CardContent className="p-5">
             <div className="flex justify-between items-start mb-2">
@@ -196,7 +178,6 @@ export const GcpCommitmentsViewComponent = ({ startDate, endDate }: Props) => {
           </CardContent>
         </Card>
 
-        {/* Resultado Neto */}
         <Card className={`border-l-4 shadow-md hover:shadow-lg transition-shadow ${isProfitable ? 'border-l-green-600' : 'border-l-red-500'}`}>
           <CardContent className="p-5">
             <div className="flex justify-between items-start mb-2">
@@ -212,7 +193,6 @@ export const GcpCommitmentsViewComponent = ({ startDate, endDate }: Props) => {
           </CardContent>
         </Card>
 
-        {/* Estado */}
         <Card className="border-l-4 border-l-gray-400 shadow-md hover:shadow-lg transition-shadow">
           <CardContent className="p-5">
             <div className="flex justify-between items-start mb-2">
@@ -227,10 +207,8 @@ export const GcpCommitmentsViewComponent = ({ startDate, endDate }: Props) => {
         </Card>
       </div>
 
-      {/* 4. DETALLES DIVIDIDOS (Explicativos) */}
       <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
 
-        {/* Panel Izquierdo: Qué contraté */}
         <div className="md:col-span-4 flex flex-col gap-4">
           <div className="flex items-center gap-2 mb-2">
             <div className="h-8 w-8 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 font-bold">1</div>
@@ -275,7 +253,6 @@ export const GcpCommitmentsViewComponent = ({ startDate, endDate }: Props) => {
           </Card>
         </div>
 
-        {/* Panel Derecho: Quién lo usa */}
         <div className="md:col-span-8 flex flex-col gap-4">
           <div className="flex items-center gap-2 mb-2">
             <div className="h-8 w-8 rounded-full bg-green-100 flex items-center justify-center text-green-600 font-bold">2</div>

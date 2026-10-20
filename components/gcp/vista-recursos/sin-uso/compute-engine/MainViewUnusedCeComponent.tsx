@@ -24,6 +24,7 @@ export const MainViewUnusedCeComponent = () => {
             <div className='w-full min-w-0'>
                 <FiltersComponent
                     Component={UnusedCeComponent}
+                    cloud='gcp'
                     dateFilter
                     projectsFilter
                     regionFilter

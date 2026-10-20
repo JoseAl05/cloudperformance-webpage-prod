@@ -74,7 +74,6 @@ export const AdvisorStatusFilterComponent = ({
                 <Command>
                     <CommandInput placeholder='Buscar status..' />
                     <CommandList>
-                        {/* <CommandEmpty>{ADVISOR_STATUSES ? 'No hay status disponibles.' : 'No se encontró status.'}</CommandEmpty> */}
                         {shouldShow && (
                             <CommandGroup className='max-h-[250px] overflow-y-auto'>
                                 {list.map((i: string) => (
@@ -108,7 +107,6 @@ export const AdvisorStatusFilterComponent = ({
             <PopoverContent className='w-full p-0'>
                 <Command>
                     <CommandInput placeholder='Buscar status...' />
-                    {/* <CommandEmpty>{!ADVISOR_STATUSES ? 'No hay status disponibles.' : 'No se encontró status.'}</CommandEmpty> */}
                     {shouldShow && (
                         <CommandGroup className='max-h-[200px] overflow-y-auto'>
                             <CommandItem value='all' onSelect={() => handleEventToggle('all')}>

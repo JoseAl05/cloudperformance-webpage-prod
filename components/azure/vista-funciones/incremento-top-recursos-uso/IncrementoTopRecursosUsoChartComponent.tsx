@@ -5,6 +5,30 @@ import { useEffect, useRef, useMemo } from "react"
 import * as echarts from "echarts"
 import { Card, CardContent } from '@/components/ui/card'
 import { TrendingUp, TrendingDown, Calendar, Activity, AlertTriangle } from "lucide-react"
+import { formatByUnit } from '@/lib/consumption'
+
+interface IncrementoSeriePunto {
+  fecha: string
+  porcentaje_uso: number
+}
+
+interface IncrementoTarjetas {
+  porcentaje_uso_mes_anterior: number | null
+  porcentaje_uso_mes_actual: number | null
+  porcentaje_uso_fecha_anterior: number | null
+  porcentaje_uso_ultima_fecha: number | null
+  variacion: number
+  incremento: number
+  tendencia_variacion: string
+  tendencia_incremento: string
+}
+
+interface IncrementoTopRecursosUsoResponse {
+  es_porcentaje?: boolean
+  unidad?: string
+  serie_temporal?: IncrementoSeriePunto[]
+  tarjetas?: IncrementoTarjetas
+}
 
 interface IncrementoTopRecursosUsoChartProps {
   startDate: Date
@@ -32,10 +56,14 @@ export const IncrementoTopRecursosUsoChartComponent = ({
     ? null
     : `/api/azure/bridge/azure/incremento-top-recursos-uso?date_from=${startDateFormatted}&date_to=${endDateFormatted}&metric_name=${encodeURIComponent(selectedMetric)}&tipo=${selectedResourceType}${selectedResource ? `&resource_name=${encodeURIComponent(selectedResource)}` : ''}`
 
-  const { data, error, isLoading } = useSWR(apiUrl, fetcher, {
+  const { data, error, isLoading } = useSWR<IncrementoTopRecursosUsoResponse>(apiUrl, fetcher, {
     revalidateOnFocus: false,
     dedupingInterval: 2000
   })
+
+  const esPorcentaje = data?.es_porcentaje ?? true
+  const unidad = data?.unidad ?? '%'
+  const etiqueta = esPorcentaje ? 'Uso' : 'Valor'
 
   const { serieTemporal, tarjetas } = useMemo(() => {
     if (!data || !data.serie_temporal) {
@@ -44,15 +72,15 @@ export const IncrementoTopRecursosUsoChartComponent = ({
 
     return {
       serieTemporal: data.serie_temporal,
-      tarjetas: data.tarjetas
+      tarjetas: data.tarjetas ?? null
     }
   }, [data])
 
   useEffect(() => {
     if (!chartRef.current || !serieTemporal || serieTemporal.length === 0) return
 
-    const timestamps = serieTemporal.map((item: unknown) => item.fecha)
-    const porcentajes = serieTemporal.map((item: unknown) => item.porcentaje_uso)
+    const timestamps = serieTemporal.map((item) => item.fecha)
+    const porcentajes = serieTemporal.map((item) => item.porcentaje_uso)
 
     if (chartInstance.current) {
       chartInstance.current.dispose()
@@ -63,7 +91,7 @@ export const IncrementoTopRecursosUsoChartComponent = ({
 
     const option: echarts.EChartsOption = {
       title: {
-        text: 'Evolución del Porcentaje de Uso',
+        text: esPorcentaje ? 'Evolución del Porcentaje de Uso' : `Evolución del Valor (${unidad})`,
         left: 'center',
         textStyle: {
           fontSize: 16,
@@ -81,7 +109,7 @@ export const IncrementoTopRecursosUsoChartComponent = ({
             month: 'short',
             year: 'numeric'
           })
-          return `<strong>${fecha}</strong><br/>${params.marker}Uso: ${params.data[1].toFixed(2)}%`
+          return `<strong>${fecha}</strong><br/>${params.marker}${etiqueta}: ${formatByUnit(params.data[1], unidad)}`
         }
       },
       grid: {
@@ -109,16 +137,16 @@ export const IncrementoTopRecursosUsoChartComponent = ({
       },
       yAxis: {
         type: 'value',
-        name: '% Uso',
+        name: esPorcentaje ? '% Uso' : unidad,
         nameLocation: 'middle',
         nameGap: 50,
         axisLabel: {
-          formatter: '{value}%'
+          formatter: (value: number) => formatByUnit(value, unidad)
         }
       },
       series: [
         {
-          name: 'Porcentaje de Uso',
+          name: esPorcentaje ? 'Porcentaje de Uso' : 'Valor',
           type: 'line',
           smooth: true,
           symbol: 'circle',
@@ -171,7 +199,7 @@ export const IncrementoTopRecursosUsoChartComponent = ({
         chartInstance.current = null
       }
     }
-  }, [serieTemporal])
+  }, [serieTemporal, esPorcentaje, unidad, etiqueta])
 
   if (isLoading) return <p className="p-8 text-center">Cargando datos...</p>
   if (error) return <p className="p-8 text-center text-red-500">Error al cargar datos</p>
@@ -197,26 +225,23 @@ export const IncrementoTopRecursosUsoChartComponent = ({
 
   return (
     <div className="space-y-6 p-4">
-      {/* Gráfico */}
       <Card className="shadow-lg rounded-2xl">
         <CardContent className="p-4">
           <div ref={chartRef} style={{ width: '100%', height: '400px' }} />
         </CardContent>
       </Card>
 
-      {/* Tarjetas de métricas */}
       {tarjetas && (
         <>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {/* Mes Anterior */}
             <Card className="border-l-4 border-l-purple-500 hover:shadow-lg transition-shadow">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-muted-foreground">Uso Mes Anterior</p>
+                    <p className="text-sm font-medium text-muted-foreground">{etiqueta} Mes Anterior</p>
                     <p className="text-3xl font-bold text-purple-600">
                       {tarjetas.porcentaje_uso_mes_anterior !== null
-                        ? `${tarjetas.porcentaje_uso_mes_anterior.toFixed(2)}%`
+                        ? formatByUnit(tarjetas.porcentaje_uso_mes_anterior, unidad)
                         : '-'}
                     </p>
                   </div>
@@ -225,15 +250,14 @@ export const IncrementoTopRecursosUsoChartComponent = ({
               </CardContent>
             </Card>
 
-            {/* Mes Actual */}
             <Card className="border-l-4 border-l-blue-500 hover:shadow-lg transition-shadow">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-muted-foreground">Uso Mes Actual</p>
+                    <p className="text-sm font-medium text-muted-foreground">{etiqueta} Mes Actual</p>
                     <p className="text-3xl font-bold text-blue-600">
                       {tarjetas.porcentaje_uso_mes_actual !== null
-                        ? `${tarjetas.porcentaje_uso_mes_actual.toFixed(2)}%`
+                        ? formatByUnit(tarjetas.porcentaje_uso_mes_actual, unidad)
                         : '-'}
                     </p>
                   </div>
@@ -242,7 +266,6 @@ export const IncrementoTopRecursosUsoChartComponent = ({
               </CardContent>
             </Card>
 
-            {/* Variación */}
             <Card className="border-l-4 border-l-orange-500 hover:shadow-lg transition-shadow">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
@@ -263,15 +286,14 @@ export const IncrementoTopRecursosUsoChartComponent = ({
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {/* Fecha Anterior */}
             <Card className="border-l-4 border-l-gray-500 hover:shadow-lg transition-shadow">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-muted-foreground">Uso Fecha Anterior</p>
+                    <p className="text-sm font-medium text-muted-foreground">{etiqueta} Fecha Anterior</p>
                     <p className="text-3xl font-bold text-gray-600">
                       {tarjetas.porcentaje_uso_fecha_anterior !== null
-                        ? `${tarjetas.porcentaje_uso_fecha_anterior.toFixed(2)}%`
+                        ? formatByUnit(tarjetas.porcentaje_uso_fecha_anterior, unidad)
                         : '-'}
                     </p>
                   </div>
@@ -280,15 +302,14 @@ export const IncrementoTopRecursosUsoChartComponent = ({
               </CardContent>
             </Card>
 
-            {/* Última Fecha */}
             <Card className="border-l-4 border-l-green-500 hover:shadow-lg transition-shadow">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-muted-foreground">Uso Última Fecha</p>
+                    <p className="text-sm font-medium text-muted-foreground">{etiqueta} Última Fecha</p>
                     <p className="text-3xl font-bold text-green-600">
                       {tarjetas.porcentaje_uso_ultima_fecha !== null
-                        ? `${tarjetas.porcentaje_uso_ultima_fecha.toFixed(2)}%`
+                        ? formatByUnit(tarjetas.porcentaje_uso_ultima_fecha, unidad)
                         : '-'}
                     </p>
                   </div>
@@ -297,7 +318,6 @@ export const IncrementoTopRecursosUsoChartComponent = ({
               </CardContent>
             </Card>
 
-            {/* Incremento */}
             <Card className="border-l-4 border-l-red-500 hover:shadow-lg transition-shadow">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">

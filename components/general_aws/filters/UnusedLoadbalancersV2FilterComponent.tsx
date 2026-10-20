@@ -8,6 +8,7 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import useSWR from 'swr'
 import { LoaderComponent } from '@/components/general_azure/LoaderComponent'
+import type { UnusedCandidate } from '@/interfaces/unused'
 
 interface UnusedLoadbalancersV2FilterComponentProps {
     startDate: Date;
@@ -17,10 +18,6 @@ interface UnusedLoadbalancersV2FilterComponentProps {
     setUnusedElbV2: Dispatch<SetStateAction<string>>;
     isUnusedElbV2Multiselect: boolean;
 }
-
-type ApiElbV2 =
-    | { elb_arn: string; elb_name: string }
-    | string
 
 export const UnusedLoadbalancersV2FilterComponent = ({
     startDate,
@@ -33,19 +30,12 @@ export const UnusedLoadbalancersV2FilterComponent = ({
     const [open, setOpen] = useState(false);
     const startDateFormatted = startDate ? startDate.toISOString().replace('Z', '').slice(0, -4) : '';
     const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : '';
-    const url = `/api/aws/bridge/loadbalancersv2/all_unused_load_balancersv2?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`
-    const { data, error, isLoading } = useSWR<ApiElbV2[]>(url,fetcher)
+    const url = `/api/aws/bridge/aws/unused/load-balancers/candidates?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`
+    const { data, error, isLoading } = useSWR<UnusedCandidate[]>(url,fetcher)
 
     const unusedElbsV2 = useMemo(() => {
         if (!Array.isArray(data)) return [] as { id: string; name: string }[]
-        if (data.length === 0) return []
-        if (typeof data[0] === 'string') {
-            return (data as string[]).map((id) => ({ id, name: id }))
-        }
-        return (data as { elb_arn: string; elb_name: string }[]).map((s) => ({
-            id: s.elb_arn,
-            name: s.elb_name,
-        }))
+        return data.map((s) => ({ id: s.resource_id, name: s.resource_name }))
     }, [data])
 
     const noElbsV2 = unusedElbsV2.length === 0

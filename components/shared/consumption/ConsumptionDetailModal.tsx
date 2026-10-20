@@ -7,14 +7,13 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { HistoryModal, HistoryModalTab } from '@/components/general_gcp/modal/HistoryModal';
 import { ConsumptionCharts } from '@/components/shared/consumption/ConsumptionCharts';
 import { formatCurrency } from '@/lib/format';
-import { formatDateTime, formatValue, getResourceValue } from '@/lib/consumption';
+import { formatDateTime, formatValue, getPathValue, getResourceValue } from '@/lib/consumption';
 import type { ConsumptionCloud, ConsumptionResource, MetricPoint } from '@/interfaces/consumption';
 import type { ConsumptionViewConfig, FieldDef } from '@/components/shared/consumption/types';
 
 const SCOPE_LABEL: Record<ConsumptionCloud, string> = { aws: 'Cuenta', azure: 'Suscripción', gcp: 'Proyecto' };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const renderField = (value: any, field: Pick<FieldDef, 'format' | 'unit'>): string => {
+export const renderField = (value: unknown, field: Pick<FieldDef, 'format' | 'unit'>): string => {
     if (value === null || value === undefined || value === '') return '—';
     if (field.format === 'date') return formatDateTime(String(value));
     if (!field.format || field.format === 'text') return typeof value === 'object' ? JSON.stringify(value) : String(value);
@@ -123,8 +122,7 @@ const MetricsTab = ({ resource, config }: { resource: ConsumptionResource; confi
                                             <TableCell className="font-mono text-xs">{formatDateTime(snapshot.sync_time)}</TableCell>
                                             {historyColumns.map((col) => (
                                                 <TableCell key={col.label} className="text-xs">
-                                                    {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                                                    {renderField(col.path.split('.').reduce<any>((acc, p) => acc?.[p], snapshot), col)}
+                                                    {renderField(getPathValue(snapshot, col.path), col)}
                                                 </TableCell>
                                             ))}
                                             <TableCell className="text-xs font-medium">{snapshot.cost !== null ? formatCurrency(snapshot.cost) : '—'}</TableCell>

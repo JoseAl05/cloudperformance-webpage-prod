@@ -118,7 +118,7 @@ export const validateTicketsBatchFetcher = async (
     return response.json() as Promise<BatchValidationResponse>;
 };
 
-type TicketState = {
+export type TicketState = {
     key: string;
     url: string;
     connectorType: 'jira' | 'servicenow';

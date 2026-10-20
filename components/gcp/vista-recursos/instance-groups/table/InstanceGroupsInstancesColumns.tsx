@@ -1,11 +1,12 @@
 'use client'
 
-import { DynamicColumn } from '@/components/general/data-table/columns';
+import { DynamicColumn } from '@/components/data-table/columns';
 import { InstanceGroupsInstances, InstanceGroupsInstancesData } from '@/interfaces/vista-compute-engine/cEInterfaces';
 import { Button } from '@/components/ui/button';
 import { History, Monitor, Globe, MapPin, CalendarClock, Calendar } from 'lucide-react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
+import { readFilterParam } from '@/lib/filters';
 
 export type ProcessedInstanceRow = InstanceGroupsInstances & {
     latestSnapshot: InstanceGroupsInstancesData | undefined;
@@ -13,7 +14,6 @@ export type ProcessedInstanceRow = InstanceGroupsInstances & {
     creationTimestamp?: string;
 };
 
-// Función unificada para formatear fechas (ISO 8601 y con Timezone Offset)
 const formatDate = (value: string | undefined) => {
     if (!value) return '-';
     try {
@@ -37,10 +37,10 @@ const extractNameFromUrl = (url: string) => {
 
 const GetParameters = () => {
     const searchParams = useSearchParams();
-    const startDateParam = searchParams.get('startDate');
-    const endDateParam = searchParams.get('endDate');
-    const projectParam = searchParams.get('projects');
-    const regionParam = searchParams.get('regions');
+    const startDateParam = readFilterParam(searchParams, 'dateFrom');
+    const endDateParam = readFilterParam(searchParams, 'dateTo');
+    const projectParam = readFilterParam(searchParams, 'scopes');
+    const regionParam = readFilterParam(searchParams, 'regions');
 
     return {
         startDateParam,
@@ -62,7 +62,7 @@ export const getInstanceGroupsInstancesColumns = (
                 return (
                     <div className="flex flex-col">
                         <Link
-                            href={{ pathname: '/gcp/recursos/compute-engine', query: { startDate: startDateParam, endDate: endDateParam, resourceId: row.original.resource_id, projects: projectParam, regions: regionParam } }}
+                            href={{ pathname: '/cloud-gcp/recursos/compute-engine', query: { startDate: startDateParam, endDate: endDateParam, resourceId: row.original.resource_id, projects: projectParam, regions: regionParam } }}
                             rel="noopener noreferrer"
                             target="_blank"
                         >
@@ -88,27 +88,7 @@ export const getInstanceGroupsInstancesColumns = (
             size: 160,
             enableSorting: true
         },
-        // {
-        //     header: "Estado",
-        //     accessorFn: (row) => row.latestSnapshot?.status,
-        //     cell: (info) => {
-        //         const status = String(info.getValue() || 'UNKNOWN');
-        //         let colorClass = "bg-gray-100 text-gray-600 border-gray-200";
 
-        //         if (status === 'RUNNING') colorClass = "bg-emerald-50 text-emerald-700 border-emerald-200";
-        //         if (status === 'STOPPED' || status === 'TERMINATED') colorClass = "bg-red-50 text-red-700 border-red-200";
-        //         if (status === 'PROVISIONING' || status === 'STAGING') colorClass = "bg-blue-50 text-blue-700 border-blue-200";
-        //         if (status === 'SUSPENDED') colorClass = "bg-amber-50 text-amber-700 border-amber-200";
-
-        //         return (
-        //             <div className={`text-[10px] px-2 py-0.5 rounded-full border font-medium w-fit ${colorClass}`}>
-        //                 {status}
-        //             </div>
-        //         );
-        //     },
-        //     size: 110,
-        //     enableSorting: true
-        // },
         {
             header: "Tipo Máquina",
             accessorFn: (row) => row.latestSnapshot?.machineType,

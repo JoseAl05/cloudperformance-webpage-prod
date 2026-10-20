@@ -1,4 +1,3 @@
-// import { MainViewCentroDeCostoComponent } from '@/components/presupuesto/centro-de-costo/MainViewCentroDeCostoComponent';
 import { MainViewCentroDeCostoComponent } from '@/components/aws/presupuesto-v2/centro-de-costo/MainViewCentroDeCostoComponent';
 import { Suspense } from 'react';
 

@@ -14,7 +14,6 @@ interface InstanceGroupConsumeComponentProps {
     tagValue?: string | null;
 }
 
-/** Consumo Instance Groups: adapta los filtros de la vista al contrato canónico (/api/gcp/consumption/instance-groups/*). */
 export const InstanceGroupConsumeComponent = ({ startDate, endDate, projects, regions, resourceId, tagKey, tagValue }: InstanceGroupConsumeComponentProps) => {
     const hasTag = !!tagKey && tagKey !== 'allKeys';
     return (
