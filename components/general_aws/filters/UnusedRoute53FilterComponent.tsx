@@ -1,4 +1,5 @@
 'use client'
+import { fetcher } from '@/lib/fetcher';
 import { Dispatch, SetStateAction, useMemo, useState } from 'react'
 import { Check, ChevronsUpDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -7,6 +8,7 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import useSWR from 'swr'
 import { LoaderComponent } from '@/components/general_azure/LoaderComponent'
+import type { UnusedCandidate } from '@/interfaces/unused'
 
 interface UnusedRoute53FilterComponentProps {
     startDate: Date;
@@ -16,14 +18,6 @@ interface UnusedRoute53FilterComponentProps {
     setUnusedR53: Dispatch<SetStateAction<string>>;
     isUnusedR53Multiselect: boolean;
 }
-
-type ApiR53 =
-    | { hz_id: string; hz_name: string }
-    | string
-
-const fetcher = (url: string) =>
-    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
-        .then(r => r.json());
 
 export const UnusedRoute53FilterComponent = ({
     startDate,
@@ -36,19 +30,12 @@ export const UnusedRoute53FilterComponent = ({
     const [open, setOpen] = useState(false);
     const startDateFormatted = startDate ? startDate.toISOString().replace('Z', '').slice(0, -4) : '';
     const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : '';
-    const url = `/api/aws/bridge/route53/all_unused_hosted_zones?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`
-    const { data, error, isLoading } = useSWR<ApiR53[]>(url,fetcher)
+    const url = `/api/aws/bridge/aws/unused/route53/candidates?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`
+    const { data, error, isLoading } = useSWR<UnusedCandidate[]>(url,fetcher)
 
     const unusedRoutes = useMemo(() => {
         if (!Array.isArray(data)) return [] as { id: string; name: string }[]
-        if (data.length === 0) return []
-        if (typeof data[0] === 'string') {
-            return (data as string[]).map((id) => ({ id, name: id }))
-        }
-        return (data as { hz_id: string; hz_name: string }[]).map((s) => ({
-            id: s.hz_id,
-            name: s.hz_name,
-        }))
+        return data.map((s) => ({ id: s.resource_id, name: s.resource_name }))
     }, [data])
 
     const noRoutes = unusedRoutes.length === 0

@@ -1,6 +1,6 @@
 'use client'
 
-import { DynamicColumn } from '@/components/general/data-table/columns';
+import { DynamicColumn } from '@/components/data-table/columns';
 import { ComputeEngineBilling } from '@/interfaces/vista-compute-engine/cEInterfaces';
 
 const formatCurrencyUSD = (value: number | undefined) => {

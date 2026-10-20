@@ -1,6 +1,6 @@
 'use client'
 
-import { DynamicColumn } from '@/components/general/data-table/columns';
+import { DynamicColumn } from '@/components/data-table/columns';
 import { Database } from 'lucide-react';
 import { S3LifecycleRow, S3LifecycleHistoryRow } from '@/interfaces/vista-top-s3-buckets/topS3BucketsInterfaces';
 

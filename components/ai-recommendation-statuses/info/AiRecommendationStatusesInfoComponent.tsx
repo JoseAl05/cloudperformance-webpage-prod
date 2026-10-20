@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo, useEffect } from 'react';
+import type { TicketState } from '@/components/AiRecommendationStatusHistoryComponent';
 import {
     RecommendationStatusGroup,
     RecommendationStatus,
@@ -1067,43 +1068,6 @@ export const AiRecommendationStatusesInfoComponent = ({ data }: AiRecommendation
         const timer = setTimeout(() => setFeedback(null), timeoutMs);
         return () => clearTimeout(timer);
     }, [feedback]);
-
-    // const validationItems = useMemo<ValidationItem[]>(() => {
-    //     if (!data || data.length === 0) return [];
-    //     const items: ValidationItem[] = [];
-    //     for (const group of data) {
-    //         const latestReport = [...group.reports].sort(
-    //             (a, b) => new Date(a.status_assigned_at).getTime() - new Date(b.status_assigned_at).getTime()
-    //         ).at(-1);
-    //         const ticketKey = latestReport?.jira_ticket?.key;
-    //         if (ticketKey && latestReport) {
-    //             items.push({
-    //                 issue_key: ticketKey,
-    //                 rec_group_id: group.recommendation_group_id,
-    //                 cloud_provider: latestReport.cloud_provider,
-    //             });
-    //         }
-    //     }
-    //     return items;
-    // }, [data]);
-
-    // const stablePayload = useMemo(() => {
-    //     const sortedItems = [...validationItems].sort((a, b) => a.issue_key.localeCompare(b.issue_key));
-    //     return JSON.stringify({ items: sortedItems });
-    // }, [validationItems]);
-
-    // const { data: validationData, isLoading: isValidatingBatch } = useSWR<BatchValidationResponse>(
-    //     validationItems.length > 0 ? [VALIDATE_JIRA_TICKETS_KEY, stablePayload] : null,
-    //     validateJiraTicketsBatchFetcher,
-    //     {
-    //         revalidateOnFocus: false,
-    //         revalidateOnReconnect: false,
-    //         shouldRetryOnError: false,
-    //         dedupingInterval: 30_000,
-    //     }
-    // );
-
-    // const validationResults = validationData?.results ?? {};
 
     const allExecutionStatuses = useMemo(
         () => groups.flatMap(group => group.reports.map(report => ({

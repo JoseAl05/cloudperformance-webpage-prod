@@ -137,7 +137,6 @@ export const SelectAlertsCloud = () => {
 
             <div className={cn("grid gap-4", (isAzure && isAws) || isGcp ? "grid-cols-1 md:grid-cols-2" : "grid-cols-1")}>
                 
-                {/* ================= AZURE ================= */}
                 {isAzure && (
                     <div onClick={handleEnterAzure} className={cn("group relative overflow-hidden rounded-2xl border bg-card p-5 shadow-sm transition", isAzureReady ? "hover:shadow-md cursor-pointer border-border" : "border-gray-200 bg-gray-50/50 cursor-default", (hasMultipleAzureAccounts && isAzureReady) ? "border-blue-400" : "")}>
                         <div className="flex items-center gap-4">
@@ -167,7 +166,6 @@ export const SelectAlertsCloud = () => {
                     </div>
                 )}
 
-                {/* ================= AWS ================= */}
                 {isAws && (
                     <div onClick={handleEnterAws} className={cn("group relative overflow-hidden rounded-2xl border bg-card p-5 shadow-sm transition", isAwsReady ? "hover:shadow-md cursor-pointer border-border" : "border-gray-200 bg-gray-50/50 cursor-default", (hasMultipleAwsAccounts && isAwsReady) ? "border-amber-400" : "")}>
                         <div className="flex items-center gap-4">
@@ -197,7 +195,6 @@ export const SelectAlertsCloud = () => {
                     </div>
                 )}
 
-                {/* ================= GCP ================= */}
                 {isGcp && (
                     <div onClick={handleEnterGcp} className={cn("group relative overflow-hidden rounded-2xl border bg-card p-5 shadow-sm transition", isGcpReady ? "hover:shadow-md cursor-pointer border-border" : "border-gray-200 bg-gray-50/50 cursor-default", (hasMultipleGcpAccounts && isGcpReady) ? "border-green-400" : "")}>
                         <div className="flex items-center gap-4">

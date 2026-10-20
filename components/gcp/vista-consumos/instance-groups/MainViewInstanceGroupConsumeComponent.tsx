@@ -28,16 +28,14 @@ export const MainViewInstanceGroupConsumeComponent = () => {
 
             <div className="w-full min-w-0">
                 <FiltersComponent
+                    cloud="gcp"
                     Component={InstanceGroupConsumeComponent}
                     dateFilter
-                    projectFilter
+                    projectsFilter
                     regionFilter
-                    // tagsFilter
                     resourceFilter
                     isResourceMultiSelect
                     resourceService='instance_groups'
-                    // tagCollection="gcp_compute_instances"
-                    // tagColumn="labels"
                 />
             </div>
         </div>

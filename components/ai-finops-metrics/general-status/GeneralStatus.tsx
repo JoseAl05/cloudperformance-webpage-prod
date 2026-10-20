@@ -2,7 +2,7 @@ import React from 'react';
 import ReactMarkdown from 'react-markdown';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator'; // Componente de shadcn
+import { Separator } from '@/components/ui/separator';
 import { Activity, Calendar, Cloud, DollarSign, RefreshCw, TrendingUp } from 'lucide-react';
 import { AiFinopsMetrics } from '@/interfaces/ai-finops-metrics/aiFinopsMetricsInterfaces';
 
@@ -36,7 +36,6 @@ export const GeneralStatus = ({ data }: GeneralStatusProps) => {
         metadata
     } = data;
 
-    // Formateadores
     const formatCurrency = (value: number) =>
         new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value);
 
@@ -45,7 +44,6 @@ export const GeneralStatus = ({ data }: GeneralStatusProps) => {
             day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
         });
 
-    // Color dinámico para el Score
     const getScoreColor = (score: number) => {
         if (score >= 80) return 'text-emerald-500 dark:text-emerald-400 border-emerald-500';
         if (score >= 50) return 'text-amber-500 dark:text-amber-400 border-amber-500';
@@ -55,10 +53,8 @@ export const GeneralStatus = ({ data }: GeneralStatusProps) => {
     return (
         <div className="flex flex-col gap-4">
 
-            {/* KPIs Principales: Grid de 2 columnas en pantallas medianas+ */}
             <div className="grid gap-4 md:grid-cols-2">
 
-                {/* KPI 1: Global Score */}
                 <Card className="relative overflow-hidden border-t-4 border-t-primary/20 shadow-sm hover:shadow-md transition-shadow">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-medium">FinOps Global Score</CardTitle>
@@ -73,11 +69,9 @@ export const GeneralStatus = ({ data }: GeneralStatusProps) => {
                         </div>
                         <MarkdownText content={global_score_explanation} />
                     </CardContent>
-                    {/* Elemento decorativo de fondo */}
                     <div className={`absolute -right-6 -top-6 h-24 w-24 rounded-full opacity-5 ${getScoreColor(global_score).split(' ')[0].replace('text-', 'bg-')}`} />
                 </Card>
 
-                {/* KPI 2: Ahorros Potenciales */}
                 <Card className="relative overflow-hidden border-t-4 border-t-green-500/20 shadow-sm hover:shadow-md transition-shadow">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-medium">Ahorro Mensual Total Estimado</CardTitle>
@@ -94,16 +88,13 @@ export const GeneralStatus = ({ data }: GeneralStatusProps) => {
                             <MarkdownText content={total_potential_monthly_savings_explanation} />
                         </div>
                     </CardContent>
-                    {/* Elemento decorativo de fondo */}
                     <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-green-500 opacity-5" />
                 </Card>
             </div>
 
-            {/* Barra de Metadata: Información técnica del reporte */}
             <Card className="bg-muted/30 border-dashed">
                 <CardContent className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 py-4">
 
-                    {/* Proveedor */}
                     <div className="flex items-center gap-3">
                         <div className="p-2 bg-background rounded-full border shadow-sm">
                             <Cloud className="h-4 w-4 text-blue-500" />
@@ -116,7 +107,6 @@ export const GeneralStatus = ({ data }: GeneralStatusProps) => {
 
                     <Separator orientation="vertical" className="hidden sm:block h-8" />
 
-                    {/* Fecha de Generación */}
                     <div className="flex items-center gap-3">
                         <div className="p-2 bg-background rounded-full border shadow-sm">
                             <Calendar className="h-4 w-4 text-purple-500" />
@@ -129,7 +119,6 @@ export const GeneralStatus = ({ data }: GeneralStatusProps) => {
 
                     <Separator orientation="vertical" className="hidden sm:block h-8" />
 
-                    {/* Última Sincronización */}
                     <div className="flex items-center gap-3">
                         <div className="p-2 bg-background rounded-full border shadow-sm">
                             <RefreshCw className="h-4 w-4 text-orange-500" />

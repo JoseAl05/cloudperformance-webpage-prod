@@ -32,8 +32,6 @@ export const MainViewTagsComponent = () => {
                     Component={TagsAnalysisComponent}
                     dateFilters={true}
                     projectsFilter={true}
-                    // serviceFilter
-                    //isServiceMultiSelect
                 />
             </div>
         </div>

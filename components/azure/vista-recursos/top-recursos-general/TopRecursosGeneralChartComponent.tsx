@@ -1,18 +1,45 @@
 'use client'
+import { fetcher } from '@/lib/fetcher';
 import useSWR from 'swr'
 import { useEffect, useRef, useMemo, useCallback, useState } from "react"
 import * as echarts from "echarts"
 import { Card, CardContent } from '@/components/ui/card'
 import { AlertTriangle, Users, FolderKanban, Server, MapPin, X } from "lucide-react"
 
-const fetcher = (url: string) =>
-  fetch(url, {
-    method: 'GET',
-    headers: {
-      'Authorization': `Bearer ${process.env.NEXT_PUBLIC_API_TOKEN}`,
-      'Content-Type': 'application/json'
-    }
-  }).then(res => res.json())
+interface AzureTopResourceItem {
+  display_name?: string
+  resource_group?: string
+  providers?: string
+  location?: string
+  resource_count?: number
+}
+
+interface AzureTopResourceRelationship {
+  display_name: string
+  resource_group: string
+  providers: string
+  location: string
+  resource_count: number
+}
+
+interface AzureTopSummary {
+  total_subscriptions: number
+  total_resource_groups: number
+  total_services: number
+  total_locations: number
+}
+
+interface AzureTopResponse {
+  top_by_subscriptions?: AzureTopResourceItem[]
+  top_by_resource_groups?: AzureTopResourceItem[]
+  top_by_services?: AzureTopResourceItem[]
+  top_by_locations?: AzureTopResourceItem[]
+  summary?: AzureTopSummary
+}
+
+interface AzureTopDetalladoResponse {
+  relationships?: AzureTopResourceRelationship[]
+}
 
 interface TopRecursosGeneralChartProps {
   startDate: Date
@@ -46,22 +73,20 @@ export const TopRecursosGeneralChartComponent = ({
   const startDateFormatted = startDate?.toISOString().split('.')[0] || ''
   const endDateFormatted = endDate?.toISOString().split('.')[0] || ''
 
-  // Fetch del endpoint agregado (original)
   const apiUrl = !startDate || !endDate
     ? null
     : `/api/azure/bridge/azure/top-recursos-general?date_from=${startDateFormatted}&date_to=${endDateFormatted}`
 
-  // Fetch del endpoint detallado (para relaciones)
   const apiUrlDetallado = !startDate || !endDate
     ? null
     : `/api/azure/bridge/azure/top-recursos-general-detallado?date_from=${startDateFormatted}&date_to=${endDateFormatted}`
 
-  const { data, error, isLoading } = useSWR(apiUrl, fetcher, {
+  const { data, error, isLoading } = useSWR<AzureTopResponse>(apiUrl, fetcher, {
     revalidateOnFocus: false,
     dedupingInterval: 2000
   })
 
-  const { data: dataDetallado } = useSWR(apiUrlDetallado, fetcher, {
+  const { data: dataDetallado } = useSWR<AzureTopDetalladoResponse>(apiUrlDetallado, fetcher, {
     revalidateOnFocus: false,
     dedupingInterval: 2000
   })
@@ -83,35 +108,32 @@ export const TopRecursosGeneralChartComponent = ({
         maximumFractionDigits: 0
       }).format(value)
 
-    // Si hay filtro activo, recalcular basado en relaciones
     if (activeFilter.type && activeFilter.value && dataDetallado?.relationships) {
       const relationships = dataDetallado.relationships
 
-      // Filtrar relaciones según el filtro activo
       let filteredRelationships = relationships
       
       switch (activeFilter.type) {
         case 'subscription':
-          filteredRelationships = relationships.filter((r: unknown) => r.display_name === activeFilter.value)
+          filteredRelationships = relationships.filter((r) => r.display_name === activeFilter.value)
           break
         case 'resourceGroup':
-          filteredRelationships = relationships.filter((r: unknown) => r.resource_group === activeFilter.value)
+          filteredRelationships = relationships.filter((r) => r.resource_group === activeFilter.value)
           break
         case 'service':
-          filteredRelationships = relationships.filter((r: unknown) => r.providers === activeFilter.value)
+          filteredRelationships = relationships.filter((r) => r.providers === activeFilter.value)
           break
         case 'location':
-          filteredRelationships = relationships.filter((r: unknown) => r.location === activeFilter.value)
+          filteredRelationships = relationships.filter((r) => r.location === activeFilter.value)
           break
       }
 
-      // Recalcular Top 5 para cada dimensión
       const subscriptionMap = new Map<string, number>()
       const resourceGroupMap = new Map<string, number>()
       const serviceMap = new Map<string, number>()
       const locationMap = new Map<string, number>()
 
-      filteredRelationships.forEach((rel: unknown) => {
+      filteredRelationships.forEach((rel) => {
         subscriptionMap.set(rel.display_name, (subscriptionMap.get(rel.display_name) || 0) + rel.resource_count)
         resourceGroupMap.set(rel.resource_group, (resourceGroupMap.get(rel.resource_group) || 0) + rel.resource_count)
         serviceMap.set(rel.providers, (serviceMap.get(rel.providers) || 0) + rel.resource_count)
@@ -159,14 +181,13 @@ export const TopRecursosGeneralChartComponent = ({
         topResourceGroups,
         topServices,
         topLocations,
-        summary: data.summary
+        summary: data.summary ?? null
       }
     }
 
-    // Sin filtro: usar datos originales
     const topSubscriptions = (data.top_by_subscriptions || [])
       .slice(0, 5)
-      .map((item: unknown) => ({
+      .map((item) => ({
         name: item.display_name || 'Sin nombre',
         value: item.resource_count || 0,
         formatted: formatNumber(item.resource_count || 0)
@@ -174,7 +195,7 @@ export const TopRecursosGeneralChartComponent = ({
 
     const topResourceGroups = (data.top_by_resource_groups || [])
       .slice(0, 5)
-      .map((item: unknown) => ({
+      .map((item) => ({
         name: item.resource_group || 'Sin especificar',
         value: item.resource_count || 0,
         formatted: formatNumber(item.resource_count || 0)
@@ -182,7 +203,7 @@ export const TopRecursosGeneralChartComponent = ({
 
     const topServices = (data.top_by_services || [])
       .slice(0, 5)
-      .map((item: unknown) => ({
+      .map((item) => ({
         name: item.providers || 'Sin servicio',
         value: item.resource_count || 0,
         formatted: formatNumber(item.resource_count || 0)
@@ -190,7 +211,7 @@ export const TopRecursosGeneralChartComponent = ({
 
     const topLocations = (data.top_by_locations || [])
       .slice(0, 5)
-      .map((item: unknown) => ({
+      .map((item) => ({
         name: item.location || 'Sin ubicación',
         value: item.resource_count || 0,
         formatted: formatNumber(item.resource_count || 0)
@@ -201,7 +222,7 @@ export const TopRecursosGeneralChartComponent = ({
       topResourceGroups,
       topServices,
       topLocations,
-      summary: data.summary
+      summary: data.summary ?? null
     }
   }, [data, dataDetallado, activeFilter])
 
@@ -218,11 +239,9 @@ export const TopRecursosGeneralChartComponent = ({
 
   const handleChartClick = useCallback((type: FilterState['type'], name: string) => {
     setActiveFilter(prev => {
-      // Si hacen clic en el mismo elemento, deseleccionar
       if (prev.type === type && prev.value === name) {
         return { type: null, value: null }
       }
-      // Sino, seleccionar el nuevo elemento
       return { type, value: name }
     })
   }, [])
@@ -319,7 +338,6 @@ export const TopRecursosGeneralChartComponent = ({
     }] : []
   })
 
-  // Chart 1: Subscriptions
   useEffect(() => {
     if (!chartRefSubscriptions.current) return
     const hasData = topSubscriptions.length > 0 && hasDataWithValue(topSubscriptions)
@@ -347,7 +365,6 @@ export const TopRecursosGeneralChartComponent = ({
     }
   }, [topSubscriptions, handleResize, hasDataWithValue, handleChartClick, activeFilter])
 
-  // Chart 2: Resource Groups
   useEffect(() => {
     if (!chartRefResourceGroups.current) return
     const hasData = topResourceGroups.length > 0 && hasDataWithValue(topResourceGroups)
@@ -369,7 +386,6 @@ export const TopRecursosGeneralChartComponent = ({
     }
   }, [topResourceGroups, hasDataWithValue, handleChartClick, activeFilter])
 
-  // Chart 3: Services
   useEffect(() => {
     if (!chartRefServices.current) return
     const hasData = topServices.length > 0 && hasDataWithValue(topServices)
@@ -391,7 +407,6 @@ export const TopRecursosGeneralChartComponent = ({
     }
   }, [topServices, hasDataWithValue, handleChartClick, activeFilter])
 
-  // Chart 4: Locations
   useEffect(() => {
     if (!chartRefLocations.current) return
     const hasData = topLocations.length > 0 && hasDataWithValue(topLocations)
@@ -455,7 +470,6 @@ export const TopRecursosGeneralChartComponent = ({
 
   return (
     <div className="space-y-6 p-4">
-      {/* Indicador de filtro activo */}
       {activeFilter.type && activeFilter.value && (
         <Card className="bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-800">
           <CardContent className="p-4">
@@ -483,7 +497,6 @@ export const TopRecursosGeneralChartComponent = ({
         </Card>
       )}
 
-      {/* Gráficos en grid 2x2 */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card className="shadow-lg rounded-2xl cursor-pointer hover:shadow-xl transition-shadow">
           <CardContent className="p-0">
@@ -507,7 +520,6 @@ export const TopRecursosGeneralChartComponent = ({
         </Card>
       </div>
 
-      {/* Cards de métricas */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card className="border-l-4 border-l-blue-500 hover:shadow-lg transition-shadow">
           <CardContent className="p-6">

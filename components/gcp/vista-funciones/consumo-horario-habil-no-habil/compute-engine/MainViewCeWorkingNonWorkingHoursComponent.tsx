@@ -24,14 +24,14 @@ export const MainViewCeWorkingNonWorkingHoursComponent = () => {
             <div className='w-full min-w-0'>
                 <FiltersComponent
                     Component={CeWorkingNonWorkingHoursComponent}
+                    cloud='gcp'
                     dateFilter
                     projectsFilter
                     regionFilter
                     resourceFilter
                     isResourceMultiSelect
                     resourceService='instances'
-                    tagCollection='gcp_compute_instances'
-                    tagColumn='labels'
+                    tagResourceType='compute_instances'
                     tagsFilter
                     localService='Compute Engine'
                 />

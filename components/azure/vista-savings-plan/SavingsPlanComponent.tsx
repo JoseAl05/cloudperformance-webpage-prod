@@ -1,5 +1,6 @@
 'use client'
 
+import { fetcher } from '@/lib/fetcher';
 import useSWR from 'swr'
 import { useState, useRef, useEffect } from "react"
 import * as echarts from 'echarts'
@@ -56,6 +57,19 @@ interface Instancia {
   consumo_diario: ConsumoDiario[];
 }
 
+interface SavingsPlanResumen {
+  valor_fijo_mensual_saving_plan: number
+  valor_compromiso_por_hora: number
+  unidad_monetaria: string
+}
+
+interface SavingsPlanAnalisis {
+  suma_pay_g_price_instancias: number
+  costo_por_uso_savings_plan: number
+  costo_exceso_ondemand: number
+  costo_hipotetico_ondemand: number
+}
+
 interface ConsumoApiResponse {
   resumen: {
     total_instancias: number;
@@ -67,14 +81,6 @@ interface ConsumoApiResponse {
   instancias: Instancia[];
 }
 
-const fetcher = (url: string) =>
-  fetch(url, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json'
-    }
-  }).then(res => res.json())
-
 const isNullish = (v: unknown) => v === null || v === undefined
 
 export const SavingsPlanComponent = ({ startDate, endDate }: SavingsPlanProps) => {
@@ -83,17 +89,17 @@ export const SavingsPlanComponent = ({ startDate, endDate }: SavingsPlanProps) =
   const startDateFormatted = startDate.toISOString().replace('Z', '').slice(0, -4)
   const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : ''
 
-  const { data: resumen, error: errorResumen, isLoading: loadingResumen } = useSWR(
+  const { data: resumen, error: errorResumen, isLoading: loadingResumen } = useSWR<SavingsPlanResumen>(
     `/api/azure/bridge/azure/saving-plan/resumen?date_from=${startDateFormatted}&date_to=${endDateFormatted}`,
     fetcher,
   )
 
-  const { data: analisis, error: errorAnalisis, isLoading: loadingAnalisis } = useSWR(
+  const { data: analisis, error: errorAnalisis, isLoading: loadingAnalisis } = useSWR<SavingsPlanAnalisis>(
     `/api/azure/bridge/azure/saving-plan/analisis?date_from=${startDateFormatted}&date_to=${endDateFormatted}`,
     fetcher,
   )
 
-  const { data: recursos, error: errorRecursos, isLoading: loadingRecursos } = useSWR(
+  const { data: recursos, error: errorRecursos, isLoading: loadingRecursos } = useSWR<unknown[]>(
     `/api/azure/bridge/azure/saving-plan/recursos_activos?date_from=${startDateFormatted}&date_to=${endDateFormatted}`,
     fetcher,
   )
@@ -132,12 +138,9 @@ export const SavingsPlanComponent = ({ startDate, endDate }: SavingsPlanProps) =
   return (
     <div className="w-full min-w-0 px-4 py-6">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* COLUMNA IZQUIERDA - 2/3 del ancho */}
         <div className="lg:col-span-2 space-y-6">
-          {/* ========== SECCIÓN: RESUMEN SAVING PLAN ========== */}
           <div className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {/* Valor Fijo Mensual */}
               <Card className="border-l-4 border-l-blue-500">
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between">
@@ -153,7 +156,6 @@ export const SavingsPlanComponent = ({ startDate, endDate }: SavingsPlanProps) =
                 </CardContent>
               </Card>
 
-              {/* Valor Compromiso por Hora */}
               <Card className="border-l-4 border-l-purple-500">
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between">
@@ -169,7 +171,6 @@ export const SavingsPlanComponent = ({ startDate, endDate }: SavingsPlanProps) =
                 </CardContent>
               </Card>
 
-              {/* Moneda */}
               <Card className="border-l-4 border-l-amber-500">
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between">
@@ -187,7 +188,6 @@ export const SavingsPlanComponent = ({ startDate, endDate }: SavingsPlanProps) =
             </div>
           </div>
 
-          {/* ========== TREEMAP - VISUALIZACIÓN DE EXCESO ========== */}
           <div className="space-y-4">
             <Card className="border-l-4">
               <div style={{ height: '500px' }}>
@@ -200,7 +200,6 @@ export const SavingsPlanComponent = ({ startDate, endDate }: SavingsPlanProps) =
           </div>
         </div>
 
-        {/* COLUMNA DERECHA - 1/3 del ancho */}
         <div className="lg:col-span-1 space-y-4">
           <Popover>
             <PopoverTrigger asChild>
@@ -329,9 +328,7 @@ export const SavingsPlanComponent = ({ startDate, endDate }: SavingsPlanProps) =
         </div>
       </div>
 
-      {/* ========== SECCIÓN: GRÁFICO DE CONSUMO DIARIO ========== */}
       <div className="mt-8 space-y-6">
-        {/* Tarjetas de Resumen de Consumo */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <Card className="border-l-4 border-l-blue-500">
             <CardContent className="p-4">
@@ -381,7 +378,6 @@ export const SavingsPlanComponent = ({ startDate, endDate }: SavingsPlanProps) =
 
         </div>
 
-        {/* Controles del Gráfico */}
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-2">
             <span className="text-sm text-muted-foreground">Instancia:</span>
@@ -404,12 +400,10 @@ export const SavingsPlanComponent = ({ startDate, endDate }: SavingsPlanProps) =
           </div>
         </div>
 
-        {/* Gráfico */}
         <SavingsPlanLineChartComponent
           data={consumoData}
         />
 
-        {/* Tabla de Instancias y Detalles */}
         <Card className="shadow-lg mt-6">
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center gap-2">

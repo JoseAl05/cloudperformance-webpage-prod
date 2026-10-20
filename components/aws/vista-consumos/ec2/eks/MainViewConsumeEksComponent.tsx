@@ -31,8 +31,7 @@ export const MainViewConsumeEksComponent = () => {
                     isEksAsgMultiSelect
                     isEksAsgInstanceMultiSelect
                     tagsFilter
-                    collection='aws_eks_clusters_details'
-                    tagColumnName='tags'
+                    resourceType='eks'
                 />
             </div>
         </div>

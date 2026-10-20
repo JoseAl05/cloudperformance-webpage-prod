@@ -1,4 +1,5 @@
 'use client'
+import { fetcher } from '@/lib/fetcher';
 import { Dispatch, SetStateAction, useEffect, useState } from 'react'
 import { Check, ChevronsUpDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -22,10 +23,6 @@ interface CentroDeCostoFilterComponentProps {
   isCentroDeCostoMultiselect: boolean
 }
 
-const fetcher = (url: string) =>
-  fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
-    .then(r => r.json())
-
 export const CentroDeCostoFilterComponent = ({
   cloudType,
   CentroDeCosto,
@@ -36,7 +33,6 @@ export const CentroDeCostoFilterComponent = ({
   const [open, setOpen] = useState(false)
 
   const url = `/api/presupuesto/bridge/${cloudType.toLowerCase()}/centro-costo`
-  //const url = `/api/presupuesto/bridge/aws/centro-costo`
 
   const shouldFetch = !!cloudType
   const { data, error, isLoading } = useSWR<CentroDeCosto[]>(shouldFetch ? url : null, fetcher)

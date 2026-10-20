@@ -2,7 +2,7 @@
 
 import { FiltersComponent } from '@/components/general_gcp/filters/FiltersComponent';
 import { TopFilestoreSubUtilizadoComponent } from './TopFilestoreSubUtilizadoComponent';
-import { TrendingDown } from 'lucide-react'; // Ícono ideal para representar sub-utilización/ahorro
+import { TrendingDown } from 'lucide-react';
 
 export const MainViewTopFilestoreSubUtilizadoComponent = () => {
     return (
@@ -11,7 +11,6 @@ export const MainViewTopFilestoreSubUtilizadoComponent = () => {
                 <div className='flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4'>
                     <div>
                         <div className='flex items-center gap-3 mb-2'>
-                            {/* Contenedor del ícono - Usamos ambar/naranja para indicar alerta/optimización */}
                             <div className='h-12 w-12 bg-amber-100 dark:bg-amber-900/30 rounded-lg flex items-center justify-center'>
                                 <TrendingDown className='h-6 w-6 text-amber-600 dark:text-amber-400' />
                             </div>
@@ -35,8 +34,7 @@ export const MainViewTopFilestoreSubUtilizadoComponent = () => {
                 regionFilter
                 filestoreTierFilter
                 tagsFilter
-                tagCollection="gcp_filestore_instances"
-                tagColumn="labels"
+                tagResourceType="filestore_instances"
             />
         </>
     );

@@ -1,5 +1,6 @@
 'use client'
 
+import { fetcher } from '@/lib/fetcher';
 import { AiRecommendationsComponent } from '@/components/AiRecommendationsComponent';
 import { MessageCard } from '@/components/aws/cards/MessageCards';
 import { RecommenderPieChartComponent } from '@/components/gcp/vista-recommender/grafico/RecommenderPieChartComponent';
@@ -18,10 +19,6 @@ interface RecommenderComponentProps {
     regions: string;
     projects: string;
 }
-
-const fetcher = (url: string) =>
-    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
-        .then(r => r.json());
 
 const isNonEmptyArray = <T,>(v: unknown): v is T[] => Array.isArray(v) && v.length > 0
 

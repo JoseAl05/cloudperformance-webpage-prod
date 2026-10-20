@@ -1,5 +1,6 @@
 'use client';
 
+import { fetchJson } from '@/lib/fetcher';
 import React, { useState, useEffect } from 'react';
 import { useSession } from '@/hooks/useSession';
 import {
@@ -9,8 +10,6 @@ import {
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
-
-// ── Tipos ─────────────────────────────────────────────────────────────────────
 
 interface ComputeUnit {
   cloud: string;
@@ -39,8 +38,6 @@ interface PartnerEstado {
     perpetuas: number;
   };
 }
-
-// ── Helpers ───────────────────────────────────────────────────────────────────
 
 function CloudBadge({ cloud }: { cloud: string }) {
   const map: Record<string, string> = {
@@ -77,8 +74,6 @@ function diasLabel(expires: string | null, estado: string): string {
   return `${dias}d restantes`;
 }
 
-// ── Card de partner ───────────────────────────────────────────────────────────
-
 function PartnerCard({ partner }: { partner: PartnerEstado }) {
   const [expandido, setExpandido] = useState(false);
 
@@ -93,7 +88,6 @@ function PartnerCard({ partner }: { partner: PartnerEstado }) {
   return (
     <div className={cn('rounded-2xl border bg-card shadow-sm overflow-hidden', borderColor)}>
 
-      {/* Header — siempre visible, clickeable */}
       <button
         onClick={() => setExpandido(p => !p)}
         className="w-full flex items-center justify-between gap-4 p-5 hover:bg-muted/30 transition text-left"
@@ -109,7 +103,6 @@ function PartnerCard({ partner }: { partner: PartnerEstado }) {
           </div>
         </div>
 
-        {/* Resumen o sin licencia */}
         {partner.sin_licencia ? (
           <Badge className="bg-orange-500/10 text-orange-600 border-orange-200 shrink-0">
             ⚠️ Sin licencia
@@ -140,11 +133,9 @@ function PartnerCard({ partner }: { partner: PartnerEstado }) {
         )}
       </button>
 
-      {/* Detalle expandido */}
       {expandido && (
         <div className="border-t px-5 pb-5 pt-4 space-y-2">
 
-          {/* Metadata */}
           {!partner.sin_licencia && partner.generado_at && (
             <p className="text-xs text-muted-foreground mb-3">
               Última licencia: {new Date(partner.generado_at).toLocaleDateString('es-CL')}
@@ -152,7 +143,6 @@ function PartnerCard({ partner }: { partner: PartnerEstado }) {
             </p>
           )}
 
-          {/* Sin licencia */}
           {partner.sin_licencia && (
             <div className="rounded-xl bg-orange-500/5 border border-orange-200 px-4 py-3">
               <p className="text-sm text-orange-600 font-medium">⚠️ Solicitud pendiente — sin .lic generado</p>
@@ -162,7 +152,6 @@ function PartnerCard({ partner }: { partner: PartnerEstado }) {
             </div>
           )}
 
-          {/* Headers de columna */}
           {partner.compute_units.length > 0 && (
             <div className="grid grid-cols-[70px_1fr_350px_230px_110px] gap-3 px-3 py-2 border-b">
               <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Nube</span>
@@ -173,7 +162,6 @@ function PartnerCard({ partner }: { partner: PartnerEstado }) {
             </div>
           )}
 
-          {/* UCs */}
           {partner.compute_units.map((uc, i) => (
             <div
               key={i}
@@ -200,8 +188,6 @@ function PartnerCard({ partner }: { partner: PartnerEstado }) {
   );
 }
 
-// ── Página principal ──────────────────────────────────────────────────────────
-
 export default function EstadoPage() {
   const { user, isLoading } = useSession();
   const [partners, setPartners]   = useState<PartnerEstado[]>([]);
@@ -211,8 +197,7 @@ export default function EstadoPage() {
 
   useEffect(() => {
     if (!user) return;
-    fetch('/api/op-licencias/estado', { credentials: 'include' })
-      .then(r => r.json())
+    fetchJson<PartnerEstado[]>('/api/op-licencias/estado', { credentials: 'include' })
       .then(data => setPartners(data))
       .catch(() => setError('Error al cargar estado de licencias.'))
       .finally(() => setLoading(false));
@@ -228,7 +213,6 @@ export default function EstadoPage() {
     return <div className="p-4 bg-red-100 text-red-700 rounded">Acceso denegado.</div>;
   }
 
-  // ── KPIs globales — totales de UCs ────────────────────────────────────────
   const kpis = {
     total:       partners.length,
     activas:     partners.reduce((acc, p) => acc + (p.resumen?.activas ?? 0), 0),
@@ -237,7 +221,6 @@ export default function EstadoPage() {
     porVencer:   partners.reduce((acc, p) => acc + (p.resumen?.por_vencer ?? 0), 0),
   };
 
-  // ── Filtrar ───────────────────────────────────────────────────────────────
   const partnersFiltrados = partners.filter(p => {
     if (filtro === 'sin_licencia') return p.sin_licencia;
     if (filtro === 'vencidas')     return (p.resumen?.vencidas ?? 0) > 0;
@@ -255,7 +238,6 @@ export default function EstadoPage() {
   return (
     <section className="px-4 py-8 space-y-6">
 
-      {/* Header */}
       <div className="flex items-center gap-3">
         <Link href="/op-licencias" className="text-muted-foreground hover:text-foreground transition">
           <ArrowLeft className="h-5 w-5" />
@@ -274,7 +256,6 @@ export default function EstadoPage() {
         </div>
       )}
 
-      {/* KPIs */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
         <div className="rounded-2xl border bg-card p-5 shadow-sm">
           <ShieldCheck className="h-6 w-6 text-blue-600 mb-2" />
@@ -303,7 +284,6 @@ export default function EstadoPage() {
         </div>
       </div>
 
-      {/* Filtros */}
       <div className="flex gap-2 flex-wrap">
         {FILTROS.map(f => (
           <button
@@ -322,7 +302,6 @@ export default function EstadoPage() {
         ))}
       </div>
 
-      {/* Cards de partners */}
       {partnersFiltrados.length === 0 ? (
         <div className="rounded-2xl border border-dashed p-12 text-center text-muted-foreground">
           <ShieldCheck className="h-10 w-10 mx-auto mb-3 opacity-30" />

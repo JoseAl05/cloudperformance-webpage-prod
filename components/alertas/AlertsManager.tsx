@@ -4,7 +4,6 @@ import React, { useState } from 'react';
 import { DollarSign, ArrowRight, ArrowLeft, TrendingUp, Wallet } from 'lucide-react';
 import BillingAlertsView from './billing/BillingAlertsView';
 import AnomalyAlertsView from './anomalies/AnomalyAlertsView';
-//import GlobalBudgetView from './budget/GlobalBudgetView';
 import CostCenterBudgetView from './budget/CostCenterBudgetView';
 
 CostCenterBudgetView

@@ -1,4 +1,5 @@
 'use client'
+import { fetchJson } from '@/lib/fetcher';
 import { Dispatch, SetStateAction, useState, useEffect } from 'react'
 import { Check, ChevronsUpDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -27,13 +28,13 @@ interface AsgFilterComponentProps {
 
 
 const fetcherPost = (url: string, tags: { Key: string; Value: string } | null = null) =>
-    fetch(url, {
+    fetchJson(url, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
         body: tags ? JSON.stringify([tags]) : null,
-    }).then(res => res.json());
+    });
 
 export const AsgFilterComponent = ({
     asg, asgInstance, setAsg, setAsgInstance,
@@ -142,7 +143,6 @@ export const AsgFilterComponent = ({
                 </PopoverContent>
             </Popover>
 
-            {/* Instancias de ASG (solo si hay ASG disponible y seleccionado) */}
             {
                 isViewResource ? (
                     <></>

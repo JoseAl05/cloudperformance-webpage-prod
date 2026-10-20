@@ -7,25 +7,20 @@ function isDarkMode(): boolean {
 }
 
 function getThemeBG(): string {
-  // 1) intenta CSS var de shadcn
   const root = getComputedStyle(document.documentElement);
   const varBg = root.getPropertyValue('--background').trim();
   if (varBg) return varBg;
-  // 2) sino, usa el fondo computado del body
   const bodyBg = getComputedStyle(document.body).backgroundColor;
   if (bodyBg) return bodyBg;
-  // 3) fallback
   return isDarkMode() ? '#0b0b0b' : '#ffffff';
 }
 
 function getIconColor(): string {
-  // Colores con buen contraste en ambos temas
   return isDarkMode()
-    ? '#e5e7eb' /* Tailwind zinc-200 */
-    : '#374151' /* slate-700 */;
+    ? '#e5e7eb'
+    : '#374151' ;
 }
 
-// === Tu SVG (con color dinámico) -> data URL para ECharts ===
 function makeFullscreenIconByTheme(): string {
   const color = getIconColor();
   const svg = `
@@ -45,7 +40,6 @@ function makeFullscreenIconByTheme(): string {
   return `image://data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
 }
 
-// === Inyecta el botón en el toolbox (respeta overrides del usuario) ===
 function augmentWithFullscreenTool(
   opt: echarts.EChartsOption,
   el: HTMLElement
@@ -55,7 +49,6 @@ function augmentWithFullscreenTool(
     : opt.toolbox ?? {};
   const userFeature = (tb as unknown).feature ?? {};
 
-  // Si el usuario lo desactiva explícitamente
   if (userFeature.myFullscreen === false) return opt;
 
   const icon = userFeature.myFullscreen?.icon ?? makeFullscreenIconByTheme();
@@ -88,7 +81,6 @@ function augmentWithFullscreenTool(
     ...tb,
     top: (tb as unknown).top ?? 10,
     iconStyle: {
-      // Asegura contraste de TODOS los íconos del toolbox (saveAsImage, etc.)
       color: iconColor,
       borderColor: iconColor,
       ...(tb as unknown).iconStyle,
@@ -100,7 +92,6 @@ function augmentWithFullscreenTool(
   return { ...opt, toolbox: toolboxFinal };
 }
 
-// === Fullscreen lifecycle: aplica fondo correcto del tema y hace resize ===
 function bindFullscreenLifecycle(chart: echarts.ECharts, el: HTMLElement) {
   const doc: unknown = document;
   const prev = {
@@ -138,42 +129,12 @@ function bindFullscreenLifecycle(chart: echarts.ECharts, el: HTMLElement) {
   document.addEventListener('fullscreenchange', onFsChange);
   document.addEventListener('webkitfullscreenchange' as unknown, onFsChange);
 
-  // Observa cambios de tema (clase 'dark' en <html>) y actualiza iconos + fondo
-  // COMENTADO POR POSIBLE CONFLICTO CON DARK MODE
-  // const mo = new MutationObserver(() => {
-  //   // 1) si está fullscreen, actualiza fondo
-  //   const active =
-  //     doc.fullscreenElement === el || doc.webkitFullscreenElement === el;
-  //   if (active) applyBG();
-
-  //   // 2) actualiza iconos del toolbox para el tema actual
-  //   chart.setOption(
-  //     {
-  //       toolbox: {
-  //         iconStyle: {
-  //           color: getIconColor(),
-  //           borderColor: getIconColor(),
-  //         },
-  //         feature: {
-  //           myFullscreen: { icon: makeFullscreenIconByTheme() },
-  //         },
-  //       },
-  //     },
-  //     { notMerge: false, lazyUpdate: true }
-  //   );
-  // });
-  // mo.observe(document.documentElement, {
-  //   attributes: true,
-  //   attributeFilter: ['class'],
-  // });
-
   return () => {
     document.removeEventListener('fullscreenchange', onFsChange);
     document.removeEventListener(
       'webkitfullscreenchange' as unknown,
       onFsChange
     );
-    // mo.disconnect();
   };
 }
 
@@ -416,12 +377,6 @@ export interface SeriesOverrides {
 
 export interface BaseSeriesDef {
   name: string;
-  /**
-   * Para (line, bar, area, stackedBar, scatter):
-   *   Array<[number | string | Date, number]>
-   * Para pie/donut:
-   *   Array<{ name: string; value: number }>
-   */
   data: unknown[];
   extra?: SeriesOverrides;
 }
@@ -694,7 +649,6 @@ function buildSeries(def: AnySeriesDef): echarts.SeriesOption {
         lineStyle: { width: 2 },
         areaStyle: def.kind === 'area' ? {} : undefined,
         data: def.data as Array<[unknown, number]> | Array<[number]>,
-        // encode: { x: 0, y: 1 },
         emphasis: { focus: 'series' },
       } as echarts.SeriesOption;
       return applyOverrides(base, def.kind);

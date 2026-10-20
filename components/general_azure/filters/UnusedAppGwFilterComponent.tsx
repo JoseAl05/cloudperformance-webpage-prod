@@ -1,4 +1,5 @@
 'use client'
+import { fetcher } from '@/lib/fetcher';
 import { Dispatch, SetStateAction, useMemo, useState } from 'react'
 import { Check, ChevronsUpDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -7,6 +8,7 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import useSWR from 'swr'
 import { LoaderComponent } from '@/components/general_azure/LoaderComponent'
+import type { UnusedCandidate } from '@/interfaces/unused'
 
 interface UnusedAppGwFilterComponentProps {
     startDate: Date;
@@ -20,14 +22,6 @@ interface UnusedAppGwFilterComponentProps {
     selectedTagKey?: string | null;
     selectedTagValue?: string | null;
 }
-
-type ApiUnusedAppGw =
-    | { gw_id_lowercase: string; gw_name: string }
-    | string
-
-const fetcher = (url: string) =>
-    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
-        .then(r => r.json());
 
 export const UnusedAppGwFilterComponent = ({
     startDate,
@@ -47,19 +41,12 @@ export const UnusedAppGwFilterComponent = ({
     const tagKeyParam = selectedTagKey || 'allKeys';
     const tagValueParam = selectedTagValue || 'allValues';
 
-    const url = `/api/azure/bridge/azure/apps_gateway/all_unused_application_gateways?date_from=${startDateFormatted}&date_to=${endDateFormatted}&subscription_id=${subscription}&location=${region}&resource_groups=${resourceGroup}&nombre_tag=${tagKeyParam}&valor_tag=${tagValueParam}`
-    const { data, error, isLoading } = useSWR<ApiUnusedAppGw[]>(url, fetcher)
+    const url = `/api/azure/bridge/azure/unused/app-gateways/candidates?date_from=${startDateFormatted}&date_to=${endDateFormatted}&subscription_id=${subscription && subscription !== 'all_subscriptions' ? subscription : 'all'}&location=${region}&resource_groups=${resourceGroup}&nombre_tag=${tagKeyParam}&valor_tag=${tagValueParam}`
+    const { data, error, isLoading } = useSWR<UnusedCandidate[]>(url, fetcher)
 
     const unusedAppsGw = useMemo(() => {
         if (!Array.isArray(data)) return [] as { id: string; name: string }[]
-        if (data.length === 0) return []
-        if (typeof data[0] === 'string') {
-            return (data as string[]).map((id) => ({ id, name: id }))
-        }
-        return (data as { gw_id_lowercase: string; gw_name: string }[]).map((s) => ({
-            id: s.gw_id_lowercase,
-            name: s.gw_name,
-        }))
+        return data.map((s) => ({ id: s.resource_id, name: s.resource_name }))
     }, [data])
 
     const nounusedAppsGw = unusedAppsGw.length === 0

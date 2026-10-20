@@ -30,6 +30,7 @@ import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { LoaderComponent } from '@/components/general_aws/LoaderComponent';
 import { bytesToMB } from '@/lib/bytesToMbs';
+import { readFilterParam } from '@/lib/filters';
 
 interface UnusedNatGatewaysInsightModalProps {
     natGw: UnusedNatGateways | null;
@@ -42,11 +43,11 @@ interface UnusedNatGatewaysInsightModalProps {
 export const UnusedNatGatewaysInsightModal = ({ natGw, asociatedResources, isLoading, isOpen, onClose }: UnusedNatGatewaysInsightModalProps) => {
     const searchParams = useSearchParams();
 
-    const startDateParam = searchParams.get('startDate');
-    const endDateParam = searchParams.get('endDate');
-    const keyParam = searchParams.get('selectedKey');
-    const valueParam = searchParams.get('selectedValue');
-    const regionParam = searchParams.get('region');
+    const startDateParam = readFilterParam(searchParams, 'dateFrom');
+    const endDateParam = readFilterParam(searchParams, 'dateTo');
+    const keyParam = readFilterParam(searchParams, 'tagKey');
+    const valueParam = readFilterParam(searchParams, 'tagValue');
+    const regionParam = readFilterParam(searchParams, 'regions');
 
     if (!natGw) return null;
 
@@ -213,7 +214,7 @@ export const UnusedNatGatewaysInsightModal = ({ natGw, asociatedResources, isLoa
                                                             <div key={instance.instance_id} className="p-3 border rounded-lg text-sm bg-white dark:bg-slate-950">
                                                                 <div className="flex justify-between items-start mb-1">
                                                                     <Link
-                                                                        href={{ pathname: '/aws/recursos/instancias-ec2', query: { startDate: startDateParam, endDate: endDateParam, instance: instance.instance_id, region: regionParam, selectedKey: keyParam, selectedValue: valueParam } }}
+                                                                        href={{ pathname: '/cloud-aws/recursos/instancias-ec2', query: { startDate: startDateParam, endDate: endDateParam, instance: instance.instance_id, region: regionParam, selectedKey: keyParam, selectedValue: valueParam } }}
                                                                         className='text-blue-500 hover:text-blue-500/80'
                                                                         rel="noopener noreferrer"
                                                                         target="_blank"
@@ -247,16 +248,16 @@ export const UnusedNatGatewaysInsightModal = ({ natGw, asociatedResources, isLoa
                                             let redirectUrl = '';
                                             switch (engineKey) {
                                                 case 'mysql':
-                                                    redirectUrl = '/aws/recursos/instancias-rds-mysql';
+                                                    redirectUrl = '/cloud-aws/recursos/instancias-rds-mysql';
                                                     break;
                                                 case 'postgresql':
-                                                    redirectUrl = '/aws/recursos/instancias-rds-pg';
+                                                    redirectUrl = '/cloud-aws/recursos/instancias-rds-pg';
                                                     break;
                                                 case 'sqlserver':
-                                                    redirectUrl = '/aws/recursos/instancias-rds-sqlserver';
+                                                    redirectUrl = '/cloud-aws/recursos/instancias-rds-sqlserver';
                                                     break;
                                                 case 'oracle':
-                                                    redirectUrl = '/aws/recursos/instancias-rds-oracle';
+                                                    redirectUrl = '/cloud-aws/recursos/instancias-rds-oracle';
                                                     break;
                                                 default:
                                                     redirectUrl = '#';
@@ -374,7 +375,7 @@ export const UnusedNatGatewaysInsightModal = ({ natGw, asociatedResources, isLoa
                                                                         <div key={i} className="flex items-center justify-between text-[10px] bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded">
                                                                             <div className="flex items-center gap-1.5 min-w-0">
                                                                                 <Link
-                                                                                    href={{ pathname: '/aws/recursos/instancias-ec2', query: { startDate: startDateParam, endDate: endDateParam, instance: ec2.name, region: regionParam, selectedKey: keyParam, selectedValue: valueParam } }}
+                                                                                    href={{ pathname: '/cloud-aws/recursos/instancias-ec2', query: { startDate: startDateParam, endDate: endDateParam, instance: ec2.name, region: regionParam, selectedKey: keyParam, selectedValue: valueParam } }}
                                                                                     className='text-blue-500 hover:text-blue-500/80'
                                                                                     rel="noopener noreferrer"
                                                                                     target="_blank"
@@ -393,16 +394,16 @@ export const UnusedNatGatewaysInsightModal = ({ natGw, asociatedResources, isLoa
                                                                         let redirectUrl = '';
                                                                         switch (db.engine) {
                                                                             case 'mysql':
-                                                                                redirectUrl = '/aws/recursos/instancias-rds-mysql';
+                                                                                redirectUrl = '/cloud-aws/recursos/instancias-rds-mysql';
                                                                                 break;
                                                                             case 'postgresql':
-                                                                                redirectUrl = '/aws/recursos/instancias-rds-pg';
+                                                                                redirectUrl = '/cloud-aws/recursos/instancias-rds-pg';
                                                                                 break;
                                                                             case 'sqlserver':
-                                                                                redirectUrl = '/aws/recursos/instancias-rds-sqlserver';
+                                                                                redirectUrl = '/cloud-aws/recursos/instancias-rds-sqlserver';
                                                                                 break;
                                                                             case 'oracle':
-                                                                                redirectUrl = '/aws/recursos/instancias-rds-oracle';
+                                                                                redirectUrl = '/cloud-aws/recursos/instancias-rds-oracle';
                                                                                 break;
                                                                             default:
                                                                                 redirectUrl = '#';

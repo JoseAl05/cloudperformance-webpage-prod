@@ -6,14 +6,14 @@ import { createChartOption, deepMerge, makeBaseOptions, useECharts } from '@/lib
 import { useTheme } from 'next-themes';
 import { Loader2 } from 'lucide-react';
 import Image from 'next/image';
-import { CloudBillingItem } from '@/lib/CloudBillingItem';
+import type { BillingPoint } from '@/interfaces/billing';
 import { CloudProvider } from '@/hooks/useMultiTenantSelection';
 
 
 interface MultiCloudMonthlyServiceProps {
-    azureData: CloudBillingItem[];
-    awsData: CloudBillingItem[];
-    gcpData: CloudBillingItem[];
+    azureData: BillingPoint[];
+    awsData: BillingPoint[];
+    gcpData: BillingPoint[];
     selectedClouds: CloudProvider[] | string[];
     isLoading: boolean;
     startDate: Date;
@@ -30,18 +30,8 @@ const CATEGORY_COLORS: Record<string, string> = {
     'Otros': '#64748b'
 };
 
-const normalizeCategory = (item: CloudBillingItem, provider: 'azure' | 'aws' | 'gcp') => {
-    let rawName = '';
-
-    if (provider === 'azure') {
-        rawName = item.meter_category || item.product || item.service_name || '';
-    } else if (provider === 'aws') {
-        rawName = item.SERVICE || item.service || '';
-    } else if (provider === 'gcp') {
-        rawName = item.service || item.service_description || '';
-    }
-
-    const lower = rawName.toLowerCase();
+const normalizeCategory = (point: BillingPoint) => {
+    const lower = (point.service || '').toLowerCase();
 
     const computeServices = [
         'compute', 'virtual machine', 'ec2', 'lambda', 'functions',
@@ -113,35 +103,16 @@ export const MultiCloudMonthlyServiceChartComponent = ({
             });
         });
 
-        const processProviderData = (data: CloudBillingItem[], provider: 'azure' | 'aws' | 'gcp', costField: keyof CloudBillingItem) => {
-            if (!Array.isArray(data)) return;
-            data.forEach(item => {
-                const dateVal = item.date || item.start_date || item.usage_date || item.usage_start_time || item.day;
-                if (!dateVal) return;
-
-                let monthStr = '';
-                if (typeof dateVal === 'string') {
-                    if (dateVal.includes('/')) {
-                        const parts = dateVal.split('/');
-                        monthStr = `${parts[2]}-${String(parts[1]).padStart(2, '0')}`;
-                    } else {
-                        monthStr = dateVal.split('T')[0].substring(0, 7);
-                    }
-                } else {
-                    monthStr = new Date(dateVal as number | Date).toISOString().substring(0, 7);
-                }
-
-                if (dataMap[monthStr]) {
-                    const category = normalizeCategory(item, provider);
-                    const cost = Number(item[costField]) || 0;
-                    dataMap[monthStr][provider][category] += cost;
-                }
+        const processProviderData = (data: BillingPoint[], provider: 'azure' | 'aws' | 'gcp') => {
+            data.forEach(point => {
+                const monthStr = point.date.slice(0, 7);
+                if (dataMap[monthStr]) dataMap[monthStr][provider][normalizeCategory(point)] += point.cost;
             });
         };
 
-        if (selectedClouds.includes('azure')) processProviderData(azureData, 'azure', 'cost_in_usd');
-        if (selectedClouds.includes('aws')) processProviderData(awsData, 'aws', 'unblendedcost');
-        if (selectedClouds.includes('gcp')) processProviderData(gcpData, 'gcp', 'cost_net_usd');
+        if (selectedClouds.includes('azure')) processProviderData(azureData, 'azure');
+        if (selectedClouds.includes('aws')) processProviderData(awsData, 'aws');
+        if (selectedClouds.includes('gcp')) processProviderData(gcpData, 'gcp');
 
         return { dates: monthList, dataMap };
     }, [azureData, awsData, gcpData, isLoading, selectedClouds, monthList]);
@@ -231,7 +202,7 @@ export const MultiCloudMonthlyServiceChartComponent = ({
                     textStyle: { color: isDark ? '#ccc' : '#666' },
                     data: Object.keys(CATEGORY_COLORS).map(cat => ({
                         name: cat,
-                        icon: 'roundRect' 
+                        icon: 'roundRect'
                     }))
                 },
                 tooltip: {
@@ -247,7 +218,7 @@ export const MultiCloudMonthlyServiceChartComponent = ({
                             const value = Number(p.value || 0);
                             const seriesName = String(p.seriesName || '');
                             const seriesId = String(p.seriesId || '');
-                            
+
                             if (value > 0 && !seriesName.startsWith('Logo-')) {
                                 const prov = seriesId.includes('aws') ? 'AWS' : seriesId.includes('azure') ? 'Azure' : 'GCP';
                                 if (!byProvider[prov]) byProvider[prov] = [];

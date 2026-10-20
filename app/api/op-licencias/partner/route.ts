@@ -24,13 +24,11 @@ export async function GET(req: NextRequest) {
     const colLic = await getCollection('op_licencias');
     const colSol = await getCollection('op_solicitudes');
 
-    // ── Buscar en licencias primero ───────────────────────────────────────────
     const ultimaLicencia = await colLic.findOne(
       { $or: [{ partner: regex }, { rut: regex }] },
       { sort: { generado_at: -1 } }
     );
 
-    // ── Si no tiene licencia, buscar en solicitudes ────────────────────────────
     const solicitudRef = ultimaLicencia
       ? null
       : await colSol.findOne(
@@ -45,12 +43,10 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    // ── Datos base del partner ────────────────────────────────────────────────
     const partnerNombre   = ultimaLicencia?.partner   || solicitudRef?.partner;
     const partnerRut      = ultimaLicencia?.rut        || solicitudRef?.rut;
     const partnerFp       = ultimaLicencia?.fingerprint || solicitudRef?.fingerprint;
 
-    // ── Solicitudes pendientes ────────────────────────────────────────────────
     const solicitudesPendientes = await colSol
       .find({ partner: partnerNombre, rut: partnerRut, estado: 'pendiente' })
       .sort({ createdAt: -1 })

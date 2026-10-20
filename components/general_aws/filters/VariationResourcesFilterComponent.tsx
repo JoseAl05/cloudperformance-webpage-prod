@@ -1,4 +1,5 @@
 'use client'
+import { fetcher as fetcherGet, fetchJson } from '@/lib/fetcher';
 import { Dispatch, SetStateAction, useEffect, useState } from 'react'
 import { Check, ChevronsUpDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -21,23 +22,13 @@ interface VariationResourcesFilterComponentProps {
 }
 
 const fetcherPost = (url: string, tags: { Key: string; Value: string } | null = null) =>
-    fetch(url, {
+    fetchJson(url, {
         method: 'POST',
         headers: {
-            'Authorization': `Bearer ${process.env.NEXT_PUBLIC_API_TOKEN}`,
             'Content-Type': 'application/json',
         },
         body: tags ? JSON.stringify([tags]) : null,
-    }).then(res => res.json());
-
-const fetcherGet = (url: string) =>
-    fetch(url, {
-        method: 'GET',
-        headers: {
-            'Authorization': `Bearer ${process.env.NEXT_PUBLIC_API_TOKEN}`,
-            'Content-Type': 'application/json',
-        },
-    }).then(res => res.json());
+    });
 
 export const VariationResourcesFilterComponent = ({
     startDate, endDate, region, service, metric, resource, setResource, isResourceMultiSelect
@@ -53,7 +44,6 @@ export const VariationResourcesFilterComponent = ({
     let fetcher: ((url: string) => Promise<unknown>) | null = null;
     switch (service) {
         case 'InstanciasEc2':
-            // /api/vm/all-instances-ec2
             fetcher = fetcherPost
             url = shouldFetch ? `/api/aws/bridge/vm/all-instances-ec2?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`
                 : null;
@@ -95,7 +85,6 @@ export const VariationResourcesFilterComponent = ({
             break;
         case 'S3Buckets':
             fetcher = fetcherGet
-            // url = shouldFetch ? `balblalbal`
             url = shouldFetch ? `/api/aws/bridge/s3/s3_buckets/list?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`
                 : null;
             break;
@@ -109,11 +98,6 @@ export const VariationResourcesFilterComponent = ({
             url = shouldFetch ? `/api/aws/bridge/ebs/all_ebs?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}`
                 : null;
             break;
-        // default:
-        //     fetcher = fetcherPost
-        //     url = shouldFetch ? `no result` 
-        //     : null;
-        //     break;
     }
 
     const { data, error, isLoading } = useSWR<string[]>(url, fetcher);

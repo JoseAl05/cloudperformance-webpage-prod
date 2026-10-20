@@ -1,5 +1,6 @@
 "use client";
 
+import { fetcher } from '@/lib/fetcher';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useRef, useEffect } from "react";
 import useSWR from "swr";
@@ -71,17 +72,12 @@ interface MetricPoint {
   MetricLabel: string;
 }
 
-// Función para transformar los datos de métricas al formato esperado por el gráfico
 const transformMetricsForChart = (
   metricsData: RdsMetricsData
 ): MetricPoint[] => {
   if (!metricsData?.metrics_data) return [];
   return metricsData.metrics_data as MetricPoint[];
 };
-
-const fetcher = (url: string) =>
-  fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
-    .then(r => r.json());
 
 export const InstanciasRdsOracleChartComponent = ({
   startDate,
@@ -132,7 +128,6 @@ export const InstanciasRdsOracleChartComponent = ({
     isLoading: metricsLoading,
   } = useSWR<RdsMetricsData>(metricsUrl, fetcher);
 
-  // -------- Eventos de la instancia --------
   const shouldFetchEvents = !!(
     startDate &&
     endDate &&
@@ -149,7 +144,6 @@ export const InstanciasRdsOracleChartComponent = ({
     isLoading: eventsLoading,
   } = useSWR(eventsUrl, fetcher);
 
-  // ---------- eCharts para "Estado de Instancias" (vista general) ----------
   const processChartData = (rawData: RdsOracleInstanceData[] = []) => {
     const statusCounts = rawData.reduce((acc, item) => {
       acc[item.DBInstanceStatus] = (acc[item.DBInstanceStatus] || 0) + 1;
@@ -199,7 +193,6 @@ export const InstanciasRdsOracleChartComponent = ({
     };
   }, [infoList]);
 
-  // -------- Loaders / errores --------
   if (infoLoading) {
     return (
       <div className="flex justify-center items-center p-12">
@@ -219,7 +212,6 @@ export const InstanciasRdsOracleChartComponent = ({
     );
   }
 
-  // Sin selección de instancia -> mensaje
   if (!instance || instance === "all_instances") {
     return (
       <div className="max-w-7xl mx-auto px-6 py-8">
@@ -230,7 +222,6 @@ export const InstanciasRdsOracleChartComponent = ({
     );
   }
 
-  // Datos de la instancia concreta
   const instanceData =
     infoList?.filter((item) => item.DBInstanceIdentifier === instance) || [];
 
@@ -244,7 +235,6 @@ export const InstanciasRdsOracleChartComponent = ({
     );
   }
 
-  // Carga/errores de métricas del summary
   if (metricsLoading) {
     return (
       <div className="flex justify-center items-center p-12">
@@ -267,12 +257,10 @@ export const InstanciasRdsOracleChartComponent = ({
   return (
     <div className="w-full min-w-0 px-4 py-6">
       <div className="flex flex-col xl:flex-row gap-8 min-w-0">
-        {/* Panel izquierdo - Información de la instancia */}
         <div className="w-full xl:max-w-sm min-w-0">
           <RdsOracleResourceViewInfoComponent data={instanceData} />
         </div>
 
-        {/* Panel derecho - Resumen de métricas */}
         <div className="flex-1 space-y-6 min-w-0 overflow-hidden">
           <MainRdsResourceViewMetricsSummaryComponentComponent
             data={metricsData ?? null}
@@ -280,7 +268,6 @@ export const InstanciasRdsOracleChartComponent = ({
           />
         </div>
       </div>
-      {/* Consumo y Balance de Créditos de CPU (Burstable) */}
       <Card className="w-full">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -297,7 +284,6 @@ export const InstanciasRdsOracleChartComponent = ({
         </CardContent>
       </Card>
 
-      {/* Gráfico 2: CPU Usage */}
       <Card className="w-full">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -314,7 +300,6 @@ export const InstanciasRdsOracleChartComponent = ({
         </CardContent>
       </Card>
 
-      {/* Gráfico 3: Database Connections */}
       <Card className="w-full">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -330,7 +315,6 @@ export const InstanciasRdsOracleChartComponent = ({
           />
         </CardContent>
       </Card>
-      {/* Gráfico 4: Memory */}
       <Card className="w-full">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -346,7 +330,6 @@ export const InstanciasRdsOracleChartComponent = ({
           />
         </CardContent>
       </Card>
-      {/* Gráfico 5: IOPS */}
       <Card className="w-full">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -362,7 +345,6 @@ export const InstanciasRdsOracleChartComponent = ({
           />
         </CardContent>
       </Card>
-      {/* Gráfico 6: Storage */}
       <Card className="w-full">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -378,7 +360,6 @@ export const InstanciasRdsOracleChartComponent = ({
           />
         </CardContent>
       </Card>
-      {/* Tabla de Eventos RDS Oracle */}
       <RdsOracleEventsTableComponent
         data={eventsData}
         startDate={startDate}

@@ -4,6 +4,9 @@ import { z } from 'zod';
 import bcrypt from 'bcryptjs';
 import { getCollection } from '@/lib/mongodb';
 import { signAuthToken } from '@/lib/auth';
+import { buildLoginPayload } from '@/lib/sessionPayload';
+import { findCompanyByName } from '@/lib/db-utils';
+import type { User } from '@/types/db';
 import { AUTH_COOKIE } from '@/lib/cookies';
 
 const LoginSchema = z.object({
@@ -29,7 +32,7 @@ export async function POST(req: Request) {
 
     const { emailOrUsername, password } = parsed.data;
 
-    const users = await getCollection('Users');
+    const users = await getCollection<User>('Users');
     const user = await users.findOne({ email: emailOrUsername });
 
     if (!user) {
@@ -54,20 +57,15 @@ export async function POST(req: Request) {
       );
     }
 
-    const payload = {
-      sub: String(user._id),
-      username: user.username,
-      client: user.client,
-      role: user.role,
-      user_db_aws: user.user_db_aws,
-      user_db_azure: user.user_db_azure,
-      is_aws: user.is_aws,
-      is_azure: user.is_azure,
-      user_db_gcp: user.user_db_gcp,
-      is_gcp: user.is_gcp,
-    };
+    const company = await findCompanyByName(user.client);
+    if (!company) {
+      return NextResponse.json(
+        { error: 'La empresa del usuario no existe.' },
+        { status: 403 }
+      );
+    }
 
-    await signAuthToken(payload);
+    await signAuthToken(buildLoginPayload(user, company));
 
     const sessions = await getCollection('sessions');
     const now = new Date();

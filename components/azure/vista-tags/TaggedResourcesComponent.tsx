@@ -1,5 +1,6 @@
 'use client'
 
+import { fetcher } from '@/lib/fetcher';
 import { useState } from 'react'
 import useSWR from 'swr'
 import { Card, CardContent } from '@/components/ui/card'
@@ -21,9 +22,6 @@ import { LoaderComponent } from '@/components/general_gcp/LoaderComponent'
 import { MessageCard } from '@/components/aws/cards/MessageCards'
 import { TagsDataTableAzure } from './table/TagsDataTable'
 
-/* ======================
-    Types
-====================== */
 export interface ResourceItemAzure {
   resource: string
   id_resource: string
@@ -55,10 +53,7 @@ interface TagsAnalysisProps {
   region: string
 }
 
-const fetcher = (url: string) => fetch(url).then(res => res.json())
-
 export const TagsAnalysisComponentAzure = ({ startDate, endDate, subscription, region }: TagsAnalysisProps) => {
-  // Estado para controlar el pop-up de detalles
   const [showDetailsModal, setShowDetailsModal] = useState(false)
 
   const startDateFormatted = startDate.toISOString().replace('Z', '').slice(0, -4)
@@ -83,11 +78,9 @@ export const TagsAnalysisComponentAzure = ({ startDate, endDate, subscription, r
     )
   }
 
-  // --- LÓGICA DE CÁLCULO AMPLIADA ---
   let totalRecursos = 0;
   let recursosSinTags = 0;
   
-  // Contadores para el detalle Nube vs Local
   let soloNube = 0;
   let soloLocal = 0;
   let mixtos = 0;
@@ -125,7 +118,6 @@ export const TagsAnalysisComponentAzure = ({ startDate, endDate, subscription, r
     )
   }
 
-  // Iteración para calcular todos los KPIs incluyendo nube vs local
   gruposArray.forEach(grupo => {
     const resources = grupo.resources || [];
     totalRecursos += resources.length;
@@ -152,13 +144,11 @@ export const TagsAnalysisComponentAzure = ({ startDate, endDate, subscription, r
   const isWarning = porcentajeCobertura >= 50 && porcentajeCobertura < 90;
 
 
-  // Calcula el % basado en el TOTAL de la infraestructura (tageados + huérfanos)
   const calcPercent = (val: number) => totalRecursos > 0 ? Math.round((val / totalRecursos) * 100) : 0;
 
   return (
     <div className="w-full min-w-0 px-4 py-6 space-y-6 relative">
       
-      {/* HEADER Y TEXTOS */}
       <div className="flex items-center gap-3 mb-6">
         <Tags className="h-7 w-7 text-[#0078D4]" />
         <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Análisis de Cobertura de Etiquetas</h1>
@@ -189,7 +179,6 @@ export const TagsAnalysisComponentAzure = ({ startDate, endDate, subscription, r
         </div>
       </div>
 
-      {/* TARJETAS KPI */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 w-full">
         <Card className="border-l-4 border-l-gray-500 shadow-sm flex flex-col justify-between w-full">
           <CardContent className="p-4 sm:p-5">
@@ -201,7 +190,6 @@ export const TagsAnalysisComponentAzure = ({ startDate, endDate, subscription, r
           </CardContent>
         </Card>
 
-        {/* TARJETA: RECURSOS TAGEADOS CON BOTÓN INFO */}
         <Card className="border-l-4 border-l-[#0078D4] shadow-sm flex flex-col justify-between w-full">
           <CardContent className="p-4 sm:p-5 relative">
             <div className="flex justify-between items-start mb-3">
@@ -227,7 +215,6 @@ export const TagsAnalysisComponentAzure = ({ startDate, endDate, subscription, r
           </CardContent>
         </Card>
 
-        {/* TARJETA: COBERTURA CON BOTÓN INFO */}
         <Card className={`border-l-4 shadow-sm flex flex-col justify-between w-full ${isOptimal ? 'border-l-green-600' : isWarning ? 'border-l-yellow-500' : 'border-l-red-500'}`}>
           <CardContent className="p-4 sm:p-5 relative">
             <div className="flex justify-between items-start mb-3">
@@ -248,14 +235,11 @@ export const TagsAnalysisComponentAzure = ({ startDate, endDate, subscription, r
         <TagsDataTableAzure data={gruposArray} />
       </div>
 
-      {/* ======================
-          MODAL DE DETALLES
-      ====================== */}
       {showDetailsModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4" onClick={() => setShowDetailsModal(false)}>
           <div 
             className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden transform transition-all"
-            onClick={(e) => e.stopPropagation()} // Evita que el click dentro cierre el modal
+            onClick={(e) => e.stopPropagation()}
           >
             <div className="p-5 border-b flex justify-between items-center bg-slate-50">
               <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">
@@ -273,7 +257,6 @@ export const TagsAnalysisComponentAzure = ({ startDate, endDate, subscription, r
               </p>
 
               <div className="space-y-3">
-                {/* Etiquetado en Nube */}
                 <div className="flex items-center justify-between p-3 border rounded-lg bg-blue-50/30 border-blue-100">
                   <div className="flex items-center gap-3">
                     <div className="p-2 bg-blue-100 text-[#0078D4] rounded-md"><Cloud className="h-5 w-5" /></div>
@@ -288,7 +271,6 @@ export const TagsAnalysisComponentAzure = ({ startDate, endDate, subscription, r
                   </div>
                 </div>
 
-                {/* Etiquetado Local */}
                 <div className="flex items-center justify-between p-3 border rounded-lg bg-purple-50/30 border-purple-100">
                   <div className="flex items-center gap-3">
                     <div className="p-2 bg-purple-100 text-purple-600 rounded-md"><Laptop className="h-5 w-5" /></div>
@@ -303,7 +285,6 @@ export const TagsAnalysisComponentAzure = ({ startDate, endDate, subscription, r
                   </div>
                 </div>
 
-                {/* Mixto */}
                 <div className="flex items-center justify-between p-3 border rounded-lg bg-emerald-50/30 border-emerald-100">
                   <div className="flex items-center gap-3">
                     <div className="p-2 bg-emerald-100 text-emerald-600 rounded-md"><Layers className="h-5 w-5" /></div>

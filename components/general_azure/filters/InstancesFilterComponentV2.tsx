@@ -1,4 +1,5 @@
 'use client'
+import { fetcher } from '@/lib/fetcher';
 import { useState, Dispatch, SetStateAction, useEffect } from 'react'
 import { Check, ChevronsUpDown } from "lucide-react"
 import { cn } from "@/lib/utils"
@@ -15,9 +16,7 @@ interface InstancesFilterProps {
   endDate: Date,
   region: string,
   subscription: string,
-  collection: string,
-  subscriptionField: string,
-  instanceField: string,
+  resourceType: string,
   selectedTagKey?: string | null,
   selectedTagValue?: string | null,
   selectedResourceGroup?: string | null,
@@ -26,20 +25,12 @@ interface InstancesFilterProps {
   onChange?: (next: { instance: string | null }) => void
 }
 
-const fetcher = (url: string) =>
-  fetch(url, {
-    method: "GET",
-    headers: { "Content-Type": "application/json" }
-  }).then(res => res.json())
-
 export const InstancesFilterComponentV2 = ({
   startDate,
   endDate,
   region,
   subscription,
-  collection,
-  subscriptionField,
-  instanceField,
+  resourceType,
   selectedTagKey,
   selectedTagValue,
   selectedResourceGroup,
@@ -59,9 +50,7 @@ export const InstancesFilterComponentV2 = ({
       date_to: endDateFormatted,
       region: region,
       subscription_id: subscription,
-      collection: collection,
-      subscription_field: subscriptionField,
-      instance_field: instanceField
+      resource_type: resourceType
     })
 
     if (selectedTagKey) params.append('nombre_tag', selectedTagKey)
@@ -73,7 +62,6 @@ export const InstancesFilterComponentV2 = ({
     return `/api/azure/bridge/azure/get-instances-custom?${params.toString()}`
   }
 
-  // Solo hacer fetch si hay región y suscripción específicas seleccionadas
   const shouldFetch = !!subscription && !!region
 
   const { data, error, isLoading } = useSWR(
@@ -83,7 +71,6 @@ export const InstancesFilterComponentV2 = ({
 
   useEffect(() => { setIsMounted(true) }, [])
 
-  // Resetear la instancia seleccionada cuando cambian los filtros principales
   useEffect(() => {
     if (!shouldFetch && selectedInstance && selectedInstance !== 'all_instances') {
       setSelectedInstance('all_instances')
@@ -93,7 +80,6 @@ export const InstancesFilterComponentV2 = ({
 
   if (!isMounted) return null
 
-  // Si no se puede hacer fetch, mostrar mensaje informativo
   if (!shouldFetch) {
     return (
       <Button 

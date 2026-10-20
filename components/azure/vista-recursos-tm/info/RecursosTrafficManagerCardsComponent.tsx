@@ -40,7 +40,6 @@ export const RecursosTrafficManagerCardsComponent = ({ latestData }: RecursosTra
 
     return (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-            {/* Tarjeta Principal de Estado */}
             <Card className="col-span-1 lg:col-span-1 border-l-4 border-l-blue-500 shadow-sm">
                 <CardHeader className="pb-2">
                     <CardTitle className="text-lg flex items-center gap-2">
@@ -82,7 +81,6 @@ export const RecursosTrafficManagerCardsComponent = ({ latestData }: RecursosTra
                 </CardContent>
             </Card>
 
-            {/* Tarjeta de Métricas y Salud */}
             <Card className="col-span-1 lg:col-span-1 shadow-sm">
                 <CardHeader className="pb-2">
                     <CardTitle className="text-lg flex items-center gap-2">
@@ -134,7 +132,6 @@ export const RecursosTrafficManagerCardsComponent = ({ latestData }: RecursosTra
                 </CardContent>
             </Card>
 
-            {/* Tarjeta de Insights / Ahorro (Dinámica) */}
             <Card className="col-span-1 lg:col-span-1 bg-slate-50/50 dark:bg-slate-900/20 border-dashed">
                 <CardHeader className="pb-2">
                     <CardTitle className="text-lg flex items-center gap-2">
@@ -143,7 +140,6 @@ export const RecursosTrafficManagerCardsComponent = ({ latestData }: RecursosTra
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3 pt-4">
-                    {/* Insight 1: Sin Endpoints */}
                     {endpointCount === 0 && (
                         <Alert variant="destructive" className="py-2">
                             <AlertCircle className="h-4 w-4" />
@@ -158,7 +154,6 @@ export const RecursosTrafficManagerCardsComponent = ({ latestData }: RecursosTra
                         </Alert>
                     )}
 
-                    {/* Insight 2: Monitor Inactivo en Perfil Activo */}
                     {endpointCount > 0 && isEnabled && isMonitorInactive && (
                         <Alert className="py-2 border-yellow-500 text-yellow-600 bg-yellow-50 dark:bg-yellow-900/10">
                             <AlertCircle className="h-4 w-4" />
@@ -170,7 +165,6 @@ export const RecursosTrafficManagerCardsComponent = ({ latestData }: RecursosTra
                         </Alert>
                     )}
 
-                    {/* Insight 3: Configuración Estándar */}
                     {endpointCount > 0 && isEnabled && !isMonitorInactive && (
                         <div className="flex items-start gap-3 p-3 rounded-md bg-blue-50/50 dark:bg-blue-900/10 border border-blue-100">
                             <Network className="h-4 w-4 text-blue-500 mt-1" />

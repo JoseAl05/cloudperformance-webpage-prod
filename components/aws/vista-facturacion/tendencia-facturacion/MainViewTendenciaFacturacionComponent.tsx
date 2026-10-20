@@ -1,4 +1,3 @@
-// components/aws/vista-facturacion/tendencia-facturacion/MainViewTendenciaFacturacionComponent.tsx
 import { FiltersComponent } from '@/components/general_aws/filters/FiltersComponent'
 import { TendenciaFacturacionChartComponent } from '@/components/aws/vista-facturacion/tendencia-facturacion/TendenciaFacturacionChartComponent'
 import { TrendingUp } from 'lucide-react'
@@ -32,8 +31,7 @@ export const MainViewTendenciaFacturacionComponent = () => {
                     isRegionMultiSelect
                     serviceFilter
                     tagsFilter
-                    collection='aws_resources'
-                    tagColumnName='Tags'
+                    resourceType='resources'
                 />
             </div>
         </div>

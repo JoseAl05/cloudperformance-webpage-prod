@@ -1,4 +1,5 @@
 'use client'
+import { fetcher } from '@/lib/fetcher';
 import { Dispatch, SetStateAction, useMemo, useState } from 'react'
 import { Check, ChevronsUpDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -7,6 +8,7 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import useSWR from 'swr'
 import { LoaderComponent } from '@/components/general_azure/LoaderComponent'
+import type { UnusedCandidate } from '@/interfaces/unused'
 
 interface UnusedVmssFilterComponentProps {
     startDate: Date;
@@ -17,14 +19,6 @@ interface UnusedVmssFilterComponentProps {
     setUnusedVmss: Dispatch<SetStateAction<string>>;
     isUnusedVmssFilterMultiselect: boolean;
 }
-
-type ApiUnusedVmss =
-    | { vm_id_lowercase: string; vm_name: string }
-    | string
-
-const fetcher = (url: string) =>
-    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
-        .then(r => r.json());
 
 export const UnusedVmssFilterComponent = ({
     startDate,
@@ -39,19 +33,12 @@ export const UnusedVmssFilterComponent = ({
     const startDateFormatted = startDate ? startDate.toISOString().replace('Z', '').slice(0, -4) : '';
     const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : '';
 
-    const url = `/api/azure/bridge/azure/vms/all_unused_vmss?date_from=${startDateFormatted}&date_to=${endDateFormatted}&subscription=${subscription}&location=${region}`
-    const { data, error, isLoading } = useSWR<string[]>(url, fetcher)
+    const url = `/api/azure/bridge/azure/unused/vmss/candidates?date_from=${startDateFormatted}&date_to=${endDateFormatted}&subscription_id=${subscription && subscription !== 'all_subscriptions' ? subscription : 'all'}&location=${region}`
+    const { data, error, isLoading } = useSWR<UnusedCandidate[]>(url, fetcher)
 
     const unusedScaleSet = useMemo(() => {
         if (!Array.isArray(data)) return [] as { id: string; name: string }[]
-        if (data.length === 0) return []
-        if (typeof data[0] === 'string') {
-            return (data as string[]).map((id) => ({ id, name: id }))
-        }
-        return (data as { vm_id_lowercase: string; vm_name: string }[]).map((s) => ({
-            id: s.vm_id_lowercase,
-            name: s.vm_name,
-        }))
+        return data.map((s) => ({ id: s.resource_id, name: s.resource_name }))
     }, [data])
 
     const noUnusedScaleSet = unusedScaleSet.length === 0

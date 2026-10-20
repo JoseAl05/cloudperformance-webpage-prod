@@ -54,8 +54,6 @@ export const SelectCloudComponent = () => {
     const hasMultipleAwsAccounts = awsAccounts.length > 1
     const hasMultipleGcpAccounts = gcpAccounts.length > 1
 
-    // Lógica para determinar si el usuario puede avanzar
-    // NO tiene múltiples cuentas (es única) O SI tiene múltiples y ya seleccionó una.
     const isAzureReady = !hasMultipleAzureAccounts || !!activeAzureAccountId
     const isAwsReady = !hasMultipleAwsAccounts || !!activeAwsAccountId
     const isGcpReady = !hasMultipleGcpAccounts || !!activeGcpAccountId
@@ -99,10 +97,8 @@ export const SelectCloudComponent = () => {
     }
 
     const handleEnterAzure = () => {
-        // Solo permitimos navegar si está listo
         if (!isAzureReady) return
 
-        // Si es cuenta única, aseguramos el token con la cuenta [0]
         if (!hasMultipleAzureAccounts && azureAccounts.length > 0) {
              const defaultAcc = azureAccounts[0]
              swapContextToken(clientName, defaultAcc.db, connectionData.dbAwsName, connectionData.dbGcpName)
@@ -163,7 +159,6 @@ export const SelectCloudComponent = () => {
                         : "grid-cols-1"
                 )}
             >
-                {/* ================= AZURE ================= */}
                 {isAzure && (
                     <div
                         onClick={handleEnterAzure}
@@ -213,7 +208,6 @@ export const SelectCloudComponent = () => {
                                 )}
                             </div>
 
-                            {/* Solo mostramos la flecha si está listo */}
                             {isAzureReady && (
                                 <ArrowRight className="h-4 w-4 opacity-70 group-hover:translate-x-1 transition-transform" />
                             )}
@@ -221,7 +215,6 @@ export const SelectCloudComponent = () => {
                     </div>
                 )}
 
-                {/* ================= AWS ================= */}
                 {isAws && (
                     <div
                         onClick={handleEnterAws}
@@ -278,7 +271,6 @@ export const SelectCloudComponent = () => {
                     </div>
                 )}
 
-                {/* ================= GCP ================= */}
                 {isGcp && (
                     <div
                         onClick={handleEnterGcp}

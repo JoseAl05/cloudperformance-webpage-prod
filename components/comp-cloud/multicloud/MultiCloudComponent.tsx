@@ -1,17 +1,21 @@
 'use client';
 
+import { fetcher } from '@/lib/fetcher';
 import { useMemo } from 'react';
 import useSWR from 'swr';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { 
-    DollarSign, Globe, CalendarDays, Wallet 
+import {
+    DollarSign, Globe, CalendarDays, Wallet
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useSession } from '@/hooks/useSession';
 import { LoaderComponent } from '@/components/general_aws/LoaderComponent';
 import Image from 'next/image';
 
-import { CloudBillingItem } from '@/lib/CloudBillingItem'; 
+import type { BillingCloud, BillingPoint, BillingTrend } from '@/interfaces/billing';
+import { billingUrl, monthOf, monthsRange } from '@/lib/billing';
+import { toApiDate } from '@/lib/consumption';
+import { CostMetricInfo } from '@/components/shared/billing/CostMetricInfo';
 import { MultiTenantSelection, CloudAccount, CloudProvider } from '@/hooks/useMultiTenantSelection';
 import { AppliedMultiCloudFilters } from './filters/MultiCloudFiltersComponent';
 
@@ -29,15 +33,17 @@ interface GlobalBillingMultiTenantDashboardProps extends AppliedMultiCloudFilter
     };
 }
 
-const fetcher = (url: string) => fetch(url, { 
-    method: 'GET', 
-    headers: { 'Content-Type': 'application/json' } 
-}).then(res => res.json());
+const pointsInMonths = (trend: BillingTrend | undefined, monthsKey: string): BillingPoint[] => {
+    const points = trend?.points ?? [];
+    if (!monthsKey) return points;
+    const months = new Set(monthsKey.split(','));
+    return points.filter(point => months.has(monthOf(point.date)));
+};
 
-export const GlobalBillingMultiTenantDashboard = ({ 
-    startDate, 
-    endDate, 
-    dateMode = 'monthly', 
+export const GlobalBillingMultiTenantDashboard = ({
+    startDate,
+    endDate,
+    dateMode = 'monthly',
     selectedMonths = [],
     azTagKey, azTagValue,
     awsTagKey, awsTagValue,
@@ -46,58 +52,51 @@ export const GlobalBillingMultiTenantDashboard = ({
     selectedTenants,
     accountsList
 }: GlobalBillingMultiTenantDashboardProps) => {
-    
+
     const { user, isLoading: isLoadingSession } = useSession();
 
-    const getDbParams = (cloud: CloudProvider): string => {
+    const getAccountIdParams = (cloud: CloudProvider): string => {
         const selectedIds = selectedTenants[cloud] || [];
         const accounts = accountsList[cloud] || [];
         return selectedIds
-            .map(id => accounts.find(acc => acc.id === id)?.db)
-            .filter((db): db is string => !!db)
+            .filter(id => accounts.some(acc => acc.id === id))
             .join(',');
     };
 
-    const azureDbs = getDbParams('azure');
-    const awsDbs = getDbParams('aws');
-    const gcpDbs = getDbParams('gcp');
+    const azureAccountIds = getAccountIdParams('azure');
+    const awsAccountIds = getAccountIdParams('aws');
+    const gcpAccountIds = getAccountIdParams('gcp');
 
-    const buildDateParams = () => {
-        const params = new URLSearchParams();
-        if (dateMode === 'multi-month' && selectedMonths.length > 0) {
-            params.append('selected_months', selectedMonths.join(','));
-        } else if (dateMode === 'monthly') {
-            const startOfYear = new Date(startDate.getFullYear(), 0, 1);
-            params.append('date_from', startOfYear.toISOString().split('.')[0]);
-            params.append('date_to', endDate.toISOString().split('.')[0]);
-        } else {
-            params.append('date_from', startDate.toISOString().split('.')[0]);
-            params.append('date_to', endDate.toISOString().split('.')[0]);
-        }
-        return params.toString();
-    };
+    const range = monthsRange(selectedMonths);
+    const dateParams = range
+        ? { date_from: range.from, date_to: range.to }
+        : {
+            date_from: toApiDate(dateMode === 'monthly' ? new Date(startDate.getFullYear(), 0, 1) : startDate),
+            date_to: toApiDate(endDate),
+        };
 
-    const buildTagParams = (key: string | null, value: string | null) => {
-        let p = '';
-        if (key && key !== 'allKeys') p += `&tag_key=${encodeURIComponent(key)}`;
-        if (value && value !== 'allValues') p += `&tag_value=${encodeURIComponent(value)}`;
-        return p;
-    };
+    const tagParams = (key: string | null, value: string | null) => ({
+        tag_key: key && key !== 'allKeys' ? key : undefined,
+        tag_value: value && value !== 'allValues' ? value : undefined,
+    });
 
-    const baseDateParams = buildDateParams();
+    const trendUrl = (cloud: BillingCloud, enabled: boolean | undefined, accountIds: string, extra: Record<string, string | undefined>) =>
+        enabled && selectedClouds.includes(cloud) && accountIds
+            ? billingUrl(cloud, 'multitenant/trend', { ...dateParams, account_ids: accountIds, ...extra })
+            : null;
 
-    const azureUrl = (user?.is_azure && selectedClouds.includes('azure') && azureDbs) 
-        ? `/api/azure/bridge/azure/facturacion/multitenant/pago-por-uso?${baseDateParams}&dbs=${azureDbs}${buildTagParams(azTagKey, azTagValue)}` : null;
-    
-    const awsUrl = (user?.is_aws && selectedClouds.includes('aws') && awsDbs) 
-        ? `/api/aws/bridge/facturacion/multitenant/tendencia-facturacion?${baseDateParams}&region=all&dbs=${awsDbs}${buildTagParams(awsTagKey, awsTagValue)}` : null;
-    
-    const gcpUrl = (user?.is_gcp && selectedClouds.includes('gcp') && gcpDbs) 
-        ? `/api/gcp/bridge/gcp/facturacion/multitenant/tendencia_facturacion?${baseDateParams}&dbs=${gcpDbs}${buildTagParams(gcpTagKey, gcpTagValue)}` : null;
+    const azureUrl = trendUrl('azure', user?.is_azure, azureAccountIds, tagParams(azTagKey, azTagValue));
+    const awsUrl = trendUrl('aws', user?.is_aws, awsAccountIds, { region: 'all_regions', ...tagParams(awsTagKey, awsTagValue) });
+    const gcpUrl = trendUrl('gcp', user?.is_gcp, gcpAccountIds, tagParams(gcpTagKey, gcpTagValue));
 
-    const { data: azureData, isLoading: isLoadingAzure } = useSWR(azureUrl, fetcher);
-    const { data: awsData, isLoading: isLoadingAws } = useSWR(awsUrl, fetcher);
-    const { data: gcpData, isLoading: isLoadingGcp } = useSWR(gcpUrl, fetcher);
+    const { data: azureTrend, isLoading: isLoadingAzure } = useSWR<BillingTrend>(azureUrl, fetcher);
+    const { data: awsTrend, isLoading: isLoadingAws } = useSWR<BillingTrend>(awsUrl, fetcher);
+    const { data: gcpTrend, isLoading: isLoadingGcp } = useSWR<BillingTrend>(gcpUrl, fetcher);
+
+    const monthsKey = selectedMonths.join(',');
+    const azureData = useMemo(() => pointsInMonths(azureTrend, monthsKey), [azureTrend, monthsKey]);
+    const awsData = useMemo(() => pointsInMonths(awsTrend, monthsKey), [awsTrend, monthsKey]);
+    const gcpData = useMemo(() => pointsInMonths(gcpTrend, monthsKey), [gcpTrend, monthsKey]);
 
     const isLoadingData = isLoadingSession || isLoadingAzure || isLoadingAws || isLoadingGcp;
 
@@ -111,72 +110,53 @@ export const GlobalBillingMultiTenantDashboard = ({
 
     const yearLabel = dateMode === 'monthly' ? `AÑO ${startDate.getUTCFullYear()}` : 'PERIODO COMPLETO';
 
-    const getTenantBreakdown = (data: CloudBillingItem[], provider: CloudProvider, costField: keyof CloudBillingItem) => {
-        if (!Array.isArray(data)) return [];
-        
+    const getTenantBreakdown = (data: BillingPoint[], provider: CloudProvider) => {
         const targetMonthStr = dateMode === 'monthly' ? `${startDate.getFullYear()}-${String(startDate.getMonth() + 1).padStart(2, '0')}` : null;
         const map = new Map<string, number>();
 
-        data.forEach(item => {
-            const dbName = item.source_db as string || 'desconocido';
-            const cost = Number(item[costField]) || 0;
-
-            if (dateMode === 'monthly' && targetMonthStr) {
-                const dateVal = item.date || item.start_date || item.usage_date || item.usage_start_time || item.day;
-                let itemMonth = '';
-                if (typeof dateVal === 'string') {
-                    if (dateVal.includes('/')) {
-                        const parts = dateVal.split(' ')[0].split('/');
-                        itemMonth = `${parts[2]}-${String(parts[1]).padStart(2, '0')}`;
-                    } else {
-                        itemMonth = dateVal.split('T')[0].substring(0, 7);
-                    }
-                } else if (dateVal) {
-                    itemMonth = new Date(dateVal as number | Date).toISOString().substring(0, 7);
-                }
-                if (itemMonth !== targetMonthStr) return;
-            }
-            map.set(dbName, (map.get(dbName) || 0) + cost);
+        data.forEach(point => {
+            if (targetMonthStr && monthOf(point.date) !== targetMonthStr) return;
+            const accountId = point.account || 'desconocido';
+            map.set(accountId, (map.get(accountId) || 0) + point.cost);
         });
 
-        return Array.from(map.entries()).map(([db, cost]) => {
-            const account = accountsList[provider].find(acc => acc.db === db);
-            return { alias: account?.alias || db, cost };
+        return Array.from(map.entries()).map(([accountId, cost]) => {
+            const account = accountsList[provider].find(acc => acc.id === accountId);
+            return { alias: account?.alias || accountId, cost };
         }).sort((a, b) => b.cost - a.cost);
     };
 
     const kpiCardsData = useMemo(() => {
         if (isLoadingData) return [];
         const data = [];
-        
+
         if (selectedClouds.includes('azure')) {
-            const breakdown = getTenantBreakdown(azureData || [], 'azure', 'cost_in_usd');
+            const breakdown = getTenantBreakdown(azureData, 'azure');
             const total = breakdown.reduce((sum, item) => sum + item.cost, 0);
-            data.push({ provider: 'Azure', logo: '/azure.svg', gasto: total, breakdown, borderClass: 'border-l-blue-500', textClass: 'text-blue-600', iconClass: 'text-blue-500' });
+            data.push({ provider: 'Azure', logo: '/azure.svg', costMetric: azureTrend?.cost_metric, gasto: total, breakdown, borderClass: 'border-l-blue-500', textClass: 'text-blue-600', iconClass: 'text-blue-500' });
         }
         if (selectedClouds.includes('aws')) {
-            const breakdown = getTenantBreakdown(awsData || [], 'aws', 'unblendedcost');
+            const breakdown = getTenantBreakdown(awsData, 'aws');
             const total = breakdown.reduce((sum, item) => sum + item.cost, 0);
-            data.push({ provider: 'AWS', logo: '/aws.svg', gasto: total, breakdown, borderClass: 'border-l-orange-500', textClass: 'text-orange-600', iconClass: 'text-orange-500' });
+            data.push({ provider: 'AWS', logo: '/aws.svg', costMetric: awsTrend?.cost_metric, gasto: total, breakdown, borderClass: 'border-l-orange-500', textClass: 'text-orange-600', iconClass: 'text-orange-500' });
         }
         if (selectedClouds.includes('gcp')) {
-            const breakdown = getTenantBreakdown(gcpData || [], 'gcp', 'cost_net_usd');
+            const breakdown = getTenantBreakdown(gcpData, 'gcp');
             const total = breakdown.reduce((sum, item) => sum + item.cost, 0);
-            data.push({ provider: 'GCP', logo: '/gcp.svg', gasto: total, breakdown, borderClass: 'border-l-red-500', textClass: 'text-red-600', iconClass: 'text-red-500' });
+            data.push({ provider: 'GCP', logo: '/gcp.svg', costMetric: gcpTrend?.cost_metric, gasto: total, breakdown, borderClass: 'border-l-red-500', textClass: 'text-red-600', iconClass: 'text-red-500' });
         }
         return data;
-    }, [azureData, awsData, gcpData, isLoadingData, selectedClouds, accountsList, startDate, dateMode]);
+    }, [azureData, awsData, gcpData, azureTrend, awsTrend, gcpTrend, isLoadingData, selectedClouds, accountsList, startDate, dateMode]);
 
     const globalTotals = useMemo(() => {
         const totalMes = kpiCardsData.reduce((sum, card) => sum + card.gasto, 0);
-        
-        const sumRaw = (arr: CloudBillingItem[], field: keyof CloudBillingItem) => 
-            Array.isArray(arr) ? arr.reduce((sum, item) => sum + (Number(item[field]) || 0), 0) : 0;
+
+        const sum = (points: BillingPoint[]) => points.reduce((total, point) => total + point.cost, 0);
 
         let totalPeriodo = 0;
-        if (selectedClouds.includes('azure')) totalPeriodo += sumRaw(azureData || [], 'cost_in_usd');
-        if (selectedClouds.includes('aws')) totalPeriodo += sumRaw(awsData || [], 'unblendedcost');
-        if (selectedClouds.includes('gcp')) totalPeriodo += sumRaw(gcpData || [], 'cost_net_usd');
+        if (selectedClouds.includes('azure')) totalPeriodo += sum(azureData);
+        if (selectedClouds.includes('aws')) totalPeriodo += sum(awsData);
+        if (selectedClouds.includes('gcp')) totalPeriodo += sum(gcpData);
 
         return { totalMes, totalPeriodo };
     }, [kpiCardsData, azureData, awsData, gcpData, selectedClouds]);
@@ -192,14 +172,14 @@ export const GlobalBillingMultiTenantDashboard = ({
                     <Wallet className="h-5 w-5 text-slate-500" />
                     Resumen Ejecutivo Consolidado
                 </h2>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
                     <Card className="border-l-4 border-l-indigo-500 shadow-sm">
                         <CardContent className="p-6">
                             <div className="flex items-center justify-between">
                                 <div>
                                     <p className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                                        Total Global (Mes) 
+                                        Total Global (Mes)
                                         <span className="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
                                             {monthYearLabel}
                                         </span>
@@ -243,6 +223,7 @@ export const GlobalBillingMultiTenantDashboard = ({
                                             <p className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                                                 <Image src={nube.logo} width={16} height={16} alt={nube.provider} />
                                                 {nube.provider} Consolidado
+                                                <CostMetricInfo metric={nube.costMetric} currency="USD" />
                                             </p>
                                             <p className={cn("text-2xl font-bold mt-1", nube.textClass)}>
                                                 $ {nube.gasto.toLocaleString('es-ES', { minimumFractionDigits: 2 })}
@@ -277,8 +258,8 @@ export const GlobalBillingMultiTenantDashboard = ({
                         <CardTitle className="text-lg">Tendencia de Gasto Agregado</CardTitle>
                     </CardHeader>
                     <CardContent className="pt-6">
-                        <MultiCloudLineChartComponent 
-                            azureData={azureData || []} awsData={awsData || []} gcpData={gcpData || []}
+                        <MultiCloudLineChartComponent
+                            azureData={azureData} awsData={awsData} gcpData={gcpData}
                             selectedClouds={selectedClouds} isLoading={isLoadingData}
                             startDate={startDate} endDate={endDate} dateMode={dateMode} selectedMonths={selectedMonths}
                         />
@@ -290,8 +271,8 @@ export const GlobalBillingMultiTenantDashboard = ({
                         <CardTitle className="text-lg">Distribución por Categoría (Suma de Tenants)</CardTitle>
                     </CardHeader>
                     <CardContent className="pt-6">
-                        <MultiCloudMonthlyServiceChartComponent 
-                            azureData={azureData || []} awsData={awsData || []} gcpData={gcpData || []}
+                        <MultiCloudMonthlyServiceChartComponent
+                            azureData={azureData} awsData={awsData} gcpData={gcpData}
                             selectedClouds={selectedClouds} isLoading={isLoadingData}
                             startDate={startDate} endDate={endDate} dateMode={dateMode} selectedMonths={selectedMonths}
                         />
@@ -303,8 +284,8 @@ export const GlobalBillingMultiTenantDashboard = ({
                         <CardTitle className="text-lg">Top Servicios Globales</CardTitle>
                     </CardHeader>
                     <CardContent className="pt-6">
-                        <MultiCloudServiceBarChartComponent 
-                            azureData={azureData || []} awsData={awsData || []} gcpData={gcpData || []}
+                        <MultiCloudServiceBarChartComponent
+                            azureData={azureData} awsData={awsData} gcpData={gcpData}
                             selectedClouds={selectedClouds} isLoading={isLoadingData}
                         />
                     </CardContent>

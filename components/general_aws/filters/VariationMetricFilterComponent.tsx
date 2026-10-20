@@ -1,4 +1,5 @@
 'use client'
+import { fetchJson } from '@/lib/fetcher';
 import { Dispatch, SetStateAction, useState, useEffect } from 'react'
 import { Check, ChevronsUpDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -7,22 +8,6 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import useSWR from 'swr'
 import { LoaderComponent } from '@/components/general_aws/LoaderComponent'
-
-// interface VariationMetricFilterComponentProps {
-//     asg: string,
-//     asgInstance: string,
-//     setAsg: Dispatch<SetStateAction<string>>,
-//     setAsgInstance: Dispatch<SetStateAction<string>>,
-//     startDate: Date,
-//     endDate: Date,
-//     region: string,
-//     selectedKey: string,
-//     selectedValue: string,
-//     isAsgMultiSelect: boolean,
-//     isAsgInstanceMultiselect: boolean,
-//     isInstancesService?: string,
-//     isViewResource?: boolean
-// }
 
 interface VariationMetricFilterComponentProps {
     startDate: Date,
@@ -49,22 +34,22 @@ type MetricOption = {
 }
 
 const fetcherPost = (url: string, tags: { Key: string; Value: string } | null = null) =>
-    fetch(url, {
+    fetchJson(url, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
         body: tags ? JSON.stringify([tags]) : null,
-    }).then(res => res.json());
+    });
 
 const fetcherGet = (url: string, tags: { Key: string; Value: string } | null = null) =>
-    fetch(url, {
+    fetchJson(url, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json'
         },
         body: tags ? JSON.stringify([tags]) : null,
-    }).then(res => res.json());
+    });
 
 export const VariationMetricFilterComponent = ({
     startDate, endDate, region, selectedService, selectedMetric, setSelectedMetric, isAsgMultiSelect
@@ -80,7 +65,6 @@ export const VariationMetricFilterComponent = ({
     const { data, error, isLoading } = useSWR(shouldFetch ? [url] : null, ([u]) => fetcherGet(u));
 
     useEffect(() => {
-        // Solo actuar cuando terminó la carga y no hubo error
         if (!isLoading && !error && Array.isArray(data) && data.length === 0) {
             setSelectedMetric('');
         }
@@ -206,23 +190,6 @@ export const VariationMetricFilterComponent = ({
                 </PopoverContent>
             </Popover>
 
-            {/* Instancias de ASG (solo si hay ASG disponible y seleccionado) */}
-            {/* {
-                isViewResource ? (
-                    <></>
-                ) : (
-                    <AsgInstancesFilterComponent
-                        asg={asg}
-                        asgInstance={asgInstance}
-                        setAsgInstance={setAsgInstance}
-                        startDate={startDateFormatted}
-                        endDate={endDateFormatted}
-                        region={region}
-                        isInstanceMultiSelect={isAsgInstanceMultiselect}
-                        isInstancesService={isInstancesService}
-                    />
-                )
-            } */}
         </div>
     )
 };

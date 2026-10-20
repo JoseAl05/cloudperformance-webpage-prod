@@ -1,11 +1,11 @@
 'use client'
+import { fetcher } from '@/lib/fetcher';
 import useSWR from 'swr'
 import { LoaderComponent } from '@/components/general_aws/LoaderComponent'
 import { MessageCard } from '@/components/azure/cards/MessageCards'
 import { AlertCircle, AtomIcon, ChartBar, Info } from 'lucide-react'
 import { AdvisorViewPieChartComponent } from '@/components/azure/vista-advisor/grafico/AdvisorViewPieChartComponent'
 import { AdvisorViewInfoComponent } from '@/components/azure/vista-advisor/info/AdvisorViewInfoComponent'
-import { AIComponentAzure } from '@/components/azure/vista-advisor/ia-recommedations/AIComponentAzure'
 import { AiRecommendationReport } from '@/interfaces/ai-recommendations/aiRecommendations'
 import { AiRecommendationsComponent } from '@/components/AiRecommendationsComponent'
 
@@ -34,10 +34,6 @@ interface AzureAdvisorRecommendation {
 
 type AzureAdvisorApiResponse = AzureAdvisorRecommendation[]
 
-const fetcher = (url: string) =>
-    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
-        .then(r => r.json());
-
 const isNonEmptyArray = <T,>(v: unknown): v is T[] => Array.isArray(v) && v.length > 0
 
 export const AdvisorViewComponent = ({
@@ -49,20 +45,14 @@ export const AdvisorViewComponent = ({
     const startDateFormatted = startDate.toISOString().replace('Z', '').slice(0, -4);
     const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : '';
 
-    // Validación: Ambos filtros deben estar seleccionados
-    // null/undefined = No seleccionado
-    // '' (vacío) = "Ver todos" (SÍ está seleccionado)
-    // 'valor' = Filtro específico (SÍ está seleccionado)
     const hasImpactSelected = impact !== null && impact !== undefined;
     const hasCategorySelected = category !== null && category !== undefined;
     const shouldFetch = hasImpactSelected && hasCategorySelected;
 
-    // Construir URL con parámetros opcionales
     const buildUrl = () => {
         if (!shouldFetch) return null;
 
         let url = `/api/azure/bridge/azure/vista-asesor?date_from=${startDateFormatted}&date_to=${endDateFormatted}`;
-        // Solo agregar filtros si NO son vacíos (vacío = "Ver todos")
         if (impact) url += `&impact=${encodeURIComponent(impact)}`;
         if (category) url += `&category=${encodeURIComponent(category)}`;
         return url;
@@ -83,7 +73,6 @@ export const AdvisorViewComponent = ({
 
     if (isLoading || aiRecommendations.isLoading) return <LoaderComponent />
 
-    // Mostrar mensaje si no se han seleccionado los filtros obligatorios
     if (!shouldFetch) {
         return (
             <div className="max-w-7xl mx-auto px-6 py-8">

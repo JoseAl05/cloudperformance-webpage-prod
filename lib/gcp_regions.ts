@@ -1,7 +1,6 @@
 export const gcp_regions = [
   { label: 'Todas las Regiones', value: 'all_regions' },
 
-  // América del Norte (EE.UU.)
   { label: 'EE.UU. Este (Carolina del Sur)', value: 'us-east1' },
   { label: 'EE.UU. Este (Virginia del Norte)', value: 'us-east4' },
   { label: 'EE.UU. Centro (Iowa)', value: 'us-central1' },
@@ -11,15 +10,12 @@ export const gcp_regions = [
   { label: 'EE.UU. Oeste (Las Vegas)', value: 'us-west4' },
   { label: 'EE.UU. Sur (Texas)', value: 'us-south1' },
 
-  // América del Norte (Canadá)
   { label: 'Canadá (Montreal)', value: 'northamerica-northeast1' },
   { label: 'Canadá (Toronto)', value: 'northamerica-northeast2' },
 
-  // Sudamérica
   { label: 'Sudamérica (Santiago de Chile)', value: 'southamerica-west1' },
   { label: 'Sudamérica (São Paulo)', value: 'southamerica-east1' },
 
-  // Europa
   { label: 'Europa (Bélgica)', value: 'europe-west1' },
   { label: 'Europa (Londres)', value: 'europe-west2' },
   { label: 'Europa (Fráncfort)', value: 'europe-west3' },
@@ -33,7 +29,6 @@ export const gcp_regions = [
   { label: 'Europa (Varsovia)', value: 'europe-central2' },
   { label: 'Europa (Finlandia)', value: 'europe-north1' },
 
-  // Asia Pacífico
   { label: 'Asia Pacífico (Taiwán)', value: 'asia-east1' },
   { label: 'Asia Pacífico (Hong Kong)', value: 'asia-east2' },
   { label: 'Asia Pacífico (Tokio)', value: 'asia-northeast1' },
@@ -46,7 +41,6 @@ export const gcp_regions = [
   { label: 'Asia Pacífico (Sídney)', value: 'australia-southeast1' },
   { label: 'Asia Pacífico (Melbourne)', value: 'australia-southeast2' },
 
-  // Medio Oriente
   { label: 'Medio Oriente (Doha)', value: 'me-central1' },
   { label: 'Medio Oriente (Tel Aviv)', value: 'me-west1' },
   { label: 'Medio Oriente (Dammam)', value: 'me-central2' },

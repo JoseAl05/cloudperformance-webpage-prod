@@ -1,4 +1,3 @@
-// lib/logger.ts
 type LogLevel = 'info' | 'warn' | 'error' | 'debug';
 
 interface LogMetadata {
@@ -59,7 +58,6 @@ class Logger {
   private sendToNewRelic(level: LogLevel, message: string, metadata?: LogMetadata) {
     if (process.env.NEW_RELIC_ENABLED !== 'true') return;
 
-    // Solo en entorno server (Next.js evita Webpack bundle)
     if (typeof window !== 'undefined') return;
 
     try {
@@ -78,7 +76,6 @@ class Logger {
         return;
       }
 
-      // Agregar metadata personalizada
       if (metadata) {
         Object.entries(metadata).forEach(([key, value]) => {
           try {
@@ -87,12 +84,10 @@ class Logger {
               typeof value === 'object' ? JSON.stringify(value) : value
             );
           } catch {
-            /* ignorado */
           }
         });
       }
 
-      // Registrar errores
       const metadataError = metadata as { error?: Error };
 
       if (level === 'error' && metadataError?.error instanceof Error) {
@@ -103,7 +98,6 @@ class Logger {
         });
       }
 
-      // Crear evento personalizado
       const eventData: Record<string, unknown> = {
         level: level.toUpperCase(),
         context: this.context,

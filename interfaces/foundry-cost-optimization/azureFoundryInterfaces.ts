@@ -144,7 +144,6 @@ export interface AzureFoundryMeterIssue {
 }
 
 export interface AzureFoundryCatalogBuildRegion {
-    // Bedrock shape
     foundation_models?: number;
     usable_models?: number;
     price_groups?: number;
@@ -152,7 +151,6 @@ export interface AzureFoundryCatalogBuildRegion {
     unjoined_models?: number;
     unjoined_sample?: string[];
     price_catalog_versions?: Record<string, number>;
-    // Vertex shape
     price_rows?: number;
     excluded_rows?: number;
     unresolved_rows?: number;

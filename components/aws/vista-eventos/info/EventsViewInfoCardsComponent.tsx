@@ -33,7 +33,6 @@ export const EventsViewInfoCardsComponent = ({ infoData }: EventsViewInfoCardsCo
         return <div className="text-center text-gray-500 py-6">No hay información para mostrar.</div>;
     }
 
-    // Total global de eventos (suma de docs)
     const eventsData = infoData.map(inf => inf.events);
     let countEvents = 0;
     eventsData.forEach(event => {
@@ -42,7 +41,6 @@ export const EventsViewInfoCardsComponent = ({ infoData }: EventsViewInfoCardsCo
         });
     });
 
-    // 1) NUEVO: contar total de docs por event_name en todo el periodo
     const countByEventName = (data: EventsApiResponse) => {
         return data
             .flatMap(r => r.events ?? [])
@@ -53,7 +51,6 @@ export const EventsViewInfoCardsComponent = ({ infoData }: EventsViewInfoCardsCo
             }, {});
     };
 
-    // 2) Usar el conteo anterior para construir las cards
     const buildEventCountCards = (
         data: EventsApiResponse,
         config?: {
@@ -85,7 +82,7 @@ export const EventsViewInfoCardsComponent = ({ infoData }: EventsViewInfoCardsCo
         icons: ICONS,
         borders: BORDERS,
         order: Object.keys(ICONS),
-    }); // ahora muestra totales de eventos (docs) por tipo
+    });
 
     const eventsGeneralData = [
         {
@@ -148,7 +145,7 @@ export const EventsViewInfoCardsComponent = ({ infoData }: EventsViewInfoCardsCo
                 })}
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">{/* ...otros bloques opcionales... */}</div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4"></div>
         </div>
     );
 };

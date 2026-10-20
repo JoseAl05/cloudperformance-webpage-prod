@@ -1,4 +1,3 @@
-// components/aws/vista-rds/avg-uso-loc-inst-rds-oracle/MainViewInstanciasAVGUsoLocInstRdsOracleComponent.tsx
 import { FiltersComponent } from '@/components/general_aws/filters/FiltersComponent'
 import { AVGUsoLocInstRdsOracleChartComponent } from '@/components/aws/vista-prom-loc/avg-uso-loc-inst-rds-oracle/AVGUsoLocInstRdsOracleChartComponent'
 import { Database } from 'lucide-react'
@@ -34,8 +33,7 @@ export const MainViewInstanciasAVGUsoLocInstRdsOracleComponent = () => {
                     instancesService='rds-oracle'
                     isInstanceMultiSelect
                     tagsFilter
-                    tagColumnName='TagList'
-                    collection='aws_rds_oracle'
+                    resourceType='rds_oracle'
 
                     isRegionMultiSelect
                     metricsRDSFilter

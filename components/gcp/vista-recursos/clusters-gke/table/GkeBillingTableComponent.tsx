@@ -2,7 +2,7 @@
 
 import { createColumns } from '@/components/data-table/columns';
 import { DataTableGrouping } from '@/components/data-table/data-table-grouping';
-import { getResourceBillingColumns } from '@/components/gcp/vista-recursos/clusters-gke/table/GkeBillingColumns';
+import { getResourceBillingColumns, type ResourceBillingGroup } from '@/components/gcp/vista-recursos/clusters-gke/table/GkeBillingColumns';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ClusterGkeBilling } from '@/interfaces/vista-gke/gkeInterfaces';
 import { BarChart3 } from 'lucide-react';

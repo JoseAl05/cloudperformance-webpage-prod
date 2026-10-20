@@ -1,15 +1,13 @@
 'use client'
 
 import { useEffect, useState, useMemo } from 'react';
-import { DatePicker } from 'react-datepicker';
-import 'react-datepicker/dist/react-datepicker.css';
 import { RegionFilterComponent } from '@/components/general_azure/filters/RegionFilterComponent';
 import { SubscriptionsFilterComponent } from '@/components/general_azure/filters/SubscriptionsFilterComponent';
 import { TagsFilterComponent } from '@/components/general_azure/filters/TagsFilterComponent';
 import { MetricsFilterComponent } from '@/components/general_azure/filters/MetricsFilterComponent';
-import { Card, CardContent } from '@/components/ui/card';
-import { Calendar, Filter, MapPin, XCircle, Cloud, Tag, Activity, Layers, Server, Cylinder, Database, Computer, Boxes, FolderTree, GitBranch, AlertTriangle } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { MapPin, Cloud, Tag, Activity, Layers, Server, Cylinder, Database, Computer, Boxes, FolderTree, GitBranch, AlertTriangle } from 'lucide-react';
+import { BaseFiltersComponent } from '@/components/shared/filters/BaseFiltersComponent';
+import { buildCommonFilters, readFilterParam, setFilterDates, FILTER_PARAMS, type CommonFilters } from '@/lib/filters';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { SubscriptionsFilterComponentV2 } from '@/components/general_azure/filters/SubscriptionsFilterComponentV2';
 import { ResourceTypesFilterComponent } from '@/components/general_azure/filters/ResourceTypesFilterComponent';
@@ -51,6 +49,9 @@ interface FiltersComponentProps {
         selectedUnusedVm?: string;
         selectedUnusedVmss?: string;
         selectedVm?: string;
+        selectedUnusedLb?: string;
+        selectedUnusedAppG?: string;
+        selectedUnusedTm?: string;
         selectedService?: string;
         selectedResourceGroup?: string | null;
         selectedInstanceV2?: string | null;
@@ -59,6 +60,7 @@ interface FiltersComponentProps {
         category?: string | null;
         cloud?: string;
         selectedFoundryModel?: string;
+        filters?: CommonFilters;
     }) => React.JSX.Element;
     dateFilter?: boolean;
     monthYearFilter?: boolean;
@@ -66,14 +68,11 @@ interface FiltersComponentProps {
     subscriptionFilter?: boolean;
     subscriptionIdFilter?: boolean;
     tagsFilter?: boolean;
-    tagsCollection?: string;
-    tagsColumnName?: string;
-    tagsRegionField?: string;
-    tagsSubscriptionField?: string;
+    tagsResourceType?: string;
     tagsLocalService?: string;
     isRegionMultiSelect?: boolean;
     metricsFilter?: boolean;
-    metricsCollection?: string;
+    metricsResourceType?: string;
     resourceTypeFilter?: boolean;
     instancesService?: string;
     instancesFilter?: boolean;
@@ -89,12 +88,9 @@ interface FiltersComponentProps {
     serviceFilter?: boolean;
     isServiceMultiselect?: boolean;
     resourceGroupFilter?: boolean;
-    resourceGroupCollection?: string;
-    resourceGroupSubscriptionField?: string;
+    resourceGroupResourceType?: string;
     instancesFilterV2?: boolean;
-    instancesV2Collection?: string;
-    instancesV2SubscriptionField?: string;
-    instancesV2InstanceField?: string;
+    instancesV2ResourceType?: string;
     deploymentOperationsFilter?: boolean;
     impactFilter?: boolean;
     categoryFilter?: boolean;
@@ -121,14 +117,11 @@ export const FiltersComponent = ({
     subscriptionFilter = false,
     subscriptionIdFilter = false,
     tagsFilter = false,
-    tagsCollection = '',
-    tagsColumnName = '',
-    tagsRegionField = '',
-    tagsSubscriptionField = '',
+    tagsResourceType = '',
     tagsLocalService = '',
     isRegionMultiSelect = false,
     metricsFilter = false,
-    metricsCollection = '',
+    metricsResourceType = '',
     resourceTypeFilter = false,
     instancesFilter = false,
     instancesService,
@@ -144,12 +137,9 @@ export const FiltersComponent = ({
     serviceFilter = false,
     isServiceMultiselect = false,
     resourceGroupFilter = false,
-    resourceGroupCollection = '',
-    resourceGroupSubscriptionField = '',
+    resourceGroupResourceType = '',
     instancesFilterV2 = false,
-    instancesV2Collection = '',
-    instancesV2SubscriptionField = '',
-    instancesV2InstanceField = '',
+    instancesV2ResourceType = '',
     deploymentOperationsFilter = false,
     impactFilter = false,
     categoryFilter = false,
@@ -181,20 +171,20 @@ export const FiltersComponent = ({
     };
 
     const getInitialFilters = () => {
-        const startDateParam = searchParams.get('startDate');
+        const startDateParam = readFilterParam(searchParams, 'dateFrom');
         const monthParam = searchParams.get('month');
         const yearParam = searchParams.get('year');
-        const endDateParam = searchParams.get('endDate');
-        const regionParam = searchParams.get('region');
-        const subscriptionParam = searchParams.get('subscription');
-        const selectedTagKeyParam = searchParams.get('tagKey');
-        const selectedTagValueParam = searchParams.get('tagValue');
+        const endDateParam = readFilterParam(searchParams, 'dateTo');
+        const regionParam = readFilterParam(searchParams, 'regions');
+        const subscriptionParam = readFilterParam(searchParams, 'scopes');
+        const selectedTagKeyParam = readFilterParam(searchParams, 'tagKey');
+        const selectedTagValueParam = readFilterParam(searchParams, 'tagValue');
         const selectedMetricParam = searchParams.get('metric');
         const selectedResourceTypeParam = searchParams.get('resourceType');
         const selectedMeterCategoryParam = searchParams.get('meterCategory');
-        const selectedInstanceParam = searchParams.get('instance');
+        const selectedInstanceParam = instancesFilter ? readFilterParam(searchParams, 'resourceIds') : searchParams.get('instance');
         const selectedStrgAccountParam = searchParams.get('strgAccount');
-        const selectedResourceParam = searchParams.get('resource');
+        const selectedResourceParam = resourcesFilter && !instancesFilter ? readFilterParam(searchParams, 'resourceIds') : searchParams.get('resource');
         const selectedUnusedVmParam = searchParams.get('unusedVm');
         const selectedUnusedVmssParam = searchParams.get('unusedVmss');
         const selectedVmParam = searchParams.get('vm');
@@ -385,49 +375,39 @@ export const FiltersComponent = ({
         setFilters(newFilters as unknown);
 
         const query = new URLSearchParams();
-        query.set('startDate', newFilters.startDate.toISOString());
-        query.set('endDate', newFilters.endDate.toISOString());
+        setFilterDates(query, newFilters.startDate, newFilters.endDate);
 
         if (monthYearFilter) {
             if (newFilters.month) query.set('month', String(newFilters.month));
             if (newFilters.year) query.set('year', String(newFilters.year));
         }
         const filterConfigs = [
-            // Estructura: { flag: boolean, key: string, value: any, ignoreValue?: string }
-            { flag: regionFilter, key: 'region', value: newFilters.region, ignoreValue: 'all_regions' },
-            { flag: subscriptionFilter || subscriptionIdFilter, key: 'subscription', value: newFilters.subscription, ignoreValue: 'all_subscriptions' },
+            { flag: regionFilter, key: FILTER_PARAMS.regions, value: newFilters.region, ignoreValue: 'all_regions' },
+            { flag: subscriptionFilter || subscriptionIdFilter, key: FILTER_PARAMS.scopes, value: newFilters.subscription, ignoreValue: 'all_subscriptions' },
 
-            // Tags
-            { flag: tagsFilter, key: 'tagKey', value: newFilters.selectedTagKey },
-            { flag: tagsFilter, key: 'tagValue', value: newFilters.selectedTagValue },
+            { flag: tagsFilter, key: FILTER_PARAMS.tagKey, value: newFilters.selectedTagKey },
+            { flag: tagsFilter, key: FILTER_PARAMS.tagValue, value: newFilters.selectedTagValue },
 
-            // Métricas y Recursos
             { flag: metricsFilter, key: 'metric', value: newFilters.selectedMetric },
             { flag: resourceTypeFilter, key: 'resourceType', value: newFilters.selectedResourceType },
-            { flag: resourcesFilter, key: 'resource', value: newFilters.selectedResource },
+            { flag: resourcesFilter, key: instancesFilter ? 'resource' : FILTER_PARAMS.resourceIds, value: newFilters.selectedResource },
 
-            // Instancias
             { flag: instancesFilter, key: 'meterCategory', value: newFilters.selectedMeterCategory },
-            { flag: instancesFilter, key: 'instance', value: newFilters.selectedInstance },
+            { flag: instancesFilter, key: FILTER_PARAMS.resourceIds, value: newFilters.selectedInstance },
             { flag: instancesFilterV2, key: 'instanceV2', value: newFilters.selectedInstanceV2, ignoreValue: 'all_instances' },
 
-            // Impacto y Categoría
             { flag: impactFilter, key: 'impact', value: newFilters.impact },
             { flag: categoryFilter, key: 'category', value: newFilters.category },
 
-            // VMs y VMSS
             { flag: unusedVmFilter, key: 'unusedVm', value: newFilters.selectedUnusedVm },
             { flag: unusedVmssFilter, key: 'unusedVmss', value: newFilters.selectedUnusedVmss },
             { flag: vmFilter, key: 'vm', value: newFilters.selectedVm },
 
-            // Grupos y Servicios
             { flag: resourceGroupFilter, key: 'resourceGroup', value: newFilters.selectedResourceGroup, ignoreValue: 'all_resource_groups' },
             { flag: serviceFilter, key: 'service', value: newFilters.selectedService },
 
-            // Operaciones
             { flag: deploymentOperationsFilter, key: 'operation', value: newFilters.selectedOperation, ignoreValue: 'all_operations' },
 
-            // Storage y Redes
             { flag: strgAccountFilter, key: 'strgAccount', value: newFilters.selectedStrgAccount },
             { flag: unusedLbFilter, key: 'unused_loadbalancer', value: newFilters.selectedUnusedLb },
             { flag: unusedAppGFilter, key: 'unused_appgateway', value: newFilters.selectedUnusedAppG },
@@ -435,7 +415,6 @@ export const FiltersComponent = ({
             { flag: unusedTmFilter, key: 'unused_tm', value: newFilters.selectedUnusedTm },
             { flag: tmFilter, key: 'tm_profile', value: newFilters.selectedTm },
 
-            // Foundry
             { flag: foundryModelFilter, key: 'foundry_model', value: newFilters.selectedFoundryModel }
         ];
         filterConfigs.forEach(({ flag, key, value, ignoreValue }) => {
@@ -513,62 +492,72 @@ export const FiltersComponent = ({
         router.push(window.location.pathname);
     };
 
+    const handleMonthYearChange = (d: Date | null) => {
+        setTempMonthYearDate(d);
+        if (d) {
+            const m = d.getMonth() + 1;
+            const y = d.getFullYear();
+            setTempMonth(m);
+            setTempYear(y);
+            const [s, e] = monthYearToRange(y, m);
+            setTempRange([s, e]);
+        } else {
+            setTempMonth(null);
+            setTempYear(null);
+            setTempRange([null, null]);
+        }
+    };
+
     return (
-        <div className='space-y-6'>
-            <Card className="w-full min-w-0 overflow-hidden">
-                <CardContent className='space-y-6'>
-                    <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6'>
-                        {dateFilter && (
-                            <div className='space-y-2'>
-                                <label className='text-sm font-medium text-foreground flex items-center gap-2'>
-                                    <Calendar className='h-4 w-4' />
-                                    Periodo
-                                </label>
-                                <DatePicker
-                                    selected={tempRange[0]}
-                                    onChange={onChange}
-                                    startDate={tempRange[0]}
-                                    endDate={tempRange[1]}
-                                    selectsRange
-                                    className='w-full px-3 py-2 border border-input bg-background text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent'
-                                />
-                            </div>
-                        )}
-
-                        {monthYearFilter && (
-                            <div className='space-y-2'>
-                                <label className='text-sm font-medium text-foreground flex items-center gap-2'>
-                                    <Calendar className='h-4 w-4' />
-                                    Mes y Año
-                                </label>
-                                <DatePicker
-                                    selected={tempMonthYearDate}
-                                    onChange={(d: Date | null) => {
-                                        setTempMonthYearDate(d);
-                                        if (d) {
-                                            const m = d.getMonth() + 1;
-                                            const y = d.getFullYear();
-                                            setTempMonth(m);
-                                            setTempYear(y);
-                                            const [s, e] = monthYearToRange(y, m);
-                                            setTempRange([s, e]);
-                                        } else {
-                                            setTempMonth(null);
-                                            setTempYear(null);
-                                            setTempRange([null, null]);
-                                        }
-                                    }}
-                                    dateFormat="MMMM yyyy"
-                                    showMonthYearPicker
-                                    showMonthDropdown
-                                    showYearDropdown
-                                    dropdownMode="select"
-                                    placeholderText="Selecciona mes y año"
-                                    className='w-full px-3 py-2 border border-input bg-background text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent'
-                                />
-                            </div>
-                        )}
-
+        <BaseFiltersComponent
+            dateRange={dateFilter ? { value: tempRange, onChange } : undefined}
+            monthYear={monthYearFilter ? { value: tempMonthYearDate, onChange: handleMonthYearChange } : undefined}
+            onApply={applyFilters}
+            onClear={clearFilters}
+            view={
+                <Component
+                    startDate={filters.startDate}
+                    endDate={filters.endDate}
+                    month={(filters as unknown).month}
+                    year={(filters as unknown).year}
+                    region={filters.region}
+                    subscription={filters.subscription}
+                    selectedTagKey={filters.selectedTagKey}
+                    selectedTagValue={filters.selectedTagValue}
+                    selectedMetric={filters.selectedMetric}
+                    selectedResourceType={(filters as unknown).selectedResourceType}
+                    selectedMeterCategory={(filters as unknown).selectedMeterCategory}
+                    selectedInstance={(filters as unknown).selectedInstance}
+                    selectedStrgAccount={(filters as unknown).selectedStrgAccount}
+                    selectedResource={(filters as unknown).selectedResource}
+                    selectedUnusedVm={(filters as unknown).selectedUnusedVmParam}
+                    selectedUnusedVmss={(filters as unknown).selectedUnusedVmssParam}
+                    selectedVm={(filters as unknown).selectedVmParam}
+                    selectedService={(filters as unknown).selectedServiceParam}
+                    selectedResourceGroup={(filters as unknown).selectedResourceGroup}
+                    selectedInstanceV2={(filters as unknown).selectedInstanceV2}
+                    selectedOperation={(filters as unknown).selectedOperation}
+                    impact={filters.impact}
+                    category={filters.category}
+                    selectedUnusedLb={filters.selectedUnusedLbParam}
+                    selectedUnusedAppG={filters.selectedUnusedAppGParam}
+                    selectedAppg={filters.selectedAppGParam}
+                    selectedUnusedTm={filters.selectedUnusedTmParam}
+                    selectedTm={filters.selectedTmParam}
+                    selectedFoundryModel={filters.selectedFoundryModelParam}
+                    cloud={cloud}
+                    filters={buildCommonFilters({
+                        dateFrom: filters.startDate,
+                        dateTo: filters.endDate,
+                        regions: filters.region,
+                        scopes: filters.subscription,
+                        resourceIds: instancesFilter ? filters.selectedInstance : filters.selectedResource,
+                        tagKey: filters.selectedTagKey,
+                        tagValue: filters.selectedTagValue,
+                    })}
+                />
+            }
+        >
                         {regionFilter && (
                             <div className='space-y-2'>
                                 <label className='text-sm font-medium text-foreground flex items-center gap-2'>
@@ -619,10 +608,7 @@ export const FiltersComponent = ({
                                     endDate={tempRange[1] ?? filters.endDate}
                                     region={tempRegion}
                                     subscription={tempSubscription}
-                                    collection={tagsCollection}
-                                    tagColumnName={tagsColumnName}
-                                    regionField={tagsRegionField}
-                                    subscriptionField={tagsSubscriptionField}
+                                    resourceType={tagsResourceType}
                                     selectedKey={tempTagKey}
                                     selectedValue={tempTagValue}
                                     setSelectedKey={setTempTagKey}
@@ -642,8 +628,7 @@ export const FiltersComponent = ({
                                     endDate={tempRange[1] ?? filters.endDate}
                                     region={tempRegion}
                                     subscription={tempSubscription}
-                                    collection={resourceGroupCollection}
-                                    subscriptionField={resourceGroupSubscriptionField}
+                                    resourceType={resourceGroupResourceType}
                                     selectedTagKey={tempTagKey}
                                     selectedTagValue={tempTagValue}
                                     selectedResourceGroup={tempResourceGroup}
@@ -674,7 +659,7 @@ export const FiltersComponent = ({
                                 <MetricsFilterComponent
                                     startDate={tempRange[0] ?? filters.startDate}
                                     endDate={tempRange[1] ?? filters.endDate}
-                                    collection={metricsCollection}
+                                    resourceType={metricsResourceType}
                                     metric={tempMetric}
                                     setMetric={setTempMetric}
                                 />
@@ -789,9 +774,7 @@ export const FiltersComponent = ({
                                     endDate={tempRange[1] ?? filters.endDate}
                                     region={tempRegion}
                                     subscription={tempSubscription}
-                                    collection={instancesV2Collection}
-                                    subscriptionField={instancesV2SubscriptionField}
-                                    instanceField={instancesV2InstanceField}
+                                    resourceType={instancesV2ResourceType}
                                     selectedTagKey={tempTagKey}
                                     selectedTagValue={tempTagValue}
                                     selectedResourceGroup={tempResourceGroup}
@@ -980,53 +963,6 @@ export const FiltersComponent = ({
                                 />
                             </div>
                         )}
-                    </div>
-
-                    <div className='flex items-center gap-4'>
-                        <Button onClick={applyFilters} className='flex items-center gap-2 bg-blue-700 cursor-pointer hover:bg-blue-500 text-white'>
-                            <Filter />
-                            Aplicar Filtros
-                        </Button>
-                        <Button onClick={clearFilters} className='flex items-center gap-2 bg-gray-500 cursor-pointer hover:bg-gray-400 text-white'>
-                            <XCircle />
-                            Limpiar Filtros
-                        </Button>
-                    </div>
-                </CardContent>
-
-                <Component
-                    startDate={filters.startDate}
-                    endDate={filters.endDate}
-                    month={(filters as unknown).month}
-                    year={(filters as unknown).year}
-                    region={filters.region}
-                    subscription={filters.subscription}
-                    selectedTagKey={filters.selectedTagKey}
-                    selectedTagValue={filters.selectedTagValue}
-                    selectedMetric={filters.selectedMetric}
-                    selectedResourceType={(filters as unknown).selectedResourceType}
-                    selectedMeterCategory={(filters as unknown).selectedMeterCategory}
-                    selectedInstance={(filters as unknown).selectedInstance}
-                    selectedStrgAccount={(filters as unknown).selectedStrgAccount}
-                    selectedResource={(filters as unknown).selectedResource}
-                    selectedUnusedVm={(filters as unknown).selectedUnusedVmParam}
-                    selectedUnusedVmss={(filters as unknown).selectedUnusedVmssParam}
-                    selectedVm={(filters as unknown).selectedVmParam}
-                    selectedService={(filters as unknown).selectedServiceParam}
-                    selectedResourceGroup={(filters as unknown).selectedResourceGroup}
-                    selectedInstanceV2={(filters as unknown).selectedInstanceV2}
-                    selectedOperation={(filters as unknown).selectedOperation}
-                    impact={filters.impact}
-                    category={filters.category}
-                    selectedUnusedLb={filters.selectedUnusedLbParam}
-                    selectedUnusedAppG={filters.selectedUnusedAppGParam}
-                    selectedAppg={filters.selectedAppGParam}
-                    selectedUnusedTm={filters.selectedUnusedTmParam}
-                    selectedTm={filters.selectedTmParam}
-                    selectedFoundryModel={filters.selectedFoundryModelParam}
-                    cloud={cloud}
-                />
-            </Card>
-        </div>
+        </BaseFiltersComponent>
     );
 };

@@ -6,33 +6,19 @@ import { UnusedVm, UnusedVmDiskDetails, UnusedVmDisksData, UnusedVmInterfaceData
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
+import { CopyButton } from '@/components/shared/CopyButton';
 import { useState } from 'react';
-import { AlertCircle, CheckCircle2, Copy, Eye, Globe, HardDrive, Network } from 'lucide-react';
+import { AlertCircle, CheckCircle2, Eye, Globe, HardDrive, Network } from 'lucide-react';
+import { readFilterParam } from '@/lib/filters';
 
 const DateParams = () => {
     const searchParams = useSearchParams();
 
-    const startDateParam = searchParams.get('startDate');
-    const endDateParam = searchParams.get('endDate');
+    const startDateParam = readFilterParam(searchParams, 'dateFrom');
+    const endDateParam = readFilterParam(searchParams, 'dateTo');
 
     return { startDateParam: startDateParam, endDateParam: endDateParam }
 }
-
-const CopyBtn = ({ text, label = 'Copiado' }: { text: string; label?: string }) => (
-    <Button
-        variant="ghost"
-        size="sm"
-        className="h-7 px-2"
-        onClick={() => {
-            navigator.clipboard.writeText(text)
-            toast.success(label)
-        }}
-        aria-label="Copiar"
-        title="Copiar"
-    >
-        <Copy className="h-3.5 w-3.5" />
-    </Button>
-)
 
 const ShortenedId = ({ id }: { id: string }) => {
     const parts = id.split("/")
@@ -45,7 +31,7 @@ const ShortenedId = ({ id }: { id: string }) => {
                 <div className="text-sm font-medium truncate">{resourceName}</div>
                 <div className="text-xs text-muted-foreground">{resourceType}</div>
             </div>
-            <CopyBtn text={id} label="ID copiado" />
+            <CopyButton text={id} label="ID copiado" />
         </div>
     )
 }
@@ -152,7 +138,7 @@ const DisksCell = ({ details }: { details?: UnusedVmDiskDetails[] }) => {
                                                             <div className="text-xs text-muted-foreground mb-1">Resource ID</div>
                                                             <code className="block text-xs font-mono text-muted-foreground break-all">{d.id}</code>
                                                         </div>
-                                                        <CopyBtn text={d.id} label="ID copiado" />
+                                                        <CopyButton text={d.id} label="ID copiado" />
                                                     </div>
                                                 </div>
                                             )}
@@ -219,7 +205,6 @@ const InterfacesCell = ({ details }: { details?: UnusedVmInterfaceDetails }) => 
                                             key={n.id ?? i}
                                             className="rounded-lg border bg-card p-4 space-y-4 hover:shadow-sm transition-shadow"
                                         >
-                                            {/* NIC Header */}
                                             <div className="space-y-3">
                                                 <div className="flex items-start justify-between gap-3">
                                                     <div className="flex-1 min-w-0">
@@ -254,7 +239,6 @@ const InterfacesCell = ({ details }: { details?: UnusedVmInterfaceDetails }) => 
                                                 )}
                                             </div>
 
-                                            {/* IP Configurations */}
                                             {(n.ip_configurations ?? []).length > 0 && (
                                                 <div className="space-y-2">
                                                     <h5 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
@@ -309,7 +293,7 @@ const InterfacesCell = ({ details }: { details?: UnusedVmInterfaceDetails }) => 
                                                                             <code className="flex-1 px-2 py-1 rounded bg-background font-mono text-2xs truncate">
                                                                                 {ip.subnet.id.split("/").slice(-1)[0]}
                                                                             </code>
-                                                                            <CopyBtn text={ip.subnet.id} label="Subred copiada" />
+                                                                            <CopyButton text={ip.subnet.id} label="Subred copiada" />
                                                                         </div>
                                                                     </div>
                                                                 )}
@@ -434,7 +418,6 @@ export const UnusedVmColumns: DynamicColumn<UnusedVm>[] = [
         ),
         size: 170,
     },
-    // --- NUEVO: columnas de métricas FinOps ---
     {
         id: "cpu_promedio",
         header: "CPU Prom %",

@@ -24,14 +24,14 @@ export const MainViewUnusedGkeComponent = () => {
             <div className='w-full min-w-0'>
                 <FiltersComponent
                     Component={UnusedGkeComponent}
+                    cloud='gcp'
                     dateFilter
                     projectsFilter
                     regionFilter
                     resourceFilter
                     isResourceMultiSelect
                     resourceService='clusters-gke'
-                    tagCollection='gcp_container_clusters'
-                    tagColumn='resourceLabels'
+                    tagResourceType='gke_clusters'
                     tagsFilter
                 />
             </div>

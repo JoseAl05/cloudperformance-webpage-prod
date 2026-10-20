@@ -4,14 +4,13 @@ import { DynamicColumn } from '@/components/data-table/columns';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Ec2ConsumneViewInstance } from '@/interfaces/vista-consumos/ec2ConsumeViewInterfaces';
-//import { ModalResourceBillingComponent } from '@/components/aws/facturacion-recurso/info/ModalResourceBillingComponent'
-//import { ResourceBillingActionCell } from '@/components/aws/facturacion-recurso/table/ResourceBillingActionCell';
+import { readFilterParam } from '@/lib/filters';
 
 const DateParams = () => {
     const searchParams = useSearchParams();
 
-    const startDateParam = searchParams.get('startDate');
-    const endDateParam = searchParams.get('endDate');
+    const startDateParam = readFilterParam(searchParams, 'dateFrom');
+    const endDateParam = readFilterParam(searchParams, 'dateTo');
 
     return { startDateParam: startDateParam, endDateParam: endDateParam }
 }
@@ -29,7 +28,7 @@ export const Ec2ConsumeViewInstanceColumns: DynamicColumn<Ec2ConsumneViewInstanc
             return (
                 <div className="font-medium">
                     <Link
-                        href={{ pathname: '/aws/recursos/instancias-ec2', query: { instance: value, startDate: startDate, endDate: endDate } }}
+                        href={{ pathname: '/cloud-aws/recursos/instancias-ec2', query: { instance: value, startDate: startDate, endDate: endDate } }}
                         rel="noopener noreferrer"
                         target="_blank"
                     >

@@ -27,9 +27,10 @@ export const MainViewLoadBalancersComponent = () => {
 
       <div className="w-full min-w-0">
         <FiltersComponent
+          cloud="gcp"
           Component={LoadBalancersComponent}
           dateFilter
-          projectFilter
+          projectsFilter
           regionFilter
           esquemaFilter
           estadoUsoFilter

@@ -57,16 +57,13 @@ export const TopStorageBucketsChart = ({ data, type }: TopStorageBucketsChartPro
     const chartData = useMemo(() => {
         if (!data || data.length === 0) return { names: [], values: [] };
 
-        // Ordenar por valor descendente
         const sorted = [...data].sort((a, b) => 
             (b[config.valueKey] as number) - (a[config.valueKey] as number)
         );
 
-        // Tomar solo top N
         const limit = parseInt(topN);
         const top = sorted.slice(0, limit);
 
-        // Invertir para que el mayor esté arriba
         const names = top.map(b => b.name).reverse();
         const values = top.map(b => b[config.valueKey] as number).reverse();
 

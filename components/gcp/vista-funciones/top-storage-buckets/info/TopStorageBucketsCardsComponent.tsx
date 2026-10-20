@@ -77,7 +77,6 @@ export const TopStorageBucketsCardsComponent = ({
 
     return (
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            {/* 1. TAMAÑO TOTAL */}
             <StatCard
                 title="Tamaño Total"
                 value={(summary.total_size_gb || 0).toFixed(2)}
@@ -87,17 +86,15 @@ export const TopStorageBucketsCardsComponent = ({
                 colorClass="blue"
             />
 
-            {/* 2. TOTAL BUCKETS - Quitamos cualquier espacio extra */}
             <StatCard
                 title="Total Buckets"
                 value={Number(summary.total_buckets)}
-                unit="" // Forzamos unit vacío para evitar el "22"
+                unit=""
                 description="Buckets únicos monitoreados."
                 icon={Database}
                 colorClass="purple"
             />
 
-            {/* 3. TOTAL OBJETOS */}
             <StatCard
                 title="Total Objetos"
                 value={(summary.total_objects || 0).toLocaleString('es-ES')}
@@ -106,10 +103,9 @@ export const TopStorageBucketsCardsComponent = ({
                 colorClass="amber"
             />
 
-            {/* 4. COSTO TOTAL - Usando el costo_total_usd del JSON */}
             <StatCard
                 title="Costo Total"
-                value={`$${(summary.costo_total_usd || 0).toFixed(8)}`} // Subimos a 8 decimales por tu JSON
+                value={`$${(summary.costo_total_usd || 0).toFixed(8)}`}
                 unit="USD"
                 description="Costo mensual estimado."
                 icon={DollarSign}

@@ -6,7 +6,7 @@ import {
     TooltipContent,
     TooltipTrigger,
 } from "@/components/ui/tooltip"
-import { DynamicColumn } from '@/components/general/data-table/columns';
+import { DynamicColumn } from '@/components/data-table/columns';
 import { IntraCloudBillingByDimension } from '@/interfaces/vista-intracloud/billing/intraCloudBillingInterfaces';
 import { Button } from '@/components/ui/button';
 import { formatMetric } from '@/lib/metricUtils';
@@ -97,16 +97,6 @@ const ComparisonCell = ({ row, tenantIds, aliasMap }: { row: AggregatedBillingRo
                                             {aliasMap[tid] || `Tenant ${idx + 1}`}: {pct}%
                                         </TooltipContent>
                                     </Tooltip>
-                                    // <div
-                                    //     key={tid}
-                                    //     className="h-2 bg-gradient-to-r from-emerald-400 to-emerald-600 rounded-full relative group"
-                                    //     style={{ width: `${pct}%` }}
-                                    //     title={`Tenant ${idx + 1}: ${pct}%`}
-                                    // >
-                                    //     <span className="absolute -top-1 left-1/2 -translate-x-1/2 text-[9px] font-medium opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-                                    //         Tenant {idx + 1}: {pct}%
-                                    //     </span>
-                                    // </div>
                                 );
                             })}
                         </div>
@@ -120,18 +110,6 @@ const ComparisonCell = ({ row, tenantIds, aliasMap }: { row: AggregatedBillingRo
                             })}
                         </div>
                     </div>
-
-                    {/* <div className="space-y-1">
-                        <div className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">
-                            Desviación Estándar
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <span className="text-xs font-semibold">±{formatCurrency(stdDev)}</span>
-                            <Badge variant="outline" className="text-[9px] h-4 px-1">
-                                CV: {coefficientOfVariation}%
-                            </Badge>
-                        </div>
-                    </div> */}
 
                     <div className="space-y-1">
                         <div className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">

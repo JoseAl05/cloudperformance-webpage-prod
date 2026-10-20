@@ -1,5 +1,6 @@
 'use client'
 
+import { fetcher } from '@/lib/fetcher';
 import { MessageCard } from '@/components/aws/cards/MessageCards';
 import { LoaderComponent } from '@/components/general_aws/LoaderComponent';
 import { StorageVariation, StorageVariationsRangesMetrics } from '@/interfaces/vista-variacion-storage/variationStorageInterfaces';
@@ -7,10 +8,6 @@ import { AlertCircle, ChartBar, Info } from 'lucide-react';
 import { StorageVariationCardsComponent } from '@/components/azure/vista-funciones/variacion-storage/info/StorageVariationCardsComponent';
 import { StorageVariationCapacitiesComponent } from '@/components/azure/vista-funciones/variacion-storage/graficos/StorageVariationCapacitiesComponent';
 import useSWR from 'swr';
-
-const fetcher = (url: string) =>
-    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
-        .then(r => r.json());
 
 const isNonEmptyArray = <T,>(v: unknown): v is T[] => Array.isArray(v) && v.length > 0
 const isNullish = (v: unknown) => v === null || v === undefined

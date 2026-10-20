@@ -2,8 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getCollection } from '@/lib/mongodb';
 import { authorizeRequest } from '@/lib/authUtils';
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
-
 function calcularEstadoUC(uc: {
   type: string;
   expires: string | null;
@@ -15,8 +13,6 @@ function calcularEstadoUC(uc: {
   return 'activa';
 }
 
-// ── GET — Estado actual de todos los partners ─────────────────────────────────
-
 export async function GET(req: NextRequest) {
   const auth = await authorizeRequest(req, ['admin_global']);
   if (!auth.authorized) {
@@ -27,7 +23,6 @@ export async function GET(req: NextRequest) {
     const colLic = await getCollection('op_licencias');
     const colSol = await getCollection('op_solicitudes');
 
-    // ── Última licencia por partner ───────────────────────────────────────────
     const ultimasPorPartner = await colLic.aggregate([
       { $sort: { generado_at: -1 } },
       {
@@ -45,7 +40,6 @@ export async function GET(req: NextRequest) {
       { $sort: { partner: 1 } },
     ]).toArray();
 
-    // ── Partners con solicitud pendiente sin licencia ─────────────────────────
     const rutConLicencia = new Set(ultimasPorPartner.map(p => p.rut));
     const solicitudesSinLic = await colSol
       .find({ estado: 'pendiente' })
@@ -72,7 +66,6 @@ export async function GET(req: NextRequest) {
         return acc;
       }, [] as object[]);
 
-    // ── Calcular resumen por partner ──────────────────────────────────────────
     const resultado = [
       ...ultimasPorPartner.map(p => {
         const ucs = (p.compute_units || []).map((uc: {

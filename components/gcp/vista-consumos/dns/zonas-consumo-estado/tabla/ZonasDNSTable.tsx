@@ -8,20 +8,10 @@ import { DataTableGrouping } from '@/components/data-table/data-table-grouping';
 import { ColumnDef } from '@tanstack/react-table';
 import { Trash2, Eye } from 'lucide-react';
 
-interface ZonaDNS {
-    name: string;
-    dns_name: string;
-    visibility: string;
-    dnssec_state: string;
-    clasificacion_uso: string;
-    queries_por_segundo: number;
-    cost_in_usd: number;
-    ahorro_potencial_usd: number;
-    sync_time: { $date: string };
-}
+import type { ConsumptionResource } from '@/interfaces/consumption';
 
 interface ZonasDNSTableProps {
-    data: ZonaDNS[];
+    data: ConsumptionResource[];
     dateFrom: Date;
     dateTo: Date;
 }
@@ -29,16 +19,16 @@ interface ZonasDNSTableProps {
 export const ZonasDNSTable = ({ data, dateFrom, dateTo }: ZonasDNSTableProps) => {
     const flattenedData = useMemo(() => {
         return data.map(zona => ({
-            sync_time: new Date(zona.sync_time.$date).toISOString(),
-            sync_time_formatted: new Date(zona.sync_time.$date).toLocaleDateString('es-ES'),
-            name: zona.name,
-            dns_name: zona.dns_name,
-            visibility: zona.visibility,
-            dnssec_state: zona.dnssec_state,
-            clasificacion_uso: zona.clasificacion_uso,
-            queries_por_segundo: zona.queries_por_segundo,
-            cost_in_usd: zona.cost_in_usd,
-            ahorro_potencial_usd: zona.ahorro_potencial_usd
+            sync_time: zona.sync_time ?? '',
+            sync_time_formatted: zona.sync_time ? new Date(zona.sync_time).toLocaleDateString('es-ES') : '—',
+            name: zona.resource_name,
+            dns_name: String(zona.details.dns_name ?? ''),
+            visibility: zona.resource_type ?? '',
+            dnssec_state: String(zona.details.dnssec_state ?? ''),
+            clasificacion_uso: zona.status ?? '',
+            queries_por_segundo: zona.metrics.queries_por_segundo ?? 0,
+            cost_in_usd: zona.cost ?? 0,
+            ahorro_potencial_usd: Number(zona.details.ahorro_potencial_usd ?? 0)
         }));
     }, [data]);
 

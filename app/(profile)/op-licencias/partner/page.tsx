@@ -10,8 +10,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
 
-// ── Tipos ─────────────────────────────────────────────────────────────────────
-
 interface ComputeUnit {
   cloud: 'aws' | 'azure' | 'gcp';
   db: string;
@@ -41,8 +39,6 @@ interface PartnerData {
   compute_units: ComputeUnit[];
   solicitudes_pendientes: SolicitudPendiente[];
 }
-
-// ── Helpers ───────────────────────────────────────────────────────────────────
 
 function ucEstado(uc: ComputeUnit): { label: string; variant: string; dias?: number } {
   if (uc.type === 'perpetual') return { label: '∞ Perpetua', variant: 'purple' };
@@ -83,16 +79,12 @@ function CloudBadge({ cloud }: { cloud: string }) {
   return <Badge className={styles[cloud] || ''}>{cloud.toUpperCase()}</Badge>;
 }
 
-// ── Formulario nueva UC ───────────────────────────────────────────────────────
-
 const ucVacia = (): Omit<ComputeUnit, 'uc_fp'> => ({
   cloud: 'aws', db: '', rut: '', cliente: '', alias: '',
   type: 'subscription',
   starts: new Date().toISOString().slice(0, 16),
   expires: new Date(Date.now() + 365 * 86400000).toISOString().slice(0, 16),
 });
-
-// ── Página ────────────────────────────────────────────────────────────────────
 
 export default function PartnerPage() {
   const { user, isLoading } = useSession();
@@ -103,7 +95,7 @@ export default function PartnerPage() {
   const [searchError, setSearchError] = useState('');
 
   const [nuevasUCs, setNuevasUCs]         = useState<Omit<ComputeUnit, 'uc_fp'>[]>([]);
-  const [solicitudesUsadas, setSolicitudesUsadas] = useState<string[]>([]); // IDs de solicitudes agregadas
+  const [solicitudesUsadas, setSolicitudesUsadas] = useState<string[]>([]);
   const [formUC, setFormUC]               = useState(ucVacia());
 
   const [generando, setGenerando]   = useState(false);
@@ -115,7 +107,6 @@ export default function PartnerPage() {
   }[]>([]);
   const [genError, setGenError]     = useState('');
 
-  // ── SII autocomplete ────────────────────────────────────────────────────────
   const [siiStatus, setSiiStatus]   = useState<'idle' | 'loading' | 'found' | 'not_found'>('idle');
   const siiDebounce                 = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -141,7 +132,6 @@ export default function PartnerPage() {
       }
     }, 500);
   }, [formUC.rut]);
-  // ── fin SII ──────────────────────────────────────────────────────────────────
 
   if (isLoading) return (
     <div className="flex items-center gap-2 p-8 text-muted-foreground">
@@ -153,14 +143,12 @@ export default function PartnerPage() {
     return <div className="p-4 bg-red-100 text-red-700 rounded">Acceso denegado.</div>;
   }
 
-  // ── Buscar partner ──────────────────────────────────────────────────────────
   async function handleBuscar() {
     if (query.length < 2) return;
     setBuscando(true);
     setSearchError('');
     setPartner(null);
     setNuevasUCs([]);
-    //setLicsGenerados([]);
 
     try {
       const res = await fetch(`/api/op-licencias/partner?q=${encodeURIComponent(query)}`, {
@@ -176,7 +164,6 @@ export default function PartnerPage() {
     }
   }
 
-  // ── Agregar UC al formulario ────────────────────────────────────────────────
   function handleAgregarUC() {
     if (!formUC.db || !formUC.rut || !formUC.cliente || !formUC.alias) {
       return;
@@ -190,25 +177,21 @@ export default function PartnerPage() {
     setNuevasUCs(prev => prev.filter((_, i) => i !== idx));
   }
 
-  // ── Agregar UCs de una solicitud pendiente ──────────────────────────────────
   function handleAgregarSolicitud(sol: SolicitudPendiente) {
     const yaExisten = nuevasUCs.map(u => u.db);
     const nuevas = sol.compute_units.filter(u => !yaExisten.includes(u.db));
     setNuevasUCs(prev => [...prev, ...nuevas]);
-    // Trackear el ID de la solicitud para marcarla como procesada al generar
     setSolicitudesUsadas(prev => 
       prev.includes(sol._id) ? prev : [...prev, sol._id]
     );
   }
 
-  // ── Generar nuevo .lic ──────────────────────────────────────────────────────
   async function handleGenerar() {
     if (!partner) return;
     setGenerando(true);
     setGenError('');
     setLicsGenerados([]);
 
-    // UCs acumulativas: las existentes vigentes + las nuevas
     const ucsExistentes = partner.compute_units.filter(uc => {
       if (uc.type === 'perpetual') return true;
       return uc.expires ? new Date(uc.expires) > new Date() : false;
@@ -230,10 +213,10 @@ export default function PartnerPage() {
         body: JSON.stringify({
           partner:          partner.partner,
           rut:              partner.rut,
-          solicitante:      user.username || user.email,
+          solicitante:      user?.username || user?.email,
           fingerprint:      partner.fingerprint,
           compute_units:    todasUCs,
-          solicitudes_ids:  solicitudesUsadas, // marcar solicitudes como procesadas
+          solicitudes_ids:  solicitudesUsadas,
         }),
       });
 
@@ -245,8 +228,7 @@ export default function PartnerPage() {
         console.log('[DEBUG] lics a setear:', lics.length);
         setLicsGenerados([...lics]);
         setNuevasUCs([]);
-        {/*setSolicitudesUsadas([]);
-        handleBuscar();*/}
+        {}
       } else {
         setGenError(`Error: ${data.error}`);
       }
@@ -286,7 +268,6 @@ export default function PartnerPage() {
   return (
     <section className="px-4 py-8 space-y-6">
 
-      {/* Header */}
       <div className="flex items-center gap-3">
         <Link href="/op-licencias" className="text-muted-foreground hover:text-foreground transition">
           <ArrowLeft className="h-5 w-5" />
@@ -299,7 +280,6 @@ export default function PartnerPage() {
         </div>
       </div>
 
-      {/* Buscador */}
       <div className="flex gap-3">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -328,10 +308,8 @@ export default function PartnerPage() {
         </div>
       )}
 
-      {/* Resultado */}
       {partner && (
         <>
-          {/* Info del partner */}
           <Card className="shadow-sm">
             <CardHeader className="pb-3">
               <div className="flex items-start justify-between flex-wrap gap-3">
@@ -369,7 +347,6 @@ export default function PartnerPage() {
             </CardContent>
           </Card>
 
-          {/* Solicitudes pendientes */}
           {partner.solicitudes_pendientes.length > 0 && (
             <Card className="shadow-sm border-amber-200">
               <CardHeader className="pb-3">
@@ -407,7 +384,6 @@ export default function PartnerPage() {
             </Card>
           )}
 
-          {/* Agregar UC manual */}
           <Card className="shadow-sm">
             <CardHeader className="pb-3">
               <CardTitle className="text-base flex items-center gap-2">
@@ -515,7 +491,6 @@ export default function PartnerPage() {
             </CardContent>
           </Card>
 
-          {/* UCs nuevas agregadas */}
           {nuevasUCs.length > 0 && (
             <Card className="shadow-sm border-blue-200">
               <CardHeader className="pb-3">
@@ -545,7 +520,6 @@ export default function PartnerPage() {
             </Card>
           )}
 
-          {/* Licencias generadas */}
           {licsGenerados.length > 0 && (
             <div className="rounded-2xl border border-green-300 bg-green-500/5 p-5 space-y-3">
               <div className="flex items-center gap-2 text-green-600 font-semibold">
@@ -588,7 +562,6 @@ export default function PartnerPage() {
             </div>
           )}
 
-          {/* Botón generar */}
           <div className="flex justify-end pt-2">
             <button
               onClick={handleGenerar}

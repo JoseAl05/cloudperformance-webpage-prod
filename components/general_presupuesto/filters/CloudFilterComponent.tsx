@@ -29,7 +29,6 @@ export const CloudFilterComponent = ({
     isCloudMultiSelect,
 }: CloudFilterComponentProps) => {
 
-  // [{ label: 'Cloud AWS', value: 'AWS' }, { label: 'Cloud AZURE', value: 'AZURE' },]
     const actualSession = useSession();
     const isAzure = actualSession.user?.is_azure;
     const isAws = actualSession.user?.is_aws;

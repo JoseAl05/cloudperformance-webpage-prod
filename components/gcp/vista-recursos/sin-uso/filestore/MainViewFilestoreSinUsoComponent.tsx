@@ -11,7 +11,6 @@ export const MainViewFilestoreSinUsoComponent = () => {
                 <div className='flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4'>
                     <div>
                         <div className='flex items-center gap-3 mb-2'>
-                            {/* Contenedor del ícono estilizado */}
                             <div className='h-12 w-12 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center'>
                                 <HardDrive className='h-6 w-6 text-blue-600 dark:text-blue-400' />
                             </div>
@@ -30,13 +29,13 @@ export const MainViewFilestoreSinUsoComponent = () => {
             </div>
             <FiltersComponent
                 Component={FilestoreSinUsoComponent}
+                cloud='gcp'
                 dateFilter
                 projectsFilter
                 regionFilter
                 filestoreTierFilter
                 tagsFilter
-                tagCollection="gcp_filestore_instances"
-                tagColumn="labels"
+                tagResourceType="filestore_instances"
             />
         </>
     );

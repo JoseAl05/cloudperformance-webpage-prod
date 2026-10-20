@@ -1,4 +1,5 @@
 'use client'
+import { fetchJson } from '@/lib/fetcher';
 import { Dispatch, SetStateAction, useEffect, useState } from 'react'
 import { Check, ChevronsUpDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -19,19 +20,14 @@ interface NatGatewaysFilterComponentProps {
     isNatGatewayMultiselect: boolean
 }
 
-const fetcherPost = (url: string, tags: { Key: string; Value: string } | null = null) =>
-    fetch(url, {
+const fetcherPost = <T = unknown>(url: string, tags: { Key: string; Value: string } | null = null) =>
+    fetchJson<T>(url, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
         body: tags ? JSON.stringify([tags]) : null,
-    }).then(res => res.json());
-
-const fetcherGet = (url: string) =>
-    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
-        .then(r => r.json());
-
+    });
 
 export const NatGatewaysFilterComponent = ({
     startDate, endDate, natGateway, setNatGateway, region, selectedKey, selectedValue, isNatGatewayMultiselect
@@ -45,7 +41,7 @@ export const NatGatewaysFilterComponent = ({
 
     const tagsBody = selectedKey !== 'allKeys' && selectedValue ? { Key: selectedKey, Value: selectedValue } : null;
 
-    const { data, error, isLoading } = useSWR<unknown[]>([url, tagsBody], ([u, t]) => fetcherPost(u, t));
+    const { data, error, isLoading } = useSWR<unknown[]>([url, tagsBody], ([u, t]) => fetcherPost<unknown[]>(u, t));
 
     useEffect(() => {
         if (!isLoading && !error) {

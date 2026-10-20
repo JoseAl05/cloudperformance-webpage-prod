@@ -1,0 +1,33 @@
+name: TypeScript (umbral de errores)
+
+# I-01: next.config.ts mantiene `ignoreBuildErrors` mientras se bajan los errores existentes; este job falla si
+# aparecen errores nuevos de TypeScript (ver scripts/check-tsc-baseline.mjs y tsc-baseline.json).
+
+on:
+  push:
+    branches:
+      - main
+      - 'develop/**'
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  typecheck:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check TypeScript error baseline
+        run: npm run typecheck:baseline

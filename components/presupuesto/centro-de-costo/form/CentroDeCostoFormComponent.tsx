@@ -1,5 +1,6 @@
 "use client";
 
+import { fetcher } from '@/lib/fetcher';
 import React, { useState, useEffect } from "react";
 import useSWR from "swr";
 
@@ -15,23 +16,16 @@ interface CentroCostoFormProps {
   onSubmit: (data: CentroCosto) => void;
   onCancel?: () => void; 
   initialData?: CentroCosto | null;
-  // Props para la API de tags
   dateFrom?: string;
   dateTo?: string;
   region?: string;
-  regionField?: string;
   subscription?: string;
-  subscriptionField?: string;
-  collection?: string;
-  tagColumnName?: string;
 }
 
 interface TagResponse {
   Key: string;
   Values: string[];
 }
-
-const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 export const CentroDeCostoFormComponent: React.FC<CentroCostoFormProps> = ({
   onSubmit,
@@ -40,11 +34,7 @@ export const CentroDeCostoFormComponent: React.FC<CentroCostoFormProps> = ({
   dateFrom,
   dateTo,
   region = "all_regions",
-  regionField = "resource_location",
   subscription = "all_subscriptions",
-  subscriptionField = "subscription_name",
-  collection = "azure_consumption_billing_account_modern_usage_details",
-  tagColumnName = "tags",
 }) => {
   const [formData, setFormData] = useState<CentroCosto>({
     id_centro_costo: "",
@@ -58,7 +48,6 @@ export const CentroDeCostoFormComponent: React.FC<CentroCostoFormProps> = ({
   const [searchTag, setSearchTag] = useState<string>("");
   const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false);
 
-  // Calcular fechas del último año solo una vez
   const dates = React.useMemo(() => {
     const now = new Date();
     const oneYearAgo = new Date();
@@ -70,8 +59,7 @@ export const CentroDeCostoFormComponent: React.FC<CentroCostoFormProps> = ({
     };
   }, [dateFrom, dateTo]);
 
-  // Llamada a la API para obtener tags
-  const apiUrl = `/api/azure/bridge/azure/get-all-tags?date_from=${dates.from}&date_to=${dates.to}&region=${region}&region_field=${regionField}&subscription=${subscription}&subscription_field=${subscriptionField}&collection=${collection}&tag_column_name=${tagColumnName}`;
+  const apiUrl = `/api/azure/bridge/azure/get-all-tags?date_from=${dates.from}&date_to=${dates.to}&region=${region}&subscription=${subscription}&resource_type=billing`;
   
   const { data: tagsData, error: tagsError, isLoading: tagsLoading } = useSWR<TagResponse[]>(
     apiUrl,
@@ -79,23 +67,19 @@ export const CentroDeCostoFormComponent: React.FC<CentroCostoFormProps> = ({
     {
       revalidateOnFocus: false,
       revalidateOnReconnect: false,
-      dedupingInterval: 60000, // Cache por 1 minuto
+      dedupingInterval: 60000,
     }
   );
 
-  // Procesar los tags de la API para obtener pares clave:valor
   const availableTags = React.useMemo(() => {
     if (!tagsData) return [];
     
     const tagPairs: string[] = [];
     tagsData.forEach((tag) => {
-      // Para cada Key, crear un par clave:valor por cada Value
       tag.Values.forEach((value) => {
-        // Solo agregar si el valor no está vacío
         if (value && value.trim() !== "") {
           tagPairs.push(`${tag.Key}:${value}`);
         } else {
-          // Si el valor está vacío, solo agregar la clave
           tagPairs.push(tag.Key);
         }
       });
@@ -104,7 +88,6 @@ export const CentroDeCostoFormComponent: React.FC<CentroCostoFormProps> = ({
     return tagPairs.sort();
   }, [tagsData]);
 
-  // Filtrar tags por búsqueda y excluir ya seleccionados
   const filteredTags = availableTags.filter(
     (tag) =>
       !formData.tags?.includes(tag) &&
@@ -157,7 +140,6 @@ export const CentroDeCostoFormComponent: React.FC<CentroCostoFormProps> = ({
       <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700 overflow-hidden">
         <div className="p-8">
           <div className="space-y-6">
-            {/* ID Centro */}
             <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">
                 ID Centro <span className="text-red-500">*</span>
@@ -179,7 +161,6 @@ export const CentroDeCostoFormComponent: React.FC<CentroCostoFormProps> = ({
               )}
             </div>
 
-            {/* Nombre Centro */}
             <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">
                 Nombre Centro <span className="text-red-500">*</span>
@@ -195,7 +176,6 @@ export const CentroDeCostoFormComponent: React.FC<CentroCostoFormProps> = ({
               />
             </div>
 
-            {/* Responsable */}
             <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">
                 Responsable
@@ -210,7 +190,6 @@ export const CentroDeCostoFormComponent: React.FC<CentroCostoFormProps> = ({
               />
             </div>
 
-            {/* Localización */}
             <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">
                 Localización
@@ -225,14 +204,12 @@ export const CentroDeCostoFormComponent: React.FC<CentroCostoFormProps> = ({
               />
             </div>
 
-            {/* Tags */}
             <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">
                 Tags
               </label>
               
               <div className="relative">
-                {/* Input de búsqueda */}
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <svg
@@ -263,25 +240,20 @@ export const CentroDeCostoFormComponent: React.FC<CentroCostoFormProps> = ({
                   />
                 </div>
 
-                {/* Mostrar error si hay */}
                 {tagsError && (
                   <p className="text-xs text-red-500 mt-1">
                     Error al cargar tags. Por favor intenta de nuevo.
                   </p>
                 )}
 
-                {/* Dropdown personalizado */}
                 {isDropdownOpen && !tagsLoading && filteredTags.length > 0 && (
                   <div className="absolute z-10 w-full mt-1 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg max-h-64 overflow-hidden">
-                    {/* Opción "Todas las tags" */}
                     <div className="px-4 py-2 text-sm font-medium text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-800">
                       Tags disponibles ({filteredTags.length})
                     </div>
                     
-                    {/* Lista con scroll */}
                     <div className="overflow-y-auto max-h-52">
                       {filteredTags.map((tag) => {
-                        // Separar clave y valor para mejor visualización
                         const [key, value] = tag.includes(':') 
                           ? tag.split(':') 
                           : [tag, null];
@@ -312,14 +284,12 @@ export const CentroDeCostoFormComponent: React.FC<CentroCostoFormProps> = ({
                   </div>
                 )}
 
-                {/* Mensaje cuando no hay resultados */}
                 {isDropdownOpen && searchTag && !tagsLoading && filteredTags.length === 0 && (
                   <div className="absolute z-10 w-full mt-1 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg p-4 text-center text-sm text-gray-500 dark:text-gray-400">
                     No se encontraron tags
                   </div>
                 )}
 
-                {/* Click fuera para cerrar */}
                 {isDropdownOpen && (
                   <div
                     className="fixed inset-0 z-0"
@@ -328,11 +298,9 @@ export const CentroDeCostoFormComponent: React.FC<CentroCostoFormProps> = ({
                 )}
               </div>
               
-              {/* Tags seleccionados */}
               {formData.tags && formData.tags.length > 0 && (
                 <div className="flex flex-wrap gap-2 mt-3">
                   {formData.tags.map((tag) => {
-                    // Separar clave y valor para mejor visualización
                     const [key, value] = tag.includes(':') 
                       ? tag.split(':') 
                       : [tag, null];
@@ -377,7 +345,6 @@ export const CentroDeCostoFormComponent: React.FC<CentroCostoFormProps> = ({
             </div>
           </div>
 
-          {/* Buttons */}
           <div className="flex flex-col sm:flex-row gap-3 mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
             <button
               type="button"

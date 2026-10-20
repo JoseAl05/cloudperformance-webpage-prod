@@ -12,7 +12,7 @@ import {
 import { ComputeEngineHistoricInfoComponent } from './ComputeEngineHistoricInfoComponent';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { getUptime } from '@/lib/getUptimeInstance';
-import { ComputeEngineInfoResponse, ComputeEngineInfoHistoryData } from '@/interfaces/cEInterfaces';
+import { ComputeEngineInfoResponse, ComputeEngineInfoHistoryData } from '@/interfaces/vista-compute-engine/cEInterfaces';
 
 interface ComputeEngineInfoComponentProps {
     data: ComputeEngineInfoResponse | null

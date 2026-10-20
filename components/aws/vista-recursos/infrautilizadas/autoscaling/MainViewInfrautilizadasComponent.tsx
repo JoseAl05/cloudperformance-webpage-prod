@@ -26,11 +26,6 @@ export const MainViewInfrautilizadasComponent = () => {
         <FiltersComponent
           Component={InstanceEc2InfrautilizadaComponent}
           dateFilter
-          // regionFilter
-          // isRegionMultiSelect
-          // instancesFilter
-          // instancesService="infraUsed"
-          // isInstanceMultiSelect
           instancesService='infraUsed'
           regionFilter
           asgFilter

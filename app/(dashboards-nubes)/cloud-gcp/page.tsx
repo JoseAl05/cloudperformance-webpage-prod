@@ -1,4 +1,3 @@
-// app/gcp/page.tsx
 import Link from "next/link"
 import Image from "next/image"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
@@ -21,7 +20,7 @@ import {
     Stars,
     TrendingUp,
     HardDrive,
-    Container, // Nuevo icono para GKE/contenedores
+    Container,
 } from "lucide-react"
 
 export default function DashboardGCPPage() {
@@ -113,7 +112,7 @@ export default function DashboardGCPPage() {
                                 <CardContent className="space-y-3">
                                     <div className="text-xs uppercase tracking-wider text-primary font-semibold">Acciones Rápidas</div>
                                     <div className="flex flex-col gap-2 rounded-xl border-2 border-primary/30 bg-gradient-to-br from-primary/5 to-primary/10 p-4 dark:from-primary/10 dark:to-primary/20">
-                                        <Link href="/cloud-gcp/recommender">
+                                        <Link href="/cloud-gcp/recomendaciones">
                                             <Button
                                                 size="default"
                                                 variant="default"
@@ -149,7 +148,7 @@ export default function DashboardGCPPage() {
                                     <div className="grid md:grid-cols-2 gap-4">
                                         <div className="flex flex-col gap-2 rounded-xl border-2 border-primary/30 bg-gradient-to-br from-primary/5 to-primary/10 p-4 dark:from-primary/10 dark:to-primary/20">
                                             <div className="text-xs font-semibold text-primary mb-1">Descuentos por Uso</div>
-                                            <Link href="/cloud-gcp/cuds/spend-based-cuds">
+                                            <Link href="/cloud-gcp/compromisos/spend-based-cuds">
                                                 <Button
                                                     size="default"
                                                     variant="default"
@@ -203,18 +202,6 @@ export default function DashboardGCPPage() {
                                                 </Button>
                                             </Link>
                                         </div>
-                                        {/* <div className="flex flex-col gap-2 rounded-xl border-2 border-primary/30 bg-gradient-to-br from-primary/5 to-primary/10 p-4 dark:from-primary/10 dark:to-primary/20">
-                                            <div className="text-xs font-semibold text-primary mb-1">Discos Huérfanos</div>
-                                            <Link href="/cloud-gcp/funciones/unused-resources/persistent-disks">
-                                                <Button
-                                                    size="default"
-                                                    variant="default"
-                                                    className="w-full gap-2 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
-                                                >
-                                                    <HardDrive className="h-4 w-4" /> Discos no utilizados
-                                                </Button>
-                                            </Link>
-                                        </div> */}
                                     </div>
                                 </CardContent>
                             </Card>
@@ -250,17 +237,12 @@ export default function DashboardGCPPage() {
                                     <Gauge className="h-4 w-4" /> Cuotas (Quotas)
                                 </Button>
                             </Link>
-                            {/* <Link href="/cloud-gcp/deployments">
-                                <Button size="sm" variant="outline" className="gap-2 cursor-pointer bg-transparent">
-                                    <CalendarClock className="h-4 w-4" /> Deployments (Cloud Build)
-                                </Button>
-                            </Link> */}
-                            <Link href="/cloud-gcp/recommender">
+                            <Link href="/cloud-gcp/recomendaciones">
                                 <Button size="sm" variant="outline" className="gap-2 cursor-pointer bg-transparent">
                                     <Pyramid className="h-4 w-4" /> Recommender (Advisor)
                                 </Button>
                             </Link>
-                            <Link href="/cloud-gcp/cuds/spend-based-cuds">
+                            <Link href="/cloud-gcp/compromisos/spend-based-cuds">
                                 <Button size="sm" variant="outline" className="gap-2 cursor-pointer bg-transparent">
                                     <HandCoins className="h-4 w-4" /> CUDs
                                 </Button>

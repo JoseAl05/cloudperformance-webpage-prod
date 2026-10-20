@@ -7,19 +7,15 @@ interface ClientContextType {
     selectedCompany: Empresa | null;
     setSelectedCompany: (data: Empresa | null) => void;
 
-    // Multi-Tenant Azure
     activeAzureAccountId: string | null;
     setActiveAzureAccountId: (id: string | null) => void;
 
-    // Multi-Tenant AWS
     activeAwsAccountId: string | null;
     setActiveAwsAccountId: (id: string | null) => void;
 
-    // Multi-Tenant GCP
     activeGcpAccountId: string | null;
     setActiveGcpAccountId: (id: string | null) => void;
 
-    // Multi-Tenant OpenAI
     activeOpenaiAccountId: string | null;
     setActiveOpenaiAccountId: (id: string | null) => void;
 }

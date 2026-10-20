@@ -1,5 +1,7 @@
 'use client'
+import { AzureFoundryComparison, AzureFoundryComparisonResponse } from '@/interfaces/foundry-cost-optimization/azureFoundryInterfaces';
 
+import { fetcher } from '@/lib/fetcher';
 import { MessageCard } from '@/components/azure/cards/MessageCards';
 import { LoaderComponent } from '@/components/general_azure/LoaderComponent';
 import { AzureFoundryComparisonView } from '@/components/microsoft-foundry/comparacion/info/AFComparisonViewComponent';
@@ -12,16 +14,12 @@ interface AzureFoundryComparisonComponent {
     selectedInstance?: string | null
 }
 
-const fetcher = (url: string) =>
-    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
-        .then(r => r.json());
-
 export const AzureFoundryComparisonComponent = ({ startDate, endDate, selectedInstance }: AzureFoundryComparisonComponent) => {
 
     const startDateFormatted = startDate.toISOString().replace('Z', '').slice(0, -4)
     const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : ''
 
-    const foundryComparison = useSWR(
+    const foundryComparison = useSWR<AzureFoundryComparison | AzureFoundryComparisonResponse>(
         (selectedInstance)
             ? `/api/azure/bridge/azure/foundry/comparison/get_azure_bedrock_comparison?date_from=${startDateFormatted}&date_to=${endDateFormatted}&account_name=${selectedInstance}`
             : null,
@@ -54,7 +52,6 @@ export const AzureFoundryComparisonComponent = ({ startDate, endDate, selectedIn
             </div>
         )
     }
-    console.log(foundryComparison.data)
     return (
         <div className='p-3'>
             <AzureFoundryComparisonView

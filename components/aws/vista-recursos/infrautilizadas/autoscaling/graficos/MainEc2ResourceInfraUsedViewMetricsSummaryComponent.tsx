@@ -4,32 +4,6 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Activity, Cpu, Zap, Ticket, MonitorCheck } from 'lucide-react';
 import { Root } from '@/interfaces/vista-infrautilizadas/ec2ResourceInfraUsedViewInterface';
 
-// interface MetricItem {
-//   MetricLabel: string;
-//   Value: number;
-//   sync_time: string;
-// }
-
-// interface CalculatedSummary {
-//   Last_CPU_Credit_Balance_EC2: number;
-//   Last_CPU_Credit_Usage_EC2: number;
-//   Porcentaje_Uso_Créditos_CPU_EC2: number;
-//   Eficiencia_Creditos_CPU_EC2_Instancia: string;
-// }
-
-// interface MetricsData {
-//   // metrics_data: MetricItem[];
-//   CPUCreditBalanceAverage: number;
-//   CPUCreditUsageAverage: number;
-//   CPUUtilizationAverage: number;
-//   CPUCreditUsagePercentage: number;
-//   // calculated_summary?: CalculatedSummary;
-// }
-
-// interface MainEc2ResourceInfraUsedViewMetricsSummaryComponentProps {
-//   data: MetricsData | null;
-// }
-
 
 interface MainEc2ResourceInfraUsedViewMetricsSummaryComponentProps {
   data: Root | null;
@@ -41,31 +15,25 @@ export const MainEc2ResourceInfraUsedViewMetricsSummaryComponent = ({ data }: Ma
   const metricsData = [
     {
       title: 'Total VM',
-      // value: data?.CPUCreditBalanceAverage,
       value: data?.resourceCount,
       icon: MonitorCheck,
       borderColor: 'border-l-blue-500',
-      // subtitle: isToday ? 'Actual' : dateLabel,
       valueStyle: 'text-xl font-bold text-foreground tracking-tight',
       format: (val: number) => val.toString(),
     },
     {
       title: 'Total vCPUs',
-      // value: data?.CPUCreditBalanceAverage,
       value: data?.vCpus,
       icon: Cpu,
       borderColor: 'border-l-blue-500',
-      // subtitle: isToday ? 'Actual' : dateLabel,
       valueStyle: 'text-xl font-bold text-foreground tracking-tight',
       format: (val: number) => val.toString(),
     },
     {
       title: 'Creditos de CPU Disponibles',
-      // value: data?.CPUCreditBalanceAverage,
       value: data?.sumCreditBalance,
       icon: Ticket,
       borderColor: 'border-l-blue-500',
-      // subtitle: isToday ? 'Actual' : dateLabel,
       valueStyle: 'text-xl font-bold text-foreground tracking-tight',
       format: (val: number) => val.toString(),
     },
@@ -74,41 +42,33 @@ export const MainEc2ResourceInfraUsedViewMetricsSummaryComponent = ({ data }: Ma
 
     {
       title: 'Promedio Creditos Disponibles',
-      // value: data?.CPUCreditBalanceAverage,
       value: data?.ec2IntancesMetricsStatistics.CPUCreditBalanceAverage,
       icon: Zap,
       borderColor: 'border-l-blue-500',
-      // subtitle: isToday ? 'Actual' : dateLabel,
       valueStyle: 'text-xl font-bold text-foreground tracking-tight',
       format: (val: number) => val.toString(),
     },
     {
       title: 'Promedio Creditos Utilizados',
-      // value: data?.CPUCreditUsageAverage,
       value: data?.ec2IntancesMetricsStatistics.CPUCreditUsageAverage,
       icon: Activity,
       borderColor: 'border-l-emerald-500',
-      // subtitle: isToday ? 'Actual' : dateLabel,
       valueStyle: 'text-xl font-bold text-foreground tracking-tight',
       format: (val: number | null | undefined) => ((val ?? 0).toFixed(2))
     },
     {
       title: 'Promedio Creditos Utilizados %',
-      // value: data?.CPUCreditUsagePercentage,
       value: data?.ec2IntancesMetricsStatistics.CPUCreditUsagePercentage,
       icon: Activity,
       borderColor: 'border-l-amber-500',
-      // subtitle: isToday ? 'Actual' : dateLabel,
       valueStyle: 'text-xl font-bold text-foreground tracking-tight',
       format: (val: number | null | undefined) => ((val ?? 0).toFixed(2))
     },
     {
       title: 'Promedio CPU Utilizados %',
-      // value: data?.CPUUtilizationAverage,
       value: data?.ec2IntancesMetricsStatistics.CPUUtilizationAverage,
       icon: Cpu,
       borderColor: 'border-l-blue-500',
-      // subtitle: isToday ? 'Actual' : dateLabel,
       valueStyle: 'text-xl font-bold text-foreground tracking-tight',
       format: (val: number | null | undefined) => ((val ?? 0).toFixed(2))
     },

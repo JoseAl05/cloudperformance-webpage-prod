@@ -133,7 +133,6 @@ export const DetailedMetricsAnalysis = ({ data }: DetailedMetricsAnalysisProps) 
     );
 };
 
-// --- Utils ---
 const MarkdownText = ({ content }: { content: string }) => {
     return (
         <ReactMarkdown
@@ -168,7 +167,6 @@ const EmptyState = () => (
     </div>
 );
 
-// --- Sub-componente: Detalle Estándar ---
 interface StandardMetricDetailProps {
     metricData: CostVolatilityAnalysis | CpuEfficiencyAnalysis | ElasticityAnalysis;
     type: 'cost_volatility' | 'cpu_efficiency' | 'elasticity';
@@ -177,7 +175,6 @@ interface StandardMetricDetailProps {
 const ITEMS_PER_PAGE = 5;
 
 const StandardMetricDetail = ({ metricData, type }: StandardMetricDetailProps) => {
-    // Estados para paginación y búsqueda
     const [searchTerm, setSearchTerm] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
 
@@ -186,7 +183,6 @@ const StandardMetricDetail = ({ metricData, type }: StandardMetricDetailProps) =
     let kpiLabel = "";
     let extraInfo: React.ReactNode = null;
 
-    // Extracción de Datos (Misma lógica anterior)
     if (type === 'cost_volatility') {
         const d = metricData as CostVolatilityAnalysis;
         kpiLabel = "Volatilidad";
@@ -215,9 +211,6 @@ const StandardMetricDetail = ({ metricData, type }: StandardMetricDetailProps) =
         }
     }
 
-    // --- Lógica de Filtrado y Paginación ---
-
-    // 1. Filtrar
     const filteredResources = resourceList.filter(r => {
         const term = searchTerm.toLowerCase();
         return (
@@ -227,21 +220,17 @@ const StandardMetricDetail = ({ metricData, type }: StandardMetricDetailProps) =
         );
     });
 
-    // 2. Calcular Páginas
     const totalPages = Math.ceil(filteredResources.length / ITEMS_PER_PAGE);
 
-    // 3. Obtener items actuales
     const currentResources = filteredResources.slice(
         (currentPage - 1) * ITEMS_PER_PAGE,
         currentPage * ITEMS_PER_PAGE
     );
 
-    // Resetear a página 1 cuando cambia la búsqueda
     useEffect(() => {
         setCurrentPage(1);
     }, [searchTerm]);
 
-    // Helpers para color de estado (Misma lógica)
     const getStatusStyle = (status: string) => {
         switch (status) {
             case 'EXCELLENT': return 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300 border-green-200 dark:border-green-800';
@@ -253,7 +242,6 @@ const StandardMetricDetail = ({ metricData, type }: StandardMetricDetailProps) =
 
     return (
         <div className="space-y-6 animate-in fade-in zoom-in-95 duration-300">
-            {/* KPI Card Principal (Sin cambios) */}
             <Card>
                 <CardHeader className="pb-4">
                     <div className="flex justify-between items-start">
@@ -315,7 +303,6 @@ const StandardMetricDetail = ({ metricData, type }: StandardMetricDetailProps) =
                 </CardContent>
             </Card>
 
-            {/* SECCIÓN DE RECURSOS CON FILTRO Y PAGINACIÓN */}
             {resourceList && resourceList.length > 0 && (
                 <div className="space-y-4">
                     <div className="flex flex-col sm:flex-row justify-between items-end sm:items-center gap-4">
@@ -325,7 +312,6 @@ const StandardMetricDetail = ({ metricData, type }: StandardMetricDetailProps) =
                             <Badge variant="secondary" className="ml-1">{resourceList.length}</Badge>
                         </h4>
 
-                        {/* Buscador */}
                         <div className="relative w-full sm:w-72">
                             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                             <Input
@@ -346,7 +332,6 @@ const StandardMetricDetail = ({ metricData, type }: StandardMetricDetailProps) =
                         </div>
                     </div>
 
-                    {/* Lista de Tarjetas Paginada */}
                     <div className="grid gap-4 min-h-[200px]">
                         {currentResources.length > 0 ? (
                             currentResources.map((resource, idx) => (
@@ -405,7 +390,6 @@ const StandardMetricDetail = ({ metricData, type }: StandardMetricDetailProps) =
                         )}
                     </div>
 
-                    {/* Controles de Paginación */}
                     {totalPages > 1 && (
                         <div className="flex items-center justify-between border-t pt-4">
                             <div className="text-xs text-muted-foreground">
@@ -442,7 +426,6 @@ const StandardMetricDetail = ({ metricData, type }: StandardMetricDetailProps) =
     );
 };
 
-// --- Sub-componente: Detalle Costo de Oportunidad ---
 const OpportunityCostDetail = ({ metricData }: { metricData: OpportunityCostAnalysis }) => {
     return (
         <div className="space-y-6 animate-in fade-in zoom-in-95 duration-300">
@@ -557,7 +540,6 @@ const OpportunityCostDetail = ({ metricData }: { metricData: OpportunityCostAnal
     );
 };
 
-// --- Sub-componente: Detalle Madurez ---
 const MaturityDetail = ({ metricData }: { metricData: MaturityAssessmentAnalysis }) => {
     return (
         <div className="space-y-6 animate-in fade-in zoom-in-95 duration-300">
@@ -567,9 +549,6 @@ const MaturityDetail = ({ metricData }: { metricData: MaturityAssessmentAnalysis
                     <h3 className="text-3xl font-extrabold text-foreground mb-2 text-center">
                         {metricData.metric_name}
                     </h3>
-                    {/* <Badge className={`${getStatusColor(metricData.status)} border`} variant="outline">
-                        {metricData.status}
-                    </Badge> */}
                 </div>
                 <CardContent className="pt-6 grid gap-6">
                     <div className="space-y-2">
@@ -616,7 +595,6 @@ const MaturityDetail = ({ metricData }: { metricData: MaturityAssessmentAnalysis
     )
 }
 
-// --- Sub-componente: Detalle Forecast ---
 const MODEL_LABELS: Record<string, string> = {
     autoets: 'AutoETS',
     autoarima: 'AutoARIMA',
@@ -687,14 +665,12 @@ const ForecastDetail = ({ forecastData }: { forecastData: AiFinopsMetrics['spend
                         <div className="grid md:grid-cols-2 gap-6">
                             <ForecastCard
                                 periods={ai.short_term_forecast}
-                                // interval={det.interval_80_usd['30d']}
                                 title="Corto Plazo"
                                 icon={Zap}
                                 iconColor="text-amber-500"
                             />
                             <ForecastCard
                                 periods={ai.long_term_forecast}
-                                // interval={det.interval_80_usd['90d']}
                                 title="Largo Plazo"
                                 icon={BarChart3}
                                 iconColor="text-indigo-500"
@@ -836,31 +812,6 @@ const ForecastDetail = ({ forecastData }: { forecastData: AiFinopsMetrics['spend
                                 </div>
                             )}
 
-                        {/* {ai.formulas_used?.length > 0 && (
-                            <div className="p-4 rounded-lg border bg-muted/20">
-                                <h4 className="font-semibold text-sm mb-3 text-foreground flex items-center gap-2">
-                                    <Layers className="h-4 w-4 text-muted-foreground" /> Métodos Aplicados
-                                </h4>
-                                <div className="space-y-3">
-                                    {ai.formulas_used.map((f, idx) => (
-                                        <div key={idx} className="pl-4 border-l-2 border-muted">
-                                            <div className="flex items-center gap-2 flex-wrap">
-                                                <span className="text-sm font-semibold text-foreground">
-                                                    {MODEL_LABELS[f.selected_method] ?? f.selected_method}
-                                                </span>
-                                                <code className="text-xs font-mono bg-muted px-1.5 py-0.5 rounded text-muted-foreground">
-                                                    {f.formula}
-                                                </code>
-                                            </div>
-                                            <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-                                                {f.description}
-                                            </p>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        )} */}
-
                         <div className="p-4 rounded-lg border border-blue-200 bg-blue-50 dark:bg-blue-950/20 dark:border-blue-800">
                             <h4 className="font-semibold text-sm mb-2 text-blue-800 dark:text-blue-300 flex items-center gap-2">
                                 <Lightbulb className="h-4 w-4" /> Recomendación del Modelo
@@ -876,7 +827,6 @@ const ForecastDetail = ({ forecastData }: { forecastData: AiFinopsMetrics['spend
     )
 }
 
-// Sub-componente: Tile de diagnóstico
 const StatTile = ({
     icon,
     label,
@@ -898,7 +848,6 @@ const StatTile = ({
     </div>
 );
 
-// Sub-componente: Tabla comparativa de modelos (proyección + backtest)
 interface ModelComparisonTableProps {
     projections: AiFinopsMetrics['spending_forecast']['deterministic']['projections'];
     mape: AiFinopsMetrics['spending_forecast']['deterministic']['backtest_mape_pct'];
@@ -986,7 +935,6 @@ const ModelComparisonTable = ({ projections, mape, wape, recommended, modelsCons
     );
 };
 
-// Sub-componente Forecast Card
 interface ForecastCardProps {
     periods: ForecastPeriod;
     interval?: { low: number; point: number; high: number };

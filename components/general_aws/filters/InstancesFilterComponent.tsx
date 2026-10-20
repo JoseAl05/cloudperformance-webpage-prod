@@ -1,4 +1,5 @@
 'use client'
+import { fetchJson } from '@/lib/fetcher';
 import { Dispatch, SetStateAction, useEffect, useState } from 'react'
 import { Check, ChevronsUpDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -21,17 +22,16 @@ interface InstancesFilterComponentProps {
 }
 
 const fetcherPost = (url: string, tags: { Key: string; Value: string } | null = null) =>
-    fetch(url, {
+    fetchJson(url, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
         body: tags ? JSON.stringify([tags]) : null,
-    }).then(res => res.json());
+    });
 
 const fetcherGet = (url: string, _tags: { Key: string; Value: string } | null = null) =>
-    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
-        .then(r => r.json());
+    fetchJson(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } });
 
 
 export const InstancesFilterComponent = ({
@@ -54,13 +54,13 @@ export const InstancesFilterComponent = ({
             url = (selectedKey && selectedValue) ? `/api/aws/bridge/vm/all-instances-ec2?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}${tagQueryParams}` : null;
             break;
         case 'unused-ec2':
-            url = (selectedKey && selectedValue) ? `/api/aws/bridge/unused/ec2/all_unused_ec2_instances?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}` : null;
+            url = (selectedKey && selectedValue) ? `/api/aws/bridge/aws/unused/ec2/candidates?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}` : null;
             break;
         case 'eks':
             url = (selectedKey && selectedValue) ? `/api/aws/bridge/eks/all-eks-clusters?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}` : null;
             break;
         case 'ebs':
-            url = (selectedKey && selectedValue) ? `/api/aws/bridge/unused/ebs/all_unused_ebs?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}` : null;
+            url = (selectedKey && selectedValue) ? `/api/aws/bridge/aws/unused/ebs/candidates?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}` : null;
             break;
         case 'rds-pg':
             url = (selectedKey && selectedValue) ? `/api/aws/bridge/db/all-instances-rds-pg?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}${tagQueryParams}` : null;
@@ -87,7 +87,7 @@ export const InstancesFilterComponent = ({
             url = region ? `/api/aws/bridge/loadbalancersv2/all_load_balancersv2?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}` : null;
             break;
         case 'infraUsed':
-            url = region ? `/api/aws/bridge/ec2/all_unused_ec2_instances?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}` : null;
+            url = region ? `/api/aws/bridge/aws/unused/ec2/candidates?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}` : null;
             break;
         case 'bedrock-inference-profiles':
             url = region ? `/api/aws/bridge/bedrock/inference_profile/all_inference_profiles?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}` : null;
@@ -102,14 +102,12 @@ export const InstancesFilterComponent = ({
             url = '';
     }
 
-    //const tagsBody = selectedKey !== 'allKeys' && selectedValue && selectedValue !== 'allValues' ? { Key: selectedKey, Value: selectedValue } : null;
     const hasTag = selectedKey && selectedKey !== 'allKeys';
 
     const tagsBody = hasTag ? { Key: selectedKey, Value: selectedValue || 'allValues' } : null;
     let apiMethod: (url: string, tags?: { Key: string; Value: string } | null) => Promise<unknown>;
 
     switch (service) {
-        case 'infraused':
         case 'loadbalancerv2':
         case 'bedrock-inference-profiles':
         case 'bedrock-custom-models':
@@ -120,7 +118,6 @@ export const InstancesFilterComponent = ({
             apiMethod = fetcherPost;
             break;
     }
-    // const apiMethod = service === "infraUsed" || service === "loadbalancerv2" ? fetcherGet : fetcherPost;
     const { data, error, isLoading } = useSWR<(string | { resource_id: string; resource_name: string; cpu_avg: number })[]>(
         url ? [url, tagsBody] : null,
         ([u, t]) => apiMethod(u, t)

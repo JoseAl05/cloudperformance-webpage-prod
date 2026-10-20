@@ -1,5 +1,6 @@
 'use client'
 
+import { fetcher } from '@/lib/fetcher';
 import { AzureFoundryCardsComponent } from '@/components/microsoft-foundry/costo-optimizacion/foundation-models/info/COFoundationCardsComponent'
 import { MessageCard } from '@/components/aws/cards/MessageCards'
 import { LoaderComponent } from '@/components/general_aws/LoaderComponent'
@@ -12,10 +13,6 @@ interface AzureFoundryComponentProps {
     endDate?: Date
     selectedInstance?: string | null 
 }
-
-const fetcher = (url: string) =>
-    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
-        .then(r => r.json());
 
 const isNonEmptyArray = <T,>(v: unknown): v is T[] => Array.isArray(v) && v.length > 0
 

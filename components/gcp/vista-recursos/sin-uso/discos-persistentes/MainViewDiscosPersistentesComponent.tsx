@@ -25,15 +25,15 @@ export const MainViewDiscosPersistentesComponent = () => {
       <div className="w-full min-w-0">
         <FiltersComponent
           Component={DiscosPersistentesComponent}
+          cloud='gcp'
           dateFilter
-          projectFilter
+          projectsFilter
           regionFilter
           resourceFilter
           isResourceMultiSelect
           resourceService="disks"
           tagsFilter={true}
-          tagCollection="gcp_compute_disks"
-          tagColumn="labels"
+          tagResourceType="compute_disks"
         />
       </div>
     </div>

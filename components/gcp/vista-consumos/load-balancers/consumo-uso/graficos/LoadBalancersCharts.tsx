@@ -30,7 +30,6 @@ export const LoadBalancersCharts = ({ data, porEsquema }: LoadBalancersChartsPro
     const topRequestsRef = useRef<HTMLDivElement>(null);
     const esquemaRef = useRef<HTMLDivElement>(null);
 
-    // Gráfico 1: Top Load Balancers por Requests (solo activos)
     const topRequestsData = useMemo(() => {
         const lbsActivos = data.filter(lb => lb.requests_totales > 0);
         const sorted = lbsActivos
@@ -38,7 +37,7 @@ export const LoadBalancersCharts = ({ data, porEsquema }: LoadBalancersChartsPro
             .slice(0, 10);
         
         return {
-            names: sorted.map(lb => lb.name).reverse(), // Reverso para que el mayor esté arriba
+            names: sorted.map(lb => lb.name).reverse(),
             requests: sorted.map(lb => lb.requests_totales).reverse()
         };
     }, [data]);
@@ -104,7 +103,6 @@ export const LoadBalancersCharts = ({ data, porEsquema }: LoadBalancersChartsPro
         return deepMerge(base, barChart);
     }, [topRequestsData]);
 
-    // Gráfico 2: Distribución por Load Balancing Scheme (Dona)
     const esquemaData = useMemo(() => {
         return Object.entries(porEsquema).map(([esquema, count]) => ({
             name: esquema,

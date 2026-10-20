@@ -1,5 +1,6 @@
 "use client";
 
+import { fetcher } from '@/lib/fetcher';
 import { useState, useMemo } from "react";
 import useSWR from "swr";
 import { Calendar, Pencil, Trash2, Search, ArrowUpDown, ArrowUp, ArrowDown, ChevronLeft, ChevronRight } from "lucide-react";
@@ -29,10 +30,6 @@ interface PresupuestoAnualTableComponentProps {
 
 type SortField = keyof PresupuestoAnual | null;
 type SortOrder = "asc" | "desc" | null;
-
-const fetcher = (url: string) =>
-  fetch(url, { method: "GET", headers: { "Content-Type": "application/json" } })
-    .then((r) => r.json());
 
 export const PresupuestoAnualTableComponent = ({ cloud, onEdit, onDelete }: PresupuestoAnualTableComponentProps) => {
   const { data, error } = useSWR<PresupuestoAnual[]>(

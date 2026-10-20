@@ -1,4 +1,3 @@
-// components/aws/vista-rds/avg-uso-loc-inst-rds-pg/MainViewInstanciasAVGUsoLocInstRdsPgComponent.tsx
 import { FiltersComponent } from '@/components/general_aws/filters/FiltersComponent'
 import { AVGUsoLocInstRdsPgChartComponent } from '@/components/aws/vista-prom-loc/avg-uso-loc-inst-rds-pg/AVGUsoLocInstRdsPgChartComponent'
 import { Database } from 'lucide-react'
@@ -34,8 +33,7 @@ export const MainViewInstanciasAVGUsoLocInstRdsPgComponent = () => {
                     instancesService='rds-pg'
                     isInstanceMultiSelect
                     tagsFilter
-                    tagColumnName='TagList'
-                    collection='aws_rds_postgresql'
+                    resourceType='rds_postgresql'
 
                     isRegionMultiSelect
                     metricsRDSFilter

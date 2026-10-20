@@ -6,7 +6,6 @@ import { DollarSign } from 'lucide-react'
 export const MainViewTopDolaresFacturadosComponent = () => {
   return (
     <div className='w-full min-w-2 space-y-9'>
-      {/* Header */}
       <div className='mb-8'>
         <div className='flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4'>
           <div>
@@ -19,7 +18,7 @@ export const MainViewTopDolaresFacturadosComponent = () => {
                   Dashboard Azure / Facturación
                 </h1>
                 <p className='text-gray-500 dark:text-gray-400'>
-                  Top 5 Dólares Facturados
+                  Top Dólares Facturados
                 </p>
               </div>
             </div>
@@ -27,7 +26,6 @@ export const MainViewTopDolaresFacturadosComponent = () => {
         </div>
       </div>
 
-      {/* Filtros + gráfico */}
       <FiltersComponent
         Component={TopDolaresFacturadosChartComponent}
         dateFilter

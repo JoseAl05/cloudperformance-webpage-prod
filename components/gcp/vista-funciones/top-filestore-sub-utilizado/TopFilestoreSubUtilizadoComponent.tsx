@@ -1,11 +1,20 @@
 'use client';
 
+import type { ComponentProps } from 'react';
+import { fetcher } from '@/lib/fetcher';
 import React, { useMemo } from 'react';
 import useSWR from 'swr';
 import { TopFilestoreSubUtilizadoCardsComponent } from './info/TopFilestoreSubUtilizadoCardsComponent';
 import { TopFilestoreSubUtilizadoChart } from './graficos/TopFilestoreSubUtilizadoChart';
 import { TopFilestoreSubUtilizadoTendenciaChart } from './graficos/TopFilestoreSubUtilizadoTendenciaChart';
 import { TopFilestoreSubUtilizadoSinMetricasTable } from './tabla/TopFilestoreSubUtilizadoSinMetricasTable';
+
+interface TopFilestoreSubUtilizadoResponse {
+    resumen: NonNullable<ComponentProps<typeof TopFilestoreSubUtilizadoCardsComponent>['resumen']>;
+    top_sub_utilizados?: Array<NonNullable<ComponentProps<typeof TopFilestoreSubUtilizadoChart>['data']>[number]>;
+    tendencias?: Array<NonNullable<ComponentProps<typeof TopFilestoreSubUtilizadoTendenciaChart>['data']>[number]>;
+    sin_metricas?: Array<NonNullable<ComponentProps<typeof TopFilestoreSubUtilizadoSinMetricasTable>['data']>[number]>;
+}
 
 interface TopFilestoreSubUtilizadoComponentProps {
     startDate: Date;
@@ -17,8 +26,6 @@ interface TopFilestoreSubUtilizadoComponentProps {
     tagValue?: string | null;
 }
 
-const fetcher = (url: string) => fetch(url).then(res => res.json());
-
 export const TopFilestoreSubUtilizadoComponent = ({
     startDate,
     endDate,
@@ -29,7 +36,6 @@ export const TopFilestoreSubUtilizadoComponent = ({
     tagValue,
 }: TopFilestoreSubUtilizadoComponentProps) => {
 
-    // Construcción de URL
     let url = `/api/gcp/bridge/gcp/funcion/top_filestore_sub_utilizado?`;
 
     if (startDate) url += `date_from=${startDate.toISOString().slice(0, 19)}&`;
@@ -47,17 +53,15 @@ export const TopFilestoreSubUtilizadoComponent = ({
 
     const shouldFetch = !!projects;
 
-    const { data, error, isLoading } = useSWR(shouldFetch ? url : null, fetcher, {
+    const { data, error, isLoading } = useSWR<TopFilestoreSubUtilizadoResponse>(shouldFetch ? url : null, fetcher, {
         revalidateOnFocus: false,
     });
 
-    // Top items del snapshot más reciente para los gráficos de barras
     const topItems = useMemo(() => {
         if (!data?.top_sub_utilizados || data.top_sub_utilizados.length === 0) return [];
         return data.top_sub_utilizados;
     }, [data]);
 
-    // Estado: Sin proyecto seleccionado
     if (!projects) {
         return (
             <div className="max-w-7xl mx-auto px-6 py-8">
@@ -68,7 +72,6 @@ export const TopFilestoreSubUtilizadoComponent = ({
         );
     }
 
-    // Estado: Cargando
     if (isLoading) {
         return (
             <div className="text-center py-8">
@@ -78,7 +81,6 @@ export const TopFilestoreSubUtilizadoComponent = ({
         );
     }
 
-    // Estado: Error
     if (error) {
         return (
             <div className="text-red-500 p-4 bg-red-50 rounded-lg border border-red-200">
@@ -88,7 +90,6 @@ export const TopFilestoreSubUtilizadoComponent = ({
         );
     }
 
-    // Estado: Sin datos
     if (!data || !data.top_sub_utilizados || data.top_sub_utilizados.length === 0) {
         return (
             <div className="text-center text-gray-500 py-8">
@@ -100,13 +101,11 @@ export const TopFilestoreSubUtilizadoComponent = ({
     return (
         <div className="space-y-6 mt-6 px-4">
 
-            {/* Cards resumen */}
             <TopFilestoreSubUtilizadoCardsComponent
                 resumen={data?.resumen}
                 isLoading={isLoading}
             />
 
-            {/* 2 Gráficos TOP en 2 columnas */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <TopFilestoreSubUtilizadoChart
                     data={topItems}
@@ -118,7 +117,6 @@ export const TopFilestoreSubUtilizadoComponent = ({
                 />
             </div>
 
-            {/* Gráficos de Tendencia (ancho completo) */}
             <div className="grid grid-cols-1 gap-6">
                 <TopFilestoreSubUtilizadoTendenciaChart
                     data={data?.tendencias || []}
@@ -134,7 +132,6 @@ export const TopFilestoreSubUtilizadoComponent = ({
                 />
             </div>
 
-            {/* Tabla instancias sin métricas */}
             {data?.sin_metricas && data.sin_metricas.length > 0 && (
                 <TopFilestoreSubUtilizadoSinMetricasTable
                     data={data.sin_metricas}

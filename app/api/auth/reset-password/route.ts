@@ -17,7 +17,6 @@ export async function POST(req: Request) {
 
         const usersCollection = await getCollection<User>('Users');
 
-        // Buscar usuario y validar expiración
         const user = await usersCollection.findOne({
             resetPasswordToken: token,
             resetPasswordExpires: { $gt: new Date() } 

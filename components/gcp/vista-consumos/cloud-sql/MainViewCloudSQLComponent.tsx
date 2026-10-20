@@ -27,14 +27,14 @@ export const MainViewCloudSQLComponent = () => {
       
       <div className="w-full min-w-0">
         <FiltersComponent
+          cloud="gcp"
           Component={CloudSQLComponent}
           dateFilter
-          projectFilter
+          projectsFilter
           regionFilter
           databaseTypeFilter
           tagsFilter          
-          tagCollection="gcp_sql_instances"
-          tagColumn="settings.userLabels"
+          tagResourceType="sql_instances"
           localService="Cloud SQL"
         />
       </div>

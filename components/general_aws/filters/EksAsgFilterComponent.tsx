@@ -1,4 +1,5 @@
 'use client'
+import { fetcher } from '@/lib/fetcher';
 import { Dispatch, SetStateAction, useState, useEffect } from 'react'
 import { Check, ChevronsUpDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -22,11 +23,6 @@ interface EksAsgFilterComponentProps {
     isEksAsgInstanceMultiselect: boolean,
     isInstancesService?: string,
 }
-
-const fetcher = (url: string) =>
-    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
-        .then(r => r.json());
-
 
 export const EksAsgFilterComponent = ({
     eks,
@@ -59,7 +55,6 @@ export const EksAsgFilterComponent = ({
 
 
     useEffect(() => {
-        // Solo actuar cuando terminó la carga y no hubo error
         if (!isLoading && !error && Array.isArray(data) && data.length === 0) {
             setEksAsg('');
             setEksAsgInstance('');
@@ -159,17 +154,6 @@ export const EksAsgFilterComponent = ({
                 isEksAsgInstanceMultiselect={isEksAsgInstanceMultiselect}
                 isInstancesService={isInstancesService}
             />
-            {/* Instancias de ASG (solo si hay ASG disponible y seleccionado) */}
-            {/* <AsgInstancesFilterComponent
-                asg={asg}
-                asgInstance={asgInstance}
-                setAsgInstance={setAsgInstance}
-                startDate={startDateFormatted}
-                endDate={endDateFormatted}
-                region={region}
-                isInstanceMultiSelect={isAsgInstanceMultiselect}
-                isInstancesService={isInstancesService}
-            /> */}
         </div>
     )
 };

@@ -2,8 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getCollection } from '@/lib/mongodb';
 import { authorizeRequest } from '@/lib/authUtils';
 
-// ── Tipos ─────────────────────────────────────────────────────────────────────
-
 interface ComputeUnitInput {
   cloud: 'aws' | 'azure' | 'gcp';
   db: string;
@@ -14,8 +12,6 @@ interface ComputeUnitInput {
   starts: string;
   expires: string | null;
 }
-
-// ── GET — Listar solicitudes ──────────────────────────────────────────────────
 
 export async function GET(req: NextRequest) {
   const auth = await authorizeRequest(req, ['admin_global']);
@@ -37,8 +33,6 @@ export async function GET(req: NextRequest) {
   }
 }
 
-// ── POST — Guardar solicitud ──────────────────────────────────────────────────
-
 export async function POST(req: NextRequest) {
   const auth = await authorizeRequest(req, ['admin_global']);
   if (!auth.authorized) {
@@ -49,7 +43,6 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { partner, rut, solicitante, fingerprint, fecha_solicitud, compute_units } = body;
 
-    // ── Validaciones ──────────────────────────────────────────────────────────
     if (!partner || !rut || !fingerprint) {
       return NextResponse.json(
         { message: 'Faltan campos obligatorios: partner, rut, fingerprint.' },
@@ -79,7 +72,6 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // ── Verificar si ya existe solicitud pendiente para este partner ──────────
     const col = await getCollection('op_solicitudes');
     const existente = await col.findOne({ partner, rut, estado: 'pendiente' });
 
@@ -93,7 +85,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // ── Insertar ──────────────────────────────────────────────────────────────
     const nueva = {
       partner,
       rut,

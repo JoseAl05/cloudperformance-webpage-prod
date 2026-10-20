@@ -28,12 +28,12 @@ export const MainViewIPsSinUsoComponent = () => {
       <div className="w-full min-w-0">
         <FiltersComponent
           Component={IPsSinUsoComponent}
+          cloud='gcp'
           dateFilter
-          projectFilter
+          projectsFilter
           regionFilter
           tagsFilter
-          tagCollection="gcp_compute_addresses"
-          tagColumn="labels"
+          tagResourceType="compute_addresses"
         />
       </div>
     </div>

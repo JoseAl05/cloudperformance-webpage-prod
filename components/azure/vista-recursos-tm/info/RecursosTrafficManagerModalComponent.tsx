@@ -35,7 +35,7 @@ export const RecursosTrafficManagerModalComponent = ({ endpoints, trigger, title
         if (status === 'Online') return 'text-green-600 bg-green-50 dark:bg-green-900/20 border-green-200';
         if (status === 'Degraded') return 'text-yellow-600 bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200';
         if (status === 'Inactive' || status === 'Disabled') return 'text-gray-500 bg-gray-50 dark:bg-gray-800 border-gray-200';
-        return 'text-blue-600 bg-blue-50 dark:bg-blue-900/20 border-blue-200'; // CheckingEndpoint etc
+        return 'text-blue-600 bg-blue-50 dark:bg-blue-900/20 border-blue-200';
     }
 
     const getMonitorIcon = (status: string) => {
@@ -78,7 +78,6 @@ export const RecursosTrafficManagerModalComponent = ({ endpoints, trigger, title
                                         key={`${endpoint.id}-${index}`}
                                         className="border rounded-lg p-4 text-sm hover:bg-slate-50 dark:hover:bg-slate-900 transition-colors shadow-sm"
                                     >
-                                        {/* Cabecera de la tarjeta */}
                                         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-3 gap-2">
                                             <div className="flex items-center gap-2">
                                                 <Target className="h-4 w-4 text-blue-500" />
@@ -96,7 +95,6 @@ export const RecursosTrafficManagerModalComponent = ({ endpoints, trigger, title
                                             </div>
                                         </div>
 
-                                        {/* Grid de detalles similar a UnusedTrafficManagerInsightModal */}
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-3 gap-x-4 text-xs bg-muted/30 p-3 rounded-md">
                                             <div className="col-span-1 sm:col-span-2">
                                                 <span className="block font-medium text-foreground mb-1 flex items-center gap-1">

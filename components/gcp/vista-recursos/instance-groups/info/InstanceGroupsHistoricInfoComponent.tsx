@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Accordion } from '@radix-ui/react-accordion'
 import { Activity, Boxes, Layers, LayoutTemplate, MapPin, RefreshCw, ShieldCheck } from 'lucide-react'
-import { HistoryData } from '@/interfaces/iGInterfaces'
+import { HistoryData } from '@/interfaces/vista-instance-group/iGInterfaces'
 
 interface InstanceGroupsHistoricInfoComponentProps {
     snapshots: HistoryData[]

@@ -32,8 +32,7 @@ export const MainViewConsumeEc2Component = () => {
                     instancesService='ec2'
                     isInstanceMultiSelect
                     tagsFilter
-                    collection='aws_ec2_instances'
-                    tagColumnName='Tags'
+                    resourceType='ec2'
                     localService='Amazon Elastic Compute Cloud - Compute'
                 />
             </div>

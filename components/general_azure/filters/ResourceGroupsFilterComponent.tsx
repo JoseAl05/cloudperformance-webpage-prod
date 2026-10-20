@@ -1,4 +1,5 @@
 'use client'
+import { fetcher } from '@/lib/fetcher';
 import { useState, Dispatch, SetStateAction, useEffect } from 'react'
 import { Check, ChevronsUpDown } from "lucide-react"
 import { cn } from "@/lib/utils"
@@ -15,8 +16,7 @@ interface ResourceGroupFilterProps {
   endDate: Date,
   region: string,
   subscription: string,
-  collection: string,
-  subscriptionField: string,
+  resourceType: string,
   selectedTagKey?: string | null,
   selectedTagValue?: string | null,
   selectedResourceGroup: string | null,
@@ -24,19 +24,12 @@ interface ResourceGroupFilterProps {
   onChange?: (next: { resourceGroup: string | null }) => void
 }
 
-const fetcher = (url: string) =>
-  fetch(url, {
-    method: "GET",
-    headers: { "Content-Type": "application/json" }
-  }).then(res => res.json())
-
 export const ResourceGroupFilterComponent = ({
   startDate,
   endDate,
   region,
   subscription,
-  collection,
-  subscriptionField,
+  resourceType,
   selectedTagKey,
   selectedTagValue,
   selectedResourceGroup,
@@ -55,9 +48,7 @@ export const ResourceGroupFilterComponent = ({
       date_to: endDateFormatted,
       region: region,
       subscription_id: subscription,
-      collection: collection,
-      subscription_field: subscriptionField,
-      resource_group_field: "resource_group"
+      resource_type: resourceType
     })
 
     if (selectedTagKey) params.append('nombre_tag', selectedTagKey)
@@ -66,7 +57,6 @@ export const ResourceGroupFilterComponent = ({
     return `/api/azure/bridge/azure/get-resource-groups?${params.toString()}`
   }
 
-  // Solo hacer fetch si hay región y suscripción específicas seleccionadas
   const shouldFetch = !!subscription && !!region
 
   const { data, error, isLoading } = useSWR(
@@ -75,7 +65,6 @@ export const ResourceGroupFilterComponent = ({
   )
 
   useEffect(() => { setIsMounted(true) }, [])
-  // Resetear el resource group seleccionado cuando cambian región o suscripción
   useEffect(() => {
     if (!shouldFetch && selectedResourceGroup && selectedResourceGroup !== 'all_resource_groups') {
       setSelectedResourceGroup('all_resource_groups')
@@ -85,7 +74,6 @@ export const ResourceGroupFilterComponent = ({
 
   if (!isMounted) return null
 
-  // Si no se puede hacer fetch, mostrar mensaje informativo
   if (!shouldFetch) {
     return (
       <Button

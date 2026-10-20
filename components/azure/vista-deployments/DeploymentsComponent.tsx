@@ -1,5 +1,6 @@
 'use client'
 
+import { fetcher } from '@/lib/fetcher';
 import { useRef, useEffect, useState } from 'react';
 import * as echarts from 'echarts';
 import { TrendingUp, Activity, Info, AlertCircle } from 'lucide-react';
@@ -21,15 +22,6 @@ interface DeploymentData {
     unique_deployments: number;
 }
 
-
-const fetcher = (url: string) =>
-    fetch(url, {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json'
-        }
-    }).then(res => res.json());
-
 const isNonEmptyArray = <T,>(v: unknown): v is T[] => Array.isArray(v) && v.length > 0
 const isNullish = (v: unknown) => v === null || v === undefined
 
@@ -38,12 +30,12 @@ export const DeploymentsComponent = ({ startDate, endDate, selectedOperation,sel
     const startDateFormatted = startDate.toISOString().split('.')[0];
     const endDateFormatted = endDate.toISOString().split('.')[0];
 
-    const deployments = useSWR(
+    const deployments = useSWR<unknown[]>(
         selectedOperation ? `/api/azure/bridge/azure/deployments/deployments?date_from=${startDateFormatted}&date_to=${endDateFormatted}&resource_groups=${selectedResourceGroup}&operation_name=${selectedOperation}` : null,
         fetcher,
     );
 
-    const deploymentsDetails = useSWR(
+    const deploymentsDetails = useSWR<unknown[]>(
         selectedOperation ? `/api/azure/bridge/azure/deployments/deployments-detalles?date_from=${startDateFormatted}&date_to=${endDateFormatted}&resource_groups=${selectedResourceGroup}&operation_name=${selectedOperation}` : null,
         fetcher
     );

@@ -44,7 +44,7 @@ export const TopFilestoreSubUtilizadoChart = ({ data, type }: TopFilestoreSubUti
                 title: 'Top Filestore por GB Desperdiciado',
                 valueKey: 'desperdicio_gb' as keyof FilestoreItem,
                 unit: 'GB',
-                color: '#f97316', // naranja — desperdicio
+                color: '#f97316',
                 metricType: 'size' as const,
             };
         } else {
@@ -52,7 +52,7 @@ export const TopFilestoreSubUtilizadoChart = ({ data, type }: TopFilestoreSubUti
                 title: 'Top Filestore por Costo Desperdiciado',
                 valueKey: 'costo_desperdiciado' as keyof FilestoreItem,
                 unit: 'USD',
-                color: '#ef4444', // rojo — costo
+                color: '#ef4444',
                 metricType: 'currency' as const,
             };
         }
@@ -66,7 +66,7 @@ export const TopFilestoreSubUtilizadoChart = ({ data, type }: TopFilestoreSubUti
         );
 
         const limit = parseInt(topN);
-        const top = sorted.slice(0, limit).reverse(); // invertir: mayor arriba
+        const top = sorted.slice(0, limit).reverse();
 
         return {
             names: top.map(item => item.name),

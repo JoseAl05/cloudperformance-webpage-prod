@@ -52,7 +52,6 @@ function GenerarContent() {
         const data = await res.json();
         const pendientes: Solicitud[] = data.filter((s: Solicitud) => s.estado === 'pendiente');
 
-        // Agrupar por partner
         const groups = new Map<string, PartnerGroup>();
         pendientes.forEach(s => {
           if (!groups.has(s.partner)) {
@@ -68,7 +67,6 @@ function GenerarContent() {
 
           s.usuarios.forEach(u => {
             if (u.estado === 'vigente_auto') {
-              // Evitar duplicados en vigentes auto
               if (!g.vigentesAuto.find(v => v.id === u.id)) {
                 g.vigentesAuto.push(u);
               }
@@ -81,7 +79,6 @@ function GenerarContent() {
         const groupsArr = Array.from(groups.values());
         setPartnerGroups(groupsArr);
 
-        // Preseleccionar usuarios no vigentes
         const inicial: Record<string, Set<string>> = {};
         groupsArr.forEach(g => {
           inicial[g.partner] = new Set(
@@ -216,7 +213,6 @@ function GenerarContent() {
   return (
     <section className="px-4 py-8 space-y-6">
 
-      {/* Header */}
       <div className="flex items-center gap-3">
         <Link href="/op-licencias" className="text-muted-foreground hover:text-foreground transition">
           <ArrowLeft className="h-5 w-5" />
@@ -233,7 +229,6 @@ function GenerarContent() {
         <div className="p-4 bg-red-500/10 border border-red-300 text-red-600 rounded-xl text-sm">{error}</div>
       )}
 
-      {/* Licencia generada */}
       {licGenerada && (
         <div className="rounded-2xl border border-green-300 bg-green-500/5 p-5 space-y-3">
           <div className="flex items-center gap-2 text-green-600 font-semibold">
@@ -250,7 +245,6 @@ function GenerarContent() {
         </div>
       )}
 
-      {/* Sin solicitudes */}
       {partnerGroups.length === 0 && !licGenerada && (
         <div className="rounded-2xl border border-dashed p-12 text-center text-muted-foreground">
           <ShieldCheck className="h-10 w-10 mx-auto mb-3 opacity-30" />
@@ -261,7 +255,6 @@ function GenerarContent() {
         </div>
       )}
 
-      {/* Un card por partner */}
       {partnerGroups.map(group => (
         <Card key={group.partner} className="shadow-sm">
           <CardHeader className="pb-3">
@@ -275,7 +268,6 @@ function GenerarContent() {
                   {group.usuariosConsolidados.length} usuarios nuevos ·{' '}
                   {group.vigentesAuto.length} vigentes automáticos
                 </p>
-                {/* Tags de solicitudes incluidas */}
                 <div className="flex flex-wrap gap-1 mt-2">
                   {group.solicitudes.map(s => (
                     <div key={s._id} className="flex items-center gap-1">
@@ -317,7 +309,6 @@ function GenerarContent() {
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
-              {/* Usuarios nuevos/por vencer/vencidos — con checkbox */}
               {group.usuariosConsolidados.map(u => (
                 <div key={`${u.id}-${u.email}`} className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/50 transition">
                   <input
@@ -333,7 +324,6 @@ function GenerarContent() {
                 </div>
               ))}
 
-              {/* Vigentes automáticos */}
               {group.vigentesAuto.length > 0 && (
                 <div className="mt-3 pt-3 border-t">
                   <p className="text-xs text-muted-foreground mb-2">

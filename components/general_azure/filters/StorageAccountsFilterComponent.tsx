@@ -1,4 +1,5 @@
 'use client'
+import { fetchJson } from '@/lib/fetcher';
 import { Dispatch, SetStateAction, useEffect, useMemo, useState } from 'react'
 import { Check, ChevronsUpDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -20,14 +21,14 @@ interface StorageAccountsFilterComponentProps {
     isStrgAccountMultiSelect: boolean;
 }
 
-const fetcherPost = (url: string, tags: { Key: string; Value: string } | null = null) =>
-    fetch(url, {
+const fetcherPost = <T = unknown>(url: string, tags: { Key: string; Value: string } | null = null) =>
+    fetchJson<T>(url, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
         body: tags ? JSON.stringify([tags]) : null,
-    }).then(res => res.json());
+    });
 
 
 export const StorageAccountsFilterComponent = ({
@@ -42,7 +43,7 @@ export const StorageAccountsFilterComponent = ({
     const tagsBody = selectedKey !== 'allKeys' && selectedValue ? { tag_key: selectedKey, tag_value: selectedValue } : null;
 
     const shouldFetch = !!url && !!region
-    const { data, error, isLoading } = useSWR<unknown[]>(shouldFetch ? [url, tagsBody] : null, ([u, t]) => fetcherPost(u, t));
+    const { data, error, isLoading } = useSWR<unknown[]>(shouldFetch ? [url, tagsBody] : null, ([u, t]) => fetcherPost<unknown[]>(u, t));
 
     useEffect(() => {
         if (!isLoading && !error && shouldFetch) {

@@ -32,8 +32,7 @@ export const MainViewSpotVsStandardComponent = () => {
           projectFilter
           regionFilter
           tagsFilter
-          tagCollection="gcp_compute_instances"
-          tagColumn="labels"
+          tagResourceType="compute_instances"
         />
       </div>
     </div>

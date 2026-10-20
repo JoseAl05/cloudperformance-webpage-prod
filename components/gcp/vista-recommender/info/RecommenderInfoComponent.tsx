@@ -2,9 +2,7 @@
 
 import { Search, X, ChevronDown, ChevronRight, Info, DollarSign, Target, Calendar } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
-import { RecommenderGcp } from '@/interfaces/gcpRecommenderInterfaces';
-
-// NOTA: Ajusta tu interfaz si es necesario, el JSON usa 'savings_estimate'
+import { RecommenderGcp } from '@/interfaces/vista-recommender/gcpRecommenderInterfaces';
 
 interface RecommenderInfoComponentProps {
     data: RecommenderGcp[] | null;
@@ -36,7 +34,6 @@ export const RecommenderInfoComponent = ({ data }: RecommenderInfoComponentProps
     const [expanded, setExpanded] = useState<Record<string, boolean>>({});
     const [selectedDescription, setSelectedDescription] = useState<string | null>(null);
 
-    // Agrupar por Category -> Description
     const groupedByCategory = useMemo(() => {
         const descMap = new Map<string, GroupedRecommender>();
 
@@ -60,7 +57,6 @@ export const RecommenderInfoComponent = ({ data }: RecommenderInfoComponentProps
             group.items.push(rec);
             group.count++;
 
-            // CAMBIO 1: Solo sumar si es categoría COST y usar Math.abs para quitar el negativo
             if (rec.category === 'COST' && rec.savings_estimate?.amount) {
                 group.total_savings += Math.abs(rec.savings_estimate.amount);
             }
@@ -276,7 +272,6 @@ export const RecommenderInfoComponent = ({ data }: RecommenderInfoComponentProps
                                                                 <div className="flex items-center gap-2">
                                                                     {priorityBadge(rec.priority)}
                                                                 </div>
-                                                                {/* CAMBIO 2: Condicional para mostrar badge de ahorro solo si es COST */}
                                                                 {showSavings && (
                                                                     <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30 px-1.5 py-0.5 rounded border border-emerald-200 dark:border-emerald-900">
                                                                         {formatCurrency(rec.total_savings, rec.currency)}
@@ -327,7 +322,6 @@ export const RecommenderInfoComponent = ({ data }: RecommenderInfoComponentProps
                                 </div>
 
                                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-4">
-                                    {/* CAMBIO 3: Renderizado condicional de la tarjeta de Ahorro */}
                                     {selectedRec.category === 'COST' ? (
                                         <div className={`rounded-lg border p-3 flex flex-col justify-between bg-emerald-50/50 dark:bg-emerald-950/10 border-emerald-200 dark:border-emerald-800`}>
                                             <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground mb-1">
@@ -339,7 +333,6 @@ export const RecommenderInfoComponent = ({ data }: RecommenderInfoComponentProps
                                             </div>
                                         </div>
                                     ) : (
-                                        // Placeholder o Info cuando no es costo
                                         <div className="rounded-lg border p-3 bg-muted/20 flex flex-col justify-between">
                                             <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground mb-1">
                                                 <Info className="h-3.5 w-3.5" />
@@ -398,7 +391,6 @@ export const RecommenderInfoComponent = ({ data }: RecommenderInfoComponentProps
                                                             <td className="px-4 py-3 text-muted-foreground">
                                                                 {item.location}
                                                             </td>
-                                                            {/* CAMBIO 5: Ocultar celda de ahorro si no es COST */}
                                                             {selectedRec.category === 'COST' && (
                                                                 <td className="px-4 py-3 text-right font-mono">
                                                                     <span className="text-emerald-600 dark:text-emerald-400">

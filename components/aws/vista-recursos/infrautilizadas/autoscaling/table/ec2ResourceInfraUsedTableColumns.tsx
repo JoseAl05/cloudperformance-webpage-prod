@@ -5,12 +5,13 @@ import { DynamicColumn } from '@/components/data-table/columns';
 import { Ec2Instance } from '@/interfaces/vista-infrautilizadas/ec2ResourceInfraUsedViewInterface';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
+import { readFilterParam } from '@/lib/filters';
 
 const DateParams = () => {
     const searchParams = useSearchParams();
 
-    const startDateParam = searchParams.get('startDate');
-    const endDateParam = searchParams.get('endDate');
+    const startDateParam = readFilterParam(searchParams, 'dateFrom');
+    const endDateParam = readFilterParam(searchParams, 'dateTo');
 
     return { startDateParam: startDateParam, endDateParam: endDateParam }
 }
@@ -27,7 +28,7 @@ export const Ec2ResourceInfraUsedViewColumns: DynamicColumn<Ec2Instance>[] = [
             return (
                 <div className="font-medium">
                     <Link
-                        href={{ pathname: '/aws/recursos/instancias-ec2', query: { instance: value, startDate: startDate, endDate: endDate } }}
+                        href={{ pathname: '/cloud-aws/recursos/instancias-ec2', query: { instance: value, startDate: startDate, endDate: endDate } }}
                         rel="noopener noreferrer"
                         target="_blank"
                     >
@@ -61,10 +62,8 @@ export const Ec2ResourceInfraUsedViewColumns: DynamicColumn<Ec2Instance>[] = [
         header: "vCPUs",
         accessorKey: "vCPUs",
         cell: (info) => {
-            // const value = info.getValue() as number;
             return (
                 <div className="text-sm text-muted-foreground">
-                    {/* {value !== null && value !== undefined ? value.toFixed(2) : '-'} */}
                     {info.getValue() as number}
                 </div>
             );
@@ -74,10 +73,8 @@ export const Ec2ResourceInfraUsedViewColumns: DynamicColumn<Ec2Instance>[] = [
         header: "N° IPs publicas",
         accessorKey: "PublicIpCount",
         cell: (info) => {
-            // const value = info.getValue() as number;
             return (
                 <div className="text-sm text-muted-foreground">
-                    {/* {value !== null && value !== undefined ? value.toFixed(2) : '-'} */}
                     {info.getValue() as number}
                 </div>
             );
@@ -87,10 +84,8 @@ export const Ec2ResourceInfraUsedViewColumns: DynamicColumn<Ec2Instance>[] = [
         header: "N° Volumenes EBS",
         accessorKey: "volumeCount",
         cell: (info) => {
-            // const value = info.getValue() as number;
             return (
                 <div className="text-sm text-muted-foreground">
-                    {/* {value !== null && value !== undefined ? value.toFixed(2) : '-'} */}
                     {info.getValue() as number}
                 </div>
             );
@@ -100,10 +95,8 @@ export const Ec2ResourceInfraUsedViewColumns: DynamicColumn<Ec2Instance>[] = [
         header: "Capacidad Total EBS (GB)",
         accessorKey: "totalSize",
         cell: (info) => {
-            // const value = info.getValue() as number;
             return (
                 <div className="text-sm text-muted-foreground">
-                    {/* {value !== null && value !== undefined ? value.toFixed(2) : '-'} */}
                     {info.getValue() as number}
                 </div>
             );
@@ -122,38 +115,5 @@ export const Ec2ResourceInfraUsedViewColumns: DynamicColumn<Ec2Instance>[] = [
         }
     },
 
-    // {
-    //     header: "Eficiencia",
-    //     accessorKey: "credit_efficiency",
-    //     cell: (info) => {
-    //         const value = info.getValue() as string;
-    //         return (
-    //             <div className="text-sm">
-    //                 <Badge
-    //                     variant={
-    //                         value === 'High' ? 'default' :
-    //                             value === 'Medium' ? 'secondary' :
-    //                                 'destructive'
-    //                     }
-    //                 >
-    //                     {value || 'N/A'}
-    //                 </Badge>
-    //             </div>
-    //         );
-    //     }
-    // },
 
-
-    // {
-    //     header: "Créditos CPU Usados",
-    //     accessorKey: "last_cpu_credits_usage",
-    //     cell: (info) => {
-    //         const value = info.getValue() as number;
-    //         return (
-    //             <div className="text-sm text-muted-foreground">
-    //                 {value !== null && value !== undefined ? value.toFixed(2) : '-'}
-    //             </div>
-    //         );
-    //     }
-    // }
 ];

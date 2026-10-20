@@ -1,4 +1,5 @@
 'use client'
+import { fetcher } from '@/lib/fetcher';
 import { Dispatch, Fragment, SetStateAction, useMemo, useState } from 'react'
 import { AlertCircle, Check, ChevronsUpDown, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -51,10 +52,6 @@ const resolveFoundryModelProvider = (name: string) => {
     const normalized = name.toLowerCase()
     return FOUNDRY_MODEL_PROVIDERS.find((provider) => provider.pattern.test(normalized)) ?? OTHER_FOUNDRY_MODEL_PROVIDER
 }
-
-const fetcher = (url: string) =>
-    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
-        .then(r => r.json());
 
 export const FoundryModelsFilterComponent = ({ foundryModel, setFoundryModel }: FoundryModelsFilterComponentProps) => {
     const [open, setOpen] = useState(false);

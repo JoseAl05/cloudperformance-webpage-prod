@@ -29,7 +29,6 @@ export const MainViewSavingPlansComponent = () => {
                 <FiltersComponent
                     Component={SpendBasedCudsComponent}
                     dateFilter={true}
-                    //monthYearFilter
                     projectsFilter={false}
                 />
             </div>

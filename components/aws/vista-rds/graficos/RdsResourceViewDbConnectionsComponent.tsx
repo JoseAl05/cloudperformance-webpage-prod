@@ -142,7 +142,6 @@ export const RdsResourceViewDbConnectionsComponent = ({
         );
     }
 
-    // Verificar si existen datos de conexiones
     const connectionData = data.filter(item =>
         item.MetricLabel === "Conexiones a la Base de Datos (Promedio)"
     );
@@ -151,7 +150,6 @@ export const RdsResourceViewDbConnectionsComponent = ({
         return (
             <div className="flex justify-center items-center h-96 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
                 <div className="flex flex-col items-center gap-5">
-                    {/* <div className="text-yellow-400 text-lg mb-2">¡Ups!</div> */}
                     <MessageCircleWarning className='h-5 w-5 text-yellow-500'/>
                     <p className="text-gray-500 font-medium">Métricas de Conexiones a Base de Datos no disponibles</p>
                 </div>

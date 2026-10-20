@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { getCollection } from '@/lib/mongodb';
 import { signAuthToken } from '@/lib/auth';
+import { buildLoginPayload } from '@/lib/sessionPayload';
 import { ObjectId } from 'mongodb';
 import type { Empresa, User } from '@/types/db';
 
@@ -29,22 +30,16 @@ export async function POST(req: Request) {
       { status: 404 }
     );
 
-  // =======================================================
-  //  NUEVA LÓGICA DE VERIFICACIÓN DE ESTADO ACTIVO
-  // =======================================================
-  // Si el campo is_active es explícitamente `false`, denegar el acceso.
   if (user.is_active === false) {
     return NextResponse.json(
       {
         error:
           'Tu cuenta ha sido bloqueada por un administrador. Contacta al soporte para más detalles.',
       },
-      { status: 403 } // 403 Forbidden
+      { status: 403 }
     );
   }
-  // =======================================================
 
-  // Obtener datos de cliente asociado a usuario
   const clients = await getCollection<Empresa>('Empresas')
   const clientData = await clients.findOne({ name: user.client });
 
@@ -58,13 +53,6 @@ export async function POST(req: Request) {
     );
   }
 
-  // Obtener datos de conectores asociados al cliente
-  const connectors = await getCollection('cloudperformance_external_connectors');
-  const connectorData = await connectors
-    .find({ "created_by.email": user.email, "created_by.username": user.username })
-    .project({ _id: 0, connector_type: 1, created_by: 1, config: 1, created_at: 1, updated_at: 1, status: 1, encrypted_credentials: 1 })
-    .toArray();
-
 
   const codes = await getCollection<{ userId: string; code: string; purpose: string; expiresAt: Date }>('twofactor_codes');
   const tf = await codes.findOne({ userId, code, purpose: 'login' });
@@ -77,44 +65,7 @@ export async function POST(req: Request) {
 
   await codes.deleteMany({ userId, purpose: 'login' });
 
-  await signAuthToken({
-    sub: String(user._id),
-    username: user.username,
-    email: user.email,
-    client: user.client,
-    role: user.role,
-    user_db_aws: user.user_db_aws || null,
-    user_db_azure: user.user_db_azure || null,
-    user_db_gcp: user.user_db_gcp || null,
-    user_db_openai: user.user_db_openai || null,
-    is_aws: user.is_aws,
-    is_azure: user.is_azure,
-    is_gcp: user.is_gcp,
-    is_openai: clientData.is_openai === true,
-    is_aws_multi_tenant: clientData.is_aws_multi_tenant === true,
-    is_azure_multi_tenant: clientData.is_azure_multi_tenant === true,
-    is_gcp_multi_tenant: clientData.is_gcp_multi_tenant === true,
-    is_openai_multi_tenant: clientData.is_openai_multi_tenant === true,
-    // Sólo hay cuentas en multi-tenant; en single-tenant manda `user_db_<cloud>`.
-    aws_accounts:
-      clientData.is_aws_multi_tenant === true
-        ? clientData.aws_accounts || []
-        : [],
-    azure_accounts:
-      clientData.is_azure_multi_tenant === true
-        ? clientData.azure_accounts || []
-        : [],
-    gcp_accounts:
-      clientData.is_gcp_multi_tenant === true
-        ? clientData.gcp_accounts || []
-        : [],
-    openai_accounts:
-      clientData.is_openai_multi_tenant === true
-        ? clientData.openai_accounts || []
-        : [],
-    planName: user.planName,
-    connectors: connectorData || []
-  });
+  await signAuthToken(buildLoginPayload(user, clientData));
 
   const sessions = await getCollection<{ userId: string; createdAt: Date; expiresAt: Date }>('sessions');
   const now = new Date();

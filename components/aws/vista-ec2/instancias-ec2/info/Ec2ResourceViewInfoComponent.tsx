@@ -12,6 +12,7 @@ import {
 import { Ec2ResourceViewHistoricInfoComponent } from '@/components/aws/vista-ec2/instancias-ec2/info/Ec2ResourceViewHistoricInfoComponent';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { getUptime } from '@/lib/getUptimeInstance';
+import type { Ec2InstanceSummary } from '@/interfaces/vista-ec2/ec2ResourceViewInterfaces';
 
 interface Ec2ResourceViewInfoComponentProps {
     data: unknown
@@ -36,7 +37,7 @@ export const Ec2ResourceViewInfoComponent = ({ data }: Ec2ResourceViewInfoCompon
             acc[instance.InstanceId].push(instance)
             return acc
         },
-        {} as Record<string, InstanceData[]>,
+        {} as Record<string, Ec2InstanceSummary[]>,
     ) : []
 
     const getPublicIpCount = (publicIps: (string | null)[]) => {
@@ -46,13 +47,11 @@ export const Ec2ResourceViewInfoComponent = ({ data }: Ec2ResourceViewInfoCompon
         <div className='w-full xl:w-[22rem]'>
             <div className='space-y-8'>
                 {Object.entries(groupedInstances).map(([instanceId, instances]) => {
-                    // INSTANCE METADATA
                     const latestInstanceState = instances[0].State_Name;
                     const latestInstanceType = instances[0].InstanceType;
                     const latestInstanceRegion = instances[0].region;
                     const latestInstanceSO = instances[0].PlatformDetails;
                     const latestInstancePurchaseMethod = instances[0].InstancePurchaseMethod;
-                    // INSTANCE EBS VOLUMES
                     const latestTotalEbsVolumes = instances[0].Total_EBS_Volumes;
                     const latestTotalAttachments = instances[0].Total_Attachments;
                     const latestInstanceEbs = instances[0].BlockDeviceMappings_Ebs_VolumeId;
@@ -60,7 +59,6 @@ export const Ec2ResourceViewInfoComponent = ({ data }: Ec2ResourceViewInfoCompon
                     const latestInstanceEbsStatus = instances[0].BlockDeviceMappings_Ebs_Status;
                     const latestInstanceEbsSize = instances[0].BlockDeviceMappings_Ebs_Size;
                     const latestInstanceEbsAttachTime = instances[0].BlockDeviceMappings_Ebs_AttachTime;
-                    // INSTANCE NETWORK
                     const latestTotalInterfaces = instances[0].NetworkInterfaces_Attachment_AttachmentId
                     const latestPublicIpCount = instances[0].NetworkInterfaces_Association_PublicIp;
                     const latestPublicIp = instances[0].NetworkInterfaces_Association_PublicIp;

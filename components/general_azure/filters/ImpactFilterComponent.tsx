@@ -1,4 +1,5 @@
 'use client'
+import { fetcher as fetcherGet } from '@/lib/fetcher';
 import { Dispatch, SetStateAction, useState } from 'react'
 import { Check, ChevronsUpDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -12,14 +13,6 @@ interface ImpactFilterComponentProps {
     impact: string | null
     setImpact: Dispatch<SetStateAction<string | null>>
 }
-
-const fetcherGet = (url: string) =>
-    fetch(url, {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-    }).then(res => res.json());
 
 export const ImpactFilterComponent = ({
     impact,
@@ -37,7 +30,6 @@ export const ImpactFilterComponent = ({
     const impacts: string[] = Array.isArray(data?.impacts) ? data.impacts : []
     const noImpacts = impacts.length === 0
     
-    // Agregar "Ver todos" al inicio
     const impactsWithAll = noImpacts ? [] : ['Ver todos', ...impacts]
 
     const getDisplayText = () => {
@@ -76,7 +68,6 @@ export const ImpactFilterComponent = ({
                                     key={imp}
                                     value={imp}
                                     onSelect={() => {
-                                        // Si selecciona "Ver todos", pasa string vacío
                                         setImpact(imp === 'Ver todos' ? '' : imp);
                                         setOpen(false);
                                     }}

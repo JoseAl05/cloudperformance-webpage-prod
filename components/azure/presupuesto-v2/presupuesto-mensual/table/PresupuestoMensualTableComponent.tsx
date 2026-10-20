@@ -1,5 +1,6 @@
 "use client";
 
+import { fetcher } from '@/lib/fetcher';
 import { useState, useMemo } from "react";
 import useSWR from "swr";
 import {
@@ -56,7 +57,7 @@ export interface PresupuestoAnualMensual {
 interface PresupuestoMensualTableComponentProps {
   cloud?: string;
   onEdit?: (data: PresupuestoAnualMensual) => void;
-  onDelete?: (id: number | string) => void; // Restaurado a tu original
+  onDelete?: (id: number | string) => void;
 }
 
 type SortField = keyof PresupuestoAnualMensual | null;
@@ -66,9 +67,6 @@ const MES_LETRAS = [
   "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
   "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
 ];
-
-const fetcher = (url: string) =>
-  fetch(url, { method: "GET", headers: { "Content-Type": "application/json" } }).then((r) => r.json());
 
 export const PresupuestoMensualTableComponent = ({
   cloud,
@@ -356,7 +354,6 @@ export const PresupuestoMensualTableComponent = ({
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        // Pasamos solo el ID, idéntico a tu lógica original
                         onDelete && onDelete(p.id_presupuesto_mensual); 
                       }}
                       className="inline-flex items-center gap-1.5 px-3 py-2 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-lg hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors duration-150 font-medium text-sm"

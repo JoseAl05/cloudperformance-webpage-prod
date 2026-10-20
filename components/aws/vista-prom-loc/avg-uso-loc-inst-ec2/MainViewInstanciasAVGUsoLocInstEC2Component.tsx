@@ -1,4 +1,3 @@
-// components/aws/vista-facturacion/tendencia-facturacion/MainViewTendenciaFacturacionComponent.tsx
 import { FiltersComponent } from '@/components/general_aws/filters/FiltersComponent'
 import { AVGUsoLocInstEC2ChartComponent } from '@/components/aws/vista-prom-loc/avg-uso-loc-inst-ec2/AVGUsoLocInstEC2ChartComponent'
 import { TrendingUp } from 'lucide-react'
@@ -34,8 +33,7 @@ export const MainViewInstanciasAVGUsoLocInstEC2Component = () => {
                     instancesService='ec2'
                     isInstanceMultiSelect
                     tagsFilter
-                    tagColumnName='Tags'
-                    collection='aws_ec2_instances'
+                    resourceType='ec2'
 
                     isRegionMultiSelect
                     metricsFilter

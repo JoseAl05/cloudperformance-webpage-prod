@@ -92,7 +92,6 @@ export const RdsResourceViewInfoComponent = ({ data }: RdsResourceViewInfoCompon
         <div className='w-full xl:w-[22rem]'>
             <div className='space-y-8'>
                 {Object.entries(groupedInstances).map(([instanceId, instances]) => {
-                    // Obtener la instancia mas reciente
                     const latestInstance = instances.sort((a, b) =>
                         new Date(b.sync_time.$date).getTime() - new Date(a.sync_time.$date).getTime()
                     )[0];
@@ -188,7 +187,6 @@ export const RdsResourceViewInfoComponent = ({ data }: RdsResourceViewInfoCompon
                                             <span className='font-medium text-green-600'>{uptimeInstance}</span>
                                         </div>
 
-                                        {/* Metricas rapidas */}
                                         <div className='grid grid-cols-1 md:grid-cols-2 gap-2 p-2 rounded-lg transition-colors duration-200 hover:bg-muted/30'>
                                             <div className='flex items-center gap-2'>
                                                 <Network className='h-4 w-4 text-muted-foreground' />
@@ -212,7 +210,6 @@ export const RdsResourceViewInfoComponent = ({ data }: RdsResourceViewInfoCompon
                                             </div>
                                         </div>
 
-                                        {/* Tags Information */}
                                         {latestInstance.TagList_Key && latestInstance.TagList_Key.length > 0 && (
                                             <Accordion type='single' collapsible className='w-full'>
                                                 <AccordionItem value={`tags-${instanceId}`} className='border-none'>
@@ -245,7 +242,6 @@ export const RdsResourceViewInfoComponent = ({ data }: RdsResourceViewInfoCompon
                                             </Accordion>
                                         )}
 
-                                        {/* Subnet Information */}
                                         <Accordion type='single' collapsible className='w-full'>
                                             <AccordionItem value={`subnets-${instanceId}`} className='border-none'>
                                                 <AccordionTrigger className='hover:no-underline py-2 px-0 cursor-pointer'>

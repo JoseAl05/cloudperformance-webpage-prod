@@ -10,12 +10,7 @@ import {
 } from '@/lib/cloudAccounts';
 import { Empresa } from '@/types/db';
 
-// =========================================================================
-// RUTA: GET /api/perfilamiento/empresas (Listado de Nombres y Datos de Licencia)
-// =========================================================================
-
 export async function GET(req: NextRequest) {
-  // 1. Autorización: Exclusivo para admin_global
   const auth = await authorizeRequest(req, ['admin_global']);
   if (!auth.authorized) {
     return NextResponse.json(
@@ -67,10 +62,6 @@ export async function GET(req: NextRequest) {
   }
 }
 
-// =========================================================================
-// RUTA: POST /api/perfilamiento/empresas (Creación de Licencia)
-// =========================================================================
-
 export async function POST(req: NextRequest) {
   const auth = await authorizeRequest(req, ['admin_global']);
   if (!auth.authorized) {
@@ -90,7 +81,6 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // 1. Validar Plan
   const planConfig = PLAN_CONFIG[planName as keyof typeof PLAN_CONFIG];
   if (!planConfig) {
     return NextResponse.json(
@@ -109,7 +99,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 2. Construir el objeto final para la DB
     const newEmpresa: Omit<Empresa, '_id'> = {
       name,
       planName,
@@ -136,9 +125,6 @@ export async function POST(req: NextRequest) {
       updatedAt: new Date(),
     };
 
-    // 3. Configuración por nube.
-    //    Multi-tenant  -> se persiste `<cloud>_accounts` (IDs generados aquí).
-    //    Single-tenant -> se persiste `user_db_<cloud>` y NO se crea el array.
     const cloudFields = newEmpresa as unknown as Record<string, unknown>;
 
     for (const cloud of CLOUD_PROVIDERS) {

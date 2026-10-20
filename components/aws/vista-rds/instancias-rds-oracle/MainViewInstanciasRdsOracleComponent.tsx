@@ -31,8 +31,7 @@ export const MainViewInstanciasRdsOracleComponent = () => {
                     instancesService='rds-oracle'
                     tagsFilter
                     serviceType="rds"
-                    collection='aws_rds_oracle'
-                    tagColumnName='TagList'
+                    resourceType='rds_oracle'
                 />
             </div>
         </div>

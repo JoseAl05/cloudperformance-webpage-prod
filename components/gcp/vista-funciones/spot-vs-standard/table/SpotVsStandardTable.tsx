@@ -29,7 +29,6 @@ interface SpotVsStandardTableProps {
 
 export const SpotVsStandardTable = ({ data, startDate, endDate }: SpotVsStandardTableProps) => {
 
-    // Flatten data: cada fila es una VM con su fecha
     const flattenedData = useMemo(() => {
         return data.map(vm => ({
             sync_time: new Date(vm.sync_time.$date).toISOString(),

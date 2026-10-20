@@ -24,6 +24,7 @@ export const MainViewUnusedIgComponent = () => {
             <div className='w-full min-w-0'>
                 <FiltersComponent
                     Component={UnusedIgComponent}
+                    cloud='gcp'
                     dateFilter
                     projectsFilter
                     regionFilter

@@ -9,8 +9,6 @@ import { DataTableSingle } from '@/components/data-table/data-table-single';
 import { createColumns } from '@/components/data-table/columns';
 import Link from 'next/link';
 
-// ── Tipos ─────────────────────────────────────────────────────────────────────
-
 interface ComputeUnit {
   cloud: 'aws' | 'azure' | 'gcp';
   db: string;
@@ -29,8 +27,6 @@ interface SolicitudMeta {
   fingerprint: string;
   fecha_solicitud: string;
 }
-
-// ── Helpers ───────────────────────────────────────────────────────────────────
 
 function cloudBadge(cloud: string) {
   const map: Record<string, string> = {
@@ -56,8 +52,6 @@ function formatFecha(fecha: string | null) {
   return <span className="text-xs">{new Date(fecha).toLocaleDateString('es-CL')}</span>;
 }
 
-// ── Página ────────────────────────────────────────────────────────────────────
-
 export default function ImportarPage() {
   const { user, isLoading } = useSession();
 
@@ -81,13 +75,11 @@ export default function ImportarPage() {
 
   const hasDatos = units.length > 0;
 
-  // ── KPIs ──────────────────────────────────────────────────────────────────
   const totalUCs        = units.length;
   const totalClientes   = new Set(units.map(u => u.rut)).size;
   const totalSubs       = units.filter(u => u.type === 'subscription').length;
   const totalPerpetuos  = units.filter(u => u.type === 'perpetual').length;
 
-  // ── Parsear JSON ──────────────────────────────────────────────────────────
   async function processFile(file: File) {
     if (!file.name.endsWith('.json')) {
       setError('El archivo debe ser .json');
@@ -104,7 +96,6 @@ export default function ImportarPage() {
       const text = await file.text();
       const json = JSON.parse(text);
 
-      // Validar estructura mínima
       if (!json.partner || !json.rut || !json.fingerprint || !Array.isArray(json.compute_units)) {
         setError('El archivo no tiene el formato correcto. Debe ser generado desde CP OnPremises.');
         return;
@@ -144,7 +135,6 @@ export default function ImportarPage() {
     if (file) processFile(file);
   }
 
-  // ── Guardar solicitud ─────────────────────────────────────────────────────
   async function handleGuardar(generarAhora: boolean) {
     if (!meta) return;
     setGuardando(true);
@@ -183,7 +173,6 @@ export default function ImportarPage() {
     }
   }
 
-  // ── Columnas tabla UCs ────────────────────────────────────────────────────
   const tablaColumns = createColumns<ComputeUnit>([
     {
       header: 'Nube',
@@ -234,7 +223,6 @@ export default function ImportarPage() {
   return (
     <section className="px-4 py-8 space-y-6">
 
-      {/* Header */}
       <div className="flex items-center gap-3">
         <Link href="/op-licencias" className="text-muted-foreground hover:text-foreground transition">
           <ArrowLeft className="h-5 w-5" />
@@ -247,7 +235,6 @@ export default function ImportarPage() {
         </div>
       </div>
 
-      {/* Zona drag & drop */}
       <div
         onDragOver={e => { e.preventDefault(); setDragging(true); }}
         onDragLeave={() => setDragging(false)}
@@ -293,7 +280,6 @@ export default function ImportarPage() {
         </div>
       </div>
 
-      {/* Error */}
       {error && (
         <div className="p-4 bg-red-500/10 border border-red-300 text-red-600 rounded-xl text-sm flex items-center gap-2">
           <AlertCircle className="h-4 w-4 shrink-0" />
@@ -301,10 +287,8 @@ export default function ImportarPage() {
         </div>
       )}
 
-      {/* Resultado */}
       {hasDatos && meta && (
         <>
-          {/* Metadata */}
           <div className="rounded-2xl border bg-card p-5 shadow-sm">
             <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-3">
               Datos de la Solicitud
@@ -335,7 +319,6 @@ export default function ImportarPage() {
             </div>
           </div>
 
-          {/* KPIs */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="rounded-2xl border bg-blue-500/10 p-5 shadow-sm">
               <Cloud className="h-6 w-6 text-blue-600 mb-2" />
@@ -359,7 +342,6 @@ export default function ImportarPage() {
             </div>
           </div>
 
-          {/* Tabla de UCs */}
           <Card>
             <CardHeader>
               <CardTitle className="text-base">Unidades de Cómputo Solicitadas</CardTitle>
@@ -375,7 +357,6 @@ export default function ImportarPage() {
             </CardContent>
           </Card>
 
-          {/* Botones */}
           <div className="flex justify-end gap-3 pt-2">
             <button
               onClick={() => handleGuardar(false)}

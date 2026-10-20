@@ -30,8 +30,7 @@ export const MainViewNatGatewaysConsumeComponent = () => {
                     isInstanceMultiSelect
                     instancesService='nat_gateway'
                     tagsFilter
-                    collection='aws_nat_gateways'
-                    tagColumnName='Tags'
+                    resourceType='nat_gateways'
                 />
             </div>
         </div>

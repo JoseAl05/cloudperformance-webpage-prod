@@ -3,7 +3,36 @@ import { cookies } from 'next/headers'
 import { AUTH_COOKIE } from '@/lib/cookies'
 import { verifyAuthToken, signAuthToken } from '@/lib/auth'
 import { findCompanyByName } from '@/lib/db-utils'
+import { companyCloudClaims } from '@/lib/sessionPayload'
+import { createLogger } from '@/lib/logger'
+import type { CloudProvider } from '@/lib/cloudAccounts'
 import type { JWTPayload } from '@/types'
+import type { Empresa } from '@/types/db'
+
+const logger = createLogger('SwapClientContext')
+
+class AccountNotAllowedError extends Error {}
+
+function resolveCloudDb(
+    company: Empresa,
+    cloud: CloudProvider,
+    requestedAccountId: unknown
+): string | null {
+    const accounts =
+        company[`is_${cloud}_multi_tenant` as const] === true
+            ? company[`${cloud}_accounts` as const] || []
+            : []
+
+    if (accounts.length === 0) return company[`user_db_${cloud}` as const] || null
+
+    if (typeof requestedAccountId === 'string' && requestedAccountId) {
+        const account = accounts.find((acc) => acc.id === requestedAccountId)
+        if (!account) throw new AccountNotAllowedError(cloud)
+        return account.db
+    }
+
+    return company[`user_db_${cloud}` as const] || accounts[0].db
+}
 
 export async function POST(request: Request) {
     const cookieStore = await cookies()
@@ -28,10 +57,10 @@ export async function POST(request: Request) {
     const body = await request.json()
     const {
         clientName,
-        user_db_azure: explicitAzureDb,
-        user_db_aws: explicitAwsDb,
-        user_db_gcp: explicitGcpDb,
-        user_db_openai: explicitOpenaiDb,
+        azure_account_id: azureAccountId,
+        aws_account_id: awsAccountId,
+        gcp_account_id: gcpAccountId,
+        openai_account_id: openaiAccountId,
     } = body
 
     if (!clientName) {
@@ -54,73 +83,58 @@ export async function POST(request: Request) {
         )
     }
 
-    const targetCompany = await findCompanyByName(clientName)
+    const targetCompanyName = isGlobalAdmin ? clientName : originalPayload.client
+    const targetCompany = await findCompanyByName(targetCompanyName)
 
     if (!targetCompany) {
         return NextResponse.json(
-            { message: `Empresa '${clientName}' no encontrada.` },
+            { message: `Empresa '${targetCompanyName}' no encontrada.` },
             { status: 404 }
         )
     }
 
-    // ------------------ DB FINAL POR NUBE ------------------
+    let finalAzureDb: string | null
+    let finalAwsDb: string | null
+    let finalGcpDb: string | null
+    let finalOpenaiDb: string | null
 
-    const finalAzureDb =
-        explicitAzureDb || targetCompany.user_db_azure || null
+    try {
+        finalAzureDb = resolveCloudDb(targetCompany, 'azure', azureAccountId)
+        finalAwsDb = resolveCloudDb(targetCompany, 'aws', awsAccountId)
+        finalGcpDb = resolveCloudDb(targetCompany, 'gcp', gcpAccountId)
+        finalOpenaiDb = resolveCloudDb(targetCompany, 'openai', openaiAccountId)
+    } catch (err) {
+        if (err instanceof AccountNotAllowedError) {
+            logger.warn('Swap rechazado: cuenta fuera de la empresa destino', {
+                actor: originalPayload.email,
+                role: originalPayload.role,
+                targetCompany: targetCompany.name,
+                cloud: err.message,
+            })
+            return NextResponse.json(
+                { message: 'La cuenta seleccionada no pertenece a la empresa.' },
+                { status: 403 }
+            )
+        }
+        throw err
+    }
 
-    const finalAwsDb =
-        explicitAwsDb || targetCompany.user_db_aws || null
-
-    const finalGcpDb =
-        explicitGcpDb || targetCompany.user_db_gcp || null
-
-    const finalOpenaiDb =
-        explicitOpenaiDb || targetCompany.user_db_openai || null
-
-    // ------------------ NUEVO PAYLOAD ------------------
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { connectors: _legacyConnectors, ...payloadWithoutConnectors } = originalPayload
 
     const newPayload: JWTPayload = {
-        ...originalPayload,
+        ...payloadWithoutConnectors,
 
         client: targetCompany.name,
         role: originalPayload.role,
         planName: targetCompany.planName,
 
-        user_db_azure: finalAzureDb,
-        user_db_aws: finalAwsDb,
-        user_db_gcp: finalGcpDb,
-        user_db_openai: finalOpenaiDb,
-
-        is_aws: targetCompany.is_aws,
-        is_azure: targetCompany.is_azure,
-        is_gcp: targetCompany.is_gcp,
-        is_openai: targetCompany.is_openai === true,
-
-        // Los flags se toman SIEMPRE de la empresa destino: si se heredaran del
-        // token anterior, un admin_global podría arrastrar un `multi_tenant`
-        // de otra empresa y quedar con cuentas que no le corresponden.
-        is_aws_multi_tenant: targetCompany.is_aws_multi_tenant === true,
-        is_azure_multi_tenant: targetCompany.is_azure_multi_tenant === true,
-        is_gcp_multi_tenant: targetCompany.is_gcp_multi_tenant === true,
-        is_openai_multi_tenant: targetCompany.is_openai_multi_tenant === true,
-
-        // Sólo hay cuentas en multi-tenant; en single-tenant manda `user_db_<cloud>`.
-        aws_accounts:
-            targetCompany.is_aws_multi_tenant === true
-                ? targetCompany.aws_accounts || []
-                : [],
-        azure_accounts:
-            targetCompany.is_azure_multi_tenant === true
-                ? targetCompany.azure_accounts || []
-                : [],
-        gcp_accounts:
-            targetCompany.is_gcp_multi_tenant === true
-                ? targetCompany.gcp_accounts || []
-                : [],
-        openai_accounts:
-            targetCompany.is_openai_multi_tenant === true
-                ? targetCompany.openai_accounts || []
-                : [],
+        ...companyCloudClaims(targetCompany, {
+            azure: finalAzureDb,
+            aws: finalAwsDb,
+            gcp: finalGcpDb,
+            openai: finalOpenaiDb,
+        }),
 
         iat: Math.floor(Date.now() / 1000),
         exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24,
@@ -129,9 +143,10 @@ export async function POST(request: Request) {
     const signedToken = await signAuthToken(newPayload);
 
     console.log('[SWAP] Cliente:', targetCompany.name);
-    console.log('[SWAP] AWS accounts:', newPayload.aws_accounts?.length);
-    console.log('[SWAP] Azure accounts:', newPayload.azure_accounts?.length);
-    console.log('[SWAP] GCP accounts:', newPayload.gcp_accounts?.length);
+    const accountCount = (accounts: unknown) => (Array.isArray(accounts) ? accounts.length : undefined);
+    console.log('[SWAP] AWS accounts:', accountCount(newPayload.aws_accounts));
+    console.log('[SWAP] Azure accounts:', accountCount(newPayload.azure_accounts));
+    console.log('[SWAP] GCP accounts:', accountCount(newPayload.gcp_accounts));
 
     console.log(
         '[SWAP] Payload bytes:',
@@ -144,6 +159,19 @@ export async function POST(request: Request) {
             Buffer.byteLength(signedToken, 'utf8')
         );
     }
+
+    logger.info('Contexto de cliente actualizado', {
+        actor: originalPayload.email,
+        role: originalPayload.role,
+        fromCompany: originalPayload.client,
+        toCompany: targetCompany.name,
+        accounts: {
+            aws: awsAccountId ?? null,
+            azure: azureAccountId ?? null,
+            gcp: gcpAccountId ?? null,
+            openai: openaiAccountId ?? null,
+        },
+    })
 
     return NextResponse.json(
         {

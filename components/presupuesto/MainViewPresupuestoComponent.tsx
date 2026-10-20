@@ -1,13 +1,10 @@
 import React from 'react'
 import { CircleDollarSign } from 'lucide-react'
 import MainMenuComponent from '@/components/presupuesto/MainMenuComponent'
-// importa tu HomePage.tsx
-// import { AdvisorViewComponent } from '@/components/presupuesto/AdvisorViewComponent'
 
 export const MainViewPresupuestoComponent: React.FC = () => {
     return (
         <div className='w-full min-w-0 space-y-4'>
-            {/* Sección de encabezado */}
             <div className='mb-8'>
                 <div className='flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4'>
                     <div>
@@ -25,25 +22,10 @@ export const MainViewPresupuestoComponent: React.FC = () => {
                 </div>
             </div>
 
-            {/* Aquí puedes integrar HomePage como un subcomponente */}
             <div className='w-full'>
                 <MainMenuComponent />
             </div>
 
-            {/* Filtros (opcional, comentados por ahora) */}
-            {/*
-            <div className='w-full min-w-0'>
-                <FiltersComponent
-                    Component={AdvisorViewComponent}
-                    dateFilter
-                    regionFilter
-                    advisorCategoriesFilter
-                    advisorStatusFilter
-                    isAdvisorCategoryMultiselect
-                    isAdvisorStatusMultiselect
-                />
-            </div>
-            */}
         </div>
     )
 }

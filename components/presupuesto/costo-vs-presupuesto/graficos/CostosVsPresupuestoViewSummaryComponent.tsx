@@ -53,13 +53,11 @@ export const CostosVsPresupuestoChart = ({ data, facturacionData }: CostosVsPres
             };
         }
 
-        // Agrupar todos los datos mensuales
         const allMonthlyData: Record<string, { presupuesto: number; real: number; forecast: number }> = {};
 
         data.forEach(presupuestoAnual => {
             if (presupuestoAnual.presupuestos_mensuales) {
                 presupuestoAnual.presupuestos_mensuales.forEach(mensual => {
-                    // Crear clave única: año-mes (formato YYYY-MM)
                     const monthKey = `${mensual.anio}-${String(mensual.mes).padStart(2, '0')}`;
                     
                     if (!allMonthlyData[monthKey]) {
@@ -73,7 +71,6 @@ export const CostosVsPresupuestoChart = ({ data, facturacionData }: CostosVsPres
             }
         });
 
-        // Procesar datos de facturación
         const facturacionRealData: [string, number][] = [];
         if (facturacionData && facturacionData.length > 0) {
             facturacionData.forEach(item => {
@@ -83,11 +80,9 @@ export const CostosVsPresupuestoChart = ({ data, facturacionData }: CostosVsPres
                     parseFloat(item.total_cost.toFixed(2))
                 ]);
             });
-            // Ordenar por fecha
             facturacionRealData.sort((a, b) => a[0].localeCompare(b[0]));
         }
 
-        // Ordenar por fecha y convertir a arrays para el gráfico
         const sortedKeys = Object.keys(allMonthlyData).sort();
         
         const presupuestoData: [string, number][] = sortedKeys.map(key => [
@@ -105,7 +100,6 @@ export const CostosVsPresupuestoChart = ({ data, facturacionData }: CostosVsPres
             parseFloat(allMonthlyData[key].forecast.toFixed(2))
         ]);
 
-        // Calcular el máximo para el eje Y
         const maxValuePresupuesto = Math.max(
             ...Object.values(allMonthlyData).flatMap(d => [d.presupuesto, d.real, d.forecast])
         );
@@ -319,7 +313,6 @@ export const CostosVsPresupuestoChart = ({ data, facturacionData }: CostosVsPres
             }
         ];
 
-        // Agregar serie de Facturación Real si existe
         if (facturacionRealData && facturacionRealData.length > 0) {
             series.push({
                 kind: 'line',

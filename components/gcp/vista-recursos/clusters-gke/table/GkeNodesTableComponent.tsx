@@ -27,7 +27,6 @@ interface GkeNodesTableComponentProps {
     data: ClusterGkeInstances[];
 }
 
-// Misma función de formateo para asegurar consistencia
 const formatDate = (value: string | undefined) => {
     if (!value) return '-';
     try {
@@ -104,21 +103,6 @@ export const GkeNodesTableComponent = ({ data }: GkeNodesTableComponentProps) =>
                             </p>
                         </div>
 
-                        {/* <div className="flex items-center gap-6 bg-background/80 p-2 px-4 rounded-full border border-border/50 shadow-sm">
-                            <div className="flex flex-col items-end">
-                                <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">Total</span>
-                                <span className="text-base font-bold text-foreground font-mono">
-                                    {stats.totalInstances}
-                                </span>
-                            </div>
-                            <div className="h-8 w-px bg-border" />
-                            <div className="flex flex-col items-end">
-                                <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">Running</span>
-                                <span className="text-base font-bold text-emerald-600 font-mono">
-                                    {stats.runningInstances}
-                                </span>
-                            </div>
-                        </div> */}
                     </div>
                 </CardHeader>
                 <CardContent className="p-0">

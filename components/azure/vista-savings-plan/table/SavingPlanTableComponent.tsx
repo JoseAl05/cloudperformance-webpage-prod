@@ -1,5 +1,6 @@
 "use client"
 
+import { fetcher } from '@/lib/fetcher';
 import useSWR from "swr"
 import { ColumnDef } from "@tanstack/react-table"
 import { DataTableGrouping } from "@/components/data-table/data-table-grouping"
@@ -34,10 +35,6 @@ type InstanciaSavingsPlan = {
 type ApiResponse = {
     instancias: InstanciaSavingsPlan[]
 }
-
-const fetcher = (url: string) =>
-    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
-        .then(r => r.json())
 
 const ModeloBadge = ({ modelo }: { modelo: string }) => {
     return (
@@ -125,44 +122,6 @@ export const SavingsPlanInstancesTable = ({
                 </div>
             ),
         },
-        // {
-        //     accessorKey: "resource_location",
-        //     header: "Ubicación",
-        //     cell: (info) => (
-        //         <div className="flex items-center gap-2">
-        //             <MapPin className="h-4 w-4 text-orange-500" />
-        //             <span className="text-sm text-gray-700">{info.getValue() as string}</span>
-        //         </div>
-        //     ),
-        // },
-        // {
-        //     accessorKey: "resource_group",
-        //     header: "Resource Group",
-        //     cell: (info) => (
-        //         <span className="text-xs text-gray-600 font-mono">{info.getValue() as string}</span>
-        //     ),
-        // },
-        // {
-        //     accessorKey: "subscription_name",
-        //     header: "Suscripción",
-        //     cell: (info) => (
-        //         <span className="text-sm text-gray-700">{info.getValue() as string}</span>
-        //     ),
-        // },
-        // {
-        //     accessorKey: "service_family",
-        //     header: "Service Family",
-        //     cell: (info) => (
-        //         <span className="text-sm text-gray-600">{info.getValue() as string}</span>
-        //     ),
-        // },
-        // {
-        //     accessorKey: "servicio",
-        //     header: "Servicio",
-        //     cell: (info) => (
-        //         <span className="text-xs text-gray-500 font-mono">{info.getValue() as string}</span>
-        //     ),
-        // },
     ]
 
     if (isLoading) {

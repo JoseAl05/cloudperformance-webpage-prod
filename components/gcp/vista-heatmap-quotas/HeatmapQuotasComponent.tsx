@@ -1,5 +1,6 @@
 'use client'
 
+import { fetcher } from '@/lib/fetcher';
 import useSWR from 'swr'
 import { useMemo, useRef, useState } from 'react'
 import { useTheme } from 'next-themes'
@@ -53,15 +54,6 @@ interface DateGroup {
     order: number
     services: Map<string, ServiceGroup>
 }
-
-const fetcher = (url: string) =>
-    fetch(url, {
-        method: 'GET',
-        headers: {
-            Authorization: `Bearer ${process.env.NEXT_PUBLIC_API_TOKEN}`,
-            'Content-Type': 'application/json',
-        },
-    }).then((res) => res.json())
 
 const fmtPct = (v: number | null | undefined) =>
     typeof v === 'number' && !Number.isNaN(v) ? `${v.toFixed(1)}%` : 'N/A'
