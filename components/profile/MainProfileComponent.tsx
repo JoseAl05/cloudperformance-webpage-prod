@@ -88,7 +88,7 @@ export const MainProfileComponent = () => {
         <div className="flex flex-col gap-8">
             <div className="flex flex-col gap-1">
                 <h1 className="text-2xl font-semibold tracking-tight md:text-3xl">
-                    ¡Bienvenido, {username}!
+                    ¡Bienvenido, {username}! Prueba
                 </h1>
                 <p className="text-sm text-muted-foreground md:text-base">
                     Accede a los módulos principales de Cloud Performance.
