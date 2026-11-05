@@ -60,8 +60,6 @@ export const SelectAIServiceComponent = () => {
     const hasMultipleGcpAccounts = gcpAccounts.length > 1
     const hasMultipleOpenaiAccounts = openaiAccounts.length > 1
 
-    // Lógica para determinar si el usuario puede avanzar
-    // NO tiene múltiples cuentas (es única) O SI tiene múltiples y ya seleccionó una.
     const isAzureReady = !hasMultipleAzureAccounts || !!activeAzureAccountId
     const isAwsReady = !hasMultipleAwsAccounts || !!activeAwsAccountId
     const isGcpReady = !hasMultipleGcpAccounts || !!activeGcpAccountId
@@ -187,7 +185,6 @@ export const SelectAIServiceComponent = () => {
                         : "grid-cols-1"
                 )}
             >
-                {/* ================= AZURE ================= */}
                 {isAzure && (
                     <div
                         onClick={handleEnterAzure}
@@ -237,7 +234,6 @@ export const SelectAIServiceComponent = () => {
                                 )}
                             </div>
 
-                            {/* Solo mostramos la flecha si está listo */}
                             {isAzureReady && (
                                 <ArrowRight className="h-4 w-4 opacity-70 group-hover:translate-x-1 transition-transform" />
                             )}
@@ -245,7 +241,6 @@ export const SelectAIServiceComponent = () => {
                     </div>
                 )}
 
-                {/* ================= AWS ================= */}
                 {isAws && (
                     <div
                         onClick={handleEnterAws}
@@ -302,7 +297,6 @@ export const SelectAIServiceComponent = () => {
                     </div>
                 )}
 
-                {/* ================= GCP ================= */}
                 {isGcp && (
                     <div
                         onClick={handleEnterGcp}
@@ -359,7 +353,6 @@ export const SelectAIServiceComponent = () => {
                     </div>
                 )}
 
-                {/* ================= OPEN IA ================= */}
                 {isOpenai && (
                     <div
                         onClick={handleEnterOpenai}

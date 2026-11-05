@@ -38,19 +38,15 @@ export interface JWTPayload {
   client: string;
   role: UserRole;
 
-  // AWS
   is_aws: boolean;
   user_db_aws: string | null;
 
-  // Azure
   is_azure: boolean;
   user_db_azure: string | null;
 
-  // GCP 
   is_gcp: boolean;
   user_db_gcp: string | null;
 
-  // OpenAI
   is_openai?: boolean;
   user_db_openai?: string | null;
 

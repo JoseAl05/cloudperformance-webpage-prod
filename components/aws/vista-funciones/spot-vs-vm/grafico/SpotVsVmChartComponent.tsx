@@ -23,7 +23,7 @@ export const SpotVsVmChartComponent = ({ data }: SpotVsVmChartComponentProps) =>
             return { totalVMs: null, totalSpot: null, spotPercentage: null }
         }
 
-        const last = data[data.length - 1] // último registro
+        const last = data[data.length - 1]
         const totalVMs = last.total_instancias || 0
         const totalSpot = last.total_spot || 0
         const spotPercentage = totalVMs > 0 ? ((totalSpot / totalVMs) * 100).toFixed(2) : null

@@ -30,10 +30,7 @@ export const MainViewBlobVsStorageComponent = () => {
                     strgAccountFilter
                     isStrgAccountMultiselect
                     tagsFilter
-                    tagsCollection='azure_storage_accounts'
-                    tagsColumnName='tags'
-                    tagsRegionField='location'
-                    tagsSubscriptionField='subscription_id'
+                    tagsResourceType='storage_accounts'
                     tagsLocalService='Storage'
                 />
             </div>

@@ -36,10 +36,9 @@ export const MainAutoscalingGroupsResourceViewMetricsSummaryComponent = ({
         );
     }
 
-    const latestData = data[0]; // Tomar el primer elemento sin sorting complicado
+    const latestData = data[0];
     const today = new Date().toLocaleDateString();
     
-    // Formatear la fecha de creación de forma bonita
     const createdDate = new Date(latestData.CreatedTime.$date);
     const formattedCreatedDate = createdDate.toLocaleDateString('es-ES', {
         weekday: 'long',

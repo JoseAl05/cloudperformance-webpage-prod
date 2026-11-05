@@ -70,7 +70,7 @@ export const PresupuestoAnualComponent = () => {
       const isEditing = !!editingPresupuesto;
       const method = isEditing ? "PUT" : "POST";
       const url = isEditing
-        ? `/api/presupuesto/bridge/${cloudType}//presupuesto/anual/${data.id_presupuesto_anual}`
+        ? `/api/presupuesto/bridge/${cloudType}/presupuesto/anual/${data.id_presupuesto_anual}`
         : `/api/presupuesto/bridge/${cloudType}/presupuesto/anual`;
 
       const res = await fetch(url, {

@@ -20,7 +20,6 @@ export const AutoscalingGroupsEventsTableComponent = ({
 }: AutoscalingGroupsEventsTableComponentProps) => {
     const eventsColumns = autoscalingGroupEventColumns;
     
-    // Ahora la API devuelve directamente un array, no un objeto con basic_events
     const tableData = Array.isArray(data) ? data : [];
     const eventCount = tableData.length;
 

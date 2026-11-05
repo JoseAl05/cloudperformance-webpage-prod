@@ -5,13 +5,13 @@ import { useEffect, useMemo, useRef } from 'react';
 import { createChartOption, deepMerge, makeBaseOptions, useECharts } from '@/lib/echartsGlobalConfig';
 import { useTheme } from 'next-themes';
 import { Loader2 } from 'lucide-react';
-import { CloudBillingItem } from '@/lib/CloudBillingItem';
+import type { BillingPoint } from '@/interfaces/billing';
 import { CloudProvider } from '@/hooks/useMultiTenantSelection';
 
 interface MultiCloudLineChartProps {
-    azureData: CloudBillingItem[];
-    awsData: CloudBillingItem[];
-    gcpData: CloudBillingItem[];
+    azureData: BillingPoint[];
+    awsData: BillingPoint[];
+    gcpData: BillingPoint[];
     selectedClouds: CloudProvider[] | string[];
     isLoading: boolean;
     startDate: Date;
@@ -42,8 +42,8 @@ export const MultiCloudLineChartComponent = ({
     const isDark = (resolvedTheme || theme) === 'dark';
     const chartRef = useRef<HTMLDivElement>(null);
 
-    const targetMonthStr = dateMode === 'monthly' 
-        ? `${startDate.getFullYear()}-${String(startDate.getMonth() + 1).padStart(2, '0')}` 
+    const targetMonthStr = dateMode === 'monthly'
+        ? `${startDate.getFullYear()}-${String(startDate.getMonth() + 1).padStart(2, '0')}`
         : null;
 
     const monthList = useMemo(() => {
@@ -51,8 +51,8 @@ export const MultiCloudLineChartComponent = ({
             return [...selectedMonths].sort();
         }
         const months = [];
-        const current = dateMode === 'monthly' 
-            ? new Date(startDate.getFullYear(), 0, 1) 
+        const current = dateMode === 'monthly'
+            ? new Date(startDate.getFullYear(), 0, 1)
             : new Date(startDate.getFullYear(), startDate.getMonth(), 1);
         const end = new Date(endDate.getFullYear(), endDate.getMonth(), 1);
         while (current <= end) {
@@ -70,37 +70,16 @@ export const MultiCloudLineChartComponent = ({
         const dateMap = new Map<string, { azure: number, aws: number, gcp: number }>();
         monthList.forEach(m => dateMap.set(m, { azure: 0, aws: 0, gcp: 0 }));
 
-        const processData = (data: CloudBillingItem[], provider: 'azure' | 'aws' | 'gcp', costField: keyof CloudBillingItem) => {
-            if (!Array.isArray(data)) return;
-            data.forEach(item => {
-                const dateVal = item.date || item.start_date || item.usage_date || item.time_period_start || item.usage_start_time || item.day || item.timePeriod?.start || item.TimePeriod?.Start;
-                if (!dateVal) return;
-                
-                let monthStr = '';
-                try {
-                    if (typeof dateVal === 'string') {
-                        if (dateVal.includes('/')) {
-                            const parts = dateVal.split('/');
-                            if (parts.length === 3) monthStr = `${parts[2]}-${String(parts[1]).padStart(2, '0')}`;
-                        } else {
-                            monthStr = dateVal.split('T')[0].substring(0, 7);
-                        }
-                    } else {
-                        monthStr = new Date(dateVal as number | Date).toISOString().substring(0, 7);
-                    }
-                    if (!monthStr || monthStr.includes('NaN')) return;
-                } catch (error) { return; }
-                
-                if (dateMap.has(monthStr)) {
-                    const costValue = Number(item[costField]);
-                    if (!isNaN(costValue)) dateMap.get(monthStr)![provider] += costValue;
-                }
+        const processData = (data: BillingPoint[], provider: 'azure' | 'aws' | 'gcp') => {
+            data.forEach(point => {
+                const monthStr = point.date.slice(0, 7);
+                if (dateMap.has(monthStr)) dateMap.get(monthStr)![provider] += point.cost;
             });
         };
 
-        if (selectedClouds.includes('azure')) processData(azureData, 'azure', 'cost_in_usd');
-        if (selectedClouds.includes('aws')) processData(awsData, 'aws', 'unblendedcost');
-        if (selectedClouds.includes('gcp')) processData(gcpData, 'gcp', 'cost_net_usd');
+        if (selectedClouds.includes('azure')) processData(azureData, 'azure');
+        if (selectedClouds.includes('aws')) processData(awsData, 'aws');
+        if (selectedClouds.includes('gcp')) processData(gcpData, 'gcp');
 
         const azureSeries: number[] = [];
         const awsSeries: number[] = [];
@@ -124,7 +103,7 @@ export const MultiCloudLineChartComponent = ({
             legend: [],
             unitLabel: '$',
             useUTC: true,
-            showToolbox: false, 
+            showToolbox: false,
         });
 
         const seriesConfig = [];

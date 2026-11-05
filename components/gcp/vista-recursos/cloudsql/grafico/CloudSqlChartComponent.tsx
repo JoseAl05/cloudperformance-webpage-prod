@@ -136,7 +136,6 @@ const SingleMetricChart = ({ metric }: { metric: CloudSqlMetrics }) => {
                     <Info className="w-4 h-4 text-blue-500 flex-shrink-0" />
                     <p className="text-[10px] text-muted-foreground">
                         Mostrando datos para la métrica <strong>{metric.metric_name}</strong>.
-                        {/* Promedio: <strong>{metric.avg_value.toFixed(2)}</strong> */}
                     </p>
                 </div>
                 {isEmpty ? (

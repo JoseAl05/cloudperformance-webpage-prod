@@ -6,7 +6,6 @@ import { TrendingUp } from 'lucide-react'
 export const MainViewTop10RecursosUsoComponent = () => {
   return (
     <div className='w-full min-w-2 space-y-9'>
-      {/* Header */}
       <div className='mb-8'>
         <div className='flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4'>
           <div>
@@ -27,12 +26,11 @@ export const MainViewTop10RecursosUsoComponent = () => {
         </div>
       </div>
 
-      {/* Filtros + gráfico */}
       <FiltersComponent
         Component={Top10RecursosUsoChartComponent}
         dateFilter
         metricsFilter
-        metricsCollection='custom_db_metrics_logs'
+        metricsResourceType='db'
         resourceTypeFilter
       />
     </div>

@@ -42,14 +42,14 @@ export const PresupuestoMensualComponent = ({
   cloud,
 }: PresupuestoMensualComponentProps) => {
 
-  // --- Mapeo Cloud
   const cloudTypeMap: Record<string, string> = {
     AWS: "aws",
     AZURE: "azure",
   };
   const cloudType = cloudTypeMap[cloud] ?? cloud;
 
-  // --- Estados
+  const listKey = `/api/presupuesto/bridge/${cloudType}/presupuesto/anual`;
+
   const [editingItem, setEditingItem] = useState<PresupuestoMensual | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [confirmDeleteId, setConfirmDeleteId] = useState<number | string | null>(null);
@@ -73,7 +73,6 @@ export const PresupuestoMensualComponent = ({
       </div>
     );
 
-  // --- Handlers
   const handleOpenForm = (item?: PresupuestoMensual) => {
     setEditingItem(item || null);
     setShowForm(true);
@@ -100,7 +99,7 @@ export const PresupuestoMensualComponent = ({
 
       if (!res.ok) throw new Error(await res.text());
 
-      mutate(`/api/presupuesto/bridge/${cloudType}/presupuesto/mensual/all`);
+      mutate(listKey);
       handleCloseForm();
 
       setAlert({
@@ -135,8 +134,7 @@ export const PresupuestoMensualComponent = ({
       );
       if (!res.ok) throw new Error("Error al eliminar el presupuesto mensual");
 
-      // mutate(`/api/presupuesto/bridge/${cloudType}/presupuesto/mensual/all`);
-      mutate(`/api/presupuesto/bridge/${cloud}/presupuesto/anual`);
+      mutate(listKey);
       setConfirmDeleteId(null);
       setAlert({
         type: "success",
@@ -154,32 +152,9 @@ export const PresupuestoMensualComponent = ({
     }
   };
 
-  // --- Render
   return (
     <SessionGate>
       <div className="w-full min-w-0 space-y-6 p-6">
-        {/* Header */}
-        {/* <div className="mb-8 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="h-12 w-12 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
-              <TicketsIcon className="h-6 w-6 text-blue-600 dark:text-blue-400" />
-            </div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
-              Presupuesto Mensual {cloud}
-            </h1>
-            <p className="text-gray-500 dark:text-gray-400">
-                  Gestión de presupuestos mensuales 📊
-            </p>
-          </div>
-
-          <Button
-            onClick={() => handleOpenForm()}
-            className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white"
-          >
-            + Nuevo Presupuesto
-          </Button>
-        </div> */}
-        {/* Header */}
         <div className="mb-8">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
             <div className="flex items-center gap-3 mb-2">
@@ -197,10 +172,6 @@ export const PresupuestoMensualComponent = ({
             </div>
             <Button
               onClick={() => handleOpenForm()}
-              // onClick={() => {
-              //   setEditingPresupuesto(null);
-              //   setShowForm(true);
-              // }}
               className="flex items-center gap-2 bg-blue-600 cursor-pointer hover:bg-blue-700 text-white"
             >
               + Nuevo Presupuesto
@@ -208,14 +179,12 @@ export const PresupuestoMensualComponent = ({
           </div>
         </div>
 
-        {/* Tabla */}
         <PresupuestoMensualTableComponent
           cloud={cloudType}
           onEdit={handleOpenForm}
           onDelete={handleDelete}
         />
 
-        {/* Formulario Modal */}
         <Dialog open={showForm} onOpenChange={setShowForm}>
           <DialogContent className="!max-w-none w-[35vw] ">
             <DialogHeader>
@@ -238,7 +207,6 @@ export const PresupuestoMensualComponent = ({
           </DialogContent>
         </Dialog>
 
-        {/* Confirmación de eliminación */}
         <AlertDialog open={!!confirmDeleteId} onOpenChange={() => setConfirmDeleteId(null)}>
           <AlertDialogContent className="bg-white dark:bg-gray-800">
             <AlertDialogHeader>
@@ -268,7 +236,6 @@ export const PresupuestoMensualComponent = ({
           </AlertDialogContent>
         </AlertDialog>
 
-        {/* Diálogo de alerta (éxito / error) */}
         <AlertDialog open={!!alert.type} onOpenChange={() => setAlert({ type: null, message: "" })}>
           <AlertDialogContent className="bg-white dark:bg-gray-800">
             <AlertDialogHeader>

@@ -31,14 +31,10 @@ export const MainViewUnusedTrafficManagerComponent = () => {
                     unusedTmFilter
                     isUnusedTmFilterMultiselect
                     tagsFilter
-                    tagsCollection='azure_traffic_managers'
-                    tagsColumnName='tags'
-                    tagsRegionField='location'
-                    tagsSubscriptionField='subscription_id'
+                    tagsResourceType='traffic_managers'
                     tagsLocalService='Traffic Manager'
                     resourceGroupFilter
-                    resourceGroupCollection='azure_traffic_managers'
-                    resourceGroupSubscriptionField='subscription_id'
+                    resourceGroupResourceType='traffic_managers'
                 />
             </div> 
         </div>

@@ -11,7 +11,6 @@ export const MainViewCostOptimizationComponent = () => {
         {
             key: 'inference-profiles',
             title: 'Inference Profiles',
-            // description: 'Visualiza y analiza los dashboards de costos de tus nubes.',
             href: '/amazon-bedrock/costo-optimizacion/inference-profiles',
             icon: User,
             iconWrapClass: 'bg-blue-100 dark:bg-blue-900/30',
@@ -22,7 +21,6 @@ export const MainViewCostOptimizationComponent = () => {
         {
             key: 'custom-models',
             title: 'Modelos Custom',
-            // description: 'Explora los dashboards de los principales servicios de IA de tus nubes.',
             href: '/amazon-bedrock/costo-optimizacion/custom-models',
             icon: Map,
             iconWrapClass: 'bg-violet-100 dark:bg-violet-900/30',
@@ -33,7 +31,6 @@ export const MainViewCostOptimizationComponent = () => {
         {
             key: 'foundation-models',
             title: 'Modelos Foundation',
-            // description: 'Compara costos y métricas entre tus distintas nubes.',
             href: '/amazon-bedrock/costo-optimizacion/foundation-models',
             icon: Bot,
             iconWrapClass: 'bg-emerald-100 dark:bg-emerald-900/30',

@@ -36,7 +36,6 @@ export const PresupuestoAnualComponent = ({ cloud }: PresupuestoAnualComponentPr
   };
   const cloudType = cloud ? cloudTypeMap[cloud] ?? undefined : undefined;
 
-  // --- Estados
   const [editingPresupuesto, setEditingPresupuesto] = useState<PresupuestoAnual | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -62,7 +61,6 @@ export const PresupuestoAnualComponent = ({ cloud }: PresupuestoAnualComponentPr
     );
   }
 
-  // --- Acciones
   const handleEdit = (presupuesto: PresupuestoAnual) => {
     setEditingPresupuesto(presupuesto);
     setShowForm(true);
@@ -92,11 +90,9 @@ export const PresupuestoAnualComponent = ({ cloud }: PresupuestoAnualComponentPr
         throw new Error(errorText || "Error al guardar el presupuesto");
       }
       
-      // Revalidar los datos de la tabla
       mutate(`/api/presupuesto/bridge/${cloudType}/presupuesto/anual`);
       handleFormClose();
       
-      // Mostrar mensaje de éxito
       setSuccessMessage(isEditing 
         ? "Presupuesto anual actualizado exitosamente" 
         : "Presupuesto anual creado exitosamente"
@@ -128,12 +124,10 @@ export const PresupuestoAnualComponent = ({ cloud }: PresupuestoAnualComponentPr
         throw new Error(errorText || "Error al eliminar el presupuesto");
       }
       
-      // Revalidar los datos de la tabla
       mutate(`/api/presupuesto/bridge/${cloudType}/presupuesto/anual`);
       setDeleteDialogOpen(false);
       setPresupuestoToDelete(null);
       
-      // Mostrar mensaje de éxito
       setSuccessMessage("Presupuesto anual eliminado exitosamente");
       setSuccessDialogOpen(true);
     } catch (err) {
@@ -150,11 +144,9 @@ export const PresupuestoAnualComponent = ({ cloud }: PresupuestoAnualComponentPr
     setPresupuestoToDelete(null);
   };
 
-  // --- Render
   return (
     <SessionGate>
       <div className="w-full min-w-0 space-y-6 p-6">
-        {/* Header */}
         <div className="mb-8">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
             <div className="flex items-center gap-3 mb-2">
@@ -182,14 +174,12 @@ export const PresupuestoAnualComponent = ({ cloud }: PresupuestoAnualComponentPr
           </div>
         </div>
 
-        {/* Tabla de presupuestos */}
         <PresupuestoAnualTableComponent
           cloud={cloudType}
           onEdit={handleEdit}
           onDelete={handleDeleteClick}
         />
 
-        {/* --- MODAL FORMULARIO --- */}
         <Dialog open={showForm} onOpenChange={setShowForm}>
           <DialogContent className="!max-w-none w-[70vw] h-[90vh] overflow-y-auto p-8 rounded-2xl shadow-xl">
             <DialogHeader>
@@ -210,7 +200,6 @@ export const PresupuestoAnualComponent = ({ cloud }: PresupuestoAnualComponentPr
           </DialogContent>
         </Dialog>
 
-        {/* --- DIALOG CONFIRMACIÓN DE ELIMINACIÓN --- */}
         <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
           <AlertDialogContent className="bg-white dark:bg-gray-800">
             <AlertDialogHeader>
@@ -245,7 +234,6 @@ export const PresupuestoAnualComponent = ({ cloud }: PresupuestoAnualComponentPr
           </AlertDialogContent>
         </AlertDialog>
 
-        {/* --- DIALOG ERROR --- */}
         <AlertDialog open={errorDialogOpen} onOpenChange={setErrorDialogOpen}>
           <AlertDialogContent className="bg-white dark:bg-gray-800">
             <AlertDialogHeader>
@@ -274,7 +262,6 @@ export const PresupuestoAnualComponent = ({ cloud }: PresupuestoAnualComponentPr
           </AlertDialogContent>
         </AlertDialog>
 
-        {/* --- DIALOG ÉXITO --- */}
         <AlertDialog open={successDialogOpen} onOpenChange={setSuccessDialogOpen}>
           <AlertDialogContent className="bg-white dark:bg-gray-800">
             <AlertDialogHeader>

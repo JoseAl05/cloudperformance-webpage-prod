@@ -1,3 +1,4 @@
+import { fetchJson } from '@/lib/fetcher';
 import React, { useState } from 'react';
 import useSWR from 'swr';
 import { Trash2, Edit, X } from 'lucide-react';
@@ -15,7 +16,8 @@ interface EmpresaData {
     planName: string;
 }
 
-const fetcher = (url: string) => fetch(url, { credentials: 'include' }).then(res => res.json());
+const fetcher = <T = unknown>(url: string) =>
+    fetchJson<T>(url, { credentials: 'include' });
 
 const ToastNotification = ({ message, type, onClose }) => {
     const bgColor = type === 'success' ? 'bg-green-600' : 'bg-red-600';
@@ -41,7 +43,6 @@ export default function LicenseTable() {
     const [statusMessage, setStatusMessage] = useState<{ message: string, type: 'success' | 'error' } | null>(null);
     const [loadingAction, setLoadingAction] = useState(false);
 
-    // Fetch de licencias (GET /api/perfilamiento/empresas)
     const { data: empresas, error, isLoading, mutate: refreshEmpresas } = useSWR<EmpresaData[]>(
         '/api/perfilamiento/empresas',
         fetcher
@@ -58,7 +59,6 @@ export default function LicenseTable() {
         setLoadingAction(true);
 
         try {
-            // LLAMADA A LA API DELETE
             const response = await fetch(`/api/perfilamiento/empresas/${empresa._id}`, {
                 method: 'DELETE',
                 credentials: 'include',

@@ -196,8 +196,8 @@ const TenantCombobox = ({
                                 return (
                                     <CommandItem
                                         key={project.id_project}
-                                        value={project.project_name} // Usamos nombre para búsqueda visual
-                                        onSelect={() => handleSelect(project.id_project)} // ID para lógica
+                                        value={project.project_name}
+                                        onSelect={() => handleSelect(project.id_project)}
                                         className="text-xs"
                                     >
                                         <Check className={cn('mr-2 h-3 w-3', isSelected ? 'opacity-100' : 'opacity-0')} />

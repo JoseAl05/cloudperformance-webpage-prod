@@ -12,7 +12,7 @@ import {
 import { CloudSqlHistoricInfoComponent } from './CloudSqlHistoricInfoComponent';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { getUptime } from '@/lib/getUptimeInstance';
-import { CloudSqlInfo, HistoryDatum } from '@/interfaces/sqlInterfaces';
+import { CloudSqlInfo, HistoryDatum } from '@/interfaces/vista-cloudsql/cSqlInterfaces';
 
 interface CloudSqlInfoComponentProps {
     data: CloudSqlInfo[] | null

@@ -18,22 +18,22 @@ const MainMenuComponent: React.FC = () => {
     {
       title: '📊 Costos vs Presupuesto',
       description: 'Visualiza y compara el presupuesto con los costos reales.',
-      path: '/azure/presupuesto/costos-vs-presupuesto',
+      path: '/cloud-azure/presupuesto/costos-vs-presupuesto',
     },
     {
       title: '🏷️ Centros de Costo',
       description: 'Carga y gestiona los centros de costo',
-      path: '/azure/presupuesto/centro-de-costo',
+      path: '/cloud-azure/presupuesto/centro-de-costo',
     },
     {
       title: '💰 Presupuestos Anuales',
       description: 'Carga y administra los presupuestos anuales',
-      path: '/azure/presupuesto/presupuesto-anual',
+      path: '/cloud-azure/presupuesto/presupuesto-anual',
     },
     {
       title: '💰 Presupuestos Mensuales',
       description: 'Carga y administra los presupuestos mensuales',
-      path: '/azure/presupuesto/presupuesto-mensual',
+      path: '/cloud-azure/presupuesto/presupuesto-mensual',
     },
 
   ];
@@ -45,7 +45,7 @@ const MainMenuComponent: React.FC = () => {
             <div
               key={mod.path}
               className="bg-white shadow-md p-4 rounded-lg border cursor-pointer hover:shadow-xl transition"
-              onClick={() => router.push(mod.path)} // Navegación usando Next.js
+              onClick={() => router.push(mod.path)}
             >
               <h2 className="text-xl font-semibold mb-2">{mod.title}</h2>
               <p className="text-sm text-gray-600">{mod.description}</p>

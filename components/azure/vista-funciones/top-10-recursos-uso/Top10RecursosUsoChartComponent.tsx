@@ -1,18 +1,32 @@
 'use client'
+import { fetcher } from '@/lib/fetcher';
 import useSWR from 'swr'
 import { useEffect, useRef, useMemo, useCallback } from "react"
 import * as echarts from "echarts"
 import { Card, CardContent } from '@/components/ui/card'
 import { AlertTriangle, CheckCircle, TrendingDown, BarChart3 } from "lucide-react"
+import { formatByUnit } from '@/lib/consumption'
 
-const fetcher = (url: string) =>
-  fetch(url, {
-    method: 'GET',
-    headers: {
-      'Authorization': `Bearer ${process.env.NEXT_PUBLIC_API_TOKEN}`,
-      'Content-Type': 'application/json'
-    }
-  }).then(res => res.json())
+interface Top10RecursoUso {
+  vm_name: string
+  valor?: number
+  porcentaje_uso: number | null
+  porcentaje_no_uso: number | null
+}
+
+interface Top10RecursosUsoResponse {
+  es_porcentaje?: boolean
+  unidad?: string
+  top_10_mayor_uso?: Top10RecursoUso[]
+  top_10_menor_uso?: Top10RecursoUso[]
+  resumen?: {
+    total_recursos_analizados: number
+    recursos_uso_critico: number | null
+    recursos_muy_infrautilizados: number | null
+    promedio_porcentaje_uso: number | null
+    promedio_valor?: number | null
+  }
+}
 
 interface Top10RecursosUsoChartProps {
   startDate: Date
@@ -41,10 +55,14 @@ export const Top10RecursosUsoChartComponent = ({
     ? null
     : `/api/azure/bridge/azure/top-recursos-uso?date_from=${startDateFormatted}&date_to=${endDateFormatted}&metric_name=${encodeURIComponent(selectedMetric)}&tipo=${selectedResourceType}`
 
-  const { data, error, isLoading } = useSWR(apiUrl, fetcher, {
+  const { data, error, isLoading } = useSWR<Top10RecursosUsoResponse>(apiUrl, fetcher, {
     revalidateOnFocus: false,
     dedupingInterval: 2000
   })
+
+  const esPorcentaje = data?.es_porcentaje ?? true
+  const unidad = data?.unidad ?? '%'
+  const formatear = useCallback((value: number) => formatByUnit(value, unidad), [unidad])
 
   const { topMostUsed, topLeastUsed, resumen } = useMemo(() => {
     if (!data || !data.top_10_mayor_uso || !data.top_10_menor_uso) {
@@ -55,22 +73,22 @@ export const Top10RecursosUsoChartComponent = ({
       }
     }
 
-    const topMostUsed = data.top_10_mayor_uso.map((item: unknown) => ({
+    const topMostUsed = data.top_10_mayor_uso.map((item) => ({
       name: item.vm_name,
-      porcentajeUso: item.porcentaje_uso
+      valor: (esPorcentaje ? item.porcentaje_uso : item.valor) ?? 0
     }))
 
-    const topLeastUsed = data.top_10_menor_uso.map((item: unknown) => ({
+    const topLeastUsed = data.top_10_menor_uso.map((item) => ({
       name: item.vm_name,
-      porcentajeNoUso: item.porcentaje_no_uso
+      valor: (esPorcentaje ? item.porcentaje_no_uso : item.valor) ?? 0
     }))
 
     return {
       topMostUsed,
       topLeastUsed,
-      resumen: data.resumen
+      resumen: data.resumen ?? null
     }
-  }, [data])
+  }, [data, esPorcentaje])
 
   const handleResize = useCallback(() => {
     chartInstanceTop.current?.resize()
@@ -78,7 +96,6 @@ export const Top10RecursosUsoChartComponent = ({
   }, [])
 
   const handleMouseOver = useCallback((resourceName: string) => {
-    // Pequeño timeout para asegurar que ambos charts estén inicializados
     setTimeout(() => {
       const indexTop = topMostUsed.findIndex(r => r.name === resourceName)
       const indexBottom = topLeastUsed.findIndex(r => r.name === resourceName)
@@ -102,7 +119,6 @@ export const Top10RecursosUsoChartComponent = ({
   }, [topMostUsed, topLeastUsed])
 
   const handleMouseOut = useCallback(() => {
-    // Quitar resaltado de ambos gráficos
     if (chartInstanceTop.current) {
       chartInstanceTop.current.dispatchAction({
         type: 'downplay',
@@ -136,15 +152,15 @@ export const Top10RecursosUsoChartComponent = ({
           if (!hasData) return 'No hay datos'
           const item = params[0]
           const value = Number(item.value ?? 0)
-          return `<strong>${item.name}</strong><br/>Uso: ${value.toFixed(2)}%`
+          return `<strong>${item.name}</strong><br/>${esPorcentaje ? 'Uso' : 'Valor'}: ${formatear(value)}`
         }
       },
-      grid: { left: 180, right: 50, top: 60, bottom: 10 },
+      grid: { left: 180, right: 70, top: 60, bottom: 10 },
       xAxis: {
         type: 'value',
-        max: 100,
-        name: '% Uso',
-        axisLabel: { formatter: '{value}%' },
+        max: esPorcentaje ? 100 : undefined,
+        name: esPorcentaje ? '% Uso' : unidad,
+        axisLabel: { formatter: (value: number) => formatear(value) },
         splitLine: { show: true, lineStyle: { color: '#f3f4f6' } }
       },
       yAxis: {
@@ -156,7 +172,7 @@ export const Top10RecursosUsoChartComponent = ({
       series: [{
         type: 'bar',
         data: hasData ? topMostUsed.map(r => ({
-          value: Number(r.porcentajeUso ?? 0),
+          value: Number(r.valor),
           itemStyle: {
             color: '#60a5fa',
             borderRadius: [0, 4, 4, 0]
@@ -174,7 +190,7 @@ export const Top10RecursosUsoChartComponent = ({
         label: {
           show: hasData,
           position: 'right',
-          formatter: (params: unknown) => `${Number(params.value ?? 0).toFixed(2)}%`,
+          formatter: (params: unknown) => formatear(Number(params.value ?? 0)),
           fontSize: 11,
           fontWeight: 'bold'
         },
@@ -195,7 +211,6 @@ export const Top10RecursosUsoChartComponent = ({
     chartInstanceTop.current = echarts.init(chartRefTop.current, null, { renderer: 'canvas' })
     chartInstanceTop.current.setOption(options, { notMerge: true, lazyUpdate: true })
 
-    // Event listeners para sincronización
     chartInstanceTop.current.on('mouseover', (params: unknown) => {
       if (params.componentType === 'series') {
         handleMouseOver(params.name)
@@ -220,7 +235,7 @@ export const Top10RecursosUsoChartComponent = ({
       chartInstanceTop.current?.dispose()
       chartInstanceTop.current = null
     }
-  }, [topMostUsed, handleResize, handleMouseOver, handleMouseOut])
+  }, [topMostUsed, esPorcentaje, unidad, formatear, handleResize, handleMouseOver, handleMouseOut])
 
   useEffect(() => {
     if (!chartRefBottom.current) return
@@ -240,15 +255,15 @@ export const Top10RecursosUsoChartComponent = ({
           if (!hasData) return 'No hay datos'
           const item = params[0]
           const value = Number(item.value ?? 0)
-          return `<strong>${item.name}</strong><br/>Disponible: ${value.toFixed(2)}%`
+          return `<strong>${item.name}</strong><br/>${esPorcentaje ? 'Disponible' : 'Valor'}: ${formatear(value)}`
         }
       },
-      grid: { left: 180, right: 50, top: 60, bottom: 10 },
+      grid: { left: 180, right: 70, top: 60, bottom: 10 },
       xAxis: {
         type: 'value',
-        max: 100,
-        name: '% Disponible',
-        axisLabel: { formatter: '{value}%' },
+        max: esPorcentaje ? 100 : undefined,
+        name: esPorcentaje ? '% Disponible' : unidad,
+        axisLabel: { formatter: (value: number) => formatear(value) },
         splitLine: { show: true, lineStyle: { color: '#f3f4f6' } }
       },
       yAxis: {
@@ -260,7 +275,7 @@ export const Top10RecursosUsoChartComponent = ({
       series: [{
         type: 'bar',
         data: hasData ? topLeastUsed.map(r => ({
-          value: Number(r.porcentajeNoUso ?? 0),
+          value: Number(r.valor),
           itemStyle: {
             color: '#60a5fa',
             borderRadius: [0, 4, 4, 0]
@@ -278,7 +293,7 @@ export const Top10RecursosUsoChartComponent = ({
         label: {
           show: hasData,
           position: 'right',
-          formatter: (params: unknown) => `${Number(params.value ?? 0).toFixed(2)}%`,
+          formatter: (params: unknown) => formatear(Number(params.value ?? 0)),
           fontSize: 11,
           fontWeight: 'bold'
         },
@@ -299,7 +314,6 @@ export const Top10RecursosUsoChartComponent = ({
     chartInstanceBottom.current = echarts.init(chartRefBottom.current, null, { renderer: 'canvas' })
     chartInstanceBottom.current.setOption(options, { notMerge: true, lazyUpdate: true })
 
-    // Event listeners para sincronización
     chartInstanceBottom.current.on('mouseover', (params: unknown) => {
       if (params.componentType === 'series') {
         handleMouseOver(params.name)
@@ -316,7 +330,7 @@ export const Top10RecursosUsoChartComponent = ({
       chartInstanceBottom.current?.dispose()
       chartInstanceBottom.current = null
     }
-  }, [topLeastUsed, handleMouseOver, handleMouseOut])
+  }, [topLeastUsed, esPorcentaje, unidad, formatear, handleMouseOver, handleMouseOut])
 
   const isEmpty = topMostUsed.length === 0 && topLeastUsed.length === 0
 
@@ -344,7 +358,6 @@ export const Top10RecursosUsoChartComponent = ({
 
   return (
     <div className="space-y-6 p-4">
-      {/* Gráficos */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card className="shadow-lg rounded-2xl">
           <CardContent className="p-0">
@@ -358,8 +371,7 @@ export const Top10RecursosUsoChartComponent = ({
         </Card>
       </div>
 
-      {/* Cards de métricas */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className={`grid grid-cols-1 ${esPorcentaje ? 'md:grid-cols-4' : 'md:grid-cols-2'} gap-4`}>
         <Card className="border-l-4 border-l-blue-500 hover:shadow-lg transition-shadow">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
@@ -373,6 +385,7 @@ export const Top10RecursosUsoChartComponent = ({
           </CardContent>
         </Card>
 
+        {esPorcentaje && (<>
         <Card className="border-l-4 border-l-red-500 hover:shadow-lg transition-shadow">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
@@ -398,13 +411,18 @@ export const Top10RecursosUsoChartComponent = ({
             </div>
           </CardContent>
         </Card>
+        </>)}
 
         <Card className="border-l-4 border-l-green-500 hover:shadow-lg transition-shadow">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Promedio Uso</p>
-                <p className="text-3xl font-bold text-green-600">{resumen?.promedio_porcentaje_uso.toFixed(1) || 0}%</p>
+                <p className="text-sm font-medium text-muted-foreground">{esPorcentaje ? 'Promedio Uso' : 'Promedio'}</p>
+                <p className="text-3xl font-bold text-green-600">
+                  {esPorcentaje
+                    ? `${(resumen?.promedio_porcentaje_uso ?? 0).toFixed(1)}%`
+                    : formatByUnit(resumen?.promedio_valor, unidad)}
+                </p>
                 <p className="text-xs text-muted-foreground">Del período</p>
               </div>
               <BarChart3 className="h-8 w-8 text-green-500" />

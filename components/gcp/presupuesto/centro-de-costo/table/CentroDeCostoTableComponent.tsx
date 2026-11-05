@@ -286,7 +286,6 @@ export const CentroDeCostoTableComponent = ({ cloud, onEdit, onDelete }: CentroD
           <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
             {paginatedData.length === 0 ? (
               <tr>
-                {/* Cambiado el colSpan de 6 a 5 al eliminar la columna de Tags */}
                 <td colSpan={5} className="px-6 py-12 text-center">
                   <Search className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-3" />
                   <p className="text-gray-500 dark:text-gray-400 font-medium">No se encontraron resultados</p>

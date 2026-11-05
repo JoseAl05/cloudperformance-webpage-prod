@@ -5,11 +5,6 @@ import { cn } from '@/lib/utils';
 
 export type CloudProvider = 'azure' | 'aws' | 'gcp' | 'openai';
 
-/**
- * Fila del editor. `_key` es sólo para React y para los handlers locales:
- * NO se envía al backend. El `id` (`clp-<id>`) lo genera y lo devuelve el
- * servidor, que es la única fuente de verdad — ver `lib/cloudAccounts.ts`.
- */
 export type CloudAccountRow = {
   _key: string;
   id?: string;
@@ -27,7 +22,6 @@ function nextRowKey(): string {
   return `row-${Date.now()}-${rowCounter}`;
 }
 
-/** Convierte las cuentas persistidas en filas editables. */
 export function toAccountRows(
   accounts: CloudAccount[] | undefined
 ): CloudAccountRow[] {
@@ -39,7 +33,6 @@ export function toAccountRows(
   }));
 }
 
-/** Fila nueva, todavía sin ID: lo asignará el servidor al guardar. */
 export function newAccountRow(cloud: CloudProvider): CloudAccountRow {
   return {
     _key: nextRowKey(),
@@ -48,7 +41,6 @@ export function newAccountRow(cloud: CloudProvider): CloudAccountRow {
   };
 }
 
-/** Payload para la API: se descarta `_key` y el `id` de las filas nuevas. */
 export function toAccountsPayload(rows: CloudAccountRow[]) {
   return rows.map((row) => ({
     ...(row.id ? { id: row.id } : {}),

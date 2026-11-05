@@ -89,12 +89,10 @@ export const ComparacionMensualTableComponent = ({ dataPresupuesto, dataFacturac
       facturacion: number 
     }> = {};
 
-    // Inicializar todos los meses
     for (let i = 1; i <= 12; i++) {
       datosPorMes[i] = { presupuesto: 0, real: 0, forecast: 0, facturacion: 0 };
     }
 
-    // Sumar presupuestos, real y forecast por mes
     dataPresupuesto?.forEach(presupuesto => {
       if (presupuesto.presupuestos_mensuales) {
         presupuesto.presupuestos_mensuales.forEach(mensual => {
@@ -105,12 +103,10 @@ export const ComparacionMensualTableComponent = ({ dataPresupuesto, dataFacturac
       }
     });
 
-    // Sumar facturación por mes
     dataFacturacion?.forEach(factura => {
       datosPorMes[factura.month].facturacion += factura.total_cost;
     });
 
-    // Crear array final
     const datos = Array.from({ length: 12 }, (_, i) => {
       const mes = i + 1;
       const presupuesto = datosPorMes[mes].presupuesto;
@@ -132,7 +128,6 @@ export const ComparacionMensualTableComponent = ({ dataPresupuesto, dataFacturac
       };
     });
 
-    // Aplicar ordenamiento
     if (sortField && sortOrder) {
       datos.sort((a, b) => {
         const aVal = a[sortField];
@@ -177,7 +172,6 @@ export const ComparacionMensualTableComponent = ({ dataPresupuesto, dataFacturac
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700 overflow-hidden">
-      {/* Table Container */}
       <div className="overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
           <thead className="bg-gray-50 dark:bg-gray-900/50 sticky top-0 z-10">
@@ -322,7 +316,6 @@ export const ComparacionMensualTableComponent = ({ dataPresupuesto, dataFacturac
                 </tr>
               );
             })}
-            {/* Fila de totales */}
             <tr className="bg-gray-100 dark:bg-gray-900 font-bold border-t-2 border-gray-300 dark:border-gray-600">
               <td className="px-6 py-4 whitespace-nowrap">
                 <span className="text-gray-900 dark:text-gray-100">TOTAL</span>

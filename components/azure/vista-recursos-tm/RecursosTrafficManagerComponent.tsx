@@ -1,5 +1,6 @@
 'use client'
 
+import { fetcher } from '@/lib/fetcher';
 import { MessageCard } from '@/components/aws/cards/MessageCards';
 import { LoaderComponent } from '@/components/general_aws/LoaderComponent';
 import { TrafficManagerDataApiResponse, TrafficManagerDataHistory } from '@/interfaces/vista-traffic-manager/trafficManagerInterfaces';
@@ -16,10 +17,6 @@ interface RecursosTrafficManagerComponentProps {
     subscription: string;
     region: string;
 }
-
-const fetcher = (url: string) =>
-    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
-        .then(r => r.json());
 
 const isNonEmptyArray = <T,>(v: unknown): v is T[] => Array.isArray(v) && v.length > 0
 
@@ -49,8 +46,6 @@ export const RecursosTrafficManagerComponent = ({ startDate, endDate, selectedTm
     const anyLoading = tmDataApiResponse.isLoading || tmAvgQueriesReturnedApiResponse.isLoading;
     const anyError = !!tmDataApiResponse.error || !!tmAvgQueriesReturnedApiResponse.error;
     const hasTmData = !!tmData && tmData.length > 0;
-    // const hasTmAvgQueriesReturnedData = !!tmAvgQueriesReturned && tmAvgQueriesReturned.length > 0;
-    // const anyData = hasTmData || hasTmAvgQueriesReturnedData;
 
 
     const hasSelectedTmData = !!selectedTm && selectedTm.length > 0;
@@ -122,12 +117,6 @@ export const RecursosTrafficManagerComponent = ({ startDate, endDate, selectedTm
                     <p className="text-sm text-muted-foreground flex items-center gap-2">
                         {selectedProfileData.resource_group} • {selectedProfileData.location}
                     </p>
-                    {/* <h1 className="text-2xl font-bold text-foreground">
-                        {selectedProfileData.tm_name}
-                    </h1>
-                    <p className="text-sm text-muted-foreground flex items-center gap-2">
-                        Grupo de recursos: {selectedProfileData.resource_group} • {selectedProfileData.location}
-                    </p> */}
                 </div>
             </div>
             <section>

@@ -36,7 +36,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ message: 'Faltan datos.' }, { status: 400 });
     }
 
-    // Buscar el último .lic generado para este partner
     const col = await getCollection<OpLicencia>('op_licencias');
     const ultimaLicencia = await col
       .find({ partner })
@@ -49,7 +48,6 @@ export async function POST(req: NextRequest) {
     const now = new Date();
     const treintaDias = 30 * 24 * 60 * 60 * 1000;
 
-    // Calcular estado por usuario
     const resultado = users.map((u: CSVUser) => {
       const vigente = usuariosVigentes.find(v => v.id === u.id);
 
@@ -71,7 +69,6 @@ export async function POST(req: NextRequest) {
       return { ...u, estado: 'vigente', diasRestantes, expires: vigente.expires };
     });
 
-    // KPIs
     const kpis = {
       empresas:            new Set(users.map((u: CSVUser) => u.empresa)).size,
       usuariosNuevos:      resultado.filter((u: {estado: string}) => u.estado === 'nuevo').length,
@@ -81,7 +78,6 @@ export async function POST(req: NextRequest) {
       licenciasAGenerar:   resultado.filter((u: {estado: string}) => u.estado !== 'vigente').length,
     };
 
-    // Usuarios vigentes que deben incluirse automáticamente en el nuevo .lic
     const vigentesAutomaticos = usuariosVigentes.filter(v => {
       const expires = new Date(v.expires);
       const diasRestantes = Math.ceil((expires.getTime() - now.getTime()) / 86400000);

@@ -29,18 +29,12 @@ export const MainViewAzureDbWorkingNonWorkingHoursComponent = () => {
                     isRegionMultiSelect
                     subscriptionIdFilter
                     tagsFilter
-                    tagsCollection="custom_db_metrics_logs"
-                    tagsColumnName="tags"
-                    tagsRegionField="location"
+                    tagsResourceType="db"
                     tagsLocalService="Azure Database"
-                    tagsSubscriptionField="resource_id"
                     resourceGroupFilter
-                    resourceGroupCollection="custom_db_metrics_logs"
-                    resourceGroupSubscriptionField="resource_id"
+                    resourceGroupResourceType="db"
                     instancesFilterV2
-                    instancesV2Collection="custom_db_metrics_logs"
-                    instancesV2SubscriptionField="resource_id"
-                    instancesV2InstanceField="resource_name"
+                    instancesV2ResourceType="db"
                 />
             </div>
         </div>

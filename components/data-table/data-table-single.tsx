@@ -31,9 +31,7 @@ interface DataTableProps<TData, TValue> {
   data: TData[]
   filterColumn?: string
   filterPlaceholder?: string
-  /** Tamaños disponibles para el selector de página */
   pageSizeOptions?: number[]
-  /** Tamaño de página inicial */
   initialPageSize?: number
 }
 
@@ -69,7 +67,6 @@ export function DataTableSingle<TData, TValue>({
     },
   })
 
-  // Totales y rango visible
   const totalRows = table.getFilteredRowModel().rows.length
   const { pageIndex, pageSize } = table.getState().pagination
   const start = totalRows ? Math.min(pageIndex * pageSize + 1, totalRows) : 0
@@ -80,7 +77,6 @@ export function DataTableSingle<TData, TValue>({
     [totalRows, pageSize]
   )
 
-  // Helpers para paginación numerada (ventana)
   const clamp = (val: number, min: number, max: number) => Math.min(max, Math.max(min, val))
   const windowSize = 5
   const pageWindow = useMemo(() => {
@@ -145,9 +141,7 @@ export function DataTableSingle<TData, TValue>({
         </Table>
       </div>
 
-      {/* Footer de paginación */}
       <div className="flex flex-wrap items-center justify-between gap-3 py-4">
-        {/* Rango visible */}
         <div className="text-sm text-muted-foreground">
           {totalRows > 0 ? (
             <>Mostrando {start}-{end} de {totalRows}</>
@@ -156,7 +150,6 @@ export function DataTableSingle<TData, TValue>({
           )}
         </div>
 
-        {/* Controles: prev / números / next */}
         <div className="flex flex-wrap items-center gap-2">
           <Button
             variant="outline"
@@ -167,10 +160,8 @@ export function DataTableSingle<TData, TValue>({
             Anterior
           </Button>
 
-          {/* Botones numerados */}
           {totalPages > 1 && (
             <div className="flex items-center gap-1">
-              {/* Ir al primero si la ventana no empieza en 0 */}
               {pageWindow.startIdx > 0 && (
                 <>
                   <Button
@@ -189,7 +180,6 @@ export function DataTableSingle<TData, TValue>({
                 </>
               )}
 
-              {/* Ventana central */}
               {Array.from(
                 { length: pageWindow.endIdx - pageWindow.startIdx + 1 },
                 (_, i) => pageWindow.startIdx + i
@@ -208,7 +198,6 @@ export function DataTableSingle<TData, TValue>({
                 )
               })}
 
-              {/* Ir al último si la ventana no termina en el último */}
               {pageWindow.endIdx < totalPages - 1 && (
                 <>
                   {pageWindow.endIdx < totalPages - 2 && (
@@ -239,14 +228,13 @@ export function DataTableSingle<TData, TValue>({
           </Button>
         </div>
 
-        {/* Selector de items por página */}
         <div className="flex items-center gap-2">
           <span className="text-sm text-muted-foreground">Items por página:</span>
           <Select
             value={String(pageSize)}
             onValueChange={(val) => {
               table.setPageSize(Number(val))
-              table.setPageIndex(0) // volver al inicio al cambiar tamaño
+              table.setPageIndex(0)
             }}
           >
             <SelectTrigger className="w-[150px]">

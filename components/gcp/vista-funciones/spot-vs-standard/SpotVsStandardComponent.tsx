@@ -1,10 +1,17 @@
 'use client'
 
+import type { ComponentProps } from 'react';
+import { fetcher } from '@/lib/fetcher';
 import React from 'react';
 import useSWR from 'swr';
 import { SpotVsStandardCardsComponent } from './info/SpotVsStandardCardsComponent';
 import { SpotVsStandardChart } from './graficos/SpotVsStandardChart';
 import { SpotVsStandardTable } from './table/SpotVsStandardTable';
+
+interface SpotVsStandardResponse {
+    resumen?: ComponentProps<typeof SpotVsStandardCardsComponent>['summary'];
+    vms?: Array<NonNullable<ComponentProps<typeof SpotVsStandardTable>['data']>[number] & NonNullable<ComponentProps<typeof SpotVsStandardChart>['data']>[number] & NonNullable<ComponentProps<typeof SpotVsStandardCardsComponent>['vms']>[number]>;
+}
 
 interface SpotVsStandardComponentProps {
     startDate: Date;
@@ -15,8 +22,6 @@ interface SpotVsStandardComponentProps {
     tagValue?: string | null;
 }
 
-const fetcher = (url: string) => fetch(url).then(res => res.json());
-
 export const SpotVsStandardComponent = ({ 
     startDate, 
     endDate, 
@@ -26,8 +31,6 @@ export const SpotVsStandardComponent = ({
     tagValue 
 }: SpotVsStandardComponentProps) => {
 
-    // Construcción de URL
-    //let url = `/api/gcp/bridge/gcp/funcion/spot_vs_standard?`;
     let url = `/api/gcp/bridge/gcp/versus/spot_vs_standard_vms?`;
 
     if (startDate) url += `date_from=${startDate.toISOString().slice(0, 19)}&`;
@@ -43,11 +46,10 @@ export const SpotVsStandardComponent = ({
 
     const shouldFetch = !!projects;
 
-    const { data, error, isLoading } = useSWR(shouldFetch ? url : null, fetcher, {
+    const { data, error, isLoading } = useSWR<SpotVsStandardResponse>(shouldFetch ? url : null, fetcher, {
         revalidateOnFocus: false,
     });
 
-    // Estado: Sin proyecto seleccionado
     if (!projects) {
         return (
             <div className="max-w-7xl mx-auto px-6 py-8">
@@ -58,7 +60,6 @@ export const SpotVsStandardComponent = ({
         );
     }
 
-    // Estado: Cargando
     if (isLoading) {
         return (
             <div className="text-center py-8">
@@ -68,7 +69,6 @@ export const SpotVsStandardComponent = ({
         );
     }
 
-    // Estado: Error
     if (error) {
         return (
             <div className="text-red-500 p-4 bg-red-50 rounded-lg border border-red-200">
@@ -78,7 +78,6 @@ export const SpotVsStandardComponent = ({
         );
     }
 
-    // Estado: Sin datos
     if (!data || !data.vms || data.vms.length === 0) {
         return (
             <div className="text-center text-gray-500 py-8">
@@ -89,17 +88,14 @@ export const SpotVsStandardComponent = ({
 
     return (
         <div className="space-y-6 mt-6 px-4">
-            {/* Cards */}
             <SpotVsStandardCardsComponent 
                 summary={data?.resumen}
                 vms={data?.vms || []}
                 isLoading={isLoading}
             />
 
-            {/* Gráfico */}
             <SpotVsStandardChart data={data?.vms || []} />
 
-            {/* Tabla expandible */}
             <SpotVsStandardTable 
                 data={data?.vms || []} 
                 startDate={startDate.toISOString().slice(0, 10)}

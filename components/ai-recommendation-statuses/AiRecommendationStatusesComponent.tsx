@@ -1,6 +1,6 @@
 'use client'
 
-
+import { fetcher } from '@/lib/fetcher';
 import { AiRecommendationStatusesInfoComponent } from '@/components/ai-recommendation-statuses/info/AiRecommendationStatusesInfoComponent';
 import { MessageCard } from '@/components/aws/cards/MessageCards';
 import { LoaderComponent } from '@/components/general_aws/LoaderComponent';
@@ -13,11 +13,6 @@ interface AiRecommendationStatusesComponentProps {
     endDate: Date;
     cloud: string;
 }
-
-
-const fetcher = (url: string) =>
-    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
-        .then(r => r.json());
 
 const isNonEmptyArray = <T,>(v: unknown): v is T[] => Array.isArray(v) && v.length > 0
 

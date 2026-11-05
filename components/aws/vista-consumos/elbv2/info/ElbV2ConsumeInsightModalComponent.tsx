@@ -8,6 +8,7 @@ import { formatGeneric } from '@/lib/bytesToMbs';
 import { LoadbalancerV2ConsumeInfoInstances, LoadbalancerV2ConsumeInfoInstancesHistory } from '@/interfaces/vista-consumos/elbV2ConsumeViewInterfaces';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import { readFilterParam } from '@/lib/filters';
 
 const formatBytes = (bytes: number) => {
     if (bytes === 0) return '0 B';
@@ -24,9 +25,9 @@ const getLatestHistory = (data: LoadbalancerV2ConsumeInfoInstances): Loadbalance
 
 const GetParameters = () => {
     const searchParams = useSearchParams();
-    const startDateParam = searchParams.get('startDate');
-    const endDateParam = searchParams.get('endDate');
-    const regionParam = searchParams.get('regions');
+    const startDateParam = readFilterParam(searchParams, 'dateFrom');
+    const endDateParam = readFilterParam(searchParams, 'dateTo');
+    const regionParam = readFilterParam(searchParams, 'regions');
 
     return {
         startDateParam,
@@ -353,7 +354,7 @@ export const ElbV2TargetGroupsView = ({ data }: { data: LoadbalancerV2ConsumeInf
                                                     <TableCell className="font-mono text-xs">
                                                         <Link
                                                             href={{
-                                                                pathname: `/aws/recursos/instancias-ec2`,
+                                                                pathname: `/cloud-aws/recursos/instancias-ec2`,
                                                                 query: {
                                                                     startDate: startDateParam,
                                                                     endDate: endDateParam,

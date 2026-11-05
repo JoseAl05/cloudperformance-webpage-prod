@@ -59,7 +59,6 @@ interface FiltersComponentProps {
 const FilterSeparator = () => (
     <div className="relative flex items-center justify-center py-3 z-0">
         <div className="absolute inset-0 flex items-center justify-center">
-            {/* <div className="h-full w-px border-l-2 border-dashed "></div> */}
         </div>
         <div className="relative z-10 flex items-center justify-center h-8 w-8 rounded-full  border  shadow-sm text-blue-600 transition-transform hover:scale-110">
             <ArrowDown className="h-4 w-4" />
@@ -463,19 +462,6 @@ export const FiltersComponent = ({
                                 </>
                             )
                         }
-                        {/* {
-                            regionFilter && payload.cloud_provider === 'GCP' && (
-                                <>
-                                    <div className='space-y-1.5 flex flex-col'>
-                                        <label className='text-sm font-medium text-gray-600'>Región de Nube</label>
-                                        <GcpRegionFilterComponent
-                                            regions={tempRegion}
-                                            setRegions={setTempRegion}
-                                        />
-                                    </div>
-                                </>
-                            )
-                        } */}
                         {regionFilter && payload.cloud_provider === 'Azure' && (
                             <>
                                 <FilterSeparator />

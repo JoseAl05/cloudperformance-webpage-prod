@@ -3,7 +3,6 @@ import { getCollection } from '@/lib/mongodb';
 import { authorizeRequest } from '@/lib/authUtils';
 import { ObjectId } from 'mongodb';
 
-// ── PUT — Actualizar estado ───────────────────────────────────────────────────
 export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
   const auth = await authorizeRequest(req, ['admin_global']);
   if (!auth.authorized) {
@@ -26,7 +25,6 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
   }
 }
 
-// ── DELETE — Eliminar solicitud ───────────────────────────────────────────────
 export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
   const auth = await authorizeRequest(req, ['admin_global']);
   if (!auth.authorized) {

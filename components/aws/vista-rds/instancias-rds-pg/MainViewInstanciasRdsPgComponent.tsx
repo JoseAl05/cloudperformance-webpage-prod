@@ -30,8 +30,7 @@ export const MainViewInstanciasRdsPgComponent = () => {
                     instancesService='rds-pg'
                     tagsFilter
                     serviceType="rds"
-                    collection='aws_rds_postgresql'
-                    tagColumnName='TagList'
+                    resourceType='rds_postgresql'
                 />
             </div>
         </div>

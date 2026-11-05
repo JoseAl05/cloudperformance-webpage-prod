@@ -32,8 +32,7 @@ export const MainViewUnusedEc2Component = () => {
           instancesService="unused-ec2"
           isInstanceMultiSelect
           tagsFilter
-          collection='aws_ec2_instances'
-          tagColumnName='Tags'
+          resourceType='ec2'
         />
       </div>
     </div>

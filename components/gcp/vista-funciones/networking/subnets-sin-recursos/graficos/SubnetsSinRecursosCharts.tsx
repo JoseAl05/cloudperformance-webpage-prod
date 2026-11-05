@@ -30,17 +30,15 @@ export const SubnetsSinRecursosCharts = ({ data, porRegion, porPurpose }: Subnet
     const regionChartRef = useRef<HTMLDivElement>(null);
     const purposeChartRef = useRef<HTMLDivElement>(null);
 
-    // Gráfico 1: Top regiones con IPs desperdiciadas (barras horizontales)
     const regionData = useMemo(() => {
-        // Ordenar regiones por cantidad y tomar top 10
         const sortedRegions = Object.entries(porRegion)
             .sort(([,a], [,b]) => b - a)
             .slice(0, 10);
         
         const regions = sortedRegions.map(([region]) => region);
-        const ipsWasted = sortedRegions.map(([,count]) => count * 4096); // Cada subnet /20 = 4096 IPs
+        const ipsWasted = sortedRegions.map(([,count]) => count * 4096);
         
-        return { regions: regions.reverse(), ipsWasted: ipsWasted.reverse() }; // Reverso para que el mayor esté arriba
+        return { regions: regions.reverse(), ipsWasted: ipsWasted.reverse() };
     }, [porRegion]);
 
     const regionOption = useMemo(() => {
@@ -49,7 +47,6 @@ export const SubnetsSinRecursosCharts = ({ data, porRegion, porPurpose }: Subnet
             unitLabel: 'IPs',
             useUTC: false,
             showToolbox: false,
-            //showDataZoom: false,
             metricType: 'count',
         });
 
@@ -70,9 +67,6 @@ export const SubnetsSinRecursosCharts = ({ data, porRegion, porPurpose }: Subnet
                 }
             ],
             extraOption: {
-                // toolbox: {
-                //     show: false  // ← AGREGAR esta línea al inicio
-                // },                
                 grid: { 
                     left: 140, 
                     right: 40, 
@@ -107,7 +101,6 @@ export const SubnetsSinRecursosCharts = ({ data, porRegion, porPurpose }: Subnet
         return deepMerge(base, barChart);
     }, [regionData]);
 
-    // Gráfico 2: Distribución por Purpose (gráfico de dona)
     const purposeData = useMemo(() => {
         return Object.entries(porPurpose).map(([purpose, count]) => ({
             name: purpose === 'PRIVATE' ? 'VMs y Recursos' : 'Balanceadores',
@@ -158,7 +151,7 @@ export const SubnetsSinRecursosCharts = ({ data, porRegion, porPurpose }: Subnet
                     name: 'Purpose',
                     type: 'pie',
                     radius: ['30%', '70%'],
-                    center: ['50%', '55%'], //bajar grafico 55%
+                    center: ['50%', '55%'],
                     data: purposeData,
                     itemStyle: {
                         borderRadius: 4,
@@ -190,9 +183,9 @@ export const SubnetsSinRecursosCharts = ({ data, porRegion, porPurpose }: Subnet
                     }
                 }
             ],
-            dataZoom: undefined,  // ← quita el zoom
-            xAxis: undefined,     // ← quita el zoom
-            yAxis: undefined,     // ← quita el zoom
+            dataZoom: undefined,
+            xAxis: undefined,
+            yAxis: undefined,
         };
 
         return deepMerge(base, pieChart);

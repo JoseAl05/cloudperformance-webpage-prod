@@ -8,21 +8,10 @@ import { DataTableGrouping } from '@/components/data-table/data-table-grouping';
 import { ColumnDef } from '@tanstack/react-table';
 import { Trash2, Eye } from 'lucide-react';
 
-interface LoadBalancer {
-    name: string;
-    region: string;
-    loadBalancingScheme: string;
-    IPAddress: string;
-    IPProtocol: string;
-    clasificacion_trafico: string;
-    requests_totales: number;
-    cost_in_usd: number;
-    ahorro_potencial_usd: number;
-    sync_time: { $date: string };
-}
+import type { ConsumptionResource } from '@/interfaces/consumption';
 
 interface LoadBalancersTableProps {
-    data: LoadBalancer[];
+    data: ConsumptionResource[];
     dateFrom: Date;
     dateTo: Date;
 }
@@ -30,17 +19,17 @@ interface LoadBalancersTableProps {
 export const LoadBalancersTable = ({ data, dateFrom, dateTo }: LoadBalancersTableProps) => {
     const flattenedData = useMemo(() => {
         return data.map(lb => ({
-            sync_time: new Date(lb.sync_time.$date).toISOString(),
-            sync_time_formatted: new Date(lb.sync_time.$date).toLocaleDateString('es-ES'),
-            name: lb.name,
-            region: lb.region,
-            loadBalancingScheme: lb.loadBalancingScheme,
-            IPAddress: lb.IPAddress,
-            IPProtocol: lb.IPProtocol,
-            clasificacion_trafico: lb.clasificacion_trafico,
-            requests_totales: lb.requests_totales,
-            cost_in_usd: lb.cost_in_usd,
-            ahorro_potencial_usd: lb.ahorro_potencial_usd
+            sync_time: lb.sync_time ?? '',
+            sync_time_formatted: lb.sync_time ? new Date(lb.sync_time).toLocaleDateString('es-ES') : '—',
+            name: lb.resource_name,
+            region: lb.region ?? '',
+            loadBalancingScheme: lb.resource_type ?? '',
+            IPAddress: String(lb.details.IPAddress ?? ''),
+            IPProtocol: String(lb.details.IPProtocol ?? ''),
+            clasificacion_trafico: lb.status ?? '',
+            requests_totales: lb.metrics.requests_totales ?? 0,
+            cost_in_usd: lb.cost ?? 0,
+            ahorro_potencial_usd: Number(lb.details.ahorro_potencial_usd ?? 0)
         }));
     }, [data]);
 

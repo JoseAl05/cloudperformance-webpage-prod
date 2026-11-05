@@ -1,5 +1,6 @@
 'use client';
 
+import { fetcher } from '@/lib/fetcher';
 import { Dispatch, SetStateAction, useState } from 'react';
 import useSWR from 'swr';
 import { Check, ChevronsUpDown } from 'lucide-react';
@@ -18,10 +19,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-
-const fetcher = (url: string) =>
-    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
-        .then(r => r.json());
 
 interface EC2MetricFilterProps {
   selectedMetric: string;

@@ -1,4 +1,5 @@
 'use client'
+import { fetcher } from '@/lib/fetcher';
 import useSWR from 'swr'
 import { LoaderComponent } from '@/components/general_aws/LoaderComponent';
 import { MessageCard } from '@/components/aws/cards/MessageCards'
@@ -18,12 +19,6 @@ interface AdvisorViewComponentProps {
     endDate: Date
     region: string
 }
-
-
-const fetcher = (url: string) =>
-    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
-        .then(r => r.json());
-
 
 const isNonEmptyArray = <T,>(v: unknown): v is T[] => Array.isArray(v) && v.length > 0
 

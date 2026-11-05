@@ -23,7 +23,6 @@ export const TopMoversModal = ({ isOpen, onClose, data, isLoading, gastoTotal }:
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm animate-in fade-in duration-200">
             <div className="bg-white rounded-2xl shadow-xl w-full max-w-3xl border border-gray-200 overflow-hidden m-4 animate-in zoom-in-95 duration-200">
-                {/* Header */}
                 <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-slate-50">
                     <div className="flex items-center gap-3">
                         <div className="p-2 bg-red-100 text-red-600 rounded-lg">
@@ -39,7 +38,6 @@ export const TopMoversModal = ({ isOpen, onClose, data, isLoading, gastoTotal }:
                     </button>
                 </div>
 
-                {/* Body */}
                 <div className="p-6">
                     {isLoading ? (
                         <div className="flex flex-col items-center justify-center py-12 gap-3 text-gray-500">

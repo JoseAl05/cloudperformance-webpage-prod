@@ -1,5 +1,6 @@
 "use client";
 
+import { fetcher } from '@/lib/fetcher';
 import { LoaderComponent } from "@/components/general_presupuesto/LoaderComponent";
 import { Card, CardContent } from "@/components/ui/card";
 import { ChartBar, Search, CircleDollarSignIcon, Tickets, ChevronDown, ChevronUp } from "lucide-react";
@@ -47,10 +48,6 @@ interface FacturacionAnual {
   count: number;
 }
 
-const fetcher = (url: string) =>
-  fetch(url, { method: "GET", headers: { "Content-Type": "application/json" } })
-    .then((r) => r.json());
-
 export const CostosVsPresupuestoComponentAWS = ({ anio, cloud, centroDeCosto }: CentroDeCostoComponentProps) => {
 
   const [facturacionPorCentro, setFacturacionPorCentro] = useState<Record<number, FacturacionAnual[]>>({});
@@ -62,9 +59,6 @@ export const CostosVsPresupuestoComponentAWS = ({ anio, cloud, centroDeCosto }: 
     setExpandedCentros(prev => ({ ...prev, [id]: !prev[id] }));
   };
 
-  // =========================================================================
-  // 1. OBTENER PRESUPUESTOS (SWR)
-  // =========================================================================
   const urlPresupuesto = cloudType && anio
     ? `/api/presupuesto/bridge/${cloudType}/presupuesto/summary/anual?anio=${anio}&centroCostoName=${centroDeCosto || 'Todos'}`
     : null;
@@ -74,9 +68,6 @@ export const CostosVsPresupuestoComponentAWS = ({ anio, cloud, centroDeCosto }: 
     fetcher
   );
 
-  // =========================================================================
-  // 2. OBTENER FACTURACIÓN GLOBAL (SWR)
-  // =========================================================================
   const urlFacturacionGlobal = cloudType && anio
     ? `/api/presupuesto/bridge/${cloudType}/presupuesto/facturacion/facturacion-anual?year=${anio}`
     : null;
@@ -90,9 +81,6 @@ export const CostosVsPresupuestoComponentAWS = ({ anio, cloud, centroDeCosto }: 
     ? dataFacturacion
     : ((dataFacturacion as unknown as { data?: FacturacionAnual[] })?.data) || [];
 
-  // =========================================================================
-  // 3. OBTENER FACTURACIÓN RELACIONAL (useEffect)
-  // =========================================================================
   useEffect(() => {
     if (!dataPresupuesto) return;
 

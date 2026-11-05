@@ -5,34 +5,20 @@ import { useSearchParams } from 'next/navigation';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
+import { CopyButton } from '@/components/shared/CopyButton';
 import { useState } from 'react';
-import { AlertCircle, CheckCircle2, Copy, Eye, Globe, HardDrive, Network, X } from 'lucide-react';
+import { AlertCircle, CheckCircle2, Eye, Globe, HardDrive, Network, X } from 'lucide-react';
 import { UnusedVmss, UnusedVmssDiskDetails, UnusedVmssDisksData, UnusedVmssInterfaceData, UnusedVmssInterfaceDetails } from '@/interfaces/vista-unused-resources/unusedVmssInterface';
+import { readFilterParam } from '@/lib/filters';
 
 const DateParams = () => {
     const searchParams = useSearchParams();
 
-    const startDateParam = searchParams.get('startDate');
-    const endDateParam = searchParams.get('endDate');
+    const startDateParam = readFilterParam(searchParams, 'dateFrom');
+    const endDateParam = readFilterParam(searchParams, 'dateTo');
 
     return { startDateParam: startDateParam, endDateParam: endDateParam }
 }
-
-const CopyBtn = ({ text, label = 'Copiado' }: { text: string; label?: string }) => (
-    <Button
-        variant="ghost"
-        size="sm"
-        className="h-7 px-2"
-        onClick={() => {
-            navigator.clipboard.writeText(text)
-            toast.success(label)
-        }}
-        aria-label="Copiar"
-        title="Copiar"
-    >
-        <Copy className="h-3.5 w-3.5" />
-    </Button>
-)
 
 const ShortenedId = ({ id }: { id: string }) => {
     const parts = id.split("/")
@@ -45,7 +31,7 @@ const ShortenedId = ({ id }: { id: string }) => {
                 <div className="text-sm font-medium truncate">{resourceName}</div>
                 <div className="text-xs text-muted-foreground">{resourceType}</div>
             </div>
-            <CopyBtn text={id} label="ID copiado" />
+            <CopyButton text={id} label="ID copiado" />
         </div>
     )
 }
@@ -148,7 +134,7 @@ const DisksCell = ({ details }: { details?: UnusedVmssDiskDetails[] }) => {
                                                             <div className="text-xs text-muted-foreground mb-1">Resource ID</div>
                                                             <code className="block text-xs font-mono text-muted-foreground break-all">{d.id}</code>
                                                         </div>
-                                                        <CopyBtn text={d.id} label="ID copiado" />
+                                                        <CopyButton text={d.id} label="ID copiado" />
                                                     </div>
                                                 </div>
                                             )}
@@ -315,7 +301,7 @@ const InterfacesCell = ({ details }: { details?: UnusedVmssInterfaceDetails }) =
                                                                             <code className="flex-1 px-2 py-1 rounded bg-background font-mono text-2xs truncate">
                                                                                 {ip.subnet.id.split("/").slice(-1)[0]}
                                                                             </code>
-                                                                            <CopyBtn text={ip.subnet.id} label="Subred copiada" />
+                                                                            <CopyButton text={ip.subnet.id} label="Subred copiada" />
                                                                         </div>
                                                                     </div>
                                                                 )}
@@ -440,7 +426,6 @@ export const UnusedVmssColumns: DynamicColumn<UnusedVmss>[] = [
         ),
         size: 170,
     },
-    // --- NUEVO: columnas de métricas FinOps ---
     {
         id: "cpu_promedio",
         header: "CPU Prom %",

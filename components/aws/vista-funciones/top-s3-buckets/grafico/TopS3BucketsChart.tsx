@@ -60,11 +60,6 @@ export const TopS3BucketsChart = ({ data, metric, title }: TopS3BucketsChartProp
     const labelWidth = Math.max(120, gridLeft - 40);
 
     const formatAxisLabel = (val: string) => {
-      // const total = totalsByName.get(val) ?? 0
-      // const metaText = metric.includes('Bytes')
-      //   ? `{meta|${(total / 1073741824).toFixed(2)} GB}`
-      //   : `{meta|${total.toLocaleString()} Objetos}`
-      // return `{name|${val}}\n${metaText}`
       return `{name|${val}}`
     }
 
@@ -110,7 +105,7 @@ export const TopS3BucketsChart = ({ data, metric, title }: TopS3BucketsChartProp
             interval: 0,
             align: 'right',
             width: labelWidth,
-            overflow: 'break', // parte en varias líneas si no cabe
+            overflow: 'break',
             lineHeight: 16,
             margin: 12,
             rich: {

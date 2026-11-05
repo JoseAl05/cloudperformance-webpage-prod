@@ -1,19 +1,11 @@
 'use client'
 
+import { fetcher } from '@/lib/fetcher';
 import useSWR from 'swr'
 import { MetricPoint, ResourceMetrics } from '@/interfaces/vista-variacion-tendencia-uso-de-recursos/variacionTendenciaUsoDeRecursosViewInterface';
 import { DualSeriesChart } from '@/components/aws/vista-funciones/variacion-tendencia-uso-de-recursos/grafico/TrendLineChartv2'
 import { bytesToGB } from '@/lib/bytesToMbs'
 import { VariacionTendenciaUsoDeRecursosCardsComponent } from '@/components/aws/vista-funciones/variacion-tendencia-uso-de-recursos/info/VariacionTendenciaUsoDeRecursosCardsComponent'
-
-const fetcher = (url: string) =>
-  fetch(url, {
-    method: 'GET',
-    headers: {
-      Authorization: `Bearer ${process.env.NEXT_PUBLIC_API_TOKEN}`,
-      'Content-Type': 'application/json',
-    },
-  }).then(res => res.json())
 
 interface VariacionTendenciaUsoDeRecursosProps {
   startDate: Date

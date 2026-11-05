@@ -6,12 +6,7 @@ import { CloudAccount, Empresa, User } from '@/types/db';
 import bcrypt from 'bcryptjs';
 import { Filter } from 'mongodb';
 
-// =========================================================================
-// RUTA: GET /api/perfilamiento/users (Listado de Usuarios) 
-// =========================================================================
-
 export async function GET(req: NextRequest) {
-  // 1. Autorización: Permitir solo a admin_global y admin_empresa
   const auth = await authorizeRequest(req, ['admin_global', 'admin_empresa']);
   if (!auth.authorized) {
     return NextResponse.json(
@@ -22,10 +17,8 @@ export async function GET(req: NextRequest) {
 
   const userLoggedIn = auth.user;
 
-  // --- CORRECCIÓN: Tipar explícitamente el filtro de MongoDB ---
   let query: Filter<User> = {};
 
-  // 2. Aplicar Filtro de Empresa si el rol es admin_empresa
   if (userLoggedIn.role === 'admin_empresa') {
     query = { client: userLoggedIn.client };
   }
@@ -33,7 +26,6 @@ export async function GET(req: NextRequest) {
   try {
     const usersCollection = await getCollection<User>('Users');
 
-    // 3. Ejecutar la consulta con el filtro
     const users = await usersCollection
       .find(query)
       .project({ passwordHash: 0 })
@@ -51,10 +43,6 @@ export async function GET(req: NextRequest) {
   }
 }
 
-// =========================================================================
-// RUTA: POST /api/perfilamiento/users (Creación de Usuarios)
-// =========================================================================
-
 export async function POST(req: NextRequest) {
   const auth = await authorizeRequest(req, ['admin_global', 'admin_empresa']);
   if (!auth.authorized) {
@@ -64,10 +52,8 @@ export async function POST(req: NextRequest) {
   const userCreating = auth.user;
   const body = await req.json();
 
-  // 1. Extraer datos
   const { email, password, username, client, role = 'usuario' } = body;
 
-  // Validación básica
   if (!email || !password || !client) {
     return NextResponse.json(
       { message: 'Faltan campos esenciales (email, password, client).' },
@@ -89,7 +75,6 @@ export async function POST(req: NextRequest) {
 
     const passwordHash = await bcrypt.hash(password, 12);
 
-    // 2. Buscar la empresa
     const empresa = await empresasCollection.findOne({ name: client });
 
     if (!empresa) {
@@ -101,7 +86,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 3. Verificación de Límites
     if (userCreating.role === 'admin_empresa') {
       if (client !== userCreating.client) {
         return NextResponse.json(
@@ -114,7 +98,6 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // 4. Construir el nuevo usuario
     const newUser: Omit<User, '_id'> = {
       email,
       username: username || email,
@@ -144,10 +127,6 @@ export async function POST(req: NextRequest) {
       planName: empresa.planName || null,
     };
 
-    // 5. HERENCIA DESDE LA EMPRESA
-    //    El usuario es un espejo de su empresa: en multi-tenant hereda
-    //    `<cloud>_accounts` con los MISMOS IDs `clp-<id>`; en single-tenant
-    //    no se crea el array y se hereda `user_db_<cloud>`.
     const inheritedFields = newUser as unknown as Record<string, unknown>;
 
     for (const cloud of CLOUD_PROVIDERS) {
@@ -172,9 +151,6 @@ export async function POST(req: NextRequest) {
       }
 
       if (isMultiTenant) {
-        // Empresa marcada multi-tenant pero sin cuentas: dato heredado
-        // inconsistente. Se degrada a single-tenant en vez de copiar un
-        // array vacío que dejaría al usuario sin conexión utilizable.
         console.warn(
           `Empresa '${client}' es multi-tenant en ${cloud} pero no tiene ${cloud}_accounts.`
         );
@@ -183,7 +159,6 @@ export async function POST(req: NextRequest) {
       inheritedFields[`user_db_${cloud}`] = masterDb;
     }
 
-    // 6. Insertar y Actualizar
     await usersCollection.insertOne(newUser);
 
     await empresasCollection.updateOne(

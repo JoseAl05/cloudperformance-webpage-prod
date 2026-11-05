@@ -39,7 +39,6 @@ export const DualSeriesChart = ({
   const processDataForSeries = (data: MetricPoint[]) => {
     if (!data || data.length === 0) return []
 
-    // Agrupar por timestamp
     const map = new Map<string, number>()
     data.forEach((item: MetricPoint) => {
       const key = item.metric_timestamp
@@ -47,7 +46,6 @@ export const DualSeriesChart = ({
       map.set(key, prev + toNumber(item.metric_value))
     })
 
-    // Convertir a array y ordenar
     return Array.from(map.entries())
       .map(([metric_timestamp, total]) => ({
         timestamp: metric_timestamp,
@@ -57,18 +55,15 @@ export const DualSeriesChart = ({
   }
 
   const normalizeTimestamps = (data: Array<{ timestamp: string, value: number }>) => {
-    // Normalizar timestamps para superponer (usar solo día/hora, ignorar mes/año)
     return data.map(item => {
       const date = new Date(item.timestamp)
 
-      // Para el displayTime, usar la fecha/hora original del timestamp (UTC)
       const utcDate = new Date(item.timestamp)
       const day = utcDate.getUTCDate().toString().padStart(2, '0')
       const month = (utcDate.getUTCMonth() + 1).toString().padStart(2, '0')
       const hours = utcDate.getUTCHours().toString().padStart(2, '0')
       const minutes = utcDate.getUTCMinutes().toString().padStart(2, '0')
 
-      // Para normalizar, usar UTC para mantener consistencia
       const normalizedDate = new Date(2024, 0, utcDate.getUTCDate(), utcDate.getUTCHours(), utcDate.getUTCMinutes())
 
       return {
@@ -131,13 +126,6 @@ export const DualSeriesChart = ({
             symbol: 'circle',
             symbolSize: 4,
             connectNulls: false,
-            // lineStyle: {
-            //   width: 2,
-            //   color: '#00a53d'
-            // },
-            // itemStyle: {
-            //   color: '#22c55e'
-            // }
           }
         },
         {
@@ -149,14 +137,6 @@ export const DualSeriesChart = ({
             symbol: 'diamond',
             symbolSize: 4,
             connectNulls: false,
-            // lineStyle: {
-            //   width: 2,
-            //   color: '#00028b',
-            //   type: 'dashed'
-            // },
-            // itemStyle: {
-            //   color: '#6366f1'
-            // }
           }
         }
       ],

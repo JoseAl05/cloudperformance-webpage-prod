@@ -1,4 +1,5 @@
 'use client'
+import { fetcher } from '@/lib/fetcher';
 import { Dispatch, SetStateAction, useEffect, useState } from 'react'
 import { Check, ChevronsUpDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -14,11 +15,6 @@ interface EventsTypeFilterComponentProps {
     region: string,
     isEventTypeMultiselect: boolean
 }
-
-const fetcher = (url: string) =>
-    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
-        .then(r => r.json());
-
 
 export const EventsTypeFilterComponent = ({
     eventType,
@@ -97,8 +93,8 @@ export const EventsTypeFilterComponent = ({
                         {!noEventsTypes && shouldFetch && (
                             <CommandGroup className='max-h-[250px] overflow-y-auto'>
                                 {list.map((i: string) => (
-                                    <CommandItem key={i} value={i} onSelect={() => { setEbs(i); setOpen(false); }}>
-                                        <Check className={cn('mr-2 h-4 w-4', ebs === i ? 'opacity-100' : 'opacity-0')} />
+                                    <CommandItem key={i} value={i} onSelect={() => { setEventType(i); setOpen(false); }}>
+                                        <Check className={cn('mr-2 h-4 w-4', eventType === i ? 'opacity-100' : 'opacity-0')} />
                                         {i}
                                     </CommandItem>
                                 ))}

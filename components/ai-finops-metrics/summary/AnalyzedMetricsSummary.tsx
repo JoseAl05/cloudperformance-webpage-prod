@@ -155,8 +155,6 @@ export const AnalyzedMetricsSummary = ({ data }: AnalyzedMetricsSummaryProps) =>
     );
 };
 
-// --- Sub-componentes ---
-
 const LEGEND_SECTIONS: {
     icon: React.ReactNode;
     title: string;
@@ -357,10 +355,8 @@ const ActionItemRow = ({ actionItem, index }: { actionItem: AiFinopsMetricsTopAc
                 </p>
             </div>
 
-            {/* Contenedor de badges */}
             <div className="pl-9 flex flex-wrap gap-2">
 
-                {/* 1. Target Professional */}
                 <AttributeBadge
                     icon={<Target className="h-3 w-3 shrink-0" />}
                     title="Rol"
@@ -368,21 +364,16 @@ const ActionItemRow = ({ actionItem, index }: { actionItem: AiFinopsMetricsTopAc
                     colorClass="bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700"
                 />
 
-                {/* 2. Risk Level */}
                 <RiskBadge level={actionItem.risk_level} />
 
-                {/* 3. Operational Impact */}
                 <ImpactBadge impact={actionItem.operational_impact} />
 
-                {/* 4. Reversibility */}
                 <ReversibilityBadge reversibility={actionItem.reversibility} />
 
             </div>
         </div>
     );
 };
-
-// --- Helpers para Badges (Etiquetas) ---
 
 interface AttributeBadgeProps {
     icon: React.ReactNode;
@@ -402,7 +393,7 @@ const AttributeBadge = ({ icon, title, label, colorClass }: AttributeBadgeProps)
 );
 
 const RiskBadge = ({ level }: { level: RiskLevel }) => {
-    let color = "bg-gray-100 text-gray-800 border-gray-200"; // Default
+    let color = "bg-gray-100 text-gray-800 border-gray-200";
 
     if (level.includes('LOW')) color = "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-800";
     else if (level.includes('MEDIUM')) color = "bg-yellow-50 text-yellow-700 border-yellow-200 dark:bg-yellow-950/30 dark:text-yellow-400 dark:border-yellow-800";

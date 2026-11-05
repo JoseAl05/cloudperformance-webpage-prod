@@ -57,10 +57,6 @@ export const TrendLineChart = ({
       .map(([sync_time, total]) => ({ sync_time, total }))
       .sort((a, b) => new Date(a.sync_time).getTime() - new Date(b.sync_time).getTime())
 
-    // const times = trendData.map(item => {
-    //   const d = new Date(item.sync_time)
-    //   return `${d.getUTCDate()}/${d.getUTCMonth() + 1}/${d.getUTCFullYear()}`
-    // })
     const times = trendData.map(item => item.sync_time);
 
     const dateCount = times.length;
@@ -121,7 +117,6 @@ export const TrendLineChart = ({
             const list = (Array.isArray(params) ? params : [params]).filter(Boolean) as unknown[];
             const first = (list[0] ?? {}) as Record<string, unknown>;
 
-            // Tomamos el valor crudo del eje (tu timestamp ISO)
             const rawAxis =
               typeof first.axisValue === 'string'
                 ? first.axisValue
@@ -129,23 +124,19 @@ export const TrendLineChart = ({
                   ? first.name
                   : '';
 
-            // Encabezado con la fecha formateada
             let header = rawAxis;
             try {
               const d = parseISO(rawAxis);
-              header = fmtFull.format(d); // p.ej. "1 oct"
+              header = fmtFull.format(d);
             } catch {
-              // si falla el parseo, mostramos tal cual
             }
 
-            // Filas por serie (soporta 1+ series)
             const rows = list
               .map((p) => {
                 const r = p as Record<string, unknown>;
                 const marker = typeof r.marker === 'string' ? r.marker : '';
                 const seriesName = typeof r.seriesName === 'string' ? r.seriesName : '';
 
-                // value puede ser number|string|[x,y]
                 let v: unknown = r.value;
                 if (Array.isArray(v)) {
                   const arr = v as unknown[];
@@ -190,7 +181,6 @@ export const TrendLineChart = ({
           axisTick: { show: false }
         },
         yAxis: { type: 'value', name: yAxisLabel },
-        // grid: { left: 150, right: 50, top: 60, bottom: 60 },
       },
     });
 

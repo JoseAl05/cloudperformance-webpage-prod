@@ -31,8 +31,7 @@ export const MainViewInstanciasRdsSQLServerComponent = () => {
                     instancesService='rds-sqlserver'
                     tagsFilter
                     serviceType="rds"
-                    collection='aws_rds_sqlserver'
-                    tagColumnName='TagList'
+                    resourceType='rds_sqlserver'
                 />
             </div>
         </div>

@@ -26,6 +26,7 @@ import { Activity, CalendarDays, CheckCircle2, History, Network, Server, XCircle
 import { formatMetric } from '@/lib/metricUtils';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
+import { readFilterParam } from '@/lib/filters';
 
 interface UnusedElbV2InsightModalProps {
     elbData: UnusedElbV2Details;
@@ -36,7 +37,6 @@ interface UnusedElbV2InsightModalProps {
     onClose: () => void;
 }
 
-// Componente para filas de progreso con tag nativo <progress>
 const MetricProgressRow = ({ label, value, globalAvg, unit }: { label: string, value: number, globalAvg: number, unit?: string }) => {
     const isAboveAvg = value > globalAvg;
     const percentageText = globalAvg > 0 ? ((value / globalAvg) * 100).toFixed(1) : '0.0';
@@ -59,8 +59,6 @@ const MetricProgressRow = ({ label, value, globalAvg, unit }: { label: string, v
 
             <progress
                 value={value}
-                // Ajuste de escala: si el valor local es mayor al promedio, el máximo de la barra es el valor local (para que se llene al 100%)
-                // Si es menor, el máximo es el promedio (para mostrar qué fracción del promedio representa)
                 max={globalAvg > 0 ? (value > globalAvg ? value : globalAvg) : 1}
                 title={`Relación: ${percentageText}% del promedio`}
                 className={`w-full h-2.5 rounded-full  appearance-none bg-secondary border border-secondary [&::-webkit-progress-bar]:bg-secondary [&::-webkit-progress-bar]:rounded-full ${progressColorClass}`}
@@ -80,9 +78,9 @@ export const UnusedElbV2InsightModal = ({
 
     const searchParams = useSearchParams();
 
-    const startDateParam = searchParams.get('startDate');
-    const endDateParam = searchParams.get('endDate');
-    const regionParam = searchParams.get('region');
+    const startDateParam = readFilterParam(searchParams, 'dateFrom');
+    const endDateParam = readFilterParam(searchParams, 'dateTo');
+    const regionParam = readFilterParam(searchParams, 'regions');
 
     const latestHistory = elbData.history && elbData.history.length > 0 ? elbData.history[0] : null;
     const resources = asociatedResources && asociatedResources.length > 0 ? asociatedResources[0] : null;
@@ -138,11 +136,9 @@ export const UnusedElbV2InsightModal = ({
 
                             <ScrollArea className="flex-1">
                                 <div className="p-6 max-w-6xl mx-auto">
-                                    {/* TAB 1: RESUMEN ACTUAL */}
                                     <TabsContent value="current" className="mt-0 space-y-8 animate-in fade-in-50 duration-300">
 
                                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                                            {/* Columna Izquierda: Configuración (Sin cambios) */}
                                             <div className="space-y-4">
                                                 <h3 className="font-semibold text-base flex items-center gap-2 text-foreground/90">
                                                     <Network className="h-4 w-4 text-blue-500" /> Configuración Actual
@@ -176,7 +172,6 @@ export const UnusedElbV2InsightModal = ({
                                                 </div>
                                             </div>
 
-                                            {/* Columna Derecha: Métricas con Barras */}
                                             <div className="space-y-4">
                                                 <h3 className="font-semibold text-base flex items-center gap-2 text-foreground/90">
                                                     <BarChart3 className="h-4 w-4 text-orange-500" /> Rendimiento vs Promedio Global
@@ -203,7 +198,6 @@ export const UnusedElbV2InsightModal = ({
                                                             <MetricProgressRow
                                                                 label="New Flows"
                                                                 value={latestHistory?.metrics_summary?.new_flows_avg || 0}
-                                                                // CORRECCIÓN: avg_new_flows
                                                                 globalAvg={globalMetrics?.avg_new_flows || 0}
                                                                 unit="Flows"
                                                             />
@@ -227,8 +221,6 @@ export const UnusedElbV2InsightModal = ({
                                             </div>
                                         </div>
 
-                                        {/* (Resto del contenido del modal igual que antes) */}
-                                        {/* Target Groups, Tablas Históricas... */}
                                         <div className="space-y-4 pt-4">
                                             <h3 className="font-semibold text-base flex items-center gap-2">
                                                 <Server className="h-4 w-4 text-purple-500" /> Target Groups (Configuración Reciente)
@@ -269,9 +261,7 @@ export const UnusedElbV2InsightModal = ({
                                         </div>
                                     </TabsContent>
 
-                                    {/* TABS DE HISTORIAL (Mantienen su lógica interna, solo usan el formatMetric ya añadido) */}
                                     <TabsContent value="metrics_history" className="mt-0">
-                                        {/* ... Código de tabla histórica ... */}
                                         <div className="space-y-4">
                                             <div className="flex items-center justify-between">
                                                 <h3 className="font-semibold flex items-center gap-2">
@@ -324,8 +314,6 @@ export const UnusedElbV2InsightModal = ({
                                     </TabsContent>
 
                                     <TabsContent value="resources_history" className="mt-0 space-y-8">
-                                        {/* ... Código de tablas de recursos ... (Sin cambios necesarios) */}
-                                        {/* Historial de Salud */}
                                         <div className="space-y-4">
                                             <div className="flex items-center justify-between">
                                                 <h3 className="font-semibold flex items-center gap-2">
@@ -360,7 +348,7 @@ export const UnusedElbV2InsightModal = ({
                                                                         </TableCell>
                                                                         <TableCell className="font-mono text-xs font-medium">
                                                                             <Link
-                                                                                href={{ pathname: '/aws/recursos/instancias-ec2', query: { startDate: startDateParam, endDate: endDateParam, instance: item.target_id, region: regionParam } }}
+                                                                                href={{ pathname: '/cloud-aws/recursos/instancias-ec2', query: { startDate: startDateParam, endDate: endDateParam, instance: item.target_id, region: regionParam } }}
                                                                                 className='text-blue-500 hover:text-blue-500/80'
                                                                                 rel="noopener noreferrer"
                                                                                 target="_blank"
@@ -389,7 +377,6 @@ export const UnusedElbV2InsightModal = ({
                                             </div>
                                         </div>
 
-                                        {/* Historial de Configuración */}
                                         <div className="space-y-4">
                                             <h3 className="font-semibold flex items-center gap-2">
                                                 <CalendarDays className="h-4 w-4 text-purple-500" /> Historial de Cambios (TGs)

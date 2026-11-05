@@ -4,13 +4,13 @@ import { useMemo, useRef } from 'react';
 import { createChartOption, makeBaseOptions, useECharts, deepMerge } from '@/lib/echartsGlobalConfig';
 import { useTheme } from 'next-themes';
 import { Loader2 } from 'lucide-react';
-import { CloudBillingItem } from '@/lib/CloudBillingItem'; 
+import type { BillingPoint } from '@/interfaces/billing';
 import { CloudProvider } from '@/hooks/useMultiTenantSelection';
 
 interface MultiCloudServiceBarProps {
-    azureData: CloudBillingItem[];
-    awsData: CloudBillingItem[];
-    gcpData: CloudBillingItem[];
+    azureData: BillingPoint[];
+    awsData: BillingPoint[];
+    gcpData: BillingPoint[];
     selectedClouds: CloudProvider[] | string[];
     isLoading?: boolean;
 }
@@ -29,28 +29,14 @@ export const MultiCloudServiceBarChartComponent = ({
     const serviceData = useMemo(() => {
         if (isLoading) return { names: [], azure: [], aws: [], gcp: [] };
 
-        const topN = 100; 
+        const topN = 100;
         const serviceMap = new Map<string, { azure: number, aws: number, gcp: number, total: number }>();
 
-        const getServiceName = (item: CloudBillingItem, provider: 'azure' | 'aws' | 'gcp') => {
-            if (provider === 'azure') {
-                return item.meter_category || item.product || item.service_name || 'Otros AZURE';
-            }
-            if (provider === 'aws') {
-                return item.SERVICE || item.service || 'Otros AWS';
-            }
-            if (provider === 'gcp') {
-                return item.service || item.service_description || 'Otros GCP';
-            }
-            return `Otros ${provider.toUpperCase()}`;
-        };
+        const processData = (data: BillingPoint[], provider: 'azure' | 'aws' | 'gcp') => {
+            data.forEach(point => {
+                const name = point.service || `Otros ${provider.toUpperCase()}`;
+                const cost = point.cost;
 
-        const processData = (data: CloudBillingItem[], provider: 'azure' | 'aws' | 'gcp', costField: keyof CloudBillingItem) => {
-            if (!Array.isArray(data)) return;
-            data.forEach(item => {
-                const name = getServiceName(item, provider);
-                const cost = Number(item[costField]) || 0;
-                
                 if (cost > 0) {
                     const entry = serviceMap.get(name) || { azure: 0, aws: 0, gcp: 0, total: 0 };
                     entry[provider] += cost;
@@ -60,9 +46,9 @@ export const MultiCloudServiceBarChartComponent = ({
             });
         };
 
-        if (selectedClouds.includes('azure')) processData(azureData, 'azure', 'cost_in_usd');
-        if (selectedClouds.includes('aws')) processData(awsData, 'aws', 'unblendedcost');
-        if (selectedClouds.includes('gcp')) processData(gcpData, 'gcp', 'cost_net_usd');
+        if (selectedClouds.includes('azure')) processData(azureData, 'azure');
+        if (selectedClouds.includes('aws')) processData(awsData, 'aws');
+        if (selectedClouds.includes('gcp')) processData(gcpData, 'gcp');
 
         const sortedServices = Array.from(serviceMap.entries()).sort((a, b) => b[1].total - a[1].total);
 
@@ -109,7 +95,7 @@ export const MultiCloudServiceBarChartComponent = ({
                 extra: {
                     type: 'bar',
                     stack: 'total',
-                    barMaxWidth: 20, 
+                    barMaxWidth: 20,
                     itemStyle: { color: '#008ad7', borderRadius: [0, 2, 2, 0] },
                     emphasis: { focus: 'series' }
                 }
@@ -154,7 +140,7 @@ export const MultiCloudServiceBarChartComponent = ({
             legend: true,
             legendOption: {
                 data: legendData,
-                top: 0, 
+                top: 0,
             },
             tooltip: true,
             series: seriesConfig,
@@ -199,7 +185,7 @@ export const MultiCloudServiceBarChartComponent = ({
                     type: 'category',
                     data: serviceData.names,
                     axisLabel: {
-                        width: 200, 
+                        width: 200,
                         overflow: 'truncate',
                         color: isDark ? '#ccc' : '#444',
                         fontSize: 11,

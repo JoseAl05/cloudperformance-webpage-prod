@@ -42,7 +42,6 @@ export const AnomalyTopMoversModal = ({ isOpen, onClose, data, isLoading }: Anom
                     </button>
                 </div>
 
-                {/* Body */}
                 <div className="p-6 overflow-y-auto bg-white flex-grow">
                     {isLoading ? (
                         <div className="flex flex-col items-center justify-center py-16 gap-3 text-slate-500">

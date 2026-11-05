@@ -1,4 +1,3 @@
-// components/gcp/vista-facturacion/tendencia-facturacion/MainViewTendenciaFacturacionComponent.tsx
 import { FiltersComponent } from '@/components/general_gcp/filters/FiltersComponent'
 import { TendenciaFacturacionComponent } from '@/components/gcp/vista-facturacion/tendencia-facturacion/TendenciaFacturacionComponent'
 import { TrendingUp } from 'lucide-react'
@@ -31,8 +30,7 @@ export const MainViewTendenciaFacturacionComponent = () => {
                     serviceFilter
                     isServiceMultiSelect
                     tagsFilter
-                    tagCollection="gcp_billing_export_detailed"
-                    tagColumn="labels"
+                    tagResourceType="billing"
                     projectsFilter
                     regionFilter
                 />

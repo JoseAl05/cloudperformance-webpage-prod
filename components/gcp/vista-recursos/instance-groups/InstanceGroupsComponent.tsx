@@ -1,5 +1,6 @@
 'use client'
 
+import { fetcher } from '@/lib/fetcher';
 import { MessageCard } from '@/components/aws/cards/MessageCards';
 import { InstanceGroupChartComponent } from '@/components/gcp/vista-recursos/instance-groups/grafico/InstanceGroupChartComponent';
 import { InstanceGroupsInfoComponent } from '@/components/gcp/vista-recursos/instance-groups/info/InstanceGroupsInfoComponent';
@@ -16,10 +17,6 @@ interface InstanceGroupsComponentProps {
     endDate: Date
     resourceId: string
 }
-
-const fetcher = (url: string) =>
-    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
-        .then(r => r.json());
 
 const isNonEmptyArray = <T,>(v: unknown): v is T[] => Array.isArray(v) && v.length > 0
 
@@ -46,11 +43,6 @@ export const InstanceGroupsComponent = ({
         resourceId ? `/api/gcp/bridge/gcp/instance_groups/all_instances_instance_groups?date_from=${startDateFormatted}&date_to=${endDateFormatted}&instance_group=${resourceId}` : null,
         fetcher
     )
-
-    // const cEBilling = useSWR(
-    //     resourceId ? `/api/gcp/bridge/gcp/instancias_compute_engine/gcp-compute-instances_billing?date_from=${startDateFormatted}&date_to=${endDateFormatted}&instance=${resourceId}` : null,
-    //     fetcher
-    // )
 
     const anyLoading =
         iGInfo.isLoading ||

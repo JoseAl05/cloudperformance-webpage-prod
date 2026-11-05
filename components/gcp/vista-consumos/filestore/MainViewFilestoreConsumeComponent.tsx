@@ -29,6 +29,7 @@ export const MainViewFilestoreConsumeComponent = () => {
 
             <div className="w-full min-w-0">
                 <FiltersComponent
+                    cloud="gcp"
                     Component={FilestoreConsumeComponent}
                     dateFilter
                     projectsFilter
@@ -38,8 +39,7 @@ export const MainViewFilestoreConsumeComponent = () => {
                     isResourceMultiSelect
                     resourceService='filestore'
                     tagsFilter
-                    tagCollection="gcp_filestore_instances"
-                    tagColumn="labels"
+                    tagResourceType="filestore_instances"
                     localService="Cloud Filestore"
                 />
             </div>

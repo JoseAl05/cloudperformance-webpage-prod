@@ -74,17 +74,17 @@ export const RecommenderCategoriesFilterComponent = ({
                     <CommandList>
                         <CommandEmpty>No se encontró categoría.</CommandEmpty>
                         <CommandGroup className="max-h-[250px] overflow-y-auto">
-                            {gcp_recommender_categories.map((category) => (
+                            {gcp_recommender_categories.map((option) => (
                                 <CommandItem
-                                    key={category.value}
-                                    value={category.value}
+                                    key={option.value}
+                                    value={option.value}
                                     onSelect={(currentValue) => {
                                         setCategory(currentValue);
                                         setOpen(false);
                                     }}
                                 >
-                                    <Check className={cn('mr-2 h-4 w-4', category === category.value ? 'opacity-100' : 'opacity-0')} />
-                                    {category.label}
+                                    <Check className={cn('mr-2 h-4 w-4', category === option.value ? 'opacity-100' : 'opacity-0')} />
+                                    {option.label}
                                 </CommandItem>
                             ))}
                         </CommandGroup>

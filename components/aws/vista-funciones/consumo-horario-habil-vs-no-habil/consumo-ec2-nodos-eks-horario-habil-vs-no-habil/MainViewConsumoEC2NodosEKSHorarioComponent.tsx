@@ -5,7 +5,6 @@ import { Computer } from 'lucide-react'
 export const ViewConsumoEC2NodesEKSHorario = () => {
   return (
     <div className='w-full min-w-2 space-y-9'>
-      {/* Header */}
       <div className='mb-8'>
         <div className='flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4'>
           <div>
@@ -26,7 +25,6 @@ export const ViewConsumoEC2NodesEKSHorario = () => {
         </div>
       </div>
 
-      {/* Filtros + gráfico */}
       <FiltersComponent
         Component={ConsumoEC2NodosEKSHorarioComponent}
         dateFilter
@@ -36,8 +34,7 @@ export const ViewConsumoEC2NodesEKSHorario = () => {
         instancesService='eks'
         isInstanceMultiSelect
         tagsFilter
-        tagColumnName='tags'
-        collection='aws_eks_clusters_details'
+        resourceType='eks'
       />
     </div>
   )

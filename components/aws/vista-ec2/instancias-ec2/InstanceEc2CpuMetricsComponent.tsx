@@ -1,5 +1,6 @@
 'use client'
 
+import { fetcher } from '@/lib/fetcher';
 import useSWR from 'swr';
 import { Ec2ResourceViewUsageCpuComponent } from '@/components/aws/vista-ec2/instancias-ec2/graficos/Ec2ResourceViewUsageCpuComponent';
 import { Ec2ResourceViewUsageCreditsComponent } from '@/components/aws/vista-ec2/instancias-ec2/graficos/Ec2ResourceViewUsageCreditsComponent';
@@ -20,10 +21,6 @@ interface InstanceEc2CpuMetricsComponentProps {
     instance: string
 }
 
-const fetcher = (url: string) =>
-    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
-        .then(r => r.json());
-
 const isNonEmptyArray = <T,>(v: unknown): v is T[] => Array.isArray(v) && v.length > 0
 const isNullish = (v: unknown) => v === null || v === undefined
 
@@ -32,7 +29,7 @@ export const InstanceEc2CpuMetricsComponent = ({ startDate, endDate, instance }:
     const startDateFormatted = startDate.toISOString().replace('Z', '').slice(0, -4);
     const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : '';
 
-    const ec2Metrics = useSWR(
+    const ec2Metrics = useSWR<Ec2ResourceViewMetricsApiResponse>(
         instance ? `/api/aws/bridge/vm/instancias-ec2-metrics?date_from=${startDateFormatted}&date_to=${endDateFormatted}&resource=${instance}` : null,
         fetcher
     )
@@ -61,7 +58,7 @@ export const InstanceEc2CpuMetricsComponent = ({ startDate, endDate, instance }:
         !isNullish<Ec2ResourceViewMetricsApiResponse>(ec2Metrics.data) ? ec2Metrics.data : null;
 
     const infoData: Ec2InstanceSummary[] | null =
-        isNonEmptyArray<Ec2ConsumneViewInstance>(ec2Info.data) ? ec2Info.data : null;
+        isNonEmptyArray<Ec2InstanceSummary>(ec2Info.data) ? ec2Info.data : null;
 
     const eventsData: Ec2ResourceViewEventsResponse[] | null =
         isNonEmptyArray<Ec2ResourceViewEventsResponse>(ec2Events.data) ? ec2Events.data : null;

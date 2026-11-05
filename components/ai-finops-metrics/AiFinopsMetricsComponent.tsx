@@ -1,5 +1,6 @@
 'use client'
 
+import { fetcher } from '@/lib/fetcher';
 import { DetailedMetricsAnalysis } from '@/components/ai-finops-metrics/details/DetailedMetricsAnalysis';
 import { GeneralStatus } from '@/components/ai-finops-metrics/general-status/GeneralStatus';
 import { AnalyzedMetricsSummary } from '@/components/ai-finops-metrics/summary/AnalyzedMetricsSummary';
@@ -17,11 +18,6 @@ interface AiFinopsMetricsComponentProps {
     endDate: Date;
     cloud: string;
 }
-
-
-const fetcher = (url: string) =>
-    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
-        .then(r => r.json());
 
 const isNonEmptyArray = <T,>(v: unknown): v is T[] => Array.isArray(v) && v.length > 0
 
@@ -102,7 +98,6 @@ export const AiFinopsMetricsComponent = ({ startDate, endDate, cloud }: AiFinops
                 <DollarSign className="h-7 w-7 text-blue-500" />
                 <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Metricas FinOps</h1>
             </div>
-            {/* SECCIÓN 1: RESUMEN FINANCIERO */}
             <div className='flex flex-col gap-5'>
 
                 <section>
@@ -113,7 +108,6 @@ export const AiFinopsMetricsComponent = ({ startDate, endDate, cloud }: AiFinops
                     <FinancialSummary data={reportData} />
                 </section>
 
-                {/* SECCIÓN 2: RESUMEN TÉCNICO */}
                 <section>
                     <div className="flex items-center gap-2 mb-4">
                         <ToolCase className="h-6 w-6 text-blue-500" />
@@ -129,14 +123,6 @@ export const AiFinopsMetricsComponent = ({ startDate, endDate, cloud }: AiFinops
                     </div>
                     <GeneralStatus data={reportData} />
                 </section>
-
-                {/* <section>
-                    <div className="flex items-center gap-2 mb-4">
-                        <HardDrive className="h-6 w-6 text-blue-500" />
-                        <h2 className="text-2xl font-semibold tracking-tight">Recursos Inactivos</h2>
-                    </div>
-                    <IdleResources data={reportData} />
-                </section> */}
 
                 <section>
                     <div className="flex items-center gap-2 mb-4">

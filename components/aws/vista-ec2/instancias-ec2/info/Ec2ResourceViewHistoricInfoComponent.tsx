@@ -29,7 +29,6 @@ export const Ec2ResourceViewHistoricInfoComponent = ({ instances }: Ec2ResourceV
                 instances && (
                     instances.map((instance, index) => {
                         const uptimeInstance = getUptime(new Date(instance.LaunchTime));
-                        // EBS
                         const totalEbsVolumes = instance.Total_EBS_Volumes;
                         const totalAttachments = instance.Total_Attachments;
                         const instanceEbs = instance.BlockDeviceMappings_Ebs_VolumeId;
@@ -37,7 +36,6 @@ export const Ec2ResourceViewHistoricInfoComponent = ({ instances }: Ec2ResourceV
                         const instanceEbsStatus = instance.BlockDeviceMappings_Ebs_Status;
                         const instanceEbsSize = instance.BlockDeviceMappings_Ebs_Size;
                         const instanceEbsAttachTime = instance.BlockDeviceMappings_Ebs_AttachTime;
-                        // NETWORK
                         const totalInterfaces = instance.NetworkInterfaces_Attachment_AttachmentId
                         const publicIpCount = instance.NetworkInterfaces_Association_PublicIp;
                         const publicIp = instance.NetworkInterfaces_Association_PublicIp;

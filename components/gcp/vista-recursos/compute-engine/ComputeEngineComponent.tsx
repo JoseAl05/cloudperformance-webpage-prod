@@ -1,5 +1,6 @@
 'use client'
 
+import { fetcher } from '@/lib/fetcher';
 import { MessageCard } from '@/components/aws/cards/MessageCards';
 import { ComputeEngineChartComponent } from '@/components/gcp/vista-recursos/compute-engine/grafico/ComputeEngineChartComponent';
 import { ComputeEngineInfoComponent } from '@/components/gcp/vista-recursos/compute-engine/info/ComputeEngineInfoComponent';
@@ -16,10 +17,6 @@ interface ComputeEngineComponentProps {
     endDate: Date
     resourceId: string
 }
-
-const fetcher = (url: string) =>
-    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
-        .then(r => r.json());
 
 const isNonEmptyArray = <T,>(v: unknown): v is T[] => Array.isArray(v) && v.length > 0
 

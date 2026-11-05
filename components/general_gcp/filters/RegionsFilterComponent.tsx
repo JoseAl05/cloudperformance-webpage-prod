@@ -16,11 +16,9 @@ import {
     PopoverContent,
     PopoverTrigger,
 } from '@/components/ui/popover';
-// Importamos la lista que acabamos de crear
 import { gcp_regions } from '@/lib/gcp_regions';
 
 interface RegionsFilterComponentProps {
-    // Mantengo los nombres de props que usa tu padre (FiltersComponent)
     regions: string;
     setRegions: Dispatch<SetStateAction<string>>;
 }
@@ -31,7 +29,6 @@ export const RegionsFilterComponent = ({
 }: RegionsFilterComponentProps) => {
     const [open, setOpen] = useState(false);
 
-    // Auto-seleccionar "Todas" si viene vacío al inicio
     useEffect(() => {
         if (!regions) {
             setRegions('all_regions');
@@ -57,18 +54,14 @@ export const RegionsFilterComponent = ({
         if (regionValue === 'all_regions') {
             regionArray = ['all_regions'];
         } else {
-            // Si selecciono una específica, quito "all_regions"
             regionArray = regionArray.filter((r) => r !== 'all_regions');
 
             if (regionArray.includes(regionValue)) {
-                // Si ya estaba, la quito (toggle off)
                 regionArray = regionArray.filter((r) => r !== regionValue);
             } else {
-                // Si no estaba, la agrego (toggle on)
                 regionArray.push(regionValue);
             }
         }
-        // Si me quedé sin nada, vuelvo a 'all_regions' por defecto
         setRegions(regionArray.length ? regionArray.join(',') : 'all_regions');
     };
 
@@ -89,15 +82,13 @@ export const RegionsFilterComponent = ({
                         <CommandEmpty>No se encontró la región.</CommandEmpty>
                         <CommandGroup className="max-h-[250px] overflow-y-auto">
 
-                            {/* 1. Opción Manual "Todas las Regiones" (Déjala tal cual) */}
                             <CommandItem value="all_regions" onSelect={() => handleRegionToggle('all_regions')}>
                                 <Check className={cn('mr-2 h-4 w-4', regions === 'all_regions' ? 'opacity-100' : 'opacity-0')} />
                                 Todas las Regiones
                             </CommandItem>
 
-                            {/* 2. Lista filtrada (Aquí es donde agregamos el .filter) */}
                             {gcp_regions
-                                .filter((r) => r.value !== 'all_regions') // <--- ESTA ES LA LÍNEA MÁGICA
+                                .filter((r) => r.value !== 'all_regions')
                                 .map((region) => (
                                     <CommandItem
                                         key={region.value}

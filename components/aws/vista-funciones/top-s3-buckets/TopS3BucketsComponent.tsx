@@ -1,5 +1,6 @@
 'use client'
 
+import { fetcher } from '@/lib/fetcher';
 import React, { useMemo } from 'react'
 import useSWR from 'swr'
 import { Card, CardContent } from '@/components/ui/card'
@@ -26,10 +27,6 @@ interface TopS3BucketsProps {
   region?: string
   buckets?: string 
 }
-
-const fetcher = (url: string) =>
-  fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
-    .then(r => r.json())
 
 export const TopS3BucketsComponent = ({
   startDate,

@@ -1,5 +1,6 @@
 'use client';
 
+import { fetcher } from '@/lib/fetcher';
 import { Dispatch, SetStateAction, useState } from 'react';
 import useSWR from 'swr';
 import { Check, ChevronsUpDown } from 'lucide-react';
@@ -18,11 +19,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-
-// === Fetcher para SWR ===
-const fetcher = (url: string) =>
-    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
-        .then(r => r.json());
 
 interface AutoScalingGroupFilterProps {
   selectedGroup: string;
@@ -44,7 +40,6 @@ export const AutoScalingGroupFilterComponent = ({
     ? endDate.toISOString().replace('Z', '').slice(0, -4)
     : '';
 
-  // Llamada a la API de AutoScaling Groups (string[])
   const { data, error } = useSWR<string[]>(
     `/api/aws/bridge/aws/ec2/autoscaling/groups?date_from=${startDateFormatted}&date_to=${endDateFormatted}`,
     fetcher

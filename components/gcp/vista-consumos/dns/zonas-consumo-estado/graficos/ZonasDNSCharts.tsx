@@ -28,7 +28,6 @@ export const ZonasDNSCharts = ({ data }: ZonasDNSChartsProps) => {
     const topQueriesRef = useRef<HTMLDivElement>(null);
     const clasificacionRef = useRef<HTMLDivElement>(null);
 
-    // Gráfico 1: Top Zonas por Queries/Segundo (solo zonas activas)
     const topQueriesData = useMemo(() => {
         const zonasActivas = data.filter(zona => zona.queries_por_segundo > 0);
         const sorted = zonasActivas
@@ -36,7 +35,7 @@ export const ZonasDNSCharts = ({ data }: ZonasDNSChartsProps) => {
             .slice(0, 10);
         
         return {
-            names: sorted.map(z => z.name).reverse(), // Reverso para que el mayor esté arriba
+            names: sorted.map(z => z.name).reverse(),
             queries: sorted.map(z => z.queries_por_segundo).reverse()
         };
     }, [data]);
@@ -95,7 +94,6 @@ export const ZonasDNSCharts = ({ data }: ZonasDNSChartsProps) => {
         return deepMerge(base, barChart);
     }, [topQueriesData]);
 
-    // Gráfico 2: Distribución por Clasificación (Dona)
     const clasificacionData = useMemo(() => {
         const clasificationMap = new Map();
         

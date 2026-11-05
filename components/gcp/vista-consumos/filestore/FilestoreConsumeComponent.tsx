@@ -1,124 +1,36 @@
 'use client'
 
-import React from 'react';
-import useSWR from 'swr';
-import { FilestoreConsumeCardsComponent } from '@/components/gcp/vista-consumos/filestore/info/FilestoreConsumeCardsComponent';
-import { FilestoreConsumeChartComponent } from '@/components/gcp/vista-consumos/filestore/grafico/FilestoreConsumeChartComponent';
-import { FilestoreConsumeTableComponent } from '@/components/gcp/vista-consumos/filestore/table/FilestoreConsumeTableComponent';
+import { ConsumptionView } from '@/components/shared/consumption/ConsumptionView';
+import { GCP_FILESTORE } from '@/components/shared/consumption/consumptionConfigs';
+import { toApiDate } from '@/lib/consumption';
 
 interface FilestoreConsumeComponentProps {
     startDate: Date;
-    endDate: Date;
+    endDate?: Date;
     projects: string;
     regions: string;
-    resourceId: string;
-    tagKey: string;
-    tagValue: string;
+    resourceId?: string;
+    tagKey?: string | null;
+    tagValue?: string | null;
 }
 
-const fetcher = (url: string) => fetch(url).then(res => res.json());
-
-export const FilestoreConsumeComponent = ({
-    startDate,
-    endDate,
-    projects,
-    regions,
-    resourceId,
-    tagKey,    
-    tagValue   
-}: FilestoreConsumeComponentProps) => {
-
-    let infoUrl = `/api/gcp/bridge/gcp/consumo/filestore/info?`;
-    if (startDate) infoUrl += `date_from=${startDate.toISOString().slice(0, 19)}&`;
-    if (endDate) infoUrl += `date_to=${endDate.toISOString().slice(0, 19)}&`;
-    if (projects) infoUrl += `project_id=${projects}&`;
-    if (regions && regions !== 'all_regions') infoUrl += `location=${regions}&`;
-    if (resourceId) infoUrl += `resource=${resourceId}&`;
-    if (tagKey) infoUrl += `tagKey=${tagKey}&`;
-    if (tagValue) infoUrl += `tagValue=${tagValue}&`;
-
-    const shouldFetch = !!projects;
-
-    const { data: infoData, error: infoError, isLoading: infoLoading } = useSWR(
-        shouldFetch ? infoUrl : null, 
-        fetcher, 
-        { revalidateOnFocus: false }
-    );
-
-
-    // let metricsUrl = `/api/gcp/bridge/gcp/consumo/consumo-filestore?`;
-    // if (projects) metricsUrl += `project_id=${projects}&`;
-
-    // if (tagKey) metricsUrl += `tagKey=${tagKey}&`;
-    // if (tagValue) metricsUrl += `tagValue=${tagValue}&`;
-
-    // const { data: metricsData, error: metricsError, isLoading: metricsLoading } = useSWR(
-    //     shouldFetch ? metricsUrl : null, 
-    //     fetcher, 
-    //     { revalidateOnFocus: false }
-    // );
-
-
-    const anyLoading = infoLoading 
-    const anyError = infoError 
-    
-  
-    const hasData = infoData?.instancias && infoData.instancias.length > 0;
-
-    if (!projects) {
-        return (
-            <div className="max-w-7xl mx-auto px-6 py-8 text-center text-gray-500 font-medium">
-                No se ha seleccionado ningún proyecto.
-            </div>
-        );
-    }
-
-    if (anyLoading) {
-        return (
-            <div className="text-center py-12">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-                <p className="mt-4 text-muted-foreground">Cargando datos de Filestore...</p>
-            </div>
-        );
-    }
-
-    if (anyError) {
-        return (
-            <div className="text-red-500 p-4 bg-red-50 rounded-lg border border-red-200">
-                <h3 className="font-semibold">Error al cargar datos</h3>
-                <p className="text-sm mt-1">No se pudieron obtener los datos de Filestore</p>
-            </div>
-        );
-    }
-
-    if (!hasData) {
-        return (
-            <div className="text-center text-gray-500 py-8">
-                <p>No se encontraron instancias de Filestore para los filtros seleccionados.</p>
-            </div>
-        );
-    }
-
+export const FilestoreConsumeComponent = ({ startDate, endDate, projects, regions, resourceId, tagKey, tagValue }: FilestoreConsumeComponentProps) => {
+    const hasTag = !!tagKey && tagKey !== 'allKeys';
     return (
-        <div className="space-y-6 mt-6 px-4">
-            {/* 1. Tarjetas de Resumen (Costos, Capacidad Total, etc.) */}
-            <FilestoreConsumeCardsComponent
-                summary={infoData.resumen}
-                instancias={infoData.instancias}
-                isLoading={infoLoading}
-            />
-
-            {/* 2. Gráficos de Consumo (Capacidad Usada vs Libre e IOPS) */}
-            <div className="flex-1 space-y-6 min-w-0 overflow-hidden">
-                <FilestoreConsumeChartComponent
-                    data={infoData.instancias} // Usamos la data que trae el historial
-                />
-            </div>
-
-            {/* 3. Tabla de Detalle */}
-            <FilestoreConsumeTableComponent
-                data={infoData.instancias}
-            />
-        </div>
+        <ConsumptionView
+            config={GCP_FILESTORE}
+            enabled={!!projects}
+            disabledText="No se ha seleccionado ningún proyecto."
+            params={{
+                date_from: startDate ? toApiDate(startDate) : undefined,
+                date_to: endDate ? toApiDate(endDate) : undefined,
+                project_id: projects,
+                region: regions && regions !== 'all_regions' ? regions : undefined,
+                resource: resourceId,
+                resources_id: resourceId,
+                tagKey: hasTag ? tagKey : undefined,
+                tagValue: hasTag && tagValue && tagValue !== 'allValues' ? tagValue : undefined,
+            }}
+        />
     );
 };

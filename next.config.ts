@@ -1,11 +1,46 @@
 import type { NextConfig } from 'next';
 
+const LEGACY_CLOUD_BASES = ['aws', 'azure', 'gcp'];
+
+const ROUTE_REDIRECTS: [string, string][] = [
+  ['/cloud-aws/advisor', '/cloud-aws/recomendaciones'],
+  ['/cloud-aws/saving-plan', '/cloud-aws/compromisos/saving-plans'],
+  ['/cloud-azure/advisor', '/cloud-azure/recomendaciones'],
+  ['/cloud-azure/saving-plan', '/cloud-azure/compromisos/saving-plans'],
+  ['/cloud-azure/consumo-vm', '/cloud-azure/consumos/vm'],
+  ['/cloud-azure/consumo-db', '/cloud-azure/consumos/db'],
+  ['/cloud-azure/consumo-nodos', '/cloud-azure/consumos/nodos'],
+  ['/cloud-azure/consumo-apps-gateway', '/cloud-azure/consumos/apps-gateway'],
+  ['/cloud-azure/recursos-vm', '/cloud-azure/recursos/vm'],
+  ['/cloud-azure/recursos-nodos', '/cloud-azure/recursos/nodos'],
+  ['/cloud-azure/recursos-db-mysql', '/cloud-azure/recursos/db-mysql'],
+  ['/cloud-azure/recursos-db-postgresql', '/cloud-azure/recursos/db-postgresql'],
+  ['/cloud-azure/recursos-traffic-manager', '/cloud-azure/recursos/traffic-manager'],
+  ['/cloud-azure/vista-facturacion/top-dolares-facturados', '/cloud-azure/facturacion/top-dolares-facturados'],
+  ['/cloud-azure/vista-recursos/top-recursos-general', '/cloud-azure/recursos/top-recursos-general'],
+  ['/cloud-gcp/recommender', '/cloud-gcp/recomendaciones'],
+  ['/cloud-gcp/cuds', '/cloud-gcp/compromisos'],
+  ['/cloud-gcp/recursos/filestore-sin-uso', '/cloud-gcp/funciones/unused-resources/filestore'],
+];
+
 const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
   output: 'standalone',
-  // Configuración recomendada para Next.js 15
+
+  async redirects() {
+    const legacyBases = LEGACY_CLOUD_BASES.flatMap((cloud) => [
+      { source: `/${cloud}`, destination: `/cloud-${cloud}`, permanent: false },
+      { source: `/${cloud}/:path+`, destination: `/cloud-${cloud}/:path+`, permanent: false },
+    ]);
+    const moved = ROUTE_REDIRECTS.flatMap(([from, to]) => [
+      { source: from, destination: to, permanent: false },
+      { source: `${from}/:path+`, destination: `${to}/:path+`, permanent: false },
+    ]);
+    return [...legacyBases, ...moved];
+  },
+
   serverExternalPackages: [
     'newrelic',
     '@newrelic/security-agent',
@@ -14,23 +49,19 @@ const nextConfig: NextConfig = {
 
   webpack: (config, { isServer }) => {
     if (isServer) {
-      // Asegurar que newrelic no sea empaquetado por webpack
       if (!config.externals) {
         config.externals = [];
       }
 
-      // Si externals es un array
       if (Array.isArray(config.externals)) {
         config.externals.push('newrelic');
         config.externals.push('@newrelic/security-agent');
         config.externals.push('@grpc/grpc-js');
       }
     } else {
-      // En el cliente, asegurar que newrelic nunca se incluya
       config.resolve = config.resolve || {};
       config.resolve.alias = config.resolve.alias || {};
 
-      // Reemplazar newrelic con un módulo vacío en el cliente
       config.resolve.alias['newrelic'] = false;
       config.resolve.alias['@newrelic/security-agent'] = false;
       config.resolve.alias['@grpc/grpc-js'] = false;
@@ -41,28 +72,3 @@ const nextConfig: NextConfig = {
 };
 
 export default nextConfig;
-
-//------- ** Usar TURBOPACK debido a nueva version de Nextjs 16.* lo usará por defecto y no WebPack ** -----------//
-
-// import type { NextConfig } from 'next';
-
-// const nextConfig: NextConfig = {
-//   typescript: {
-//     ignoreBuildErrors: true,
-//   },
-//   serverExternalPackages: [
-//     'newrelic',
-//     '@newrelic/security-agent',
-//     '@grpc/grpc-js',
-//   ],
-
-//   turbopack: {
-//     resolveAlias: {
-//       'newrelic': 'newrelic',
-//       '@newrelic/security-agent': '@newrelic/security-agent',
-//       '@grpc/grpc-js': '@grpc/grpc-js',
-//     },
-//   },
-// };
-
-// export default nextConfig;

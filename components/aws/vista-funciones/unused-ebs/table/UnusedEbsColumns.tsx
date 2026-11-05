@@ -1,6 +1,6 @@
 'use client'
 
-import { DynamicColumn } from '@/components/general/data-table/columns';
+import { DynamicColumn } from '@/components/data-table/columns';
 import { Button } from '@/components/ui/button';
 import { Eye, HardDrive } from 'lucide-react';
 import { useState } from 'react';
@@ -10,6 +10,7 @@ import { UnusedEbsTableData, UnusedEbsTableDataMetric } from '@/interfaces/vista
 import { UnusedEbsAnalysisView, UnusedEbsResourcesView, UnusedEbsHistoryView } from '@/components/aws/vista-funciones/unused-ebs/info/UnusedEbsInsightModal';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import { readFilterParam } from '@/lib/filters';
 
 export interface FlattenedEbsRow extends UnusedEbsTableData {
     sort_idle_time: number;
@@ -118,9 +119,9 @@ const DetailsCell = ({ row }: { row: UnusedEbsTableData }) => {
 
 const GetParameters = () => {
     const searchParams = useSearchParams();
-    const startDateParam = searchParams.get('startDate');
-    const endDateParam = searchParams.get('endDate');
-    const regionParam = searchParams.get('regions');
+    const startDateParam = readFilterParam(searchParams, 'dateFrom');
+    const endDateParam = readFilterParam(searchParams, 'dateTo');
+    const regionParam = readFilterParam(searchParams, 'regions');
 
     return {
         startDateParam,
@@ -142,7 +143,7 @@ export const getUnusedEbsColumns = (totalGlobalCost: number): DynamicColumn<Flat
                     </div>
                     <div className="flex flex-col overflow-hidden">
                         <Link
-                            href={{ pathname: '/aws/recursos/ebs', query: { startDate: startDateParam, endDate: endDateParam, resourceId: row.original.volume_id, regions: regionParam } }}
+                            href={{ pathname: '/cloud-aws/recursos/ebs', query: { startDate: startDateParam, endDate: endDateParam, resourceId: row.original.volume_id, regions: regionParam } }}
                             rel="noopener noreferrer"
                             target="_blank"
                         >

@@ -1,6 +1,6 @@
 'use client'
 
-import { DynamicColumn } from '@/components/general/data-table/columns';
+import { DynamicColumn } from '@/components/data-table/columns';
 import { Button } from '@/components/ui/button';
 import { Eye, Server } from 'lucide-react';
 import { useState } from 'react';
@@ -10,6 +10,7 @@ import { UnusedEc2TableData, UnusedEc2TableDataMetric } from '@/interfaces/vista
 import { UnusedEc2AnalysisView, UnusedEc2ResourcesView, UnusedEc2HistoryView } from '@/components/aws/vista-funciones/unused-ec2/info/UnusedEc2InsightModal';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import { readFilterParam } from '@/lib/filters';
 
 export interface FlattenedEc2Row extends UnusedEc2TableData {
     sort_cpu: number;
@@ -118,9 +119,9 @@ const DetailsCell = ({ row }: { row: UnusedEc2TableData }) => {
 
 const GetParameters = () => {
     const searchParams = useSearchParams();
-    const startDateParam = searchParams.get('startDate');
-    const endDateParam = searchParams.get('endDate');
-    const regionParam = searchParams.get('regions');
+    const startDateParam = readFilterParam(searchParams, 'dateFrom');
+    const endDateParam = readFilterParam(searchParams, 'dateTo');
+    const regionParam = readFilterParam(searchParams, 'regions');
 
     return {
         startDateParam,
@@ -142,7 +143,7 @@ export const getUnusedEc2Columns = (totalGlobalCost: number): DynamicColumn<Flat
                     </div>
                     <div className="flex flex-col overflow-hidden">
                         <Link
-                            href={{ pathname: '/aws/recursos/ec2', query: { startDate: startDateParam, endDate: endDateParam, resourceId: row.original.instance_id, regions: regionParam } }}
+                            href={{ pathname: '/cloud-aws/recursos/ec2', query: { startDate: startDateParam, endDate: endDateParam, resourceId: row.original.instance_id, regions: regionParam } }}
                             rel="noopener noreferrer"
                             target="_blank"
                         >

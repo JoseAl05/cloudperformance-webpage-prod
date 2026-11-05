@@ -11,19 +11,13 @@ import {
 } from '@/lib/cloudAccounts';
 import { CloudAccount, Empresa, User } from '@/types/db';
 
-// Define el tipo para los parámetros dinámicos de la ruta
 interface Params {
   params: { id: string };
 }
 
-// =========================================================================
-// RUTA: GET /api/perfilamiento/empresas/[id] (Obtener datos de una sola Licencia)
-// =========================================================================
-
 export async function GET(req: NextRequest, { params }: Params) {
   const { id } = await params;
 
-  // 1. Autorización: Exclusivo para admin_global
   const auth = await authorizeRequest(req, ['admin_global']);
   if (!auth.authorized) {
     return NextResponse.json({ message: auth.message }, { status: 403 });
@@ -40,7 +34,6 @@ export async function GET(req: NextRequest, { params }: Params) {
     const _id = new ObjectId(id);
     const empresasCollection = await getCollection<Empresa>('Empresas');
 
-    // Buscar la empresa por ID
     const empresa = await empresasCollection.findOne({ _id });
 
     if (!empresa) {
@@ -60,14 +53,9 @@ export async function GET(req: NextRequest, { params }: Params) {
   }
 }
 
-// =========================================================================
-// RUTA: PUT /api/perfilamiento/empresas/[id] (Edición de Licencia y Conexiones DB)
-// =========================================================================
-
 export async function PUT(req: NextRequest, { params }: Params) {
   const { id } = await params;
 
-  // 1. Autorización: Exclusivo para admin_global
   const auth = await authorizeRequest(req, ['admin_global']);
   if (!auth.authorized) {
     return NextResponse.json({ message: auth.message }, { status: 403 });
@@ -83,7 +71,6 @@ export async function PUT(req: NextRequest, { params }: Params) {
 
     const body = await req.json();
 
-    // CAMPOS DE LICENCIA. La configuración por nube se lee dentro del bucle.
     const { planName, userLimit: rawUserLimit } = body;
 
     const _id = new ObjectId(id);
@@ -98,17 +85,14 @@ export async function PUT(req: NextRequest, { params }: Params) {
       );
     }
 
-    // Campos a escribir en la empresa...
     const setFields: Record<string, unknown> = {};
     const unsetFields: Record<string, ''> = {};
 
-    // ...y su espejo exacto para los usuarios de la empresa.
     const userSetFields: Record<string, unknown> = {};
     const userUnsetFields: Record<string, ''> = {};
 
     let newLimit: number = currentEmpresa.userLimit;
 
-    // 2. VALIDACIÓN Y ASIGNACIÓN DE PLAN/LÍMITE
     if (planName && planName !== currentEmpresa.planName) {
       const planConfig = PLAN_CONFIG[planName as keyof typeof PLAN_CONFIG];
       if (!planConfig) {
@@ -136,16 +120,9 @@ export async function PUT(req: NextRequest, { params }: Params) {
     }
     setFields.userLimit = newLimit;
 
-    // 3. CONFIGURACIÓN POR NUBE (AWS / Azure / GCP)
-    //    Multi-tenant  -> se persiste `<cloud>_accounts`, conservando los IDs
-    //                     ya existentes y generando `clp-<id>` para las nuevas.
-    //    Single-tenant -> se persiste `user_db_<cloud>` y se ELIMINA el array
-    //                     con `$unset` (nunca se escribe `undefined`, que el
-    //                     driver serializaría como `null` dejando IDs muertos).
     for (const cloud of CLOUD_PROVIDERS) {
       const isEnabled = body[`is_${cloud}`];
 
-      // Si el body no declara la nube, no se toca ni aquí ni en los usuarios.
       if (typeof isEnabled !== 'boolean') continue;
 
       const isMultiTenant = body[`is_${cloud}_multi_tenant`] === true;
@@ -183,7 +160,6 @@ export async function PUT(req: NextRequest, { params }: Params) {
         unsetFields[accountsField] = '';
       }
 
-      // Los usuarios reciben exactamente la misma configuración.
       userSetFields[enabledField] = setFields[enabledField];
       userSetFields[multiTenantField] = setFields[multiTenantField];
       userSetFields[dbField] = setFields[dbField];
@@ -195,7 +171,6 @@ export async function PUT(req: NextRequest, { params }: Params) {
       }
     }
 
-    // 4. Ejecutar la actualización de la LICENCIA MAESTRA
     setFields.updatedAt = new Date();
 
     const empresaUpdate: Record<string, unknown> = { $set: setFields };
@@ -205,9 +180,6 @@ export async function PUT(req: NextRequest, { params }: Params) {
 
     await empresasCollection.updateOne({ _id }, empresaUpdate);
 
-    // 5. PROPAGACIÓN DE CAMBIOS A USUARIOS ASOCIADOS
-    //    El usuario queda como espejo exacto de la empresa: mismos flags,
-    //    misma DB maestra y mismas cuentas con los mismos IDs `clp-<id>`.
     const usersCollection = await getCollection<User>('Users');
 
     let modifiedUsers = 0;
@@ -248,14 +220,9 @@ export async function PUT(req: NextRequest, { params }: Params) {
   }
 }
 
-// =========================================================================
-// RUTA: DELETE /api/perfilamiento/empresas/[id] (Eliminación de Licencia y Usuarios)
-// =========================================================================
-
 export async function DELETE(req: NextRequest, { params }: Params) {
   const { id } = await params;
 
-  // 1. Autorización: Exclusivo para admin_global
   const auth = await authorizeRequest(req, ['admin_global']);
   if (!auth.authorized) {
     return NextResponse.json({ message: auth.message }, { status: 403 });
@@ -273,7 +240,6 @@ export async function DELETE(req: NextRequest, { params }: Params) {
     const empresasCollection = await getCollection<Empresa>('Empresas');
     const usersCollection = await getCollection<User>('Users');
 
-    // 2. Buscar la empresa antes de eliminar (necesitamos el nombre para eliminar usuarios)
     const empresaToDelete = await empresasCollection.findOne({ _id });
 
     if (!empresaToDelete) {
@@ -283,12 +249,10 @@ export async function DELETE(req: NextRequest, { params }: Params) {
       );
     }
 
-    // 3. Eliminar todos los usuarios asociados a esa empresa/cliente
     const deleteUsersResult = await usersCollection.deleteMany({
       client: empresaToDelete.name,
     });
 
-    // 4. Eliminar la licencia (empresa)
     const deleteEmpresaResult = await empresasCollection.deleteOne({ _id });
 
     if (deleteEmpresaResult.deletedCount === 0) {

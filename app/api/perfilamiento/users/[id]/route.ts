@@ -5,14 +5,10 @@ import { authorizeRequest } from '@/lib/authUtils';
 import { User, Empresa } from '@/types/db';
 import bcrypt from 'bcryptjs';
 
-// Define el tipo para los parámetros dinámicos de la ruta
 interface Params {
   params: { id: string };
 }
 
-// =========================================================================
-// RUTA: PUT /api/perfilamiento/users/[id] (Edición de Usuario)
-// =========================================================================
 export async function PUT(req: NextRequest, { params }: Params) {
   const auth = await authorizeRequest(req, ['admin_global', 'admin_empresa']);
   if (!auth.authorized) {
@@ -43,7 +39,6 @@ export async function PUT(req: NextRequest, { params }: Params) {
       );
     }
 
-    // 1. Comprobaciones de Seguridad de Roles (sin cambios)
     if (userEditing.role === 'admin_empresa') {
       if (userFound.client !== userEditing.client) {
         return NextResponse.json(
@@ -62,47 +57,31 @@ export async function PUT(req: NextRequest, { params }: Params) {
       }
     }
 
-    // 2. Preparar Campos y Ejecutar Actualización
-
-    // Manejar cambio de contraseña
     if (body.password) {
       updateFields.passwordHash = await bcrypt.hash(body.password, 12);
     }
 
-    // Campos permitidos para actualizar
     const allowedFields = [
       'email',
       'username',
       'role',
-      'is_aws',
-      'is_azure',
-      'user_db_aws',
-      'user_db_azure',
-      'is_gcp',
-      'user_db_gcp',
-      'is_openai',
-      'user_db_openai',
-      'is_active', 
-      'passwordHash', // Para que el campo de la contraseña hasheada sea incluido
+      'is_active',
+      'passwordHash',
     ];
 
     allowedFields.forEach((key) => {
       if (body[key] !== undefined && body[key] !== null) {
-        // Asegurar que is_active solo acepte booleanos
         if (key === 'is_active' && typeof body[key] !== 'boolean') {
-          // Ignorar o registrar error
         } else {
           updateFields[key] = body[key];
         }
       }
     });
 
-    // El admin global puede cambiar el campo 'client'
     if (body.client && userEditing.role === 'admin_global') {
       updateFields.client = body.client;
     }
 
-    // Validación: No permitir que el admin se bloquee a sí mismo (solo si el campo está en el body)
     if (body.is_active === false && userEditing.userId === userIdToEdit) {
       return NextResponse.json(
         { message: 'No puedes bloquear tu propia cuenta de administrador.' },
@@ -136,9 +115,6 @@ export async function PUT(req: NextRequest, { params }: Params) {
   }
 }
 
-// =========================================================================
-// RUTA: DELETE /api/perfilamiento/users/[id] (Eliminación de Usuario) - Sin cambios
-// =========================================================================
 export async function DELETE(req: NextRequest, { params }: Params) {
   const auth = await authorizeRequest(req, ['admin_global', 'admin_empresa']);
   if (!auth.authorized) {
@@ -170,7 +146,6 @@ export async function DELETE(req: NextRequest, { params }: Params) {
       );
     }
 
-    // 2. Comprobaciones de Seguridad
     if (userDeleting.role === 'admin_empresa') {
       if (userFound.client !== userDeleting.client) {
         return NextResponse.json(
@@ -192,7 +167,6 @@ export async function DELETE(req: NextRequest, { params }: Params) {
       }
     }
 
-    // 3. Ejecutar ELIMINACIÓN y DECREMENTO
     const deleteResult = await usersCollection.deleteOne({ _id });
 
     if (deleteResult.deletedCount > 0) {

@@ -70,9 +70,9 @@ export const PresupuestoAnualComponent = () => {
       const isEditing = !!editingPresupuesto;
       const method = isEditing ? "PUT" : "POST";
       const url = isEditing
-        ? `/api/presupuesto/bridge/${cloudType}//presupuesto/anual/${data.id_presupuesto_anual}`
+        ? `/api/presupuesto/bridge/${cloudType}/presupuesto/anual/${data.id_presupuesto_anual}`
         : `/api/presupuesto/bridge/${cloudType}/presupuesto/anual`;
-
+      console.log(data)
       const res = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
@@ -94,7 +94,7 @@ export const PresupuestoAnualComponent = () => {
           } else {
             errorMsg = errorText;
           }
-        } catch (e) {
+        } catch (e: unknown) {
           errorMsg = errorText || `Error HTTP: ${res.status}`;
         }
         throw new Error(errorMsg);

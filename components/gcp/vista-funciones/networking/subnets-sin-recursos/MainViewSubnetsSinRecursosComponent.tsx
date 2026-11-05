@@ -32,8 +32,7 @@ export const MainViewSubnetsSinRecursosComponent = () => {
           projectFilter
           regionFilter
           tagsFilter
-          tagCollection="gcp_compute_subnetworks"
-          tagColumn="labels"
+          tagResourceType="compute_subnetworks"
         />
       </div>
     </div>

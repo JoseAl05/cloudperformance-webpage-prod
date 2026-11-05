@@ -1,5 +1,6 @@
 'use client'
 
+import { fetcher } from '@/lib/fetcher';
 import useSWR from 'swr'
 import { useMemo, useRef, useState } from 'react'
 import { useTheme } from 'next-themes'
@@ -16,15 +17,6 @@ import {
 import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
 import { deepMerge, makeBaseOptions, useECharts } from '@/lib/echartsGlobalConfig'
-
-const fetcher = (url: string) =>
-    fetch(url, {
-        method: 'GET',
-        headers: {
-            Authorization: `Bearer ${process.env.NEXT_PUBLIC_API_TOKEN}`,
-            'Content-Type': 'application/json',
-        },
-    }).then((res) => res.json())
 
 interface HeatmapQuotasComponentProps {
     startDate: Date

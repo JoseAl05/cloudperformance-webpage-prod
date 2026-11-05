@@ -1,5 +1,6 @@
 'use client'
 
+import { fetcher } from '@/lib/fetcher';
 import { MessageCard } from '@/components/azure/cards/MessageCards';
 import { LoaderComponent } from '@/components/general_azure/LoaderComponent';
 import { BMComparisonView } from '@/components/amazon-bedrock/comparacion/info/BMComparisonViewComponent';
@@ -13,10 +14,6 @@ interface BMComparisonComponent {
     instance?: string | null
     region?: string | null
 }
-
-const fetcher = (url: string) =>
-    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
-        .then(r => r.json());
 
 export const BMComparisonComponent = ({ startDate, endDate, instance, region }: BMComparisonComponent) => {
 

@@ -16,6 +16,7 @@ import {
 import { Badge } from '@/components/ui/badge'
 import { ArrowUpRight, ArrowDownRight, Minus } from 'lucide-react'
 import { bytesToGB, formatCapacity } from '@/lib/bytesToMbs'
+import { titleCase } from '@/lib/format'
 
 interface StorageVariationCardsComponentProps {
     strgVariationData: StorageVariation[]
@@ -31,7 +32,6 @@ const fmtGB = (n: number | null | undefined) => {
     if (typeof n !== 'number' || !isFinite(n)) return '—'
     const gb = Number(bytesToGB(n))
     return `${gb} GB`
-    // return `${new Intl.NumberFormat().format(gb)} GB`
 }
 
 const esLabelMap: Record<string, string> = {
@@ -233,7 +233,6 @@ export const StorageVariationCardsComponent = ({
                             <div className="flex flex-wrap items-center gap-4">
                                 <Trend value={varAbsGB ?? undefined} />
                                 <div className="flex items-baseline gap-2.5">
-                                    {/* <span className="text-2xl font-bold tabular-nums text-slate-900 dark:text-slate-100">{fmtGB(varAbsBytes ?? null)}</span> */}
                                     <span className="text-2xl font-bold tabular-nums text-slate-900 dark:text-slate-100">{formatCapacity(varAbsBytes)}</span>
                                     <span className="text-lg font-semibold text-slate-600 dark:text-slate-400">
                                         ({fmtPercent(varPct)})

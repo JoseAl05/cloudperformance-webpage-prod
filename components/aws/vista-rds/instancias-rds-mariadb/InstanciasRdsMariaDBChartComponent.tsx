@@ -1,5 +1,6 @@
 "use client";
 
+import { fetcher } from '@/lib/fetcher';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useRef, useEffect } from "react";
 import useSWR from "swr";
@@ -71,17 +72,12 @@ interface MetricPoint {
   MetricLabel: string;
 }
 
-// Función para transformar los datos de métricas al formato esperado por el gráfico
 const transformMetricsForChart = (
   metricsData: RdsMetricsData
 ): MetricPoint[] => {
   if (!metricsData?.metrics_data) return [];
   return metricsData.metrics_data as MetricPoint[];
 };
-
-const fetcher = (url: string) =>
-  fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
-    .then(r => r.json());
 
 export const InstanciasRdsMariaDBChartComponent = ({
   startDate,
@@ -97,7 +93,6 @@ export const InstanciasRdsMariaDBChartComponent = ({
   const startDateFormatted = startDate.toISOString().split(".")[0];
   const endDateFormatted = endDate.toISOString().split(".")[0];
 
-  // API de MariaDB
   let infoUrl = `/api/aws/bridge/db/instancias-rds-mariadb?date_from=${startDateFormatted}&date_to=${endDateFormatted}`;
   if (region && region !== "all_regions") infoUrl += `&region=${region}`;
   if (selectedKey && selectedValue) {
@@ -133,7 +128,6 @@ export const InstanciasRdsMariaDBChartComponent = ({
     isLoading: metricsLoading,
   } = useSWR<RdsMetricsData>(metricsUrl, fetcher);
 
-  // -------- Eventos de la instancia --------
   const shouldFetchEvents = !!(
     startDate &&
     endDate &&
@@ -150,7 +144,6 @@ export const InstanciasRdsMariaDBChartComponent = ({
     isLoading: eventsLoading,
   } = useSWR(eventsUrl, fetcher);
 
-  // ---------- eCharts para "Estado de Instancias" (vista general) ----------
   const processChartData = (rawData: RdsMariaDBInstanceData[] = []) => {
     const statusCounts = rawData.reduce((acc, item) => {
       acc[item.DBInstanceStatus] = (acc[item.DBInstanceStatus] || 0) + 1;
@@ -200,7 +193,6 @@ export const InstanciasRdsMariaDBChartComponent = ({
     };
   }, [infoList]);
 
-  // -------- Loaders / errores --------
   if (infoLoading) {
     return (
       <div className="flex justify-center items-center p-12">
@@ -220,7 +212,6 @@ export const InstanciasRdsMariaDBChartComponent = ({
     );
   }
 
-  // Sin selección de instancia -> mensaje
   if (!instance || instance === "all_instances") {
     return (
       <div className="max-w-7xl mx-auto px-6 py-8">
@@ -231,7 +222,6 @@ export const InstanciasRdsMariaDBChartComponent = ({
     );
   }
 
-  // Datos de la instancia concreta
   const instanceData =
     infoList?.filter((item) => item.DBInstanceIdentifier === instance) || [];
 
@@ -245,7 +235,6 @@ export const InstanciasRdsMariaDBChartComponent = ({
     );
   }
 
-  // Carga/errores de métricas del summary
   if (metricsLoading) {
     return (
       <div className="flex justify-center items-center p-12">
@@ -268,12 +257,10 @@ export const InstanciasRdsMariaDBChartComponent = ({
   return (
     <div className="w-full min-w-0 px-4 py-6">
       <div className="flex flex-col xl:flex-row gap-8 min-w-0">
-        {/* Panel izquierdo - Información de la instancia */}
         <div className="w-full xl:max-w-sm min-w-0">
           <RdsMariaDBResourceViewInfoComponent data={instanceData} />
         </div>
 
-        {/* Panel derecho - Resumen de métricas */}
         <div className="flex-1 space-y-6 min-w-0 overflow-hidden">
           <MainRdsResourceViewMetricsSummaryComponentComponent
             data={metricsData ?? null}
@@ -281,7 +268,6 @@ export const InstanciasRdsMariaDBChartComponent = ({
           />
         </div>
       </div>
-      {/*  Grafico 1 - Consumo y Balance de Créditos de CPU (Burstable) */}
       <Card className="w-full">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -298,7 +284,6 @@ export const InstanciasRdsMariaDBChartComponent = ({
         </CardContent>
       </Card>
 
-      {/* Gráfico 2: CPU Usage */}
       <Card className="w-full">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -315,7 +300,6 @@ export const InstanciasRdsMariaDBChartComponent = ({
         </CardContent>
       </Card>
 
-      {/* Gráfico 3: Database Connections */}
       <Card className="w-full">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -331,7 +315,6 @@ export const InstanciasRdsMariaDBChartComponent = ({
           />
         </CardContent>
       </Card>
-      {/* Gráfico 4: Memory */}
       <Card className="w-full">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -347,7 +330,6 @@ export const InstanciasRdsMariaDBChartComponent = ({
           />
         </CardContent>
       </Card>
-      {/* Gráfico 5: IOPS */}
       <Card className="w-full">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -363,7 +345,6 @@ export const InstanciasRdsMariaDBChartComponent = ({
           />
         </CardContent>
       </Card>
-      {/* Gráfico 6: Storage */}
       <Card className="w-full">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -379,7 +360,6 @@ export const InstanciasRdsMariaDBChartComponent = ({
           />
         </CardContent>
       </Card>
-      {/* Tabla de Eventos RDS MariaDB */}
       <RdsMariaDBEventsTableComponent
         data={eventsData}
         startDate={startDate}

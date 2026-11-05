@@ -1,0 +1,32 @@
+# Componentes `components/aws/cards/`
+
+[← Índice](../../README.md)
+
+Tarjeta de mensaje (avisos) de las vistas AWS.
+
+Archivos:
+
+- [`components/aws/cards/MessageCards.tsx`](#components-aws-cards-messagecards-tsx)
+
+<a id="components-aws-cards-messagecards-tsx"></a>
+## `components/aws/cards/MessageCards.tsx`
+
+**Componente**
+
+Exporta:
+
+- componente `MessageCard` `({ icon: Icon, title, description, tone = 'info', className, }: MessageCardProps)`
+
+Interfaz `MessageCardProps`:
+
+| Campo | Tipo | Opcional | Descripción |
+|---|---|---|---|
+| `icon` | `React.ElementType` | no | — |
+| `title` | `string` | no | — |
+| `description` | `string` | sí | — |
+| `tone` | `'info' \| 'error' \| 'warn'` | sí | — |
+| `className` | `string` | sí | — |
+
+- Usa: [`utils.ts`](../../lib.md#lib-utils-ts)
+- Usado por: [`AiFinopsMetricsComponent.tsx`](../ai-finops-metrics.md#components-ai-finops-metrics-aifinopsmetricscomponent-tsx), [`AiRecommendationStatusesComponent.tsx`](../ai-recommendation-statuses.md#components-ai-recommendation-statuses-airecommendationstatusescomponent-tsx), [`BMComparisonViewComponent.tsx`](../amazon-bedrock.md#components-amazon-bedrock-comparacion-info-bmcomparisonviewcomponent-tsx), [`COCustomModelsComponent.tsx`](../amazon-bedrock.md#components-amazon-bedrock-costo-optimizacion-custom-models-cocustommodelscomponent-tsx), [`COFoundationComponent.tsx`](../amazon-bedrock.md#components-amazon-bedrock-costo-optimizacion-foundation-models-cofoundationcomponent-tsx), [`COInferenceProfilesComponent.tsx`](../amazon-bedrock.md#components-amazon-bedrock-costo-optimizacion-inference-profiles-coinferenceprofilescomponent-tsx), [`AdvisorViewComponent.tsx`](vista-advisor.md#components-aws-vista-advisor-advisorviewcomponent-tsx), [`InstanceEc2CpuMetricsComponent.tsx`](vista-ec2.md#components-aws-vista-ec2-instancias-ec2-instanceec2cpumetricscomponent-tsx), [`EventsViewComponent.tsx`](vista-eventos.md#components-aws-vista-eventos-eventsviewcomponent-tsx), [`TopS3BucketsComponent.tsx`](vista-funciones.md#components-aws-vista-funciones-top-s3-buckets-tops3bucketscomponent-tsx), [`TaggedResourcesComponent.tsx`](vista-tags.md#components-aws-vista-tags-taggedresourcescomponent-tsx), [`DeploymentsComponent.tsx`](../azure/vista-deployments.md#components-azure-vista-deployments-deploymentscomponent-tsx), [`AverageByLocationComponent.tsx`](../azure/vista-funciones.md#components-azure-vista-funciones-average-by-location-averagebylocationcomponent-tsx), [`BlobVsStorageGeneralComponent.tsx`](../azure/vista-funciones.md#components-azure-vista-funciones-blob-vs-storage-general-blobvsstoragegeneralcomponent-tsx), [`SpotVsRegularVmComponent.tsx`](../azure/vista-funciones.md#components-azure-vista-funciones-spot-vs-regular-vm-spotvsregularvmcomponent-tsx), [`StorageVariationComponent.tsx`](../azure/vista-funciones.md#components-azure-vista-funciones-variacion-storage-storagevariationcomponent-tsx), [`AzureMysqlResourceComponent.tsx`](../azure/vista-recursos-mysql.md#components-azure-vista-recursos-mysql-azuremysqlresourcecomponent-tsx), [`AzureNodeResourceComponent.tsx`](../azure/vista-recursos-nodos.md#components-azure-vista-recursos-nodos-azurenoderesourcecomponent-tsx), [`AzurePostgresResourceComponent.tsx`](../azure/vista-recursos-postgresql.md#components-azure-vista-recursos-postgresql-azurepostgresresourcecomponent-tsx), [`RecursosTrafficManagerComponent.tsx`](../azure/vista-recursos-tm.md#components-azure-vista-recursos-tm-recursostrafficmanagercomponent-tsx), [`AzureVmResourceComponent.tsx`](../azure/vista-recursos-vm.md#components-azure-vista-recursos-vm-azurevmresourcecomponent-tsx), [`SavingsPlanComponent.tsx`](../azure/vista-savings-plan.md#components-azure-vista-savings-plan-savingsplancomponent-tsx), [`TaggedResourcesComponent.tsx`](../azure/vista-tags.md#components-azure-vista-tags-taggedresourcescomponent-tsx), [`SpendBasedCudsComponent.tsx`](../gcp/vista-cuds.md#components-gcp-vista-cuds-spend-based-cuds-spendbasedcudscomponent-tsx), [`RecommenderComponent.tsx`](../gcp/vista-recommender.md#components-gcp-vista-recommender-recommendercomponent-tsx), [`CloudSqlComponent.tsx`](../gcp/vista-recursos.md#components-gcp-vista-recursos-cloudsql-cloudsqlcomponent-tsx), [`GkeComponent.tsx`](../gcp/vista-recursos.md#components-gcp-vista-recursos-clusters-gke-gkecomponent-tsx), [`GkeChartComponent.tsx`](../gcp/vista-recursos.md#components-gcp-vista-recursos-clusters-gke-grafico-gkechartcomponent-tsx), [`GkeMetricsCardComponent.tsx`](../gcp/vista-recursos.md#components-gcp-vista-recursos-clusters-gke-info-gkemetricscardcomponent-tsx), [`GkeBillingComponent.tsx`](../gcp/vista-recursos.md#components-gcp-vista-recursos-clusters-gke-table-gkebillingcomponent-tsx), [`ComputeEngineComponent.tsx`](../gcp/vista-recursos.md#components-gcp-vista-recursos-compute-engine-computeenginecomponent-tsx), [`InstanceGroupsComponent.tsx`](../gcp/vista-recursos.md#components-gcp-vista-recursos-instance-groups-instancegroupscomponent-tsx), [`InstanceGroupChartComponent.tsx`](../gcp/vista-recursos.md#components-gcp-vista-recursos-instance-groups-grafico-instancegroupchartcomponent-tsx), [`InstanceGroupsMetricsCardsComponent.tsx`](../gcp/vista-recursos.md#components-gcp-vista-recursos-instance-groups-info-instancegroupsmetricscardscomponent-tsx), [`InstanceGroupsBillingComponent.tsx`](../gcp/vista-recursos.md#components-gcp-vista-recursos-instance-groups-table-instancegroupsbillingcomponent-tsx), [`ReservationsComponent.tsx`](../gcp/vista-reservas.md#components-gcp-vista-reservas-reservationscomponent-tsx), [`TaggedResourcesComponent.tsx`](../gcp/vista-tags.md#components-gcp-vista-tags-taggedresourcescomponent-tsx), [`GcpVertexComparisonComponent.tsx`](../google-vertex.md#components-google-vertex-comparacion-gcpvertexcomparisoncomponent-tsx), [`GcpVertexComparisonViewComponent.tsx`](../google-vertex.md#components-google-vertex-comparacion-info-gcpvertexcomparisonviewcomponent-tsx), [`COGcpVertexComponent.tsx`](../google-vertex.md#components-google-vertex-costo-optimizacion-vertex-models-cogcpvertexcomponent-tsx), [`COAzureFoundryComponent.tsx`](../microsoft-foundry.md#components-microsoft-foundry-costo-optimizacion-foundation-models-coazurefoundrycomponent-tsx), [`COOpenAIComponent.tsx`](../open-ia.md#components-open-ia-costo-optimizacion-foundation-models-coopenaicomponent-tsx), [`DataStateComponent.tsx`](../shared.md#components-shared-datastatecomponent-tsx)
+

@@ -23,20 +23,6 @@ export const MainViewInfrautilizadasEksComponent = () => {
         </div>
       </div>
       <div className="w-full min-w-0">
-        {/* <FiltersComponent
-          Component={InstanceEksInfrautilizadaComponent}
-          dateFilter
-          // regionFilter
-          // isRegionMultiSelect
-          // instancesFilter
-          // instancesService="infraUsed"
-          // isInstanceMultiSelect
-          instancesService='infraUsed'
-          regionFilter
-          asgFilter
-          isAsgMultiSelect
-          isAsgInstanceMultiSelect
-        /> */}
 
         <FiltersComponent
             Component={InstanceEksInfrautilizadaComponent}

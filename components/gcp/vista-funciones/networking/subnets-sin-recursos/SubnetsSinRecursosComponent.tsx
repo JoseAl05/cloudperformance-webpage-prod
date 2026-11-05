@@ -1,10 +1,17 @@
 'use client'
 
+import type { ComponentProps } from 'react';
+import { fetcher } from '@/lib/fetcher';
 import React from 'react';
 import useSWR from 'swr';
 import { SubnetsSinRecursosCardsComponent } from './info/SubnetsSinRecursosCardsComponent';
 import { SubnetsSinRecursosCharts } from './graficos/SubnetsSinRecursosCharts';
 import { SubnetsSinRecursosTable } from './tabla/SubnetsSinRecursosTable';
+
+interface SubnetsSinRecursosResponse {
+    resumen?: ComponentProps<typeof SubnetsSinRecursosCardsComponent>['summary'] & { por_region?: Record<string, number>; por_purpose?: Record<string, number> };
+    subnets_sin_recursos?: Array<NonNullable<ComponentProps<typeof SubnetsSinRecursosTable>['data']>[number] & NonNullable<ComponentProps<typeof SubnetsSinRecursosCharts>['data']>[number] & NonNullable<ComponentProps<typeof SubnetsSinRecursosCardsComponent>['subnets']>[number]>;
+}
 
 interface SubnetsSinRecursosComponentProps {
     startDate: Date;
@@ -14,8 +21,6 @@ interface SubnetsSinRecursosComponentProps {
     tagKey?: string | null;
     tagValue?: string | null;
 }
-
-const fetcher = (url: string) => fetch(url).then(res => res.json());
 
 export const SubnetsSinRecursosComponent = ({
     startDate,
@@ -40,7 +45,7 @@ export const SubnetsSinRecursosComponent = ({
 
     const shouldFetch = !!projects;
 
-    const { data, error, isLoading } = useSWR(
+    const { data, error, isLoading } = useSWR<SubnetsSinRecursosResponse>(
         shouldFetch ? url : null, 
         fetcher, 
         { revalidateOnFocus: false }
@@ -84,28 +89,24 @@ export const SubnetsSinRecursosComponent = ({
 
     return (
         <div className="space-y-6 mt-6 px-4">
-            {/* Cards */}
             <SubnetsSinRecursosCardsComponent
                 summary={data?.resumen}
                 subnets={data?.subnets_sin_recursos || []}
                 isLoading={isLoading}
             />
 
-            {/* Gráficos */}
             <SubnetsSinRecursosCharts 
                 data={data?.subnets_sin_recursos || []} 
                 porRegion={data?.resumen?.por_region || {}}
                 porPurpose={data?.resumen?.por_purpose || {}}
             />
 
-            {/* Tabla */}
             <SubnetsSinRecursosTable 
                 data={data?.subnets_sin_recursos || []} 
                 dateFrom={startDate}
                 dateTo={endDate}
             />
 
-            {/* TRABAJANDO */}
             <div className="text-sm text-muted-foreground">Trabajando aquí en algo que cambiara tu vida.</div>
         </div>
     );

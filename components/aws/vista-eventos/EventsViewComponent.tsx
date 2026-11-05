@@ -1,5 +1,6 @@
 'use client'
 
+import { fetcher } from '@/lib/fetcher';
 import { LoaderComponent } from '@/components/general_aws/LoaderComponent'
 import { EventsApiResponse } from '@/interfaces/vista-eventos/eventsViewInterfaces'
 import useSWR from 'swr'
@@ -15,10 +16,6 @@ interface EventsViewComponentProps {
     eventType: string
     region: string
 };
-
-const fetcher = (url: string) =>
-    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
-        .then(r => r.json());
 
 const isNonEmptyArray = <T,>(v: unknown): v is T[] => Array.isArray(v) && v.length > 0
 const isNullish = (v: unknown) => v === null || v === undefined
@@ -104,12 +101,9 @@ export const EventsViewComponent = ({ startDate, endDate, eventType, region }: E
                 <EventsViewEventCountComponent
                     data={eventsData}
                 />
-                {/* <Ec2ResourceConsumeViewUsageCreditsComponent data={creditsMetricsData} />
-                <Ec2ResourceConsumeViewUsageCpuComponent data={cpuMetricsData} /> */}
             </div>
             <div className="flex flex-col gap-5 mt-10">
                 <div className="flex items-center gap-3 my-5">
-                    {/* <Clock className="h-8 w-8 text-blue-500" /> */}
                     <h1 className="text-3xl font-bold text-foreground">Detalle Instancias</h1>
                 </div>
                 <EventsViewTableComponent
@@ -118,13 +112,6 @@ export const EventsViewComponent = ({ startDate, endDate, eventType, region }: E
                     endDate={endDateFormatted}
                     eventType={eventType}
                 />
-                {/* <Ec2ConsumeViewInstanceTable
-                    data={infoData}
-                    startDate={startDate}
-                    endDate={endDate}
-                    instance={instance}
-                    enableGrouping
-                /> */}
             </div>
         </div>
     )

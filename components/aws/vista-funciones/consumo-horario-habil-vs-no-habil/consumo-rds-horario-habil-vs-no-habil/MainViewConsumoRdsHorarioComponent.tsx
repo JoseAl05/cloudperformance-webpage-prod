@@ -4,23 +4,23 @@ import { Computer } from 'lucide-react'
 import { ConsumoRdsHorarioComponent } from '@/components/aws/vista-funciones/consumo-horario-habil-vs-no-habil/consumo-rds-horario-habil-vs-no-habil/ConsumoRdsHorarioComponent'
 
 export const MainViewConsumoRdsHorario = ({ dbType }: { dbType: string }) => {
-    let dbCollection = ''
+    let resourceType = ''
 
     switch (dbType) {
         case 'rds-pg':
-            dbCollection = 'aws_rds_postgresql'
+            resourceType = 'rds_postgresql'
             break;
         case 'rds-mysql':
-            dbCollection = 'aws_rds_mysql'
+            resourceType = 'rds_mysql'
             break;
         case 'rds-oracle':
-            dbCollection = 'aws_rds_oracle'
+            resourceType = 'rds_oracle'
             break;
         case 'rds-sqlserver':
-            dbCollection = 'aws_rds_sqlserver'
+            resourceType = 'rds_sqlserver'
             break;
         case 'rds-mariadb':
-            dbCollection = 'aws_rds_mariadb'
+            resourceType = 'rds_mariadb'
             break;
         default:
             break;
@@ -57,8 +57,7 @@ export const MainViewConsumoRdsHorario = ({ dbType }: { dbType: string }) => {
                 isInstanceMultiSelect
                 dbType={dbType}
                 tagsFilter
-                tagColumnName='TagList'
-                collection={dbCollection}
+                resourceType={resourceType}
                 localService='Amazon Relational Database Service'
             />
         </div>

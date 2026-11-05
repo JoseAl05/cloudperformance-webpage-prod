@@ -29,8 +29,7 @@ export const MainViewInstanciasAutoscalingGroupsComponent = () => {
                     asgFilter
                     isViewResource
                     tagsFilter
-                    collection='aws_auto_scaling_groups'
-                    tagColumnName='Tags'
+                    resourceType='asg'
                 />
             </div>
         </div>

@@ -410,37 +410,6 @@ export const COCustomModelsCardsComponent = ({
         ))}
       </div>
 
-      {/* <style jsx global>{`
-        @keyframes cost-comparison-collapsible-down {
-          from {
-            height: 0;
-            opacity: 0;
-          }
-          to {
-            height: var(--radix-collapsible-content-height);
-            opacity: 1;
-          }
-        }
-
-        @keyframes cost-comparison-collapsible-up {
-          from {
-            height: var(--radix-collapsible-content-height);
-            opacity: 1;
-          }
-          to {
-            height: 0;
-            opacity: 0;
-          }
-        }
-
-        .cost-comparison-content[data-state="open"] {
-          animation: cost-comparison-collapsible-down 300ms ease-out;
-        }
-
-        .cost-comparison-content[data-state="closed"] {
-          animation: cost-comparison-collapsible-up 300ms ease-out;
-        }
-      `}</style> */}
     </>
   );
 };

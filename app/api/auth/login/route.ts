@@ -5,7 +5,6 @@ import bcrypt from 'bcryptjs';
 import { rateLimit } from '@/lib/rateLimit';
 import { send2FACodeEmail } from '@/lib/email';
 import { createLogger } from '@/lib/logger';
-// import newrelic from 'newrelic';
 
 const logger = createLogger('LoginAPI');
 
@@ -19,17 +18,15 @@ function generateCode() {
 }
 
 export async function POST(req: Request) {
-  const requestId = crypto.randomUUID(); // ID único para rastrear la petición
+  const requestId = crypto.randomUUID();
 
   logger.info('Petición de login recibida', { requestId });
 
   try {
-    // Obtener IP
     const ip =
       (req.headers.get('x-forwarded-for') || '').split(',')[0] || 'unknown';
     logger.debug('IP del cliente identificada', { ip, requestId });
 
-    // Rate limiting
     const rl = rateLimit(`login:${ip}`, 3, 5 * 60000);
     if (!rl.allowed) {
       logger.warn('Rate limit excedido', {
@@ -49,7 +46,6 @@ export async function POST(req: Request) {
       remainingAttempts: rl.remaining,
     });
 
-    // Parsear body
     const body = await req.json();
     const { emailOrUsername } = body;
 
@@ -58,7 +54,6 @@ export async function POST(req: Request) {
       requestId,
     });
 
-    // Validar datos
     const parsed = LoginSchema.safeParse(body);
     if (!parsed.success) {
       logger.warn('Validación de datos fallida', {
@@ -71,7 +66,6 @@ export async function POST(req: Request) {
 
     const { password } = parsed.data;
 
-    // Buscar usuario en DB
     const users = await getCollection('Users');
     const user = await logger.time('Búsqueda de usuario en DB', () =>
       users.findOne({ email: emailOrUsername })
@@ -95,7 +89,6 @@ export async function POST(req: Request) {
       requestId,
     });
 
-    // Verificar si la cuenta está activa
     if (user.is_active === false) {
       logger.warn('Intento de login en cuenta bloqueada', {
         userId,
@@ -110,7 +103,6 @@ export async function POST(req: Request) {
       );
     }
 
-    // Verificar contraseña
     const passwordValid = await logger.time('Verificación de contraseña', () =>
       bcrypt.compare(password, user.passwordHash)
     );
@@ -131,7 +123,6 @@ export async function POST(req: Request) {
       requestId,
     });
 
-    // Generar código 2FA
     const code = generateCode();
     const now = new Date();
     const expiresAt = new Date(now.getTime() + 10 * 60_000);
@@ -142,7 +133,6 @@ export async function POST(req: Request) {
       expiresAt: expiresAt.toISOString(),
     });
 
-    // Guardar código en DB
     const codes = await getCollection('twofactor_codes');
     await logger.time('Guardando código 2FA en DB', () =>
       codes.insertOne({
@@ -154,7 +144,6 @@ export async function POST(req: Request) {
       })
     );
 
-    // Enviar email
     try {
       await logger.time('Enviando email con código 2FA', () =>
         send2FACodeEmail(user.email, code)
@@ -172,7 +161,6 @@ export async function POST(req: Request) {
         requestId,
       });
 
-      // Decidir si continuar o fallar
       return NextResponse.json(
         { error: 'Error al enviar el código. Intenta nuevamente.' },
         { status: 500 }

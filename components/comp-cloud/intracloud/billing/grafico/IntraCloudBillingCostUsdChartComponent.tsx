@@ -5,13 +5,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Info } from 'lucide-react';
 import { createChartOption, deepMerge, makeBaseOptions, useECharts } from '@/lib/echartsGlobalConfig';
 import { useTheme } from 'next-themes';
-import { formatMetric } from '@/lib/metricUtils';
-import { ReqPayload } from '@/components/comp-cloud/intracloud/IntraCloudConfigComponent';
-import { IntraCloudBilling, IntraCloudMonthlyBilling } from '@/interfaces/vista-intracloud/billing/intraCloudBillingInterfaces';
+import { IntraCloudMonthlyBilling } from '@/interfaces/vista-intracloud/billing/intraCloudBillingInterfaces';
 
 interface IntraCloudBillingCostUsdChartComponentProps {
-  data: IntraCloudMonthlyBilling[];
-  payload: ReqPayload;
+  data: IntraCloudMonthlyBilling[] | undefined;
 }
 
 const MONTH_ORDER: Record<string, number> = {
@@ -20,39 +17,32 @@ const MONTH_ORDER: Record<string, number> = {
   Septiembre: 9, Octubre: 10, Noviembre: 11, Diciembre: 12,
 };
 
-export const IntraCloudBillingCostUsdChartComponent = ({ data, payload }: IntraCloudBillingCostUsdChartComponentProps) => {
+export const IntraCloudBillingCostUsdChartComponent = ({ data }: IntraCloudBillingCostUsdChartComponentProps) => {
   const { theme, resolvedTheme } = useTheme();
   const currentTheme = resolvedTheme || theme;
   const isDark = currentTheme === 'dark';
 
   const chartRef = useRef<HTMLDivElement>(null);
 
-  const chartSeriesData = useMemo(() => {
-    if (!data || !Array.isArray(data)) return [];
+  const { categories, chartSeriesData } = useMemo(() => {
+    if (!data || !Array.isArray(data)) return { categories: [] as string[], chartSeriesData: [] };
 
-    const monthSet = new Set<{ month: string; cost_in_usd: number }>()
+    const monthKey = (item: { year: number; month: string }) => item.year * 100 + (MONTH_ORDER[item.month] ?? 0);
+    const keys = new Map<number, { year: number; month: string }>();
+    data.forEach((tenant) => (tenant.billing_data ?? []).forEach((item) => keys.set(monthKey(item), item)));
+    const sortedKeys = Array.from(keys.keys()).sort((a, b) => a - b);
+    const years = new Set(Array.from(keys.values()).map((item) => item.year));
+    const labelOf = (item: { year: number; month: string }) => (years.size > 1 ? `${item.month} ${item.year}` : item.month);
 
-
-    return data.map((tenant, index) => {
-      if(tenant.billing_data.length && tenant.billing_data.length === 0) {
-        return {
-          name: '',
-          data: []
-        }
-      }
-      const sortedData = [...tenant.billing_data].sort(
-        (a, b) => (MONTH_ORDER[a.month] ?? 0) - (MONTH_ORDER[b.month] ?? 0)
-      );
-
-      const chartData: [string, string][] = sortedData.map(item => [
-        item.month,
-        formatMetric(item.cost_in_usd)
-      ]);
-
-      const name = tenant.tenant_alias || `Tenant ${index + 1}`;
-
-      return { name, data: chartData };
+    const series = data.map((tenant, index) => {
+      const costs = new Map((tenant.billing_data ?? []).map((item) => [monthKey(item), Number(item.cost_in_usd) || 0]));
+      return {
+        name: tenant.tenant_alias || `Tenant ${index + 1}`,
+        data: sortedKeys.map((key) => costs.get(key) ?? null),
+      };
     });
+
+    return { categories: sortedKeys.map((key) => labelOf(keys.get(key)!)), chartSeriesData: series };
   }, [data]);
 
   const option = useMemo(() => {
@@ -80,12 +70,11 @@ export const IntraCloudBillingCostUsdChartComponent = ({ data, payload }: IntraC
       tooltip: true,
       series: seriesConfig as unknown,
       extraOption: {
-        xAxis: { axisLabel: { rotate: 30 } },
+        xAxis: { type: 'category', data: categories, axisLabel: { rotate: 30 } },
         yAxis: {
           type: 'value',
           name: 'Costo (USD)',
           nameTextStyle: { color: '#666', fontSize: 10 },
-          // nameGap: 25,
           min: 0,
           axisLine: { show: false },
           axisTick: { show: false },
@@ -114,11 +103,11 @@ export const IntraCloudBillingCostUsdChartComponent = ({ data, payload }: IntraC
     });
 
     return deepMerge(base, lines);
-  }, [isDark, chartSeriesData]);
+  }, [isDark, categories, chartSeriesData]);
 
   useECharts(chartRef, option, [option], isDark ? 'cp-dark' : 'cp-light');
 
-  const isEmpty = chartSeriesData.length === 0 || chartSeriesData.every(s => s.data.length === 0);
+  const isEmpty = chartSeriesData.length === 0 || chartSeriesData.every(s => s.data.every(v => v === null));
 
   return (
     <Card className="w-full">

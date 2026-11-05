@@ -5,7 +5,6 @@ import { Badge } from '@/components/ui/badge';
 import { LucideIcon, DollarSign, TrendingUp, CalendarDays, Layers } from 'lucide-react';
 import { useMemo } from 'react';
 
-// Tipos basados en tu JSON
 interface BillingItem {
     start_date: string;
     end_date: string;
@@ -25,7 +24,6 @@ interface ResourceBillingStatsProps {
 
 type CardVariant = 'default' | 'destructive' | 'warning' | 'info' | 'success';
 
-// --- Reutilizando tu lógica de diseño de StatCard ---
 const getVariantStyles = (variant: CardVariant) => {
     switch (variant) {
         case 'success':
@@ -90,13 +88,11 @@ export const ResourceBillingStats = ({ data }: ResourceBillingStatsProps) => {
         let daysCount = 0;
         const dailyTotals: Record<string, number> = {};
 
-        // Iterar sobre todos los servicios (ej: Compute, EC2-Other)
         data.forEach(serviceGroup => {
             serviceGroup.billing.forEach(day => {
                 const cost = day.unblendedcost || 0;
                 totalCost += cost;
 
-                // Agrupar por fecha para encontrar el peak real del recurso completo
                 const dateKey = day.start_date;
                 dailyTotals[dateKey] = (dailyTotals[dateKey] || 0) + cost;
             });
@@ -140,7 +136,7 @@ export const ResourceBillingStats = ({ data }: ResourceBillingStatsProps) => {
                 value={formatCurrency(kpis.maxDailyCost)}
                 description="El costo más alto registrado en un solo día."
                 icon={TrendingUp}
-                variant="warning" // Warning visual para peaks altos
+                variant="warning"
                 footer="Máximo histórico del periodo"
             />
             <StatCard
@@ -150,7 +146,6 @@ export const ResourceBillingStats = ({ data }: ResourceBillingStatsProps) => {
                 icon={Layers}
                 variant="success"
                 footer={data.map(d => d.service).join(', ')}
-                // footer={data.map(d => d.service.split('-')[0].trim()).slice(0, 2).join(', ') + (data.length > 2 ? '...' : '')}
             />
         </div>
     );

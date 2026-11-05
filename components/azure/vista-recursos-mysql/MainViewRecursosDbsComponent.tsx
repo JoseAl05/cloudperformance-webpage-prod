@@ -30,12 +30,9 @@ export const MainViewRecursosMysqlComponent = () => {
                     subscriptionIdFilter
                     regionFilter
                     resourceGroupFilter
-                    resourceGroupCollection="custom_db_metrics_logs"
-                    resourceGroupSubscriptionField="resource_id"
+                    resourceGroupResourceType="db"
                     instancesFilterV2
-                    instancesV2Collection="azure_mysqlflexibleservers_servers"
-                    instancesV2SubscriptionField="id"
-                    instancesV2InstanceField="name"
+                    instancesV2ResourceType="mysql_servers"
                     
                     isResourceMultiSelect={false}
                 />

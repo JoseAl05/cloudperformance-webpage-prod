@@ -1,5 +1,6 @@
 'use client'
 
+import { fetcher } from '@/lib/fetcher';
 import useSWR from 'swr'
 import { Card, CardContent } from '@/components/ui/card'
 import {
@@ -20,12 +21,6 @@ import { LoaderComponent } from '@/components/general_gcp/LoaderComponent'
 import { MessageCard } from '@/components/aws/cards/MessageCards'
 import { TagsDataTableAWS } from './table/TagsDataTable'
 import { useState } from 'react'
-
-const fetcher = (url: string) =>
-  fetch(url, {
-    method: 'GET',
-    headers: { 'Content-Type': 'application/json' }
-  }).then(res => res.json())
 
 export interface ResourceItemAWS {
   resource: string
@@ -188,7 +183,6 @@ export const TagsAnalysisComponentAWS = ({ startDate, endDate, services }: TagsA
         </div>
       </div>
 
-      {/* TARJETAS KPI */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 w-full">
         <Card className="border-l-4 border-l-gray-500 shadow-sm flex flex-col justify-between w-full">
           <CardContent className="p-4 sm:p-5">
@@ -249,7 +243,7 @@ export const TagsAnalysisComponentAWS = ({ startDate, endDate, services }: TagsA
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4" onClick={() => setShowDetailsModal(false)}>
           <div
             className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden transform transition-all"
-            onClick={(e) => e.stopPropagation()} // Evita que el click dentro cierre el modal
+            onClick={(e) => e.stopPropagation()}
           >
             <div className="p-5 border-b flex justify-between items-center bg-slate-50">
               <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">
@@ -267,7 +261,6 @@ export const TagsAnalysisComponentAWS = ({ startDate, endDate, services }: TagsA
               </p>
 
               <div className="space-y-3">
-                {/* Etiquetado en Nube */}
                 <div className="flex items-center justify-between p-3 border rounded-lg bg-blue-50/30 border-blue-100">
                   <div className="flex items-center gap-3">
                     <div className="p-2 bg-blue-100 text-[#0078D4] rounded-md"><Cloud className="h-5 w-5" /></div>
@@ -282,7 +275,6 @@ export const TagsAnalysisComponentAWS = ({ startDate, endDate, services }: TagsA
                   </div>
                 </div>
 
-                {/* Etiquetado Local */}
                 <div className="flex items-center justify-between p-3 border rounded-lg bg-purple-50/30 border-purple-100">
                   <div className="flex items-center gap-3">
                     <div className="p-2 bg-purple-100 text-purple-600 rounded-md"><Laptop className="h-5 w-5" /></div>
@@ -297,7 +289,6 @@ export const TagsAnalysisComponentAWS = ({ startDate, endDate, services }: TagsA
                   </div>
                 </div>
 
-                {/* Mixto */}
                 <div className="flex items-center justify-between p-3 border rounded-lg bg-emerald-50/30 border-emerald-100">
                   <div className="flex items-center gap-3">
                     <div className="p-2 bg-emerald-100 text-emerald-600 rounded-md"><Layers className="h-5 w-5" /></div>

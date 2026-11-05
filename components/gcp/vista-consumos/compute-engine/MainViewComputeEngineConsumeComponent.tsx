@@ -1,6 +1,5 @@
 import { FiltersComponent } from "@/components/general_gcp/filters/FiltersComponent";
 import { Database } from "lucide-react";
-import { CloudSQLComponent } from "./CloudSQLComponent";
 import { ComputeEngineConsumeComponent } from '@/components/gcp/vista-consumos/compute-engine/ComputeEngineConsumeComponent';
 
 export const MainViewComputeEngineConsumeComponent = () => {
@@ -28,16 +27,16 @@ export const MainViewComputeEngineConsumeComponent = () => {
 
             <div className="w-full min-w-0">
                 <FiltersComponent
+                    cloud="gcp"
                     Component={ComputeEngineConsumeComponent}
                     dateFilter
-                    projectFilter
+                    projectsFilter
                     regionFilter
                     resourceFilter
                     isResourceMultiSelect
                     resourceService='instances'
                     tagsFilter
-                    tagCollection="gcp_custom_vm_metrics_logs"
-                    tagColumn="labels"
+                    tagResourceType="vm_metrics"
                     localService="Compute Engine"
                 />
             </div>

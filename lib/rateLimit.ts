@@ -1,4 +1,3 @@
-// CAMBIAR ESTO PARA MANEJARLO CON REDIS (BACKLOG)
 const buckets = new Map<string, { count: number; resetAt: number }>();
 
 export function rateLimit(key: string, limit = 10, windowMs = 60_000) {

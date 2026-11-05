@@ -52,22 +52,6 @@ export const InterCloudSelectionComponent = () => {
                     reqPayload.service_type === 'vms' && (
                         <>
                             <MainViewInterCloudVmComponent payload={reqPayload} />
-                            {/* <Card className="border-l-4 border-l-green-500 shadow-sm my-5">
-                                <CardHeader>
-                                    <CardTitle className="text-lg text-gray-700 flex items-center gap-2">
-                                        <CloudCog size={18} className="text-green-600" />
-                                        Cloud Performance — Selección preparada
-                                    </CardTitle>
-                                </CardHeader>
-                                <CardContent className="space-y-4">
-                                    <p className="text-sm text-gray-600">
-                                        Se ha generado el payload para la nube seleccionada.
-                                    </p>
-                                    <pre className="text-xs bg-slate-900 text-slate-100 rounded-md p-4 overflow-x-auto">
-                                        {JSON.stringify(reqPayload, null, 2)}
-                                    </pre>
-                                </CardContent>
-                            </Card> */}
                         </>
                     )
                 }

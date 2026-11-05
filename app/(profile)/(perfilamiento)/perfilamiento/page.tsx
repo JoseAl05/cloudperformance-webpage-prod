@@ -56,7 +56,7 @@ export default function PerfilamientoIndexPage() {
              <div className="mx-auto max-w-5xl px-4 py-8 text-center">
                  <div className="p-10 bg-red-100 border border-red-400 text-red-700 rounded-lg shadow-lg">
                     <h1 className="text-2xl font-bold">🚫 Acceso Denegado</h1>
-                    <p className="mt-2 text-sm">Tu rol ({user.role}) no tiene permisos para acceder a esta área de gestión.</p>
+                    <p className="mt-2 text-sm">Tu rol ({user?.role}) no tiene permisos para acceder a esta área de gestión.</p>
                 </div>
             </div>
         );

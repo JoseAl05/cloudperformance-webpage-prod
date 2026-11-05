@@ -1133,7 +1133,6 @@ export const AiRecommendationsComponent = ({ data, cloud }: AiRecommendationsCom
 
             {reports.map((report) => (
                 <div key={report.report_id} className="space-y-4">
-                    {/* Cabecera del Reporte */}
                     <div className="bg-blue-50/50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-900 rounded-xl p-5 sm:p-6">
                         <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-6">
                             <div className="flex-1 space-y-4">

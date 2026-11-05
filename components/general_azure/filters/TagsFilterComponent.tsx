@@ -1,4 +1,5 @@
 'use client'
+import { fetcher } from '@/lib/fetcher';
 import { useState, Dispatch, SetStateAction, useEffect, useMemo } from 'react'
 import { Check, ChevronsUpDown } from "lucide-react"
 import { cn } from "@/lib/utils"
@@ -15,10 +16,7 @@ interface TagFilterComponentProps {
     endDate: Date,
     region: string,
     subscription: string,
-    collection: string,
-    tagColumnName: string,
-    regionField?: string,
-    subscriptionField?: string,
+    resourceType: string,
     selectedKey?: string | null,
     selectedValue?: string | null,
     localService?: string | null,
@@ -33,23 +31,12 @@ interface AzureTagItem {
     Values: string[];
 }
 
-const fetcher = (url: string) =>
-    fetch(url, {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json'
-        }
-    }).then(res => res.json())
-
 export const TagsFilterComponent = ({
     startDate,
     endDate,
     region,
     subscription,
-    collection,
-    tagColumnName,
-    regionField = 'location',
-    subscriptionField = 'subscription_id',
+    resourceType,
     selectedKey,
     selectedValue,
     localService,
@@ -67,9 +54,9 @@ export const TagsFilterComponent = ({
 
     const shouldFetch = !!subscription && !!region
 
-    const { data, error, isLoading } = useSWR(
+    const { data, error, isLoading } = useSWR<AzureTagItem[]>(
         shouldFetch
-            ? `/api/azure/bridge/azure/get-all-tags?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&region_field=${regionField}&subscription=${subscription}&subscription_field=${subscriptionField}&collection=${collection}&tag_column_name=${tagColumnName}&local_service=${localService}`
+            ? `/api/azure/bridge/azure/get-all-tags?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=${region}&subscription=${subscription}&resource_type=${resourceType}&local_service=${localService}`
             : null,
         fetcher
     )

@@ -42,7 +42,6 @@ const fetcher = async (url: string) => {
   return res.json()
 }
 
-// Funciones puras para transformación de datos
 const formatTooltip = (info: TooltipData): string => {
   const formatCurrency = (val: number) => `$${val.toFixed(2)}`
   const formatHours = (val: number) => `${val.toFixed(2)}h`
@@ -165,7 +164,6 @@ export const TreemapSavingsPlanComponent = ({ startDate, endDate }: TreemapSavin
   const chartInstance = useRef<echarts.EChartsType | null>(null)
   const resizeObserverRef = useRef<ResizeObserver | null>(null)
 
-  // Memoizar URLs para evitar cambios innecesarios
   const url = useMemo(() => {
     const start = startDate.toISOString().split('.')[0]
     const end = endDate?.toISOString().split('.')[0] ?? ''
@@ -178,17 +176,14 @@ export const TreemapSavingsPlanComponent = ({ startDate, endDate }: TreemapSavin
     focusThrottleInterval: 300000
   })
 
-  // Memoizar datos transformados
   const formattedData = useMemo(() => transformData(data), [data])
 
-  // Memoizar opciones del gráfico
   const chartOptions = useMemo(() => getChartOptions(formattedData), [formattedData])
 
   const handleResize = useCallback(() => {
     chartInstance.current?.resize()
   }, [])
 
-  // Usar requestAnimationFrame para resize más eficiente
   const debouncedResize = useCallback(() => {
     let timeoutId: NodeJS.Timeout
     return () => {
@@ -204,10 +199,9 @@ export const TreemapSavingsPlanComponent = ({ startDate, endDate }: TreemapSavin
 
     if (!chartRef.current) return
 
-    // Inicializar o reutilizar instancia
     if (!chartInstance.current) {
       chartInstance.current = echarts.init(chartRef.current, null, {
-        useDirtyRect: true, // Optimización de rendimiento
+        useDirtyRect: true,
         useCoarsePointer: true
       })
     }
@@ -230,7 +224,6 @@ export const TreemapSavingsPlanComponent = ({ startDate, endDate }: TreemapSavin
 
     const debouncedHandler = debouncedResize()
 
-    // ResizeObserver con mejor rendimiento
     const resizeObserver = new ResizeObserver(() => {
       debouncedHandler()
     })

@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Info } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { deepMerge, makeBaseOptions, useECharts } from '@/lib/echartsGlobalConfig';
-import { RecommenderGcp } from '@/interfaces/gcpRecommenderInterfaces';
+import { RecommenderGcp } from '@/interfaces/vista-recommender/gcpRecommenderInterfaces';
 
 interface RecommenderPieChartComponentProps {
     data: RecommenderGcp[];

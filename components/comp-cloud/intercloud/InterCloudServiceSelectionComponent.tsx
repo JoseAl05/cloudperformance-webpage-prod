@@ -19,7 +19,6 @@ export const InterCloudServiceSelectionComponent = ({ cloudType, onServiceSelect
 
     const services = [
         { id: 'vms', label: 'Máquinas Virtuales', icon: Cpu, description: 'Máquinas virtuales (EC2, Virtual Machines, Compute Instances)' },
-        // { id: 'storage', label: 'Storage y Discos', icon: HardDrive, description: 'Volúmenes, Buckets y retención.' }
     ];
 
     const handleGenerateClick = () => {

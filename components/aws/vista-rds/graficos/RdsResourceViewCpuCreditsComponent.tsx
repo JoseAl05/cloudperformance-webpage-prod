@@ -253,7 +253,6 @@ export const RdsResourceViewCpuCreditsComponent = ({
         );
     }
 
-    // Verificar si existen las métricas de CPU Credits específicas
     const allowedMetrics = [
         "Uso de Créditos de CPU (Promedio)",
         "Créditos de CPU Disponibles (Promedio)"

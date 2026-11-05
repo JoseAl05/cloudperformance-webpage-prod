@@ -19,29 +19,24 @@ interface LicenseCreationFormProps {
 export default function LicenseCreationForm({ refreshLicenseStatus }: LicenseCreationFormProps) {
     const { user: userLoggedIn } = useSession();
 
-    // Estados para las cuentas dinámicas
     const [azureAccountsData, setAzureAccountsData] = useState<CloudAccountRow[]>([]);
     const [awsAccountsData, setAwsAccountsData] = useState<CloudAccountRow[]>([]);
-    const [gcpAccountsData, setGcpAccountsData] = useState<CloudAccountRow[]>([]); // Nuevo estado GCP
+    const [gcpAccountsData, setGcpAccountsData] = useState<CloudAccountRow[]>([]);
     const [openaiAccountsData, setOpenaiAccountsData] = useState<CloudAccountRow[]>([]);
 
     const [formData, setFormData] = useState({
         name: '',
         planName: PLAN_NAMES[0] || '',
         userLimit: PLAN_CONFIG[PLAN_NAMES[0]]?.userLimit || 1,
-        // Campos AWS
         user_db_aws: '',
         is_aws: true,
         is_aws_multi_tenant: false,
-        // Campos Azure
         user_db_azure: '',
         is_azure: true,
         is_azure_multi_tenant: false,
-        // Campos GCP (Nuevos)
         user_db_gcp: '',
         is_gcp: true,
         is_gcp_multi_tenant: false,
-        // Campos Open IA
         user_db_openai: '',
         is_openai: false,
         is_openai_multi_tenant: false,
@@ -64,7 +59,6 @@ export default function LicenseCreationForm({ refreshLicenseStatus }: LicenseCre
                 }
             }
 
-            // Limpieza de estados si se desactivan los checkbox principales
             if (name === 'is_aws' && !finalValue) {
                 newState.user_db_aws = '';
                 newState.is_aws_multi_tenant = false;
@@ -75,13 +69,12 @@ export default function LicenseCreationForm({ refreshLicenseStatus }: LicenseCre
                 newState.is_azure_multi_tenant = false;
                 setAzureAccountsData([]);
             }
-            if (name === 'is_gcp' && !finalValue) { // Lógica limpieza GCP
+            if (name === 'is_gcp' && !finalValue) {
                 newState.user_db_gcp = '';
                 newState.is_gcp_multi_tenant = false;
                 setGcpAccountsData([]);
             }
 
-            // Limpieza de arrays si se desactiva multi-tenant
             if (name === 'is_azure_multi_tenant' && !finalValue) setAzureAccountsData([]);
             if (name === 'is_aws_multi_tenant' && !finalValue) setAwsAccountsData([]);
             if (name === 'is_gcp_multi_tenant' && !finalValue) setGcpAccountsData([]);
@@ -91,21 +84,19 @@ export default function LicenseCreationForm({ refreshLicenseStatus }: LicenseCre
         });
     };
 
-    // Handler unificado para añadir cuentas
     const handleAddAccount = useCallback((cloud: CloudProvider) => {
         const newAccount = newAccountRow(cloud);
         if (cloud === 'azure') setAzureAccountsData(prev => [...prev, newAccount]);
         else if (cloud === 'aws') setAwsAccountsData(prev => [...prev, newAccount]);
-        else if (cloud === 'gcp') setGcpAccountsData(prev => [...prev, newAccount]); // Caso GCP
+        else if (cloud === 'gcp') setGcpAccountsData(prev => [...prev, newAccount]);
         else setOpenaiAccountsData(prev => [...prev, newAccount]);
     }, []);
 
-    // Handler unificado para actualizar cuentas
     const handleUpdateAccount = useCallback((cloud: CloudProvider, rowKey: string, field: 'alias' | 'db', value: string) => {
         let setter;
         if (cloud === 'azure') setter = setAzureAccountsData;
         else if (cloud === 'aws') setter = setAwsAccountsData;
-        else if (cloud === 'gcp') setter = setGcpAccountsData; // Setter GCP
+        else if (cloud === 'gcp') setter = setGcpAccountsData;
         else setter = setOpenaiAccountsData;
 
         setter(prev => prev.map(acc =>
@@ -113,11 +104,10 @@ export default function LicenseCreationForm({ refreshLicenseStatus }: LicenseCre
         ));
     }, []);
 
-    // Handler unificado para eliminar cuentas
     const handleRemoveAccount = useCallback((cloud: CloudProvider, rowKey: string) => {
         if (cloud === 'azure') setAzureAccountsData(prev => prev.filter(acc => acc._key !== rowKey));
         else if (cloud === 'aws') setAwsAccountsData(prev => prev.filter(acc => acc._key !== rowKey));
-        else if (cloud === 'gcp') setGcpAccountsData(prev => prev.filter(acc => acc._key !== rowKey)); // Remover GCP
+        else if (cloud === 'gcp') setGcpAccountsData(prev => prev.filter(acc => acc._key !== rowKey));
         else setOpenaiAccountsData(prev => prev.filter(acc => acc._key !== rowKey));
     }, []);
 
@@ -132,7 +122,6 @@ export default function LicenseCreationForm({ refreshLicenseStatus }: LicenseCre
             return;
         }
 
-        // Validaciones AWS
         if (!formData.is_aws_multi_tenant && formData.is_aws && !formData.user_db_aws) {
             setMessage('Error: El Nombre DB AWS es requerido si el acceso AWS está activado.');
             setLoading(false); return;
@@ -142,7 +131,6 @@ export default function LicenseCreationForm({ refreshLicenseStatus }: LicenseCre
             setLoading(false); return;
         }
 
-        // Validaciones Azure
         if (!formData.is_azure_multi_tenant && formData.is_azure && !formData.user_db_azure) {
             setMessage('Error: El Nombre DB Azure es requerido si el acceso Azure está activado.');
             setLoading(false); return;
@@ -152,7 +140,6 @@ export default function LicenseCreationForm({ refreshLicenseStatus }: LicenseCre
             setLoading(false); return;
         }
 
-        // Validaciones GCP (Nuevas)
         if (!formData.is_gcp_multi_tenant && formData.is_gcp && !formData.user_db_gcp) {
             setMessage('Error: El Nombre DB GCP es requerido si el acceso GCP está activado.');
             setLoading(false); return;
@@ -162,7 +149,6 @@ export default function LicenseCreationForm({ refreshLicenseStatus }: LicenseCre
             setLoading(false); return;
         }
 
-        // Validaciones Open IA
         if (!formData.is_openai_multi_tenant && formData.is_openai && !formData.user_db_openai) {
             setMessage('Error: El Nombre DB Open IA es requerido si el acceso Open IA está activado.');
             setLoading(false); return;
@@ -172,8 +158,6 @@ export default function LicenseCreationForm({ refreshLicenseStatus }: LicenseCre
             setLoading(false); return;
         }
 
-        // Las cuentas SÓLO se envían en modo multi-tenant. En single-tenant la
-        // conexión vive en `user_db_<cloud>` y el backend no crea el array.
         const finalAwsAccounts = formData.is_aws && formData.is_aws_multi_tenant
             ? toAccountsPayload(awsAccountsData)
             : undefined;
@@ -199,25 +183,21 @@ export default function LicenseCreationForm({ refreshLicenseStatus }: LicenseCre
                     planName: formData.planName,
                     userLimit: formData.userLimit,
 
-                    // Datos AWS
                     user_db_aws: formData.is_aws && !formData.is_aws_multi_tenant ? formData.user_db_aws : null,
                     is_aws: formData.is_aws,
                     is_aws_multi_tenant: formData.is_aws_multi_tenant,
                     aws_accounts: finalAwsAccounts,
 
-                    // Datos Azure
                     user_db_azure: formData.is_azure && !formData.is_azure_multi_tenant ? formData.user_db_azure : null,
                     is_azure: formData.is_azure,
                     is_azure_multi_tenant: formData.is_azure_multi_tenant,
                     azure_accounts: finalAzureAccounts,
 
-                    // Datos GCP
                     user_db_gcp: formData.is_gcp && !formData.is_gcp_multi_tenant ? formData.user_db_gcp : null,
                     is_gcp: formData.is_gcp,
                     is_gcp_multi_tenant: formData.is_gcp_multi_tenant,
                     gcp_accounts: finalGcpAccounts,
 
-                    // Datos Open IA
                     user_db_openai: formData.is_openai && !formData.is_openai_multi_tenant ? formData.user_db_openai : null,
                     is_openai: formData.is_openai,
                     is_openai_multi_tenant: formData.is_openai_multi_tenant,
@@ -237,7 +217,7 @@ export default function LicenseCreationForm({ refreshLicenseStatus }: LicenseCre
                     userLimit: PLAN_CONFIG[PLAN_NAMES[0]]?.userLimit || 1,
                     is_aws: true,
                     is_azure: true,
-                    is_gcp: true, // Resetear GCP a true
+                    is_gcp: true,
                     is_openai: false,
                     user_db_aws: '',
                     user_db_azure: '',
@@ -250,7 +230,7 @@ export default function LicenseCreationForm({ refreshLicenseStatus }: LicenseCre
                 }));
                 setAzureAccountsData([]);
                 setAwsAccountsData([]);
-                setGcpAccountsData([]); // Limpiar cuentas GCP
+                setGcpAccountsData([]);
                 setOpenaiAccountsData([]);
                 if (refreshLicenseStatus) refreshLicenseStatus();
             } else {
@@ -305,7 +285,6 @@ export default function LicenseCreationForm({ refreshLicenseStatus }: LicenseCre
 
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
 
-                {/* COLUMNA AWS */}
                 <div className="space-y-2 border p-3 rounded-lg bg-amber-50/20 border-amber-100">
                     <div className="flex items-center space-x-4 mb-2">
                         <input type="checkbox" name="is_aws" id="is_aws" checked={formData.is_aws} onChange={handleChange} className="h-4 w-4 rounded border-gray-300 text-amber-600 focus:ring-amber-500" />
@@ -336,7 +315,6 @@ export default function LicenseCreationForm({ refreshLicenseStatus }: LicenseCre
                     )}
                 </div>
 
-                {/* COLUMNA AZURE */}
                 <div className="space-y-2 border p-3 rounded-lg bg-blue-50/20 border-blue-100">
                       <div className="flex items-center space-x-4 mb-2">
                         <input type="checkbox" name="is_azure" id="is_azure" checked={formData.is_azure} onChange={handleChange} className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
@@ -368,7 +346,6 @@ export default function LicenseCreationForm({ refreshLicenseStatus }: LicenseCre
                     )}
                 </div>
 
-                {/* COLUMNA GCP (NUEVA) */}
                 <div className="space-y-2 border p-3 rounded-lg bg-emerald-50/20 border-emerald-100">
                       <div className="flex items-center space-x-4 mb-2">
                         <input type="checkbox" name="is_gcp" id="is_gcp" checked={formData.is_gcp} onChange={handleChange} className="h-4 w-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500" />
@@ -401,7 +378,6 @@ export default function LicenseCreationForm({ refreshLicenseStatus }: LicenseCre
                 </div>
 
 
-                {/* COLUMNA OPEN IA */}
                 <div className="space-y-2 border p-3 rounded-lg bg-slate-50/40 border-slate-200">
                       <div className="flex items-center space-x-4 mb-2">
                         <input type="checkbox" name="is_openai" id="is_openai" checked={formData.is_openai} onChange={handleChange} className="h-4 w-4 rounded border-gray-300 text-slate-700 focus:ring-slate-500" />

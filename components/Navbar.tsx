@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import Image from "next/image"
 import Link from "next/link"
+import { NavbarClientSwitcher } from "@/components/NavbarClientSwitcher"
 
 interface NavbarProps {
     payload: unknown
@@ -19,7 +20,9 @@ interface NavbarProps {
 
 export const Navbar = ({ payload }: NavbarProps) => {
     const { setTheme, theme } = useTheme()
-    const username = (payload as unknown)?.username as string | undefined
+    const session = (payload ?? {}) as { username?: unknown; role?: unknown }
+    const username = typeof session.username === "string" ? session.username : undefined
+    const isGlobalAdmin = session.role === "admin_global"
 
     return (
         <header className="sticky top-0 z-50 w-full bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/70">
@@ -39,6 +42,7 @@ export const Navbar = ({ payload }: NavbarProps) => {
                     </Link>
 
                     <div className="flex items-center gap-3">
+                        {isGlobalAdmin && <NavbarClientSwitcher />}
                         <Button
                             variant="secondary"
                             size="sm"

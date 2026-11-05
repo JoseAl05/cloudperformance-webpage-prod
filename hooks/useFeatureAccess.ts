@@ -1,9 +1,11 @@
+import { fetchJson } from '@/lib/fetcher';
 import { useSession } from '@/hooks/useSession';
 import useSWR from 'swr';
 import { CloudAccount, Empresa, User } from '@/types/db';
 import { useClientContext } from '@/components/context/ClientContext';
 
-const fetcher = (url: string) => fetch(url, { credentials: 'include' }).then(res => res.json());
+const fetcher = <T = unknown>(url: string) =>
+    fetchJson<T>(url, { credentials: 'include' });
 
 const PLAN_ACCESS_CONFIG: Record<string, {
     aws: 'full_dashboard' | 'pdf_report' | 'none';
@@ -84,16 +86,12 @@ export const useFeatureAccess = () => {
     let activeCredentials: Empresa | User | null;
 
     if (isGlobalAdmin && selectedCompany) {
-        // Caso 1: Admin Global visualizando una empresa seleccionada
         activeCredentials = selectedCompany;
     } else if (userLoggedIn) {
-        // Caso 2: Admin Empresa o Usuario  (usando su propia sesión)
         activeCredentials = userLoggedIn;
     } else {
         activeCredentials = null;
     }
-
-    //  LÓGICA MULTI-TENANT
 
     const normalizeAccounts = (rawAccounts: CloudAccount[] | undefined, legacyDb: string | null | undefined): CloudAccount[] => {
         let list = rawAccounts || [];
@@ -103,7 +101,6 @@ export const useFeatureAccess = () => {
         return list;
     };
 
-    // Normalizar nubes
     const azureAccountsList = normalizeAccounts(activeCredentials?.azure_accounts, activeCredentials?.user_db_azure);
     const awsAccountsList = normalizeAccounts(activeCredentials?.aws_accounts, activeCredentials?.user_db_aws);
     const gcpAccountsList = normalizeAccounts(activeCredentials?.gcp_accounts, activeCredentials?.user_db_gcp);
@@ -160,17 +157,19 @@ export const useFeatureAccess = () => {
         openaiAccountsList,
     };
 
+    const findAccountId = (accounts: CloudAccount[], db: string | null): string | null =>
+        db ? accounts.find(acc => acc.db === db)?.id ?? null : null;
 
-    const swapContextToken = async (targetClientName: string, explicitAzureDb: string | null = null, explicitAwsDb: string | null = null, explicitGcpDb: string | null = null, explicitOpenaiDb: string | null = null) => {
-        if (!targetClientName) return;
+    const swapContextToken = async (targetClientName: string, explicitAzureDb: string | null = null, explicitAwsDb: string | null = null, explicitGcpDb: string | null = null, explicitOpenaiDb: string | null = null): Promise<boolean> => {
+        if (!targetClientName) return false;
 
         try {
             const payload = {
                 clientName: targetClientName,
-                user_db_azure: explicitAzureDb,
-                user_db_aws: explicitAwsDb,
-                user_db_gcp: explicitGcpDb,
-                user_db_openai: explicitOpenaiDb,
+                azure_account_id: findAccountId(azureAccountsList, explicitAzureDb),
+                aws_account_id: findAccountId(awsAccountsList, explicitAwsDb),
+                gcp_account_id: findAccountId(gcpAccountsList, explicitGcpDb),
+                openai_account_id: findAccountId(openaiAccountsList, explicitOpenaiDb),
             };
 
             const response = await fetch('/api/auth/swap-client-context', {
@@ -185,9 +184,11 @@ export const useFeatureAccess = () => {
                 throw new Error(errorData.message || 'Error al cambiar contexto.');
             }
             refreshSession();
+            return true;
 
         } catch (error) {
             console.error("Fallo al cambiar el contexto:", error);
+            return false;
         }
    };
 

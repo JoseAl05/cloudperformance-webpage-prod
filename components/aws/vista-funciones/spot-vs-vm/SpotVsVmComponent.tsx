@@ -1,4 +1,6 @@
 'use client'
+import { SpotVsRegularVm } from '@/interfaces/vista-spot-vs-regular-vm/spotVsRegularVmInterfaces';
+import { fetcher } from '@/lib/fetcher';
 import useSWR from 'swr'
 import { useEffect, useRef, useMemo } from "react"
 import * as echarts from "echarts"
@@ -6,10 +8,6 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Server, Cloud, Percent } from "lucide-react"
 import { TableComponentSpotVsVm } from "@/components/aws/vista-funciones/spot-vs-vm/table/SpotVsVmTableComponent"
 import { SpotVsVmChartComponent } from '@/components/aws/vista-funciones/spot-vs-vm/grafico/SpotVsVmChartComponent'
-
-const fetcher = (url: string) =>
-    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
-        .then(r => r.json());
 
 interface SpotVsVmProps {
   startDate: Date,
@@ -24,18 +22,17 @@ export const MainViewSpotVsVm = ({ startDate, endDate }: SpotVsVmProps) => {
   const startDateFormatted = startDate ? startDate.toISOString().replace('Z', '').slice(0, -4) : '';
   const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : '';
 
-  const { data, error, isLoading } = useSWR(
+  const { data, error, isLoading } = useSWR<SpotVsRegularVm[]>(
     `/api/aws/bridge/vm/spot_vs_vm?date_from=${startDateFormatted}&date_to=${endDateFormatted}&region=all_regions`,
     fetcher
   )
 
-    // 📌 Calcular métricas finales
   const metrics = useMemo(() => {
     if (!data || data.length === 0) {
       return { totalVMs: null, totalSpot: null, spotPercentage: null }
     }
 
-    const last = data[data.length - 1] // último registro
+    const last = data[data.length - 1]
     const totalVMs = last.total_instancias || 0
     const totalSpot = last.total_spot || 0
     const spotPercentage = totalVMs > 0 ? ((totalSpot / totalVMs) * 100).toFixed(2) : null
@@ -46,9 +43,9 @@ export const MainViewSpotVsVm = ({ startDate, endDate }: SpotVsVmProps) => {
   useEffect(() => {
     if (!chartRef.current || !data) return
 
-    const times = data.map((item: unknown) => item.sync_time)
-    const totalInstancias = data.map((item: unknown) => item.total_instancias)
-    const totalSpot = data.map((item: unknown) => item.total_spot)
+    const times = data.map((item) => item.sync_time)
+    const totalInstancias = data.map((item) => item.total_instancias)
+    const totalSpot = data.map((item) => item.total_spot)
 
     const options: echarts.EChartsOption = {
       tooltip: {
@@ -70,7 +67,6 @@ export const MainViewSpotVsVm = ({ startDate, endDate }: SpotVsVmProps) => {
         type: 'category',
         data: times.map((t: string) => {
             const d = new Date(t)
-            // Solo día/mes (si prefieres dd/mm/yyyy agrega también d.getUTCFullYear())
             return `${d.getUTCDate()}/${d.getUTCMonth() + 1}`
         }),
         axisLabel: { rotate: 45 }
@@ -125,9 +121,7 @@ export const MainViewSpotVsVm = ({ startDate, endDate }: SpotVsVmProps) => {
 
      return (
     <div className="space-y-6 p-4">
-      {/* 📌 Tarjetas métricas */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {/* Total VMs */}
         <Card className="border-l-4 border-l-indigo-500 shadow-lg rounded-2xl">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
@@ -147,7 +141,6 @@ export const MainViewSpotVsVm = ({ startDate, endDate }: SpotVsVmProps) => {
           </CardContent>
         </Card>
 
-        {/* Total Spot VMs */}
         <Card className="border-l-4 border-l-orange-500 shadow-lg rounded-2xl">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
@@ -167,7 +160,6 @@ export const MainViewSpotVsVm = ({ startDate, endDate }: SpotVsVmProps) => {
           </CardContent>
         </Card>
 
-        {/* % Spot */}
         <Card className="border-l-4 border-l-green-500 shadow-lg rounded-2xl">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
@@ -188,13 +180,11 @@ export const MainViewSpotVsVm = ({ startDate, endDate }: SpotVsVmProps) => {
         </Card>
       </div>
 
-      {/* 📊 Gráfico*/}
       <SpotVsVmChartComponent
-        data={data}
+        data={data ?? []}
       />
 
 
-        {/* === Tabla === */}
         <TableComponentSpotVsVm
           startDateFormatted={startDateFormatted}
           endDateFormatted={endDateFormatted}

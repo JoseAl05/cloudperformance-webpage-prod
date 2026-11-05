@@ -1,26 +1,17 @@
 import ExcelJS from 'exceljs'
-import { RespuestaHistoricoConsumo } from '@/components/azure/vista-facturacion/tendencia-pago-por-uso/table/HistoricalBillingTable' // Ajusta esta ruta si es diferente
+import type { BillingHistory } from '@/interfaces/billing'
 
-const formatDevLabel = (periodo: string, meses: string[]) => {
-  const parts = periodo.split('_')
-  if (parts.length > 1) {
-    const mesActual = parts[parts.length - 1]
-    const currentIndex = meses.indexOf(mesActual)
-    if (currentIndex > 0) {
-      const mesAnterior = meses[currentIndex - 1]
-      return `${mesAnterior} vs ${mesActual}`
-    }
-    return `vs ${mesActual}`
-  }
-  return periodo
+const formatDevLabel = (toMonth: string, meses: string[]) => {
+  const currentIndex = meses.indexOf(toMonth)
+  return currentIndex > 0 ? `${meses[currentIndex - 1]} vs ${toMonth}` : `vs ${toMonth}`
 }
 
 export const exportHistoricalBillingToExcel = async (
-  data: RespuestaHistoricoConsumo,
+  data: BillingHistory,
   meses: string[],
-  periodosDesviacion: string[],
-  filename = 'Historico_Consumo_Azure.xlsx'
+  filename = 'Historico_Consumo.xlsx'
 ) => {
+  const periodosDesviacion = meses.slice(1)
   const wb = new ExcelJS.Workbook()
   const ws = wb.addWorksheet('Histórico de Consumo')
 
@@ -72,12 +63,12 @@ export const exportHistoricalBillingToExcel = async (
 
   row2.getCell(1).alignment = { horizontal: 'left', vertical: 'middle' }
 
-  data.datos_historicos_tabla.forEach((row) => {
+  data.services.forEach((row) => {
     const rowData = [
-      row.service_category,
-      ...row.consumo_historico.map((c) => c.costo),
-      row.total_historico,
-      ...row.desviaciones_mensuales.map((d) => d.valor),
+      row.service,
+      ...meses.map((m) => row.months.find((c) => c.month === m)?.cost ?? 0),
+      row.total,
+      ...periodosDesviacion.map((m) => row.deviations.find((d) => d.to_month === m)?.value ?? null),
     ]
     const dataRow = ws.addRow(rowData)
 
@@ -109,8 +100,8 @@ export const exportHistoricalBillingToExcel = async (
 
   const totalRowData = [
     'TOTAL GENERAL',
-    ...data.totales_generales.por_mes.map((t) => t.total),
-    data.totales_generales.gran_total,
+    ...meses.map((m) => data.totals.by_month.find((t) => t.month === m)?.total ?? 0),
+    data.totals.total,
   ]
   const totalRow = ws.addRow(totalRowData)
   totalRow.eachCell((cell, colNumber) => {
@@ -129,7 +120,7 @@ export const exportHistoricalBillingToExcel = async (
     
     const headersResumen = ['Resumen desviaciones mensuales', ...periodosDesviacion.map(d => formatDevLabel(d, meses))]
     const rHead = ws.addRow(headersResumen)
-    rHead.eachCell((cell, colNumber) => {
+    rHead.eachCell((cell) => {
       cell.fill = headerBg
       cell.font = fontWhiteBold
       cell.alignment = { horizontal: 'center', vertical: 'middle' }
@@ -137,7 +128,7 @@ export const exportHistoricalBillingToExcel = async (
     })
     rHead.getCell(1).alignment = { horizontal: 'left', vertical: 'middle' }
 
-    const rowAlzas = ['T10-Alzas', ...data.resumen_desviaciones_mensuales.map(r => r.alzas)]
+    const rowAlzas = ['T10-Alzas', ...data.deviations.map(r => r.increases)]
     const rAlzas = ws.addRow(rowAlzas)
     rAlzas.eachCell((cell, colNumber) => {
       cell.border = thinBorder
@@ -151,7 +142,7 @@ export const exportHistoricalBillingToExcel = async (
       }
     })
 
-    const rowBajas = ['T10-Bajas', ...data.resumen_desviaciones_mensuales.map(r => r.bajas)]
+    const rowBajas = ['T10-Bajas', ...data.deviations.map(r => r.decreases)]
     const rBajas = ws.addRow(rowBajas)
     rBajas.eachCell((cell, colNumber) => {
       cell.border = thinBorder
@@ -165,7 +156,7 @@ export const exportHistoricalBillingToExcel = async (
       }
     })
 
-    const rowNeto = ['Neto', ...data.resumen_desviaciones_mensuales.map(r => r.neto)]
+    const rowNeto = ['Neto', ...data.deviations.map(r => r.net)]
     const rNeto = ws.addRow(rowNeto)
     rNeto.eachCell((cell, colNumber) => {
       cell.border = thinBorder
@@ -182,11 +173,10 @@ export const exportHistoricalBillingToExcel = async (
     })
   }
   
-  // --- AJUSTE DE ANCHO DE COLUMNAS (AUTOMÁTICO) ---
   ws.columns.forEach((column) => {
     let maxLength = 0;
     
-    column.eachCell({ includeEmpty: true }, (cell) => {
+    column.eachCell?.({ includeEmpty: true }, (cell) => {
       const cellValue = cell.value ? cell.value.toString() : ''; 
       const extraPadding = cell.numFmt ? 5 : 0;       
       const currentLength = cellValue.length + extraPadding;

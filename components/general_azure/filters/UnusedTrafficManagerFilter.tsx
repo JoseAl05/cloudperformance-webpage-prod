@@ -1,4 +1,5 @@
 'use client'
+import { fetcher } from '@/lib/fetcher';
 import { Dispatch, SetStateAction, useMemo, useState } from 'react'
 import { Check, ChevronsUpDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -7,6 +8,7 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import useSWR from 'swr'
 import { LoaderComponent } from '@/components/general_azure/LoaderComponent'
+import type { UnusedCandidate } from '@/interfaces/unused'
 
 interface UnusedTrafficManagerFilterProps {
     startDate: Date;
@@ -20,14 +22,6 @@ interface UnusedTrafficManagerFilterProps {
     selectedTagKey?: string | null;
     selectedTagValue?: string | null;
 }
-
-type ApiUnusedTm =
-    | { tm_id_lowercase: string; tm_name: string }
-    | string
-
-const fetcher = (url: string) =>
-    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
-        .then(r => r.json());
 
 export const UnusedTrafficManagerFilter = ({
     startDate,
@@ -47,19 +41,12 @@ export const UnusedTrafficManagerFilter = ({
     const tagKeyParam = selectedTagKey || 'allKeys';
     const tagValueParam = selectedTagValue || 'allValues';
 
-    const url = `/api/azure/bridge/azure/traffic_managers/all_unused_traffic_managers?date_from=${startDateFormatted}&date_to=${endDateFormatted}&subscription_id=${subscription}&location=${region}&resource_groups=${resourceGroup}&nombre_tag=${tagKeyParam}&valor_tag=${tagValueParam}`
-    const { data, error, isLoading } = useSWR<ApiUnusedTm[]>(url, fetcher)
+    const url = `/api/azure/bridge/azure/unused/traffic-managers/candidates?date_from=${startDateFormatted}&date_to=${endDateFormatted}&subscription_id=${subscription && subscription !== 'all_subscriptions' ? subscription : 'all'}&location=${region}&resource_groups=${resourceGroup}&nombre_tag=${tagKeyParam}&valor_tag=${tagValueParam}`
+    const { data, error, isLoading } = useSWR<UnusedCandidate[]>(url, fetcher)
 
     const unusedTms = useMemo(() => {
         if (!Array.isArray(data)) return [] as { id: string; name: string }[]
-        if (data.length === 0) return []
-        if (typeof data[0] === 'string') {
-            return (data as string[]).map((id) => ({ id, name: id }))
-        }
-        return (data as { tm_id_lowercase: string; tm_name: string }[]).map((s) => ({
-            id: s.tm_id_lowercase,
-            name: s.tm_name,
-        }))
+        return data.map((s) => ({ id: s.resource_id, name: s.resource_name }))
     }, [data])
 
     const noUnusedTms = unusedTms.length === 0

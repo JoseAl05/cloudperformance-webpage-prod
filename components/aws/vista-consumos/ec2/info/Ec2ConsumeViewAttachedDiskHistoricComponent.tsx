@@ -76,7 +76,7 @@ export const Ec2ConsumeViewAttachedDiskHistoricComponent = ({ instanceInfo }: Ec
                                         <Server className="h-5 w-5 text-blue-500" />
                                         <Link
                                             href={{
-                                                pathname: '/aws/recursos/instancias-ec2',
+                                                pathname: '/cloud-aws/recursos/instancias-ec2',
                                                 query: { instance: instance.instanceId }
                                             }}
                                             rel="noopener noreferrer"

@@ -20,6 +20,7 @@ import { formatGeneric, formatBytes } from '@/lib/bytesToMbs';
 import { WorkingNonWorkingInfoView, WorkingNonWorkingMetricsView } from '@/components/gcp/vista-funciones/consumo-horario-habil-no-habil/info/WorkingNonWorkingInsightModalComponent';
 import { usePathname, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import { readFilterParam } from '@/lib/filters';
 
 export const getMetricFormat = (metricName: string): 'percent' | 'bytes' | 'number' => {
     const lower = metricName.toLowerCase();
@@ -179,10 +180,10 @@ const DetailsCell = ({ row }: { row: WorkingNonWorkingHoursUsageSummaryByResourc
 const GetParameters = () => {
     const searchParams = useSearchParams();
     const pathname = usePathname();
-    const startDateParam = searchParams.get('startDate');
-    const endDateParam = searchParams.get('endDate');
-    const projectParam = searchParams.get('projects');
-    const regionParam = searchParams.get('regions');
+    const startDateParam = readFilterParam(searchParams, 'dateFrom');
+    const endDateParam = readFilterParam(searchParams, 'dateTo');
+    const projectParam = readFilterParam(searchParams, 'scopes');
+    const regionParam = readFilterParam(searchParams, 'regions');
 
     return {
         startDateParam,
@@ -224,7 +225,7 @@ export const getWorkingNonWorkingColumns = (
                 const { startDateParam, endDateParam, projectParam, regionParam, pathname } = GetParameters();
 
                 const isCloudSql = pathname.includes('cloud-sql');
-                const redirectBaseUrl = isCloudSql ? '/gcp/recursos/cloudsql' : '/gcp/recursos';
+                const redirectBaseUrl = isCloudSql ? '/cloud-gcp/recursos/cloudsql' : '/cloud-gcp/recursos';
                 const resourcePath = isCloudSql ? info.getValue() : info.row.original.resource_id;
 
                 let redirectUrl = '';

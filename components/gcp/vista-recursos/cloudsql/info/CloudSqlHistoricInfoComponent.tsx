@@ -7,7 +7,7 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { getUptime } from '@/lib/getUptimeInstance'
 import { Accordion } from '@/components/ui/accordion'
 import { Globe, HardDrive, MapPin, Network, Database, ShieldCheck } from 'lucide-react'
-import { HistoryDatum } from '@/interfaces/sqlInterfaces'
+import { HistoryDatum } from '@/interfaces/vista-cloudsql/cSqlInterfaces'
 
 interface CloudSqlHistoricInfoComponentProps {
     instances: HistoryDatum[]

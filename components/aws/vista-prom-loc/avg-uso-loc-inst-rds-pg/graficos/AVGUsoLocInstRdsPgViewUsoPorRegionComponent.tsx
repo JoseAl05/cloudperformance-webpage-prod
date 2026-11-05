@@ -244,7 +244,6 @@ export const AVGUsoLocInstRdsPgViewUsoPorRegionComponent = ({
   isLoading,
   error,
 }: Props) => {
-  // Lista de métricas (únicas y ordenadas) igual que en EC2
   const metrics = useMemo(() => {
     if (Array.isArray(allMetrics) && allMetrics.length) {
       return [...new Set(allMetrics)].sort(byAlpha);
@@ -256,7 +255,6 @@ export const AVGUsoLocInstRdsPgViewUsoPorRegionComponent = ({
     return Array.from(set).sort(byAlpha);
   }, [allMetrics, data]);
 
-  // Mapa región → (métrica → dato de celda) igual que en EC2
   const table = useMemo(() => {
     const map = new Map<string, Map<string, CellDatum>>();
     for (const row of data ?? []) {

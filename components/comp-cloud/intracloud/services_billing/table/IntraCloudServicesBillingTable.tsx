@@ -10,7 +10,7 @@ import {
 import { BarChart3, TrendingUp, TrendingDown } from 'lucide-react';
 import { Dispatch, SetStateAction, useMemo } from 'react';
 import { ReqPayload } from '@/components/comp-cloud/intracloud/IntraCloudConfigComponent';
-import { AggregatedComputeRow } from '@/components/comp-cloud/intracloud/compute/table/IntraCloudComputeBillingColumns';
+import { AggregatedComputeRow } from '@/components/comp-cloud/intracloud/services_billing/table/IntraCloudServicesBillingColumns';
 import { formatMetric } from '@/lib/metricUtils';
 import { IntraCloudBillingDimSelectionComponent } from '@/components/comp-cloud/intracloud/billing/table/IntraCloudBillingDimSelectionComponent';
 import { IntraCloudStorageBilling } from '@/interfaces/vista-intracloud/storage/intraCloudStorageInterfaces';

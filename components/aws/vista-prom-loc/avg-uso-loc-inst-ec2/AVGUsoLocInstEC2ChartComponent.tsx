@@ -1,5 +1,6 @@
 'use client';
 
+import { fetcher } from '@/lib/fetcher';
 import useSWR from 'swr';
 import { useMemo } from 'react';
 import { AVGUsoLocInstEC2ViewUsoPorRegionComponent } from '@/components/aws/vista-prom-loc/avg-uso-loc-inst-ec2/graficos/AVGUsoLocInstEC2ViewUsoPorRegionComponent';
@@ -16,7 +17,6 @@ interface Props {
   metrics?: string;
 }
 
-// Interfaces para respuesta general (/promedio-loc-ec2)
 interface MetricAverageGeneral {
   metric_groups: string[];
   metric_label: string;
@@ -34,7 +34,6 @@ interface ApiResponseGeneral {
   instances_by_sync_time: unknown[];
 }
 
-// Interfaces para respuesta de detalle (/promedio-loc-ec2-detalle)
 interface MetricAverageDetail {
   metric_group?: string;
   metric_groups?: string[];
@@ -63,7 +62,6 @@ interface ApiResponseDetail {
   metric_averages: MetricAverageDetail[];
 }
 
-// Union type para ambas respuestas
 type ApiResponse = ApiResponseGeneral | ApiResponseDetail;
 
 interface MetricValues {
@@ -78,10 +76,6 @@ interface ProcessedHeatmapData {
   metrics: { [key: string]: MetricValues };
 }
 
-const fetcher = (url: string) =>
-    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
-        .then(r => r.json());
-
 export const AVGUsoLocInstEC2ChartComponent = ({
   startDate,
   endDate,
@@ -89,22 +83,17 @@ export const AVGUsoLocInstEC2ChartComponent = ({
   region,
   metrics
 }: Props) => {
-  // Construir la URL de la API con lógica híbrida
   const apiUrl = useMemo(() => {
     if (!metrics || metrics.trim() === '') return null;
 
-    // Formatear fechas exactamente como en tu ejemplo: 2025-08-01T00:00:00
     const formatDate = (date: Date) => {
-      return date.toISOString().split('.')[0]; // Elimina milisegundos y Z
+      return date.toISOString().split('.')[0];
     };
 
-    // Los grupos de métricas decodificados y separados por coma
     const metricGroups = metrics.split(',').map(m => decodeURIComponent(m.trim())).join(',');
     const baseUrl = '/api/aws/bridge';
 
-    // LÓGICA HÍBRIDA: cambiar endpoint según instancia seleccionada
     if (instance && instance !== '' && instance !== 'all') {
-      // Endpoint para instancia específica
       const queryParams = [
         `date_from=${formatDate(startDate)}`,
         `date_to=${formatDate(endDate || new Date())}`,
@@ -115,7 +104,6 @@ export const AVGUsoLocInstEC2ChartComponent = ({
 
       return `${baseUrl}/vm/promedio-loc-ec2-detalle?${queryParams}`;
     } else {
-      // Endpoint general (comportamiento original)
       const queryParams = [
         `date_from=${formatDate(startDate)}`,
         `date_to=${formatDate(endDate || new Date())}`,
@@ -127,7 +115,6 @@ export const AVGUsoLocInstEC2ChartComponent = ({
     }
   }, [startDate, endDate, region, metrics, instance]);
 
-  // Solo hacer la petición si tenemos los parámetros mínimos
   const shouldFetch = !!(startDate && endDate && apiUrl);
 
 
@@ -137,13 +124,10 @@ export const AVGUsoLocInstEC2ChartComponent = ({
     fetcher
   );
 
-  // Procesar datos para el heatmap con lógica híbrida
   const processedData = useMemo(() => {
     if (!apiData) return [];
 
-    // Detectar tipo de respuesta basado en la estructura
     if ('instance_info' in apiData) {
-      // RESPUESTA DE DETALLE - instancia específica
       const detailData = apiData as ApiResponseDetail;
 
       if (!detailData.metric_averages?.length) return [];
@@ -167,12 +151,10 @@ export const AVGUsoLocInstEC2ChartComponent = ({
       }];
 
     } else {
-      // RESPUESTA GENERAL - todas las instancias (lógica original)
       const generalData = apiData as ApiResponseGeneral;
 
       if (!generalData.metric_averages?.length) return [];
 
-      // Agrupar métricas por región real (solo regiones con datos)
       const regionData: { [key: string]: { [key: string]: MetricValues } } = {};
 
       generalData.metric_averages.forEach(metric => {
@@ -190,7 +172,6 @@ export const AVGUsoLocInstEC2ChartComponent = ({
         };
       });
 
-      // Solo devolver regiones que realmente tienen datos
       return Object.entries(regionData).map(([regionName, metrics]) => ({
         region: regionName,
         metrics
@@ -198,7 +179,6 @@ export const AVGUsoLocInstEC2ChartComponent = ({
     }
   }, [apiData]);
 
-  // Obtener todas las métricas únicas
   const allMetrics = useMemo(() => {
     const metricsSet = new Set<string>();
     processedData.forEach(item => {
@@ -207,7 +187,6 @@ export const AVGUsoLocInstEC2ChartComponent = ({
     return Array.from(metricsSet).sort();
   }, [processedData]);
 
-  // Estados de carga y error
   if (isLoading) {
     return (
       <div className="flex justify-center items-center p-12">
@@ -238,7 +217,6 @@ export const AVGUsoLocInstEC2ChartComponent = ({
     );
   }
 
-  // Mensaje cuando no hay instancia seleccionada (opcional)
   if (!instance || instance === '' || instance === 'all') {
     if (processedData.length === 0) {
       return (

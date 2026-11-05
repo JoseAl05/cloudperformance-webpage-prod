@@ -1,4 +1,5 @@
 'use client'
+import { fetcher } from '@/lib/fetcher';
 import useSWR from 'swr'
 import { useEffect, useRef, useMemo, useState } from "react"
 import * as echarts from "echarts"
@@ -8,14 +9,18 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { TableDetalleHorarioComponent } from '@/components/azure/vista-funciones/consumo-horario-habil-no-habil/table/TableDetalleHorarioComponent'
 
-const fetcher = (url: string) =>
-  fetch(url, {
-    method: 'GET',
-    headers: {
-      'Authorization': `Bearer ${process.env.NEXT_PUBLIC_API_TOKEN}`,
-      'Content-Type': 'application/json'
-    }
-  }).then(res => res.json())
+interface AnalisisVmDato {
+  vm_name: string
+  Tipo_Horario: string
+  used: number
+  Fecha: string
+  Hora?: string
+}
+
+interface AnalisisVmsHorarioResponse {
+  datos?: AnalisisVmDato[]
+  tarjetas?: Record<string, string>
+}
 
 interface AnalisisVMsHorarioChartProps {
   startDate: Date
@@ -40,7 +45,7 @@ export const AnalisisVMsHorarioChartComponent = ({
     ? null
     : `/api/azure/bridge/azure/analisis-vms-horario?date_from=${startDateFormatted}&date_to=${endDateFormatted}&metric_name=${encodeURIComponent(selectedMetric)}`
 
-  const { data, error, isLoading } = useSWR(apiUrl, fetcher, {
+  const { data, error, isLoading } = useSWR<AnalisisVmsHorarioResponse>(apiUrl, fetcher, {
     revalidateOnFocus: false,
     dedupingInterval: 2000
   })
@@ -50,25 +55,21 @@ export const AnalisisVMsHorarioChartComponent = ({
       return { datosHabil: [], datosNoHabil: [], tarjetas: null, unidad: '' }
     }
 
-    // Filtrar por VM si hay una seleccionada
     const datosFiltrados = selectedVM
-      ? data.datos.filter((d: unknown) => d.vm_name === selectedVM)
+      ? data.datos.filter((d) => d.vm_name === selectedVM)
       : data.datos
 
 
-    const habil = datosFiltrados.filter((d: unknown) => d.Tipo_Horario === "Horario Hábil" || d.Tipo_Horario === "Horario HÃ¡bil")
-    const noHabil = datosFiltrados.filter((d: unknown) => d.Tipo_Horario === "Horario No Hábil" || d.Tipo_Horario === "Horario No HÃ¡bil")
+    const habil = datosFiltrados.filter((d) => d.Tipo_Horario === "Horario Hábil" || d.Tipo_Horario === "Horario HÃ¡bil")
+    const noHabil = datosFiltrados.filter((d) => d.Tipo_Horario === "Horario No Hábil" || d.Tipo_Horario === "Horario No HÃ¡bil")
 
-    // Extraer unidad del primer valor de las tarjetas originales
     const primeraMetrica = data.tarjetas?.Promedio_Recurso_Utilizado_Habil || ''
     const match = primeraMetrica.match(/\((.*?)\)/)
     const unidadExtraida = match ? match[1] : ''
 
-    // Recalcular tarjetas si hay VM seleccionada
-    let tarjetasCalculadas = data.tarjetas
+    let tarjetasCalculadas = data.tarjetas ?? null
     
     if (selectedVM) {
-      // Calcular promedios para la VM seleccionada
       const recursoUtilizadoHabil = habil.filter(d => d.used > 0)
       const recursoUtilizadoNoHabil = noHabil.filter(d => d.used > 0)
       const recursoNoUtilizadoHabil = habil.filter(d => d.used === 0)
@@ -108,7 +109,7 @@ export const AnalisisVMsHorarioChartComponent = ({
 
   const handleSelectVM = (vmName: string) => {
     if (selectedVM === vmName) {
-      setSelectedVM(null) // Si ya está seleccionada, deseleccionar
+      setSelectedVM(null)
     } else {
       setSelectedVM(vmName)
     }
@@ -121,12 +122,11 @@ export const AnalisisVMsHorarioChartComponent = ({
   useEffect(() => {
     if (!chartRef.current || (datosHabil.length === 0 && datosNoHabil.length === 0)) return
 
-    const prepararDatos = (datos: unknown[]) => {
-      // Agrupar por día y tomar el promedio, guardando también la hora
+    const prepararDatos = (datos: AnalisisVmDato[]) => {
       const porDia = new Map()
       
       datos.forEach(item => {
-        const fecha = item.Fecha // Ya está en formato DD/MM/YYYY
+        const fecha = item.Fecha
         const [dia, mes, anio] = fecha.split('/')
         const fechaKey = `${anio}-${mes}-${dia}`
         
@@ -331,7 +331,6 @@ export const AnalisisVMsHorarioChartComponent = ({
 
   return (
     <div className="space-y-6 p-4">
-      {/* Indicador de VM seleccionada */}
       {selectedVM && (
         <Card className="border-2 border-blue-500 bg-blue-50">
           <CardContent className="p-4">
@@ -356,14 +355,12 @@ export const AnalisisVMsHorarioChartComponent = ({
         </Card>
       )}
 
-      {/* Gráfico */}
       <Card className="shadow-lg rounded-2xl">
         <CardContent className="p-4">
           <div ref={chartRef} style={{ width: '100%', height: '300px' }} />
         </CardContent>
       </Card>
 
-      {/* Tarjetas */}
       {tarjetas && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <Card className="border-l-4 border-l-blue-500 hover:shadow-lg transition-shadow">
@@ -429,7 +426,6 @@ export const AnalisisVMsHorarioChartComponent = ({
         <p className="text-xs">Período: {startDate.toLocaleDateString()} - {endDate.toLocaleDateString()}</p>
       </div>
 
-      {/* Tabla de Detalle */}
       <div className="flex flex-col gap-3 mt-8">
         <div className="flex items-center gap-3 text-2xl font-bold">
           <FileSpreadsheet className="h-7 w-7 text-blue-500" />

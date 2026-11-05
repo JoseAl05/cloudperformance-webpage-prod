@@ -1,4 +1,3 @@
-// components/aws/vista-facturacion/tendencia-facturacion/MainViewTendenciaFacturacionComponent.tsx
 import { FiltersComponent } from '@/components/general_azure/filters/FiltersComponent'
 import { TendenciaFacturacionPagoPorUsoComponent } from '@/components/azure/vista-facturacion/tendencia-pago-por-uso/TendenciaFacturacionPagoPorUsoComponent'
 import { TrendingUp } from 'lucide-react'
@@ -32,14 +31,12 @@ export const MainViewTendenciaPagoPorUsoComponent = () => {
                     isRegionMultiSelect
                     subscriptionFilter
                     tagsFilter
-                    tagsCollection='azure_consumption_billing_account_modern_usage_details'
-                    tagsColumnName='tags'
+                    tagsResourceType='billing'
                     tagsRegionField = 'resource_location'
                     tagsSubscriptionField = 'subscription_name'
                     tagsLocalService='Virtual Machines'
                     resourceGroupFilter
-                    resourceGroupCollection='azure_consumption_billing_account_modern_usage_details'
-                    resourceGroupSubscriptionField='subscription_guid'
+                    resourceGroupResourceType='billing'
                     instancesFilter
                 />
             </div>

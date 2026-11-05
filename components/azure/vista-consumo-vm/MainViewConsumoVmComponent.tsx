@@ -1,4 +1,3 @@
-// components/aws/vista-facturacion/tendencia-facturacion/MainViewTendenciaFacturacionComponent.tsx
 import { FiltersComponent } from '@/components/general_azure/filters/FiltersComponent'
 import  {AzureVmMetricsComponent}  from '@/components/azure/vista-consumo-vm/ConsumoVmComponent'
 import { ChartLine } from 'lucide-react'
@@ -32,18 +31,14 @@ export const MainViewConsumoVmComponent = () => {
                     isRegionMultiSelect
                     subscriptionIdFilter
                     tagsFilter
-                    tagsCollection='custom_vm_metrics_logs'
-                    tagsColumnName='tags'
+                    tagsResourceType='vm'
                     tagsRegionField = 'location'
                     tagsLocalService='Virtual Machines'
                     tagsSubscriptionField = 'vm_id'
                     resourceGroupFilter
-                    resourceGroupCollection='custom_vm_metrics_logs'
-                    resourceGroupSubscriptionField='vm_id'
+                    resourceGroupResourceType='vm'
                     instancesFilterV2
-                    instancesV2Collection="custom_vm_metrics_logs"
-                    instancesV2SubscriptionField="vm_id"
-                    instancesV2InstanceField="vm_name"
+                    instancesV2ResourceType="vm"
   
                 />
             </div>

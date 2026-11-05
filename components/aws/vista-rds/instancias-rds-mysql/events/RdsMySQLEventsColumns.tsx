@@ -137,7 +137,6 @@ const RdsMysqlEventDetailsModal = ({ event }: { event: RdsMysqlEvent }) => {
                             </div>
                         </div>
 
-                        {/* Información específica de RDS */}
                         {(event.DBInstanceIdentifier || event.Engine) && (
                             <div className='border-t pt-4'>
                                 <h4 className='text-sm font-medium mb-3 flex items-center gap-2'>
@@ -366,7 +365,6 @@ export const rdsMysqlEventColumns: ColumnDef<RdsMysqlEvent>[] = [
             if (!row || !row.original) {
                 return <div>-</div>;
             }
-            // ... resto del código de acciones usando row.original
         },
     },
 ]

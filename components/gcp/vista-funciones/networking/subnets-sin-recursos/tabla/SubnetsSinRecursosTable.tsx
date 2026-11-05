@@ -28,7 +28,6 @@ interface SubnetsSinRecursosTableProps {
 export const SubnetsSinRecursosTable = ({ data, dateFrom, dateTo }: SubnetsSinRecursosTableProps) => {
     const flattenedData = useMemo(() => {
         return data.map(subnet => {
-            // Calcular IPs disponibles desde CIDR
             const cidrSuffix = parseInt(subnet.ip_cidr_range.split('/')[1]);
             const ipsDisponibles = Math.pow(2, 32 - cidrSuffix);
 

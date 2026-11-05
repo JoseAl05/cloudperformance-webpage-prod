@@ -1,5 +1,6 @@
 'use client';
 
+import { fetcher } from '@/lib/fetcher';
 import { Dispatch, SetStateAction, useState } from 'react';
 import useSWR from 'swr';
 import { Check, ChevronsUpDown } from 'lucide-react';
@@ -24,10 +25,6 @@ interface S3BucketFilterProps {
   endDate: Date;
   region?: string;
 }
-
-const fetcher = (url: string) =>
-    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
-        .then(r => r.json());
 
 export const S3BucketFilter = ({
   selectedBuckets,
@@ -84,7 +81,6 @@ export const S3BucketFilter = ({
       ? []
       : selectedBuckets.split(',').filter(Boolean);
 
-  // --- Render States ---
   if (isLoading) {
     return (
       <Button variant="outline" disabled className="w-[250px] justify-between">
@@ -121,7 +117,6 @@ export const S3BucketFilter = ({
           <CommandInput placeholder="Buscar bucket..." />
           <CommandEmpty>No se encontró el bucket.</CommandEmpty>
           <CommandGroup className="max-h-[200px] overflow-y-auto">
-            {/* Opción: Todos */}
             <CommandItem value="all" onSelect={() => handleBucketToggle('all')}>
               <Check
                 className={`mr-2 h-4 w-4 ${
@@ -131,7 +126,6 @@ export const S3BucketFilter = ({
               Todos los Buckets
             </CommandItem>
 
-            {/* Buckets individuales */}
             {bucketsList.map((bucket) => {
               const checked = selectedArray.includes(bucket);
               return (

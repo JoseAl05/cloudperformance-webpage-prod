@@ -1,6 +1,6 @@
 'use client'
 
-import { DynamicColumn } from '@/components/general/data-table/columns';
+import { DynamicColumn } from '@/components/data-table/columns';
 import { CloudSqlBilling } from '@/interfaces/vista-cloudsql/cSqlInterfaces';
 
 const formatCurrencyUSD = (value: number | undefined) => {

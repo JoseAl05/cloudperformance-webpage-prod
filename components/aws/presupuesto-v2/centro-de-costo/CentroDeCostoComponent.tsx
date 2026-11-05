@@ -40,8 +40,8 @@ interface CloudTag {
 
 export const CentroDeCostoComponent = () => {
   const cloudType = "aws";
+  const canImportFromCloud = false;
 
-  // --- Estados Originales ---
   const [editingCentro, setEditingCentro] = useState<CentroCosto | null>(null);
   const [showForm, setShowForm] = useState<boolean>(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState<boolean>(false);
@@ -62,7 +62,6 @@ export const CentroDeCostoComponent = () => {
   const [cloudTags, setCloudTags] = useState<CloudTag[]>([]);
 
   const handleEdit = (centro: CentroCosto) => {
-    // 1. Alineado con la eliminación de tags de los componentes hijos
     const sanitizedCentro: CentroCosto = {
       ...centro,
       responsable_centro: centro.responsable_centro ?? "",
@@ -104,10 +103,9 @@ export const CentroDeCostoComponent = () => {
             errorMsg = extracted.map((e: { msg: string }) => e.msg).join(", ");
           } else if (typeof extracted === "string") {
             if (extracted.startsWith('{') && extracted.includes('detail')) {
-              // 2. Omitiendo variable de catch no utilizada
               try {
                 extracted = JSON.parse(extracted).detail;
-              } catch { /* Ignorar si no es JSON válido */ }
+              } catch { }
             }
             errorMsg = extracted;
           } else if (extracted) {
@@ -132,13 +130,11 @@ export const CentroDeCostoComponent = () => {
     } catch (err: unknown) {
       let cleanMessage = err instanceof Error ? err.message : "Error al guardar el centro de costo";
       
-      // 2. Omitiendo variable de catch no utilizada
       try {
         if (cleanMessage.startsWith('{') && cleanMessage.includes('detail')) {
           cleanMessage = JSON.parse(cleanMessage).detail || cleanMessage;
         }
       } catch {
-        // Si falla el parseo, se queda el mensaje original
       }
 
       setErrorMessage(cleanMessage);
@@ -182,7 +178,6 @@ export const CentroDeCostoComponent = () => {
     setCentroToDelete(null);
   };
 
-  // --- Acciones de Importación (Buscando en la Nube) ---
   const handleOpenImport = () => {
     setShowImportDialog(true);
     setHasScanned(false);
@@ -202,8 +197,7 @@ export const CentroDeCostoComponent = () => {
 
     try {
       const params = new URLSearchParams({
-        collection: "azure_consumption_billing_account_modern_usage_details",
-        tag_column_name: "tags",
+        resource_type: "billing",
         cost_center_keys: importKeys,
       });
 
@@ -298,14 +292,16 @@ export const CentroDeCostoComponent = () => {
             </div>
 
             <div className="flex items-center gap-3">
-              <Button
-                onClick={handleOpenImport}
-                variant="outline"
-                className="flex items-center gap-2 border-blue-600 text-blue-600 hover:bg-blue-50 dark:border-blue-400 dark:text-blue-400 dark:hover:bg-blue-950"
-              >
-                <CloudDownload className="w-4 h-4" />
-                Importar desde la nube
-              </Button>
+              {canImportFromCloud && (
+                <Button
+                  onClick={handleOpenImport}
+                  variant="outline"
+                  className="flex items-center gap-2 border-blue-600 text-blue-600 hover:bg-blue-50 dark:border-blue-400 dark:text-blue-400 dark:hover:bg-blue-950"
+                >
+                  <CloudDownload className="w-4 h-4" />
+                  Importar desde la nube
+                </Button>
+              )}
 
               <Button
                 onClick={() => {
@@ -483,7 +479,6 @@ export const CentroDeCostoComponent = () => {
           </DialogContent>
         </Dialog>
 
-        {/* Alertas y Confirmaciones */}
         <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
           <AlertDialogContent className="bg-white dark:bg-gray-800">
             <AlertDialogHeader>

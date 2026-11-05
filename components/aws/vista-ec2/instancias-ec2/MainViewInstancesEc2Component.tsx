@@ -28,8 +28,7 @@ export const MainViewInstancesEc2Component = () => {
                     instancesFilter
                     instancesService='ec2'
                     tagsFilter
-                    collection='aws_ec2_instances'
-                    tagColumnName='Tags'
+                    resourceType='ec2'
                 />
             </div>
         </div>

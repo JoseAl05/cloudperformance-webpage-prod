@@ -38,7 +38,6 @@ export const MainViewMultiTenantComponent = () => {
     const availableCloudsCount = [isAzure, isAws, isGcp].filter(Boolean).length;
     const canCompare = availableCloudsCount >= 2;
 
-    // Arreglo maestro tipado
     const cloudOptions: CloudConfigOption[] = [
         { id: 'azure', active: isAzure, label: 'Microsoft Azure', logo: '/azure.svg', accounts: azureTenants },
         { id: 'aws', active: isAws, label: 'Amazon Web Services', logo: '/aws.svg', accounts: awsTenants },
@@ -80,7 +79,6 @@ export const MainViewMultiTenantComponent = () => {
         });
     };
 
-    // Validaciones seguras para TypeScript con Optional Chaining
     const allTenantsSelected = selectedClouds.length > 0 && selectedClouds.every(c => (selectedTenants[c]?.length ?? 0) > 0);
     const hasAnyTenantSelected = selectedClouds.some(c => (selectedTenants[c]?.length ?? 0) > 0);
 
@@ -93,12 +91,10 @@ export const MainViewMultiTenantComponent = () => {
         setCurrentStep(2); 
     };
 
-    // VISTA DEL DASHBOARD (Paso 3)
     if (currentStep === 3 && canCompare) {
         return (
             <div className="w-full animate-in fade-in zoom-in-95 duration-500">
                 
-                {/* BOTÓN STICKY DE VOLVER */}
                 <div className="sticky top-0 z-10 bg-background py-4 mb-4">
                     <Button
                         variant="outline"
@@ -145,7 +141,6 @@ export const MainViewMultiTenantComponent = () => {
         );
     }
 
-    // VISTA DE CONFIGURACIÓN (Pasos 1 y 2)
     return (
         <div className="w-full max-w-5xl mx-auto space-y-8 px-4 py-8">
             <header className="mb-10 flex items-center gap-4">
@@ -158,7 +153,6 @@ export const MainViewMultiTenantComponent = () => {
                 </div>
             </header>
 
-            {/* PASO 1: SELECTOR DE NUBES */}
             <Card className={cn(
                 "border-l-4 shadow-sm transition-all duration-500",
                 currentStep === 1 ? "border-l-green-500" : "border-l-gray-200 opacity-80"
@@ -233,7 +227,6 @@ export const MainViewMultiTenantComponent = () => {
                 </CardContent>
             </Card>
 
-            {/* PASO 2: SELECCIÓN DE TENANTS */}
             {canCompare && (
                 <Card className={cn(
                     "border-l-4 shadow-sm transition-all duration-500",

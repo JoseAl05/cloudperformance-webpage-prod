@@ -22,7 +22,7 @@ interface EditLicenseModalProps {
 export default function EditLicenseModal({ empresa, onClose, refreshList }: EditLicenseModalProps) {
     const [azureAccountsData, setAzureAccountsData] = useState<CloudAccountRow[]>([]);
     const [awsAccountsData, setAwsAccountsData] = useState<CloudAccountRow[]>([]);
-    const [gcpAccountsData, setGcpAccountsData] = useState<CloudAccountRow[]>([]); // Nuevo estado GCP
+    const [gcpAccountsData, setGcpAccountsData] = useState<CloudAccountRow[]>([]);
     const [openaiAccountsData, setOpenaiAccountsData] = useState<CloudAccountRow[]>([]);
 
     const [formData, setFormData] = useState({
@@ -30,19 +30,15 @@ export default function EditLicenseModal({ empresa, onClose, refreshList }: Edit
         planName: empresa.planName,
         userLimit: empresa.userLimit,
         currentUsers: empresa.currentUsers,
-        // AWS
         is_aws: empresa.is_aws || false,
         user_db_aws: empresa.user_db_aws || '',
         is_aws_multi_tenant: empresa.is_aws_multi_tenant || false,
-        // Azure
         is_azure: empresa.is_azure || false,
         user_db_azure: empresa.user_db_azure || '',
         is_azure_multi_tenant: empresa.is_azure_multi_tenant || false,
-        // GCP (Nuevos campos)
         is_gcp: empresa.is_gcp || false,
         user_db_gcp: empresa.user_db_gcp || '',
         is_gcp_multi_tenant: empresa.is_gcp_multi_tenant || false,
-        // Open IA
         is_openai: empresa.is_openai || false,
         user_db_openai: empresa.user_db_openai || '',
         is_openai_multi_tenant: empresa.is_openai_multi_tenant || false,
@@ -69,7 +65,6 @@ export default function EditLicenseModal({ empresa, onClose, refreshList }: Edit
                 user_db_azure: empresa.user_db_azure || '',
                 is_azure_multi_tenant: empresa.is_azure_multi_tenant || false,
 
-                // Carga inicial GCP
                 is_gcp: empresa.is_gcp || false,
                 user_db_gcp: empresa.user_db_gcp || '',
                 is_gcp_multi_tenant: empresa.is_gcp_multi_tenant || false,
@@ -79,10 +74,9 @@ export default function EditLicenseModal({ empresa, onClose, refreshList }: Edit
                 is_openai_multi_tenant: empresa.is_openai_multi_tenant || false,
             });
 
-            // Cargar las cuentas existentes (conservando sus IDs `clp-<id>`)
             setAzureAccountsData(toAccountRows(empresa.azure_accounts));
             setAwsAccountsData(toAccountRows(empresa.aws_accounts));
-            setGcpAccountsData(toAccountRows(empresa.gcp_accounts)); // Cargar cuentas GCP
+            setGcpAccountsData(toAccountRows(empresa.gcp_accounts));
             setOpenaiAccountsData(toAccountRows(empresa.openai_accounts));
 
             setMessage('');
@@ -103,28 +97,24 @@ export default function EditLicenseModal({ empresa, onClose, refreshList }: Edit
                 newState.userLimit = PLAN_CONFIG[value as keyof typeof PLAN_CONFIG]?.userLimit || prev.userLimit;
             }
 
-            // Limpiar datos cuando se desactiva AWS
             if (name === 'is_aws' && !checked) {
                 newState.user_db_aws = '';
                 newState.is_aws_multi_tenant = false;
                 setAwsAccountsData([]);
             }
 
-            // Limpiar datos cuando se desactiva Azure
             if (name === 'is_azure' && !checked) {
                 newState.user_db_azure = '';
                 newState.is_azure_multi_tenant = false;
                 setAzureAccountsData([]);
             }
 
-            // Limpiar datos cuando se desactiva GCP
             if (name === 'is_gcp' && !checked) {
                 newState.user_db_gcp = '';
                 newState.is_gcp_multi_tenant = false;
                 setGcpAccountsData([]);
             }
 
-            // Limpiar arrays cuando se desactiva multi-tenant
             if (name === 'is_azure_multi_tenant' && !checked) setAzureAccountsData([]);
             if (name === 'is_aws_multi_tenant' && !checked) setAwsAccountsData([]);
             if (name === 'is_gcp_multi_tenant' && !checked) setGcpAccountsData([]);
@@ -136,7 +126,6 @@ export default function EditLicenseModal({ empresa, onClose, refreshList }: Edit
 
     const handleAddAccount = useCallback((cloud: CloudProvider) => {
         const newAccount = newAccountRow(cloud);
-        // Lógica de selección de setter
         if (cloud === 'azure') setAzureAccountsData(prev => [...prev, newAccount]);
         else if (cloud === 'aws') setAwsAccountsData(prev => [...prev, newAccount]);
         else if (cloud === 'gcp') setGcpAccountsData(prev => [...prev, newAccount]);
@@ -170,13 +159,11 @@ export default function EditLicenseModal({ empresa, onClose, refreshList }: Edit
         setLoading(true);
         setMessage('');
 
-        // Validaciones Básicas
         if (!formData.name || !formData.planName) {
             setMessage('Error: Faltan campos esenciales (Nombre o Plan).');
             setLoading(false); return;
         }
 
-        // Validaciones AWS
         if (!formData.is_aws_multi_tenant && formData.is_aws && !formData.user_db_aws) {
             setMessage('Error: El Nombre DB AWS es requerido si el acceso AWS está activado.');
             setLoading(false); return;
@@ -186,7 +173,6 @@ export default function EditLicenseModal({ empresa, onClose, refreshList }: Edit
             setLoading(false); return;
         }
 
-        // Validaciones Azure
         if (!formData.is_azure_multi_tenant && formData.is_azure && !formData.user_db_azure) {
             setMessage('Error: El Nombre DB Azure es requerido si el acceso Azure está activado.');
             setLoading(false); return;
@@ -196,7 +182,6 @@ export default function EditLicenseModal({ empresa, onClose, refreshList }: Edit
             setLoading(false); return;
         }
 
-        // Validaciones GCP
         if (!formData.is_gcp_multi_tenant && formData.is_gcp && !formData.user_db_gcp) {
             setMessage('Error: El Nombre DB GCP es requerido si el acceso GCP está activado.');
             setLoading(false); return;
@@ -211,7 +196,6 @@ export default function EditLicenseModal({ empresa, onClose, refreshList }: Edit
             setLoading(false); return;
         }
 
-        // Validaciones Open IA
         if (!formData.is_openai_multi_tenant && formData.is_openai && !formData.user_db_openai) {
             setMessage('Error: El Nombre DB Open IA es requerido si el acceso Open IA está activado.');
             setLoading(false); return;
@@ -221,8 +205,6 @@ export default function EditLicenseModal({ empresa, onClose, refreshList }: Edit
             setLoading(false); return;
         }
 
-        // Las cuentas SÓLO se envían en modo multi-tenant. En single-tenant el
-        // backend elimina el array y deja `user_db_<cloud>` como conexión.
         const finalAzureAccounts = formData.is_azure && formData.is_azure_multi_tenant
             ? toAccountsPayload(azureAccountsData)
             : undefined;
@@ -243,25 +225,21 @@ export default function EditLicenseModal({ empresa, onClose, refreshList }: Edit
             planName: formData.planName,
             userLimit: formData.userLimit,
 
-            // AWS
             is_aws: formData.is_aws,
             user_db_aws: formData.is_aws && !formData.is_aws_multi_tenant ? formData.user_db_aws : null,
             is_aws_multi_tenant: formData.is_aws_multi_tenant,
             aws_accounts: finalAwsAccounts,
 
-            // Azure
             is_azure: formData.is_azure,
             user_db_azure: formData.is_azure && !formData.is_azure_multi_tenant ? formData.user_db_azure : null,
             is_azure_multi_tenant: formData.is_azure_multi_tenant,
             azure_accounts: finalAzureAccounts,
 
-            // GCP
             is_gcp: formData.is_gcp,
             user_db_gcp: formData.is_gcp && !formData.is_gcp_multi_tenant ? formData.user_db_gcp : null,
             is_gcp_multi_tenant: formData.is_gcp_multi_tenant,
             gcp_accounts: finalGcpAccounts,
 
-            // Open IA
             is_openai: formData.is_openai,
             user_db_openai: formData.is_openai && !formData.is_openai_multi_tenant ? formData.user_db_openai : null,
             is_openai_multi_tenant: formData.is_openai_multi_tenant,
@@ -330,7 +308,6 @@ export default function EditLicenseModal({ empresa, onClose, refreshList }: Edit
 
                     <div>
                         <div className="p-6 space-y-6">
-                            {/* Información básica */}
                             <div className="grid grid-cols-2 gap-4 border-b pb-4">
                                 <div className="space-y-1">
                                     <label className="text-sm font-medium text-gray-500">Empresa</label>
@@ -346,7 +323,6 @@ export default function EditLicenseModal({ empresa, onClose, refreshList }: Edit
                                 </div>
                             </div>
 
-                            {/* Plan y límite */}
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-2">
                                     <label htmlFor="planName" className="text-sm font-medium">Plan Contratado</label>
@@ -373,15 +349,12 @@ export default function EditLicenseModal({ empresa, onClose, refreshList }: Edit
                                 </div>
                             </div>
 
-                            {/* Configuración de Conexiones */}
                             <h6 className="text-sm font-bold text-gray-600 flex items-center space-x-2 border-t pt-4">
                                 <Cloud className="h-4 w-4" /> <span>Configuración de Conexiones Maestras</span>
                             </h6>
 
-                            {/* Grilla de Nubes: AWS - Azure - GCP - Open IA */}
                             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
 
-                                {/* AWS CONFIGURATION */}
                                 <div className="space-y-2 border p-3 rounded-lg bg-amber-50/20 border-amber-100">
                                     <div className="flex items-center space-x-4 mb-2">
                                         <input
@@ -440,7 +413,6 @@ export default function EditLicenseModal({ empresa, onClose, refreshList }: Edit
                                     )}
                                 </div>
 
-                                {/* AZURE CONFIGURATION */}
                                 <div className="space-y-2 border p-3 rounded-lg bg-blue-50/20 border-blue-100">
                                     <div className="flex items-center space-x-4 mb-2">
                                         <input
@@ -499,7 +471,6 @@ export default function EditLicenseModal({ empresa, onClose, refreshList }: Edit
                                     )}
                                 </div>
 
-                                {/* GCP CONFIGURATION (NUEVO) */}
                                 <div className="space-y-2 border p-3 rounded-lg bg-emerald-50/20 border-emerald-100">
                                     <div className="flex items-center space-x-4 mb-2">
                                         <input
@@ -558,7 +529,6 @@ export default function EditLicenseModal({ empresa, onClose, refreshList }: Edit
                                     )}
                                 </div>
 
-                                {/* OPEN IA CONFIGURATION */}
                                 <div className="space-y-2 border p-3 rounded-lg bg-slate-50/40 border-slate-200">
                                     <div className="flex items-center space-x-4 mb-2">
                                         <input

@@ -1,5 +1,6 @@
 'use client'
 
+import { fetcher } from '@/lib/fetcher';
 import { MessageCard } from '@/components/aws/cards/MessageCards';
 import { CloudSqlChartComponent } from '@/components/gcp/vista-recursos/cloudsql/grafico/CloudSqlChartComponent';
 import { CloudSqlInfoComponent } from '@/components/gcp/vista-recursos/cloudsql/info/CloudSqlInfoComponent';
@@ -18,10 +19,6 @@ interface CloudSqlComponentProps {
     tagKey: string;
     tagValue: string;
 }
-
-const fetcher = (url: string) =>
-    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
-        .then(r => r.json());
 
 const isNonEmptyArray = <T,>(v: unknown): v is T[] => Array.isArray(v) && v.length > 0
 

@@ -15,7 +15,7 @@ import {
     TooltipContent,
     TooltipTrigger,
 } from "@/components/ui/tooltip"
-import { DynamicColumn } from '@/components/general/data-table/columns';
+import { DynamicColumn } from '@/components/data-table/columns';
 import { IntraCloudComputeBilling } from '@/interfaces/vista-intracloud/compute/intraCloudComputeInterfaces';
 import { formatMetric } from '@/lib/metricUtils';
 import { TrendingUp, TrendingDown, Maximize2, BarChart3, Info } from 'lucide-react';
@@ -65,7 +65,6 @@ const CostCell = ({ cost, subLabel }: { cost: number | undefined, subLabel?: str
 
 const ComparisonCell = ({ row, tenantIds, cloudProvider }: { row: AggregatedComputeRow, tenantIds: string[], cloudProvider: string }) => {
     const costs = tenantIds.map(tid => Number(row[tid]) || 0);
-    // const validCosts = costs.filter(c => c >= 0);
     const validCosts = costs;
 
     if (validCosts.length === 0) {
@@ -172,10 +171,6 @@ const ComparisonCell = ({ row, tenantIds, cloudProvider }: { row: AggregatedComp
             )}
         </div>
     );
-
-    // if (cloudProvider !== 'Azure') {
-    //     return content;
-    // }
 
     return (
         <Dialog>

@@ -1,5 +1,6 @@
 "use client";
 
+import { fetcher } from '@/lib/fetcher';
 import { useState, useMemo } from "react";
 import useSWR from "swr";
 import { CircleDollarSign, Pencil, Trash2, Search, ArrowUpDown, ArrowUp, ArrowDown, ChevronLeft, ChevronRight, Tag } from "lucide-react";
@@ -20,10 +21,6 @@ interface CentroDeCostoTableComponentProps {
 
 type SortField = keyof CentroCosto | null;
 type SortOrder = "asc" | "desc" | null;
-
-const fetcher = (url: string) =>
-  fetch(url, { method: "GET", headers: { "Content-Type": "application/json" } })
-    .then((r) => r.json());
 
 export const CentroDeCostoTableComponent = ({ cloud, onEdit, onDelete }: CentroDeCostoTableComponentProps) => {
   const { data, error, isLoading } = useSWR<CentroCosto[]>(
@@ -192,7 +189,6 @@ export const CentroDeCostoTableComponent = ({ cloud, onEdit, onDelete }: CentroD
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700 overflow-hidden">
-      {/* Search Bar */}
       <div className="px-6 py-4 bg-gray-50 dark:bg-gray-900/50 border-b border-gray-200 dark:border-gray-700">
         <div className="flex items-center gap-4">
           <div className="relative flex-1">
@@ -229,7 +225,6 @@ export const CentroDeCostoTableComponent = ({ cloud, onEdit, onDelete }: CentroD
         )}
       </div>
 
-      {/* Table Container */}
       <div className="overflow-x-auto" style={{ minHeight: '500px', maxHeight: '600px' }}>
         <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
           <thead className="bg-gray-50 dark:bg-gray-900/50 sticky top-0 z-10">
@@ -379,7 +374,6 @@ export const CentroDeCostoTableComponent = ({ cloud, onEdit, onDelete }: CentroD
         </table>
       </div>
 
-      {/* Footer con Pagination */}
       <div className="bg-gray-50 dark:bg-gray-900/50 px-6 py-4 border-t border-gray-200 dark:border-gray-700">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-sm text-gray-600 dark:text-gray-400">

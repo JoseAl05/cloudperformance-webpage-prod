@@ -1,4 +1,5 @@
 'use client'
+import { fetcher as fetcherGet } from '@/lib/fetcher';
 import { Dispatch, SetStateAction, useState } from 'react'
 import { Check, ChevronsUpDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -12,14 +13,6 @@ interface CategoryFilterComponentProps {
     category: string | null
     setCategory: Dispatch<SetStateAction<string | null>>
 }
-
-const fetcherGet = (url: string) =>
-    fetch(url, {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-    }).then(res => res.json());
 
 export const CategoryFilterComponent = ({
     category,
@@ -37,7 +30,6 @@ export const CategoryFilterComponent = ({
     const categories: string[] = Array.isArray(data?.categories) ? data.categories : []
     const noCategories = categories.length === 0
     
-    // Agregar "Ver todos" al inicio
     const categoriesWithAll = noCategories ? [] : ['Ver todos', ...categories]
 
     const getDisplayText = () => {
@@ -76,7 +68,6 @@ export const CategoryFilterComponent = ({
                                     key={cat}
                                     value={cat}
                                     onSelect={() => {
-                                        // Si selecciona "Ver todos", pasa string vacío
                                         setCategory(cat === 'Ver todos' ? '' : cat);
                                         setOpen(false);
                                     }}

@@ -33,8 +33,7 @@ export const MainViewUnusedAutoscalingComponent = () => {
           instancesService="asg"
           isInstanceMultiSelect
           tagsFilter
-          collection='aws_auto_scaling_groups'
-          tagColumnName='Tags'
+          resourceType='asg'
         />
       </div>
     </div>

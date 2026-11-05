@@ -19,10 +19,7 @@ export async function signAuthToken(
     .setExpirationTime(`${ttlSeconds}s`)
     .sign(secret);
 
-  // Detecta si la conexión es HTTPS (soporta proxies)
-  // Nota: en rutas de servidor puedes leer cabeceras, aquí suele bastar con NODE_ENV
   const isProd = process.env.NODE_ENV === 'production';
-  // Si corres en prod pero en HTTP (localhost), puedes forzar via ENV:
   const forceInsecureLocal = process.env.FORCE_INSECURE_COOKIES === '1';
 
   cookieStore.set({
@@ -31,8 +28,7 @@ export async function signAuthToken(
     httpOnly: true,
     sameSite: 'lax',
     path: '/',
-    secure: isProd && !forceInsecureLocal, // evita secure en localhost http
-    // opcionalmente: expires: new Date(Date.now() + ttlSeconds*1000)
+    secure: isProd && !forceInsecureLocal,
   });
 
   return token;

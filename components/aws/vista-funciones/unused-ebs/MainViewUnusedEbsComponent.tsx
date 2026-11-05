@@ -30,8 +30,7 @@ export const MainViewUnusedEbsComponent = () => {
                     instancesService='ebs'
                     isInstanceMultiSelect
                     tagsFilter
-                    tagColumnName='Tags'
-                    collection='aws_ec2_ebs_volumes'
+                    resourceType='ebs'
                 />
             </div>
         </div>

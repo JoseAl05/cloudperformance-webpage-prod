@@ -29,7 +29,6 @@ export const SpotVsStandardChart = ({ data }: SpotVsStandardChartProps) => {
     const safeData = Array.isArray(data) ? data : [];
 
     const { totalSeries, standardSeries, spotSeries } = useMemo(() => {
-        // Agrupar por fecha
         const groupedByDate = safeData.reduce((acc, vm) => {
             const date = new Date(vm.sync_time.$date).toISOString().split('T')[0];
 
@@ -48,7 +47,6 @@ export const SpotVsStandardChart = ({ data }: SpotVsStandardChartProps) => {
             return acc;
         }, {} as Record<string, { total: number; standard: number; spot: number }>);
 
-        // Convertir a arrays ordenados
         const dates = Object.keys(groupedByDate).sort();
 
         const totalSeries: [string, number][] = dates.map(date => [

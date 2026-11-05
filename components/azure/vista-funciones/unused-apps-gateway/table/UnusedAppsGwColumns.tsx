@@ -6,9 +6,10 @@ import { Button } from '@/components/ui/button';
 import { Eye, Copy } from 'lucide-react';
 import { useState } from 'react';
 import { UnusedAppGw } from '@/interfaces/vista-unused-resources/unusedAppGInterfaces';
-import { UnusedAppGwInsightModal } from '@/components/azure/vista-funciones/unused-apps-gateway/info/UnusedAppGwInsightModal'; // Asegúrate de importar el modal que creamos
+import { UnusedAppGwInsightModal } from '@/components/azure/vista-funciones/unused-apps-gateway/info/UnusedAppGwInsightModal';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import { readFilterParam } from '@/lib/filters';
 
 const DetailsCell = ({ appGw }: { appGw: UnusedAppGw }) => {
     const [open, setOpen] = useState(false);
@@ -37,8 +38,8 @@ const DetailsCell = ({ appGw }: { appGw: UnusedAppGw }) => {
 const QueryParams = () => {
     const searchParams = useSearchParams();
 
-    const startDateParam = searchParams.get('startDate');
-    const endDateParam = searchParams.get('endDate');
+    const startDateParam = readFilterParam(searchParams, 'dateFrom');
+    const endDateParam = readFilterParam(searchParams, 'dateTo');
     const resourceGroupParam = searchParams.get('resourceGroup');
 
     return { startDateParam: startDateParam, endDateParam: endDateParam, resourceGroup: resourceGroupParam }
@@ -59,7 +60,7 @@ export const UnusedAppsGwColumns: DynamicColumn<UnusedAppGw>[] = [
             return (
                 <div className="flex flex-col">
                     <Link
-                        href={{ pathname: '/azure/consumo-apps-gateway/', query: { appgateway: resourceId, startDate: startDate, endDate: endDate, resourceGroup: resourceGroup } }}
+                        href={{ pathname: '/cloud-azure/consumos/apps-gateway/', query: { appgateway: resourceId, startDate: startDate, endDate: endDate, resourceGroup: resourceGroup } }}
                         rel="noopener noreferrer"
                         target="_blank"
                     >

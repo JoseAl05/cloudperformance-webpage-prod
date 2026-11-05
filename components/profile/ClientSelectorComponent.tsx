@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useFeatureAccess } from '@/hooks/useFeatureAccess';
+import { useActiveCompany } from '@/hooks/useActiveCompany';
 import { useClientContext } from '@/components/context/ClientContext';
 
 import {
@@ -20,15 +21,9 @@ import { cn } from "@/lib/utils";
 export default function ClientSelectorComponent() {
     const { isGlobalAdmin, companiesList, loading, swapContextToken, setSelectedCompany } = useFeatureAccess();
     const { selectedCompany } = useClientContext();
+    useActiveCompany();
 
     const [open, setOpen] = useState(false);
-
-    useEffect(() => {
-        if (!selectedCompany && companiesList.length > 0) {
-            setSelectedCompany(companiesList[0]);
-            swapContextToken(companiesList[0].name);
-        }
-    }, [companiesList, selectedCompany, setSelectedCompany, swapContextToken]);
 
     if (!isGlobalAdmin) return null;
 

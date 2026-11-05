@@ -203,7 +203,6 @@ export const RdsResourceViewIopsComponent = ({
         );
     }
 
-    // Verificar si existen las métricas de IOPS específicas
     const allowedMetrics = [
         "Lecturas por Segundo (Promedio)",
         "Escrituras por Segundo (Promedio)"
@@ -217,7 +216,6 @@ export const RdsResourceViewIopsComponent = ({
         return (
             <div className="flex justify-center items-center h-96 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
                 <div className="flex flex-col items-center gap-5">
-                    {/* <div className="text-yellow-400 text-lg mb-2">¡Ups!</div> */}
                     <MessageCircleWarning className='h-5 w-5 text-yellow-500' />
                     <p className="text-gray-500 font-medium">Métricas de Operaciones de lectura y escritura no disponibles</p>
                 </div>

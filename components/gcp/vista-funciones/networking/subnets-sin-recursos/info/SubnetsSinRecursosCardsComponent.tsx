@@ -60,7 +60,6 @@ const StatCard = ({ title, value, unit, icon: Icon, description, subtitle, color
     );
 };
 
-// Función para calcular IPs desde CIDR
 const calcularIPsDesdeSubnets = (subnets: unknown[]): number => {
     return subnets.reduce((total, subnet) => {
         const cidrSuffix = parseInt(subnet.ip_cidr_range.split('/')[1]);
@@ -74,14 +73,13 @@ export const SubnetsSinRecursosCardsComponent = ({ summary, subnets = [], isLoad
     const calculatedData = useMemo(() => {
         if (!summary || !subnets) return { ipsPrivadasBloqueadas: 0, regionesExpuestas: 0, esRedDefault: false };
 
-        // 🟢 CÁLCULO CORRECTO usando los datos reales
         const ipsPrivadasBloqueadas = calcularIPsDesdeSubnets(subnets);
         
         const regionesExpuestas = Object.keys(summary.por_region).length;
         const esRedDefault = summary.por_network.default > 0;
 
         return { ipsPrivadasBloqueadas, regionesExpuestas, esRedDefault };
-    }, [summary, subnets]);  // ← Agregar 'subnets' a las dependencias
+    }, [summary, subnets]);
 
     if (isLoading) {
         return (

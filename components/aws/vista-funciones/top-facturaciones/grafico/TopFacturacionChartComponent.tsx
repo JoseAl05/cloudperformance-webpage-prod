@@ -25,6 +25,15 @@ interface UiTuning {
     legend?: LegendCfg
 }
 
+export interface TopFacturacionRow {
+    dimension?: string;
+    costo_neto?: number;
+    costo_bruto?: number;
+    [key: string]: unknown;
+}
+
+export type TopFacturacionResponse = TopFacturacionRow[] | { data?: TopFacturacionRow[] };
+
 interface TopFacturacionChartComponentProps {
     data: unknown[] | { data?: unknown[] }
     selectedFamily: string

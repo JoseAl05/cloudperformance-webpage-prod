@@ -1,5 +1,6 @@
 'use client'
 
+import { fetcher } from '@/lib/fetcher';
 import useSWR from 'swr'
 import React, { useMemo, useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -12,9 +13,6 @@ import {
 } from '@/components/ui/select'
 import { TopFacturacionChartComponent } from '@/components/aws/vista-funciones/top-facturaciones/grafico/TopFacturacionChartComponent'
 import { AlertCircle } from 'lucide-react'
-
-const fetcher = (url: string) =>
-  fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } }).then((r) => r.json())
 
 interface TopRecursosProps {
   groupBy: 'ResourceRegion' | 'ResourceType' | 'ResourceService'

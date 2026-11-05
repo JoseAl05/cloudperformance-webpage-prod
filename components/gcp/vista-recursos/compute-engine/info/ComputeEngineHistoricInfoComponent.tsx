@@ -7,7 +7,7 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { getUptime } from '@/lib/getUptimeInstance'
 import { Accordion } from '@radix-ui/react-accordion'
 import { Globe, HardDrive, MapPin, Network, Server } from 'lucide-react'
-import { ComputeEngineInfoHistoryData } from '@/interfaces/cEInterfaces'
+import { ComputeEngineInfoHistoryData } from '@/interfaces/vista-compute-engine/cEInterfaces'
 
 interface ComputeEngineHistoricInfoComponentProps {
     instances: ComputeEngineInfoHistoryData[]

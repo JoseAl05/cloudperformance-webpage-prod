@@ -24,14 +24,14 @@ export const MainViewUnusedCeComponent = () => {
             <div className='w-full min-w-0'>
                 <FiltersComponent
                     Component={UnusedCeComponent}
+                    cloud='gcp'
                     dateFilter
                     projectsFilter
                     regionFilter
                     resourceFilter
                     isResourceMultiSelect
                     resourceService='unused-instances'
-                    tagCollection='gcp_compute_instances'
-                    tagColumn='labels'
+                    tagResourceType='compute_instances'
                     tagsFilter
                 />
             </div>

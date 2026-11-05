@@ -1,4 +1,5 @@
 'use client'
+import { fetcher } from '@/lib/fetcher';
 import { Dispatch, SetStateAction, useEffect, useState } from 'react'
 import { Check, ChevronsUpDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -20,10 +21,6 @@ interface EksAsgInstancesFilterComponentProps {
     isInstancesService?: string,
 }
 
-const fetcher = (url: string) =>
-    fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
-        .then(r => r.json());
-
 export const EksAsgInstancesFilterComponent = ({
     eksAsg,
     eksAsgInstance,
@@ -41,7 +38,6 @@ export const EksAsgInstancesFilterComponent = ({
     switch (isInstancesService) {
         case 'infraUsed':
             url = shouldFetch ? `/api/aws/bridge/aws/ec2/unused/autoscaling/getInstances?date_from=${startDate}&date_to=${endDate}&region=${region}&autoscaling_group=${encodeURIComponent(eksAsg)}`
-            // url = shouldFetch ? `/api/aws/bridge/autoscaling/all-asg-instances-ec2?date_from=${startDate}&date_to=${endDate}&region=${region}&autoscaling_group=${encodeURIComponent(asg)}`
             : null;
             break;
         default:
@@ -50,9 +46,6 @@ export const EksAsgInstancesFilterComponent = ({
                 : null;
             break;
     }
-    // const url = shouldFetch
-    //     ? `/api/aws/bridge/eks/all-eks-asg-instances-ec2?date_from=${startDate}&date_to=${endDate}&region=${region}&autoscaling_group=${encodeURIComponent(eksAsg)}`
-    //     : null
 
     const { data, error, isLoading } = useSWR<string[]>(url, fetcher);
     useEffect(() => {

@@ -5,35 +5,21 @@ import { useSearchParams } from 'next/navigation';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
+import { CopyButton } from '@/components/shared/CopyButton';
 import { useState } from 'react';
-import { AlertCircle, CheckCircle2, Copy, Eye, Puzzle } from 'lucide-react';
+import { AlertCircle, CheckCircle2, Eye, Puzzle } from 'lucide-react';
 import { UnusedVmssDiskDetails, UnusedVmssDisksData } from '@/interfaces/vista-unused-resources/unusedVmssInterface';
 import { UnusedVmExtensions, UnusedVmExtensionsData } from '@/interfaces/vista-unused-resources/unusedVmExtensionsInterfaces';
+import { readFilterParam } from '@/lib/filters';
 
 const DateParams = () => {
     const searchParams = useSearchParams();
 
-    const startDateParam = searchParams.get('startDate');
-    const endDateParam = searchParams.get('endDate');
+    const startDateParam = readFilterParam(searchParams, 'dateFrom');
+    const endDateParam = readFilterParam(searchParams, 'dateTo');
 
     return { startDateParam: startDateParam, endDateParam: endDateParam }
 }
-
-const CopyBtn = ({ text, label = 'Copiado' }: { text: string; label?: string }) => (
-    <Button
-        variant="ghost"
-        size="sm"
-        className="h-7 px-2"
-        onClick={() => {
-            navigator.clipboard.writeText(text)
-            toast.success(label)
-        }}
-        aria-label="Copiar"
-        title="Copiar"
-    >
-        <Copy className="h-3.5 w-3.5" />
-    </Button>
-)
 
 const ShortenedId = ({ id }: { id: string }) => {
     const parts = id.split("/")
@@ -46,7 +32,7 @@ const ShortenedId = ({ id }: { id: string }) => {
                 <div className="text-sm font-medium truncate">{resourceName}</div>
                 <div className="text-xs text-muted-foreground">{resourceType}</div>
             </div>
-            <CopyBtn text={id} label="ID copiado" />
+            <CopyButton text={id} label="ID copiado" />
         </div>
     )
 }
@@ -161,7 +147,6 @@ const ExtensionsCell = ({ details }: { details?: UnusedVmExtensionsData[] }) => 
                                                         <h1 className="text-sm font-medium">ID Recurso</h1>
                                                         <span className="pt-2 border-t w-[25rem] text-nowrap overflow-x-scroll">
                                                             {n.id}
-                                                            {/* <ShortenedId id={n.id} /> */}
                                                         </span>
                                                     </div>
                                                 )}

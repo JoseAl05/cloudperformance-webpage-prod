@@ -62,13 +62,11 @@ export const AverageByLocationCardsGCPComponent = ({ data }: Props) => {
                   'bg-slate-100/40 dark:bg-slate-900/40'
                 )}
               >
-                {/* Región */}
                 <div className="flex items-center gap-2 mb-3">
                   <MapPin className="h-4 w-4 text-blue-500" />
                   <span className="text-lg font-semibold">{region.region}</span>
                 </div>
 
-                {/* Recursos */}
                 <div className="flex items-center gap-2 text-sm">
                   <Boxes className="h-4 w-4 text-blue-500" />
                   <span>Total recursos analizados</span>
@@ -77,7 +75,6 @@ export const AverageByLocationCardsGCPComponent = ({ data }: Props) => {
                   {region.total_recursos}
                 </div>
 
-                {/* Métricas */}
                 <div className="flex items-center gap-2 text-sm">
                   <ChartBar className="h-4 w-4 text-blue-500" />
                   <span>Métricas analizadas</span>
@@ -86,7 +83,6 @@ export const AverageByLocationCardsGCPComponent = ({ data }: Props) => {
                   {metricsCount}
                 </div>
 
-                {/* Muestras */}
                 <div className="flex items-center gap-2 text-sm">
                   <CalendarClock className="h-4 w-4 text-blue-500" />
                   <span>Total muestras recolectadas</span>

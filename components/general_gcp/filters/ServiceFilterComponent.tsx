@@ -71,7 +71,6 @@ export const ServiceFilterComponent = ({
     ? selectedService.split(',').filter(Boolean)
     : [];
 
-  // ---------- SINGLE SELECT ----------
   if (!isServiceMultiselect) {
     return (
       <Popover open={open} onOpenChange={setOpen}>
@@ -122,7 +121,6 @@ export const ServiceFilterComponent = ({
     );
   }
 
-  // ---------- MULTI SELECT ----------
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>

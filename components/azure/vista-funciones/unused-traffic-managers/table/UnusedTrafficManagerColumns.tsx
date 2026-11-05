@@ -8,6 +8,7 @@ import { useSearchParams } from 'next/navigation';
 import { UnusedTm } from '@/interfaces/vista-unused-resources/unusedTmInterfaces';
 import { UnusedTrafficManagerInsightModal } from '@/components/azure/vista-funciones/unused-traffic-managers/info/UnusedTrafficManagerInsightModal';
 import Link from 'next/link';
+import { readFilterParam } from '@/lib/filters';
 
 const DetailsCell = ({ tm }: { tm: UnusedTm }) => {
     const [open, setOpen] = useState(false);
@@ -36,11 +37,11 @@ const DetailsCell = ({ tm }: { tm: UnusedTm }) => {
 const QueryParams = () => {
     const searchParams = useSearchParams();
 
-    const startDateParam = searchParams.get('startDate');
-    const endDateParam = searchParams.get('endDate');
+    const startDateParam = readFilterParam(searchParams, 'dateFrom');
+    const endDateParam = readFilterParam(searchParams, 'dateTo');
     const resourceGroupParam = searchParams.get('resourceGroup');
-    const tagKeyParam = searchParams.get('tagKey');
-    const tagValueParam = searchParams.get('tagValue');
+    const tagKeyParam = readFilterParam(searchParams, 'tagKey');
+    const tagValueParam = readFilterParam(searchParams, 'tagValue');
     const unusedTmParam = searchParams.get('unused_tm');
 
 
@@ -73,7 +74,7 @@ export const UnusedTrafficManagerColumns: DynamicColumn<UnusedTm>[] = [
                 <div className="flex flex-col">
                     <Link
                         href={{
-                            pathname: '/azure/recursos-traffic-manager',
+                            pathname: '/cloud-azure/recursos/traffic-manager',
                             query: {
                                 startDate: startDate,
                                 endDate: endDate,
