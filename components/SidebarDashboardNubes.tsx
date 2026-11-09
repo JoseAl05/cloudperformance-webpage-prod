@@ -304,6 +304,13 @@ const NAV: Record<Provider, NavItem[]> = {
     vcenter: [
         { label: 'Inicio', icon: LayoutDashboard, href: '/cloud-vcenter' },
         { label: 'Tendencia Facturación', icon: Grid2X2, href: '/cloud-vcenter/facturacion' },
+        {
+            label: 'Consumos',
+            icon: LineChart,
+            items: [
+                { label: 'Máquinas Virtuales', icon: Computer, href: '/cloud-vcenter/consumos/vm' },
+            ],
+        },
     ],
 }
 

@@ -11,7 +11,7 @@ import { formatDateTime, formatValue, getPathValue, getResourceValue } from '@/l
 import type { ConsumptionCloud, ConsumptionResource, MetricPoint } from '@/interfaces/consumption';
 import type { ConsumptionViewConfig, FieldDef } from '@/components/shared/consumption/types';
 
-const SCOPE_LABEL: Record<ConsumptionCloud, string> = { aws: 'Cuenta', azure: 'Suscripción', gcp: 'Proyecto' };
+const SCOPE_LABEL: Record<ConsumptionCloud, string> = { aws: 'Cuenta', azure: 'Suscripción', gcp: 'Proyecto', vcenter: 'vCenter' };
 
 export const renderField = (value: unknown, field: Pick<FieldDef, 'format' | 'unit'>): string => {
     if (value === null || value === undefined || value === '') return '—';
