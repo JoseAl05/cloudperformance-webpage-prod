@@ -3,7 +3,7 @@ import { Plus, Trash2 } from 'lucide-react';
 import { CloudAccount } from '@/types/db';
 import { cn } from '@/lib/utils';
 
-export type CloudProvider = 'azure' | 'aws' | 'gcp' | 'openai';
+export type CloudProvider = 'azure' | 'aws' | 'gcp' | 'openai' | 'vcenter';
 
 export type CloudAccountRow = {
   _key: string;
@@ -65,6 +65,10 @@ const THEME: Record<CloudProvider, { field: string; accent: string }> = {
   openai: {
     field: 'text-slate-700 border-slate-300',
     accent: 'text-slate-600 hover:text-slate-800',
+  },
+  vcenter: {
+    field: 'text-violet-700 border-violet-300',
+    accent: 'text-violet-600 hover:text-violet-800',
   },
 };
 

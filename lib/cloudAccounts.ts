@@ -1,12 +1,13 @@
 import type { CloudAccount } from '@/types/db';
 
-export type CloudProvider = 'aws' | 'azure' | 'gcp' | 'openai';
+export type CloudProvider = 'aws' | 'azure' | 'gcp' | 'openai' | 'vcenter';
 
 export const CLOUD_PROVIDERS: readonly CloudProvider[] = [
   'aws',
   'azure',
   'gcp',
   'openai',
+  'vcenter',
 ] as const;
 
 export const CLOUD_LABELS: Record<
@@ -28,6 +29,11 @@ export const CLOUD_LABELS: Record<
     label: 'Open IA',
     account: 'cuenta Open IA',
     accountPlural: 'cuentas Open IA',
+  },
+  vcenter: {
+    label: 'vCenter',
+    account: 'instancia vCenter',
+    accountPlural: 'instancias vCenter',
   },
 };
 

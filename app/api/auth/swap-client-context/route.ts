@@ -61,6 +61,7 @@ export async function POST(request: Request) {
         aws_account_id: awsAccountId,
         gcp_account_id: gcpAccountId,
         openai_account_id: openaiAccountId,
+        vcenter_account_id: vcenterAccountId,
     } = body
 
     if (!clientName) {
@@ -97,12 +98,14 @@ export async function POST(request: Request) {
     let finalAwsDb: string | null
     let finalGcpDb: string | null
     let finalOpenaiDb: string | null
+    let finalVcenterDb: string | null
 
     try {
         finalAzureDb = resolveCloudDb(targetCompany, 'azure', azureAccountId)
         finalAwsDb = resolveCloudDb(targetCompany, 'aws', awsAccountId)
         finalGcpDb = resolveCloudDb(targetCompany, 'gcp', gcpAccountId)
         finalOpenaiDb = resolveCloudDb(targetCompany, 'openai', openaiAccountId)
+        finalVcenterDb = resolveCloudDb(targetCompany, 'vcenter', vcenterAccountId)
     } catch (err) {
         if (err instanceof AccountNotAllowedError) {
             logger.warn('Swap rechazado: cuenta fuera de la empresa destino', {
@@ -134,6 +137,7 @@ export async function POST(request: Request) {
             aws: finalAwsDb,
             gcp: finalGcpDb,
             openai: finalOpenaiDb,
+            vcenter: finalVcenterDb,
         }),
 
         iat: Math.floor(Date.now() / 1000),
@@ -147,6 +151,7 @@ export async function POST(request: Request) {
     console.log('[SWAP] AWS accounts:', accountCount(newPayload.aws_accounts));
     console.log('[SWAP] Azure accounts:', accountCount(newPayload.azure_accounts));
     console.log('[SWAP] GCP accounts:', accountCount(newPayload.gcp_accounts));
+    console.log('[SWAP] vCenter accounts:', accountCount(newPayload.vcenter_accounts));
 
     console.log(
         '[SWAP] Payload bytes:',
@@ -170,6 +175,7 @@ export async function POST(request: Request) {
             azure: azureAccountId ?? null,
             gcp: gcpAccountId ?? null,
             openai: openaiAccountId ?? null,
+            vcenter: vcenterAccountId ?? null,
         },
     })
 

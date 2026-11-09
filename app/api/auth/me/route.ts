@@ -58,21 +58,25 @@ export async function GET() {
       is_azure: payload.is_azure === true,
       is_gcp: payload.is_gcp === true,
       is_openai: payload.is_openai === true,
+      is_vcenter: payload.is_vcenter === true,
 
       user_db_aws: dbOf(payload.user_db_aws),
       user_db_azure: dbOf(payload.user_db_azure),
       user_db_gcp: dbOf(payload.user_db_gcp),
       user_db_openai: dbOf(payload.user_db_openai),
+      user_db_vcenter: dbOf(payload.user_db_vcenter),
 
       is_aws_multi_tenant: payload.is_aws_multi_tenant === true,
       is_azure_multi_tenant: payload.is_azure_multi_tenant === true,
       is_gcp_multi_tenant: payload.is_gcp_multi_tenant === true,
       is_openai_multi_tenant: payload.is_openai_multi_tenant === true,
+      is_vcenter_multi_tenant: payload.is_vcenter_multi_tenant === true,
 
       azure_accounts: accountsOf(payload.azure_accounts),
       aws_accounts: accountsOf(payload.aws_accounts),
       gcp_accounts: accountsOf(payload.gcp_accounts),
       openai_accounts: accountsOf(payload.openai_accounts),
+      vcenter_accounts: accountsOf(payload.vcenter_accounts),
 
       connectors: connector || []
     };

@@ -50,8 +50,12 @@ export interface JWTPayload {
   is_openai?: boolean;
   user_db_openai?: string | null;
 
+  is_vcenter?: boolean;
+  user_db_vcenter?: string | null;
+
   is_aws_multi_tenant?: boolean;
   is_azure_multi_tenant?: boolean;
   is_gcp_multi_tenant?: boolean;
   is_openai_multi_tenant?: boolean;
+  is_vcenter_multi_tenant?: boolean;
 }

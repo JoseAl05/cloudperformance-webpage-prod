@@ -18,6 +18,9 @@ interface ClientContextType {
 
     activeOpenaiAccountId: string | null;
     setActiveOpenaiAccountId: (id: string | null) => void;
+
+    activeVcenterAccountId: string | null;
+    setActiveVcenterAccountId: (id: string | null) => void;
 }
 
 const ClientContext = createContext<ClientContextType | undefined>(undefined);
@@ -29,12 +32,14 @@ export const ClientContextProvider = ({ children }: { children: React.ReactNode 
     const [activeAwsAccountId, setActiveAwsAccountId] = useState<string | null>(null);
     const [activeGcpAccountId, setActiveGcpAccountId] = useState<string | null>(null);
     const [activeOpenaiAccountId, setActiveOpenaiAccountId] = useState<string | null>(null);
+    const [activeVcenterAccountId, setActiveVcenterAccountId] = useState<string | null>(null);
 
     useEffect(() => {
         setActiveAzureAccountId(null);
         setActiveAwsAccountId(null);
         setActiveGcpAccountId(null);
         setActiveOpenaiAccountId(null);
+        setActiveVcenterAccountId(null);
     }, [selectedCompany]);
 
     const contextValue = useMemo(() => ({
@@ -51,13 +56,17 @@ export const ClientContextProvider = ({ children }: { children: React.ReactNode 
         setActiveGcpAccountId,
 
         activeOpenaiAccountId,
-        setActiveOpenaiAccountId
+        setActiveOpenaiAccountId,
+
+        activeVcenterAccountId,
+        setActiveVcenterAccountId
     }), [
         selectedCompany,
         activeAzureAccountId,
         activeAwsAccountId,
         activeGcpAccountId,
-        activeOpenaiAccountId
+        activeOpenaiAccountId,
+        activeVcenterAccountId
     ]);
 
     return (
