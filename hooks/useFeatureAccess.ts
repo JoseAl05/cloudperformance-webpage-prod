@@ -70,6 +70,9 @@ export const useFeatureAccess = () => {
 
         activeOpenaiAccountId,
         setActiveOpenaiAccountId,
+
+        activeVcenterAccountId,
+        setActiveVcenterAccountId,
     } = useClientContext();
 
     const isGlobalAdmin = userLoggedIn?.role === 'admin_global';
@@ -105,6 +108,7 @@ export const useFeatureAccess = () => {
     const awsAccountsList = normalizeAccounts(activeCredentials?.aws_accounts, activeCredentials?.user_db_aws);
     const gcpAccountsList = normalizeAccounts(activeCredentials?.gcp_accounts, activeCredentials?.user_db_gcp);
     const openaiAccountsList = normalizeAccounts(activeCredentials?.openai_accounts, activeCredentials?.user_db_openai);
+    const vcenterAccountsList = normalizeAccounts(activeCredentials?.vcenter_accounts, activeCredentials?.user_db_vcenter);
 
     let currentDbAzure = null;
     if (azureAccountsList.length > 0) {
@@ -128,6 +132,12 @@ export const useFeatureAccess = () => {
     if (openaiAccountsList.length > 0) {
         const selectedAccount = openaiAccountsList.find(acc => acc.id === activeOpenaiAccountId);
         currentDbOpenai = selectedAccount ? selectedAccount.db : openaiAccountsList[0].db;
+    }
+
+    let currentDbVcenter = null;
+    if (vcenterAccountsList.length > 0) {
+        const selectedAccount = vcenterAccountsList.find(acc => acc.id === activeVcenterAccountId);
+        currentDbVcenter = selectedAccount ? selectedAccount.db : vcenterAccountsList[0].db;
     }
 
     const sourcePlanName = activeCredentials?.planName || (isGlobalAdmin ? 'Global Access' : undefined);
@@ -155,12 +165,16 @@ export const useFeatureAccess = () => {
         isOpenaiActive: activeCredentials?.is_openai || false,
         dbOpenaiName: currentDbOpenai,
         openaiAccountsList,
+
+        isVcenterActive: activeCredentials?.is_vcenter || false,
+        dbVcenterName: currentDbVcenter,
+        vcenterAccountsList,
     };
 
     const findAccountId = (accounts: CloudAccount[], db: string | null): string | null =>
         db ? accounts.find(acc => acc.db === db)?.id ?? null : null;
 
-    const swapContextToken = async (targetClientName: string, explicitAzureDb: string | null = null, explicitAwsDb: string | null = null, explicitGcpDb: string | null = null, explicitOpenaiDb: string | null = null): Promise<boolean> => {
+    const swapContextToken = async (targetClientName: string, explicitAzureDb: string | null = null, explicitAwsDb: string | null = null, explicitGcpDb: string | null = null, explicitOpenaiDb: string | null = null, explicitVcenterDb: string | null = null): Promise<boolean> => {
         if (!targetClientName) return false;
 
         try {
@@ -170,6 +184,7 @@ export const useFeatureAccess = () => {
                 aws_account_id: findAccountId(awsAccountsList, explicitAwsDb),
                 gcp_account_id: findAccountId(gcpAccountsList, explicitGcpDb),
                 openai_account_id: findAccountId(openaiAccountsList, explicitOpenaiDb),
+                vcenter_account_id: findAccountId(vcenterAccountsList, explicitVcenterDb),
             };
 
             const response = await fetch('/api/auth/swap-client-context', {
@@ -203,6 +218,7 @@ export const useFeatureAccess = () => {
         activeAwsAccountId, setActiveAwsAccountId,
         activeGcpAccountId, setActiveGcpAccountId,
         activeOpenaiAccountId, setActiveOpenaiAccountId,
+        activeVcenterAccountId, setActiveVcenterAccountId,
 
         canAccessFullDashboardAws: isGlobalAdmin || (planRestrictions.aws === 'full_dashboard'),
         canAccessFullDashboardAzure: isGlobalAdmin || (planRestrictions.azure === 'full_dashboard'),

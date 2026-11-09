@@ -36,6 +36,11 @@ export interface Empresa {
   user_db_openai: string | null;
   is_openai_multi_tenant: boolean;
   openai_accounts?: CloudAccount[];
+
+  is_vcenter: boolean;
+  user_db_vcenter: string | null;
+  is_vcenter_multi_tenant: boolean;
+  vcenter_accounts?: CloudAccount[];
 }
 
 export interface User {
@@ -69,6 +74,11 @@ export interface User {
   user_db_openai?: string | null;
   is_openai_multi_tenant: boolean;
   openai_accounts?: CloudAccount[];
+
+  is_vcenter: boolean;
+  user_db_vcenter?: string | null;
+  is_vcenter_multi_tenant: boolean;
+  vcenter_accounts?: CloudAccount[];
 
   recoveryToken?: string;
   recoveryTokenExpires?: Date;
@@ -105,6 +115,11 @@ export interface AuthUserPayload {
   is_openai?: boolean;
   is_openai_multi_tenant?: boolean;
   openai_accounts?: CloudAccount[];
+
+  user_db_vcenter?: string | null;
+  is_vcenter?: boolean;
+  is_vcenter_multi_tenant?: boolean;
+  vcenter_accounts?: CloudAccount[];
 }
 
 export interface ClientConnector {

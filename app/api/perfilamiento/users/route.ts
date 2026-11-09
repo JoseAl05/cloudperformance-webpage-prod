@@ -124,6 +124,10 @@ export async function POST(req: NextRequest) {
       user_db_openai: null,
       is_openai_multi_tenant: false,
 
+      is_vcenter: false,
+      user_db_vcenter: null,
+      is_vcenter_multi_tenant: false,
+
       planName: empresa.planName || null,
     };
 

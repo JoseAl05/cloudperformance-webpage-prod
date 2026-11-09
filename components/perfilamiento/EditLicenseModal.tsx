@@ -24,6 +24,7 @@ export default function EditLicenseModal({ empresa, onClose, refreshList }: Edit
     const [awsAccountsData, setAwsAccountsData] = useState<CloudAccountRow[]>([]);
     const [gcpAccountsData, setGcpAccountsData] = useState<CloudAccountRow[]>([]);
     const [openaiAccountsData, setOpenaiAccountsData] = useState<CloudAccountRow[]>([]);
+    const [vcenterAccountsData, setVcenterAccountsData] = useState<CloudAccountRow[]>([]);
 
     const [formData, setFormData] = useState({
         name: empresa.name,
@@ -42,6 +43,9 @@ export default function EditLicenseModal({ empresa, onClose, refreshList }: Edit
         is_openai: empresa.is_openai || false,
         user_db_openai: empresa.user_db_openai || '',
         is_openai_multi_tenant: empresa.is_openai_multi_tenant || false,
+        is_vcenter: empresa.is_vcenter || false,
+        user_db_vcenter: empresa.user_db_vcenter || '',
+        is_vcenter_multi_tenant: empresa.is_vcenter_multi_tenant || false,
     });
 
     const [loading, setLoading] = useState(false);
@@ -72,12 +76,17 @@ export default function EditLicenseModal({ empresa, onClose, refreshList }: Edit
                 is_openai: empresa.is_openai || false,
                 user_db_openai: empresa.user_db_openai || '',
                 is_openai_multi_tenant: empresa.is_openai_multi_tenant || false,
+
+                is_vcenter: empresa.is_vcenter || false,
+                user_db_vcenter: empresa.user_db_vcenter || '',
+                is_vcenter_multi_tenant: empresa.is_vcenter_multi_tenant || false,
             });
 
             setAzureAccountsData(toAccountRows(empresa.azure_accounts));
             setAwsAccountsData(toAccountRows(empresa.aws_accounts));
             setGcpAccountsData(toAccountRows(empresa.gcp_accounts));
             setOpenaiAccountsData(toAccountRows(empresa.openai_accounts));
+            setVcenterAccountsData(toAccountRows(empresa.vcenter_accounts));
 
             setMessage('');
         }
@@ -115,10 +124,17 @@ export default function EditLicenseModal({ empresa, onClose, refreshList }: Edit
                 setGcpAccountsData([]);
             }
 
+            if (name === 'is_vcenter' && !checked) {
+                newState.user_db_vcenter = '';
+                newState.is_vcenter_multi_tenant = false;
+                setVcenterAccountsData([]);
+            }
+
             if (name === 'is_azure_multi_tenant' && !checked) setAzureAccountsData([]);
             if (name === 'is_aws_multi_tenant' && !checked) setAwsAccountsData([]);
             if (name === 'is_gcp_multi_tenant' && !checked) setGcpAccountsData([]);
             if (name === 'is_openai_multi_tenant' && !checked) setOpenaiAccountsData([]);
+            if (name === 'is_vcenter_multi_tenant' && !checked) setVcenterAccountsData([]);
 
             return newState;
         });
@@ -129,7 +145,8 @@ export default function EditLicenseModal({ empresa, onClose, refreshList }: Edit
         if (cloud === 'azure') setAzureAccountsData(prev => [...prev, newAccount]);
         else if (cloud === 'aws') setAwsAccountsData(prev => [...prev, newAccount]);
         else if (cloud === 'gcp') setGcpAccountsData(prev => [...prev, newAccount]);
-        else setOpenaiAccountsData(prev => [...prev, newAccount]);
+        else if (cloud === 'openai') setOpenaiAccountsData(prev => [...prev, newAccount]);
+        else setVcenterAccountsData(prev => [...prev, newAccount]);
     }, []);
 
     const handleUpdateAccount = useCallback((cloud: CloudProvider, rowKey: string, field: 'alias' | 'db', value: string) => {
@@ -137,7 +154,8 @@ export default function EditLicenseModal({ empresa, onClose, refreshList }: Edit
         if (cloud === 'azure') setter = setAzureAccountsData;
         else if (cloud === 'aws') setter = setAwsAccountsData;
         else if (cloud === 'gcp') setter = setGcpAccountsData;
-        else setter = setOpenaiAccountsData;
+        else if (cloud === 'openai') setter = setOpenaiAccountsData;
+        else setter = setVcenterAccountsData;
 
         setter(prev => prev.map(acc =>
             acc._key === rowKey ? { ...acc, [field]: value } : acc
@@ -149,7 +167,8 @@ export default function EditLicenseModal({ empresa, onClose, refreshList }: Edit
         if (cloud === 'azure') setter = setAzureAccountsData;
         else if (cloud === 'aws') setter = setAwsAccountsData;
         else if (cloud === 'gcp') setter = setGcpAccountsData;
-        else setter = setOpenaiAccountsData;
+        else if (cloud === 'openai') setter = setOpenaiAccountsData;
+        else setter = setVcenterAccountsData;
 
         setter(prev => prev.filter(acc => acc._key !== rowKey));
     }, []);
@@ -205,6 +224,15 @@ export default function EditLicenseModal({ empresa, onClose, refreshList }: Edit
             setLoading(false); return;
         }
 
+        if (!formData.is_vcenter_multi_tenant && formData.is_vcenter && !formData.user_db_vcenter) {
+            setMessage('Error: El Nombre DB vCenter es requerido si el acceso vCenter estÃ¡ activado.');
+            setLoading(false); return;
+        }
+        if (formData.is_vcenter_multi_tenant && vcenterAccountsData.length === 0) {
+            setMessage('Error: Si marca Multi-Tenant vCenter, debe agregar al menos una instancia.');
+            setLoading(false); return;
+        }
+
         const finalAzureAccounts = formData.is_azure && formData.is_azure_multi_tenant
             ? toAccountsPayload(azureAccountsData)
             : undefined;
@@ -219,6 +247,10 @@ export default function EditLicenseModal({ empresa, onClose, refreshList }: Edit
 
         const finalOpenaiAccounts = formData.is_openai && formData.is_openai_multi_tenant
             ? toAccountsPayload(openaiAccountsData)
+            : undefined;
+
+        const finalVcenterAccounts = formData.is_vcenter && formData.is_vcenter_multi_tenant
+            ? toAccountsPayload(vcenterAccountsData)
             : undefined;
 
         const updatePayload = {
@@ -244,6 +276,11 @@ export default function EditLicenseModal({ empresa, onClose, refreshList }: Edit
             user_db_openai: formData.is_openai && !formData.is_openai_multi_tenant ? formData.user_db_openai : null,
             is_openai_multi_tenant: formData.is_openai_multi_tenant,
             openai_accounts: finalOpenaiAccounts,
+
+            is_vcenter: formData.is_vcenter,
+            user_db_vcenter: formData.is_vcenter && !formData.is_vcenter_multi_tenant ? formData.user_db_vcenter : null,
+            is_vcenter_multi_tenant: formData.is_vcenter_multi_tenant,
+            vcenter_accounts: finalVcenterAccounts,
         };
 
         try {
@@ -580,6 +617,64 @@ export default function EditLicenseModal({ empresa, onClose, refreshList }: Edit
                                         <AccountListEditor
                                             cloud="openai"
                                             accounts={openaiAccountsData}
+                                            onAdd={handleAddAccount}
+                                            onUpdate={handleUpdateAccount}
+                                            onRemove={handleRemoveAccount}
+                                        />
+                                    )}
+                                </div>
+
+                                <div className="space-y-2 border p-3 rounded-lg bg-violet-50/30 border-violet-200">
+                                    <div className="flex items-center space-x-4 mb-2">
+                                        <input
+                                            type="checkbox"
+                                            name="is_vcenter"
+                                            id="is_vcenter"
+                                            checked={formData.is_vcenter}
+                                            onChange={handleChange}
+                                            className="h-4 w-4 rounded border-gray-300 text-violet-700 focus:ring-violet-500"
+                                        />
+                                        <label htmlFor="is_vcenter" className="text-sm font-medium">Acceso vCenter</label>
+
+                                        {formData.is_vcenter && (
+                                            <div className="flex items-center space-x-2">
+                                                <input
+                                                    type="checkbox"
+                                                    name="is_vcenter_multi_tenant"
+                                                    id="is_vcenter_multi_tenant"
+                                                    checked={formData.is_vcenter_multi_tenant}
+                                                    onChange={handleChange}
+                                                    className="h-4 w-4 rounded border-gray-300 text-violet-700 focus:ring-violet-500"
+                                                />
+                                                <label htmlFor="is_vcenter_multi_tenant" className="text-sm font-medium text-violet-700">
+                                                    Multi-Tenant
+                                                </label>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {formData.is_vcenter && !formData.is_vcenter_multi_tenant && (
+                                        <div className="space-y-2 pt-2">
+                                            <label htmlFor="user_db_vcenter" className="text-xs font-medium text-violet-700">
+                                                Nombre DB vCenter (Maestra/Principal)
+                                            </label>
+                                            <input
+                                                type="text"
+                                                name="user_db_vcenter"
+                                                id="user_db_vcenter"
+                                                value={formData.user_db_vcenter}
+                                                onChange={handleChange}
+                                                required={formData.is_vcenter}
+                                                className="flex h-10 w-full rounded-md border border-violet-300 bg-white px-3 py-2 text-sm"
+                                                placeholder="Ej: Cloud_Performance_vCenter"
+                                            />
+                                        </div>
+                                    )}
+
+                                    {formData.is_vcenter && formData.is_vcenter_multi_tenant && (
+                                        <AccountListEditor
+                                            cloud="vcenter"
+                                            accounts={vcenterAccountsData}
                                             onAdd={handleAddAccount}
                                             onUpdate={handleUpdateAccount}
                                             onRemove={handleRemoveAccount}
