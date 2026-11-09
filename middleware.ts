@@ -15,6 +15,7 @@ const CLOUD_FLAGS = [
   { prefix: '/cloud-aws', flag: 'is_aws' },
   { prefix: '/cloud-azure', flag: 'is_azure' },
   { prefix: '/cloud-gcp', flag: 'is_gcp' },
+  { prefix: '/cloud-vcenter', flag: 'is_vcenter' },
   { prefix: '/open-ia', flag: 'is_openai' },
   { prefix: '/amazon-bedrock', flag: 'is_aws' },
   { prefix: '/microsoft-foundry', flag: 'is_azure' },

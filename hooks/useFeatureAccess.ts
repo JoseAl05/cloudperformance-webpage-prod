@@ -226,6 +226,8 @@ export const useFeatureAccess = () => {
         canAccessPdfReportAzure: isGlobalAdmin || (planRestrictions.azure !== 'none'),
         canAccessPdfReportAws: isGlobalAdmin || (planRestrictions.aws !== 'none'),
         canAccessPdfReportGcp: isGlobalAdmin || planRestrictions.gcp !== 'none',
+        canAccessFullDashboardVcenter: isGlobalAdmin || connectionData.isVcenterActive,
+        canAccessPdfReportVcenter: isGlobalAdmin || connectionData.isVcenterActive,
         canAccessPresupuesto: isGlobalAdmin || planRestrictions.presupuesto,
         canAccessVistaAdvisor: isGlobalAdmin || planRestrictions.vistaAdvisor,
 

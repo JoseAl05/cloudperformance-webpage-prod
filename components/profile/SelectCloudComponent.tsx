@@ -34,6 +34,9 @@ export const SelectCloudComponent = () => {
         activeGcpAccountId,
         setActiveGcpAccountId,
 
+        activeVcenterAccountId,
+        setActiveVcenterAccountId,
+
         swapContextToken
     } = useFeatureAccess()
 
@@ -42,21 +45,25 @@ export const SelectCloudComponent = () => {
     const isAzure = connectionData.isAzureActive
     const isAws = connectionData.isAwsActive
     const isGcp = connectionData.isGcpActive
+    const isVcenter = connectionData.isVcenterActive
 
-    const nothing = !isAzure && !isAws && !isGcp
+    const nothing = !isAzure && !isAws && !isGcp && !isVcenter
     const clientName = connectionData.client
 
     const azureAccounts = connectionData.azureAccountsList || []
     const awsAccounts = connectionData.awsAccountsList || []
     const gcpAccounts = connectionData.gcpAccountsList || []
+    const vcenterAccounts = connectionData.vcenterAccountsList || []
 
     const hasMultipleAzureAccounts = azureAccounts.length > 1
     const hasMultipleAwsAccounts = awsAccounts.length > 1
     const hasMultipleGcpAccounts = gcpAccounts.length > 1
+    const hasMultipleVcenterAccounts = vcenterAccounts.length > 1
 
     const isAzureReady = !hasMultipleAzureAccounts || !!activeAzureAccountId
     const isAwsReady = !hasMultipleAwsAccounts || !!activeAwsAccountId
     const isGcpReady = !hasMultipleGcpAccounts || !!activeGcpAccountId
+    const isVcenterReady = !hasMultipleVcenterAccounts || !!activeVcenterAccountId
 
     const handleAccountChange = (
         newId: string,
@@ -96,6 +103,22 @@ export const SelectCloudComponent = () => {
         swapContextToken(client, newDbAzure, newDbAws, newDbGcp)
     }
 
+    const handleVcenterAccountChange = (newId: string) => {
+        const selectedAccount = vcenterAccounts.find(acc => acc.id === newId)
+        const client = connectionData.client
+        if (!selectedAccount || !client) return
+
+        setActiveVcenterAccountId(newId)
+        swapContextToken(
+            client,
+            connectionData.dbAzureName,
+            connectionData.dbAwsName,
+            connectionData.dbGcpName,
+            connectionData.dbOpenaiName,
+            selectedAccount.db
+        )
+    }
+
     const handleEnterAzure = () => {
         if (!isAzureReady) return
 
@@ -129,6 +152,24 @@ export const SelectCloudComponent = () => {
         router.push(`/cloud-gcp?client=${clientName}`)
     }
 
+    const handleEnterVcenter = () => {
+        if (!isVcenterReady || !clientName) return
+
+        if (!hasMultipleVcenterAccounts && vcenterAccounts.length > 0) {
+            const defaultAcc = vcenterAccounts[0]
+            swapContextToken(
+                clientName,
+                connectionData.dbAzureName,
+                connectionData.dbAwsName,
+                connectionData.dbGcpName,
+                connectionData.dbOpenaiName,
+                defaultAcc.db
+            )
+        }
+
+        router.push(`/cloud-vcenter?client=${clientName}`)
+    }
+
     const stopProp = (e: React.MouseEvent) => {
         e.stopPropagation()
     }
@@ -154,7 +195,7 @@ export const SelectCloudComponent = () => {
             <div
                 className={cn(
                     "grid gap-4",
-                    (isAzure && isAws) || isGcp
+                    (isAzure && isAws) || isGcp || isVcenter
                         ? "grid-cols-1 md:grid-cols-2"
                         : "grid-cols-1"
                 )}
@@ -321,6 +362,62 @@ export const SelectCloudComponent = () => {
                             </div>
 
                             {isGcpReady && (
+                                <ArrowRight className="h-4 w-4 opacity-70 group-hover:translate-x-1 transition-transform" />
+                            )}
+                        </div>
+                    </div>
+                )}
+
+                {isVcenter && (
+                    <div
+                        onClick={handleEnterVcenter}
+                        className={cn(
+                            "group relative overflow-hidden rounded-2xl border bg-card p-5 shadow-sm transition",
+                            isVcenterReady
+                                ? "hover:shadow-md cursor-pointer border-border"
+                                : "border-gray-200 bg-gray-50/50 cursor-default",
+                            (hasMultipleVcenterAccounts && isVcenterReady) ? "border-violet-400" : ""
+                        )}
+                    >
+                        <div className={cn("absolute -left-10 -top-10 h-32 w-32 rounded-full blur-2xl transition-opacity", isVcenterReady ? "bg-violet-500/10 opacity-100" : "opacity-0")} />
+
+                        <div className="flex items-center gap-4">
+                            <div className={cn("relative h-12 w-12 rounded-xl ring-1 bg-background grid place-items-center transition-all", isVcenterReady ? "ring-border grayscale-0" : "ring-gray-200 grayscale")}>
+                                <Image alt="vCenter" src="/vcenter.svg" width={30} height={30} />
+                            </div>
+
+                            <div className="flex-1 z-10">
+                                <h3 className={cn("text-lg font-semibold", !isVcenterReady && "text-gray-500")}>VMware vCenter</h3>
+
+                                {hasMultipleVcenterAccounts && (
+                                    <div className="mt-1 flex items-center gap-2" onClick={stopProp}>
+                                        <span className="text-xs text-muted-foreground">Instancia:</span>
+                                        <Select
+                                            value={activeVcenterAccountId || ""}
+                                            onValueChange={handleVcenterAccountChange}
+                                        >
+                                            <SelectTrigger className={cn("h-7 w-[180px] text-xs font-bold transition-colors", activeVcenterAccountId ? "text-violet-700 bg-white/50 border-violet-200" : "text-gray-500 border-dashed border-gray-400")}>
+                                                <SelectValue placeholder="Seleccione una instancia..." />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {vcenterAccounts.map(acc => (
+                                                    <SelectItem key={acc.id} value={acc.id} className="text-xs">
+                                                        {acc.alias}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                )}
+
+                                {!hasMultipleVcenterAccounts && (
+                                    <p className="text-xs text-muted-foreground mt-1">
+                                        Hosts, máquinas virtuales, clusters y datastores.
+                                    </p>
+                                )}
+                            </div>
+
+                            {isVcenterReady && (
                                 <ArrowRight className="h-4 w-4 opacity-70 group-hover:translate-x-1 transition-transform" />
                             )}
                         </div>
