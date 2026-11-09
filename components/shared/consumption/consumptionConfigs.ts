@@ -406,3 +406,77 @@ export const GCP_FILESTORE: ConsumptionViewConfig = {
     },
     emptyText: 'No se encontraron instancias de Filestore para los filtros seleccionados.',
 };
+
+export const VCENTER_VM: ConsumptionViewConfig = {
+    cloud: 'vcenter',
+    resource: 'vm',
+    serviceName: 'vCenter',
+    resourceTypeLabel: 'VM vCenter',
+    labels: INSTANCE_LABELS,
+    metricsEndpoints: ['metrics'],
+    hasEfficiency: true,
+    tableColumns: [
+        { label: 'CPU', path: 'metrics.cpu_utilization', format: 'percent', bar: true, secondary: { label: 'vCPU', path: 'metrics.vcpus', format: 'text' } },
+        { label: 'Memoria', path: 'metrics.memory_utilization', format: 'percent', bar: true, secondary: { label: 'RAM', path: 'metrics.memory_gb', format: 'gb' } },
+        { label: 'Disco', path: 'metrics.storage_utilization', format: 'percent', bar: true, secondary: { label: 'Capacidad', path: 'metrics.storage_capacity_gb', format: 'gb' } },
+    ],
+    generalFields: [
+        { label: 'Hostname', path: 'details.guest_hostname' },
+        { label: 'Sistema operativo', path: 'details.guest_os' },
+        { label: 'Direcciones IP', path: 'details.ip_addresses' },
+        { label: 'Host ESXi', path: 'details.esxi_host' },
+        { label: 'Resource pool', path: 'details.resource_pool' },
+        { label: 'VMware Tools', path: 'details.tools_status' },
+        { label: 'Versión de hardware', path: 'details.hardware_version' },
+        { label: 'Último arranque', path: 'details.boot_time', format: 'date' },
+        { label: 'Monitoreada como', path: 'details.monitored_as' },
+        { label: 'Último chequeo de monitoreo', path: 'details.last_check', format: 'date' },
+        { label: 'Ambiente', path: 'details.environment' },
+        { label: 'Productos facturados', path: 'details.billing_products' },
+        { label: 'Período cargo fijo', path: 'details.billing_period_fixed' },
+        { label: 'Período cargo variable', path: 'details.billing_period_variable' },
+    ],
+    metricGroups: [
+        {
+            title: 'CPU',
+            rows: [
+                { label: 'Uso', path: 'metrics.cpu_utilization', format: 'percent' },
+                { label: 'vCPU asignadas', path: 'metrics.vcpus', format: 'text' },
+            ],
+        },
+        {
+            title: 'Memoria',
+            rows: [
+                { label: 'Uso', path: 'metrics.memory_utilization', format: 'percent' },
+                { label: 'Usada', path: 'metrics.memory_used_gb', format: 'gb' },
+                { label: 'Total (sistema operativo)', path: 'metrics.memory_total_gb', format: 'gb' },
+                { label: 'Asignada (vCenter)', path: 'metrics.memory_gb', format: 'gb' },
+            ],
+        },
+        {
+            title: 'Almacenamiento',
+            rows: [
+                { label: 'Uso', path: 'metrics.storage_utilization', format: 'percent' },
+                { label: 'Usado', path: 'metrics.storage_used_gb', format: 'gb' },
+                { label: 'Capacidad visible', path: 'metrics.storage_capacity_gb', format: 'gb' },
+                { label: 'Aprovisionado', path: 'metrics.provisioned_storage_gb', format: 'gb' },
+            ],
+        },
+        {
+            title: 'Disponibilidad y costo',
+            rows: [
+                { label: 'Uptime (días)', path: 'metrics.uptime_days', format: 'number' },
+                { label: 'Latencia ping (ms)', path: 'metrics.ping_latency_ms', format: 'number' },
+                { label: 'Pérdida ping', path: 'metrics.ping_loss_percent', format: 'percent' },
+                { label: 'Cargo fijo', path: 'details.cost_fixed', format: 'count', unit: 'COP' },
+                { label: 'Cargo variable', path: 'details.cost_variable', format: 'count', unit: 'COP' },
+            ],
+        },
+    ],
+    showStorageInefficient: true,
+    recommendations: {
+        idle: 'CPU y memoria prácticamente sin uso en el último chequeo de monitoreo. Si no es crítica, evalúe apagarla o retirarla para liberar capacidad del clúster y su cargo en la prefactura.',
+        underutilized: 'Uso bajo de CPU y memoria en el último chequeo. Evalúe reducir vCPU y RAM asignadas (right-sizing) para disminuir el cargo por capacidad.',
+    },
+    emptyText: 'No se encontraron máquinas virtuales de vCenter. Los datos de vCenter son fotos de cada sincronización: si eligió un período, asegúrese de que incluya una.',
+};

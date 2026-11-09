@@ -1,4 +1,4 @@
-export type ConsumptionCloud = 'aws' | 'azure' | 'gcp';
+export type ConsumptionCloud = 'aws' | 'azure' | 'gcp' | 'vcenter';
 
 export interface MetricPoint {
     timestamp: string;
