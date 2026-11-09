@@ -46,7 +46,7 @@ import {
 import { SidebarNav, resolveNav, type NavItem } from '@/components/SidebarNav'
 import type { Sidebar } from '@/components/ui/sidebar'
 
-type Provider = 'aws' | 'azure' | 'gcp'
+type Provider = 'aws' | 'azure' | 'gcp' | 'vcenter'
 
 const NAV: Record<Provider, NavItem[]> = {
     aws: [
@@ -300,6 +300,10 @@ const NAV: Record<Provider, NavItem[]> = {
                 { label: 'Cloud SQL Sql Server', icon: Database, href: '/cloud-gcp/recursos/cloudsql/sqlserver' },
             ],
         },
+    ],
+    vcenter: [
+        { label: 'Inicio', icon: LayoutDashboard, href: '/cloud-vcenter' },
+        { label: 'Tendencia Facturación', icon: Grid2X2, href: '/cloud-vcenter/facturacion' },
     ],
 }
 
