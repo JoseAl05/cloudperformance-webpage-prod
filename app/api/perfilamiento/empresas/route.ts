@@ -48,6 +48,11 @@ export async function GET(req: NextRequest) {
         is_openai_multi_tenant: 1,
         openai_accounts: 1,
 
+        is_vcenter: 1,
+        user_db_vcenter: 1,
+        is_vcenter_multi_tenant: 1,
+        vcenter_accounts: 1,
+
         _id: 1,
       })
       .toArray();
@@ -120,6 +125,10 @@ export async function POST(req: NextRequest) {
       is_openai: false,
       user_db_openai: null,
       is_openai_multi_tenant: false,
+
+      is_vcenter: false,
+      user_db_vcenter: null,
+      is_vcenter_multi_tenant: false,
 
       createdAt: new Date(),
       updatedAt: new Date(),
