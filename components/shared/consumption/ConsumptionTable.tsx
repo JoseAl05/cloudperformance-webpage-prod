@@ -11,6 +11,7 @@ import { DataTableGrouping } from '@/components/data-table/data-table-grouping';
 import { ConsumptionDetailModal, renderField } from '@/components/shared/consumption/ConsumptionDetailModal';
 import { formatCurrency } from '@/lib/format';
 import { formatDateTime, getResourceValue, toNumberOrNull } from '@/lib/consumption';
+import type { QueryParams } from '@/lib/consumption';
 import type { ConsumptionResource } from '@/interfaces/consumption';
 import type { ConsumptionViewConfig, MetricColumnDef } from '@/components/shared/consumption/types';
 
@@ -51,19 +52,26 @@ const ClassificationCell = ({ row }: { row: Row }) => {
     return <div className="flex flex-wrap gap-1">{badges}</div>;
 };
 
-const DetailsCell = ({ row, config }: { row: Row; config: ConsumptionViewConfig }) => {
+const DetailsCell = ({ row, config, params }: { row: Row; config: ConsumptionViewConfig; params?: QueryParams }) => {
     const [open, setOpen] = useState(false);
     return (
         <>
             <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => setOpen(true)} aria-label="Ver detalle">
                 <Eye className="h-4 w-4 text-slate-500 dark:text-slate-400" />
             </Button>
-            {open && <ConsumptionDetailModal resource={row} config={config} isOpen={open} onClose={() => setOpen(false)} />}
+            {open && <ConsumptionDetailModal resource={row} config={config} params={params} isOpen={open} onClose={() => setOpen(false)} />}
         </>
     );
 };
 
-export const ConsumptionTable = ({ resources, config }: { resources: ConsumptionResource[]; config: ConsumptionViewConfig }) => {
+interface ConsumptionTableProps {
+    resources: ConsumptionResource[];
+    config: ConsumptionViewConfig;
+    source?: string;
+    params?: QueryParams;
+}
+
+export const ConsumptionTable = ({ resources, config, source, params }: ConsumptionTableProps) => {
     const rows = useMemo<Row[]>(() => resources.map((r) => {
         const row: Row = { ...r };
         config.tableColumns.forEach((col, i) => { row[`__col${i}`] = getResourceValue(r, col.path) ?? null; });
@@ -107,7 +115,7 @@ export const ConsumptionTable = ({ resources, config }: { resources: Consumption
                 size: 120,
             },
             {
-                header: 'Ubicación',
+                header: source === 'vcenter' ? 'Ambiente' : 'Región',
                 accessorKey: 'region',
                 cell: (info: unknown) => {
                     const row = rowOf(info);
@@ -155,12 +163,12 @@ export const ConsumptionTable = ({ resources, config }: { resources: Consumption
             },
             {
                 header: 'Detalle',
-                cell: (info: unknown) => <DetailsCell row={rowOf(info)} config={config} />,
+                cell: (info: unknown) => <DetailsCell row={rowOf(info)} config={config} params={params} />,
                 size: 90,
             },
         ];
         return createColumns(cols);
-    }, [config, maxima]);
+    }, [config, maxima, params]);
 
     if (resources.length === 0) return null;
 

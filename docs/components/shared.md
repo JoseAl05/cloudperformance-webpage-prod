@@ -22,6 +22,7 @@ Archivos:
 - [`components/shared/consumption/ConsumptionDetailModal.tsx`](#components-shared-consumption-consumptiondetailmodal-tsx)
 - [`components/shared/consumption/ConsumptionTable.tsx`](#components-shared-consumption-consumptiontable-tsx)
 - [`components/shared/consumption/ConsumptionView.tsx`](#components-shared-consumption-consumptionview-tsx)
+- [`components/shared/consumption/ResourceSeriesTab.tsx`](#components-shared-consumption-resourceseriestab-tsx)
 - [`components/shared/consumption/consumptionConfigs.ts`](#components-shared-consumption-consumptionconfigs-ts)
 - [`components/shared/consumption/types.ts`](#components-shared-consumption-types-ts)
 - [`components/shared/filters/BaseFiltersComponent.tsx`](#components-shared-filters-basefilterscomponent-tsx)
@@ -437,7 +438,7 @@ Internos:
 
 Exporta:
 
-- componente `ConsumptionCharts` `({ data, metricOverrides }: ConsumptionChartsProps)` — Un gráfico por métrica (las series llegan mezcladas y se agrupan por `metric`).
+- componente `ConsumptionCharts` `({ data, metricOverrides }: ConsumptionChartsProps)` — Un gráfico por métrica (las series llegan mezcladas y se agrupan por `metric`). Una métrica con un solo punto se dibuja con marcadores y sin barra de zoom, para que el punto sea visible.
 
 Interfaz `ConsumptionChartsProps`:
 
@@ -465,7 +466,7 @@ Internos:
 Exporta:
 
 - función `renderField` `(value: unknown, field: Pick<FieldDef, 'format' | 'unit'>): string`
-- componente `ConsumptionDetailModal` `({ resource, config, isOpen, onClose }: ConsumptionDetailModalProps)`
+- componente `ConsumptionDetailModal` `({ resource, config, params, isOpen, onClose }: ConsumptionDetailModalProps)` — Pestañas Información, Métricas, Gráficos (solo si `config.detailSeries` está definido), Series (solo si el recurso trae `series`), Tags y Recomendación.
 
 Interfaz `ConsumptionDetailModalProps`:
 
@@ -473,6 +474,7 @@ Interfaz `ConsumptionDetailModalProps`:
 |---|---|---|---|
 | `resource` | `ConsumptionResource` | no | — |
 | `config` | `ConsumptionViewConfig` | no | — |
+| `params` | `QueryParams` | sí | Parámetros de la vista (período) que usa la pestaña Gráficos para pedir las series. |
 | `isOpen` | `boolean` | no | — |
 | `onClose` | `() => void` | no | — |
 
@@ -485,7 +487,7 @@ Internos:
 - componente `TagsTab` `({ resource }: { resource: ConsumptionResource })`
 - componente `RecommendationTab` `({ resource, config }: { resource: ConsumptionResource; config: ConsumptionViewConfig })`
 
-- Usa: [`scroll-area.tsx`](ui.md#components-ui-scroll-area-tsx), [`badge.tsx`](ui.md#components-ui-badge-tsx), [`table.tsx`](ui.md#components-ui-table-tsx), [`HistoryModal.tsx`](general_gcp.md#components-general-gcp-modal-historymodal-tsx), [`ConsumptionCharts.tsx`](#components-shared-consumption-consumptioncharts-tsx), [`format.ts`](../lib.md#lib-format-ts), [`consumption.ts`](../lib.md#lib-consumption-ts), [`consumption.ts`](../tipos.md#interfaces-consumption-ts), [`types.ts`](#components-shared-consumption-types-ts)
+- Usa: [`scroll-area.tsx`](ui.md#components-ui-scroll-area-tsx), [`badge.tsx`](ui.md#components-ui-badge-tsx), [`table.tsx`](ui.md#components-ui-table-tsx), [`HistoryModal.tsx`](general_gcp.md#components-general-gcp-modal-historymodal-tsx), [`ConsumptionCharts.tsx`](#components-shared-consumption-consumptioncharts-tsx), [`ResourceSeriesTab.tsx`](#components-shared-consumption-resourceseriestab-tsx), [`format.ts`](../lib.md#lib-format-ts), [`consumption.ts`](../lib.md#lib-consumption-ts), [`consumption.ts`](../tipos.md#interfaces-consumption-ts), [`types.ts`](#components-shared-consumption-types-ts)
 - Usado por: [`ConsumptionTable.tsx`](#components-shared-consumption-consumptiontable-tsx)
 
 ---
@@ -497,7 +499,16 @@ Internos:
 
 Exporta:
 
-- componente `ConsumptionTable` `({ resources, config }: { resources: ConsumptionResource[]; config: ConsumptionViewConfig })`
+- componente `ConsumptionTable` `({ resources, config, source, params }: ConsumptionTableProps)`
+
+Interfaz `ConsumptionTableProps`:
+
+| Campo | Tipo | Opcional | Descripción |
+|---|---|---|---|
+| `resources` | `ConsumptionResource[]` | no | — |
+| `config` | `ConsumptionViewConfig` | no | — |
+| `source` | `string` | sí | — |
+| `params` | `QueryParams` | sí | Se reenvía al detalle de cada recurso. |
 
 - Tipo interno `Row` = `ConsumptionResource & Record<string, unknown>`
 Internos:
@@ -505,7 +516,7 @@ Internos:
 - función `rowOf` `(info: unknown): Row` — DynamicColumn tipa `cell` con `info: unknown`; aquí se acota al contexto de celda de TanStack.
 - componente `BarCell` `({ value, max, column, row }: { value: number | null; max: number; column: MetricColumnDef; row: Row })`
 - componente `ClassificationCell` `({ row }: { row: Row })`
-- componente `DetailsCell` `({ row, config }: { row: Row; config: ConsumptionViewConfig })`
+- componente `DetailsCell` `({ row, config, params }: { row: Row; config: ConsumptionViewConfig; params?: QueryParams })`
 
 - Usa: [`badge.tsx`](ui.md#components-ui-badge-tsx), [`button.tsx`](ui.md#components-ui-button-tsx), [`card.tsx`](ui.md#components-ui-card-tsx), [`columns.tsx`](data-table.md#components-data-table-columns-tsx), [`data-table-grouping.tsx`](data-table.md#components-data-table-data-table-grouping-tsx), [`ConsumptionDetailModal.tsx`](#components-shared-consumption-consumptiondetailmodal-tsx), [`format.ts`](../lib.md#lib-format-ts), [`consumption.ts`](../lib.md#lib-consumption-ts), [`consumption.ts`](../tipos.md#interfaces-consumption-ts), [`types.ts`](#components-shared-consumption-types-ts)
 - Usado por: [`ConsumptionView.tsx`](#components-shared-consumption-consumptionview-tsx)
@@ -519,7 +530,7 @@ Internos:
 
 Exporta:
 
-- componente `ConsumptionView` `({ config, params, enabled, disabledText }: ConsumptionViewProps)` — Vista estándar de Consumo / Eficiencia: tarjetas de resumen y eficiencia, un gráfico por métrica y la tabla de recursos con su detalle. Igual para AWS, Azure y GCP; lo propio de cada recurso vive en `config`.
+- componente `ConsumptionView` `({ config, params, enabled, disabledText, source }: ConsumptionViewProps)` — Vista estándar de Consumo / Eficiencia: tarjetas de resumen y eficiencia, un gráfico por métrica y la tabla de recursos con su detalle. Igual para AWS, Azure, GCP y vCenter; lo propio de cada recurso vive en `config`. Con `metricsEndpoints` vacío no se dibujan gráficos en la vista principal (vCenter los muestra en la pestaña Gráficos del detalle).
 
 Interfaz `ConsumptionViewProps`:
 
@@ -538,6 +549,36 @@ Internos:
 - Hooks: `useSWR`
 - Usa: [`fetcher.ts`](../lib.md#lib-fetcher-ts), [`consumption.ts`](../lib.md#lib-consumption-ts), [`DataStateComponent.tsx`](#components-shared-datastatecomponent-tsx), [`ConsumptionCards.tsx`](#components-shared-consumption-consumptioncards-tsx), [`ConsumptionCharts.tsx`](#components-shared-consumption-consumptioncharts-tsx), [`ConsumptionTable.tsx`](#components-shared-consumption-consumptiontable-tsx), [`consumption.ts`](../tipos.md#interfaces-consumption-ts), [`types.ts`](#components-shared-consumption-types-ts)
 - Usado por: [`Ec2InstancesConsumeComponent.tsx`](aws/vista-consumos.md#components-aws-vista-consumos-ec2-ec2instancesconsumecomponent-tsx), [`AsgConsumeComponent.tsx`](aws/vista-consumos.md#components-aws-vista-consumos-ec2-asg-asgconsumecomponent-tsx), [`EksConsumeComponent.tsx`](aws/vista-consumos.md#components-aws-vista-consumos-ec2-eks-eksconsumecomponent-tsx), [`ElbV2ConsumeComponent.tsx`](aws/vista-consumos.md#components-aws-vista-consumos-elbv2-elbv2consumecomponent-tsx), [`NatGatewaysConsumeComponent.tsx`](aws/vista-consumos.md#components-aws-vista-consumos-nat-gateways-natgatewaysconsumecomponent-tsx), [`RdsInstancesConsumeComponent.tsx`](aws/vista-consumos.md#components-aws-vista-consumos-rds-rdsinstancesconsumecomponent-tsx), [`ConsumoAppGwComponent.tsx`](azure/vista-consumo-apps-gateway.md#components-azure-vista-consumo-apps-gateway-consumoappgwcomponent-tsx), [`ConsumoDbComponent.tsx`](azure/vista-consumo-db.md#components-azure-vista-consumo-db-consumodbcomponent-tsx), [`ConsumoNodosComponent.tsx`](azure/vista-consumo-nodos.md#components-azure-vista-consumo-nodos-consumonodoscomponent-tsx), [`ConsumoVmComponent.tsx`](azure/vista-consumo-vm.md#components-azure-vista-consumo-vm-consumovmcomponent-tsx), [`CloudSQLComponent.tsx`](gcp/vista-consumos.md#components-gcp-vista-consumos-cloud-sql-cloudsqlcomponent-tsx), [`ClusterGkeConsumeComponent.tsx`](gcp/vista-consumos.md#components-gcp-vista-consumos-clusters-gke-clustergkeconsumecomponent-tsx), [`ComputeEngineConsumeComponent.tsx`](gcp/vista-consumos.md#components-gcp-vista-consumos-compute-engine-computeengineconsumecomponent-tsx), [`FilestoreConsumeComponent.tsx`](gcp/vista-consumos.md#components-gcp-vista-consumos-filestore-filestoreconsumecomponent-tsx), [`InstanceGroupConsumeComponent.tsx`](gcp/vista-consumos.md#components-gcp-vista-consumos-instance-groups-instancegroupconsumecomponent-tsx)
+
+---
+
+<a id="components-shared-consumption-resourceseriestab-tsx"></a>
+## `components/shared/consumption/ResourceSeriesTab.tsx`
+
+**Componente (cliente)**
+
+Exporta:
+
+- componente `ResourceSeriesTab` `({ resource, config, series, params }: ResourceSeriesTabProps)` — Pestaña Gráficos del detalle para recursos con métricas dinámicas (vCenter). Pide las series solo al abrir la pestaña (`/{cloud}/consumption/{resource}/{series.action}` con el período de la vista y `resource_ip`), agrupa los chequeos por servicio con un selector (por defecto el de CPU) y dibuja cada métrica con `ConsumptionCharts`, tomando el formato de la unidad que trae la API ('%' → porcentaje, 'B' → bytes, sin unidad → conteo, otra → número con su unidad). Si el recurso no tiene IP de monitoreo, muestra un aviso y no hace la petición.
+
+Interfaz `ResourceSeriesTabProps`:
+
+| Campo | Tipo | Opcional | Descripción |
+|---|---|---|---|
+| `resource` | `ConsumptionResource` | no | — |
+| `config` | `ConsumptionViewConfig` | no | — |
+| `series` | `DetailSeriesDef` | no | — |
+| `params` | `QueryParams` | no | Período de la vista (`date_from`, `date_to`). |
+
+Internos:
+
+- constante `GRANULARITY_LABEL`
+- constante `NO_SERVICE`
+- función `toDefinition` `({ metric, unit }: SeriesMetric): MetricDefinition`
+
+- Hooks: `useSWR`
+- Usa: [`scroll-area.tsx`](ui.md#components-ui-scroll-area-tsx), [`select.tsx`](ui.md#components-ui-select-tsx), [`DataStateComponent.tsx`](#components-shared-datastatecomponent-tsx), [`ConsumptionCharts.tsx`](#components-shared-consumption-consumptioncharts-tsx), [`fetcher.ts`](../lib.md#lib-fetcher-ts), [`consumption.ts`](../lib.md#lib-consumption-ts), [`consumption.ts`](../tipos.md#interfaces-consumption-ts), [`types.ts`](#components-shared-consumption-types-ts)
+- Usado por: [`ConsumptionDetailModal.tsx`](#components-shared-consumption-consumptiondetailmodal-tsx)
 
 ---
 
@@ -563,6 +604,7 @@ Exporta:
 - constante `GCP_GKE` = `gcpCompute('gke', 'Clusters GKE', 'GKE Node')`
 - constante `GCP_CLOUD_SQL` = `{ cloud: 'gcp', resource: 'cloud-sql', serviceName: 'Cloud SQL', resourceTypeLa…`
 - constante `GCP_FILESTORE` = `{ cloud: 'gcp', resource: 'filestore', serviceName: 'Filestore', resourceTypeLa…`
+- constante `VCENTER_VM` = `{ cloud: 'vcenter', resource: 'vm', serviceName: 'vCenter', resourceTypeLabel: …` — Sin gráficos en la vista principal (`metricsEndpoints: []`); las series de cada VM se piden en el detalle con `detailSeries: { action: 'series', ipPath: 'details.monitored_address' }`.
 
 Internos:
 
@@ -596,6 +638,7 @@ Exporta:
 - interfaz `FieldDef` — Un valor a mostrar, leído por ruta del recurso ("metrics.avg_cpu_utilization", "details.vpc_id", "resource_type").
 - interfaz `MetricColumnDef` — Columna numérica de la tabla, con barra relativa al máximo visible.
 - interfaz `MetricGroupDef`
+- interfaz `DetailSeriesDef` — Series por recurso que se piden al abrir la pestaña Gráficos del detalle.
 - interfaz `ConsumptionViewConfig` — Configuración de una vista de consumo. Todo lo que cambia entre nubes/recursos vive aquí; el diseño (tarjetas, gráficos, tabla y detalle) es el mismo para todas.
 
 Interfaz `FieldDef` (exportada) — Un valor a mostrar, leído por ruta del recurso ("metrics.avg_cpu_utilization", "details.vpc_id", "resource_type").:
@@ -621,6 +664,13 @@ Interfaz `MetricGroupDef` (exportada):
 | `title` | `string` | no | — |
 | `rows` | `FieldDef[]` | no | — |
 
+Interfaz `DetailSeriesDef` (exportada) — Series por recurso que se piden al abrir la pestaña Gráficos del detalle.:
+
+| Campo | Tipo | Opcional | Descripción |
+|---|---|---|---|
+| `action` | `string` | no | Acción del endpoint de consumo (`/{cloud}/consumption/{resource}/{action}`), p. ej. 'series'. |
+| `ipPath` | `string` | no | Ruta en el recurso de la IP a consultar (`resource_ip`); sin valor, la pestaña indica que no hay monitoreo. |
+
 Interfaz `ConsumptionViewConfig` (exportada) — Configuración de una vista de consumo. Todo lo que cambia entre nubes/recursos vive aquí; el diseño (tarjetas, gráficos, tabla y detalle) es el mismo para todas.:
 
 | Campo | Tipo | Opcional | Descripción |
@@ -636,6 +686,7 @@ Interfaz `ConsumptionViewConfig` (exportada) — Configuración de una vista de 
 | `generalFields` | `FieldDef[]` | no | Campos de "Información General" en el detalle. |
 | `metricGroups` | `MetricGroupDef[]` | no | Bloques de "Métricas" en el detalle. |
 | `historyColumns` | `FieldDef[]` | sí | Columnas del historial por sincronización (rutas relativas al registro: 'metrics.x', 'cost'). |
+| `detailSeries` | `DetailSeriesDef` | sí | Agrega la pestaña Gráficos al detalle, con todas las métricas disponibles del recurso (métricas dinámicas, como vCenter). |
 | `showStorageInefficient` | `boolean` | sí | — |
 | `recommendations` | `{ idle: string; underutilized: string }` | no | — |
 | `emptyText` | `string` | no | — |
