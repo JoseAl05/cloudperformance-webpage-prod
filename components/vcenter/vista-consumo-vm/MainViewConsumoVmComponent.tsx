@@ -18,7 +18,7 @@ export const MainViewConsumoVmComponent = () => (
                     </p>
                 </div>
             </div>
-            <div className='flex items-start gap-2 rounded-lg border border-blue-200 bg-blue-50 p-3 text-sm text-blue-900 dark:border-blue-900 dark:bg-blue-950/40 dark:text-blue-200'>
+            {/* <div className='flex items-start gap-2 rounded-lg border border-blue-200 bg-blue-50 p-3 text-sm text-blue-900 dark:border-blue-900 dark:bg-blue-950/40 dark:text-blue-200'>
                 <Info className='h-4 w-4 mt-0.5 flex-shrink-0' />
                 <p>
                     Cada sincronización de vCenter es una foto: el uso de CPU y memoria corresponde al último chequeo de
@@ -26,10 +26,16 @@ export const MainViewConsumoVmComponent = () => (
                     prefactura (cargo fijo y variable). Sin un período seleccionado se muestra la última
                     sincronización; al elegir un rango se usa la última foto de cada VM dentro de él.
                 </p>
-            </div>
+            </div> */}
         </div>
         <div className='w-full min-w-0'>
-            <FiltersComponent Component={VcenterVmConsumptionComponent} />
+            <FiltersComponent
+                cloud="vcenter"
+                Component={VcenterVmConsumptionComponent}
+                dateFilter
+                resourceFilter
+                isResourceMultiSelect
+            />
         </div>
     </div>
 );

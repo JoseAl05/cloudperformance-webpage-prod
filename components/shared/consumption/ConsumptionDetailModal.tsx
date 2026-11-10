@@ -6,8 +6,10 @@ import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { HistoryModal, HistoryModalTab } from '@/components/general_gcp/modal/HistoryModal';
 import { ConsumptionCharts } from '@/components/shared/consumption/ConsumptionCharts';
+import { ResourceSeriesTab } from '@/components/shared/consumption/ResourceSeriesTab';
 import { formatCurrency } from '@/lib/format';
 import { formatDateTime, formatValue, getPathValue, getResourceValue } from '@/lib/consumption';
+import type { QueryParams } from '@/lib/consumption';
 import type { ConsumptionCloud, ConsumptionResource, MetricPoint } from '@/interfaces/consumption';
 import type { ConsumptionViewConfig, FieldDef } from '@/components/shared/consumption/types';
 
@@ -203,14 +205,22 @@ const RecommendationTab = ({ resource, config }: { resource: ConsumptionResource
 interface ConsumptionDetailModalProps {
     resource: ConsumptionResource;
     config: ConsumptionViewConfig;
+    params?: QueryParams;
     isOpen: boolean;
     onClose: () => void;
 }
 
-export const ConsumptionDetailModal = ({ resource, config, isOpen, onClose }: ConsumptionDetailModalProps) => {
+export const ConsumptionDetailModal = ({ resource, config, params, isOpen, onClose }: ConsumptionDetailModalProps) => {
     const tabs: HistoryModalTab[] = [
         { value: 'info', label: 'Información', content: <InfoTab resource={resource} config={config} /> },
         { value: 'metricas', label: 'Métricas', content: <MetricsTab resource={resource} config={config} /> },
+        ...(config.detailSeries
+            ? [{
+                value: 'graficos',
+                label: 'Gráficos',
+                content: <ResourceSeriesTab resource={resource} config={config} series={config.detailSeries} params={params ?? {}} />,
+            }]
+            : []),
         ...(Object.keys(resource.series).length > 0
             ? [{ value: 'series', label: 'Series', content: <SeriesTab resource={resource} /> }]
             : []),

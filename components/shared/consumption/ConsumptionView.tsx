@@ -20,9 +20,10 @@ interface ConsumptionViewProps {
     params: QueryParams;
     enabled: boolean;
     disabledText: string;
+    source?: string;
 }
 
-export const ConsumptionView = ({ config, params, enabled, disabledText }: ConsumptionViewProps) => {
+export const ConsumptionView = ({ config, params, enabled, disabledText, source }: ConsumptionViewProps) => {
     const { cloud, resource } = config;
 
     const info = useSWR<ConsumptionInfoResponse>(enabled ? consumptionUrl(cloud, resource, 'info', params) : null, fetcher, SWR_OPTIONS);
@@ -57,7 +58,7 @@ export const ConsumptionView = ({ config, params, enabled, disabledText }: Consu
                         <ConsumptionCharts data={points} />
                     </div>
                 )}
-                <ConsumptionTable resources={resources} config={config} />
+                <ConsumptionTable resources={resources} config={config} source={source} params={params} />
             </div>
         </DataStateComponent>
     );

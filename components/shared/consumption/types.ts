@@ -18,6 +18,11 @@ export interface MetricGroupDef {
     rows: FieldDef[];
 }
 
+export interface DetailSeriesDef {
+    action: string;
+    ipPath: string;
+}
+
 export interface ConsumptionViewConfig {
     cloud: ConsumptionCloud;
     resource: string;
@@ -30,6 +35,7 @@ export interface ConsumptionViewConfig {
     generalFields: FieldDef[];
     metricGroups: MetricGroupDef[];
     historyColumns?: FieldDef[];
+    detailSeries?: DetailSeriesDef;
     showStorageInefficient?: boolean;
     recommendations: { idle: string; underutilized: string };
     emptyText: string;
