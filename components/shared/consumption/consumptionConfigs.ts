@@ -413,7 +413,8 @@ export const VCENTER_VM: ConsumptionViewConfig = {
     serviceName: 'vCenter',
     resourceTypeLabel: 'VM vCenter',
     labels: INSTANCE_LABELS,
-    metricsEndpoints: ['metrics'],
+    metricsEndpoints: [],
+    detailSeries: { action: 'series', ipPath: 'details.monitored_address' },
     hasEfficiency: true,
     tableColumns: [
         { label: 'CPU', path: 'metrics.cpu_utilization', format: 'percent', bar: true, secondary: { label: 'vCPU', path: 'metrics.vcpus', format: 'text' } },

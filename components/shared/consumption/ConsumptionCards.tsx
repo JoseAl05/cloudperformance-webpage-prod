@@ -49,7 +49,7 @@ export const ConsumptionCards = ({ config, summary, efficiency }: ConsumptionCar
             )}
 
             {summary && (
-                <div className={`grid grid-cols-1 md:grid-cols-2 ${config.showStorageInefficient ? 'xl:grid-cols-5' : 'xl:grid-cols-4'} gap-4`}>
+                <div className={`grid grid-cols-1 md:grid-cols-2 ${config.showStorageInefficient ? 'xl:grid-cols-4' : 'xl:grid-cols-3'} gap-4`}>
                     <StatCard
                         title={config.labels.total}
                         value={summary.total_resources}

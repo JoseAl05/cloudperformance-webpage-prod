@@ -20,6 +20,7 @@ const MetricChart = ({ points, definition }: { points: ChartPoint[]; definition:
         const sorted = [...points].sort((a, b) => a.timestamp.localeCompare(b.timestamp));
         const series = (key: 'avg_value' | 'max_value' | 'min_value') =>
             sorted.map((p) => [p.timestamp, p[key]] as [string, number | null]);
+        const marker = sorted.length < 2 ? { showSymbol: true, symbol: 'circle', symbolSize: 8 } : {};
 
         const isPercent = definition.format === 'percent';
         const formatAxis = (value: number) => {
@@ -41,9 +42,9 @@ const MetricChart = ({ points, definition }: { points: ChartPoint[]; definition:
             legend: true,
             tooltip: true,
             series: [
-                { kind: 'line', name: 'Promedio', data: series('avg_value'), smooth: true, extra: { color: '#36A2EB' } },
-                { kind: 'line', name: 'Máximo', data: series('max_value'), smooth: true, extra: { color: '#FF6384' } },
-                { kind: 'line', name: 'Mínimo', data: series('min_value'), smooth: true, extra: { color: '#28e995' } },
+                { kind: 'line', name: 'Promedio', data: series('avg_value'), smooth: true, extra: { color: '#36A2EB', ...marker } },
+                { kind: 'line', name: 'Máximo', data: series('max_value'), smooth: true, extra: { color: '#FF6384', ...marker } },
+                { kind: 'line', name: 'Mínimo', data: series('min_value'), smooth: true, extra: { color: '#28e995', ...marker } },
             ],
             extraOption: {
                 tooltip: {
@@ -59,6 +60,7 @@ const MetricChart = ({ points, definition }: { points: ChartPoint[]; definition:
                 },
                 xAxis: { axisLabel: { rotate: 30 } },
                 grid: { left: 50, right: 20, top: 56, bottom: 64, containLabel: true },
+                ...(sorted.length < 2 ? { dataZoom: [] } : {}),
             },
         });
         return deepMerge(base, lines);

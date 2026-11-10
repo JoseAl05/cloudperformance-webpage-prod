@@ -1331,7 +1331,7 @@ Interfaz `BillingTop` (exportada):
 
 Exporta:
 
-- tipo `ConsumptionCloud` = `'aws' | 'azure' | 'gcp'` — Contrato canónico de la familia "Consumo / Eficiencia" (espejo de `utils/consumption_schemas.py`, idéntico en cloudperformance-api-aws, -azure y -gcp). Rutas: /api/{cloud}/consumption/{recurso}/{metrics|info|efficiency} Fechas: siempre ISO 8601 UTC ("2026-09-22T07:00:03.184Z").
+- tipo `ConsumptionCloud` = `'aws' | 'azure' | 'gcp' | 'vcenter'` — Contrato canónico de la familia "Consumo / Eficiencia" (espejo de `utils/consumption_schemas.py`, idéntico en cloudperformance-api-aws, -azure y -gcp). Rutas: /api/{cloud}/consumption/{recurso}/{metrics|info|efficiency} Fechas: siempre ISO 8601 UTC ("2026-09-22T07:00:03.184Z").
 - interfaz `MetricPoint`
 - tipo `EfficiencyLevel` = `'low' | 'medium' | 'high' | 'no_data'`
 - interfaz `EfficiencyMetric`
@@ -1340,6 +1340,9 @@ Exporta:
 - interfaz `ResourceSnapshot`
 - interfaz `ConsumptionResource`
 - interfaz `ConsumptionSummary`
+- tipo `SeriesGranularity` = `'hour' | 'day'`
+- interfaz `SeriesMetric` — Metadatos de una métrica dinámica de un recurso (chequeo de monitoreo en vCenter).
+- interfaz `ResourceSeriesResponse` — Respuesta de `/{cloud}/consumption/{recurso}/series`: todas las métricas del recurso y sus puntos en el formato `MetricPoint` (promedio, máximo y mínimo por hora, o por día si el período es de 7 días o más).
 - interfaz `ConsumptionInfoResponse`
 
 Interfaz `MetricPoint` (exportada):
@@ -1433,6 +1436,24 @@ Interfaz `ConsumptionSummary` (exportada):
 | `breakdowns` | `Record<string, Record<string, number>>` | no | — |
 | `extra` | `Record<string, unknown>` | no | — |
 
+Interfaz `SeriesMetric` (exportada) — Metadatos de una métrica dinámica de un recurso (chequeo de monitoreo en vCenter).:
+
+| Campo | Tipo | Opcional | Descripción |
+|---|---|---|---|
+| `metric` | `string` | no | Nombre de la métrica; es la misma clave que `MetricPoint.metric`. |
+| `service` | `string \| null` | no | Servicio que agrupa la métrica en el selector. |
+| `unit` | `string \| null` | no | — |
+| `warning` | `number \| null` | no | Umbral de advertencia más reciente. |
+| `critical` | `number \| null` | no | Umbral crítico más reciente. |
+
+Interfaz `ResourceSeriesResponse` (exportada):
+
+| Campo | Tipo | Opcional | Descripción |
+|---|---|---|---|
+| `granularity` | `SeriesGranularity` | no | — |
+| `metrics` | `SeriesMetric[]` | no | — |
+| `points` | `MetricPoint[]` | no | — |
+
 Interfaz `ConsumptionInfoResponse` (exportada):
 
 | Campo | Tipo | Opcional | Descripción |
@@ -1440,7 +1461,7 @@ Interfaz `ConsumptionInfoResponse` (exportada):
 | `summary` | `ConsumptionSummary` | no | — |
 | `resources` | `ConsumptionResource[]` | no | — |
 
-- Usado por: [`ZonasDNSComponent.tsx`](components/gcp/vista-consumos.md#components-gcp-vista-consumos-dns-zonas-consumo-estado-zonasdnscomponent-tsx), [`ZonasDNSCardsComponent.tsx`](components/gcp/vista-consumos.md#components-gcp-vista-consumos-dns-zonas-consumo-estado-info-zonasdnscardscomponent-tsx), [`ZonasDNSTable.tsx`](components/gcp/vista-consumos.md#components-gcp-vista-consumos-dns-zonas-consumo-estado-tabla-zonasdnstable-tsx), [`LoadBalancersComponent.tsx`](components/gcp/vista-consumos.md#components-gcp-vista-consumos-load-balancers-consumo-uso-loadbalancerscomponent-tsx), [`LoadBalancersCardsComponent.tsx`](components/gcp/vista-consumos.md#components-gcp-vista-consumos-load-balancers-consumo-uso-info-loadbalancerscardscomponent-tsx), [`LoadBalancersTable.tsx`](components/gcp/vista-consumos.md#components-gcp-vista-consumos-load-balancers-consumo-uso-tabla-loadbalancerstable-tsx), [`ConsumptionCards.tsx`](components/shared.md#components-shared-consumption-consumptioncards-tsx), [`ConsumptionCharts.tsx`](components/shared.md#components-shared-consumption-consumptioncharts-tsx), [`ConsumptionDetailModal.tsx`](components/shared.md#components-shared-consumption-consumptiondetailmodal-tsx), [`ConsumptionTable.tsx`](components/shared.md#components-shared-consumption-consumptiontable-tsx), [`ConsumptionView.tsx`](components/shared.md#components-shared-consumption-consumptionview-tsx), [`types.ts`](components/shared.md#components-shared-consumption-types-ts), [`consumption.ts`](lib.md#lib-consumption-ts)
+- Usado por: [`ZonasDNSComponent.tsx`](components/gcp/vista-consumos.md#components-gcp-vista-consumos-dns-zonas-consumo-estado-zonasdnscomponent-tsx), [`ZonasDNSCardsComponent.tsx`](components/gcp/vista-consumos.md#components-gcp-vista-consumos-dns-zonas-consumo-estado-info-zonasdnscardscomponent-tsx), [`ZonasDNSTable.tsx`](components/gcp/vista-consumos.md#components-gcp-vista-consumos-dns-zonas-consumo-estado-tabla-zonasdnstable-tsx), [`LoadBalancersComponent.tsx`](components/gcp/vista-consumos.md#components-gcp-vista-consumos-load-balancers-consumo-uso-loadbalancerscomponent-tsx), [`LoadBalancersCardsComponent.tsx`](components/gcp/vista-consumos.md#components-gcp-vista-consumos-load-balancers-consumo-uso-info-loadbalancerscardscomponent-tsx), [`LoadBalancersTable.tsx`](components/gcp/vista-consumos.md#components-gcp-vista-consumos-load-balancers-consumo-uso-tabla-loadbalancerstable-tsx), [`ConsumptionCards.tsx`](components/shared.md#components-shared-consumption-consumptioncards-tsx), [`ConsumptionCharts.tsx`](components/shared.md#components-shared-consumption-consumptioncharts-tsx), [`ConsumptionDetailModal.tsx`](components/shared.md#components-shared-consumption-consumptiondetailmodal-tsx), [`ConsumptionTable.tsx`](components/shared.md#components-shared-consumption-consumptiontable-tsx), [`ConsumptionView.tsx`](components/shared.md#components-shared-consumption-consumptionview-tsx), [`ResourceSeriesTab.tsx`](components/shared.md#components-shared-consumption-resourceseriestab-tsx), [`types.ts`](components/shared.md#components-shared-consumption-types-ts), [`consumption.ts`](lib.md#lib-consumption-ts)
 
 ---
 

@@ -79,6 +79,22 @@ export interface ConsumptionSummary {
     extra: Record<string, unknown>;
 }
 
+export type SeriesGranularity = 'hour' | 'day';
+
+export interface SeriesMetric {
+    metric: string;
+    service: string | null;
+    unit: string | null;
+    warning: number | null;
+    critical: number | null;
+}
+
+export interface ResourceSeriesResponse {
+    granularity: SeriesGranularity;
+    metrics: SeriesMetric[];
+    points: MetricPoint[];
+}
+
 export interface ConsumptionInfoResponse {
     summary: ConsumptionSummary;
     resources: ConsumptionResource[];
