@@ -23,6 +23,10 @@ export const COST_METRICS: Record<string, { label: string; description: string }
         label: 'GCP · Costo neto (CLP)',
         description: 'El mismo costo neto de GCP (descontados créditos y descuentos), expresado en pesos chilenos.',
     },
+    cost_with_tax: {
+        label: 'vCenter · Costo con impuestos',
+        description: 'Costo de prefacturación de vCenter con impuestos, incluyendo los conceptos fijos y variables del período.',
+    },
 };
 
 export const costMetricInfo = (metric: string | null | undefined) =>

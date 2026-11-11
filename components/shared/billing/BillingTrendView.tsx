@@ -17,7 +17,12 @@ import { BillingTrendChart } from './BillingTrendChart';
 import { BillingHistoryTable } from './BillingHistoryTable';
 import { CostMetricInfo } from './CostMetricInfo';
 
-const CLOUD_LABEL: Record<BillingCloud, string> = { aws: 'AWS', azure: 'Azure', gcp: 'GCP' };
+const CLOUD_LABEL: Record<BillingCloud, string> = {
+    aws: 'AWS',
+    azure: 'Azure',
+    gcp: 'GCP',
+    vcenter: 'vCenter',
+};
 
 interface BillingTrendViewProps {
     cloud: BillingCloud;

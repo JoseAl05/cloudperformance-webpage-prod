@@ -12,7 +12,7 @@ import { useSession } from '@/hooks/useSession';
 import { LoaderComponent } from '@/components/general_aws/LoaderComponent';
 import Image from 'next/image';
 
-import type { BillingCloud, BillingPoint, BillingTrend } from '@/interfaces/billing';
+import type { BillingPoint, BillingTrend } from '@/interfaces/billing';
 import { billingUrl, monthOf, monthsRange } from '@/lib/billing';
 import { toApiDate } from '@/lib/consumption';
 import { CostMetricInfo } from '@/components/shared/billing/CostMetricInfo';
@@ -80,7 +80,7 @@ export const GlobalBillingMultiTenantDashboard = ({
         tag_value: value && value !== 'allValues' ? value : undefined,
     });
 
-    const trendUrl = (cloud: BillingCloud, enabled: boolean | undefined, accountIds: string, extra: Record<string, string | undefined>) =>
+    const trendUrl = (cloud: CloudProvider, enabled: boolean | undefined, accountIds: string, extra: Record<string, string | undefined>) =>
         enabled && selectedClouds.includes(cloud) && accountIds
             ? billingUrl(cloud, 'multitenant/trend', { ...dateParams, account_ids: accountIds, ...extra })
             : null;
