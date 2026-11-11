@@ -1,4 +1,4 @@
-export type BillingCloud = 'aws' | 'azure' | 'gcp';
+export type BillingCloud = 'aws' | 'azure' | 'gcp' | 'vcenter';
 
 export type BillingAction = 'trend' | 'multitenant/trend' | 'history' | 'top';
 
