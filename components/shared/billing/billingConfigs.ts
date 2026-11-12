@@ -36,3 +36,7 @@ export const AZURE_TOP_DIMENSIONS: TopBillingDimension[] = [
 export const GCP_TOP_DIMENSIONS = {
     region: { value: 'region', label: 'Región', icon: '🌍', uiTuning: tuning(30, 100) },
 } satisfies Record<string, TopBillingDimension>;
+
+export const VCENTER_TOP_DIMENSIONS = {
+    resource: { value: 'resource', label: 'Recurso', icon: '🖥️', uiTuning: tuning(30, 100) },
+} satisfies Record<string, TopBillingDimension>;
