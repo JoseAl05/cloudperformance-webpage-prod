@@ -86,7 +86,7 @@ const AmountCell = ({ value, total, currency }: { value: number | null; total: n
             <div className="flex justify-between items-end text-xs gap-2">
                 <span className="font-bold">{value !== null ? formatCurrency(value, { currency }) : '—'}</span>
                 <span className="text-[10px] text-muted-foreground opacity-80" title="Total de los recursos de la tabla">
-                    Tot: {formatCurrency(total, { currency: 'USD' })}
+                    Tot: {formatCurrency(total, { currency })}
                 </span>
             </div>
             <div className="w-full h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">

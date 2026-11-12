@@ -464,3 +464,37 @@ export const GCP_IPS_UNUSED: UnusedViewConfig = {
     diagnosisRule: 'IP reservada sin recursos que la usen = sin uso.',
     emptyText: 'No encontramos IPs sin uso en el rango seleccionado.',
 };
+
+export const VCENTER_VM_UNUSED: UnusedViewConfig = {
+    cloud: 'vcenter',
+    resource: 'vm',
+    serviceName: 'VMs',
+    resourceTypeLabel: 'VM vCenter',
+    cardMetrics: [
+        { label: 'CPU Promedio Global', metrics: ['cpu_utilization'] },
+        { label: 'Memoria Promedio Global', metrics: ['memory_utilization'] },
+        { label: 'Disco Promedio Global', metrics: ['storage_utilization'] },
+    ],
+    tableMetrics: [
+        { label: 'CPU', metrics: ['cpu_utilization'] },
+        { label: 'Memoria', metrics: ['memory_utilization'] },
+        { label: 'Disco', metrics: ['storage_utilization'] },
+    ],
+    attributes: [
+        { key: 'ip_address', label: 'Dirección IP', format: 'text' },
+        { key: 'vcpus', label: 'vCPUs', format: 'count', unit: 'vCPU', total: true },
+        { key: 'memory_gb', label: 'Memoria asignada', format: 'gb', total: true },
+        { key: 'storage_capacity_gb', label: 'Capacidad de disco visible', format: 'gb' },
+        { key: 'provisioned_storage_gb', label: 'Disco aprovisionado', format: 'gb', total: true },
+        { key: 'guest_os', label: 'Sistema operativo', format: 'text' },
+        { key: 'esxi_host', label: 'Host ESXi', format: 'text' },
+        { key: 'environment', label: 'Ambiente', format: 'text' },
+    ],
+    tableAttributes: [
+        { key: 'ip_address', label: 'Dirección IP', format: 'text' },
+    ],
+    breakdowns: [{ key: 'region', label: 'Por ambiente' }],
+    summaryFromResources: true,
+    diagnosisRule: 'Promedios del período: CPU < 10 %, memoria < 40 % y disco < 20 % = infrautilizada; solo una o dos bajo el umbral = bajo uso.',
+    emptyText: 'No encontramos VMs de vCenter infrautilizadas en el período seleccionado.',
+};

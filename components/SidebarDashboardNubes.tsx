@@ -311,6 +311,19 @@ const NAV: Record<Provider, NavItem[]> = {
                 { label: 'Máquinas Virtuales', icon: Computer, href: '/cloud-vcenter/consumos/vm' },
             ],
         },
+        {
+            label: 'Funciones',
+            icon: Zap,
+            items: [
+                {
+                    label: 'Recursos no utilizados',
+                    icon: TrendingDown,
+                    items: [
+                        { label: 'Máquinas Virtuales', icon: Computer, href: '/cloud-vcenter/funciones/unused-resources/vm' },
+                    ],
+                },
+            ],
+        },
     ],
 }
 

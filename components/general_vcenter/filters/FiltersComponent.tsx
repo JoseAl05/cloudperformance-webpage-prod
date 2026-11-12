@@ -6,7 +6,7 @@ import { BaseFiltersComponent } from '@/components/shared/filters/BaseFiltersCom
 import { readFilterParam, setFilterDates, setFilterParam } from '@/lib/filters';
 import { useRouter, useSearchParams } from 'next/navigation';
 
-import { ResourcesFilterComponent } from './ResourcesFilterComponent';
+import { ResourcesFilterComponent, type VcenterResourceService } from './ResourcesFilterComponent';
 import {
     BillingTypeFilterComponent,
     parseBillingType,
@@ -32,6 +32,7 @@ interface FiltersComponentProps {
     dateFilter?: boolean;
     resourceFilter?: boolean;
     isResourceMultiSelect?: boolean;
+    resourceService?: VcenterResourceService;
     billingTypeFilter?: boolean;
     businessUnitFilter?: boolean;
     cloud: string;
@@ -42,6 +43,7 @@ export const FiltersComponent = ({
     dateFilter = true,
     resourceFilter = false,
     isResourceMultiSelect = false,
+    resourceService = 'all',
     billingTypeFilter = false,
     businessUnitFilter = false,
     cloud
@@ -167,6 +169,7 @@ export const FiltersComponent = ({
                         startDate={tempStartDate}
                         endDate={tempEndDate}
                         isResourceMultiSelect={isResourceMultiSelect}
+                        service={resourceService}
                     />
                 </div>
             )}
