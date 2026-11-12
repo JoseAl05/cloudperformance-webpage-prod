@@ -749,7 +749,7 @@ Internos:
 
 Exporta:
 
-- componente `UnusedCards` `({ config, summary, resources }: UnusedCardsProps)` — Costo y ahorro (si la API los entrega), recursos analizados con su diagnóstico, totales de capacidad, distribuciones y una tarjeta por métrica (promedio y peak).
+- componente `UnusedCards` `({ config, summary, resources }: UnusedCardsProps)` — Costo y ahorro (si la API los entrega), recursos analizados con su diagnóstico, totales de capacidad, distribuciones y una tarjeta por métrica (promedio y peak). El costo total usa la moneda que informan los recursos (USD en AWS, Azure y GCP; COP en vCenter); el ahorro sigue en USD.
 
 Interfaz `UnusedCardsProps`:
 
@@ -830,7 +830,7 @@ Internos:
 - función `attributeColumnKey` `(key: string)`
 - componente `ResourceCell` `({ row, config }: { row: Row; config: UnusedViewConfig })`
 - componente `MetricCell` `({ row, group, definition }: { row: Row; group: MetricGroup; definition: MetricDefinition })` — Valor del recurso + barra (ranking: respecto del más cargado; contribution: % del total del grupo).
-- componente `AmountCell` `({ value, total, currency }: { value: number | null; total: number; currency: string })` — Monto con barra relativa al total de la tabla (costo del período o ahorro mensual).
+- componente `AmountCell` `({ value, total, currency }: { value: number | null; total: number; currency: string })` — Monto con barra relativa al total de la tabla (costo del período o ahorro mensual). El total ("Tot:") se muestra en la misma moneda del monto.
 - componente `DetailsCell` `({ row, config, associatedUrl }: { row: Row; config: UnusedViewConfig; associatedUrl?: (resourceId: string) => string })`
 - componente `TableLegend` `()`
 
@@ -953,6 +953,7 @@ Exporta:
 - constante `GCP_PERSISTENT_DISKS_UNUSED` = `{ cloud: 'gcp', resource: 'persistent-disks', serviceName: 'discos persistentes…` — GCP: discos persistentes, Filestore e IPs
 - constante `GCP_FILESTORE_UNUSED` = `{ cloud: 'gcp', resource: 'filestore', serviceName: 'instancias Filestore', res…`
 - constante `GCP_IPS_UNUSED` = `{ cloud: 'gcp', resource: 'ips', serviceName: 'IPs', resourceTypeLabel: 'Direcc…`
+- constante `VCENTER_VM_UNUSED` = `{ cloud: 'vcenter', resource: 'vm', serviceName: 'VMs', resourceTypeLabel: 'VM vCenter', …` — VMs de vCenter infrautilizadas. Métricas `cpu_utilization`, `memory_utilization` y `storage_utilization` (promedios del período); diagnóstico: las tres bajo el umbral (CPU < 10 %, memoria < 40 %, disco < 20 %) = infrautilizada, una o dos = bajo uso. Tarjetas calculadas desde los recursos (`summaryFromResources`), sin series en la vista principal; costo del período en COP.
 
 Internos:
 

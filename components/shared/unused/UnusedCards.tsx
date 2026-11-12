@@ -59,6 +59,7 @@ export const UnusedCards = ({ config, summary, resources }: UnusedCardsProps) =>
     const withCost = resources.filter((r) => r.cost !== null);
     const withSavings = resources.filter((r) => r.potential_savings !== null);
     const totalCost = withCost.reduce((sum, r) => sum + (r.cost ?? 0), 0);
+    const costCurrency = withCost[0]?.currency ?? 'USD';
     const totalSavings = withSavings.reduce((sum, r) => sum + (r.potential_savings ?? 0), 0);
     const underutilized = resources.filter((r) => r.diagnosis.status === 'underutilized').length;
     const lowUsage = resources.filter((r) => r.diagnosis.status === 'low_usage').length;
@@ -71,8 +72,8 @@ export const UnusedCards = ({ config, summary, resources }: UnusedCardsProps) =>
                     {withCost.length > 0 && (
                         <StatCard
                             title={`Costo total ${config.serviceName}`}
-                            value={formatCurrency(totalCost, { currency: 'USD' })}
-                            description="Gasto de los recursos analizados en el período seleccionado (USD)."
+                            value={formatCurrency(totalCost, { currency: costCurrency })}
+                            description={`Gasto de los recursos analizados en el período seleccionado (${costCurrency}).`}
                             icon={DollarSign}
                             color="green"
                         />

@@ -2075,7 +2075,7 @@ Interfaz `PromptOptimizationResponse` (exportada):
 
 Exporta:
 
-- tipo `UnusedCloud` = `'aws' | 'azure' | 'gcp'` — Contrato canónico de la familia "Recursos sin uso", grupo por métricas (espejo de `utils/unused_schemas.py`, idéntico en cloudperformance-api-aws, -azure y -gcp). Rutas: /api/{cloud}/unused/{recurso}/{candidates|summary|series|resources|associated} El recurso a analizar va en `resource` ("all" o ids separados por coma). Fechas en ISO 8601 UTC. Vacío siempre `[]`.
+- tipo `UnusedCloud` = `'aws' | 'azure' | 'gcp' | 'vcenter'` — Contrato canónico de la familia "Recursos sin uso", grupo por métricas (espejo de `utils/unused_schemas.py`, idéntico en cloudperformance-api-aws, -azure, -gcp y -vcenter). En vCenter el endpoint es /api/vcenter/unused/vm/resources y la VM se filtra por `resource_ip` ("all" = todas las VMs infrautilizadas). Rutas: /api/{cloud}/unused/{recurso}/{candidates|summary|series|resources|associated} El recurso a analizar va en `resource` ("all" o ids separados por coma). Fechas en ISO 8601 UTC. Vacío siempre `[]`.
 - tipo `UnusedAction` = `'candidates' | 'summary' | 'series' | 'resources' | 'associated'`
 - tipo `DiagnosisStatus` = `'underutilized' | 'low_usage' | 'healthy' | 'no_data'`
 - interfaz `UnusedCandidate` — Opción del filtro: un recurso detectado como sin uso / infrautilizado.

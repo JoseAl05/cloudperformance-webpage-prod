@@ -1,4 +1,4 @@
-export type UnusedCloud = 'aws' | 'azure' | 'gcp';
+export type UnusedCloud = 'aws' | 'azure' | 'gcp' | 'vcenter';
 
 export type UnusedAction = 'candidates' | 'summary' | 'series' | 'resources' | 'associated';
 
