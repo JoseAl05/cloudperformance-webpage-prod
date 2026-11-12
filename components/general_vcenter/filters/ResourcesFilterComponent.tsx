@@ -20,12 +20,20 @@ import { toApiDate } from '@/lib/consumption'
 
 const ALL = 'all';
 
+export type VcenterResourceService = 'all' | 'unused';
+
+const RESOURCE_ENDPOINTS: Record<VcenterResourceService, string> = {
+    all: 'all_resources',
+    unused: 'all_unused_resources',
+};
+
 interface ResourcesFilterComponentProps {
     resourceIp: string;
     setResourceIp: Dispatch<SetStateAction<string>>;
     startDate?: Date;
     endDate?: Date;
     isResourceMultiSelect: boolean;
+    service?: VcenterResourceService;
 }
 
 interface ResourceItem {
@@ -33,18 +41,18 @@ interface ResourceItem {
     resource_ip: string;
 }
 
-const getUrl = (startDate?: Date, endDate?: Date) => {
+const getUrl = (service: VcenterResourceService, startDate?: Date, endDate?: Date) => {
     if (!startDate || !endDate) return null;
     const params = new URLSearchParams({ date_from: toApiDate(startDate), date_to: toApiDate(endDate) });
-    return `/api/vcenter/bridge/resources/all_resources?${params.toString()}`;
+    return `/api/vcenter/bridge/resources/${RESOURCE_ENDPOINTS[service]}?${params.toString()}`;
 }
 
 export const ResourcesFilterComponent = ({
-    resourceIp, setResourceIp, startDate, endDate, isResourceMultiSelect
+    resourceIp, setResourceIp, startDate, endDate, isResourceMultiSelect, service = 'all'
 }: ResourcesFilterComponentProps) => {
     const [open, setOpen] = useState(false);
 
-    const url = useMemo(() => getUrl(startDate, endDate), [startDate, endDate]);
+    const url = useMemo(() => getUrl(service, startDate, endDate), [service, startDate, endDate]);
 
     const { data, error, isLoading } = useSWR<ResourceItem[]>(url, fetcherGet, {
         revalidateOnFocus: false,

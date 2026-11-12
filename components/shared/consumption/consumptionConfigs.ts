@@ -476,8 +476,8 @@ export const VCENTER_VM: ConsumptionViewConfig = {
     ],
     showStorageInefficient: true,
     recommendations: {
-        idle: 'CPU y memoria prácticamente sin uso en el último chequeo de monitoreo. Si no es crítica, evalúe apagarla o retirarla para liberar capacidad del clúster y su cargo en la prefactura.',
-        underutilized: 'Uso bajo de CPU y memoria en el último chequeo. Evalúe reducir vCPU y RAM asignadas (right-sizing) para disminuir el cargo por capacidad.',
+        idle: 'CPU y memoria prácticamente sin uso en promedio durante el período (CPU bajo 2 % y memoria bajo 20 %). Si no es crítica, evalúe apagarla o retirarla para liberar capacidad del clúster y su cargo en la prefactura.',
+        underutilized: 'En promedio durante el período, CPU bajo 10 %, memoria bajo 40 % y disco bajo 20 % de uso. Evalúe reducir vCPU, RAM y disco asignados (right-sizing) para disminuir el cargo por capacidad.',
     },
     emptyText: 'No se encontraron máquinas virtuales de vCenter. Los datos de vCenter son fotos de cada sincronización: si eligió un período, asegúrese de que incluya una.',
 };
