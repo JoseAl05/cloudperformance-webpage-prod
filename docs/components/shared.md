@@ -988,7 +988,7 @@ Exporta:
 - constante `GCP_PERSISTENT_DISKS_UNUSED` = `{ cloud: 'gcp', resource: 'persistent-disks', serviceName: 'discos persistentes…` — GCP: discos persistentes, Filestore e IPs
 - constante `GCP_FILESTORE_UNUSED` = `{ cloud: 'gcp', resource: 'filestore', serviceName: 'instancias Filestore', res…`
 - constante `GCP_IPS_UNUSED` = `{ cloud: 'gcp', resource: 'ips', serviceName: 'IPs', resourceTypeLabel: 'Direcc…`
-- constante `VCENTER_VM_UNUSED` = `{ cloud: 'vcenter', resource: 'vm', serviceName: 'VMs', resourceTypeLabel: 'VM vCenter', …` — VMs de vCenter infrautilizadas. Métricas `cpu_utilization`, `memory_utilization` y `storage_utilization` (promedios del período); diagnóstico: las tres bajo el umbral (CPU < 10 %, memoria < 40 %, disco < 20 %) = infrautilizada, una o dos = bajo uso. Tarjetas calculadas desde los recursos (`summaryFromResources`), sin series en la vista principal; costo del período en COP, con "Costo por ambiente" junto al costo total y "VMs por ambiente" entre los totales.
+- constante `VCENTER_VM_UNUSED` = `{ cloud: 'vcenter', resource: 'vm', serviceName: 'VMs', resourceTypeLabel: 'VM vCenter', …` — VMs de vCenter infrautilizadas. Métricas `cpu_utilization`, `memory_utilization` y `storage_utilization` (promedios del período); diagnóstico: las tres bajo el umbral (CPU < 10 %, memoria < 40 %, disco < 20 %) = infrautilizada, una o dos = bajo uso. Tarjetas calculadas desde los recursos (`summaryFromResources`), sin series en la vista principal; costo del período en COP.
 
 Internos:
 
