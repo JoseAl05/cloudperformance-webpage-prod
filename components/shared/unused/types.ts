@@ -14,6 +14,8 @@ export interface AttributeDef {
 export interface BreakdownDef {
     key: string;
     label: string;
+    measure?: 'count' | 'cost';
+    emptyLabel?: string;
 }
 
 export interface UnusedViewConfig {

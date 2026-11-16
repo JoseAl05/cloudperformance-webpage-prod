@@ -415,6 +415,10 @@ export const VCENTER_VM: ConsumptionViewConfig = {
     labels: INSTANCE_LABELS,
     metricsEndpoints: [],
     detailSeries: { action: 'series', ipPath: 'details.monitored_address' },
+    breakdowns: [
+        { key: 'vms_by_environment', label: 'VMs por ambiente', format: 'count' },
+        { key: 'cost_by_environment', label: 'Costo por ambiente', format: 'currency' },
+    ],
     hasEfficiency: true,
     tableColumns: [
         { label: 'CPU', path: 'metrics.cpu_utilization', format: 'percent', bar: true, secondary: { label: 'vCPU', path: 'metrics.vcpus', format: 'text' } },
