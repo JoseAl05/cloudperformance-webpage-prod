@@ -24,6 +24,7 @@ interface PresupuestoAnual {
 
 interface PresupuestoAnualTableComponentProps {
   cloud?: string;
+  currency?: string;
   onEdit?: (data: PresupuestoAnual) => void;
   onDelete?: (id: number) => void;
 }
@@ -31,7 +32,7 @@ interface PresupuestoAnualTableComponentProps {
 type SortField = keyof PresupuestoAnual | null;
 type SortOrder = "asc" | "desc" | null;
 
-export const PresupuestoAnualTableComponent = ({ cloud, onEdit, onDelete }: PresupuestoAnualTableComponentProps) => {
+export const PresupuestoAnualTableComponent = ({ cloud, currency = 'CLP', onEdit, onDelete }: PresupuestoAnualTableComponentProps) => {
   const { data, error } = useSWR<PresupuestoAnual[]>(
     cloud ? `/api/presupuesto/bridge/${cloud}/presupuesto/anual` : null,
     fetcher,
@@ -170,7 +171,7 @@ export const PresupuestoAnualTableComponent = ({ cloud, onEdit, onDelete }: Pres
     const num = parseFloat(amount);
     return num.toLocaleString('es-CL', {
       style: 'currency',
-      currency: 'CLP',
+      currency,
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     });

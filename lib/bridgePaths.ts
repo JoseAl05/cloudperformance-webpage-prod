@@ -8,7 +8,7 @@ export const BRIDGE_ALLOWED_PREFIXES = {
   azure: ['azure', 'mantenedor-tags'],
   gcp: ['gcp', 'mantenedor-tags'],
   alertas: ['configurar', 'proyectos', 'servicios', 'historial', 'anomalias', 'budget'],
-  presupuesto: ['aws', 'azure', 'gcp'],
+  presupuesto: ['aws', 'azure', 'gcp', 'vcenter'],
   comparisonCloud: ['intercloud', 'intracloud'],
   connector: ['connector'],
   openai: ['openai'],

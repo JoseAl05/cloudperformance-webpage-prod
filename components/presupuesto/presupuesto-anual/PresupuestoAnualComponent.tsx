@@ -27,14 +27,18 @@ import { SessionGate } from "@/components/general_presupuesto/session/SesionGate
 
 interface PresupuestoAnualComponentProps {
   cloud: string;
+  currency?: string;
 }
 
-export const PresupuestoAnualComponent = ({ cloud }: PresupuestoAnualComponentProps) => {
+export const PresupuestoAnualComponent = ({ cloud, currency = "CLP" }: PresupuestoAnualComponentProps) => {
   const cloudTypeMap: Record<string, string> = {
     AWS: "aws",
     AZURE: "azure",
+    GCP: "gcp",
+    VCENTER: "vcenter",
+    vCenter: "vcenter",
   };
-  const cloudType = cloud ? cloudTypeMap[cloud] ?? undefined : undefined;
+  const cloudType = cloud ? cloudTypeMap[cloud] ?? cloud.toLowerCase() : undefined;
 
   const [editingPresupuesto, setEditingPresupuesto] = useState<PresupuestoAnual | null>(null);
   const [showForm, setShowForm] = useState(false);
@@ -176,6 +180,7 @@ export const PresupuestoAnualComponent = ({ cloud }: PresupuestoAnualComponentPr
 
         <PresupuestoAnualTableComponent
           cloud={cloudType}
+          currency={currency}
           onEdit={handleEdit}
           onDelete={handleDeleteClick}
         />
@@ -196,6 +201,7 @@ export const PresupuestoAnualComponent = ({ cloud }: PresupuestoAnualComponentPr
               onSubmit={handleFormSubmit}
               onCancel={handleFormClose}
               cloud={cloudType}
+              currency={currency}
             />
           </DialogContent>
         </Dialog>
