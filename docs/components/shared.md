@@ -6,6 +6,7 @@ Vistas genéricas reutilizadas por las tres nubes: facturación (tendencia, hist
 
 Archivos:
 
+- [`components/shared/BreakdownCard.tsx`](#components-shared-breakdowncard-tsx)
 - [`components/shared/DataStateComponent.tsx`](#components-shared-datastatecomponent-tsx)
 - [`components/shared/PlanAccessGate.tsx`](#components-shared-planaccessgate-tsx)
 - [`components/shared/StatCard.tsx`](#components-shared-statcard-tsx)
@@ -39,6 +40,28 @@ Archivos:
 - [`components/shared/working-hours/WorkingHoursView.tsx`](#components-shared-working-hours-workinghoursview-tsx)
 - [`components/shared/working-hours/types.ts`](#components-shared-working-hours-types-ts)
 - [`components/shared/working-hours/workingHoursConfigs.ts`](#components-shared-working-hours-workinghoursconfigs-ts)
+
+<a id="components-shared-breakdowncard-tsx"></a>
+## `components/shared/BreakdownCard.tsx`
+
+**Componente**
+
+Exporta:
+
+- componente `BreakdownCard` `({ title, entries, format }: BreakdownCardProps)` — Tarjeta de distribución: una fila por etiqueta con su valor y una barra relativa al mayor, ordenadas de mayor a menor.
+
+Interfaz `BreakdownCardProps`:
+
+| Campo | Tipo | Opcional | Descripción |
+|---|---|---|---|
+| `title` | `string` | no | — |
+| `entries` | `Array<[string, number]>` | no | Pares etiqueta / valor. |
+| `format` | `(value: number) => string` | sí | Formato del valor (por defecto número con separador de miles; los montos usan `formatCurrency`). |
+
+- Usa: [`card.tsx`](ui.md#components-ui-card-tsx)
+- Usado por: [`ConsumptionCards.tsx`](#components-shared-consumption-consumptioncards-tsx), [`UnusedCards.tsx`](#components-shared-unused-unusedcards-tsx)
+
+---
 
 <a id="components-shared-datastatecomponent-tsx"></a>
 ## `components/shared/DataStateComponent.tsx`
@@ -411,7 +434,7 @@ Internos:
 
 Exporta:
 
-- componente `ConsumptionCards` `({ config, summary, efficiency }: ConsumptionCardsProps)`
+- componente `ConsumptionCards` `({ config, summary, efficiency }: ConsumptionCardsProps)` — Si `config.breakdowns` está definido, dibuja con `BreakdownCard` las distribuciones de `summary.breakdowns`: las de conteo junto a los totales y las de monto en una fila propia junto a "Costo Total". Sin `breakdowns` el diseño no cambia.
 
 Interfaz `ConsumptionCardsProps`:
 
@@ -604,7 +627,7 @@ Exporta:
 - constante `GCP_GKE` = `gcpCompute('gke', 'Clusters GKE', 'GKE Node')`
 - constante `GCP_CLOUD_SQL` = `{ cloud: 'gcp', resource: 'cloud-sql', serviceName: 'Cloud SQL', resourceTypeLa…`
 - constante `GCP_FILESTORE` = `{ cloud: 'gcp', resource: 'filestore', serviceName: 'Filestore', resourceTypeLa…`
-- constante `VCENTER_VM` = `{ cloud: 'vcenter', resource: 'vm', serviceName: 'vCenter', resourceTypeLabel: …` — Sin gráficos en la vista principal (`metricsEndpoints: []`); las series de cada VM se piden en el detalle con `detailSeries: { action: 'series', ipPath: 'details.monitored_address' }`.
+- constante `VCENTER_VM` = `{ cloud: 'vcenter', resource: 'vm', serviceName: 'vCenter', resourceTypeLabel: …` — Sin gráficos en la vista principal (`metricsEndpoints: []`); las series de cada VM se piden en el detalle con `detailSeries: { action: 'series', ipPath: 'details.monitored_address' }`. Tarjetas "VMs por ambiente" (`vms_by_environment`) y "Costo por ambiente" (`cost_by_environment`) desde `summary.breakdowns`.
 
 Internos:
 
@@ -638,6 +661,7 @@ Exporta:
 - interfaz `FieldDef` — Un valor a mostrar, leído por ruta del recurso ("metrics.avg_cpu_utilization", "details.vpc_id", "resource_type").
 - interfaz `MetricColumnDef` — Columna numérica de la tabla, con barra relativa al máximo visible.
 - interfaz `MetricGroupDef`
+- interfaz `SummaryBreakdownDef` — Distribución del resumen a mostrar como tarjeta (clave de `summary.breakdowns`).
 - interfaz `DetailSeriesDef` — Series por recurso que se piden al abrir la pestaña Gráficos del detalle.
 - interfaz `ConsumptionViewConfig` — Configuración de una vista de consumo. Todo lo que cambia entre nubes/recursos vive aquí; el diseño (tarjetas, gráficos, tabla y detalle) es el mismo para todas.
 
@@ -664,6 +688,14 @@ Interfaz `MetricGroupDef` (exportada):
 | `title` | `string` | no | — |
 | `rows` | `FieldDef[]` | no | — |
 
+Interfaz `SummaryBreakdownDef` (exportada) — Distribución del resumen a mostrar como tarjeta (clave de `summary.breakdowns`).:
+
+| Campo | Tipo | Opcional | Descripción |
+|---|---|---|---|
+| `key` | `string` | no | Clave en `summary.breakdowns` (p. ej. 'cost_by_environment'). |
+| `label` | `string` | no | Título de la tarjeta. |
+| `format` | `'count' \| 'currency'` | no | 'count' = cantidad de recursos (va junto a los totales); 'currency' = monto en la moneda del resumen (va junto a "Costo Total"). |
+
 Interfaz `DetailSeriesDef` (exportada) — Series por recurso que se piden al abrir la pestaña Gráficos del detalle.:
 
 | Campo | Tipo | Opcional | Descripción |
@@ -687,6 +719,7 @@ Interfaz `ConsumptionViewConfig` (exportada) — Configuración de una vista de 
 | `metricGroups` | `MetricGroupDef[]` | no | Bloques de "Métricas" en el detalle. |
 | `historyColumns` | `FieldDef[]` | sí | Columnas del historial por sincronización (rutas relativas al registro: 'metrics.x', 'cost'). |
 | `detailSeries` | `DetailSeriesDef` | sí | Agrega la pestaña Gráficos al detalle, con todas las métricas disponibles del recurso (métricas dinámicas, como vCenter). |
+| `breakdowns` | `SummaryBreakdownDef[]` | sí | Tarjetas de distribución del resumen (p. ej. VMs y costo por ambiente en vCenter). |
 | `showStorageInefficient` | `boolean` | sí | — |
 | `recommendations` | `{ idle: string; underutilized: string }` | no | — |
 | `emptyText` | `string` | no | — |
@@ -896,6 +929,8 @@ Interfaz `BreakdownDef` (exportada) — Tarjeta de distribución: cuántos recur
 |---|---|---|---|
 | `key` | `string` | no | Clave de `attributes` o campo del recurso ('resource_type', 'region', 'status', 'scope'). |
 | `label` | `string` | no | — |
+| `measure` | `'count' \| 'cost'` | sí | 'count' (por defecto) cuenta recursos por valor; 'cost' suma el costo del período por valor y la tarjeta se muestra junto al costo total. |
+| `emptyLabel` | `string` | sí | Etiqueta para recursos sin valor en el campo (por defecto "Sin dato"). |
 
 Interfaz `UnusedViewConfig` (exportada) — Configuración de una vista de recursos sin uso. Todo lo que cambia entre nubes/recursos vive aquí; el diseño (tarjetas, gráficos, tabla y detalle) es el mismo para todas.:
 

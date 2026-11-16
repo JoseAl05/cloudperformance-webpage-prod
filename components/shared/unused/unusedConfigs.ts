@@ -493,7 +493,10 @@ export const VCENTER_VM_UNUSED: UnusedViewConfig = {
     tableAttributes: [
         { key: 'ip_address', label: 'Dirección IP', format: 'text' },
     ],
-    breakdowns: [{ key: 'region', label: 'Por ambiente' }],
+    breakdowns: [
+        { key: 'region', label: 'VMs por ambiente', emptyLabel: 'Sin ambiente' },
+        { key: 'region', label: 'Costo por ambiente', measure: 'cost', emptyLabel: 'Sin ambiente' },
+    ],
     summaryFromResources: true,
     diagnosisRule: 'Promedios del período: CPU < 10 %, memoria < 40 % y disco < 20 % = infrautilizada; solo una o dos bajo el umbral = bajo uso.',
     emptyText: 'No encontramos VMs de vCenter infrautilizadas en el período seleccionado.',

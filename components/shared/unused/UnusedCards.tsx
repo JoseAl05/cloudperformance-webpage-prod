@@ -2,7 +2,7 @@
 
 import { Activity, Cpu, DollarSign, HardDrive, Network, PiggyBank, Server } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
+import { BreakdownCard } from '@/components/shared/BreakdownCard';
 import { StatCard, StatCardColor } from '@/components/shared/StatCard';
 import { formatCurrency } from '@/lib/format';
 import { formatValue, metricKey, toNumberOrNull } from '@/lib/consumption';
@@ -20,34 +20,24 @@ const metricIcon = (metric: string): LucideIcon => {
 
 const COLORS: StatCardColor[] = ['blue', 'purple', 'amber', 'green', 'slate'];
 
-const BreakdownCard = ({ breakdown, resources }: { breakdown: BreakdownDef; resources: UnusedResource[] }) => {
-    const counts = new Map<string, number>();
+const breakdownEntries = (breakdown: BreakdownDef, resources: UnusedResource[]): Array<[string, number]> => {
+    const totals = new Map<string, number>();
     resources.forEach((r) => {
+        if (breakdown.measure === 'cost' && r.cost === null) return;
         const value = resourceField(r, breakdown.key);
-        const label = value === null || value === undefined || value === '' ? 'Sin dato' : String(value);
-        counts.set(label, (counts.get(label) ?? 0) + 1);
+        const label = value === null || value === undefined || value === '' ? breakdown.emptyLabel ?? 'Sin dato' : String(value);
+        totals.set(label, (totals.get(label) ?? 0) + (breakdown.measure === 'cost' ? r.cost ?? 0 : 1));
     });
-    const entries = [...counts.entries()].sort((a, b) => b[1] - a[1]);
-    const max = Math.max(1, ...entries.map(([, n]) => n));
-    return (
-        <Card className="border-l-4 border-l-slate-400 shadow-sm">
-            <CardContent className="p-6 space-y-3">
-                <p className="text-sm font-medium text-muted-foreground">{breakdown.label}</p>
-                {entries.map(([label, n]) => (
-                    <div key={label} className="space-y-1">
-                        <div className="flex justify-between text-xs gap-2">
-                            <span className="truncate" title={label}>{label}</span>
-                            <span className="font-bold">{n}</span>
-                        </div>
-                        <div className="w-full h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                            <div className="h-full rounded-full bg-blue-500" style={{ width: `${(n / max) * 100}%` }} />
-                        </div>
-                    </div>
-                ))}
-            </CardContent>
-        </Card>
-    );
+    return [...totals.entries()];
 };
+
+const UnusedBreakdownCard = ({ breakdown, resources, currency }: { breakdown: BreakdownDef; resources: UnusedResource[]; currency: string }) => (
+    <BreakdownCard
+        title={breakdown.label}
+        entries={breakdownEntries(breakdown, resources)}
+        format={breakdown.measure === 'cost' ? (value) => formatCurrency(value, { currency }) : undefined}
+    />
+);
 
 interface UnusedCardsProps {
     config: UnusedViewConfig;
@@ -64,11 +54,14 @@ export const UnusedCards = ({ config, summary, resources }: UnusedCardsProps) =>
     const underutilized = resources.filter((r) => r.diagnosis.status === 'underutilized').length;
     const lowUsage = resources.filter((r) => r.diagnosis.status === 'low_usage').length;
     const totals = (config.attributes ?? []).filter((a) => a.total);
+    const costBreakdowns = withCost.length > 0 ? (config.breakdowns ?? []).filter((b) => b.measure === 'cost') : [];
+    const countBreakdowns = (config.breakdowns ?? []).filter((b) => b.measure !== 'cost');
+    const topCards = (withCost.length > 0 ? 1 : 0) + (withSavings.length > 0 ? 1 : 0) + costBreakdowns.length;
 
     return (
         <div className="space-y-4">
             {(withCost.length > 0 || withSavings.length > 0) && (
-                <div className={`grid grid-cols-1 ${withCost.length > 0 && withSavings.length > 0 ? 'md:grid-cols-2' : ''} gap-4`}>
+                <div className={`grid grid-cols-1 ${topCards > 1 ? 'md:grid-cols-2' : ''} gap-4`}>
                     {withCost.length > 0 && (
                         <StatCard
                             title={`Costo total ${config.serviceName}`}
@@ -78,6 +71,9 @@ export const UnusedCards = ({ config, summary, resources }: UnusedCardsProps) =>
                             color="green"
                         />
                     )}
+                    {costBreakdowns.map((breakdown) => (
+                        <UnusedBreakdownCard key={`${breakdown.key}-cost`} breakdown={breakdown} resources={withCost} currency={costCurrency} />
+                    ))}
                     {withSavings.length > 0 && (
                         <StatCard
                             title="Ahorro mensual estimado"
@@ -113,8 +109,8 @@ export const UnusedCards = ({ config, summary, resources }: UnusedCardsProps) =>
                         />
                     );
                 })}
-                {(config.breakdowns ?? []).map((breakdown) => (
-                    <BreakdownCard key={breakdown.key} breakdown={breakdown} resources={resources} />
+                {countBreakdowns.map((breakdown) => (
+                    <UnusedBreakdownCard key={breakdown.key} breakdown={breakdown} resources={resources} currency={costCurrency} />
                 ))}
                 {config.cardMetrics.map((group, i) => {
                     const values = config.summaryFromResources ? summaryFromResources(resources, group) : combineSummary(summary, group);

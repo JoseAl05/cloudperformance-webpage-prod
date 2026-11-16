@@ -2,6 +2,7 @@
 
 import { Activity, Database, DollarSign, HardDrive, TrendingDown, Zap } from 'lucide-react';
 import { StatCard, StatCardColor } from '@/components/shared/StatCard';
+import { BreakdownCard } from '@/components/shared/BreakdownCard';
 import { formatCurrency } from '@/lib/format';
 import { formatValue, getMetricDefinition } from '@/lib/consumption';
 import type { ConsumptionSummary, EfficiencyLevel, EfficiencyResponse } from '@/interfaces/consumption';
@@ -29,6 +30,22 @@ export const ConsumptionCards = ({ config, summary, efficiency }: ConsumptionCar
         : summary.cost_total === 0
             ? 'Sin costo registrado en el período (p. ej. capa gratuita).'
             : 'Costo total del período seleccionado.';
+    const breakdowns = (config.breakdowns ?? [])
+        .map((def) => ({ def, entries: Object.entries(summary?.breakdowns[def.key] ?? {}) }))
+        .filter(({ entries }) => entries.length > 0);
+    const countBreakdowns = breakdowns.filter(({ def }) => def.format === 'count');
+    const costBreakdowns = breakdowns.filter(({ def }) => def.format === 'currency');
+    const formatCost = (value: number) => formatCurrency(value, { currency: summary?.currency ?? 'USD' });
+    const costCard = summary && (
+        <StatCard
+            title="Costo Total"
+            value={summary.cost_total !== null ? formatCost(summary.cost_total) : '—'}
+            unit={summary.currency ?? undefined}
+            description={costDescription}
+            icon={DollarSign}
+            color="green"
+        />
+    );
 
     return (
         <div className="space-y-6">
@@ -58,6 +75,9 @@ export const ConsumptionCards = ({ config, summary, efficiency }: ConsumptionCar
                         icon={Database}
                         color="blue"
                     />
+                    {countBreakdowns.map(({ def, entries }) => (
+                        <BreakdownCard key={def.key} title={def.label} entries={entries} />
+                    ))}
                     <StatCard
                         title={config.labels.idle}
                         value={summary.idle_resources}
@@ -84,14 +104,16 @@ export const ConsumptionCards = ({ config, summary, efficiency }: ConsumptionCar
                             color="purple"
                         />
                     )}
-                    <StatCard
-                        title="Costo Total"
-                        value={summary.cost_total !== null ? formatCurrency(summary.cost_total, { currency: summary.currency ?? 'USD' }) : '—'}
-                        unit={summary.currency ?? undefined}
-                        description={costDescription}
-                        icon={DollarSign}
-                        color="green"
-                    />
+                    {costBreakdowns.length === 0 && costCard}
+                </div>
+            )}
+
+            {summary && costBreakdowns.length > 0 && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {costCard}
+                    {costBreakdowns.map(({ def, entries }) => (
+                        <BreakdownCard key={def.key} title={def.label} entries={entries} format={formatCost} />
+                    ))}
                 </div>
             )}
 
