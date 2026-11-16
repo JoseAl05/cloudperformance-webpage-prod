@@ -36,15 +36,20 @@ import { SessionGate } from "@/components/general_presupuesto/session/SesionGate
 
 interface PresupuestoMensualComponentProps {
   cloud: string;
+  currency?: string;
 }
 
 export const PresupuestoMensualComponent = ({
   cloud,
+  currency = "CLP",
 }: PresupuestoMensualComponentProps) => {
 
   const cloudTypeMap: Record<string, string> = {
     AWS: "aws",
     AZURE: "azure",
+    GCP: "gcp",
+    VCENTER: "vcenter",
+    vCenter: "vcenter",
   };
   const cloudType = cloudTypeMap[cloud] ?? cloud;
 
@@ -181,6 +186,7 @@ export const PresupuestoMensualComponent = ({
 
         <PresupuestoMensualTableComponent
           cloud={cloudType}
+          currency={currency}
           onEdit={handleOpenForm}
           onDelete={handleDelete}
         />

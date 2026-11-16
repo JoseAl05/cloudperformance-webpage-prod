@@ -16,6 +16,7 @@ interface CentroCostoFormProps {
   onSubmit: (data: CentroCosto) => void;
   onCancel?: () => void; 
   initialData?: CentroCosto | null;
+  showTags?: boolean;
   dateFrom?: string;
   dateTo?: string;
   region?: string;
@@ -31,6 +32,7 @@ export const CentroDeCostoFormComponent: React.FC<CentroCostoFormProps> = ({
   onSubmit,
   onCancel,
   initialData,
+  showTags = true,
   dateFrom,
   dateTo,
   region = "all_regions",
@@ -62,7 +64,7 @@ export const CentroDeCostoFormComponent: React.FC<CentroCostoFormProps> = ({
   const apiUrl = `/api/azure/bridge/azure/get-all-tags?date_from=${dates.from}&date_to=${dates.to}&region=${region}&subscription=${subscription}&resource_type=billing`;
   
   const { data: tagsData, error: tagsError, isLoading: tagsLoading } = useSWR<TagResponse[]>(
-    apiUrl,
+    showTags ? apiUrl : null,
     fetcher,
     {
       revalidateOnFocus: false,
@@ -132,7 +134,14 @@ export const CentroDeCostoFormComponent: React.FC<CentroCostoFormProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(formData);
+    if (showTags) {
+      onSubmit(formData);
+      return;
+    }
+
+    const dataWithoutTags = { ...formData };
+    delete dataWithoutTags.tags;
+    onSubmit(dataWithoutTags);
   };
 
   return (
@@ -204,6 +213,7 @@ export const CentroDeCostoFormComponent: React.FC<CentroCostoFormProps> = ({
               />
             </div>
 
+            {showTags && (
             <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">
                 Tags
@@ -343,6 +353,7 @@ export const CentroDeCostoFormComponent: React.FC<CentroCostoFormProps> = ({
                 </div>
               )}
             </div>
+            )}
           </div>
 
           <div className="flex flex-col sm:flex-row gap-3 mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">

@@ -15,6 +15,7 @@ interface CentroCosto {
 
 interface CentroDeCostoTableComponentProps {
   cloud?: string;
+  showTags?: boolean;
   onEdit?: (data: CentroCosto) => void;
   onDelete?: (id: number | string) => void;
 }
@@ -22,7 +23,7 @@ interface CentroDeCostoTableComponentProps {
 type SortField = keyof CentroCosto | null;
 type SortOrder = "asc" | "desc" | null;
 
-export const CentroDeCostoTableComponent = ({ cloud, onEdit, onDelete }: CentroDeCostoTableComponentProps) => {
+export const CentroDeCostoTableComponent = ({ cloud, showTags = true, onEdit, onDelete }: CentroDeCostoTableComponentProps) => {
   const { data, error, isLoading } = useSWR<CentroCosto[]>(
     cloud ? `/api/presupuesto/bridge/${cloud}/centro-costo` : null,
     fetcher,
@@ -77,7 +78,7 @@ export const CentroDeCostoTableComponent = ({ cloud, onEdit, onDelete }: CentroD
         centro.nombre_centro.toLowerCase().includes(search) ||
         centro.responsable_centro?.toLowerCase().includes(search) ||
         centro.localizacion?.toLowerCase().includes(search) ||
-        tagsString.includes(search)
+        (showTags && tagsString.includes(search))
       );
     });
 
@@ -105,7 +106,7 @@ export const CentroDeCostoTableComponent = ({ cloud, onEdit, onDelete }: CentroD
     }
 
     return filtered;
-  }, [data, searchTerm, sortField, sortOrder]);
+  }, [data, searchTerm, showTags, sortField, sortOrder]);
 
   const paginatedData = useMemo(() => {
     const startIndex = (currentPage - 1) * itemsPerPage;
@@ -195,7 +196,9 @@ export const CentroDeCostoTableComponent = ({ cloud, onEdit, onDelete }: CentroD
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 w-5 h-5" />
             <input
               type="text"
-              placeholder="Buscar por ID, nombre, responsable, localización o tags..."
+              placeholder={showTags
+                ? "Buscar por ID, nombre, responsable, localización o tags..."
+                : "Buscar por ID, nombre, responsable o localización..."}
               value={searchTerm}
               onChange={(e) => {
                 setSearchTerm(e.target.value);
@@ -265,12 +268,14 @@ export const CentroDeCostoTableComponent = ({ cloud, onEdit, onDelete }: CentroD
                   {getSortIcon("localizacion")}
                 </div>
               </th>
+              {showTags && (
               <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
                 <div className="flex items-center gap-2">
                   <Tag className="w-4 h-4" />
                   Tags
                 </div>
               </th>
+              )}
               <th className="px-6 py-4 text-center text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
                 Acciones
               </th>
@@ -279,7 +284,7 @@ export const CentroDeCostoTableComponent = ({ cloud, onEdit, onDelete }: CentroD
           <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
             {paginatedData.length === 0 ? (
               <tr>
-                <td colSpan={6} className="px-6 py-12 text-center">
+                <td colSpan={showTags ? 6 : 5} className="px-6 py-12 text-center">
                   <Search className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-3" />
                   <p className="text-gray-500 dark:text-gray-400 font-medium">No se encontraron resultados</p>
                   <p className="text-gray-400 dark:text-gray-500 text-sm mt-1">Intenta con otros términos de búsqueda</p>
@@ -309,6 +314,7 @@ export const CentroDeCostoTableComponent = ({ cloud, onEdit, onDelete }: CentroD
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-gray-600 dark:text-gray-400">{centro.localizacion || "-"}</div>
                   </td>
+                  {showTags && (
                   <td className="px-6 py-4">
                     <div className="flex flex-wrap gap-1.5 max-w-xs">
                       {centro.tags && centro.tags.length > 0 ? (
@@ -344,6 +350,7 @@ export const CentroDeCostoTableComponent = ({ cloud, onEdit, onDelete }: CentroD
                       )}
                     </div>
                   </td>
+                  )}
                   <td className="px-6 py-4 whitespace-nowrap text-center">
                     <div className="flex items-center justify-center gap-2">
                       <button
