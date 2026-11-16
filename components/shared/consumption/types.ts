@@ -18,6 +18,12 @@ export interface MetricGroupDef {
     rows: FieldDef[];
 }
 
+export interface SummaryBreakdownDef {
+    key: string;
+    label: string;
+    format: 'count' | 'currency';
+}
+
 export interface DetailSeriesDef {
     action: string;
     ipPath: string;
@@ -36,6 +42,7 @@ export interface ConsumptionViewConfig {
     metricGroups: MetricGroupDef[];
     historyColumns?: FieldDef[];
     detailSeries?: DetailSeriesDef;
+    breakdowns?: SummaryBreakdownDef[];
     showStorageInefficient?: boolean;
     recommendations: { idle: string; underutilized: string };
     emptyText: string;
