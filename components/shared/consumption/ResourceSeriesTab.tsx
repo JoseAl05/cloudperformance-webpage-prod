@@ -11,20 +11,13 @@ import { DataStateComponent } from '@/components/shared/DataStateComponent';
 import { ConsumptionCharts } from '@/components/shared/consumption/ConsumptionCharts';
 import { fetcher } from '@/lib/fetcher';
 import { cn } from '@/lib/utils';
-import { consumptionUrl, getResourceValue, metricKey } from '@/lib/consumption';
-import type { MetricDefinition, QueryParams } from '@/lib/consumption';
+import { consumptionUrl, definitionFromUnit, getResourceValue, metricKey } from '@/lib/consumption';
+import type { QueryParams } from '@/lib/consumption';
 import type { ConsumptionResource, ResourceSeriesResponse, SeriesMetric } from '@/interfaces/consumption';
 import type { ConsumptionViewConfig, DetailSeriesDef } from '@/components/shared/consumption/types';
 
 const NO_SERVICE = 'Sin servicio';
 const SWR_OPTIONS = { revalidateOnFocus: false };
-
-const toDefinition = ({ metric, unit }: SeriesMetric): MetricDefinition => {
-    if (unit === '%') return { label: metric, format: 'percent' };
-    if (unit === 'B') return { label: metric, format: 'bytes' };
-    if (!unit) return { label: metric, format: 'count' };
-    return { label: metric, format: 'number', unit };
-};
 
 const defaultMetric = (metrics: SeriesMetric[]): string | null =>
     (metrics.find((m) => /^cpu usage percent$/i.test(m.metric))
@@ -66,7 +59,7 @@ export const ResourceSeriesTab = ({ resource, config, series, params }: Resource
         return Array.from(byService.entries());
     }, [metrics]);
     const overrides = useMemo(
-        () => Object.fromEntries(metrics.map((m) => [metricKey(m.metric), toDefinition(m)])),
+        () => Object.fromEntries(metrics.map((m) => [metricKey(m.metric), definitionFromUnit(m.metric, m.unit)])),
         [metrics]
     );
 

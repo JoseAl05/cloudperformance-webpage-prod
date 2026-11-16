@@ -5051,9 +5051,11 @@ Interfaz `ResourceMetrics` (exportada):
 
 Exporta:
 
-- tipo `WorkingHoursCloud` = `'aws' | 'azure' | 'gcp'` — Contrato canónico de la familia "Horario hábil vs no hábil" (espejo de `utils/working_hours_schemas.py`, idéntico en cloudperformance-api-aws, -azure y -gcp). Rutas: /api/{cloud}/working-hours/{recurso}/{usage|summary|resources} El horario hábil se calcula en America/Santiago (lunes a viernes, 08:00-18:00). Los `timestamp` de `usage` vienen en ISO 8601 con el desfase de Santiago ("2026-09-12T21:00:00-03:00"); `sync_time` en ISO 8601 UTC. Vacío siempre `[]`.
+- tipo `WorkingHoursCloud` = `'aws' | 'azure' | 'gcp' | 'vcenter'` — Contrato canónico de la familia "Horario hábil vs no hábil" (espejo de `utils/working_hours_schemas.py`, idéntico en cloudperformance-api-aws, -azure, -gcp y -vcenter). Rutas: /api/{cloud}/working-hours/{recurso}/{usage|summary|resources} El horario hábil se calcula en America/Santiago (lunes a viernes, 08:00-18:00), salvo vCenter, que lo calcula en America/Bogota. Los `timestamp` de `usage` vienen en ISO 8601 con el desfase de Santiago ("2026-09-12T21:00:00-03:00"); `sync_time` en ISO 8601 UTC. Vacío siempre `[]`. vCenter agrega `/families` y exige `family` en las otras tres rutas.
 - tipo `ScheduleType` = `'business_hours' | 'non_business_hours'`
-- tipo `WorkingHoursAction` = `'usage' | 'summary' | 'resources'`
+- tipo `WorkingHoursAction` = `'usage' | 'summary' | 'resources' | 'families'`
+- interfaz `WorkingHoursFamilyMetric` — Métrica de una familia (nombre genérico y unidad ya normalizada; bytes en GB).
+- interfaz `WorkingHoursFamily` — Familia de métricas de vCenter con su `category` (CPU, Memoria, Disco, Red, Base de datos, Servicios, Disponibilidad, Otros) y sus métricas. Las familias son específicas (p. ej. "Uso de CPU", "Swap", "Tablespaces", "Sesiones y conexiones") y el selector de la vista las agrupa por categoría.
 - interfaz `WorkingHoursPoint` — Un punto por hora y métrica, clasificado en hábil / no hábil.
 - interfaz `WorkingHoursSummaryItem` — Promedio, máximo y mínimo de una métrica en un horario.
 - interfaz `WorkingHoursDominant` — Horario con el mayor promedio para una métrica del recurso (`null` si empatan o no hay datos).

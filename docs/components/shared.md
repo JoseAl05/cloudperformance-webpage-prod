@@ -582,7 +582,7 @@ Internos:
 
 Exporta:
 
-- componente `ResourceSeriesTab` `({ resource, config, series, params }: ResourceSeriesTabProps)` — Pestaña Gráficos del detalle para recursos con métricas dinámicas (vCenter). Al abrir la pestaña pide solo la lista de métricas del recurso (`/{cloud}/consumption/{resource}/{series.metricsAction}` con el período y `resource_ip`) y la muestra en un selector con búsqueda, agrupada por servicio (por defecto "CPU Usage percent" o la primera de CPU). Las lecturas se piden únicamente para la métrica seleccionada (`{series.action}` con `metric`) y se dibujan con `ConsumptionCharts`, tomando el formato de la unidad que trae la API ('%' → porcentaje, 'B' → bytes, sin unidad → conteo, otra → número con su unidad). Si el recurso no tiene IP de monitoreo, muestra un aviso y no hace peticiones. Cada punto es una lectura con su `timestamp` exacto (sin agrupar); el encabezado indica cuántas lecturas tiene la métrica en el período.
+- componente `ResourceSeriesTab` `({ resource, config, series, params }: ResourceSeriesTabProps)` — Pestaña Gráficos del detalle para recursos con métricas dinámicas (vCenter). Al abrir la pestaña pide solo la lista de métricas del recurso (`/{cloud}/consumption/{resource}/{series.metricsAction}` con el período y `resource_ip`) y la muestra en un selector con búsqueda, agrupada por servicio (por defecto "CPU Usage percent" o la primera de CPU). Las lecturas se piden únicamente para la métrica seleccionada (`{series.action}` con `metric`) y se dibujan con `ConsumptionCharts`, tomando el formato de la unidad que trae la API con `definitionFromUnit` de `lib/consumption.ts`. Si el recurso no tiene IP de monitoreo, muestra un aviso y no hace peticiones. Cada punto es una lectura con su `timestamp` exacto (sin agrupar); el encabezado indica cuántas lecturas tiene la métrica en el período.
 
 Interfaz `ResourceSeriesTabProps`:
 
@@ -597,7 +597,6 @@ Internos:
 
 - constante `NO_SERVICE`
 - constante `SWR_OPTIONS`
-- función `toDefinition` `({ metric, unit }: SeriesMetric): MetricDefinition`
 - función `defaultMetric` `(metrics: SeriesMetric[]): string | null` — Métrica inicial del selector.
 
 - Hooks: `useSWR`, `useState`, `useMemo`
@@ -1191,6 +1190,8 @@ Interfaz `WorkingHoursViewConfig` (exportada) — Configuración de una vista de
 | `resourceTypeLabel` | `string` | no | — |
 | `metricOverrides` | `Record<string, MetricDefinition>` | sí | Formato propio de este recurso para alguna métrica (por clave normalizada, ver `metricKey`). |
 | `resourceLink` | `(resource: WorkingHoursResource, ctx: ResourceLinkContext) => Resourc…` | sí | — |
+| `timeZone` | `string` | sí | Zona en que se clasifica y muestra el horario hábil (por defecto America/Santiago). vCenter usa America/Bogota. |
+| `timeZoneLabel` | `string` | sí | Nombre de la zona en los textos del gráfico, la leyenda de la tabla y el detalle (por defecto "Santiago"). |
 | `emptyText` | `string` | no | — |
 
 - Usa: [`consumption.ts`](../lib.md#lib-consumption-ts), [`workingHours.ts`](../tipos.md#interfaces-workinghours-ts)
@@ -1220,6 +1221,7 @@ Exporta:
 - constante `GCP_GKE_WH` = `{ cloud: 'gcp', resource: 'gke', serviceName: 'nodos de Clusters GKE', resource…`
 - función `gcpCloudSqlWorkingHours` `(dbEngine?: string): WorkingHoursViewConfig` — `dbEngine` es el de la vista: 'mysql', 'postgres' o 'sqlserver'.
 - constante `GCP_FILESTORE_WH` = `{ cloud: 'gcp', resource: 'filestore', serviceName: 'instancias Filestore', res…`
+- constante `VCENTER_VM_WH` = `{ cloud: 'vcenter', resource: 'vm', serviceName: 'Máquinas Virtuales vCenter', …` — Horario hábil en Bogotá (`timeZone: 'America/Bogota'`). La vista de vCenter le agrega `metricOverrides` según las unidades de la familia de métricas elegida en su selector.
 
 Internos:
 

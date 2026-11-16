@@ -24,7 +24,7 @@ const SummaryView = ({ resource, config }: { resource: WorkingHoursResource; con
                 <div>
                     <h4 className="text-sm font-bold">Recurso analizado</h4>
                     <p className="text-xs opacity-90 mt-1">
-                        Comparación del uso en horario hábil (lunes a viernes, 08:00-18:00 de Santiago) y no hábil.
+                        Comparación del uso en horario hábil (lunes a viernes, 08:00-18:00 de {config.timeZoneLabel ?? 'Santiago'}) y no hábil.
                     </p>
                 </div>
             </div>
