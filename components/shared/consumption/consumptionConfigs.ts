@@ -414,7 +414,7 @@ export const VCENTER_VM: ConsumptionViewConfig = {
     resourceTypeLabel: 'VM vCenter',
     labels: INSTANCE_LABELS,
     metricsEndpoints: [],
-    detailSeries: { action: 'series', ipPath: 'details.monitored_address' },
+    detailSeries: { action: 'series', metricsAction: 'series/metrics', ipPath: 'details.monitored_address' },
     breakdowns: [
         { key: 'vms_by_environment', label: 'VMs por ambiente', format: 'count' },
         { key: 'cost_by_environment', label: 'Costo por ambiente', format: 'currency' },

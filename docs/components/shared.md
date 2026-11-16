@@ -582,7 +582,7 @@ Internos:
 
 Exporta:
 
-- componente `ResourceSeriesTab` `({ resource, config, series, params }: ResourceSeriesTabProps)` — Pestaña Gráficos del detalle para recursos con métricas dinámicas (vCenter). Pide las series solo al abrir la pestaña (`/{cloud}/consumption/{resource}/{series.action}` con el período de la vista y `resource_ip`), agrupa los chequeos por servicio con un selector (por defecto el de CPU) y dibuja cada métrica con `ConsumptionCharts`, tomando el formato de la unidad que trae la API ('%' → porcentaje, 'B' → bytes, sin unidad → conteo, otra → número con su unidad). Si el recurso no tiene IP de monitoreo, muestra un aviso y no hace la petición.
+- componente `ResourceSeriesTab` `({ resource, config, series, params }: ResourceSeriesTabProps)` — Pestaña Gráficos del detalle para recursos con métricas dinámicas (vCenter). Al abrir la pestaña pide solo la lista de métricas del recurso (`/{cloud}/consumption/{resource}/{series.metricsAction}` con el período y `resource_ip`) y la muestra en un selector con búsqueda, agrupada por servicio (por defecto "CPU Usage percent" o la primera de CPU). Las lecturas se piden únicamente para la métrica seleccionada (`{series.action}` con `metric`) y se dibujan con `ConsumptionCharts`, tomando el formato de la unidad que trae la API ('%' → porcentaje, 'B' → bytes, sin unidad → conteo, otra → número con su unidad). Si el recurso no tiene IP de monitoreo, muestra un aviso y no hace peticiones. Cada punto es una lectura con su `timestamp` exacto (sin agrupar); el encabezado indica cuántas lecturas tiene la métrica en el período.
 
 Interfaz `ResourceSeriesTabProps`:
 
@@ -595,12 +595,13 @@ Interfaz `ResourceSeriesTabProps`:
 
 Internos:
 
-- constante `GRANULARITY_LABEL`
 - constante `NO_SERVICE`
+- constante `SWR_OPTIONS`
 - función `toDefinition` `({ metric, unit }: SeriesMetric): MetricDefinition`
+- función `defaultMetric` `(metrics: SeriesMetric[]): string | null` — Métrica inicial del selector.
 
-- Hooks: `useSWR`
-- Usa: [`scroll-area.tsx`](ui.md#components-ui-scroll-area-tsx), [`select.tsx`](ui.md#components-ui-select-tsx), [`DataStateComponent.tsx`](#components-shared-datastatecomponent-tsx), [`ConsumptionCharts.tsx`](#components-shared-consumption-consumptioncharts-tsx), [`fetcher.ts`](../lib.md#lib-fetcher-ts), [`consumption.ts`](../lib.md#lib-consumption-ts), [`consumption.ts`](../tipos.md#interfaces-consumption-ts), [`types.ts`](#components-shared-consumption-types-ts)
+- Hooks: `useSWR`, `useState`, `useMemo`
+- Usa: [`scroll-area.tsx`](ui.md#components-ui-scroll-area-tsx), [`button.tsx`](ui.md#components-ui-button-tsx), [`command.tsx`](ui.md#components-ui-command-tsx), [`popover.tsx`](ui.md#components-ui-popover-tsx), [`DataStateComponent.tsx`](#components-shared-datastatecomponent-tsx), [`ConsumptionCharts.tsx`](#components-shared-consumption-consumptioncharts-tsx), [`fetcher.ts`](../lib.md#lib-fetcher-ts), [`consumption.ts`](../lib.md#lib-consumption-ts), [`consumption.ts`](../tipos.md#interfaces-consumption-ts), [`types.ts`](#components-shared-consumption-types-ts)
 - Usado por: [`ConsumptionDetailModal.tsx`](#components-shared-consumption-consumptiondetailmodal-tsx)
 
 ---
@@ -627,7 +628,7 @@ Exporta:
 - constante `GCP_GKE` = `gcpCompute('gke', 'Clusters GKE', 'GKE Node')`
 - constante `GCP_CLOUD_SQL` = `{ cloud: 'gcp', resource: 'cloud-sql', serviceName: 'Cloud SQL', resourceTypeLa…`
 - constante `GCP_FILESTORE` = `{ cloud: 'gcp', resource: 'filestore', serviceName: 'Filestore', resourceTypeLa…`
-- constante `VCENTER_VM` = `{ cloud: 'vcenter', resource: 'vm', serviceName: 'vCenter', resourceTypeLabel: …` — Sin gráficos en la vista principal (`metricsEndpoints: []`); las series de cada VM se piden en el detalle con `detailSeries: { action: 'series', ipPath: 'details.monitored_address' }`. Tarjetas "VMs por ambiente" (`vms_by_environment`) y "Costo por ambiente" (`cost_by_environment`) desde `summary.breakdowns`.
+- constante `VCENTER_VM` = `{ cloud: 'vcenter', resource: 'vm', serviceName: 'vCenter', resourceTypeLabel: …` — Sin gráficos en la vista principal (`metricsEndpoints: []`); las series de cada VM se piden en el detalle con `detailSeries: { action: 'series', metricsAction: 'series/metrics', ipPath: 'details.monitored_address' }`. Tarjetas "VMs por ambiente" (`vms_by_environment`) y "Costo por ambiente" (`cost_by_environment`) desde `summary.breakdowns`.
 
 Internos:
 
@@ -700,7 +701,8 @@ Interfaz `DetailSeriesDef` (exportada) — Series por recurso que se piden al ab
 
 | Campo | Tipo | Opcional | Descripción |
 |---|---|---|---|
-| `action` | `string` | no | Acción del endpoint de consumo (`/{cloud}/consumption/{resource}/{action}`), p. ej. 'series'. |
+| `action` | `string` | no | Acción del endpoint de consumo (`/{cloud}/consumption/{resource}/{action}`) que entrega las lecturas de una métrica (parámetro `metric`), p. ej. 'series'. |
+| `metricsAction` | `string` | no | Acción que entrega la lista de métricas del recurso para el selector, p. ej. 'series/metrics'. |
 | `ipPath` | `string` | no | Ruta en el recurso de la IP a consultar (`resource_ip`); sin valor, la pestaña indica que no hay monitoreo. |
 
 Interfaz `ConsumptionViewConfig` (exportada) — Configuración de una vista de consumo. Todo lo que cambia entre nubes/recursos vive aquí; el diseño (tarjetas, gráficos, tabla y detalle) es el mismo para todas.:
