@@ -27,14 +27,18 @@ import { SessionGate } from "@/components/general_presupuesto/session/SesionGate
 
 interface CentroDeCostoComponentProps {
   cloud: string;
+  showTags?: boolean;
 }
 
-export const CentroDeCostoComponent = ({ cloud }: CentroDeCostoComponentProps) => {
+export const CentroDeCostoComponent = ({ cloud, showTags = true }: CentroDeCostoComponentProps) => {
     const cloudTypeMap: Record<string, string> = {
     AWS: "aws",
     AZURE: "azure",
+    GCP: "gcp",
+    VCENTER: "vcenter",
+    vCenter: "vcenter",
   };
-  const cloudType = cloud ? cloudTypeMap[cloud] ?? undefined : undefined;
+  const cloudType = cloud ? cloudTypeMap[cloud] ?? cloud.toLowerCase() : undefined;
 
   const [editingCentro, setEditingCentro] = useState<CentroCosto | null>(null);
   const [showForm, setShowForm] = useState(false);
@@ -167,6 +171,7 @@ export const CentroDeCostoComponent = ({ cloud }: CentroDeCostoComponentProps) =
 
         <CentroDeCostoTableComponent
           cloud={cloudType}
+          showTags={showTags}
           onEdit={handleEdit}
           onDelete={handleDeleteClick}
         />
@@ -184,6 +189,7 @@ export const CentroDeCostoComponent = ({ cloud }: CentroDeCostoComponentProps) =
 
             <CentroDeCostoFormComponent
               initialData={editingCentro ?? undefined}
+              showTags={showTags}
               onSubmit={handleFormSubmit}
               onCancel={handleFormClose}
             />

@@ -56,6 +56,7 @@ export interface PresupuestoAnualMensual {
 
 interface PresupuestoMensualTableComponentProps {
   cloud?: string;
+  currency?: string;
   onEdit?: (data: PresupuestoAnualMensual) => void;
   onDelete?: (id: number | string) => void;
 }
@@ -70,6 +71,7 @@ const MES_LETRAS = [
 
 export const PresupuestoMensualTableComponent = ({
   cloud,
+  currency = 'CLP',
   onEdit,
   onDelete,
 }: PresupuestoMensualTableComponentProps) => {
@@ -237,7 +239,7 @@ export const PresupuestoMensualTableComponent = ({
     const num = parseFloat(amount);
     return num.toLocaleString('es-CL', {
       style: 'currency',
-      currency: 'CLP',
+      currency,
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     });

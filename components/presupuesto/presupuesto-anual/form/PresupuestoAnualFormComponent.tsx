@@ -42,6 +42,7 @@ interface PresupuestoAnualFormProps {
   onCancel?: () => void;
   initialData?: PresupuestoAnual | null;
   cloud?: string;
+  currency?: string;
 }
 
 const MESES_NOMBRES = [
@@ -54,6 +55,7 @@ export const PresupuestoAnualFormComponent: React.FC<PresupuestoAnualFormProps> 
   onCancel,
   initialData,
   cloud,
+  currency = 'CLP',
 }) => {
   const [formData, setFormData] = useState<PresupuestoAnual>({
     id_centro_costo: "",
@@ -159,7 +161,7 @@ export const PresupuestoAnualFormComponent: React.FC<PresupuestoAnualFormProps> 
   const formatCurrency = (amount: number) => {
     return amount.toLocaleString('es-CL', {
       style: 'currency',
-      currency: 'CLP',
+      currency,
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     });
