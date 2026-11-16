@@ -1340,9 +1340,8 @@ Exporta:
 - interfaz `ResourceSnapshot`
 - interfaz `ConsumptionResource`
 - interfaz `ConsumptionSummary`
-- tipo `SeriesGranularity` = `'hour' | 'day'`
-- interfaz `SeriesMetric` — Metadatos de una métrica dinámica de un recurso (chequeo de monitoreo en vCenter).
-- interfaz `ResourceSeriesResponse` — Respuesta de `/{cloud}/consumption/{recurso}/series`: todas las métricas del recurso y sus puntos en el formato `MetricPoint` (promedio, máximo y mínimo por hora, o por día si el período es de 7 días o más).
+- interfaz `SeriesMetric` — Metadatos de una métrica dinámica de un recurso (chequeo de monitoreo en vCenter). `/{cloud}/consumption/{recurso}/series/metrics` entrega la lista del recurso para el selector, sin lecturas.
+- interfaz `ResourceSeriesResponse` — Respuesta de `/{cloud}/consumption/{recurso}/series?metric=…`: solo la métrica pedida (sus metadatos y sus puntos en el formato `MetricPoint`). Un punto por lectura, con su `timestamp` exacto (sin agrupar por hora ni día); el período se filtra por `timestamp` y cada lectura se cuenta una sola vez aunque aparezca en varias sincronizaciones.
 - interfaz `ConsumptionInfoResponse`
 
 Interfaz `MetricPoint` (exportada):
@@ -1450,7 +1449,6 @@ Interfaz `ResourceSeriesResponse` (exportada):
 
 | Campo | Tipo | Opcional | Descripción |
 |---|---|---|---|
-| `granularity` | `SeriesGranularity` | no | — |
 | `metrics` | `SeriesMetric[]` | no | — |
 | `points` | `MetricPoint[]` | no | — |
 

@@ -26,6 +26,7 @@ export interface SummaryBreakdownDef {
 
 export interface DetailSeriesDef {
     action: string;
+    metricsAction: string;
     ipPath: string;
 }
 
