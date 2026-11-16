@@ -541,6 +541,7 @@ Exporta:
 - función `formatDateTime` `(iso: string | null | undefined): string`
 - interfaz `MetricDefinition` — Registro de métricas (series de tiempo de las tres nubes)
 - función `metricKey` `(name: string): string` — Clave normalizada: minúsculas y sin separadores ("Percentage CPU" -> "percentagecpu").
+- función `definitionFromUnit` `(label: string, unit: string | null | undefined): MetricDefinition` — Formato de una métrica dinámica según la unidad que trae la API: '%' → porcentaje, 'B' → bytes, 'GB' → GB, sin unidad → conteo, otra → número con su unidad. Lo usan la pestaña Gráficos del consumo y el horario hábil de vCenter.
 - función `getMetricDefinition` `(name: string): MetricDefinition`
 - función `getPathValue` `(source: unknown, path: string): unknown` — Lee un valor por ruta ("metrics.avg_cpu_utilization", "details.vpc_id") de cualquier objeto.
 - función `getResourceValue` `(resource: ConsumptionResource, path: string): unknown` — Lee un valor de un recurso por ruta ("metrics.avg_cpu_utilization", "details.vpc_id", "resource_type").
@@ -1241,8 +1242,8 @@ Exporta:
 - función `workingHoursUrl` `(cloud: WorkingHoursCloud, resource: string, action: WorkingHoursAction, params: QueryParams): string` — `/api/{cloud}/bridge/{cloud}/working-hours/{resource}/{action}?{params}` (el bridge lo envía a `/api/{cloud}/working-hours/...`).
 - constante `SCHEDULES` = `['business_hours', 'non_business_hours']`
 - constante `SCHEDULE_LABELS` = `{ business_hours: 'Horario Hábil', non_business_hours: 'Horario No Hábil', }`
-- constante `SCHEDULE_TIME_ZONE` = `'America/Santiago'` — El horario hábil se define en Santiago: las horas se muestran siempre en esa zona, sin importar el navegador.
-- función `formatSantiagoTime` `(value: string | number | Date): string`
+- constante `SCHEDULE_TIME_ZONE` = `'America/Santiago'` — Zona por defecto del horario hábil (AWS, Azure y GCP): las horas se muestran siempre en esa zona, sin importar el navegador. vCenter usa America/Bogota vía `timeZone` de la configuración.
+- función `formatScheduleTime` `(value: string | number | Date, timeZone: string = SCHEDULE_TIME_ZONE): string` — Fecha y hora (dd-mm hh:mm) en la zona del horario hábil de la vista.
 - función `getWorkingHoursMetric` `(name: string, overrides?: Record<string, MetricDefinition>): MetricDefinition` — Formato de una métrica: primero lo propio del recurso (`overrides`, por clave normalizada), luego el registro común.
 - función `sortMetrics` `(names: Iterable<string>): string[]` — Ordena métricas con CPU primero y el resto alfabético.
 - función `findSummary` `(items: WorkingHoursSummaryItem[], metric: string, schedule: ScheduleType): WorkingHoursSummaryItem | undefined`

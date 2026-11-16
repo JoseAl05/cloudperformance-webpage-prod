@@ -318,6 +318,13 @@ const NAV: Record<Provider, NavItem[]> = {
             icon: Zap,
             items: [
                 {
+                    label: 'Consumo horario hábil vs no hábil',
+                    icon: Clock,
+                    items: [
+                        { label: 'Máquinas Virtuales', icon: Computer, href: '/cloud-vcenter/funciones/uso-horario-habil-no-habil/vm' },
+                    ],
+                },
+                {
                     label: 'Recursos no utilizados',
                     icon: TrendingDown,
                     items: [

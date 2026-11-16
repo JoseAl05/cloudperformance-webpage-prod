@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useECharts } from '@/lib/echartsGlobalConfig';
 import { compactNumber, formatValue } from '@/lib/consumption';
 import type { MetricDefinition } from '@/lib/consumption';
-import { formatSantiagoTime, getWorkingHoursMetric, SCHEDULE_LABELS, sortMetrics } from '@/lib/workingHours';
+import { formatScheduleTime, getWorkingHoursMetric, SCHEDULE_LABELS, SCHEDULE_TIME_ZONE, sortMetrics } from '@/lib/workingHours';
 import type { WorkingHoursPoint } from '@/interfaces/workingHours';
 import type { WorkingHoursViewConfig } from '@/components/shared/working-hours/types';
 
@@ -23,7 +23,7 @@ interface TooltipParam {
 
 const average = (values: number[]) => (values.length > 0 ? values.reduce((sum, v) => sum + v, 0) / values.length : null);
 
-const MetricChart = ({ metric, points, definition }: { metric: string; points: WorkingHoursPoint[]; definition: MetricDefinition }) => {
+const MetricChart = ({ metric, points, definition, timeZone }: { metric: string; points: WorkingHoursPoint[]; definition: MetricDefinition; timeZone: string }) => {
     const { theme, resolvedTheme } = useTheme();
     const isDark = (resolvedTheme || theme) === 'dark';
     const chartRef = useRef<HTMLDivElement>(null);
@@ -76,13 +76,13 @@ const MetricChart = ({ metric, points, definition }: { metric: string; points: W
                                 <span style="display:inline-block;border-radius:10px;width:10px;height:10px;background-color:${p.color};"></span>
                                 <span>${p.seriesName}:</span><strong>${fmt(p.value ? p.value[1] : null)}</strong></div>`);
                     if (rows.length === 0) return '';
-                    const when = params[0]?.axisValue !== undefined ? formatSantiagoTime(params[0].axisValue) : '';
+                    const when = params[0]?.axisValue !== undefined ? formatScheduleTime(params[0].axisValue, timeZone) : '';
                     return `<div style="font-size:12px;font-weight:600;margin-bottom:4px">${when}</div>${rows.join('')}`;
                 },
             },
             xAxis: {
                 type: 'time' as const,
-                axisLabel: { formatter: (value: number) => formatSantiagoTime(value), hideOverlap: true },
+                axisLabel: { formatter: (value: number) => formatScheduleTime(value, timeZone), hideOverlap: true },
             },
             yAxis: {
                 type: 'value' as const,
@@ -101,7 +101,7 @@ const MetricChart = ({ metric, points, definition }: { metric: string; points: W
                 line(SCHEDULE_LABELS.non_business_hours, NON_BUSINESS_COLOR, 'diamond', nonBusiness),
             ],
         };
-    }, [business, nonBusiness, definition]);
+    }, [business, nonBusiness, definition, timeZone]);
 
     useECharts(chartRef as React.RefObject<HTMLDivElement>, option, [option], isDark ? 'cp-dark' : 'cp-light');
 
@@ -152,12 +152,18 @@ export const WorkingHoursCharts = ({ data, config }: { data: WorkingHoursPoint[]
             <div className="flex items-center gap-2">
                 <Info className="w-4 h-4 text-blue-500 flex-shrink-0" />
                 <p className="text-xs text-muted-foreground">
-                    Horario hábil: lunes a viernes de 08:00 a 18:00, hora de <strong>Santiago de Chile</strong> (las horas del gráfico están en esa zona).
+                    Horario hábil: lunes a viernes de 08:00 a 18:00, hora de <strong>{config.timeZoneLabel ?? 'Santiago de Chile'}</strong> (las horas del gráfico están en esa zona).
                 </p>
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 w-full">
                 {metrics.map((metric) => (
-                    <MetricChart key={metric} metric={metric} points={grouped[metric]} definition={getWorkingHoursMetric(metric, config.metricOverrides)} />
+                    <MetricChart
+                        key={metric}
+                        metric={metric}
+                        points={grouped[metric]}
+                        definition={getWorkingHoursMetric(metric, config.metricOverrides)}
+                        timeZone={config.timeZone ?? SCHEDULE_TIME_ZONE}
+                    />
                 ))}
             </div>
         </div>

@@ -170,3 +170,13 @@ export const GCP_FILESTORE_WH: WorkingHoursViewConfig = {
     resourceTypeLabel: 'Filestore',
     emptyText: 'No encontramos instancias Filestore en el rango seleccionado.',
 };
+
+export const VCENTER_VM_WH: WorkingHoursViewConfig = {
+    cloud: 'vcenter',
+    resource: 'vm',
+    serviceName: 'Máquinas Virtuales vCenter',
+    resourceTypeLabel: 'VM vCenter',
+    timeZone: 'America/Bogota',
+    timeZoneLabel: 'Bogotá',
+    emptyText: 'No encontramos lecturas de monitoreo de las máquinas virtuales para esta familia en el período seleccionado.',
+};

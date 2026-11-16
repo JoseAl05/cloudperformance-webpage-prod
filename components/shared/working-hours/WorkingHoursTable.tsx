@@ -120,12 +120,12 @@ const DetailsCell = ({ row, config }: { row: Row; config: WorkingHoursViewConfig
     );
 };
 
-const TableLegend = () => (
+const TableLegend = ({ timeZoneLabel }: { timeZoneLabel: string }) => (
     <div className="flex flex-wrap gap-4 text-xs text-muted-foreground mt-2 bg-slate-50 dark:bg-slate-900/50 p-2 rounded-md border border-slate-100 dark:border-slate-800">
         <span className="flex items-center gap-1">
             <span className="w-2 h-2 rounded-full bg-amber-500" />
             <Briefcase className="w-3 h-3" />
-            <strong>Hábil:</strong> lunes a viernes, 08:00-18:00 (Santiago)
+            <strong>Hábil:</strong> lunes a viernes, 08:00-18:00 ({timeZoneLabel})
         </span>
         <span className="flex items-center gap-1">
             <span className="w-2 h-2 rounded-full bg-purple-500" />
@@ -212,7 +212,7 @@ export const WorkingHoursTable = ({ resources, config }: { resources: WorkingHou
                         <CardDescription>Promedio de cada métrica por horario; la barra es relativa al máximo visible.</CardDescription>
                     </div>
                 </div>
-                <TableLegend />
+                <TableLegend timeZoneLabel={config.timeZoneLabel ?? 'Santiago'} />
             </CardHeader>
             <CardContent className="p-4">
                 <DataTableGrouping
