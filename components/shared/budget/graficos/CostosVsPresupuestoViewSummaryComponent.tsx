@@ -1,10 +1,10 @@
 'use client';
 
-import { useMemo, useRef } from 'react';
+import { type RefObject, useMemo, useRef } from 'react';
 import { useTheme } from 'next-themes';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Info } from 'lucide-react';
-import { createChartOption, deepMerge, makeBaseOptions, useECharts } from '@/lib/echartsGlobalConfig';
+import { type AnySeriesDef, createChartOption, deepMerge, makeBaseOptions, useECharts } from '@/lib/echartsGlobalConfig';
 
 interface PresupuestoMensual {
     id_presupuesto_mensual: number;
@@ -159,7 +159,7 @@ export const CostosVsPresupuestoChart = ({ data, facturacionData, providerLabel 
             metricType: 'default',
         });
 
-        const series: Record<string, unknown>[] = [
+        const series: AnySeriesDef[] = [
             {
                 kind: 'line',
                 name: 'Presupuesto Mensual',
@@ -224,7 +224,7 @@ export const CostosVsPresupuestoChart = ({ data, facturacionData, providerLabel 
         return deepMerge(base, lines);
     }, [presupuestoData, realData, forecastData, facturacionRealData, yMaxRounded, isDark, providerLabel]);
 
-    useECharts(chartRef, option, [option], isDark ? 'cp-dark' : 'cp-light');
+    useECharts(chartRef as RefObject<HTMLDivElement>, option, [option], isDark ? 'cp-dark' : 'cp-light');
 
     return (
         <Card className="w-full">
