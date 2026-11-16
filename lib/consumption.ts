@@ -75,6 +75,14 @@ export interface MetricDefinition {
 
 export const metricKey = (name: string): string => name.toLowerCase().replace(/[^a-z0-9]/g, '');
 
+export const definitionFromUnit = (label: string, unit: string | null | undefined): MetricDefinition => {
+    if (unit === '%') return { label, format: 'percent' };
+    if (unit === 'B') return { label, format: 'bytes' };
+    if (unit === 'GB') return { label, format: 'gb' };
+    if (!unit) return { label, format: 'count' };
+    return { label, format: 'number', unit };
+};
+
 const METRICS: Record<string, MetricDefinition> = {
     cpuutilization: { label: 'Uso de CPU', format: 'percent' },
     percentagecpu: { label: 'Uso de CPU', format: 'percent' },

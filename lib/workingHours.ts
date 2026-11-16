@@ -24,9 +24,9 @@ export const SCHEDULE_LABELS: Record<ScheduleType, string> = {
 
 export const SCHEDULE_TIME_ZONE = 'America/Santiago';
 
-export const formatSantiagoTime = (value: string | number | Date): string =>
+export const formatScheduleTime = (value: string | number | Date, timeZone: string = SCHEDULE_TIME_ZONE): string =>
     new Intl.DateTimeFormat('es-CL', {
-        timeZone: SCHEDULE_TIME_ZONE,
+        timeZone,
         day: '2-digit',
         month: '2-digit',
         hour: '2-digit',
