@@ -319,6 +319,13 @@ const NAV: Record<Provider, NavItem[]> = {
             icon: Zap,
             items: [
                 {
+                    label: 'Consumo horario hábil vs no hábil',
+                    icon: Clock,
+                    items: [
+                        { label: 'Máquinas Virtuales', icon: Computer, href: '/cloud-vcenter/funciones/uso-horario-habil-no-habil/vm' },
+                    ],
+                },
+                {
                     label: 'Recursos no utilizados',
                     icon: TrendingDown,
                     items: [
@@ -334,7 +341,7 @@ export const SidebarDashboardNubesComponent = ({
     ...props
 }: React.ComponentProps<typeof Sidebar>) => {
     const pathname = usePathname() ?? ''
-    const items = useMemo(() => resolveNav(NAV, pathname), [pathname])
+    const items = useMemo(() => resolveNav(NAV, pathname, 'clouds'), [pathname])
 
     return <SidebarNav items={items} {...props} />
 }

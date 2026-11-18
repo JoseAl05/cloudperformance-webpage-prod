@@ -37,7 +37,7 @@ export const SidebarDashboardServiciosIaComponent = ({
     ...props
 }: React.ComponentProps<typeof Sidebar>) => {
     const pathname = usePathname() ?? ''
-    const items = useMemo(() => resolveNav(NAV, pathname), [pathname])
+    const items = useMemo(() => resolveNav(NAV, pathname, 'ia-services'), [pathname])
 
     return <SidebarNav items={items} {...props} />
 }

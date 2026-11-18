@@ -17,5 +17,7 @@ export interface WorkingHoursViewConfig {
     resourceTypeLabel: string;
     metricOverrides?: Record<string, MetricDefinition>;
     resourceLink?: (resource: WorkingHoursResource, ctx: ResourceLinkContext) => ResourceLink | null;
+    timeZone?: string;
+    timeZoneLabel?: string;
     emptyText: string;
 }

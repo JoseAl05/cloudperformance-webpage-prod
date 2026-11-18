@@ -1,8 +1,19 @@
-export type WorkingHoursCloud = 'aws' | 'azure' | 'gcp';
+export type WorkingHoursCloud = 'aws' | 'azure' | 'gcp' | 'vcenter';
 
 export type ScheduleType = 'business_hours' | 'non_business_hours';
 
-export type WorkingHoursAction = 'usage' | 'summary' | 'resources';
+export type WorkingHoursAction = 'usage' | 'summary' | 'resources' | 'families';
+
+export interface WorkingHoursFamilyMetric {
+    metric: string;
+    unit: string | null;
+}
+
+export interface WorkingHoursFamily {
+    family: string;
+    category: string;
+    metrics: WorkingHoursFamilyMetric[];
+}
 
 export interface WorkingHoursPoint {
     timestamp: string;

@@ -45,10 +45,17 @@ export const containsActive = (items: NavItem[], pathname: string): boolean =>
         isItemActive(item, pathname) || (item.items ? containsActive(item.items, pathname) : false)
     )
 
-export const resolveNav = <K extends string>(map: Record<K, NavItem[]>, pathname: string): NavItem[] => {
-    const key = (Object.keys(map) as K[]).find(
-        (candidate) => pathname === `/cloud-${candidate}` || pathname.startsWith(`/cloud-${candidate}/`)
-    )
+export const resolveNav = <K extends string>(map: Record<K, NavItem[]>, pathname: string, section: string): NavItem[] => {
+    let key: K | undefined;
+    if(section === 'clouds'){
+        key = (Object.keys(map) as K[]).find(
+            (candidate) => pathname === `/cloud-${candidate}` || pathname.startsWith(`/cloud-${candidate}/`)
+        )
+    } else if(section === 'ia-services'){
+        key = (Object.keys(map) as K[]).find(
+            (candidates) => pathname === `/${candidates}` || pathname.startsWith(`/${candidates}/`)
+        )
+    }
     return key ? map[key] : []
 }
 
