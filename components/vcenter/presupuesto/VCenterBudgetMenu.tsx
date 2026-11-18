@@ -23,11 +23,6 @@ const MODULES = [
     description: 'Carga y administra los presupuestos mensuales',
     path: '/cloud-vcenter/presupuesto/presupuesto-mensual',
   },
-  // {
-  //   title: '🔗 Asignación de Recursos',
-  //   description: 'Relaciona recursos vCenter con centros de costo',
-  //   path: '/cloud-vcenter/presupuesto/asignacion-recursos',
-  // },
 ] as const;
 
 export function VCenterBudgetMenu() {
