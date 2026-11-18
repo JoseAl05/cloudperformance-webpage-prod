@@ -304,7 +304,7 @@ export const CostosVsPresupuestoComponent = ({ anio, cloud, centroDeCosto }: Cen
                 </button>
               </div>
 
-              <div className="grid grid-cols-2 md:grid-cols-5 gap-3 p-4 bg-gray-50 dark:bg-gray-900/50 rounded-lg border border-gray-100 dark:border-gray-700/50">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 p-4 bg-gray-50 dark:bg-gray-900/50 rounded-lg border border-gray-100 dark:border-gray-700/50">
                 <div>
                   <p className="text-xs text-gray-500 dark:text-gray-400">Ppto. Mensual Total</p>
                   <p className="text-lg font-semibold text-blue-600 dark:text-blue-400">{formatCurrency(totales.totalMensualAsociado)}</p>
@@ -316,12 +316,6 @@ export const CostosVsPresupuestoComponent = ({ anio, cloud, centroDeCosto }: Cen
                 <div>
                   <p className="text-xs text-gray-500 dark:text-gray-400">Forecast Total</p>
                   <p className="text-lg font-semibold text-purple-600 dark:text-purple-400">{formatCurrency(totales.totalForecastMes)}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Recursos Vinculados</p>
-                  <span className="inline-flex items-center px-2 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300 rounded-md text-xs font-medium">
-                    ID Relacional: {presupuesto.id_centro_costo}
-                  </span>
                 </div>
                 <div>
                   <p className="text-xs text-gray-500 dark:text-gray-400">Facturación {providerLabel} Asignada</p>

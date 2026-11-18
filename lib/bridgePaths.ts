@@ -12,7 +12,7 @@ export const BRIDGE_ALLOWED_PREFIXES = {
   comparisonCloud: ['intercloud', 'intracloud'],
   connector: ['connector'],
   openai: ['openai'],
-  vcenter: ['vcenter', 'resources'],
+  vcenter: ['vcenter', 'resources', 'mantenedor-tags'],
 } as const satisfies Record<string, readonly string[]>;
 
 export function isAllowedBridgePath(
