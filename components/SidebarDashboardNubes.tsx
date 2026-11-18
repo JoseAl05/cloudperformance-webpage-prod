@@ -340,7 +340,7 @@ export const SidebarDashboardNubesComponent = ({
     ...props
 }: React.ComponentProps<typeof Sidebar>) => {
     const pathname = usePathname() ?? ''
-    const items = useMemo(() => resolveNav(NAV, pathname), [pathname])
+    const items = useMemo(() => resolveNav(NAV, pathname, 'clouds'), [pathname])
 
     return <SidebarNav items={items} {...props} />
 }
