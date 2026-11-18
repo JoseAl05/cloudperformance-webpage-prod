@@ -53,7 +53,7 @@ export const resolveNav = <K extends string>(map: Record<K, NavItem[]>, pathname
         )
     } else if(section === 'ia-services'){
         key = (Object.keys(map) as K[]).find(
-            (candidates) => pathname === `/${candidates}`
+            (candidates) => pathname === `/${candidates}` || pathname.startsWith(`/${candidates}/`)
         )
     }
     return key ? map[key] : []
