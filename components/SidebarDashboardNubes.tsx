@@ -306,6 +306,7 @@ const NAV: Record<Provider, NavItem[]> = {
         { label: 'Tendencia Facturación', icon: Grid2X2, href: '/cloud-vcenter/facturacion' },
         { label: 'Top Facturación por Recursos', icon: Boxes, href: '/cloud-vcenter/facturacion/top-recursos' },
         { label: 'Presupuestos', icon: CircleDollarSign, href: '/cloud-vcenter/presupuesto' },
+        { label: 'Mantenedor de Etiquetas (Tags)', icon: Tags, href: '/cloud-vcenter/tags' },
         {
             label: 'Consumos',
             icon: LineChart,
