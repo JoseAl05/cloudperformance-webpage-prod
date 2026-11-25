@@ -13,6 +13,7 @@ interface BillingAlertsTableProps {
     handleEditClick: (alerta: AlertConfig) => void;
     handleDelete: (id: string) => void;
     isDeleting: string | null;
+    provider: string;
 }
 
 export const BillingAlertsTable = ({
@@ -20,7 +21,8 @@ export const BillingAlertsTable = ({
     isFetching,
     handleEditClick,
     handleDelete,
-    isDeleting
+    isDeleting,
+    provider
 }: BillingAlertsTableProps) => {
     
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -42,7 +44,7 @@ export const BillingAlertsTable = ({
         }
     };
 
-    const columns = getBillingAlertsColumns(handleEditClick, handleDelete, isDeleting, handleInspectAlert);
+    const columns = getBillingAlertsColumns(handleEditClick, handleDelete, isDeleting, handleInspectAlert, provider);
 
     return (
         <>

@@ -37,6 +37,7 @@ export default function CostCenterBudgetView({ provider }: CostCenterBudgetViewP
     const [centrosCosto, setCentrosCosto] = useState<CostCenter[]>([]);
     const [configuraciones, setConfiguraciones] = useState<BudgetAlertConfig[]>([]);
     const [presupuestosMap, setPresupuestosMap] = useState<Record<number, number>>({});
+    const [budgetPeriod, setBudgetPeriod] = useState<string | null>(null);
     const [selectedCostCenterId, setSelectedCostCenterId] = useState<number>(0);
     
     const [isFetching, setIsFetching] = useState<boolean>(true);
@@ -49,6 +50,7 @@ export default function CostCenterBudgetView({ provider }: CostCenterBudgetViewP
             case 'azure': return connectionData.azureAccountsList || [];
             case 'aws': return connectionData.awsAccountsList || [];
             case 'gcp': return connectionData.gcpAccountsList || [];
+            case 'vcenter': return connectionData.vcenterAccountsList || [];
             default: return [];
         }
     }, [provider, connectionData]);
@@ -92,6 +94,7 @@ export default function CostCenterBudgetView({ provider }: CostCenterBudgetViewP
             setCentrosCosto(res.centros_costo || []);
             setConfiguraciones(res.configuraciones || []);
             setPresupuestosMap(res.presupuestos_asignados || {});
+            setBudgetPeriod(res.budget_period || null);
             
             if (res.centros_costo && res.centros_costo.length > 0 && selectedCostCenterId === 0) {
                 setSelectedCostCenterId(res.centros_costo[0].id_centro_costo);
@@ -119,7 +122,9 @@ export default function CostCenterBudgetView({ provider }: CostCenterBudgetViewP
                 connectionData.client,
                 provider === 'azure' ? selectedAccount.db : connectionData.dbAzureName,
                 provider === 'aws' ? selectedAccount.db : connectionData.dbAwsName,
-                provider === 'gcp' ? selectedAccount.db : connectionData.dbGcpName
+                provider === 'gcp' ? selectedAccount.db : connectionData.dbGcpName,
+                connectionData.dbOpenaiName,
+                provider === 'vcenter' ? selectedAccount.db : connectionData.dbVcenterName
             );
             setTimeout(() => { cargarDatos(); }, 200);
         }
@@ -230,6 +235,7 @@ export default function CostCenterBudgetView({ provider }: CostCenterBudgetViewP
                             selectedCostCenterId={selectedCostCenterId}
                             onCostCenterChange={setSelectedCostCenterId}
                             presupuestoActual={presupuestosMap[selectedCostCenterId] || 0}
+                            budgetPeriod={budgetPeriod}
                             setConfig={handleConfigChange}
                             handleSubmit={handleSave}
                             isSaving={isSaving}

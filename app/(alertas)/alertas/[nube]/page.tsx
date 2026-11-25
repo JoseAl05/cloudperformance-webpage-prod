@@ -5,13 +5,14 @@ import { ArrowLeft } from 'lucide-react';
 const PROVIDER_NAMES: Record<string, string> = {
     azure: 'Microsoft Azure',
     aws: 'Amazon Web Services',
-    gcp: 'Google Cloud Platform'
+    gcp: 'Google Cloud Platform',
+    vcenter: 'VMware vCenter'
 };
 
 export default async function AlertasNubePage({ params }: { params: Promise<{ nube: string }> }) {
     const { nube } = await params;
 
-    if (!['azure', 'aws', 'gcp'].includes(nube)) {
+    if (!['azure', 'aws', 'gcp', 'vcenter'].includes(nube)) {
         return <div>Nube no válida</div>;
     }
 

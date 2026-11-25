@@ -4,9 +4,10 @@ import { Activity, AlertTriangle } from 'lucide-react';
 interface AnomalyKpiCardsProps {
     totalReglas: number;
     anomaliasDetectadas: number;
+    provider: string;
 }
 
-export const AnomalyKpiCards: React.FC<AnomalyKpiCardsProps> = ({ totalReglas, anomaliasDetectadas }) => {
+export const AnomalyKpiCards: React.FC<AnomalyKpiCardsProps> = ({ totalReglas, anomaliasDetectadas, provider }) => {
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm flex items-center justify-between">
@@ -21,7 +22,9 @@ export const AnomalyKpiCards: React.FC<AnomalyKpiCardsProps> = ({ totalReglas, a
 
             <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm flex items-center justify-between">
                 <div>
-                    <p className="text-sm font-medium text-gray-500 mb-1">Anomalías Detectadas (Últ. 24h)</p>
+                    <p className="text-sm font-medium text-gray-500 mb-1">
+                        {provider === 'vcenter' ? 'Anomalías Detectadas (Último período)' : 'Anomalías Detectadas (Últ. 24h)'}
+                    </p>
                     <h4 className="text-2xl font-bold text-gray-800">{anomaliasDetectadas}</h4>
                 </div>
                 <div className={`w-12 h-12 rounded-full flex items-center justify-center ${anomaliasDetectadas > 0 ? 'bg-purple-50 text-purple-600' : 'bg-gray-50 text-gray-400'}`}>
