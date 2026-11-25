@@ -50,14 +50,15 @@ export default function BillingAlertsView({ provider }: { provider: string }) {
         project_id: 'all_projects', 
         service: 'all_services', 
         threshold_amount: 0, 
-        currency: 'usd', 
+        currency: provider === 'vcenter' ? 'COP' : 'usd',
         alert_emails: [] 
     });
 
     const activeAccountsList: CloudAccount[] = 
         provider === 'azure' ? (connectionData?.azureAccountsList || []) :
         provider === 'aws' ? (connectionData?.awsAccountsList || []) :
-        provider === 'gcp' ? (connectionData?.gcpAccountsList || []) : [];
+        provider === 'gcp' ? (connectionData?.gcpAccountsList || []) :
+        provider === 'vcenter' ? (connectionData?.vcenterAccountsList || []) : [];
 
     useEffect(() => {
         const cargarDatosEquipo = async () => {
@@ -161,7 +162,9 @@ export default function BillingAlertsView({ provider }: { provider: string }) {
                 connectionData.client,
                 provider === 'azure' ? selectedAccount.db : connectionData.dbAzureName,
                 provider === 'aws' ? selectedAccount.db : connectionData.dbAwsName,
-                provider === 'gcp' ? selectedAccount.db : connectionData.dbGcpName
+                provider === 'gcp' ? selectedAccount.db : connectionData.dbGcpName,
+                connectionData.dbOpenaiName,
+                provider === 'vcenter' ? selectedAccount.db : connectionData.dbVcenterName
             );
             setTimeout(() => {
                 cargarAlertas();
@@ -253,7 +256,7 @@ export default function BillingAlertsView({ provider }: { provider: string }) {
     };
 
     const dbOptions = activeAccountsList.map(acc => ({ label: acc.alias, value: acc.id }));
-    const projectOptions = [{ label: 'Todas las Suscripciones', value: 'all_projects' }, ...availableProjects.map(p => ({ label: p, value: p }))];
+    const projectOptions = [{ label: provider === 'vcenter' ? 'Todas las unidades de negocio' : 'Todas las Suscripciones', value: 'all_projects' }, ...availableProjects.map(p => ({ label: p, value: p }))];
     const serviceOptions = [{ label: 'Todos los Servicios', value: 'all_services' }, ...availableServices.map(s => ({ label: s, value: s }))];
 
     return (
@@ -285,6 +288,7 @@ export default function BillingAlertsView({ provider }: { provider: string }) {
                 handleSubmit={handleSubmit} editingId={editingId} cancelEdit={cancelEdit} loading={loading}
                 currentUserEmail={currentUserEmail} 
                 companyEmails={companyEmails}       
+                provider={provider}
             />
             
             <BillingAlertsTable 
@@ -293,6 +297,7 @@ export default function BillingAlertsView({ provider }: { provider: string }) {
                 handleEditClick={handleEditClick}
                 handleDelete={handleDelete}
                 isDeleting={isDeleting}
+                provider={provider}
             />
         </div>
     );

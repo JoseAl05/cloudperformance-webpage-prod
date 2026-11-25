@@ -80,7 +80,9 @@ export default function AlertsManager({ provider }: AlertsManagerProps) {
                             Alzas Inusuales
                         </h3>
                         <p className="text-sm mt-2 text-gray-500">
-                            Detecta anomalías y saltos bruscos en tu consumo diario mediante algoritmos.
+                            {provider === 'vcenter'
+                                ? 'Compara el último período mensual cargado con el mes anterior.'
+                                : 'Detecta anomalías y saltos bruscos en tu consumo diario mediante algoritmos.'}
                         </p>
                     </button>
                 </div>

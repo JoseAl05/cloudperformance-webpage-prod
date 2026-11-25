@@ -13,6 +13,7 @@ export interface AnomalyAlertsTableProps {
     handleEditClick: (alerta: AnomalyConfig) => void;
     handleDelete: (id: string) => void;
     isDeleting: string | null;
+    provider: string;
 }
 
 export interface AnomalyHistoryResponse {
@@ -25,7 +26,8 @@ export const AnomalyAlertsTable = ({
     isFetching,
     handleEditClick,
     handleDelete,
-    isDeleting
+    isDeleting,
+    provider
 }: AnomalyAlertsTableProps) => {
     
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
@@ -49,7 +51,7 @@ export const AnomalyAlertsTable = ({
         }
     };
 
-    const columns = getAnomalyAlertsColumns(handleEditClick, handleDelete, isDeleting, handleInspectAlert);
+    const columns = getAnomalyAlertsColumns(handleEditClick, handleDelete, isDeleting, handleInspectAlert, provider);
 
     return (
         <>

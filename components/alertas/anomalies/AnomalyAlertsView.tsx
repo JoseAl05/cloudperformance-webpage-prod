@@ -60,14 +60,15 @@ export default function AnomalyAlertsView({ provider }: AnomalyAlertsViewProps) 
         project_id: 'all_projects', 
         service: 'all_services', 
         sensitivity_percentage: 20, 
-        comparison_period: '7d',    
+        comparison_period: provider === 'vcenter' ? 'previous_month' : '7d',
         alert_emails: [] 
     });
 
     const activeAccountsList: CloudAccount[] = 
         provider === 'azure' ? (connectionData?.azureAccountsList || []) :
         provider === 'aws' ? (connectionData?.awsAccountsList || []) :
-        provider === 'gcp' ? (connectionData?.gcpAccountsList || []) : [];
+        provider === 'gcp' ? (connectionData?.gcpAccountsList || []) :
+        provider === 'vcenter' ? (connectionData?.vcenterAccountsList || []) : [];
 
     useEffect(() => {
         if (activeAccountsList.length > 0 && !selectedDbAccount) {
@@ -165,7 +166,9 @@ export default function AnomalyAlertsView({ provider }: AnomalyAlertsViewProps) 
                 connectionData.client,
                 provider === 'azure' ? selectedAccount.db : connectionData.dbAzureName,
                 provider === 'aws' ? selectedAccount.db : connectionData.dbAwsName,
-                provider === 'gcp' ? selectedAccount.db : connectionData.dbGcpName
+                provider === 'gcp' ? selectedAccount.db : connectionData.dbGcpName,
+                connectionData.dbOpenaiName,
+                provider === 'vcenter' ? selectedAccount.db : connectionData.dbVcenterName
             );
             setTimeout(() => {
                 cargarAlertas();
@@ -223,6 +226,7 @@ export default function AnomalyAlertsView({ provider }: AnomalyAlertsViewProps) 
             <AnomalyKpiCards 
                 totalReglas={alertas.length} 
                 anomaliasDetectadas={alertas.filter(a => a.status === 'spike_detected').length}
+                provider={provider}
             />
             
             <AnomalyAlertForm 
@@ -235,6 +239,7 @@ export default function AnomalyAlertsView({ provider }: AnomalyAlertsViewProps) 
                 loading={loading}
                 currentUserEmail={currentUserEmail}
                 companyEmails={companyEmails}
+                provider={provider}
             />
             
             <AnomalyAlertsTable 
@@ -254,6 +259,7 @@ export default function AnomalyAlertsView({ provider }: AnomalyAlertsViewProps) 
                     }
                 }}
                 isDeleting={isDeleting}
+                provider={provider}
             />
         </div>
     );

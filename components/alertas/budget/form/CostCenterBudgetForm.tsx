@@ -14,6 +14,7 @@ interface CostCenterBudgetFormProps {
     companyEmails: string[];
     feedbackMsg: { text: string; type: 'success' | 'info' | 'error' } | null;
     presupuestoActual: number;
+    budgetPeriod?: string | null;
 }
 
 export const CostCenterBudgetForm = ({
@@ -27,7 +28,8 @@ export const CostCenterBudgetForm = ({
     currentUserEmail, 
     companyEmails, 
     feedbackMsg,
-    presupuestoActual
+    presupuestoActual,
+    budgetPeriod
 }: CostCenterBudgetFormProps) => {
 
     const [currentEmail, setCurrentEmail] = useState<string>('');
@@ -35,7 +37,10 @@ export const CostCenterBudgetForm = ({
 
     const puedeActivar = selectedCostCenterId !== 0 && presupuestoActual > 0;
 
-    const fechaActual = new Date();
+    const [periodYear, periodMonth] = budgetPeriod?.split('-').map(Number) || [];
+    const fechaActual = periodYear && periodMonth
+        ? new Date(periodYear, periodMonth - 1, 1)
+        : new Date();
     const mes = fechaActual.toLocaleString('es-CL', { month: 'long' });
     const anio = fechaActual.getFullYear();
     const periodoActual = `${mes} ${anio}`.toUpperCase();
@@ -158,7 +163,7 @@ export const CostCenterBudgetForm = ({
                                     </h3>
                                     {presupuestoActual === 0 && (
                                         <p className="text-xs text-amber-600 font-bold mt-2 flex items-center gap-1">
-                                            <Info size={14} /> Sin presupuesto asignado para el mes actual.
+                                            <Info size={14} /> Sin presupuesto asignado para este período.
                                         </p>
                                     )}
                                 </div>

@@ -349,7 +349,7 @@ export const CostCenterStatusBoard = ({ provider, configuraciones, centrosCosto,
             )}
 
             <div className="relative z-[60]">
-                <AlertHistoryModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} data={selectedHistory} />
+                <AlertHistoryModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} data={selectedHistory} currency={provider === 'vcenter' ? 'COP' : 'USD'} />
             </div>
         </div>
     );

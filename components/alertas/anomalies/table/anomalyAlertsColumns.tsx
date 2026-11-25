@@ -6,15 +6,16 @@ export const getAnomalyAlertsColumns = (
     handleEditClick: (alerta: AnomalyConfig) => void,
     handleDelete: (id: string) => void,
     isDeleting: string | null,
-    onInspectAlert: (alertaId: string, cloudProvider: string) => void
+    onInspectAlert: (alertaId: string, cloudProvider: string) => void,
+    provider: string
 ): ColumnDef<AnomalyConfig>[] => [
     {
         accessorKey: "project_id",
-        header: "Suscripción / Proyecto",
+        header: provider === 'vcenter' ? "Unidad de negocio" : "Suscripción / Proyecto",
         cell: ({ row }) => {
             const val = row.original.project_id;
             if (val === 'all_projects') {
-                return <span className="font-mono text-xs font-semibold text-gray-500">Todas las Suscripciones</span>;
+                return <span className="font-mono text-xs font-semibold text-gray-500">{provider === 'vcenter' ? 'Todas las unidades' : 'Todas las Suscripciones'}</span>;
             }
             return (
                 <span className="font-mono text-[11px] font-semibold text-gray-600 bg-gray-50 px-2 py-1 rounded-md border border-gray-100">
@@ -25,7 +26,7 @@ export const getAnomalyAlertsColumns = (
     },
     {
         accessorKey: "service",
-        header: "Servicio",
+        header: provider === 'vcenter' ? "Producto / Servicio" : "Servicio",
         cell: ({ row }) => (
             <span className="font-bold text-gray-800">
                 {row.original.service === 'all_services' ? 'Todos los Servicios' : row.original.service}
@@ -49,6 +50,7 @@ export const getAnomalyAlertsColumns = (
         cell: ({ row }) => {
             const period = row.original.comparison_period;
             const label = 
+                period === 'previous_month' ? 'Mes anterior' :
                 period === '7d' ? 'Últimos 7 días' : 
                 period === '15d' ? 'Últimos 15 días' : 
                 period === '30d' ? 'Últimos 30 días' : 'Día Anterior';

@@ -18,14 +18,15 @@ interface AnomalyAlertFormProps {
     loading: boolean;
     currentUserEmail?: string;
     companyEmails?: string[];
+    provider: string;
 }
 
-type ComparisonPeriodType = 'previous_day' | '7d' | '15d' | '30d';
+type ComparisonPeriodType = 'previous_day' | '7d' | '15d' | '30d' | 'previous_month';
 
 export const AnomalyAlertForm: React.FC<AnomalyAlertFormProps> = ({
     formData, setFormData, projectOptions, serviceOptions,
     isLoadingProjects, isLoadingServices, alertEmails, setAlertEmails,
-    handleSubmit, editingId, cancelEdit, loading, currentUserEmail, companyEmails = []
+    handleSubmit, editingId, cancelEdit, loading, currentUserEmail, companyEmails = [], provider
 }) => {
     const [currentEmail, setCurrentEmail] = useState<string>('');
 
@@ -67,7 +68,7 @@ export const AnomalyAlertForm: React.FC<AnomalyAlertFormProps> = ({
                 <div className="flex flex-col gap-5">
                     <div className="group">
                         <label className="block text-[13px] font-bold text-gray-700 mb-2 group-focus-within:text-purple-600 transition-colors">
-                            Proyecto / Suscripción
+                            {provider === 'vcenter' ? 'Unidad de negocio' : 'Proyecto / Suscripción'}
                         </label>
                         <select 
                             className="w-full h-11 border-gray-200 rounded-xl text-sm font-semibold text-gray-800 bg-gray-50/50 focus:bg-white focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all shadow-sm"
@@ -75,7 +76,7 @@ export const AnomalyAlertForm: React.FC<AnomalyAlertFormProps> = ({
                             onChange={(e) => setFormData({ ...formData, project_id: e.target.value, service: 'all_services' })}
                             disabled={isLoadingProjects}
                         >
-                            <option value="all_projects">{isLoadingProjects ? 'Cargando...' : 'Todas las suscripciones'}</option>
+                            <option value="all_projects">{isLoadingProjects ? 'Cargando...' : provider === 'vcenter' ? 'Todas las unidades de negocio' : 'Todas las suscripciones'}</option>
                             {!isLoadingProjects && projectOptions.map((proj: CloudProject) => (
                                 <option key={proj.id} value={proj.id}>{proj.name || proj.id}</option>
                             ))}
@@ -83,7 +84,7 @@ export const AnomalyAlertForm: React.FC<AnomalyAlertFormProps> = ({
                     </div>
                     <div className="group">
                         <label className="block text-[13px] font-bold text-gray-700 mb-2 group-focus-within:text-purple-600 transition-colors">
-                            Servicio
+                            {provider === 'vcenter' ? 'Producto / Servicio' : 'Servicio'}
                         </label>
                         <select 
                             className="w-full h-11 border-gray-200 rounded-xl text-sm font-semibold text-gray-800 bg-gray-50/50 focus:bg-white focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all shadow-sm"
@@ -93,7 +94,7 @@ export const AnomalyAlertForm: React.FC<AnomalyAlertFormProps> = ({
                         >
                             <option value="all_services">
                                 {isLoadingServices ? 'Cargando servicios...' : 
-                                 formData.project_id === 'all_projects' ? 'Selecciona un proyecto para filtrar' : 'Todos los servicios'}
+                                 formData.project_id === 'all_projects' ? (provider === 'vcenter' ? 'Selecciona una unidad de negocio' : 'Selecciona un proyecto para filtrar') : 'Todos los servicios'}
                             </option>
                             {!isLoadingServices && serviceOptions.map((serv: string) => (
                                 <option key={serv} value={serv}>{serv}</option>
@@ -110,23 +111,29 @@ export const AnomalyAlertForm: React.FC<AnomalyAlertFormProps> = ({
                         <input 
                             type="number" min="1" step="0.1" required
                             className="w-full h-11 px-4 border-gray-200 rounded-xl text-sm font-bold text-gray-800 bg-gray-50/50 focus:bg-white focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all shadow-sm"
-                            value={formData.sensitivity_percentage}
-                            onChange={(e) => setFormData({ ...formData, sensitivity_percentage: parseFloat(e.target.value) })}
+                            value={Number.isFinite(formData.sensitivity_percentage) && formData.sensitivity_percentage > 0 ? formData.sensitivity_percentage : ''}
+                            onChange={(e) => setFormData({ ...formData, sensitivity_percentage: parseFloat(e.target.value) || 0 })}
                         />
                     </div>
                     <div className="group">
                         <label className="flex items-center gap-2 text-[13px] font-bold text-gray-700 mb-2 group-focus-within:text-purple-600 transition-colors">
-                            <Clock size={16} className="text-purple-500" /> Período Base 
+                            <Clock size={16} className="text-purple-500" /> {provider === 'vcenter' ? 'Comparación mensual' : 'Período Base'}
                         </label>
                         <select 
                             className="w-full h-11 border-gray-200 rounded-xl text-sm font-semibold text-gray-800 bg-gray-50/50 focus:bg-white focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all shadow-sm"
                             value={formData.comparison_period}
                             onChange={(e) => setFormData({ ...formData, comparison_period: e.target.value as ComparisonPeriodType })}
                         >
-                                <option value="previous_day">Día anterior (Ayer vs Anteayer)</option>
-                                <option value="7d">Promedio últimos 7 días</option>
-                                <option value="15d">Promedio últimos 15 días</option>
-                                <option value="30d">Promedio últimos 30 días</option>
+                                {provider === 'vcenter' ? (
+                                    <option value="previous_month">Último mes cargado vs mes anterior</option>
+                                ) : (
+                                    <>
+                                        <option value="previous_day">Día anterior (Ayer vs Anteayer)</option>
+                                        <option value="7d">Promedio últimos 7 días</option>
+                                        <option value="15d">Promedio últimos 15 días</option>
+                                        <option value="30d">Promedio últimos 30 días</option>
+                                    </>
+                                )}
                         </select>
                     </div>
                 </div>
