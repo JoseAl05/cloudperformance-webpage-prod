@@ -29,6 +29,7 @@ interface BillingAlertFormProps {
     loading: boolean;
     currentUserEmail?: string;
     companyEmails?: string[];
+    provider: string;
 }
 
 
@@ -36,7 +37,7 @@ interface BillingAlertFormProps {
 export const BillingAlertForm = ({
     formData, setFormData, projectOptions, serviceOptions, isLoadingProjects, isLoadingServices,
     alertEmails, setAlertEmails, quiereAdvertencias, setQuiereAdvertencias, porcentajes, togglePorcentaje,
-    handleSubmit, editingId, cancelEdit, loading, currentUserEmail, companyEmails
+    handleSubmit, editingId, cancelEdit, loading, currentUserEmail, companyEmails, provider
 }: BillingAlertFormProps) => {
 
     const [currentEmail, setCurrentEmail] = useState('');
@@ -83,7 +84,7 @@ export const BillingAlertForm = ({
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                     <div className="flex flex-col gap-2.5 group">
                         <label className="flex items-center gap-2 text-[13px] font-bold text-gray-700 group-focus-within:text-blue-600 transition-colors">
-                            <LayoutTemplate className="w-4 h-4" /> Suscripción
+                            <LayoutTemplate className="w-4 h-4" /> {provider === 'vcenter' ? 'Unidad de negocio' : 'Suscripción'}
                         </label>
                         <SearchableSelect 
                             value={formData.project_id} 
@@ -94,7 +95,7 @@ export const BillingAlertForm = ({
                     </div>
                     <div className="flex flex-col gap-2.5 group">
                         <label className="flex items-center gap-2 text-[13px] font-bold text-gray-700 group-focus-within:text-blue-600 transition-colors">
-                            <Server className="w-4 h-4" /> Servicio
+                            <Server className="w-4 h-4" /> {provider === 'vcenter' ? 'Producto / Servicio' : 'Servicio'}
                         </label>
                         <SearchableSelect 
                             value={formData.service} 
@@ -105,7 +106,7 @@ export const BillingAlertForm = ({
                     </div>
                     <div className="flex flex-col gap-2.5 group">
                         <label className="flex items-center gap-2 text-[13px] font-bold text-gray-700 group-focus-within:text-blue-600 transition-colors">
-                            <DollarSign className="w-4 h-4" /> Límite Mensual (USD)
+                            <DollarSign className="w-4 h-4" /> Límite Mensual ({provider === 'vcenter' ? 'COP' : 'USD'})
                         </label>
                         <div className="relative transform transition-all duration-300 group-focus-within:scale-[1.02]">
                             <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">$</span>

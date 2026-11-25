@@ -19,6 +19,7 @@ export interface BudgetServiceResponse {
     configuraciones: BudgetAlertConfig[];
     centros_costo: CostCenter[];
     presupuestos_asignados: Record<number, number>;
+    budget_period?: string;
 }
 
 export interface SaveConfigResponse {

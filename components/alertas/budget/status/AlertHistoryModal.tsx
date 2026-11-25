@@ -27,9 +27,10 @@ export interface AlertHistoryModalProps {
     isOpen: boolean;
     onClose: () => void;
     data: HistoryEventData | HistoryEventData[] | null;
+    currency?: string;
 }
 
-export const AlertHistoryModal = ({ isOpen, onClose, data }: AlertHistoryModalProps) => {
+export const AlertHistoryModal = ({ isOpen, onClose, data, currency = 'USD' }: AlertHistoryModalProps) => {
     if (!isOpen || !data) return null;
 
 
@@ -83,7 +84,7 @@ export const AlertHistoryModal = ({ isOpen, onClose, data }: AlertHistoryModalPr
                                 <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-0.5">Límite {tipo_alerta === 'EXCEDIDO' ? 'Superado' : 'en Riesgo'}</p>
                                 <div className="flex items-baseline gap-1.5">
                                     <span className="text-xl font-black text-slate-800">${(gasto_real_mes ?? 0).toFixed(2)}</span>
-                                    <span className="text-xs text-slate-400 font-medium">de ${(threshold_amount ?? 0).toFixed(2)} USD</span>
+                                    <span className="text-xs text-slate-400 font-medium">de ${(threshold_amount ?? 0).toFixed(2)} {currency}</span>
                                 </div>
                             </div>
                         </div>
