@@ -49,7 +49,10 @@ export const AiRecommendationsStatusDialogComponent = ({
             break;
         case 'gcp':
             HISTORY_ENDPOINT = '/api/gcp/bridge/gcp/ai_recommendations/get_recommendation_execution_status_history';
-             break;
+            break;
+        case 'vcenter':
+            HISTORY_ENDPOINT = '/api/vcenter/bridge/vcenter/ai_recommendations/get_recommendation_execution_status_history';
+            break;
         default:
             break;
     }

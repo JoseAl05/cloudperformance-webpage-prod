@@ -185,6 +185,8 @@ Páginas y layouts del App Router. Cada página suele limitarse a leer los filtr
 | `/cloud-gcp/recursos/instance-groups` | [`(dashboards-nubes)/cloud-gcp/recursos/instance-groups/page.tsx`](#app-dashboards-nubes-cloud-gcp-recursos-instance-groups-page-tsx) | page |
 | `/cloud-gcp/reservas` | [`(dashboards-nubes)/cloud-gcp/reservas/page.tsx`](#app-dashboards-nubes-cloud-gcp-reservas-page-tsx) | page |
 | `/cloud-gcp/tags` | [`(dashboards-nubes)/cloud-gcp/tags/page.tsx`](#app-dashboards-nubes-cloud-gcp-tags-page-tsx) | page |
+| `/cloud-vcenter/recomendaciones` | [`(dashboards-nubes)/cloud-vcenter/recomendaciones/page.tsx`](#app-dashboards-nubes-cloud-vcenter-recomendaciones-page-tsx) | page |
+| `/cloud-vcenter/recomendaciones/rec-statuses` | [`(dashboards-nubes)/cloud-vcenter/recomendaciones/rec-statuses/page.tsx`](#app-dashboards-nubes-cloud-vcenter-recomendaciones-rec-statuses-page-tsx) | page |
 | `/comparacion-nubes` | [`(profile)/(comparacion)/comparacion-nubes/page.tsx`](#app-profile-comparacion-comparacion-nubes-page-tsx) | page |
 | `/comparacion-nubes/internube` | [`(profile)/(comparacion)/comparacion-nubes/internube/page.tsx`](#app-profile-comparacion-comparacion-nubes-internube-page-tsx) | page |
 | `/comparacion-nubes/intranube` | [`(profile)/(comparacion)/comparacion-nubes/intranube/page.tsx`](#app-profile-comparacion-comparacion-nubes-intranube-page-tsx) | page |
@@ -2923,6 +2925,50 @@ Exporta:
 - (default) componente `DashboardGcpTaggedResources` `()`
 
 - Usa: [`MainViewTaggedResourcesComponent.tsx`](components/gcp/vista-tags.md#components-gcp-vista-tags-mainviewtaggedresourcescomponent-tsx)
+
+---
+
+<a id="app-dashboards-nubes-cloud-vcenter-recomendaciones-page-tsx"></a>
+## `app/(dashboards-nubes)/cloud-vcenter/recomendaciones/page.tsx`
+
+**Página (cliente) · ruta `/cloud-vcenter/recomendaciones`**
+
+Exporta:
+
+- (default) componente `DashboardVcenterRecommendationsPage` `()`
+
+Internos:
+
+- componente `AccessDeniedComponent` `({ planName }: { planName: string })`
+
+- Hooks: `useFeatureAccess`
+- Usa: [`MainViewRecommendationsComponent.tsx`](components/vcenter/vista-recomendaciones.md#components-vcenter-vista-recomendaciones-mainviewrecommendationscomponent-tsx), [`useFeatureAccess.ts`](hooks.md#hooks-usefeatureaccess-ts)
+
+Notas de implementación:
+
+- Igual que en AWS, Azure y GCP, requiere `canAccessVistaAdvisor` (plan Business), además del `PlanAccessGate` del layout de vCenter.
+
+---
+
+<a id="app-dashboards-nubes-cloud-vcenter-recomendaciones-rec-statuses-page-tsx"></a>
+## `app/(dashboards-nubes)/cloud-vcenter/recomendaciones/rec-statuses/page.tsx`
+
+**Página (cliente) · ruta `/cloud-vcenter/recomendaciones/rec-statuses`**
+
+Exporta:
+
+- (default) componente `DashboardVcenterRecStatusesPage` `()`
+
+Internos:
+
+- componente `AccessDeniedComponent` `({ planName }: { planName: string })`
+
+- Hooks: `useFeatureAccess`
+- Usa: [`useFeatureAccess.ts`](hooks.md#hooks-usefeatureaccess-ts), [`MainViewAiRecommendationStatusesComponent.tsx`](components/ai-recommendation-statuses.md#components-ai-recommendation-statuses-mainviewairecommendationstatusescomponent-tsx) (`cloud="vcenter"`)
+
+Notas de implementación:
+
+- Si tiene el permiso, renderiza la vista.
 
 ---
 
