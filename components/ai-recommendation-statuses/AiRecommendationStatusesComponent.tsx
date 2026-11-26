@@ -9,16 +9,16 @@ import { AlertCircle, Info, History } from 'lucide-react';
 import useSWR from 'swr';
 
 interface AiRecommendationStatusesComponentProps {
-    startDate: Date;
-    endDate: Date;
-    cloud: string;
+    startDate?: Date;
+    endDate?: Date;
+    cloud?: string;
 }
 
 const isNonEmptyArray = <T,>(v: unknown): v is T[] => Array.isArray(v) && v.length > 0
 
 export const AiRecommendationStatusesComponent = ({ startDate, endDate, cloud }: AiRecommendationStatusesComponentProps) => {
 
-    const startDateFormatted = startDate.toISOString().replace('Z', '').slice(0, -4);
+    const startDateFormatted = startDate ? startDate.toISOString().replace('Z', '').slice(0, -4) : '';
     const endDateFormatted = endDate ? endDate.toISOString().replace('Z', '').slice(0, -4) : '';
 
     let url = '';
@@ -32,6 +32,9 @@ export const AiRecommendationStatusesComponent = ({ startDate, endDate, cloud }:
             break;
         case 'gcp':
             url = '/api/gcp/bridge/gcp/ai_recommendations/get_all_recomendations_statuses_events'
+            break;
+        case 'vcenter':
+            url = '/api/vcenter/bridge/vcenter/ai_recommendations/get_all_recomendations_statuses_events';
             break;
         default:
             break;

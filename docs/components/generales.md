@@ -141,16 +141,17 @@ Internos:
 - función `getRiskWeight` `(level: string): number`
 - función `normalizeConfidence` `(value?: string): PotentialConfidence`
 - componente `ConfidenceBadge` `({ value, className = '' }: { value?: string; className?: string })`
-- componente `SavingsScenarioSummary` `({ conservative, optimistic, confidence, syncTime, }: { conservative: number; optimistic?: number | null; confidence?: …`
+- función `getReportCurrency` `(report: AiRecommendationReport): string` — primera `impact_matrix.currency` de los recursos del reporte, o `USD`
+- componente `SavingsScenarioSummary` `({ conservative, optimistic, confidence, syncTime, currency = 'USD', }: { conservative: number; optimistic?: number | null; confidence?: …` — los montos se muestran en `currency` (la moneda del reporte; COP en vCenter)
 - componente `StatusFeedbackToast` `({ feedback, onDismiss }: StatusFeedbackToastProps)`
 - componente `StatusSection` `({ resource, onSubmit, onOpenHistory }: StatusSectionProps)`
 - componente `ResourceCard` `({ resource, onStatusChange, onOpenHistory }: ResourceCardProps)`
 - componente `FindingsSection` `({ resources, onStatusChange, onOpenHistory }: FindingsSectionProps)`
 
-- API: `/api/aws/bridge/advisor/assign_recommendation_execution_status`, `/api/azure/bridge/azure/assign_recommendation_execution_status`, `/api/gcp/bridge/gcp/ai_recommendations/assign_recommendation_execution_status`
+- API: `/api/aws/bridge/advisor/assign_recommendation_execution_status`, `/api/azure/bridge/azure/assign_recommendation_execution_status`, `/api/gcp/bridge/gcp/ai_recommendations/assign_recommendation_execution_status`, `/api/vcenter/bridge/vcenter/ai_recommendations/assign_recommendation_execution_status`
 - Hooks: `useSWRMutation`
 - Usa: [`aiRecommendations.ts`](../tipos.md#interfaces-ai-recommendations-airecommendations-ts), [`button.tsx`](ui.md#components-ui-button-tsx), [`select.tsx`](ui.md#components-ui-select-tsx), [`textarea.tsx`](ui.md#components-ui-textarea-tsx), [`AiRecommendationsStatusDialogComponent.tsx`](#components-airecommendationsstatusdialogcomponent-tsx), [`separator.tsx`](ui.md#components-ui-separator-tsx), [`tooltip.tsx`](ui.md#components-ui-tooltip-tsx)
-- Usado por: [`AdvisorViewComponent.tsx`](aws/vista-advisor.md#components-aws-vista-advisor-advisorviewcomponent-tsx), [`AdvisorViewComponent.tsx`](azure/vista-advisor.md#components-azure-vista-advisor-advisorviewcomponent-tsx), [`RecommenderComponent.tsx`](gcp/vista-recommender.md#components-gcp-vista-recommender-recommendercomponent-tsx)
+- Usado por: [`AdvisorViewComponent.tsx`](aws/vista-advisor.md#components-aws-vista-advisor-advisorviewcomponent-tsx), [`AdvisorViewComponent.tsx`](azure/vista-advisor.md#components-azure-vista-advisor-advisorviewcomponent-tsx), [`RecommenderComponent.tsx`](gcp/vista-recommender.md#components-gcp-vista-recommender-recommendercomponent-tsx), [`RecommendationsComponent.tsx`](vcenter/vista-recomendaciones.md#components-vcenter-vista-recomendaciones-recommendationscomponent-tsx)
 
 Notas de implementación:
 
@@ -181,7 +182,7 @@ Internos:
 
 - función `historyFetcher` `(url: string): Promise<RecommendationStatusGroup[]>`
 
-- API: `/api/aws/bridge/advisor/get_recommendation_execution_status_history`, `/api/azure/bridge/azure/get_recommendation_execution_status_history`, `/api/gcp/bridge/gcp/ai_recommendations/get_recommendation_execution_status_history`
+- API: `/api/aws/bridge/advisor/get_recommendation_execution_status_history`, `/api/azure/bridge/azure/get_recommendation_execution_status_history`, `/api/gcp/bridge/gcp/ai_recommendations/get_recommendation_execution_status_history`, `/api/vcenter/bridge/vcenter/ai_recommendations/get_recommendation_execution_status_history`
 - Hooks: `useSWR`
 - Usa: [`dialog.tsx`](ui.md#components-ui-dialog-tsx), [`aiRecommendations.ts`](../tipos.md#interfaces-ai-recommendations-airecommendations-ts), [`AiRecommendationStatusHistoryComponent.tsx`](#components-airecommendationstatushistorycomponent-tsx)
 - Usado por: [`AiRecommendationsComponent.tsx`](#components-airecommendationscomponent-tsx)
