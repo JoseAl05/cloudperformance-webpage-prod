@@ -1,6 +1,7 @@
 import { FiltersComponent as GcpFiltersComponent } from '@/components/general_gcp/filters/FiltersComponent'
 import { FiltersComponent as AwsFiltersComponent} from '@/components/general_aws/filters/FiltersComponent'
 import { FiltersComponent as AzureFiltersComponent } from '@/components/general_azure/filters/FiltersComponent'
+import { FiltersComponent as VcenterFiltersComponent } from '@/components/general_vcenter/filters/FiltersComponent'
 import { Pyramid} from 'lucide-react'
 import { AiRecommendationStatusesComponent } from '@/components/ai-recommendation-statuses/AiRecommendationStatusesComponent'
 
@@ -49,6 +50,15 @@ export const MainViewAiRecommendationStatusesComponent = ({cloud}: MainViewAiRec
                 {
                     cloud === 'gcp' && (
                         <GcpFiltersComponent
+                            Component={AiRecommendationStatusesComponent}
+                            dateFilter
+                            cloud={cloud}
+                        />
+                    )
+                }
+                {
+                    cloud === 'vcenter' && (
+                        <VcenterFiltersComponent
                             Component={AiRecommendationStatusesComponent}
                             dateFilter
                             cloud={cloud}

@@ -23,15 +23,15 @@ Interfaz `AiRecommendationStatusesComponentProps`:
 
 | Campo | Tipo | Opcional | Descripción |
 |---|---|---|---|
-| `startDate` | `Date` | no | — |
-| `endDate` | `Date` | no | — |
-| `cloud` | `string` | no | — |
+| `startDate` | `Date` | sí | — |
+| `endDate` | `Date` | sí | — |
+| `cloud` | `string` | sí | — |
 
 Internos:
 
 - función `isNonEmptyArray` `(v: unknown): v is T[]`
 
-- API: `/api/aws/bridge/advisor/get_all_recomendations_statuses_events`, `/api/azure/bridge/azure/get_all_recomendations_statuses_events`, `/api/gcp/bridge/gcp/ai_recommendations/get_all_recomendations_statuses_events`
+- API: `/api/aws/bridge/advisor/get_all_recomendations_statuses_events`, `/api/azure/bridge/azure/get_all_recomendations_statuses_events`, `/api/gcp/bridge/gcp/ai_recommendations/get_all_recomendations_statuses_events`, `/api/vcenter/bridge/vcenter/ai_recommendations/get_all_recomendations_statuses_events`
 - Hooks: `useSWR`
 - Usa: [`fetcher.ts`](../lib.md#lib-fetcher-ts), [`AiRecommendationStatusesInfoComponent.tsx`](#components-ai-recommendation-statuses-info-airecommendationstatusesinfocomponent-tsx), [`MessageCards.tsx`](aws/cards.md#components-aws-cards-messagecards-tsx), [`LoaderComponent.tsx`](general_aws.md#components-general-aws-loadercomponent-tsx), [`aiRecommendations.ts`](../tipos.md#interfaces-ai-recommendations-airecommendations-ts)
 - Usado por: [`MainViewAiRecommendationStatusesComponent.tsx`](#components-ai-recommendation-statuses-mainviewairecommendationstatusescomponent-tsx)
@@ -54,7 +54,7 @@ Interfaz `MainViewAiRecommendationStatusesComponentProps`:
 | `cloud` | `string` | no | — |
 
 - Usa: [`FiltersComponent.tsx`](general_gcp.md#components-general-gcp-filters-filterscomponent-tsx), [`FiltersComponent.tsx`](general_aws.md#components-general-aws-filters-filterscomponent-tsx), [`FiltersComponent.tsx`](general_azure.md#components-general-azure-filters-filterscomponent-tsx), [`AiRecommendationStatusesComponent.tsx`](#components-ai-recommendation-statuses-airecommendationstatusescomponent-tsx)
-- Usado por: [`page.tsx`](../rutas.md#app-dashboards-nubes-cloud-aws-recomendaciones-rec-statuses-page-tsx), [`page.tsx`](../rutas.md#app-dashboards-nubes-cloud-azure-recomendaciones-rec-statuses-page-tsx), [`page.tsx`](../rutas.md#app-dashboards-nubes-cloud-gcp-recomendaciones-rec-statuses-page-tsx)
+- Usado por: [`page.tsx`](../rutas.md#app-dashboards-nubes-cloud-aws-recomendaciones-rec-statuses-page-tsx), [`page.tsx`](../rutas.md#app-dashboards-nubes-cloud-azure-recomendaciones-rec-statuses-page-tsx), [`page.tsx`](../rutas.md#app-dashboards-nubes-cloud-gcp-recomendaciones-rec-statuses-page-tsx), [`page.tsx`](../rutas.md#app-dashboards-nubes-cloud-vcenter-recomendaciones-rec-statuses-page-tsx)
 
 ---
 
@@ -142,7 +142,8 @@ Internos:
 - constante `COLLAPSED_TIMELINE_LIMIT`
 - función `cleanText` `(text: string)`
 - función `formatDate` `(dateStr: string)`
-- función `formatCurrency` `(value: number)`
+- función `currencyForProvider` `(cloudProvider?: string): string` — `COP` para vCenter, `USD` para el resto
+- función `formatCurrency` `(value: number, currency: string = 'USD')`
 - función `resolveStatusEndpoint` `(cloud: string): string`
 - función `statusFetcher` `(url: string, { arg }: { arg: RecommendationStatusEvent }): Promise<AssignExecutionStatusResponse>`
 - componente `StatusFeedbackToast` `({ feedback, onDismiss }: StatusFeedbackToastProps)`
@@ -150,7 +151,7 @@ Internos:
 - componente `GroupCard` `({ group, sortedReports, allExecutionStatuses, isValidatingJira, isValidatingServiceNow, jiraValidationResult, servicen…`
 - componente `InactionCostCard` `({ total, contributors, onSelect }: InactionCostCardProps)`
 
-- API: `/api/aws/bridge/advisor/assign_recommendation_execution_status`, `/api/azure/bridge/azure/assign_recommendation_execution_status`, `/api/connector/bridge/connector/jira/create_ticket`, `/api/connector/bridge/connector/jira/validate_tickets`, `/api/connector/bridge/connector/servicenow/create_ticket`, `/api/connector/bridge/connector/servicenow/validate_tickets`, `/api/gcp/bridge/gcp/ai_recommendations/assign_recommendation_execution_status`
+- API: `/api/aws/bridge/advisor/assign_recommendation_execution_status`, `/api/azure/bridge/azure/assign_recommendation_execution_status`, `/api/connector/bridge/connector/jira/create_ticket`, `/api/connector/bridge/connector/jira/validate_tickets`, `/api/connector/bridge/connector/servicenow/create_ticket`, `/api/connector/bridge/connector/servicenow/validate_tickets`, `/api/gcp/bridge/gcp/ai_recommendations/assign_recommendation_execution_status`, `/api/vcenter/bridge/vcenter/ai_recommendations/assign_recommendation_execution_status`
 - Hooks: `useConnector`, `useSWR`, `useSWRMutation`
 - Usa: [`AiRecommendationStatusHistoryComponent.tsx`](generales.md#components-airecommendationstatushistorycomponent-tsx), [`aiRecommendations.ts`](../tipos.md#interfaces-ai-recommendations-airecommendations-ts), [`button.tsx`](ui.md#components-ui-button-tsx), [`input.tsx`](ui.md#components-ui-input-tsx), [`select.tsx`](ui.md#components-ui-select-tsx), [`textarea.tsx`](ui.md#components-ui-textarea-tsx), [`useConnectors.ts`](../hooks.md#hooks-useconnectors-ts), [`utils.ts`](../lib.md#lib-utils-ts), [`TicketButtonComponent.tsx`](generales.md#components-ticketbuttoncomponent-tsx)
 - Usado por: [`AiRecommendationStatusesComponent.tsx`](#components-ai-recommendation-statuses-airecommendationstatusescomponent-tsx)

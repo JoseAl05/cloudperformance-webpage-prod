@@ -148,6 +148,7 @@ Definidas en `.env.example`:
 | [`components/profile`](components/profile.md) | 8 |
 | [`components/shared`](components/shared.md) | 32 |
 | [`components/ui`](components/ui.md) | 28 |
+| [`components/vcenter/vista-recomendaciones`](components/vcenter/vista-recomendaciones.md) | 2 |
 | [`configuracion`](configuracion.md) | 6 |
 | [`hooks`](hooks.md) | 6 |
 | [`lib`](lib.md) | 45 |

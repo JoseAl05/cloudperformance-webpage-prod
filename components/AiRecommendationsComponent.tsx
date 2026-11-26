@@ -205,16 +205,21 @@ const ConfidenceBadge = ({ value, className = '' }: { value?: string; className?
     );
 };
 
+const getReportCurrency = (report: AiRecommendationReport): string =>
+    report.resources.find((resource) => resource.impact_matrix?.currency)?.impact_matrix.currency || 'USD';
+
 const SavingsScenarioSummary = ({
     conservative,
     optimistic,
     confidence,
     syncTime,
+    currency = 'USD',
 }: {
     conservative: number;
     optimistic?: number | null;
     confidence?: string;
     syncTime?: string | Date | null;
+    currency?: string;
 }) => {
     const optimisticValue = typeof optimistic === 'number' ? optimistic : 0;
     const hasUpside = optimisticValue > conservative + 0.01;
@@ -235,7 +240,7 @@ const SavingsScenarioSummary = ({
                     Conservador
                 </span>
                 <span className="text-2xl font-black text-emerald-700 dark:text-emerald-400 leading-none tabular-nums">
-                    {formatCurrency(conservative)}
+                    {formatCurrency(conservative, currency)}
                 </span>
             </div>
             <span className="block text-[11px] text-slate-500 dark:text-slate-400 mt-1">
@@ -249,7 +254,7 @@ const SavingsScenarioSummary = ({
                             Optimista
                         </span>
                         <span className="text-2xl font-black text-amber-700 dark:text-amber-400 leading-none tabular-nums">
-                            {formatCurrency(optimisticValue)}
+                            {formatCurrency(optimisticValue, currency)}
                         </span>
                     </div>
                     <div className="flex items-center justify-between gap-3 mt-1">
@@ -270,7 +275,7 @@ const SavingsScenarioSummary = ({
                     </div>
                     <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-snug mt-3">
                         El escenario optimista <strong>ya incluye</strong> el conservador. No son cifras sumables:
-                        los {formatCurrency(upside)} restantes son la misma acción valorada con supuestos que el
+                        los {formatCurrency(upside, currency)} restantes son la misma acción valorada con supuestos que el
                         cliente debe validar.
                     </p>
                 </>
@@ -1021,6 +1026,9 @@ export const AiRecommendationsComponent = ({ data, cloud }: AiRecommendationsCom
         case 'gcp':
             STATUS_ENDPOINT = '/api/gcp/bridge/gcp/ai_recommendations/assign_recommendation_execution_status';
             break;
+        case 'vcenter':
+            STATUS_ENDPOINT = '/api/vcenter/bridge/vcenter/ai_recommendations/assign_recommendation_execution_status';
+            break;
         default:
             break;
     }
@@ -1166,6 +1174,7 @@ export const AiRecommendationsComponent = ({ data, cloud }: AiRecommendationsCom
                                     optimistic={report.total_potential_monthly_savings}
                                     confidence={report.confidence_potential_monthly_savings}
                                     syncTime={report.sync_time}
+                                    currency={getReportCurrency(report)}
                                 />
                             </div>
                         </div>

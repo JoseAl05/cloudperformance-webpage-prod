@@ -184,8 +184,11 @@ const formatDate = (dateStr: string) => {
     }).format(new Date(dateStr));
 };
 
-const formatCurrency = (value: number) =>
-    new Intl.NumberFormat('es', { style: 'currency', currency: 'USD' }).format(value);
+const currencyForProvider = (cloudProvider?: string): string =>
+    cloudProvider?.toLowerCase() === 'vcenter' ? 'COP' : 'USD';
+
+const formatCurrency = (value: number, currency: string = 'USD') =>
+    new Intl.NumberFormat('es', { style: 'currency', currency }).format(value);
 
 
 
@@ -197,6 +200,8 @@ const resolveStatusEndpoint = (cloud: string): string => {
             return '/api/aws/bridge/advisor/assign_recommendation_execution_status';
         case 'gcp':
             return '/api/gcp/bridge/gcp/ai_recommendations/assign_recommendation_execution_status';
+        case 'vcenter':
+            return '/api/vcenter/bridge/vcenter/ai_recommendations/assign_recommendation_execution_status';
         default:
             return '';
     }
@@ -678,7 +683,7 @@ const GroupCard = ({ group, sortedReports, allExecutionStatuses, isValidatingJir
                     <div className="flex flex-col items-end">
                         <span className="text-xs font-normal text-slate-500 dark:text-slate-400 mb-1">Ahorro Est.</span>
                         <span className="text-xs font-medium text-slate-700 dark:text-slate-300 tabular-nums">
-                            {formatCurrency(latest.saving_value)}
+                            {formatCurrency(latest.saving_value, currencyForProvider(latest.cloud_provider))}
                         </span>
                     </div>
                     <div className="ml-2 text-slate-500">
@@ -897,7 +902,7 @@ const InactionCostCard = ({ total, contributors, onSelect }: InactionCostCardPro
                         Ahorro no capturado
                     </span>
                     <span className="text-2xl font-black text-amber-700 dark:text-amber-300 tabular-nums">
-                        {formatCurrency(total)}
+                        {formatCurrency(total, currencyForProvider(contributors[0]?.cloudProvider))}
                     </span>
                 </div>
             </div>
@@ -937,7 +942,7 @@ const InactionCostCard = ({ total, contributors, onSelect }: InactionCostCardPro
                                     </span>
                                     <span className="flex items-center gap-2 flex-shrink-0">
                                         <span className="text-sm font-bold text-amber-700 dark:text-amber-300 tabular-nums">
-                                            {formatCurrency(contributor.savingValue)}
+                                            {formatCurrency(contributor.savingValue, currencyForProvider(contributor.cloudProvider))}
                                         </span>
                                         <ChevronRight className="h-4 w-4 text-slate-400" />
                                     </span>
